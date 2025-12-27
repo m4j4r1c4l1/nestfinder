@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
 
+// ========================================
+// ROUTING PROVIDER CONFIGURATION
+// Change this to switch between providers:
+// - 'osrm' = OSRM /route with nearest-neighbor ordering
+// - 'osrm-trip' = OSRM /trip with OSRM optimization
+// - 'openroute' = OpenRouteService (may require API key for heavy use)
+// ========================================
+const ROUTING_PROVIDER = 'osrm';
+
 const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
     const [routeData, setRouteData] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -21,6 +30,154 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
         return points.filter(p => statusFilter[p.status]);
     };
 
+    // ========================================
+    // OSRM Route Provider (original)
+    // ========================================
+    const calculateOSRMRoute = async (waypoints) => {
+        // Use nearest neighbor to order points
+        let current = waypoints[0];
+        let remaining = waypoints.slice(1);
+        const orderedPath = [current];
+
+        while (remaining.length > 0) {
+            let nearestIdx = 0;
+            let minDst = Infinity;
+
+            for (let i = 0; i < remaining.length; i++) {
+                const p = remaining[i];
+                const d = Math.sqrt(
+                    Math.pow(p.latitude - current.latitude, 2) +
+                    Math.pow(p.longitude - current.longitude, 2)
+                );
+                if (d < minDst) {
+                    minDst = d;
+                    nearestIdx = i;
+                }
+            }
+
+            current = remaining[nearestIdx];
+            orderedPath.push(current);
+            remaining.splice(nearestIdx, 1);
+        }
+
+        const coordinates = orderedPath
+            .map(p => `${p.longitude},${p.latitude}`)
+            .join(';');
+
+        const response = await fetch(
+            `https://router.project-osrm.org/route/v1/foot/${coordinates}?overview=full&geometries=geojson`
+        );
+        const data = await response.json();
+
+        if (data.code !== 'Ok' || !data.routes?.[0]) {
+            throw new Error('OSRM route failed');
+        }
+
+        const route = data.routes[0];
+        return {
+            path: orderedPath,
+            geometry: route.geometry.coordinates.map(c => ({ latitude: c[1], longitude: c[0] })),
+            distance: (route.distance / 1000).toFixed(1),
+            time: Math.round(route.duration / 60)
+        };
+    };
+
+    // ========================================
+    // OSRM Trip Provider
+    // ========================================
+    const calculateOSRMTrip = async (waypoints) => {
+        const coordinates = waypoints
+            .map(p => `${p.longitude},${p.latitude}`)
+            .join(';');
+
+        const response = await fetch(
+            `https://router.project-osrm.org/trip/v1/foot/${coordinates}?overview=full&geometries=geojson&roundtrip=false&source=first`
+        );
+        const data = await response.json();
+
+        if (data.code !== 'Ok' || !data.trips?.[0]) {
+            throw new Error('OSRM trip failed');
+        }
+
+        const trip = data.trips[0];
+        const orderedWaypoints = data.waypoints
+            .sort((a, b) => a.waypoint_index - b.waypoint_index)
+            .map(wp => waypoints[wp.waypoint_index]);
+
+        return {
+            path: orderedWaypoints,
+            geometry: trip.geometry.coordinates.map(c => ({ latitude: c[1], longitude: c[0] })),
+            distance: (trip.distance / 1000).toFixed(1),
+            time: Math.round(trip.duration / 60)
+        };
+    };
+
+    // ========================================
+    // OpenRouteService Provider
+    // ========================================
+    const calculateOpenRoute = async (waypoints) => {
+        // Order waypoints using nearest neighbor first
+        let current = waypoints[0];
+        let remaining = waypoints.slice(1);
+        const orderedPath = [current];
+
+        while (remaining.length > 0) {
+            let nearestIdx = 0;
+            let minDst = Infinity;
+
+            for (let i = 0; i < remaining.length; i++) {
+                const p = remaining[i];
+                const d = Math.sqrt(
+                    Math.pow(p.latitude - current.latitude, 2) +
+                    Math.pow(p.longitude - current.longitude, 2)
+                );
+                if (d < minDst) {
+                    minDst = d;
+                    nearestIdx = i;
+                }
+            }
+
+            current = remaining[nearestIdx];
+            orderedPath.push(current);
+            remaining.splice(nearestIdx, 1);
+        }
+
+        // OpenRouteService API (free tier, no API key needed for limited use)
+        const coordinates = orderedPath.map(p => [p.longitude, p.latitude]);
+
+        const response = await fetch(
+            'https://api.openrouteservice.org/v2/directions/foot-walking/geojson',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    coordinates: coordinates
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.error || !data.features?.[0]) {
+            throw new Error(data.error?.message || 'OpenRouteService failed');
+        }
+
+        const feature = data.features[0];
+        const props = feature.properties.summary;
+
+        return {
+            path: orderedPath,
+            geometry: feature.geometry.coordinates.map(c => ({ latitude: c[1], longitude: c[0] })),
+            distance: (props.distance / 1000).toFixed(1),
+            time: Math.round(props.duration / 60)
+        };
+    };
+
+    // ========================================
+    // Main Calculate Function
+    // ========================================
     const calculateRoute = async () => {
         const filteredPoints = getFilteredPoints();
         if (filteredPoints.length < 2) {
@@ -32,75 +189,32 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
         setError('');
 
         try {
-            // First, use nearest neighbor to order points
-            let current = userLocation
-                ? { latitude: userLocation.latitude, longitude: userLocation.longitude }
-                : filteredPoints[0];
-            let remaining = userLocation ? [...filteredPoints] : filteredPoints.slice(1);
-            const orderedPath = [current];
+            const waypoints = userLocation
+                ? [{ latitude: userLocation.latitude, longitude: userLocation.longitude }, ...filteredPoints]
+                : [...filteredPoints];
 
-            while (remaining.length > 0) {
-                let nearestIdx = 0;
-                let minDst = Infinity;
+            let result;
 
-                for (let i = 0; i < remaining.length; i++) {
-                    const p = remaining[i];
-                    const d = Math.sqrt(
-                        Math.pow(p.latitude - current.latitude, 2) +
-                        Math.pow(p.longitude - current.longitude, 2)
-                    );
-                    if (d < minDst) {
-                        minDst = d;
-                        nearestIdx = i;
-                    }
-                }
-
-                current = remaining[nearestIdx];
-                orderedPath.push(current);
-                remaining.splice(nearestIdx, 1);
+            switch (ROUTING_PROVIDER) {
+                case 'osrm-trip':
+                    result = await calculateOSRMTrip(waypoints);
+                    break;
+                case 'openroute':
+                    result = await calculateOpenRoute(waypoints);
+                    break;
+                case 'osrm':
+                default:
+                    result = await calculateOSRMRoute(waypoints);
+                    break;
             }
 
-            // Now get actual walking route from OSRM
-            const coordinates = orderedPath
-                .map(p => `${p.longitude},${p.latitude}`)
-                .join(';');
-
-            const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${coordinates}?overview=full&geometries=geojson`;
-
-            const response = await fetch(osrmUrl);
-            const data = await response.json();
-
-            if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
-                throw new Error('Could not calculate walking route');
-            }
-
-            const route = data.routes[0];
-            const distanceKm = (route.distance / 1000).toFixed(1);
-            const timeMins = Math.round(route.duration / 60);
-
-            // Extract the geometry coordinates for the actual walking path
-            const geometry = route.geometry.coordinates.map(coord => ({
-                latitude: coord[1],
-                longitude: coord[0]
-            }));
-
-            const result = {
-                path: orderedPath,      // Waypoints in order
-                geometry,               // Actual walking route geometry
-                distance: distanceKm,
-                time: timeMins,
-                pointCount: filteredPoints.length
-            };
-
+            result.pointCount = filteredPoints.length;
             setRouteData(result);
             onCalculate(result);
         } catch (err) {
             console.error('Route calculation error:', err);
             setError(err.message || 'Failed to calculate route. Try again.');
-
-            // Fallback to straight lines
-            const filteredPoints = getFilteredPoints();
-            onCalculate({ path: filteredPoints, geometry: null });
+            onCalculate({ path: getFilteredPoints(), geometry: null });
         } finally {
             setLoading(false);
         }
