@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.DEV ? '/api' : '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 class ApiClient {
   constructor() {
