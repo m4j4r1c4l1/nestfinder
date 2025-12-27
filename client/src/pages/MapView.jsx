@@ -217,7 +217,7 @@ const MapView = () => {
                     className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
                     onClick={() => setActiveSheet('route')}
                 >
-                    <span>�</span>
+                    <span>🚶</span>
                     Route
                 </button>
                 <button
@@ -225,7 +225,7 @@ const MapView = () => {
                     onClick={() => setActiveSheet('submit')}
                     style={activeSheet === 'submit' ? {} : { color: 'var(--color-primary)' }}
                 >
-                    <span>�</span>
+                    <span>🐦</span>
                     Report
                 </button>
                 <button
