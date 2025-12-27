@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import db from '../database.js';
+import { get, all } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
@@ -10,23 +10,23 @@ router.use(requireAdmin);
 // Get dashboard stats
 router.get('/stats', (req, res) => {
     const stats = {
-        totalPoints: db.prepare('SELECT COUNT(*) as count FROM points').get().count,
-        pendingPoints: db.prepare('SELECT COUNT(*) as count FROM points WHERE status = ?').get('pending').count,
-        confirmedPoints: db.prepare('SELECT COUNT(*) as count FROM points WHERE status = ?').get('confirmed').count,
-        deactivatedPoints: db.prepare('SELECT COUNT(*) as count FROM points WHERE status = ?').get('deactivated').count,
-        totalUsers: db.prepare('SELECT COUNT(*) as count FROM users').get().count,
-        activeUsers: db.prepare(`
+        totalPoints: get('SELECT COUNT(*) as count FROM points').count,
+        pendingPoints: get('SELECT COUNT(*) as count FROM points WHERE status = ?', ['pending']).count,
+        confirmedPoints: get('SELECT COUNT(*) as count FROM points WHERE status = ?', ['confirmed']).count,
+        deactivatedPoints: get('SELECT COUNT(*) as count FROM points WHERE status = ?', ['deactivated']).count,
+        totalUsers: get('SELECT COUNT(*) as count FROM users').count,
+        activeUsers: get(`
       SELECT COUNT(*) as count FROM users 
       WHERE datetime(last_active) > datetime('now', '-7 days')
-    `).get().count,
-        todaySubmissions: db.prepare(`
+    `).count,
+        todaySubmissions: get(`
       SELECT COUNT(*) as count FROM points 
       WHERE date(created_at) = date('now')
-    `).get().count,
-        todayActions: db.prepare(`
+    `).count,
+        todayActions: get(`
       SELECT COUNT(*) as count FROM logs 
       WHERE date(created_at) = date('now')
-    `).get().count
+    `).count
     };
 
     res.json({ stats });
@@ -45,49 +45,48 @@ router.get('/logs', (req, res) => {
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    let query = `
+    let sql = `
     SELECT l.*, u.nickname as user_nickname
     FROM logs l
     LEFT JOIN users u ON l.user_id = u.id
     WHERE 1=1
   `;
-    let countQuery = 'SELECT COUNT(*) as count FROM logs WHERE 1=1';
+    let countSql = 'SELECT COUNT(*) as count FROM logs WHERE 1=1';
     const params = [];
     const countParams = [];
 
     if (action) {
-        query += ' AND l.action = ?';
-        countQuery += ' AND action = ?';
+        sql += ' AND l.action = ?';
+        countSql += ' AND action = ?';
         params.push(action);
         countParams.push(action);
     }
 
     if (userId) {
-        query += ' AND l.user_id = ?';
-        countQuery += ' AND user_id = ?';
+        sql += ' AND l.user_id = ?';
+        countSql += ' AND user_id = ?';
         params.push(userId);
         countParams.push(userId);
     }
 
     if (startDate) {
-        query += ' AND datetime(l.created_at) >= datetime(?)';
-        countQuery += ' AND datetime(created_at) >= datetime(?)';
+        sql += ' AND datetime(l.created_at) >= datetime(?)';
+        countSql += ' AND datetime(created_at) >= datetime(?)';
         params.push(startDate);
         countParams.push(startDate);
     }
 
     if (endDate) {
-        query += ' AND datetime(l.created_at) <= datetime(?)';
-        countQuery += ' AND datetime(created_at) <= datetime(?)';
+        sql += ' AND datetime(l.created_at) <= datetime(?)';
+        countSql += ' AND datetime(created_at) <= datetime(?)';
         params.push(endDate);
         countParams.push(endDate);
     }
 
-    query += ' ORDER BY l.created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), offset);
+    sql += ` ORDER BY l.created_at DESC LIMIT ${parseInt(limit)} OFFSET ${offset}`;
 
-    const logs = db.prepare(query).all(...params);
-    const total = db.prepare(countQuery).get(...countParams).count;
+    const logs = all(sql, params);
+    const total = get(countSql, countParams).count;
 
     res.json({
         logs: logs.map(l => ({
@@ -105,13 +104,13 @@ router.get('/logs', (req, res) => {
 
 // Get all users
 router.get('/users', (req, res) => {
-    const users = db.prepare(`
+    const users = all(`
     SELECT u.*,
       (SELECT COUNT(*) FROM points WHERE user_id = u.id) as points_count,
       (SELECT COUNT(*) FROM confirmations WHERE user_id = u.id) as actions_count
     FROM users u
     ORDER BY u.last_active DESC
-  `).all();
+  `);
 
     res.json({ users });
 });
@@ -120,16 +119,16 @@ router.get('/users', (req, res) => {
 router.get('/users/:id', (req, res) => {
     const userId = req.params.id;
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
 
     if (!user) {
         return res.status(404).json({ error: 'User not found' });
     }
 
-    const points = db.prepare('SELECT * FROM points WHERE user_id = ?').all(userId);
-    const recentLogs = db.prepare(`
+    const points = all('SELECT * FROM points WHERE user_id = ?', [userId]);
+    const recentLogs = all(`
     SELECT * FROM logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 50
-  `).all(userId);
+  `, [userId]);
 
     res.json({
         user,
@@ -143,14 +142,14 @@ router.get('/users/:id', (req, res) => {
 
 // Get all points (for admin map)
 router.get('/points', (req, res) => {
-    const points = db.prepare(`
+    const points = all(`
     SELECT p.*, u.nickname as submitter_nickname,
       (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'confirm') as confirm_count,
       (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'deactivate') as deactivate_count
     FROM points p
     LEFT JOIN users u ON p.user_id = u.id
     ORDER BY p.created_at DESC
-  `).all();
+  `);
 
     res.json({ points });
 });
@@ -159,7 +158,7 @@ router.get('/points', (req, res) => {
 router.get('/logs/export', (req, res) => {
     const { format = 'json', startDate, endDate } = req.query;
 
-    let query = `
+    let sql = `
     SELECT l.*, u.nickname as user_nickname
     FROM logs l
     LEFT JOIN users u ON l.user_id = u.id
@@ -168,18 +167,18 @@ router.get('/logs/export', (req, res) => {
     const params = [];
 
     if (startDate) {
-        query += ' AND datetime(l.created_at) >= datetime(?)';
+        sql += ' AND datetime(l.created_at) >= datetime(?)';
         params.push(startDate);
     }
 
     if (endDate) {
-        query += ' AND datetime(l.created_at) <= datetime(?)';
+        sql += ' AND datetime(l.created_at) <= datetime(?)';
         params.push(endDate);
     }
 
-    query += ' ORDER BY l.created_at DESC';
+    sql += ' ORDER BY l.created_at DESC';
 
-    const logs = db.prepare(query).all(...params);
+    const logs = all(sql, params);
 
     if (format === 'csv') {
         const headers = ['id', 'user_id', 'user_nickname', 'action', 'target_id', 'metadata', 'created_at'];

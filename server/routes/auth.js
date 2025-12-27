@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
-import db, { log } from '../database.js';
+import { run, get, log } from '../database.js';
 
 const router = Router();
 
@@ -14,7 +14,7 @@ router.post('/register', (req, res) => {
     }
 
     // Check if device already registered
-    const existing = db.prepare('SELECT * FROM users WHERE device_id = ?').get(deviceId);
+    const existing = get('SELECT * FROM users WHERE device_id = ?', [deviceId]);
 
     if (existing) {
         log(existing.id, 'login', null, { method: 'existing_device' });
@@ -27,12 +27,12 @@ router.post('/register', (req, res) => {
     // Create new user
     const userId = uuidv4();
 
-    db.prepare(`
-    INSERT INTO users (id, device_id, nickname)
-    VALUES (?, ?, ?)
-  `).run(userId, deviceId, nickname || null);
+    run(
+        `INSERT INTO users (id, device_id, nickname) VALUES (?, ?, ?)`,
+        [userId, deviceId, nickname || null]
+    );
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
 
     log(userId, 'register', null, { nickname });
 
@@ -51,9 +51,9 @@ router.put('/nickname', (req, res) => {
         return res.status(401).json({ error: 'User ID required' });
     }
 
-    db.prepare('UPDATE users SET nickname = ? WHERE id = ?').run(nickname, userId);
+    run('UPDATE users SET nickname = ? WHERE id = ?', [nickname, userId]);
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
 
     log(userId, 'update_nickname', null, { nickname });
 
@@ -68,7 +68,7 @@ router.post('/admin/login', (req, res) => {
         return res.status(400).json({ error: 'Username and password required' });
     }
 
-    const admin = db.prepare('SELECT * FROM admins WHERE username = ?').get(username);
+    const admin = get('SELECT * FROM admins WHERE username = ?', [username]);
 
     if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
         return res.status(401).json({ error: 'Invalid credentials' });

@@ -1,4 +1,4 @@
-import db from '../database.js';
+import { get } from '../database.js';
 
 // Middleware to verify user exists
 export const requireUser = (req, res, next) => {
@@ -8,14 +8,16 @@ export const requireUser = (req, res, next) => {
         return res.status(401).json({ error: 'User ID required' });
     }
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
 
     if (!user) {
         return res.status(401).json({ error: 'Invalid user' });
     }
 
-    // Update last active
-    db.prepare('UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?').run(userId);
+    // Update last active (fire and forget)
+    import('../database.js').then(db => {
+        db.run('UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
+    });
 
     req.user = user;
     next();
@@ -34,7 +36,7 @@ export const requireAdmin = (req, res, next) => {
     // Simple token validation - in production use JWT
     try {
         const [adminId, timestamp] = Buffer.from(token, 'base64').toString().split(':');
-        const admin = db.prepare('SELECT * FROM admins WHERE id = ?').get(adminId);
+        const admin = get('SELECT * FROM admins WHERE id = ?', [parseInt(adminId)]);
 
         if (!admin) {
             return res.status(401).json({ error: 'Invalid admin token' });

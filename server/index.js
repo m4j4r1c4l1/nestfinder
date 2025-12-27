@@ -3,8 +3,8 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 
-// Initialize database (creates tables if not exists)
-import './database.js';
+// Initialize database (must happen before routes)
+import { initDatabase } from './database.js';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -80,11 +80,12 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
 });
 
-// Start server
+// Start server after database is ready
 const PORT = process.env.PORT || 3001;
 
-server.listen(PORT, () => {
-    console.log(`
+initDatabase().then(() => {
+    server.listen(PORT, () => {
+        console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
 ║   🐦 NestFinder API Server                            ║
@@ -104,5 +105,9 @@ server.listen(PORT, () => {
 ║   Default: admin / admin123                           ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
-  `);
+    `);
+    });
+}).catch(err => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
 });

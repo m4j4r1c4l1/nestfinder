@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import db, { getSettings } from '../database.js';
+import { run, getSettings } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
@@ -22,14 +22,12 @@ router.put('/', requireAdmin, (req, res) => {
         return res.status(400).json({ error: 'Settings object required' });
     }
 
-    const updateSetting = db.prepare(`
-    INSERT INTO settings (key, value, updated_at) 
-    VALUES (?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP
-  `);
-
     for (const [key, value] of Object.entries(settings)) {
-        updateSetting.run(key, String(value), String(value));
+        run(
+            `INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+            [key, String(value), String(value)]
+        );
     }
 
     const updatedSettings = getSettings();
