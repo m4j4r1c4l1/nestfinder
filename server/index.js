@@ -69,6 +69,29 @@ app.use('/api/points', pointsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+    // 1. Serve Client (Public App)
+    app.use(express.static(path.join(__dirname, '../client/dist')));
+
+    // 2. Serve Admin Dashboard
+    app.use('/admin-panel', express.static(path.join(__dirname, '../admin/dist')));
+
+    // Handle React routing for Admin
+    app.get('/admin-panel/*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../admin/dist', 'index.html'));
+    });
+
+    // Handle React routing for Client (catch-all must be last)
+    app.get('*', (req, res) => {
+        // Don't intercept API requests
+        if (req.path.startsWith('/api')) {
+            return res.status(404).json({ error: 'Not found' });
+        }
+        res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+    });
+}
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({
