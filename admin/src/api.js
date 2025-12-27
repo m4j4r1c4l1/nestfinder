@@ -70,5 +70,12 @@ export const adminApi = {
 
     getPoints() {
         return this.fetch('/admin/points');
+    },
+
+    changePassword(currentPassword, newPassword) {
+        return this.fetch('/admin/password', {
+            method: 'PUT',
+            body: JSON.stringify({ currentPassword, newPassword }),
+        });
     }
 };

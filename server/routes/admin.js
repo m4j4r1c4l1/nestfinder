@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { get, all } from '../database.js';
+import { get, all, run } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 
@@ -202,6 +203,30 @@ router.get('/logs/export', (req, res) => {
         })),
         exported_at: new Date().toISOString()
     });
+});
+
+// Change admin password
+router.put('/password', (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Current and new password required' });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const admin = get('SELECT * FROM admins WHERE id = ?', [req.admin.id]);
+
+    if (!admin || !bcrypt.compareSync(currentPassword, admin.password_hash)) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const newHash = bcrypt.hashSync(newPassword, 10);
+    run('UPDATE admins SET password_hash = ? WHERE id = ?', [newHash, req.admin.id]);
+
+    res.json({ success: true, message: 'Password changed successfully' });
 });
 
 export default router;
