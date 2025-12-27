@@ -1,0 +1,19 @@
+{
+  "name": "nestfinder-server",
+  "version": "1.0.0",
+  "description": "NestFinder API Server - Tracking locations for homeless assistance",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0",
+    "ws": "^8.16.0"
+  }
+}
