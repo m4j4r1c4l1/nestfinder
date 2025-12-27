@@ -12,6 +12,10 @@ const Settings = () => {
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
     const [changingPassword, setChangingPassword] = useState(false);
 
+    // Reset state
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const [resetting, setResetting] = useState(false);
+
     useEffect(() => {
         adminApi.getSettings().then(data => {
             setSettings(data.settings);
@@ -65,6 +69,20 @@ const Settings = () => {
         }
     };
 
+    const handleReset = async () => {
+        setResetting(true);
+        setMessage({ text: '', type: '' });
+        try {
+            await adminApi.resetDatabase();
+            setMessage({ text: 'Database reset successfully! All points, users, and logs have been cleared.', type: 'success' });
+            setShowResetConfirm(false);
+        } catch (err) {
+            setMessage({ text: err.message || 'Failed to reset database', type: 'error' });
+        } finally {
+            setResetting(false);
+        }
+    };
+
     if (loading) return <div>Loading settings...</div>;
 
     return (
@@ -103,7 +121,7 @@ const Settings = () => {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div className="form-group">
-                                <label className="form-label">Confirmations to Verify Point</label>
+                                <label className="form-label">Confirmations to Verify</label>
                                 <input
                                     name="confirmations_required"
                                     type="number"
@@ -112,13 +130,10 @@ const Settings = () => {
                                     onChange={handleChange}
                                     min="1"
                                 />
-                                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>
-                                    Confirmations needed to change status from Pending to Confirmed.
-                                </p>
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Reports to Deactivate Point</label>
+                                <label className="form-label">Reports to Deactivate</label>
                                 <input
                                     name="deactivations_required"
                                     type="number"
@@ -127,9 +142,6 @@ const Settings = () => {
                                     onChange={handleChange}
                                     min="1"
                                 />
-                                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>
-                                    User reports required to mark a point as Deactivated.
-                                </p>
                             </div>
                         </div>
 
@@ -159,7 +171,7 @@ const Settings = () => {
             </div>
 
             {/* Security Settings */}
-            <div className="card">
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div className="card-header" style={{ borderBottom: '1px solid var(--color-border)', padding: '1rem' }}>
                     <h3 style={{ margin: 0, fontSize: '1rem' }}>🔒 Security</h3>
                 </div>
@@ -191,47 +203,89 @@ const Settings = () => {
                                     required
                                 />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">New Password</label>
-                                <input
-                                    type="password"
-                                    className="form-input"
-                                    value={passwords.new}
-                                    onChange={e => setPasswords({ ...passwords, new: e.target.value })}
-                                    required
-                                    minLength={6}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Confirm New Password</label>
-                                <input
-                                    type="password"
-                                    className="form-input"
-                                    value={passwords.confirm}
-                                    onChange={e => setPasswords({ ...passwords, confirm: e.target.value })}
-                                    required
-                                />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div className="form-group">
+                                    <label className="form-label">New Password</label>
+                                    <input
+                                        type="password"
+                                        className="form-input"
+                                        value={passwords.new}
+                                        onChange={e => setPasswords({ ...passwords, new: e.target.value })}
+                                        required
+                                        minLength={6}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Confirm Password</label>
+                                    <input
+                                        type="password"
+                                        className="form-input"
+                                        value={passwords.confirm}
+                                        onChange={e => setPasswords({ ...passwords, confirm: e.target.value })}
+                                        required
+                                    />
+                                </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary"
-                                    disabled={changingPassword}
-                                >
+                                <button type="submit" className="btn btn-primary" disabled={changingPassword}>
                                     {changingPassword ? 'Changing...' : 'Update Password'}
                                 </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    onClick={() => {
-                                        setShowPasswordChange(false);
-                                        setPasswords({ current: '', new: '', confirm: '' });
-                                    }}
-                                >
+                                <button type="button" className="btn btn-secondary" onClick={() => {
+                                    setShowPasswordChange(false);
+                                    setPasswords({ current: '', new: '', confirm: '' });
+                                }}>
                                     Cancel
                                 </button>
                             </div>
                         </form>
+                    )}
+                </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="card" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                <div className="card-header" style={{ borderBottom: '1px solid rgba(239, 68, 68, 0.3)', padding: '1rem', background: 'rgba(239, 68, 68, 0.05)' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--color-deactivated)' }}>⚠️ Danger Zone</h3>
+                </div>
+                <div className="card-body" style={{ padding: '1.5rem' }}>
+                    {!showResetConfirm ? (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <div style={{ fontWeight: 500 }}>Reset Database</div>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                    Delete all points, users, logs. Settings will be kept.
+                                </div>
+                            </div>
+                            <button
+                                className="btn"
+                                style={{ background: 'var(--color-deactivated)', color: 'white' }}
+                                onClick={() => setShowResetConfirm(true)}
+                            >
+                                Reset Database
+                            </button>
+                        </div>
+                    ) : (
+                        <div>
+                            <p style={{ color: 'var(--color-deactivated)', marginBottom: '1rem' }}>
+                                <strong>Warning:</strong> This will permanently delete all points, users, confirmations, and logs. This action cannot be undone.
+                            </p>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button
+                                    className="btn"
+                                    style={{ background: 'var(--color-deactivated)', color: 'white' }}
+                                    onClick={handleReset}
+                                    disabled={resetting}
+                                >
+                                    {resetting ? 'Resetting...' : 'Yes, Reset Everything'}
+                                </button>
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowResetConfirm(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>

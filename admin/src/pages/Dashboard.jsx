@@ -6,7 +6,7 @@ const Dashboard = ({ onNavigate }) => {
     const [stats, setStats] = useState(null);
     const [points, setPoints] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [modalData, setModalData] = useState(null); // { type, title, data }
+    const [modalData, setModalData] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -99,60 +99,40 @@ const Dashboard = ({ onNavigate }) => {
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
             <h2 style={{ margin: 0 }}>Dashboard Overview</h2>
 
-            {/* Stats Row - Compact */}
+            {/* Stats Row */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
-                <StatCard
-                    value={stats.totalPoints}
-                    label="Total Points"
-                    onClick={() => handleStatClick('totalPoints')}
-                    color="var(--color-primary)"
-                />
-                <StatCard
-                    value={stats.activeUsers}
-                    label="Active Users (7d)"
-                    onClick={() => handleStatClick('activeUsers')}
-                    color="var(--color-confirmed)"
-                />
-                <StatCard
-                    value={stats.todaySubmissions}
-                    label="New Reports Today"
-                    onClick={() => handleStatClick('todayReports')}
-                    color="var(--color-pending)"
-                />
-                <StatCard
-                    value={stats.todayActions}
-                    label="Actions Today"
-                    onClick={() => handleStatClick('todayActions')}
-                    color="var(--color-accent)"
-                />
+                <StatCard value={stats.totalPoints} label="Total Points" onClick={() => handleStatClick('totalPoints')} color="var(--color-primary)" />
+                <StatCard value={stats.activeUsers} label="Active Users (7d)" onClick={() => handleStatClick('activeUsers')} color="var(--color-confirmed)" />
+                <StatCard value={stats.todaySubmissions} label="New Reports Today" onClick={() => handleStatClick('todayReports')} color="var(--color-pending)" />
+                <StatCard value={stats.todayActions} label="Actions Today" onClick={() => handleStatClick('todayActions')} color="var(--color-accent)" />
             </div>
 
-            {/* Main Content - Map takes most space */}
-            <div style={{ flex: 1, display: 'flex', gap: '1rem', minHeight: 0 }}>
-                {/* Map - Takes 75% */}
-                <div className="card" style={{ flex: 3, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
-                        <span style={{ fontWeight: 600 }}>Global Activity Map</span>
-                    </div>
-                    <div style={{ flex: 1, minHeight: '300px' }}>
-                        <AdminMap points={points} />
-                    </div>
+            {/* Map - Full Width, takes remaining space */}
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: '350px' }}>
+                <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{points.length} total points</span>
                 </div>
+                <div style={{ flex: 1, minHeight: '250px' }}>
+                    <AdminMap points={points} />
+                </div>
+            </div>
 
-                {/* Status Summary - Compact sidebar */}
-                <div className="card" style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column' }}>
-                    <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
-                        <span style={{ fontWeight: 600 }}>Status Summary</span>
-                    </div>
-                    <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
-                        <StatusBar label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" />
-                        <StatusBar label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" />
-                        <StatusBar label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" />
+            {/* Status Summary - Below Map, Horizontal Layout */}
+            <div className="card">
+                <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
+                    <span style={{ fontWeight: 600 }}>📊 Status Summary</span>
+                </div>
+                <div className="card-body" style={{ padding: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+                        <StatusCard label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" />
+                        <StatusCard label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" />
+                        <StatusCard label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" />
                     </div>
                 </div>
             </div>
 
-            {/* Modal for Details */}
+            {/* Modal */}
             {modalData && (
                 <Modal title={modalData.title} onClose={() => setModalData(null)}>
                     {modalData.data.length === 0 ? (
@@ -187,7 +167,7 @@ const Dashboard = ({ onNavigate }) => {
     );
 };
 
-// Compact clickable stat card
+// Clickable stat card
 const StatCard = ({ value, label, onClick, color }) => (
     <div
         className="card"
@@ -203,30 +183,41 @@ const StatCard = ({ value, label, onClick, color }) => (
         onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
     >
         <div style={{ fontSize: '2rem', fontWeight: 700, color }}>{value}</div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+        <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
     </div>
 );
 
-// Status bar with percentage
-const StatusBar = ({ label, count, total, color }) => {
+// Status card with icon and progress
+const StatusCard = ({ label, count, total, color, icon }) => {
     const percent = total > 0 ? (count / total * 100).toFixed(0) : 0;
     return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: color }}></span>
-                    {label}
-                </span>
-                <span style={{ fontWeight: 600 }}>{count}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '50%',
+                background: `${color}20`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.25rem'
+            }}>
+                {icon}
             </div>
-            <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{ width: `${percent}%`, height: '100%', background: color, transition: 'width 0.3s ease' }}></div>
+            <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                    <span style={{ fontWeight: 500 }}>{label}</span>
+                    <span style={{ fontWeight: 700, color }}>{count}</span>
+                </div>
+                <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: `${percent}%`, height: '100%', background: color, transition: 'width 0.3s ease' }}></div>
+                </div>
             </div>
         </div>
     );
 };
 
-// Simple Modal component
+// Modal
 const Modal = ({ title, onClose, children }) => (
     <div
         style={{
@@ -250,9 +241,7 @@ const Modal = ({ title, onClose, children }) => (
                 <h3 style={{ margin: 0 }}>{title}</h3>
                 <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>&times;</button>
             </div>
-            <div className="card-body">
-                {children}
-            </div>
+            <div className="card-body">{children}</div>
         </div>
     </div>
 );

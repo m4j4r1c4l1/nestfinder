@@ -192,4 +192,16 @@ export const getSettings = () => {
   }, {});
 };
 
-export default { initDatabase, getDb, run, get, all, log, getSetting, getSettings, saveDatabase };
+// Reset database (clear all data except settings and admins)
+export const resetDatabase = () => {
+  db.run('DELETE FROM confirmations');
+  db.run('DELETE FROM logs');
+  db.run('DELETE FROM points');
+  db.run('DELETE FROM users');
+  // Reset auto-increment counters
+  db.run("DELETE FROM sqlite_sequence WHERE name IN ('confirmations', 'logs', 'points')");
+  saveDatabase();
+  console.log('Database reset completed');
+};
+
+export default { initDatabase, getDb, run, get, all, log, getSetting, getSettings, saveDatabase, resetDatabase };
