@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.DEV ? '/api' : '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const adminApi = {
     token: localStorage.getItem('nestfinder_admin_token'),
