@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">🏠 NestFinder</h1>
+  <h1 align="center">🐦 NestFinder</h1>
   <p align="center">
     <strong>A Progressive Web App for mapping and tracking resources for homeless assistance</strong>
   </p>
