@@ -122,7 +122,7 @@ npm run dev
 
 ## 📄 License
 
-MIT © 2024 NestFinder
+MIT © 2025 NestFinder
 
 ---
 
