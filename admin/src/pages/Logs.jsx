@@ -7,6 +7,7 @@ const Logs = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [filters, setFilters] = useState({ limit: 50 });
+    const [exporting, setExporting] = useState(false);
 
     const fetchLogs = async () => {
         setLoading(true);
@@ -25,15 +26,45 @@ const Logs = () => {
         fetchLogs();
     }, [page, filters]);
 
+    const handleExportCSV = async () => {
+        setExporting(true);
+        try {
+            const token = localStorage.getItem('nestfinder_admin_token');
+            const response = await fetch('/api/admin/logs/export?format=csv', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Export failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'nestfinder-logs.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } catch (err) {
+            console.error('Export error:', err);
+            alert('Failed to export logs');
+        } finally {
+            setExporting(false);
+        }
+    };
+
     return (
         <div>
             <div className="flex-between flex-center mb-4">
                 <h2>System Logs</h2>
                 <button
                     className="btn btn-secondary"
-                    onClick={() => window.location.href = `${window.location.protocol}//${window.location.hostname}:3001/api/admin/logs/export?format=csv&limit=1000`}
+                    onClick={handleExportCSV}
+                    disabled={exporting}
                 >
-                    Export CSV
+                    {exporting ? 'Exporting...' : 'Export CSV'}
                 </button>
             </div>
 
