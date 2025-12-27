@@ -231,15 +231,20 @@ router.put('/password', (req, res) => {
 
 // Reset database (clear all data)
 router.post('/reset', (req, res) => {
-    const { confirm } = req.body;
+    const { confirm, target = 'all' } = req.body;
+    const validTargets = ['logs', 'points', 'users', 'all'];
+    if (!validTargets.includes(target)) {
+        return res.status(400).json({ error: 'Invalid target' });
+    }
 
-    if (confirm !== 'RESET') {
-        return res.status(400).json({ error: 'Please confirm by sending { confirm: "RESET" }' });
+    if (confirm !== target.toUpperCase()) {
+        return res.status(400).json({ error: 'Confirmation required' });
     }
 
     try {
-        resetDatabase();
-        res.json({ success: true, message: 'Database reset successfully. All points, users, logs, and confirmations have been cleared.' });
+        resetDatabase(target);
+        const msgs = { logs: 'Logs cleared.', points: 'Points cleared.', users: 'Users cleared.', all: 'All data cleared.' };
+        res.json({ success: true, message: msgs[target] });
     } catch (err) {
         res.status(500).json({ error: 'Failed to reset database' });
     }

@@ -99,35 +99,46 @@ const Dashboard = ({ onNavigate }) => {
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
             <h2 style={{ margin: 0 }}>Dashboard Overview</h2>
 
-            {/* Stats Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
-                <StatCard value={stats.totalPoints} label="Total Points" onClick={() => handleStatClick('totalPoints')} color="var(--color-primary)" />
-                <StatCard value={stats.activeUsers} label="Active Users (7d)" onClick={() => handleStatClick('activeUsers')} color="var(--color-confirmed)" />
-                <StatCard value={stats.todaySubmissions} label="New Reports Today" onClick={() => handleStatClick('todayReports')} color="var(--color-pending)" />
-                <StatCard value={stats.todayActions} label="Actions Today" onClick={() => handleStatClick('todayActions')} color="var(--color-accent)" />
-            </div>
+            {/* Main Content: Map + Right Sidebar */}
+            <div style={{ flex: 1, display: 'flex', gap: '1rem', minHeight: 0 }}>
 
-            {/* Map - Full Width, takes remaining space */}
-            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: '350px' }}>
-                <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{points.length} total points</span>
+                {/* Map - Left side, takes most width */}
+                <div className="card" style={{ flex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{points.length} total points</span>
+                    </div>
+                    <div style={{ flex: 1, minHeight: '300px' }}>
+                        <AdminMap points={points} />
+                    </div>
                 </div>
-                <div style={{ flex: 1, minHeight: '250px' }}>
-                    <AdminMap points={points} />
-                </div>
-            </div>
 
-            {/* Status Summary - Below Map, Horizontal Layout */}
-            <div className="card">
-                <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
-                    <span style={{ fontWeight: 600 }}>📊 Status Summary</span>
-                </div>
-                <div className="card-body" style={{ padding: '1rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-                        <StatusCard label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" />
-                        <StatusCard label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" />
-                        <StatusCard label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" />
+                {/* Right Sidebar - Metrics + Status */}
+                <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+                    {/* Metrics */}
+                    <div className="card" style={{ flex: 1 }}>
+                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600 }}>📈 Metrics</span>
+                        </div>
+                        <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <MetricRow label="Total Points" value={stats.totalPoints} onClick={() => handleStatClick('totalPoints')} color="var(--color-primary)" />
+                            <MetricRow label="Active Users (7d)" value={stats.activeUsers} onClick={() => handleStatClick('activeUsers')} color="var(--color-confirmed)" />
+                            <MetricRow label="New Reports Today" value={stats.todaySubmissions} onClick={() => handleStatClick('todayReports')} color="var(--color-pending)" />
+                            <MetricRow label="Actions Today" value={stats.todayActions} onClick={() => handleStatClick('todayActions')} color="var(--color-accent)" />
+                        </div>
+                    </div>
+
+                    {/* Status Summary */}
+                    <div className="card" style={{ flex: 1 }}>
+                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600 }}>📊 Status Summary</span>
+                        </div>
+                        <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" />
+                            <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" />
+                            <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -167,51 +178,43 @@ const Dashboard = ({ onNavigate }) => {
     );
 };
 
-// Clickable stat card
-const StatCard = ({ value, label, onClick, color }) => (
+// Compact metric row (clickable)
+const MetricRow = ({ label, value, onClick, color }) => (
     <div
-        className="card"
         onClick={onClick}
         style={{
-            padding: '1rem',
-            textAlign: 'center',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '0.6rem 0.75rem',
+            background: 'var(--color-bg-tertiary)',
+            borderRadius: 'var(--radius-md)',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             borderLeft: `3px solid ${color}`
         }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--color-bg-secondary)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'var(--color-bg-tertiary)'}
     >
-        <div style={{ fontSize: '2rem', fontWeight: 700, color }}>{value}</div>
-        <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+        <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{label}</span>
+        <span style={{ fontSize: '1.25rem', fontWeight: 700, color }}>{value}</span>
     </div>
 );
 
-// Status card with icon and progress
-const StatusCard = ({ label, count, total, color, icon }) => {
+// Status row with progress bar
+const StatusRow = ({ label, count, total, color, icon }) => {
     const percent = total > 0 ? (count / total * 100).toFixed(0) : 0;
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                background: `${color}20`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.25rem'
-            }}>
-                {icon}
+        <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                    <span>{icon}</span>
+                    {label}
+                </span>
+                <span style={{ fontWeight: 600, color }}>{count}</span>
             </div>
-            <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                    <span style={{ fontWeight: 500 }}>{label}</span>
-                    <span style={{ fontWeight: 700, color }}>{count}</span>
-                </div>
-                <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: `${percent}%`, height: '100%', background: color, transition: 'width 0.3s ease' }}></div>
-                </div>
+            <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ width: `${percent}%`, height: '100%', background: color, transition: 'width 0.3s ease' }}></div>
             </div>
         </div>
     );

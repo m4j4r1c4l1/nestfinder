@@ -17,19 +17,33 @@ const MapView = () => {
         updateFilters,
         submitPoint,
         confirmPoint,
-        deactivatePoint
+        deactivatePoint,
+        reactivatePoint
     } = usePoints();
     const { location: userLocation, getCurrentLocation } = useGeolocation();
 
     // UI State
-    const [activeSheet, setActiveSheet] = useState(null); // 'submit', 'details', 'filter', 'route', 'download'
+    const [activeSheet, setActiveSheet] = useState(null);
     const [selectedPoint, setSelectedPoint] = useState(null);
     const [routePath, setRoutePath] = useState(null);
+    const [toast, setToast] = useState(null); // { message, type: 'success' | 'error' }
 
     // Initialize location
     useEffect(() => {
         getCurrentLocation().catch(() => { });
     }, []);
+
+    // Auto-hide toast
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
+
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+    };
 
     const handlePointClick = (point) => {
         setSelectedPoint(point);
@@ -44,11 +58,42 @@ const MapView = () => {
     const handleSubmit = async (data) => {
         await submitPoint(data);
         setActiveSheet(null);
+        showToast('Location submitted successfully!', 'success');
+    };
+
+    const handleConfirm = async (pointId) => {
+        try {
+            await confirmPoint(pointId);
+            setActiveSheet(null);
+            showToast('Point confirmed!', 'success');
+        } catch (err) {
+            showToast(err.message || 'Failed to confirm point', 'error');
+        }
+    };
+
+    const handleDeactivate = async (pointId) => {
+        try {
+            await deactivatePoint(pointId);
+            setActiveSheet(null);
+            showToast('Point deactivated', 'success');
+        } catch (err) {
+            showToast(err.message || 'Failed to deactivate point', 'error');
+        }
+    };
+
+    const handleReactivate = async (pointId) => {
+        try {
+            await reactivatePoint(pointId);
+            setActiveSheet(null);
+            showToast('Point reactivated - now pending confirmation', 'success');
+        } catch (err) {
+            showToast(err.message || 'Failed to reactivate point', 'error');
+        }
     };
 
     const handleRouteCalculate = (path) => {
         setRoutePath(path);
-        setActiveSheet(null); // Close panel to see map
+        setActiveSheet(null);
     };
 
     const handleClearRoute = () => {
@@ -62,6 +107,25 @@ const MapView = () => {
 
     return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+            {/* Toast Notification */}
+            {toast && (
+                <div className={`toast ${toast.type}`} style={{
+                    position: 'fixed',
+                    top: 'var(--space-4)',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 400,
+                    padding: 'var(--space-3) var(--space-5)',
+                    borderRadius: 'var(--radius-lg)',
+                    background: toast.type === 'error' ? 'var(--color-deactivated)' : 'var(--color-confirmed)',
+                    color: 'white',
+                    fontWeight: 500,
+                    boxShadow: 'var(--shadow-lg)'
+                }}>
+                    {toast.message}
+                </div>
+            )}
+
             {/* Main Map */}
             <Map
                 points={points}
@@ -69,19 +133,6 @@ const MapView = () => {
                 onPointClick={handlePointClick}
                 route={routePath}
             />
-
-            {/* Floating Action Button (FAB) for Submission */}
-            {!activeSheet && (
-                <div className="map-fab">
-                    <button
-                        className="btn btn-primary btn-icon shadow-lg"
-                        style={{ width: 56, height: 56, borderRadius: '50%', fontSize: '1.5rem' }}
-                        onClick={() => setActiveSheet('submit')}
-                    >
-                        +
-                    </button>
-                </div>
-            )}
 
             {/* Bottom Sheet Container */}
             <div className={`bottom-sheet ${activeSheet ? 'open' : ''}`}>
@@ -96,8 +147,9 @@ const MapView = () => {
                         <PointDetails
                             point={selectedPoint}
                             user={user}
-                            onConfirm={() => { confirmPoint(selectedPoint.id); setActiveSheet(null); }}
-                            onDeactivate={() => { deactivatePoint(selectedPoint.id); setActiveSheet(null); }}
+                            onConfirm={() => handleConfirm(selectedPoint.id)}
+                            onDeactivate={() => handleDeactivate(selectedPoint.id)}
+                            onReactivate={() => handleReactivate(selectedPoint.id)}
                             onClose={handleSheetClose}
                         />
                     )}
@@ -144,6 +196,14 @@ const MapView = () => {
                 >
                     <span>🗺️</span>
                     Map
+                </button>
+                <button
+                    className={`bottom-nav-item ${activeSheet === 'submit' ? 'active' : ''}`}
+                    onClick={() => setActiveSheet('submit')}
+                    style={activeSheet === 'submit' ? {} : { color: 'var(--color-primary)' }}
+                >
+                    <span>🐦</span>
+                    Report
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}

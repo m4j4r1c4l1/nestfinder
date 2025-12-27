@@ -108,6 +108,7 @@ export const initDatabase = async () => {
   const defaultSettings = [
     { key: 'confirmations_required', value: '1' },
     { key: 'deactivations_required', value: '3' },
+    { key: 'deactivation_retention_days', value: '7' },
     { key: 'weekly_reminder_enabled', value: 'true' },
     { key: 'app_name', value: 'NestFinder' }
   ];
@@ -193,15 +194,34 @@ export const getSettings = () => {
 };
 
 // Reset database (clear all data except settings and admins)
-export const resetDatabase = () => {
-  db.run('DELETE FROM confirmations');
-  db.run('DELETE FROM logs');
-  db.run('DELETE FROM points');
-  db.run('DELETE FROM users');
-  // Reset auto-increment counters
-  db.run("DELETE FROM sqlite_sequence WHERE name IN ('confirmations', 'logs', 'points')");
+export const resetDatabase = (target = 'all') => {
+  switch (target) {
+    case 'logs':
+      db.run('DELETE FROM logs');
+      break;
+    case 'points':
+      db.run('DELETE FROM confirmations');
+      db.run('DELETE FROM points');
+      db.run("DELETE FROM sqlite_sequence WHERE name IN ('confirmations', 'points')");
+      break;
+    case 'users':
+      db.run('DELETE FROM confirmations');
+      db.run('DELETE FROM logs');
+      db.run('DELETE FROM points');
+      db.run('DELETE FROM users');
+      db.run("DELETE FROM sqlite_sequence WHERE name IN ('confirmations', 'logs', 'points')");
+      break;
+    case 'all':
+    default:
+      db.run('DELETE FROM confirmations');
+      db.run('DELETE FROM logs');
+      db.run('DELETE FROM points');
+      db.run('DELETE FROM users');
+      db.run("DELETE FROM sqlite_sequence WHERE name IN ('confirmations', 'logs', 'points')");
+      break;
+  }
   saveDatabase();
-  console.log('Database reset completed');
+  console.log(`Database reset completed: ${target}`);
 };
 
 export default { initDatabase, getDb, run, get, all, log, getSetting, getSettings, saveDatabase, resetDatabase };

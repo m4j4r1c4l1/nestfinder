@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useGeolocation } from '../hooks/useGeolocation';
 
 const SubmitPoint = ({ onSubmit, onCancel }) => {
-    const { location, loading: locLoading, getCurrentLocation, getAddress } = useGeolocation();
+    const { location, loading: locLoading, getCurrentLocation, getAddress, setLocation } = useGeolocation();
+    const [inputMode, setInputMode] = useState('gps'); // 'gps' or 'address'
     const [address, setAddress] = useState('');
+    const [manualAddress, setManualAddress] = useState({ city: '', street: '', number: '' });
     const [notes, setNotes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isGeocoding, setIsGeocoding] = useState(false);
     const [error, setError] = useState('');
-
-    // Get location on mount logic could go here, but better to let user trigger it explicitly to save battery
 
     const handleGetLocation = async () => {
         try {
@@ -21,10 +22,49 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
         }
     };
 
+    const handleGeocodeAddress = async () => {
+        const fullAddress = `${manualAddress.street} ${manualAddress.number}, ${manualAddress.city}`;
+        if (!manualAddress.city || !manualAddress.street) {
+            setError('Please enter at least city and street');
+            return;
+        }
+
+        setIsGeocoding(true);
+        setError('');
+
+        try {
+            // Use Nominatim for geocoding
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`
+            );
+            const data = await response.json();
+
+            if (data.length === 0) {
+                setError('Address not found. Try a different format.');
+                setIsGeocoding(false);
+                return;
+            }
+
+            const result = data[0];
+            // Update location in parent through a mock setLocation
+            if (setLocation) {
+                setLocation({
+                    latitude: parseFloat(result.lat),
+                    longitude: parseFloat(result.lon)
+                });
+            }
+            setAddress(result.display_name);
+        } catch (err) {
+            setError('Failed to geocode address. Check your connection.');
+        } finally {
+            setIsGeocoding(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!location) {
-            setError('Location is required. Tap "Get My Location"');
+            setError('Location is required. Use GPS or enter an address.');
             return;
         }
 
@@ -37,7 +77,8 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
                 notes
             });
         } catch (err) {
-            setError('Failed to submit. Try again.');
+            console.error('Submit point error:', err);
+            setError(err.message || 'Failed to submit. Try again.');
             setIsSubmitting(false);
         }
     };
@@ -56,31 +97,99 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
             </div>
 
             <div className="card-body">
-                <form onSubmit={handleSubmit}>
+                {/* Mode Toggle */}
+                <div className="toggle-group mb-4">
+                    <button
+                        type="button"
+                        className={`toggle-btn ${inputMode === 'gps' ? 'active' : ''}`}
+                        onClick={() => setInputMode('gps')}
+                    >
+                        📍 Use GPS
+                    </button>
+                    <button
+                        type="button"
+                        className={`toggle-btn ${inputMode === 'address' ? 'active' : ''}`}
+                        onClick={() => setInputMode('address')}
+                    >
+                        🏠 Enter Address
+                    </button>
+                </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Location</label>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                className="form-input"
-                                value={address || (location ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : '')}
-                                placeholder="Tap button to find location"
-                                readOnly
-                            />
+                <form onSubmit={handleSubmit}>
+                    {inputMode === 'gps' ? (
+                        <div className="form-group">
+                            <label className="form-label">Current Location</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={address || (location ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : '')}
+                                    placeholder="Tap button to find location"
+                                    readOnly
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary btn-icon"
+                                    onClick={handleGetLocation}
+                                    disabled={locLoading}
+                                >
+                                    {locLoading ? <span className="spinner" style={{ width: 16, height: 16 }} /> : '📍'}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="form-group">
+                                <label className="form-label">City</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="e.g., Madrid"
+                                    value={manualAddress.city}
+                                    onChange={(e) => setManualAddress({ ...manualAddress, city: e.target.value })}
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                <div className="form-group" style={{ flex: 2 }}>
+                                    <label className="form-label">Street</label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="e.g., Gran Vía"
+                                        value={manualAddress.street}
+                                        onChange={(e) => setManualAddress({ ...manualAddress, street: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label className="form-label">Number</label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="e.g., 42"
+                                        value={manualAddress.number}
+                                        onChange={(e) => setManualAddress({ ...manualAddress, number: e.target.value })}
+                                    />
+                                </div>
+                            </div>
                             <button
                                 type="button"
-                                className="btn btn-secondary btn-icon"
-                                onClick={handleGetLocation}
-                                disabled={locLoading}
+                                className="btn btn-secondary btn-block"
+                                onClick={handleGeocodeAddress}
+                                disabled={isGeocoding || !manualAddress.city || !manualAddress.street}
                             >
-                                {locLoading ? <span className="spinner" style={{ width: 16, height: 16 }} /> : '📍'}
+                                {isGeocoding ? 'Searching...' : '🔍 Find Location'}
                             </button>
+                            {location && address && (
+                                <div style={{ marginTop: 'var(--space-3)', padding: 'var(--space-3)', background: 'var(--color-confirmed-light)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
+                                    ✅ Found: {address.substring(0, 60)}...
+                                </div>
+                            )}
                         </div>
-                        {error && <div style={{ color: 'var(--color-deactivated)', fontSize: '12px', marginTop: 4 }}>{error}</div>}
-                    </div>
+                    )}
 
-                    <div className="form-group">
+                    {error && <div style={{ color: 'var(--color-deactivated)', fontSize: '12px', marginTop: 'var(--space-2)' }}>{error}</div>}
+
+                    <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
                         <label className="form-label">Notes (Optional)</label>
                         <textarea
                             className="form-input"
@@ -91,7 +200,7 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
                         />
                     </div>
 
-                    <div className="flex gap-2" style={{ marginTop: 'var(--space-6)' }}>
+                    <div className="flex gap-2" style={{ marginTop: 'var(--space-4)' }}>
                         <button
                             type="submit"
                             className="btn btn-primary btn-block"
@@ -106,7 +215,7 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
                     </p>
                 </form>
             </div>
-        </div >
+        </div>
     );
 };
 

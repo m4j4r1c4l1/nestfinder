@@ -5,7 +5,7 @@ export const usePoints = () => {
     const [points, setPoints] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
-        status: ['pending', 'confirmed'] // Default: don't show deactivated
+        status: ['pending', 'confirmed', 'deactivated'] // Include all statuses
     });
 
     // WebSocket reference
@@ -91,6 +91,10 @@ export const usePoints = () => {
         await api.deactivatePoint(id);
     };
 
+    const reactivatePoint = async (id) => {
+        await api.reactivatePoint(id);
+    };
+
     const updateFilters = (newFilters) => {
         setFilters(prev => ({ ...prev, ...newFilters }));
     };
@@ -103,6 +107,7 @@ export const usePoints = () => {
         submitPoint,
         confirmPoint,
         deactivatePoint,
+        reactivatePoint,
         refresh: fetchPoints
     };
 };

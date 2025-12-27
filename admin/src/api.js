@@ -79,10 +79,10 @@ export const adminApi = {
         });
     },
 
-    resetDatabase() {
+    resetDatabase(target = 'all') {
         return this.fetch('/admin/reset', {
             method: 'POST',
-            body: JSON.stringify({ confirm: 'RESET' }),
+            body: JSON.stringify({ confirm: target.toUpperCase(), target }),
         });
     }
 };
