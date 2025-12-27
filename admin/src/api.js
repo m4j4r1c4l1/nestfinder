@@ -77,5 +77,12 @@ export const adminApi = {
             method: 'PUT',
             body: JSON.stringify({ currentPassword, newPassword }),
         });
+    },
+
+    resetDatabase() {
+        return this.fetch('/admin/reset', {
+            method: 'POST',
+            body: JSON.stringify({ confirm: 'RESET' }),
+        });
     }
 };
