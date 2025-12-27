@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.DEV ? '/api' : '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const adminApi = {
     token: localStorage.getItem('nestfinder_admin_token'),
@@ -76,6 +76,13 @@ export const adminApi = {
         return this.fetch('/admin/password', {
             method: 'PUT',
             body: JSON.stringify({ currentPassword, newPassword }),
+        });
+    },
+
+    resetDatabase(target = 'all') {
+        return this.fetch('/admin/reset', {
+            method: 'POST',
+            body: JSON.stringify({ confirm: target.toUpperCase(), target }),
         });
     }
 };

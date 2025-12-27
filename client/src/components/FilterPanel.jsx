@@ -11,9 +11,8 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
 
     return (
         <div className="card">
-            <div className="card-header flex-between flex-center">
+            <div className="card-header">
                 <h3 className="card-title" style={{ marginBottom: 0 }}>Filters</h3>
-                <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem' }}>Done</button>
             </div>
             <div className="card-body">
                 <label className="form-label">Show Status</label>
@@ -27,6 +26,16 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
                             {status.charAt(0).toUpperCase() + status.slice(1)}
                         </button>
                     ))}
+                </div>
+
+                <div style={{ marginTop: 'var(--space-6)', display: 'flex', justifyContent: 'center' }}>
+                    <button
+                        onClick={onClose}
+                        className="btn btn-primary"
+                        style={{ padding: '0.75rem 2rem' }}
+                    >
+                        ✓ Done
+                    </button>
                 </div>
             </div>
         </div>

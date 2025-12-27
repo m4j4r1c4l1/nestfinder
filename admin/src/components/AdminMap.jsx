@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Reuse icon logic or simplify
+// Fix default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: null,
@@ -24,17 +24,57 @@ const icons = {
     deactivated: createIcon('deactivated')
 };
 
+// Component to handle map resize
+const MapResizer = () => {
+    const map = useMap();
+
+    useEffect(() => {
+        // Invalidate size after mount and on window resize
+        const handleResize = () => {
+            setTimeout(() => map.invalidateSize(), 100);
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        // Also observe parent container size changes
+        const resizeObserver = new ResizeObserver(handleResize);
+        if (map.getContainer().parentElement) {
+            resizeObserver.observe(map.getContainer().parentElement);
+        }
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            resizeObserver.disconnect();
+        };
+    }, [map]);
+
+    return null;
+};
+
 const AdminMap = ({ points }) => {
+    // Set max bounds to prevent world wrapping
+    const maxBounds = L.latLngBounds(
+        L.latLng(-85, -180),  // Southwest
+        L.latLng(85, 180)     // Northeast
+    );
+
     return (
         <MapContainer
-            center={[51.505, -0.09]}
-            zoom={2}
-            style={{ height: '400px', width: '100%', borderRadius: 'var(--radius-lg)' }}
+            center={[40.0, -4.0]}
+            zoom={6}
+            minZoom={2}
+            maxZoom={18}
+            maxBounds={maxBounds}
+            maxBoundsViscosity={1.0}
+            style={{ height: '100%', width: '100%', borderRadius: 'var(--radius-lg)', minHeight: '300px' }}
         >
+            <MapResizer />
             <TileLayer
                 attribution='&copy; OSM'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                className="map-tiles"
+                noWrap={true}
+                bounds={maxBounds}
             />
             {points.map(point => (
                 <Marker
@@ -51,10 +91,20 @@ const AdminMap = ({ points }) => {
                 </Marker>
             ))}
             <style>{`
-        .leaflet-layer {
-          filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
-        }
-      `}</style>
+                .leaflet-container {
+                    background: var(--color-bg-secondary) !important;
+                }
+                .leaflet-layer {
+                    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+                }
+                .custom-marker {
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                }
+            `}</style>
         </MapContainer>
     );
 };

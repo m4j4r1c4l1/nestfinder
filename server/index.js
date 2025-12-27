@@ -2,6 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize database (must happen before routes)
 import { initDatabase } from './database.js';
@@ -72,6 +77,17 @@ app.get('/api/health', (req, res) => {
         version: '1.0.0',
         timestamp: new Date().toISOString()
     });
+});
+
+// Serve static files from client dist
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// Handle React routing, return all non-API requests to React app
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+        return next();
+    }
+    res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
 });
 
 // Error handling

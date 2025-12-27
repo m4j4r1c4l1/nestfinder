@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.DEV ? '/api' : '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 class ApiClient {
   constructor() {
@@ -94,6 +94,12 @@ class ApiClient {
 
   deactivatePoint(id) {
     return this.fetch(`/points/${id}/deactivate`, {
+      method: 'POST',
+    });
+  }
+
+  reactivatePoint(id) {
+    return this.fetch(`/points/${id}/reactivate`, {
       method: 'POST',
     });
   }
