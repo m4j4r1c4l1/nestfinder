@@ -26,7 +26,8 @@ const MapView = () => {
     const [activeSheet, setActiveSheet] = useState(null);
     const [selectedPoint, setSelectedPoint] = useState(null);
     const [routePath, setRoutePath] = useState(null);
-    const [toast, setToast] = useState(null); // { message, type: 'success' | 'error' }
+    const [toast, setToast] = useState(null);
+    const [clickedLocation, setClickedLocation] = useState(null); // For map click to report
 
     // Initialize location
     useEffect(() => {
@@ -48,6 +49,13 @@ const MapView = () => {
     const handlePointClick = (point) => {
         setSelectedPoint(point);
         setActiveSheet('details');
+    };
+
+    const handleMapClick = (coords) => {
+        // When user clicks map, open submit panel with that location
+        setClickedLocation(coords);
+        setActiveSheet('submit');
+        showToast('Location selected! Add details below.', 'success');
     };
 
     const handleSheetClose = () => {
@@ -91,9 +99,12 @@ const MapView = () => {
         }
     };
 
-    const handleRouteCalculate = (path) => {
-        setRoutePath(path);
+    const handleRouteCalculate = (routeData) => {
+        setRoutePath(routeData);
         setActiveSheet(null);
+        if (routeData.distance && routeData.time) {
+            showToast(`Route: ${routeData.distance}km, ~${routeData.time} min walking`, 'success');
+        }
     };
 
     const handleClearRoute = () => {
@@ -131,6 +142,7 @@ const MapView = () => {
                 points={points}
                 userLocation={userLocation}
                 onPointClick={handlePointClick}
+                onMapClick={handleMapClick}
                 route={routePath}
             />
 
@@ -140,7 +152,11 @@ const MapView = () => {
                 <div className="bottom-sheet-content">
 
                     {activeSheet === 'submit' && (
-                        <SubmitPoint onSubmit={handleSubmit} onCancel={handleSheetClose} />
+                        <SubmitPoint
+                            onSubmit={handleSubmit}
+                            onCancel={handleSheetClose}
+                            initialLocation={clickedLocation}
+                        />
                     )}
 
                     {activeSheet === 'details' && selectedPoint && (
@@ -198,19 +214,19 @@ const MapView = () => {
                     Map
                 </button>
                 <button
+                    className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
+                    onClick={() => setActiveSheet('route')}
+                >
+                    <span>�</span>
+                    Route
+                </button>
+                <button
                     className={`bottom-nav-item ${activeSheet === 'submit' ? 'active' : ''}`}
                     onClick={() => setActiveSheet('submit')}
                     style={activeSheet === 'submit' ? {} : { color: 'var(--color-primary)' }}
                 >
-                    <span>🐦</span>
+                    <span>�</span>
                     Report
-                </button>
-                <button
-                    className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet('route')}
-                >
-                    <span>🚶</span>
-                    Route
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'filter' ? 'active' : ''}`}

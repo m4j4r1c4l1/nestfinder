@@ -2,59 +2,117 @@ import React, { useState } from 'react';
 
 const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
     const [routeData, setRouteData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    const calculateRoute = () => {
-        if (points.length < 3) return;
+    // Status filter for route calculation
+    const [statusFilter, setStatusFilter] = useState({
+        pending: true,
+        confirmed: true,
+        deactivated: false
+    });
 
-        // Simple robust TSP solver (Nearest Neighbor)
-        // Start from user location or first point
-        let current = userLocation || points[0];
-        let remaining = userLocation ? [...points] : points.slice(1);
-        const path = [current];
-        let totalDist = 0;
+    const toggleStatus = (status) => {
+        setStatusFilter(prev => ({ ...prev, [status]: !prev[status] }));
+    };
 
-        while (remaining.length > 0) {
-            let nearest = null;
-            let minDst = Infinity;
-            let nearestIdx = -1;
+    // Get filtered points based on status selection
+    const getFilteredPoints = () => {
+        return points.filter(p => statusFilter[p.status]);
+    };
 
-            for (let i = 0; i < remaining.length; i++) {
-                const p = remaining[i];
-                // Haversine approx
-                const d = Math.sqrt(Math.pow(p.latitude - current.latitude, 2) + Math.pow(p.longitude - current.longitude, 2));
-                if (d < minDst) {
-                    minDst = d;
-                    nearest = p;
-                    nearestIdx = i;
-                }
-            }
-
-            if (nearest) {
-                path.push(nearest);
-                totalDist += minDst * 111; // Approx km per degree
-                current = nearest;
-                remaining.splice(nearestIdx, 1);
-            }
+    const calculateRoute = async () => {
+        const filteredPoints = getFilteredPoints();
+        if (filteredPoints.length < 2) {
+            setError('Need at least 2 points to calculate a route');
+            return;
         }
 
-        // Walking speed approx 5km/h
-        const timeHours = totalDist / 5;
-        const timeMins = Math.round(timeHours * 60);
+        setLoading(true);
+        setError('');
 
-        const result = {
-            path,
-            distance: totalDist.toFixed(1),
-            time: timeMins
-        };
+        try {
+            // First, use nearest neighbor to order points
+            let current = userLocation
+                ? { latitude: userLocation.latitude, longitude: userLocation.longitude }
+                : filteredPoints[0];
+            let remaining = userLocation ? [...filteredPoints] : filteredPoints.slice(1);
+            const orderedPath = [current];
 
-        setRouteData(result);
-        onCalculate(path);
+            while (remaining.length > 0) {
+                let nearestIdx = 0;
+                let minDst = Infinity;
+
+                for (let i = 0; i < remaining.length; i++) {
+                    const p = remaining[i];
+                    const d = Math.sqrt(
+                        Math.pow(p.latitude - current.latitude, 2) +
+                        Math.pow(p.longitude - current.longitude, 2)
+                    );
+                    if (d < minDst) {
+                        minDst = d;
+                        nearestIdx = i;
+                    }
+                }
+
+                current = remaining[nearestIdx];
+                orderedPath.push(current);
+                remaining.splice(nearestIdx, 1);
+            }
+
+            // Now get actual walking route from OSRM
+            const coordinates = orderedPath
+                .map(p => `${p.longitude},${p.latitude}`)
+                .join(';');
+
+            const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${coordinates}?overview=full&geometries=geojson`;
+
+            const response = await fetch(osrmUrl);
+            const data = await response.json();
+
+            if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+                throw new Error('Could not calculate walking route');
+            }
+
+            const route = data.routes[0];
+            const distanceKm = (route.distance / 1000).toFixed(1);
+            const timeMins = Math.round(route.duration / 60);
+
+            // Extract the geometry coordinates for the actual walking path
+            const geometry = route.geometry.coordinates.map(coord => ({
+                latitude: coord[1],
+                longitude: coord[0]
+            }));
+
+            const result = {
+                path: orderedPath,      // Waypoints in order
+                geometry,               // Actual walking route geometry
+                distance: distanceKm,
+                time: timeMins,
+                pointCount: filteredPoints.length
+            };
+
+            setRouteData(result);
+            onCalculate(result);
+        } catch (err) {
+            console.error('Route calculation error:', err);
+            setError(err.message || 'Failed to calculate route. Try again.');
+
+            // Fallback to straight lines
+            const filteredPoints = getFilteredPoints();
+            onCalculate({ path: filteredPoints, geometry: null });
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleClear = () => {
         setRouteData(null);
+        setError('');
         onClear();
     };
+
+    const filteredCount = getFilteredPoints().length;
 
     return (
         <div className="card">
@@ -62,6 +120,43 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
                 <h3 className="card-title">Optimize Route</h3>
             </div>
             <div className="card-body">
+                {/* Status Filter */}
+                <div className="mb-4">
+                    <label className="form-label">Include in route:</label>
+                    <div className="toggle-group">
+                        <button
+                            type="button"
+                            className={`toggle-btn pending ${statusFilter.pending ? 'active' : ''}`}
+                            onClick={() => toggleStatus('pending')}
+                        >
+                            ⏳ Pending
+                        </button>
+                        <button
+                            type="button"
+                            className={`toggle-btn confirmed ${statusFilter.confirmed ? 'active' : ''}`}
+                            onClick={() => toggleStatus('confirmed')}
+                        >
+                            ✅ Confirmed
+                        </button>
+                        <button
+                            type="button"
+                            className={`toggle-btn deactivated ${statusFilter.deactivated ? 'active' : ''}`}
+                            onClick={() => toggleStatus('deactivated')}
+                        >
+                            ❌ Deactivated
+                        </button>
+                    </div>
+                    <div className="text-muted text-sm" style={{ marginTop: '0.5rem' }}>
+                        {filteredCount} points selected
+                    </div>
+                </div>
+
+                {error && (
+                    <div style={{ color: 'var(--color-deactivated)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                        {error}
+                    </div>
+                )}
+
                 {routeData ? (
                     <div>
                         <div className="route-info">
@@ -74,6 +169,9 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
                                 <div className="route-stat-label">Minutes</div>
                             </div>
                         </div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', textAlign: 'center' }}>
+                            Visiting {routeData.pointCount} locations
+                        </div>
                         <button className="btn btn-secondary btn-block" onClick={handleClear}>
                             Clear Route
                         </button>
@@ -81,16 +179,17 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
                 ) : (
                     <div>
                         <p className="text-muted mb-4 text-sm">
-                            Calculate the most efficient walking path to visit all visible points.
+                            Calculate the most efficient walking path through streets to visit selected points.
                         </p>
                         <button
                             className="btn btn-primary btn-block"
                             onClick={calculateRoute}
-                            disabled={points.length < 3}
+                            disabled={filteredCount < 2 || loading}
                         >
-                            {points.length < 3
-                                ? `Need ${3 - points.length} more points`
-                                : 'Calculate Walking Route'}
+                            {loading ? 'Calculating...' :
+                                filteredCount < 2
+                                    ? `Need ${2 - filteredCount} more points`
+                                    : `Calculate Route (${filteredCount} points)`}
                         </button>
                     </div>
                 )}

@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGeolocation } from '../hooks/useGeolocation';
 
-const SubmitPoint = ({ onSubmit, onCancel }) => {
+const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     const { location, loading: locLoading, getCurrentLocation, getAddress, setLocation } = useGeolocation();
-    const [inputMode, setInputMode] = useState('gps'); // 'gps' or 'address'
+    const [inputMode, setInputMode] = useState(initialLocation ? 'map' : 'gps'); // 'gps', 'address', or 'map'
     const [address, setAddress] = useState('');
     const [manualAddress, setManualAddress] = useState({ city: '', street: '', number: '' });
     const [notes, setNotes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
     const [error, setError] = useState('');
+
+    // Handle initialLocation from map click
+    useEffect(() => {
+        if (initialLocation) {
+            setLocation(initialLocation);
+            setInputMode('map');
+            // Reverse geocode to get address
+            getAddress(initialLocation.latitude, initialLocation.longitude)
+                .then(addr => setAddress(addr))
+                .catch(() => setAddress(`${initialLocation.latitude.toFixed(4)}, ${initialLocation.longitude.toFixed(4)}`));
+        }
+    }, [initialLocation]);
 
     const handleGetLocation = async () => {
         try {
@@ -33,7 +45,6 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
         setError('');
 
         try {
-            // Use Nominatim for geocoding
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`
             );
@@ -46,7 +57,6 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
             }
 
             const result = data[0];
-            // Update location in parent through a mock setLocation
             if (setLocation) {
                 setLocation({
                     latitude: parseFloat(result.lat),
@@ -64,7 +74,7 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!location) {
-            setError('Location is required. Use GPS or enter an address.');
+            setError('Location is required. Use GPS, click on map, or enter an address.');
             return;
         }
 
@@ -98,25 +108,34 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
 
             <div className="card-body">
                 {/* Mode Toggle */}
-                <div className="toggle-group mb-4">
-                    <button
-                        type="button"
-                        className={`toggle-btn ${inputMode === 'gps' ? 'active' : ''}`}
-                        onClick={() => setInputMode('gps')}
-                    >
-                        📍 Use GPS
-                    </button>
-                    <button
-                        type="button"
-                        className={`toggle-btn ${inputMode === 'address' ? 'active' : ''}`}
-                        onClick={() => setInputMode('address')}
-                    >
-                        🏠 Enter Address
-                    </button>
+                <div className="mb-4">
+                    <div className="toggle-group">
+                        <button
+                            type="button"
+                            className={`toggle-btn ${inputMode === 'gps' ? 'active' : ''}`}
+                            onClick={() => setInputMode('gps')}
+                        >
+                            📍 GPS
+                        </button>
+                        <button
+                            type="button"
+                            className={`toggle-btn ${inputMode === 'map' ? 'active' : ''}`}
+                            onClick={() => setInputMode('map')}
+                        >
+                            🗺️ Map
+                        </button>
+                        <button
+                            type="button"
+                            className={`toggle-btn ${inputMode === 'address' ? 'active' : ''}`}
+                            onClick={() => setInputMode('address')}
+                        >
+                            🏠 Address
+                        </button>
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    {inputMode === 'gps' ? (
+                    {inputMode === 'gps' && (
                         <div className="form-group">
                             <label className="form-label">Current Location</label>
                             <div className="flex gap-2">
@@ -137,7 +156,41 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
                                 </button>
                             </div>
                         </div>
-                    ) : (
+                    )}
+
+                    {inputMode === 'map' && (
+                        <div className="form-group">
+                            <label className="form-label">Selected Location</label>
+                            <div style={{
+                                padding: 'var(--space-3)',
+                                background: location ? 'var(--color-confirmed-light)' : 'var(--color-bg-tertiary)',
+                                borderRadius: 'var(--radius-md)',
+                                fontSize: '0.9rem'
+                            }}>
+                                {location ? (
+                                    <>
+                                        <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>
+                                            ✅ Location selected
+                                        </div>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                            {address || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div style={{ color: 'var(--color-text-muted)' }}>
+                                        👆 Tap on the map to select a location
+                                    </div>
+                                )}
+                            </div>
+                            {!location && (
+                                <div style={{ marginTop: 'var(--space-2)', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                    Close this panel, tap on the map where you want to report, and it will open again with that location.
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {inputMode === 'address' && (
                         <div>
                             <div className="form-group">
                                 <label className="form-label">City</label>
@@ -179,7 +232,7 @@ const SubmitPoint = ({ onSubmit, onCancel }) => {
                             >
                                 {isGeocoding ? 'Searching...' : '🔍 Find Location'}
                             </button>
-                            {location && address && (
+                            {location && address && inputMode === 'address' && (
                                 <div style={{ marginTop: 'var(--space-3)', padding: 'var(--space-3)', background: 'var(--color-confirmed-light)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
                                     ✅ Found: {address.substring(0, 60)}...
                                 </div>
