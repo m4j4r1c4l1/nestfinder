@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { get, all, run } from '../database.js';
+import { get, all, run, resetDatabase } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
 
@@ -227,6 +227,27 @@ router.put('/password', (req, res) => {
     run('UPDATE admins SET password_hash = ? WHERE id = ?', [newHash, req.admin.id]);
 
     res.json({ success: true, message: 'Password changed successfully' });
+});
+
+// Reset database (clear all data)
+router.post('/reset', (req, res) => {
+    const { confirm, target = 'all' } = req.body;
+    const validTargets = ['logs', 'points', 'users', 'all'];
+    if (!validTargets.includes(target)) {
+        return res.status(400).json({ error: 'Invalid target' });
+    }
+
+    if (confirm !== target.toUpperCase()) {
+        return res.status(400).json({ error: 'Confirmation required' });
+    }
+
+    try {
+        resetDatabase(target);
+        const msgs = { logs: 'Logs cleared.', points: 'Points cleared.', users: 'Users cleared.', all: 'All data cleared.' };
+        res.json({ success: true, message: msgs[target] });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to reset database' });
+    }
 });
 
 export default router;

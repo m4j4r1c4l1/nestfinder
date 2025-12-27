@@ -1,11 +1,9 @@
 import React from 'react';
 
-const PointDetails = ({ point, user, onConfirm, onDeactivate, onClose }) => {
+const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onClose }) => {
     if (!point) return null;
 
     const isPoster = user && point.user_id === user.id;
-    const canConfirm = user && !point.confirmations?.some(c => c.user_id === user.id); // Simple check, real logic in backend
-    const canDeactivate = user && !point.deactivations?.some(c => c.user_id === user.id);
 
     // Format date
     const date = new Date(point.created_at).toLocaleDateString(undefined, {
@@ -54,12 +52,20 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onClose }) => {
                 </div>
 
                 <div className="point-detail-actions flex-col">
-                    {point.status !== 'deactivated' && (
+                    {point.status === 'deactivated' ? (
+                        /* Deactivated points: show reactivate option */
+                        <button
+                            className="btn btn-primary btn-block"
+                            onClick={() => onReactivate(point.id)}
+                        >
+                            🔄 Reactivate this location
+                        </button>
+                    ) : (
+                        /* Active/Pending points: show confirm and deactivate */
                         <>
                             <button
                                 className="btn btn-success btn-block"
                                 onClick={() => onConfirm(point.id)}
-                            // Disabled state logic would go here based on previous votes
                             >
                                 Yes, I see help needed here
                             </button>

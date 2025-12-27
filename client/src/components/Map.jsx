@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -32,59 +32,170 @@ const icons = {
     })
 };
 
-// Component to handle map center updates
-const RecenterMap = ({ center }) => {
+// Component to handle initial centering only (not auto-recenter)
+const InitialCenter = ({ center, userLocation }) => {
     const map = useMap();
+    const initialized = React.useRef(false);
+
     useEffect(() => {
-        if (center) {
-            map.flyTo(center, map.getZoom());
+        // Wait for actual user location before centering
+        if (userLocation && !initialized.current) {
+            map.flyTo([userLocation.latitude, userLocation.longitude], 15);
+            initialized.current = true;
         }
-    }, [center, map]);
+    }, [userLocation, map]);
     return null;
+};
+
+// Recenter button component
+const RecenterButton = ({ userLocation }) => {
+    const map = useMap();
+
+    if (!userLocation) return null;
+
+    return (
+        <div style={{
+            position: 'absolute',
+            bottom: '120px',
+            right: '10px',
+            zIndex: 1000
+        }}>
+            <button
+                onClick={() => {
+                    map.flyTo([userLocation.latitude, userLocation.longitude], 15);
+                }}
+                style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'var(--color-bg-secondary)',
+                    border: '2px solid var(--color-border)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                    boxShadow: 'var(--shadow-md)'
+                }}
+                title="Center on my location"
+            >
+                📍
+            </button>
+        </div>
+    );
 };
 
 // Helper for routing display
 const RouteLayer = ({ route }) => {
     const map = useMap();
     const routeRef = React.useRef(null);
+    const markersRef = React.useRef([]);
 
     useEffect(() => {
-        if (!route || route.length < 2) {
-            if (routeRef.current) {
-                map.removeLayer(routeRef.current);
-                routeRef.current = null;
-            }
+        // Clear existing route and markers
+        if (routeRef.current) {
+            map.removeLayer(routeRef.current);
+            routeRef.current = null;
+        }
+        markersRef.current.forEach(m => map.removeLayer(m));
+        markersRef.current = [];
+
+        if (!route) return;
+
+        // Determine what coordinates to use for the line
+        let latlngs;
+        let waypoints = null;
+
+        if (route.geometry && route.geometry.length > 0) {
+            // Use OSRM walking route geometry
+            latlngs = route.geometry.map(p => [p.latitude, p.longitude]);
+            waypoints = route.path; // Ordered waypoints for numbering
+        } else if (route.path && route.path.length >= 2) {
+            // Fallback to straight lines between waypoints
+            latlngs = route.path.map(p => [p.latitude, p.longitude]);
+            waypoints = route.path;
+        } else if (Array.isArray(route) && route.length >= 2) {
+            // Legacy format: array of points
+            latlngs = route.map(p => [p.latitude, p.longitude]);
+            waypoints = route;
+        } else {
             return;
         }
 
-        if (routeRef.current) {
-            map.removeLayer(routeRef.current);
-        }
-
-        const latlngs = route.map(p => [p.latitude, p.longitude]);
-
-        // Sort points by distance essentially (simple path for MVP)
-        // In real app, we'd use OSRM polyline
+        // Create the polyline
         routeRef.current = L.polyline(latlngs, {
-            color: 'var(--color-primary)',
-            weight: 4,
-            opacity: 0.7,
-            dashArray: '10, 10'
+            color: '#3b82f6',
+            weight: 5,
+            opacity: 0.8,
+            lineCap: 'round',
+            lineJoin: 'round'
         }).addTo(map);
 
+        // Add numbered markers for waypoints
+        if (waypoints && waypoints.length > 0) {
+            waypoints.forEach((point, index) => {
+                // Skip the first point if it's user location (doesn't have an id)
+                const number = point.id ? index : null;
+                if (number === null || number === 0) return; // Skip user location marker (index 0 if no id)
+
+                const displayNumber = point.id ? index : index;
+
+                const numberIcon = L.divIcon({
+                    className: 'route-number-icon',
+                    html: `<div style="
+                        background: #3b82f6;
+                        color: white;
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 12px;
+                        font-weight: bold;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                    ">${displayNumber}</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                const marker = L.marker([point.latitude, point.longitude], { icon: numberIcon }).addTo(map);
+                markersRef.current.push(marker);
+            });
+        }
+
+        // Fit map to show entire route
         map.fitBounds(routeRef.current.getBounds(), { padding: [50, 50] });
 
         return () => {
             if (routeRef.current) {
                 map.removeLayer(routeRef.current);
             }
+            markersRef.current.forEach(m => map.removeLayer(m));
+            markersRef.current = [];
         };
     }, [route, map]);
 
     return null;
 };
 
-const Map = ({ points = [], userLocation, onPointClick, route }) => {
+// Map click handler
+const MapClickHandler = ({ onMapClick }) => {
+    const map = useMapEvents({
+        click: (e) => {
+            if (onMapClick) {
+                onMapClick({
+                    latitude: e.latlng.lat,
+                    longitude: e.latlng.lng
+                });
+            }
+        }
+    });
+    return null;
+};
+
+const Map = ({ points = [], userLocation, onPointClick, onMapClick, route }) => {
     // Default to London if no location yet
     const defaultCenter = [51.505, -0.09];
     const center = userLocation ? [userLocation.latitude, userLocation.longitude] : defaultCenter;
@@ -104,6 +215,9 @@ const Map = ({ points = [], userLocation, onPointClick, route }) => {
                 />
 
                 <ZoomControl position="bottomright" />
+
+                {/* Recenter button */}
+                <RecenterButton userLocation={userLocation} />
 
                 {userLocation && (
                     <Marker
@@ -127,8 +241,9 @@ const Map = ({ points = [], userLocation, onPointClick, route }) => {
                     </Marker>
                 ))}
 
-                <RecenterMap center={center} />
+                <InitialCenter center={center} userLocation={userLocation} />
                 <RouteLayer route={route} />
+                <MapClickHandler onMapClick={onMapClick} />
             </MapContainer>
 
             {/* Styles for Dark Mode Map Tiles Override */}

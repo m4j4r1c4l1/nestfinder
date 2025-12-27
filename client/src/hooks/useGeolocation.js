@@ -59,5 +59,5 @@ export const useGeolocation = (apiKey) => { // apiKey not used for browser nativ
         }
     };
 
-    return { location, error, loading, getCurrentLocation, getAddress };
+    return { location, setLocation, error, loading, getCurrentLocation, getAddress };
 };

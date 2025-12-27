@@ -11,6 +11,7 @@ export const setBroadcast = (fn) => { broadcast = fn; };
 // Get all points (with optional filters)
 router.get('/', (req, res) => {
   const { status, minLat, maxLat, minLng, maxLng } = req.query;
+  const retentionDays = parseInt(getSetting('deactivation_retention_days')) || 7;
 
   let sql = `
     SELECT p.*, u.nickname as submitter_nickname,
@@ -18,9 +19,12 @@ router.get('/', (req, res) => {
       (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'deactivate') as deactivate_count
     FROM points p
     LEFT JOIN users u ON p.user_id = u.id
-    WHERE 1=1
+    WHERE (
+      p.status != 'deactivated' 
+      OR datetime(p.updated_at) > datetime('now', '-' || ? || ' days')
+    )
   `;
-  const params = [];
+  const params = [retentionDays];
 
   if (status) {
     const statuses = status.split(',');
@@ -90,6 +94,11 @@ router.post('/:id/confirm', requireUser, (req, res) => {
 
   if (!point) {
     return res.status(404).json({ error: 'Point not found' });
+  }
+
+  // Original poster cannot confirm their own point
+  if (point.user_id === userId) {
+    return res.status(400).json({ error: 'You cannot confirm your own report' });
   }
 
   // Check if user already confirmed
@@ -218,6 +227,53 @@ router.post('/:id/deactivate', requireUser, (req, res) => {
     threshold,
     new_status: updatedPoint.status
   });
+
+  broadcast({ type: 'point_updated', point: updatedPoint });
+
+  res.json({ point: updatedPoint });
+});
+
+// Reactivate a deactivated point (moves to pending)
+router.post('/:id/reactivate', requireUser, (req, res) => {
+  const pointId = parseInt(req.params.id);
+  const userId = req.user.id;
+
+  const point = get('SELECT * FROM points WHERE id = ?', [pointId]);
+
+  if (!point) {
+    return res.status(404).json({ error: 'Point not found' });
+  }
+
+  if (point.status !== 'deactivated') {
+    return res.status(400).json({ error: 'Only deactivated points can be reactivated' });
+  }
+
+  // Check if still within retention period
+  const retentionDays = parseInt(getSetting('deactivation_retention_days')) || 7;
+  const deactivatedAt = new Date(point.updated_at);
+  const expiresAt = new Date(deactivatedAt.getTime() + retentionDays * 24 * 60 * 60 * 1000);
+
+  if (new Date() > expiresAt) {
+    return res.status(400).json({ error: 'This point has expired and cannot be reactivated' });
+  }
+
+  // Reactivate: set status to pending, clear deactivation votes
+  run('DELETE FROM confirmations WHERE point_id = ? AND type = ?', [pointId, 'deactivate']);
+  run(
+    `UPDATE points SET status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+    [pointId]
+  );
+
+  const updatedPoint = get(`
+    SELECT p.*, u.nickname as submitter_nickname,
+      (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'confirm') as confirm_count,
+      (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'deactivate') as deactivate_count
+    FROM points p
+    LEFT JOIN users u ON p.user_id = u.id
+    WHERE p.id = ?
+  `, [pointId]);
+
+  log(userId, 'reactivate_point', pointId.toString());
 
   broadcast({ type: 'point_updated', point: updatedPoint });
 
