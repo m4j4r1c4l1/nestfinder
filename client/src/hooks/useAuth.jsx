@@ -14,9 +14,16 @@ export const AuthProvider = ({ children }) => {
             const userId = localStorage.getItem('nestfinder_user_id');
             const storedUser = localStorage.getItem('nestfinder_user_data');
 
-            if (userId && storedUser) {
+            if (userId) {
+                // Always set the API userId
                 api.setUserId(userId);
-                setUser(JSON.parse(storedUser));
+
+                if (storedUser) {
+                    setUser(JSON.parse(storedUser));
+                } else {
+                    // Create minimal user object if data is missing
+                    setUser({ id: userId, nickname: 'User' });
+                }
             }
 
             setLoading(false);

@@ -13,8 +13,8 @@ const Settings = () => {
     const [changingPassword, setChangingPassword] = useState(false);
 
     // Reset state
-    const [showResetConfirm, setShowResetConfirm] = useState(false);
-    const [resetting, setResetting] = useState(false);
+    const [resetting, setResetting] = useState(null); // 'logs' | 'points' | 'users' | 'all' | null
+    const [confirmReset, setConfirmReset] = useState(null);
 
     useEffect(() => {
         adminApi.getSettings().then(data => {
@@ -43,20 +43,16 @@ const Settings = () => {
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
-
         if (passwords.new !== passwords.confirm) {
             setMessage({ text: 'New passwords do not match', type: 'error' });
             return;
         }
-
         if (passwords.new.length < 6) {
             setMessage({ text: 'Password must be at least 6 characters', type: 'error' });
             return;
         }
-
         setChangingPassword(true);
         setMessage({ text: '', type: '' });
-
         try {
             await adminApi.changePassword(passwords.current, passwords.new);
             setMessage({ text: 'Password changed successfully!', type: 'success' });
@@ -69,21 +65,28 @@ const Settings = () => {
         }
     };
 
-    const handleReset = async () => {
-        setResetting(true);
+    const handleReset = async (target) => {
+        setResetting(target);
         setMessage({ text: '', type: '' });
         try {
-            await adminApi.resetDatabase();
-            setMessage({ text: 'Database reset successfully! All points, users, and logs have been cleared.', type: 'success' });
-            setShowResetConfirm(false);
+            const result = await adminApi.resetDatabase(target);
+            setMessage({ text: result.message, type: 'success' });
+            setConfirmReset(null);
         } catch (err) {
-            setMessage({ text: err.message || 'Failed to reset database', type: 'error' });
+            setMessage({ text: err.message || 'Failed to reset', type: 'error' });
         } finally {
-            setResetting(false);
+            setResetting(null);
         }
     };
 
     if (loading) return <div>Loading settings...</div>;
+
+    const resetOptions = [
+        { target: 'logs', label: 'Clear Logs', desc: 'Delete all activity logs', icon: '📜', color: '#f59e0b' },
+        { target: 'points', label: 'Clear Points', desc: 'Delete all points and confirmations', icon: '📍', color: '#ef4444' },
+        { target: 'users', label: 'Clear Users', desc: 'Delete all users (also clears points, logs)', icon: '👥', color: '#dc2626' },
+        { target: 'all', label: 'Reset All', desc: 'Delete everything except settings', icon: '💣', color: '#991b1b' }
+    ];
 
     return (
         <div style={{ maxWidth: '700px' }}>
@@ -111,59 +114,32 @@ const Settings = () => {
                     <form onSubmit={handleSave}>
                         <div className="form-group">
                             <label className="form-label">App Name</label>
-                            <input
-                                name="app_name"
-                                className="form-input"
-                                value={settings.app_name || ''}
-                                onChange={handleChange}
-                            />
+                            <input name="app_name" className="form-input" value={settings.app_name || ''} onChange={handleChange} />
                         </div>
-
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div className="form-group">
                                 <label className="form-label">Confirmations to Verify</label>
-                                <input
-                                    name="confirmations_required"
-                                    type="number"
-                                    className="form-input"
-                                    value={settings.confirmations_required || ''}
-                                    onChange={handleChange}
-                                    min="1"
-                                />
+                                <input name="confirmations_required" type="number" className="form-input" value={settings.confirmations_required || ''} onChange={handleChange} min="1" />
                             </div>
-
                             <div className="form-group">
                                 <label className="form-label">Reports to Deactivate</label>
-                                <input
-                                    name="deactivations_required"
-                                    type="number"
-                                    className="form-input"
-                                    value={settings.deactivations_required || ''}
-                                    onChange={handleChange}
-                                    min="1"
-                                />
+                                <input name="deactivations_required" type="number" className="form-input" value={settings.deactivations_required || ''} onChange={handleChange} min="1" />
                             </div>
                         </div>
-
+                        <div className="form-group">
+                            <label className="form-label">Deactivated Point Retention (Days)</label>
+                            <input name="deactivation_retention_days" type="number" className="form-input" value={settings.deactivation_retention_days || '7'} onChange={handleChange} min="1" max="365" />
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
+                                Deactivated points are removed from the map after this many days
+                            </div>
+                        </div>
                         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                <input
-                                    type="checkbox"
-                                    name="weekly_reminder_enabled"
-                                    checked={settings.weekly_reminder_enabled === 'true'}
-                                    onChange={(e) => setSettings({ ...settings, weekly_reminder_enabled: e.target.checked ? 'true' : 'false' })}
-                                    style={{ width: 18, height: 18 }}
-                                />
+                                <input type="checkbox" name="weekly_reminder_enabled" checked={settings.weekly_reminder_enabled === 'true'} onChange={(e) => setSettings({ ...settings, weekly_reminder_enabled: e.target.checked ? 'true' : 'false' })} style={{ width: 18, height: 18 }} />
                                 Enable Weekly Validation Reminders
                             </label>
                         </div>
-
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={saving}
-                            style={{ padding: '0.75rem 2rem' }}
-                        >
+                        <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem 2rem' }}>
                             {saving ? 'Saving...' : 'Save Settings'}
                         </button>
                     </form>
@@ -180,62 +156,29 @@ const Settings = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <div style={{ fontWeight: 500 }}>Admin Password</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                    Change your admin login password
-                                </div>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Change your admin login password</div>
                             </div>
-                            <button
-                                className="btn btn-secondary"
-                                onClick={() => setShowPasswordChange(true)}
-                            >
-                                Change Password
-                            </button>
+                            <button className="btn btn-secondary" onClick={() => setShowPasswordChange(true)}>Change Password</button>
                         </div>
                     ) : (
                         <form onSubmit={handlePasswordChange}>
                             <div className="form-group">
                                 <label className="form-label">Current Password</label>
-                                <input
-                                    type="password"
-                                    className="form-input"
-                                    value={passwords.current}
-                                    onChange={e => setPasswords({ ...passwords, current: e.target.value })}
-                                    required
-                                />
+                                <input type="password" className="form-input" value={passwords.current} onChange={e => setPasswords({ ...passwords, current: e.target.value })} required />
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div className="form-group">
                                     <label className="form-label">New Password</label>
-                                    <input
-                                        type="password"
-                                        className="form-input"
-                                        value={passwords.new}
-                                        onChange={e => setPasswords({ ...passwords, new: e.target.value })}
-                                        required
-                                        minLength={6}
-                                    />
+                                    <input type="password" className="form-input" value={passwords.new} onChange={e => setPasswords({ ...passwords, new: e.target.value })} required minLength={6} />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Confirm Password</label>
-                                    <input
-                                        type="password"
-                                        className="form-input"
-                                        value={passwords.confirm}
-                                        onChange={e => setPasswords({ ...passwords, confirm: e.target.value })}
-                                        required
-                                    />
+                                    <input type="password" className="form-input" value={passwords.confirm} onChange={e => setPasswords({ ...passwords, confirm: e.target.value })} required />
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button type="submit" className="btn btn-primary" disabled={changingPassword}>
-                                    {changingPassword ? 'Changing...' : 'Update Password'}
-                                </button>
-                                <button type="button" className="btn btn-secondary" onClick={() => {
-                                    setShowPasswordChange(false);
-                                    setPasswords({ current: '', new: '', confirm: '' });
-                                }}>
-                                    Cancel
-                                </button>
+                                <button type="submit" className="btn btn-primary" disabled={changingPassword}>{changingPassword ? 'Changing...' : 'Update Password'}</button>
+                                <button type="button" className="btn btn-secondary" onClick={() => { setShowPasswordChange(false); setPasswords({ current: '', new: '', confirm: '' }); }}>Cancel</button>
                             </div>
                         </form>
                     )}
@@ -247,46 +190,55 @@ const Settings = () => {
                 <div className="card-header" style={{ borderBottom: '1px solid rgba(239, 68, 68, 0.3)', padding: '1rem', background: 'rgba(239, 68, 68, 0.05)' }}>
                     <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--color-deactivated)' }}>⚠️ Danger Zone</h3>
                 </div>
-                <div className="card-body" style={{ padding: '1.5rem' }}>
-                    {!showResetConfirm ? (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ fontWeight: 500 }}>Reset Database</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                    Delete all points, users, logs. Settings will be kept.
+                <div className="card-body" style={{ padding: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {resetOptions.map(opt => (
+                            <div key={opt.target} style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '0.75rem 1rem',
+                                background: 'var(--color-bg-tertiary)',
+                                borderRadius: 'var(--radius-md)',
+                                borderLeft: `3px solid ${opt.color}`
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <span style={{ fontSize: '1.25rem' }}>{opt.icon}</span>
+                                    <div>
+                                        <div style={{ fontWeight: 500 }}>{opt.label}</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>{opt.desc}</div>
+                                    </div>
                                 </div>
+                                {confirmReset === opt.target ? (
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            className="btn"
+                                            style={{ background: opt.color, color: 'white', padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}
+                                            onClick={() => handleReset(opt.target)}
+                                            disabled={resetting === opt.target}
+                                        >
+                                            {resetting === opt.target ? '...' : 'Confirm'}
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary"
+                                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}
+                                            onClick={() => setConfirmReset(null)}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        className="btn"
+                                        style={{ background: 'transparent', border: `1px solid ${opt.color}`, color: opt.color, padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}
+                                        onClick={() => setConfirmReset(opt.target)}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                )}
                             </div>
-                            <button
-                                className="btn"
-                                style={{ background: 'var(--color-deactivated)', color: 'white' }}
-                                onClick={() => setShowResetConfirm(true)}
-                            >
-                                Reset Database
-                            </button>
-                        </div>
-                    ) : (
-                        <div>
-                            <p style={{ color: 'var(--color-deactivated)', marginBottom: '1rem' }}>
-                                <strong>Warning:</strong> This will permanently delete all points, users, confirmations, and logs. This action cannot be undone.
-                            </p>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button
-                                    className="btn"
-                                    style={{ background: 'var(--color-deactivated)', color: 'white' }}
-                                    onClick={handleReset}
-                                    disabled={resetting}
-                                >
-                                    {resetting ? 'Resetting...' : 'Yes, Reset Everything'}
-                                </button>
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={() => setShowResetConfirm(false)}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

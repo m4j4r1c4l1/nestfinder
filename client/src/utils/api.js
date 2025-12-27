@@ -98,6 +98,12 @@ class ApiClient {
     });
   }
 
+  reactivatePoint(id) {
+    return this.fetch(`/points/${id}/reactivate`, {
+      method: 'POST',
+    });
+  }
+
   getRoute(points) {
     // In a real app, this would call a routing API directly or via proxy
     // For MVP, we'll calculate simple Euclidean distance or use OSRM via frontend if needed
