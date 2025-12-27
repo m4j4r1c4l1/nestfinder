@@ -134,9 +134,11 @@ const RouteLayer = ({ route }) => {
         // Add numbered markers for waypoints
         if (waypoints && waypoints.length > 0) {
             waypoints.forEach((point, index) => {
-                // Skip the first point if it's user location (doesn't have an id)
-                const number = point.id ? index : null;
-                if (number === null || number === 0) return; // Skip user location marker (index 0 if no id)
+                // Use explicit sequence if available (from RoutePanel), otherwise fallback to index if it has an ID
+                // Note: user location usually has sequence=null or no ID
+                const number = (point.sequence !== undefined) ? point.sequence : (point.id ? index : null);
+
+                if (number === null || number === 0) return; // Skip user location or 0-indexed start logic if needed
 
                 const displayNumber = point.id ? index : index;
 
