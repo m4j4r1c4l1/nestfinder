@@ -7,12 +7,11 @@ import React, { useState } from 'react';
 // - 'osrm-trip' = OSRM /trip with OSRM optimization
 // - 'openroute' = OpenRouteService (may require API key for heavy use)
 // ========================================
-const ROUTING_PROVIDER = 'osrm';
-
 const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
     const [routeData, setRouteData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [mode, setMode] = useState('simple'); // Default to 'simple' (Nearest Neighbor) as requested
 
     // Status filter for route calculation
     const [statusFilter, setStatusFilter] = useState({
@@ -22,6 +21,8 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
     });
 
     const toggleStatus = (status) => {
+        setRouteData(null); // Clear route when filters change
+        onClear();
         setStatusFilter(prev => ({ ...prev, [status]: !prev[status] }));
     };
 
@@ -30,7 +31,7 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
         return points.filter(p => statusFilter[p.status]);
     };
 
-    // ========================================
+
     // OSRM Route Provider (original)
     // ========================================
     const calculateOSRMRoute = async (waypoints) => {
@@ -100,8 +101,9 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
         }
 
         const trip = data.trips[0];
+        // data.waypoints contains 'trips_index' which indicates the order in the optimized trip
         const orderedWaypoints = data.waypoints
-            .sort((a, b) => a.waypoint_index - b.waypoint_index)
+            .sort((a, b) => a.trips_index - b.trips_index)
             .map(wp => waypoints[wp.waypoint_index]);
 
         return {
@@ -190,23 +192,29 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
 
         try {
             const waypoints = userLocation
-                ? [{ latitude: userLocation.latitude, longitude: userLocation.longitude }, ...filteredPoints]
+                ? [{ latitude: userLocation.latitude, longitude: userLocation.longitude, isUser: true }, ...filteredPoints]
                 : [...filteredPoints];
 
             let result;
 
-            switch (ROUTING_PROVIDER) {
-                case 'osrm-trip':
+            switch (mode) {
+                case 'optimized':
                     result = await calculateOSRMTrip(waypoints);
                     break;
-                case 'openroute':
-                    result = await calculateOpenRoute(waypoints);
-                    break;
-                case 'osrm':
+                case 'simple':
                 default:
                     result = await calculateOSRMRoute(waypoints);
                     break;
             }
+
+            // Assign explicit sequence numbers (1, 2, 3...) to destination points for the Map to display
+            // We skip the first point (User/Start) by starting sequence check after it
+            result.path = result.path.map((p, index) => ({
+                ...p,
+                // If it's the user location (index 0 usually), no sequence.
+                // Otherwise assign sequential numbers 1..N based on position in the FINAL path.
+                sequence: (index === 0 && p.isUser) ? null : index
+            }));
 
             result.pointCount = filteredPoints.length;
             setRouteData(result);
@@ -234,6 +242,29 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
                 <h3 className="card-title">Optimize Route</h3>
             </div>
             <div className="card-body">
+                {/* Method Selection */}
+                <div className="mb-4">
+                    <label className="form-label">Optimization:</label>
+                    <div className="toggle-group">
+                        <button
+                            type="button"
+                            className={`toggle-btn ${mode === 'optimized' ? 'active' : ''}`}
+                            onClick={() => { setMode('optimized'); setRouteData(null); onClear(); }}
+                            title="Best order to visit all points (TSP)"
+                        >
+                            ⚡ Optimized
+                        </button>
+                        <button
+                            type="button"
+                            className={`toggle-btn ${mode === 'simple' ? 'active' : ''}`}
+                            onClick={() => { setMode('simple'); setRouteData(null); onClear(); }}
+                            title="Visit closest point next (Nearest Neighbor)"
+                        >
+                            📏 Simple
+                        </button>
+                    </div>
+                </div>
+
                 {/* Status Filter */}
                 <div className="mb-4">
                     <label className="form-label">Include in route:</label>
