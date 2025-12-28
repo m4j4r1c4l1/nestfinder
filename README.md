@@ -17,8 +17,8 @@
 ## ✨ Features
 
 - 🗺️ **Interactive Map** — View and navigate resource locations with Leaflet maps
-- 📍 **Submit Points** — Users can submit new resource locations
-- 🚶 **Route Calculation** — Calculate walking routes between points
+- 📍 **Submit Points** — Users can submit new resource locations with emoji tags
+- 🚶 **Route Planner** — Calculate optimal walking routes for visible points only ([docs](ROUTE.md))
 - 📱 **Progressive Web App** — Works offline, installable on mobile devices
 - 🔐 **Anonymous Auth** — Privacy-first anonymous authentication
 - 📊 **Admin Dashboard** — Manage data, view logs, and configure settings
