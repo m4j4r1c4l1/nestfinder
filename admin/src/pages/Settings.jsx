@@ -222,7 +222,7 @@ const Settings = () => {
                                 className="form-input"
                                 value={settings.vapid_private_key || ''}
                                 onChange={handleChange}
-                                placeholder="nxHpwQ2psC2qhlx76NwpUo-zcmtMoeP5iAcUf07JHs4"
+                                placeholder="Enter your VAPID private key..."
                                 style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
                             />
                             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
