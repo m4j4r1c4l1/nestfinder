@@ -8,6 +8,8 @@ const App = () => {
     const { user, loading } = useAuth();
     const pushNotifications = usePushNotifications();
     const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
+    const [subscribing, setSubscribing] = useState(false);
+    const [subscribeError, setSubscribeError] = useState(null);
 
     // Check if we should show notification prompt
     useEffect(() => {
@@ -25,13 +27,29 @@ const App = () => {
     }, [user, pushNotifications.isSupported, pushNotifications.isSubscribed]);
 
     const handleEnableNotifications = async () => {
+        setSubscribing(true);
+        setSubscribeError(null);
+
         try {
-            const success = await pushNotifications.subscribe(user?.id);
+            // Add timeout to prevent infinite hang
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Request timed out')), 15000)
+            );
+
+            const subscribePromise = pushNotifications.subscribe(user?.id);
+
+            const success = await Promise.race([subscribePromise, timeoutPromise]);
+
             if (success) {
                 setShowNotificationPrompt(false);
+            } else {
+                setSubscribeError('Permission denied or not supported');
             }
         } catch (err) {
-            console.log('Push subscription failed:', err.message);
+            console.error('Push subscription failed:', err);
+            setSubscribeError(err.message || 'Failed to enable');
+        } finally {
+            setSubscribing(false);
         }
     };
 
@@ -80,25 +98,40 @@ const App = () => {
                     <p style={{ margin: '0 0 var(--space-3) 0', fontSize: '0.9rem', opacity: 0.95 }}>
                         Get alerts when new locations are reported
                     </p>
+
+                    {subscribeError && (
+                        <div style={{
+                            background: 'rgba(255,255,255,0.2)',
+                            padding: 'var(--space-2)',
+                            borderRadius: 'var(--radius-md)',
+                            marginBottom: 'var(--space-3)',
+                            fontSize: '0.85rem'
+                        }}>
+                            ⚠️ {subscribeError}
+                        </div>
+                    )}
+
                     <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                         <button
                             onClick={handleEnableNotifications}
+                            disabled={subscribing}
                             style={{
                                 flex: 1,
-                                background: 'white',
+                                background: subscribing ? 'rgba(255,255,255,0.7)' : 'white',
                                 color: '#667eea',
                                 border: 'none',
                                 borderRadius: 'var(--radius-md)',
                                 padding: 'var(--space-3)',
                                 fontSize: '1rem',
                                 fontWeight: 'bold',
-                                cursor: 'pointer'
+                                cursor: subscribing ? 'wait' : 'pointer'
                             }}
                         >
-                            Enable
+                            {subscribing ? '⏳ Enabling...' : 'Enable'}
                         </button>
                         <button
                             onClick={handleDismissPrompt}
+                            disabled={subscribing}
                             style={{
                                 flex: 1,
                                 background: 'rgba(255,255,255,0.2)',
