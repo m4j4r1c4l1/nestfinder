@@ -61,7 +61,8 @@ const RecenterButton = ({ userLocation }) => {
             zIndex: 1000
         }}>
             <button
-                onClick={() => {
+                onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering map click
                     map.flyTo([userLocation.latitude, userLocation.longitude], 15);
                 }}
                 style={{
