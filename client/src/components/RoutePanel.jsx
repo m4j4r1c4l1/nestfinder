@@ -96,14 +96,23 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) =
             }
 
             const route = data.routes[0];
+
+            // Convert distance from meters to km
+            const distanceKm = route.distance / 1000;
+
+            // Calculate walking time ourselves
+            // OSRM demo server sometimes returns unrealistic times
+            // Average walking speed: ~5 km/h = ~12 min/km
+            const walkingTimeMinutes = Math.round(distanceKm * 12);
+
             const result = {
                 path: orderedPath.map((p, index) => ({
                     ...p,
                     sequence: (index === 0 && p.isUser) ? null : index
                 })),
                 geometry: route.geometry.coordinates.map(c => ({ latitude: c[1], longitude: c[0] })),
-                distance: (route.distance / 1000).toFixed(1),
-                time: Math.round(route.duration / 60),
+                distance: distanceKm.toFixed(1),
+                time: walkingTimeMinutes,
                 pointCount: filteredPoints.length
             };
 
