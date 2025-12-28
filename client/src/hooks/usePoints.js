@@ -32,7 +32,7 @@ export const usePoints = () => {
     useEffect(() => {
         // Setup WebSocket for real-time updates
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.hostname}:3001`; // Adjust port if needed
+        const wsUrl = `${protocol}//${window.location.host}`; // Use current host/port
 
         wsRef.current = new WebSocket(wsUrl);
 
