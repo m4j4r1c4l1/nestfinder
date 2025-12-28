@@ -16,6 +16,7 @@ import authRoutes from './routes/auth.js';
 import pointsRoutes, { setBroadcast as setPointsBroadcast } from './routes/points.js';
 import settingsRoutes, { setBroadcast as setSettingsBroadcast } from './routes/settings.js';
 import adminRoutes from './routes/admin.js';
+import notificationsRoutes from './routes/notifications.js';
 
 const app = express();
 const server = createServer(app);
@@ -68,6 +69,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/points', pointsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/push', notificationsRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {

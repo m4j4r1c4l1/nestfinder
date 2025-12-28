@@ -3,6 +3,7 @@ import { adminApi } from './api';
 import Dashboard from './pages/Dashboard';
 import Logs from './pages/Logs';
 import Settings from './pages/Settings';
+import Notifications from './pages/Notifications';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -167,6 +168,7 @@ const App = () => {
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+        { id: 'notifications', label: 'Notifications', icon: '📢' },
         { id: 'logs', label: 'Activity Logs', icon: '📜' },
         { id: 'settings', label: 'Settings', icon: '⚙️' }
     ];
@@ -251,6 +253,7 @@ const App = () => {
             {/* Main Content */}
             <main style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                 {view === 'dashboard' && <Dashboard />}
+                {view === 'notifications' && <Notifications />}
                 {view === 'logs' && <Logs />}
                 {view === 'settings' && <Settings />}
             </main>
