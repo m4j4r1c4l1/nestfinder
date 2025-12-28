@@ -17,7 +17,15 @@ export const useGeolocation = (apiKey) => { // apiKey not used for browser nativ
             setLoading(true);
             setError(null); // Clear previous errors
 
+            // ENFORCE TIMEOUT: If browser hangs, we kill it manually after 10s
+            const timeoutId = setTimeout(() => {
+                setError(new Error('Location request timed out completely'));
+                setLoading(false);
+                reject(new Error('Location request timed out completely'));
+            }, 10000);
+
             const success = (position) => {
+                clearTimeout(timeoutId); // Good, we got it
                 const coords = {
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude,
@@ -32,6 +40,7 @@ export const useGeolocation = (apiKey) => { // apiKey not used for browser nativ
             };
 
             const failure = (err) => {
+                clearTimeout(timeoutId); // Stopped waiting
                 // If high accuracy fails (timeout or unavailable), try low accuracy
                 if (err.code === 3 || err.code === 2) {
                     console.log('High accuracy failed, trying low accuracy...');
@@ -55,32 +64,39 @@ export const useGeolocation = (apiKey) => { // apiKey not used for browser nativ
                 }
             };
 
-            navigator.geolocation.getCurrentPosition(
-                success,
-                failure,
-                {
-                    enableHighAccuracy: true,
-                    timeout: 5000, // Short timeout for high accuracy
-                    maximumAge: 0
-                }
-            );
+            try {
+                navigator.geolocation.getCurrentPosition(
+                    success,
+                    failure,
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } catch (e) {
+                clearTimeout(timeoutId);
+                reject(e);
+            }
         });
     };
-
-    // Function to get address from coordinates (Reverse Geocoding using OpenStreetMap Nominatim)
-    const getAddress = async (lat, lng) => {
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-                { headers: { 'User-Agent': 'NestFinder/1.0' } }
-            );
-            const data = await response.json();
-            return data.display_name || 'Unknown location';
-        } catch (e) {
-            console.error('Reverse geocoding error:', e);
-            return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-        }
+});
     };
 
-    return { location, setLocation, error, loading, getCurrentLocation, getAddress };
+// Function to get address from coordinates (Reverse Geocoding using OpenStreetMap Nominatim)
+const getAddress = async (lat, lng) => {
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+            { headers: { 'User-Agent': 'NestFinder/1.0' } }
+        );
+        const data = await response.json();
+        return data.display_name || 'Unknown location';
+    } catch (e) {
+        console.error('Reverse geocoding error:', e);
+        return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+};
+
+return { location, setLocation, error, loading, getCurrentLocation, getAddress };
 };
