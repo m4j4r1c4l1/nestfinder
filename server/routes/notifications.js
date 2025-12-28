@@ -204,8 +204,8 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
         const payload = JSON.stringify({
             title: notificationTitle,
             body: notificationBody,
-            icon: '/icon-192.png',
-            badge: '/badge-72.png',
+            icon: '/icons/icon-192.png',
+            badge: '/icons/badge-72.png',
             data: { url: '/', type: template || 'custom' }
         });
 
