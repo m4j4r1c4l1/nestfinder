@@ -43,3 +43,18 @@ Your app will be live at `https://your-app-name.onrender.com`.
 
 - **Main App:** `/`
 - **Admin Dashboard:** `/admin-panel`
+
+## 5. Add Persistent Disk (Crucial for SQLite)
+*If you are on the Starter plan or higher:*
+1.  Scroll down to **Disks** (Advanced).
+2.  Click **Add Disk**.
+3.  **Name**: `nestfinder-db`
+4.  **Mount Path**: `/opt/render/project/src/server/db`
+    *   *Explanation*: Render clones your repo to `/opt/render/project/src`. Our code looks for the DB in `server/db`. This mount ensures that the `server/db` folder is stored on a separate, persistent disk.
+5.  **Size**: 1 GB is plenty.
+
+> [!WARNING]
+> If you do not add a persistent disk, your database will be reset every time the server restarts or deploys.
+
+## 6. Database Note
+The project uses `sql.js` which loads the DB into memory and writes it back to disk manually. While this works, for a heavier production load in the future, consider switching to `better-sqlite3` or `sqlite3` for better performance and safety. For now, the Persistent Disk solution works perfectly with the existing code.
