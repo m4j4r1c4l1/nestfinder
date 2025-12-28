@@ -495,14 +495,16 @@ textarea.form-input {
 /* Bottom Sheet - Centered Modal Style */
 .bottom-sheet {
   position: fixed;
-  /* Center vertically and horizontally */
-  top: 50%;
+  /* Center but shift up to account for bottom nav */
   left: 50%;
+  top: calc(50% - 45px);
+  /* Shift up by half the nav height */
   transform: translate(-50%, -50%) scale(0.9);
   z-index: var(--z-modal);
-  max-height: 70vh;
+  /* Leave room for bottom nav (90px) plus margin */
+  max-height: calc(100vh - 140px);
   width: calc(100% - var(--space-8));
-  max-width: 500px;
+  max-width: 480px;
   background: var(--color-bg-glass);
   border-radius: var(--radius-xl);
   backdrop-filter: blur(20px);
@@ -510,7 +512,8 @@ textarea.form-input {
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-slow);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .bottom-sheet.open {
@@ -526,19 +529,28 @@ textarea.form-input {
   border-radius: var(--radius-full);
   margin: var(--space-3) auto;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .bottom-sheet-content {
   padding: var(--space-4) var(--space-5);
   overflow-y: auto;
-  max-height: calc(70vh - 40px);
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
+  -webkit-overflow-scrolling: touch;
+  /* Smooth scrolling on iOS */
 }
 
 .bottom-sheet-content>* {
   width: 100%;
+}
+
+/* Center card content within modal */
+.bottom-sheet-content .card {
+  margin: 0 auto;
 }
 
 /* Bottom Nav - Mobile Optimized */
