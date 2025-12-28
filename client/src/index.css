@@ -665,7 +665,8 @@ textarea.form-input {
   right: -4px;
   background: #ff3b30;
   color: white;
-  font-size: 9px;
+  font-size: 7px;
+  /* Reduced for definitive fit */
   font-weight: 800;
   width: 15px;
   /* Compact */

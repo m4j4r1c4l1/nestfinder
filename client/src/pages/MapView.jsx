@@ -380,7 +380,7 @@ const MapView = () => {
                     className={`bottom-nav-item ${activeSheet === 'submit' ? 'active' : ''}`}
                     onClick={() => setActiveSheet(activeSheet === 'submit' ? null : 'submit')}
                 >
-                    <span>🪹</span>
+                    <span style={{ fontSize: '2rem' }}>🪹</span>
                     Report
                 </button>
                 <button
