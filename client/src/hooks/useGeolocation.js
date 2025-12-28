@@ -15,29 +15,52 @@ export const useGeolocation = (apiKey) => { // apiKey not used for browser nativ
             }
 
             setLoading(true);
+            setError(null); // Clear previous errors
 
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const coords = {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                        accuracy: position.coords.accuracy,
-                        heading: position.coords.heading,
-                        speed: position.coords.speed,
-                        timestamp: position.timestamp
-                    };
-                    setLocation(coords);
-                    setLoading(false);
-                    resolve(coords);
-                },
-                (err) => {
+            const success = (position) => {
+                const coords = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy,
+                    heading: position.coords.heading,
+                    speed: position.coords.speed,
+                    timestamp: position.timestamp
+                };
+                setLocation(coords);
+                setLoading(false);
+                resolve(coords);
+            };
+
+            const failure = (err) => {
+                // If high accuracy fails (timeout or unavailable), try low accuracy
+                if (err.code === 3 || err.code === 2) {
+                    console.log('High accuracy failed, trying low accuracy...');
+                    navigator.geolocation.getCurrentPosition(
+                        success,
+                        (finalErr) => {
+                            setError(finalErr);
+                            setLoading(false);
+                            reject(finalErr);
+                        },
+                        {
+                            enableHighAccuracy: false,
+                            timeout: 15000,
+                            maximumAge: 30000
+                        }
+                    );
+                } else {
                     setError(err);
                     setLoading(false);
                     reject(err);
-                },
+                }
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                success,
+                failure,
                 {
                     enableHighAccuracy: true,
-                    timeout: 10000,
+                    timeout: 5000, // Short timeout for high accuracy
                     maximumAge: 0
                 }
             );
