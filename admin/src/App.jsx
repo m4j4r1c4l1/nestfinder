@@ -65,7 +65,7 @@ const Login = ({ onLogin }) => {
             }}>
                 {/* Logo & Header */}
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🐦</div>
+                    <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🪹</div>
                     <h1 style={{
                         fontSize: '2rem',
                         fontWeight: 700,
@@ -193,7 +193,7 @@ const App = () => {
                     borderBottom: '1px solid var(--color-border)',
                     marginBottom: '1.5rem'
                 }}>
-                    <span style={{ fontSize: '1.5rem' }}>🐦</span>
+                    <span style={{ fontSize: '1.5rem' }}>🪹</span>
                     <div>
                         <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>NestFinder</div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Admin</div>

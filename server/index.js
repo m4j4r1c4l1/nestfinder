@@ -130,7 +130,7 @@ initDatabase().then(() => {
         console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
-║   🐦 NestFinder API Server                            ║
+║   🪹 NestFinder API Server                            ║
 ║   Finding nests for those without one                 ║
 ║                                                       ║
 ║   HTTP:      http://localhost:${PORT}                   ║
