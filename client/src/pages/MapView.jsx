@@ -20,7 +20,7 @@ const MapView = () => {
         deactivatePoint,
         reactivatePoint
     } = usePoints();
-    const { location: userLocation, getCurrentLocation } = useGeolocation();
+    const { location: userLocation, getCurrentLocation, error: geoError } = useGeolocation();
 
     // UI State
     const [activeSheet, setActiveSheet] = useState(null);
@@ -33,6 +33,13 @@ const MapView = () => {
     useEffect(() => {
         getCurrentLocation().catch(() => { });
     }, []);
+
+    // Show geolocation errors
+    useEffect(() => {
+        if (geoError) {
+            showToast(geoError.message || 'Location access denied', 'error');
+        }
+    }, [geoError]);
 
     // Auto-hide toast
     useEffect(() => {
