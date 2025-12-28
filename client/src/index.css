@@ -628,8 +628,13 @@ textarea.form-input {
 
 .bottom-nav-item span {
   font-size: 1.75rem;
-  /* Even larger icons */
   line-height: 1;
+  display: block;
+  height: 32px;
+  /* Fixed height for icon container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bottom-nav-item:hover,
@@ -664,8 +669,10 @@ textarea.form-input {
   right: -6px;
   background: #ff3b30;
   color: white;
-  font-size: 9px;
-  font-weight: 800;
+  font-size: 5px;
+  /* Very small for fit */
+  font-weight: 900;
+  /* Extra bold for readability */
   width: 18px;
   height: 18px;
   border-radius: 50%;
