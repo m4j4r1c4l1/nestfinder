@@ -62,7 +62,7 @@ const Notifications = () => {
     const loadStats = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('adminToken');
+            const token = localStorage.getItem('nestfinder_admin_token');
             const response = await fetch(`${API_URL}/api/push/admin/stats`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -113,7 +113,7 @@ const Notifications = () => {
             setSending(true);
             setResult(null);
 
-            const token = localStorage.getItem('adminToken');
+            const token = localStorage.getItem('nestfinder_admin_token');
             const response = await fetch(`${API_URL}/api/push/admin/send`, {
                 method: 'POST',
                 headers: {
