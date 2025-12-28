@@ -495,19 +495,22 @@ textarea.form-input {
 /* Bottom Sheet */
 .bottom-sheet {
   position: fixed;
-  bottom: 0;
+  /* Position above the bottom nav */
+  bottom: 90px;
+  /* Height of expanded bottom nav */
   left: 0;
   right: 0;
   z-index: var(--z-modal);
-  max-height: 85vh;
+  max-height: 60vh;
+  /* Reduced to ensure nav stays visible */
   background: var(--color-bg-glass);
-  border-top-left-radius: var(--radius-xl);
-  border-top-right-radius: var(--radius-xl);
+  border-radius: var(--radius-xl);
   backdrop-filter: blur(20px);
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
-  transform: translateY(100%);
+  transform: translateY(calc(100% + 90px));
   transition: transform var(--transition-slow);
   overflow: hidden;
+  margin: 0 var(--space-2);
 }
 
 .bottom-sheet.open {
@@ -520,22 +523,25 @@ textarea.form-input {
   background: var(--color-text-muted);
   border-radius: var(--radius-full);
   margin: var(--space-3) auto;
+  cursor: pointer;
 }
 
 .bottom-sheet-content {
-  padding: var(--space-4) var(--space-5) var(--space-8);
+  padding: var(--space-4) var(--space-5) var(--space-4);
   overflow-y: auto;
-  max-height: calc(85vh - 40px);
+  max-height: calc(60vh - 40px);
 }
 
-/* Bottom Nav */
+/* Bottom Nav - Mobile Optimized */
 .bottom-nav {
   display: flex;
   background: var(--color-bg-glass);
   border-top: 1px solid var(--color-border);
   backdrop-filter: blur(16px);
-  padding: var(--space-2) 0;
-  padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+  padding: var(--space-3) 0;
+  padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
+  /* Make it 50% taller */
+  min-height: 90px;
 }
 
 .bottom-nav-item {
@@ -543,15 +549,22 @@ textarea.form-input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-2);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  /* Larger text */
+  font-size: var(--font-size-sm);
+  font-weight: 600;
   color: var(--color-text-muted);
   background: none;
   border: none;
   cursor: pointer;
   transition: all var(--transition-base);
+}
+
+.bottom-nav-item span {
+  font-size: 1.5rem;
+  /* Larger icons */
 }
 
 .bottom-nav-item:hover,
@@ -560,8 +573,8 @@ textarea.form-input {
 }
 
 .bottom-nav-item svg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
 }
 
 /* Toast Notifications */
