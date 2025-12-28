@@ -336,13 +336,55 @@ const MapView = () => {
                                         className="btn btn-primary btn-block"
                                         onClick={async () => {
                                             try {
+                                                // Step 1: Request permission
                                                 const perm = await Notification.requestPermission();
-                                                if (perm === 'granted') {
-                                                    setToast({ message: '✅ Notifications enabled!', type: 'success' });
-                                                } else {
+                                                if (perm !== 'granted') {
                                                     setToast({ message: `Permission: ${perm}. Check browser settings.`, type: 'error', duration: 5000 });
+                                                    return;
                                                 }
+
+                                                // Step 2: Register service worker
+                                                const registration = await navigator.serviceWorker.register('/sw.js');
+                                                await navigator.serviceWorker.ready;
+
+                                                // Step 3: Get VAPID public key
+                                                const API_URL = import.meta.env.VITE_API_URL || '';
+                                                const keyResponse = await fetch(`${API_URL}/api/push/vapid-public-key`);
+                                                const { publicKey, error } = await keyResponse.json();
+                                                if (error) {
+                                                    setToast({ message: `Server: ${error}`, type: 'error', duration: 5000 });
+                                                    return;
+                                                }
+
+                                                // Step 4: Convert VAPID key
+                                                const urlBase64ToUint8Array = (base64String) => {
+                                                    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                                                    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                                                    const rawData = window.atob(base64);
+                                                    const outputArray = new Uint8Array(rawData.length);
+                                                    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+                                                    return outputArray;
+                                                };
+
+                                                // Step 5: Subscribe to push
+                                                const sub = await registration.pushManager.subscribe({
+                                                    userVisibleOnly: true,
+                                                    applicationServerKey: urlBase64ToUint8Array(publicKey)
+                                                });
+
+                                                // Step 6: Send subscription to server
+                                                await fetch(`${API_URL}/api/push/subscribe`, {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                        subscription: sub.toJSON(),
+                                                        userId: user?.id || 'anonymous'
+                                                    })
+                                                });
+
+                                                setToast({ message: '✅ Notifications enabled & subscribed!', type: 'success' });
                                             } catch (err) {
+                                                console.error('Push subscription error:', err);
                                                 setToast({ message: `Error: ${err.message}`, type: 'error', duration: 5000 });
                                             }
                                         }}
