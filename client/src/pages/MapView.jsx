@@ -139,8 +139,6 @@ const MapView = () => {
 
     return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <NotificationCenter userId={user?.id} />
-
             {/* Toast Notification */}
             {toast && (
                 <div className={`toast ${toast.type}`} style={{
@@ -383,6 +381,7 @@ const MapView = () => {
                     <span>⬇️</span>
                     Data
                 </button>
+                <NotificationCenter userId={user?.id} />
             </nav>
         </div>
     );
