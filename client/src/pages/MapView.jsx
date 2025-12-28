@@ -377,36 +377,29 @@ const MapView = () => {
             {/* Bottom Navigation */}
             <nav className="bottom-nav">
                 <button
-                    className={`bottom-nav-item ${!activeSheet ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(null)}
-                >
-                    <span>🗺️</span>
-                    Map
-                </button>
-                <button
                     className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet('route')}
+                    onClick={() => setActiveSheet(activeSheet === 'route' ? null : 'route')}
                 >
                     <span>🚶</span>
                     Route
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'submit' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet('submit')}
+                    onClick={() => setActiveSheet(activeSheet === 'submit' ? null : 'submit')}
                 >
                     <span>🐦</span>
                     Report
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'filter' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet('filter')}
+                    onClick={() => setActiveSheet(activeSheet === 'filter' ? null : 'filter')}
                 >
                     <span>🔍</span>
                     Filter
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'download' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet('download')}
+                    onClick={() => setActiveSheet(activeSheet === 'download' ? null : 'download')}
                 >
                     <span>⬇️</span>
                     Data
@@ -414,7 +407,7 @@ const MapView = () => {
                 <NotificationBell
                     unreadCount={unreadCount}
                     active={activeSheet === 'notifications'}
-                    onClick={() => setActiveSheet('notifications')}
+                    onClick={() => setActiveSheet(activeSheet === 'notifications' ? null : 'notifications')}
                 />
             </nav>
         </div>
