@@ -110,6 +110,23 @@ export const initDatabase = async () => {
     );
   `);
 
+  db.run(`
+    -- In-App Notifications table
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT,
+      type TEXT DEFAULT 'info',
+      read BOOLEAN DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+  `);
+
+  db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);`);
+
   // Create indexes
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_status ON points(status);`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_user ON points(user_id);`);
