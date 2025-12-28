@@ -54,9 +54,17 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             }}
                         >
                             <div className="notification-item-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                <span className="notification-title" style={{ fontWeight: !n.read ? 'bold' : 'normal' }}>{n.title}</span>
+                                <span className="notification-title" style={{ fontWeight: 'bold' }}>{n.title}</span>
                                 <span className="notification-time" style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>
-                                    {new Date(n.created_at).toLocaleDateString()}
+                                    {new Date(n.created_at).toLocaleString('en-GB', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        hour12: false
+                                    })}
                                 </span>
                             </div>
                             <div className="notification-body" style={{ color: 'var(--color-text)', fontSize: '0.95rem' }}>{n.body}</div>
