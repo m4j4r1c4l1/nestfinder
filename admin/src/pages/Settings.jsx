@@ -236,7 +236,7 @@ const Settings = () => {
                                 className="form-input"
                                 value={settings.vapid_subject || ''}
                                 onChange={handleChange}
-                                placeholder="mailto:admin@nestfinder.app"
+                                placeholder="mailto:m4j4r1.c4l1@gmail.com"
                             />
                             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
                                 Contact email or URL for the application

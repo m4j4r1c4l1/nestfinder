@@ -130,7 +130,7 @@ export const initDatabase = async () => {
     // Then update via admin settings or directly in the database
     { key: 'vapid_public_key', value: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' },
     { key: 'vapid_private_key', value: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' },
-    { key: 'vapid_subject', value: 'mailto:admin@nestfinder.app' }
+    { key: 'vapid_subject', value: 'mailto:m4j4r1.c4l1@gmail.com' }
   ];
 
   defaultSettings.forEach(s => {
