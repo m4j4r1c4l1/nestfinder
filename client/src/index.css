@@ -670,11 +670,17 @@ textarea.form-input {
   background: #ff3b30;
   color: white;
   font-size: 6px !important;
-  /* Force small size */
   font-weight: 900;
   width: 14px;
-  /* Smaller container forces smaller content */
   height: 14px;
+  min-width: 14px;
+  /* Prevent shrinking */
+  min-height: 14px;
+  /* Prevent shrinking */
+  max-width: 14px;
+  /* Prevent growing */
+  max-height: 14px;
+  /* Prevent growing */
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -685,8 +691,10 @@ textarea.form-input {
   margin: 0 !important;
   line-height: 1 !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  transform: scale(1);
-  /* Prevent any scaling */
+  flex-shrink: 0;
+  /* Prevent flex distortion */
+  aspect-ratio: 1 / 1;
+  /* Enforce perfect circle */
 }
 
 .toast {
