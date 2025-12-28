@@ -651,29 +651,26 @@ textarea.form-input {
 
 .notification-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -4px;
+  right: -4px;
   background: #ef4444;
   /* Bright Red */
   color: white;
-  font-size: 11px;
-  /* Readable size */
+  font-size: 9px;
+  /* Smaller font to fit */
   font-weight: 700;
-  width: 20px;
-  /* Fixed width */
-  height: 20px;
-  /* Fixed height */
+  width: 16px;
+  /* Back to compact size */
+  height: 16px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid white;
-  /* Distinct border */
+  border: 1px solid white;
   z-index: 10;
   line-height: 1;
   padding: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  /* Slight depth */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .toast {
