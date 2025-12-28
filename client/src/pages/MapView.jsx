@@ -354,19 +354,12 @@ const MapView = () => {
                         <div className="card">
                             <div className="card-header"><h3 className="card-title">Download & Settings</h3></div>
                             <div className="card-body flex-col gap-3">
-                                <button className="btn btn-secondary btn-block" onClick={() => handleDownload('json')}>
+                                <button className="btn btn-primary btn-block" onClick={() => handleDownload('json')}>
                                     Download JSON
                                 </button>
-                                <button className="btn btn-secondary btn-block" onClick={() => handleDownload('csv')}>
+                                <button className="btn btn-primary btn-block" onClick={() => handleDownload('csv')}>
                                     Download CSV
                                 </button>
-
-                                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
-                                    <h4 style={{ margin: '0 0 var(--space-2) 0', fontSize: '0.9rem' }}>🔔 Notifications</h4>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: 'var(--space-2)' }}>
-                                        Check the bell icon for updates
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     )}
