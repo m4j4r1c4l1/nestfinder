@@ -15,7 +15,7 @@ const NotificationBell = ({ unreadCount, onClick, active }) => {
                     </span>
                 )}
             </div>
-            Alerts
+            Messages
         </button>
     );
 };

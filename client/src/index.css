@@ -625,7 +625,8 @@ textarea.form-input {
   right: -4px;
   background: red;
   color: white;
-  font-size: 10px;
+  font-size: 9px;
+  /* Reduced from 10px */
   font-weight: bold;
   height: 16px;
   min-width: 16px;
@@ -635,6 +636,10 @@ textarea.form-input {
   justify-content: center;
   border: 1px solid white;
   z-index: 10;
+  line-height: 1;
+  /* Ensure vertical centering */
+  padding-bottom: 0;
+  /* Reset any padding */
 }
 
 .toast {
