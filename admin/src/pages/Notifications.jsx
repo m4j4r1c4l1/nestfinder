@@ -49,10 +49,14 @@ const Notifications = () => {
     const [target, setTarget] = useState('all');
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [subscribers, setSubscribers] = useState([]);
-    const [stats, setStats] = useState({ totalSubscribers: 0 });
+    const [stats, setStats] = useState({
+        totalSubscribers: 0,
+        notificationMetrics: { total: 0, unread: 0 }
+    });
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Load subscriber stats
     useEffect(() => {
@@ -148,35 +152,120 @@ const Notifications = () => {
         }
     };
 
+    // Clear all notifications
+    const handleClearNotifications = async () => {
+        if (!confirm('Are you sure you want to delete ALL notifications? This cannot be undone.')) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('nestfinder_admin_token');
+            const response = await fetch(`${API_URL}/api/push/admin/notifications/clear-all`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setResult({
+                    success: true,
+                    message: `✅ ${data.message}`
+                });
+                // Reload stats to update metrics
+                await loadStats();
+            } else {
+                const data = await response.json();
+                setResult({ success: false, message: data.error || 'Failed to clear notifications' });
+            }
+        } catch (err) {
+            setResult({ success: false, message: err.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Filter subscribers based on search query
+    const filteredSubscribers = subscribers.filter(sub => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+            (sub.nickname || '').toLowerCase().includes(searchLower) ||
+            sub.user_id.toLowerCase().includes(searchLower)
+        );
+    });
+
     return (
         <div className="notifications-page">
             <div className="page-header">
-                <h1>📢 Push Notifications</h1>
+                <h1>🔔 In-App Notifications</h1>
                 <p className="text-muted">Send notifications to app users</p>
             </div>
 
             {/* Stats Card */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div className="card-body">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{
-                            fontSize: '2rem',
-                            fontWeight: 'bold',
-                            color: 'var(--primary-color, #3b82f6)'
-                        }}>
-                            {stats.totalSubscribers}
-                        </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                        {/* Total Users */}
                         <div>
-                            <div style={{ fontWeight: 600 }}>Total Users</div>
-                            <div className="text-muted text-sm">Users receiving In-App notifications</div>
+                            <div style={{
+                                fontSize: '2rem',
+                                fontWeight: 'bold',
+                                color: 'var(--primary-color, #3b82f6)'
+                            }}>
+                                {stats.totalSubscribers}
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 600 }}>Total Users</div>
+                                <div className="text-muted text-sm">Registered users</div>
+                            </div>
                         </div>
+
+                        {/* Total Notifications */}
+                        <div>
+                            <div style={{
+                                fontSize: '2rem',
+                                fontWeight: 'bold',
+                                color: '#8b5cf6'
+                            }}>
+                                {stats.notificationMetrics?.total || 0}
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 600 }}>Total Messages</div>
+                                <div className="text-muted text-sm">In database</div>
+                            </div>
+                        </div>
+
+                        {/* Unread Notifications */}
+                        <div>
+                            <div style={{
+                                fontSize: '2rem',
+                                fontWeight: 'bold',
+                                color: '#f59e0b'
+                            }}>
+                                {stats.notificationMetrics?.unread || 0}
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 600 }}>Unread Messages</div>
+                                <div className="text-muted text-sm">Pending delivery</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
                         <button
                             onClick={loadStats}
                             disabled={loading}
-                            style={{ marginLeft: 'auto' }}
                             className="btn btn-secondary btn-sm"
                         >
                             🔄 Refresh
+                        </button>
+                        <button
+                            onClick={handleClearNotifications}
+                            disabled={loading}
+                            className="btn btn-secondary btn-sm"
+                            style={{ marginLeft: 'auto', background: '#dc2626', color: 'white' }}
+                        >
+                            🗑️ Clear All Notifications
                         </button>
                     </div>
                 </div>
@@ -274,6 +363,17 @@ const Notifications = () => {
                     {target === 'selected' && (
                         <div className="form-group" style={{ marginTop: '1rem' }}>
                             <label className="form-label">Select Users ({selectedUsers.length} selected)</label>
+
+                            {/* Search Input */}
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="🔍 Search by nickname or ID..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                style={{ marginBottom: '0.5rem' }}
+                            />
+
                             <div style={{
                                 maxHeight: '200px',
                                 overflow: 'auto',
@@ -281,12 +381,12 @@ const Notifications = () => {
                                 borderRadius: '8px',
                                 padding: '0.5rem'
                             }}>
-                                {subscribers.length === 0 ? (
+                                {filteredSubscribers.length === 0 ? (
                                     <div className="text-muted text-center" style={{ padding: '1rem' }}>
-                                        No subscribers found
+                                        {searchQuery ? 'No users match your search' : 'No users found'}
                                     </div>
                                 ) : (
-                                    subscribers.map((sub, idx) => (
+                                    filteredSubscribers.map((sub, idx) => (
                                         <label
                                             key={sub.user_id + idx}
                                             style={{

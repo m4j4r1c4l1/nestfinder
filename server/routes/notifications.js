@@ -102,6 +102,10 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
         // Count total users
         const total = get('SELECT COUNT(*) as count FROM users');
 
+        // Get notification metrics
+        const notificationCount = get('SELECT COUNT(*) as count FROM notifications');
+        const unreadCount = get('SELECT COUNT(*) as count FROM notifications WHERE read = 0');
+
         // List recent active users
         const users = all(`
             SELECT id as user_id, nickname, created_at, last_active
@@ -112,7 +116,11 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
 
         res.json({
             totalSubscribers: total?.count || 0,
-            subscribers: users
+            subscribers: users,
+            notificationMetrics: {
+                total: notificationCount?.count || 0,
+                unread: unreadCount?.count || 0
+            }
         });
     } catch (error) {
         console.error('Stats error:', error);
@@ -176,6 +184,26 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
     } catch (error) {
         console.error('Send notification error:', error);
         res.status(500).json({ error: 'Failed to send notification' });
+    }
+});
+
+// Clear all notifications (admin only)
+router.delete('/admin/notifications/clear-all', requireAdmin, (req, res) => {
+    try {
+        const result = run('DELETE FROM notifications');
+
+        log('admin', 'notifications_cleared', null, {
+            deletedCount: result.changes || 0
+        });
+
+        res.json({
+            success: true,
+            message: `Cleared ${result.changes || 0} notification(s)`,
+            deleted: result.changes || 0
+        });
+    } catch (error) {
+        console.error('Clear notifications error:', error);
+        res.status(500).json({ error: 'Failed to clear notifications' });
     }
 });
 
