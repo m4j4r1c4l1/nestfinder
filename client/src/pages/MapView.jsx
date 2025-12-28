@@ -178,85 +178,94 @@ const MapView = () => {
             )}
 
             {/* Enable Location Banner - Shows when location not available */}
-            {!userLocation && (
-                <div style={{
-                    position: 'fixed',
-                    top: 'var(--space-4)',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 350,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                    padding: 'var(--space-4)',
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: 'var(--shadow-xl)',
-                    maxWidth: '90%',
-                    width: '400px',
-                    textAlign: 'center'
-                }}>
-                    <div style={{ fontSize: '1.5rem', marginBottom: 'var(--space-2)' }}>📍</div>
-                    <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: '1.1rem', fontWeight: 600 }}>
-                        Enable Your Location
-                    </h3>
-                    <p style={{ margin: '0 0 var(--space-3) 0', fontSize: '0.9rem', opacity: 0.95 }}>
-                        Tap below to enable location for personalized routes
-                    </p>
-                    <button
-                        onClick={() => {
-                            setToast(null); // Clear any existing toast
-                            getCurrentLocation()
-                                .then(() => {
-                                    showToast('Location enabled!', 'success');
-                                })
-                                .catch(err => {
-                                    console.error('Location error:', err);
-                                    // Show specific guidance based on error
-                                    if (err.code === 1) {
-                                        showToast('Location denied. Check Settings → Privacy → Location Services → Safari', 'error');
-                                    } else if (err.code === 2) {
-                                        showToast('Location unavailable. Check your device GPS.', 'error');
-                                    } else if (err.code === 3 || err.message?.includes('timeout')) {
-                                        showToast('Location timed out. Try again or check GPS.', 'error');
-                                    }
-                                });
-                        }}
-                        style={{
-                            background: 'white',
-                            color: '#667eea',
-                            border: 'none',
-                            borderRadius: 'var(--radius-md)',
-                            padding: 'var(--space-3) var(--space-5)',
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            boxShadow: 'var(--shadow-md)',
-                            transition: 'transform 0.2s',
-                            width: '100%'
-                        }}
-                        onMouseDown={(e) => {
-                            e.currentTarget.style.transform = 'scale(0.98)';
-                        }}
-                        onMouseUp={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                        onTouchStart={(e) => {
-                            e.currentTarget.style.transform = 'scale(0.98)';
-                        }}
-                        onTouchEnd={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                    >
-                        📍 Enable Location
-                    </button>
-                    <p style={{
-                        margin: 'var(--space-3) 0 0 0',
-                        fontSize: '0.75rem',
-                        opacity: 0.85
+            {!userLocation && (() => {
+                // Detect platform
+                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+                const isAndroid = /android/i.test(userAgent);
+
+                const platformInstructions = isIOS
+                    ? 'iOS: Settings → Privacy → Location Services → Safari → Allow'
+                    : isAndroid
+                        ? 'Android: Settings → Apps → Browser → Permissions → Location → Allow'
+                        : 'Check your browser settings to enable location access';
+
+                return (
+                    <div style={{
+                        position: 'fixed',
+                        top: 'var(--space-4)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 350,
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        padding: 'var(--space-4)',
+                        borderRadius: 'var(--radius-lg)',
+                        boxShadow: 'var(--shadow-xl)',
+                        maxWidth: '90%',
+                        width: '400px',
+                        textAlign: 'center'
                     }}>
-                        On iOS: Settings → Privacy → Location Services → Safari → Allow
-                    </p>
-                </div>
-            )}
+                        <div style={{ fontSize: '1.5rem', marginBottom: 'var(--space-2)' }}>📍</div>
+                        <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: '1.1rem', fontWeight: 600 }}>
+                            Enable Your Location
+                        </h3>
+                        <p style={{ margin: '0 0 var(--space-3) 0', fontSize: '0.9rem', opacity: 0.95 }}>
+                            Tap below to enable location for personalized routes
+                        </p>
+                        <button
+                            onClick={() => {
+                                setToast(null);
+                                getCurrentLocation()
+                                    .then(() => {
+                                        showToast('Location enabled!', 'success');
+                                    })
+                                    .catch(err => {
+                                        console.error('Location error:', err);
+                                        if (err.code === 1) {
+                                            const tip = isIOS
+                                                ? 'Settings → Privacy → Location Services → Safari'
+                                                : isAndroid
+                                                    ? 'Settings → Apps → Browser → Permissions → Location'
+                                                    : 'browser settings';
+                                            showToast(`Location denied. Check ${tip}`, 'error');
+                                        } else if (err.code === 2) {
+                                            showToast('Location unavailable. Check your device GPS.', 'error');
+                                        } else if (err.code === 3 || err.message?.includes('timeout')) {
+                                            showToast('Location timed out. Try again or check GPS.', 'error');
+                                        }
+                                    });
+                            }}
+                            style={{
+                                background: 'white',
+                                color: '#667eea',
+                                border: 'none',
+                                borderRadius: 'var(--radius-md)',
+                                padding: 'var(--space-3) var(--space-5)',
+                                fontSize: '1rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                boxShadow: 'var(--shadow-md)',
+                                transition: 'transform 0.2s',
+                                width: '100%'
+                            }}
+                            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+                            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            onTouchStart={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+                            onTouchEnd={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                            📍 Enable Location
+                        </button>
+                        <p style={{
+                            margin: 'var(--space-3) 0 0 0',
+                            fontSize: '0.75rem',
+                            opacity: 0.85
+                        }}>
+                            {platformInstructions}
+                        </p>
+                    </div>
+                );
+            })()}
 
             {/* Main Map */}
             <Map
