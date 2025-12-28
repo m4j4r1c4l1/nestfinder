@@ -39,6 +39,7 @@ export default defineConfig({
             },
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+                navigateFallbackDenylist: [/^\/admin-panel/], // Don't intercept admin panel requests
                 runtimeCaching: [
                     {
                         urlPattern: /^https:\/\/.*\.tile\.openstreetmap\.org\/.*/i,
