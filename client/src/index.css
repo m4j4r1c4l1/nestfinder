@@ -562,18 +562,27 @@ textarea.form-input {
 .bottom-nav {
   display: flex;
   min-height: 80px;
-  /* Standard height */
-  /* Fancy styling */
-  background: rgba(255, 255, 255, 0.9);
+  /* Dark Elegant Floating Island */
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 500px;
+  border-radius: 32px;
+  /* Large fully rounded corners */
+  background: rgba(20, 25, 35, 0.9);
+  /* Deep Dark Blue/Black */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.08);
-  /* Ambient shadow */
-  border-radius: 24px 24px 0 0;
-  /* Rounded top */
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
-  margin-top: -20px;
-  /* Overlay map slightly? No, just style. */
+  /* Safari support */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  /* Deep shadow */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: space-evenly;
+  z-index: 1000;
+  padding: 0 16px;
+  margin: 0;
 }
 
 .bottom-nav-item {
@@ -587,16 +596,15 @@ textarea.form-input {
   /* Larger text */
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-text-muted);
   background: none;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  border-radius: 16px;
-  /* Pill shape for active state */
-  margin: 0 4px;
-  /* Space between pills */
+  border-radius: 20px;
+  /* Pill shape */
+  padding: 8px 0;
+  /* Compact vertically */
 }
 
 .bottom-nav-item::before {
@@ -605,11 +613,12 @@ textarea.form-input {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0);
-  width: 100%;
-  height: 100%;
-  background: var(--color-primary);
-  opacity: 0.1;
-  border-radius: 16px;
+  width: 50px;
+  /* Circle/Oval */
+  height: 50px;
+  background: rgba(255, 255, 255, 0.15);
+  /* White glow */
+  border-radius: 50%;
   transition: transform 0.3s ease;
   z-index: -1;
 }
@@ -626,7 +635,8 @@ textarea.form-input {
 
 .bottom-nav-item:hover,
 .bottom-nav-item.active {
-  color: var(--color-primary);
+  color: white;
+  /* Bright white when active */
 }
 
 .bottom-nav-item svg {
@@ -651,26 +661,28 @@ textarea.form-input {
 
 .notification-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #ef4444;
-  /* Bright Red */
+  top: -2px;
+  /* Tucked closer to icon */
+  right: 0px;
+  background: #ff3b30;
+  /* Apple Red */
   color: white;
-  font-size: 9px;
-  /* Smaller font to fit */
-  font-weight: 700;
-  width: 16px;
-  /* Back to compact size */
-  height: 16px;
-  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 20px;
+  /* Ensure 2 digits fit */
+  height: 20px;
+  border-radius: 10px;
+  /* Pill if wide, circle if small */
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid white;
+  border: 2px solid #141923;
+  /* Match nav background for 'cutout' look */
   z-index: 10;
-  line-height: 1;
-  padding: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  padding: 0 4px;
+  /* Breathing room */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .toast {
