@@ -12,6 +12,7 @@
             padding: 0;
             height: 100%;
             overflow: hidden;
+            background-color: #0f172a;
         }
 
         iframe {
@@ -24,7 +25,20 @@
 </head>
 
 <body>
-    <iframe src="https://nestfinder-sa1g.onrender.com" title="NestFinder Application" allow="geolocation"></iframe>
+    <iframe id="app-frame" src="https://nestfinder-sa1g.onrender.com" title="NestFinder Application"
+        allow="geolocation"></iframe>
+
+    <script>
+        // Check current URL to see if we should load a specific page
+        const path = window.location.pathname;
+        const iframe = document.getElementById('app-frame');
+
+        // If the URL contains 'admin-panel', update the iframe src
+        // We use 'includes' to handle /nestfinder/admin-panel or just /admin-panel
+        if (path.includes('/admin-panel')) {
+            iframe.src = "https://nestfinder-sa1g.onrender.com/admin-panel";
+        }
+    </script>
 </body>
 
 </html>
