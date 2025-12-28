@@ -48,11 +48,14 @@ export const usePushNotifications = () => {
 
         try {
             // Request permission
+            console.log('[Push] Requesting permission...');
             const perm = await Notification.requestPermission();
+            console.log('[Push] Permission result:', perm);
             setPermission(perm);
 
             if (perm !== 'granted') {
-                console.log('Notification permission denied');
+                console.log('[Push] Permission denied:', perm);
+                setError(`Permission: ${perm}`);
                 return false;
             }
 

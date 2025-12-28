@@ -43,7 +43,13 @@ const App = () => {
             if (success) {
                 setShowNotificationPrompt(false);
             } else {
-                setSubscribeError('Permission denied or not supported');
+                // Show actual error from hook if available
+                const hookError = pushNotifications.error;
+                if (hookError) {
+                    setSubscribeError(hookError);
+                } else {
+                    setSubscribeError('Permission denied. Click browser lock icon → Allow notifications.');
+                }
             }
         } catch (err) {
             console.error('Push subscription failed:', err);
