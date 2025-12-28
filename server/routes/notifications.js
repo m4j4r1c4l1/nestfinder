@@ -2,14 +2,18 @@ import express from 'express';
 import webPush from 'web-push';
 import { getDb, run, get, all, log, getSetting } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { decrypt } from '../crypto.js';
 
 const router = express.Router();
 
-// Get VAPID keys from database
+// Get VAPID keys from database (decrypts private key)
 const getVapidConfig = () => {
+    const encryptedPrivateKey = getSetting('vapid_private_key');
+    const privateKey = decrypt(encryptedPrivateKey);
+
     return {
         publicKey: getSetting('vapid_public_key'),
-        privateKey: getSetting('vapid_private_key'),
+        privateKey: privateKey,
         subject: getSetting('vapid_subject') || 'mailto:m4j4r1.c4l1@gmail.com'
     };
 };
