@@ -304,6 +304,17 @@ const Notifications = () => {
                                                 onChange={() => toggleUser(sub.user_id)}
                                             />
                                             <span>{sub.nickname || sub.user_id}</span>
+                                            {sub.device_count > 1 && (
+                                                <span style={{
+                                                    background: '#eee',
+                                                    padding: '2px 6px',
+                                                    borderRadius: '10px',
+                                                    fontSize: '0.7rem',
+                                                    marginLeft: '4px'
+                                                }}>
+                                                    {sub.device_count} devices
+                                                </span>
+                                            )}
                                             <span className="text-muted text-sm" style={{ marginLeft: 'auto' }}>
                                                 {new Date(sub.created_at).toLocaleDateString()}
                                             </span>

@@ -20,18 +20,43 @@ const getVapidConfig = () => {
 
 // Configure web-push lazily (keys read from database)
 let vapidConfigured = false;
+let vapidError = null;
 const ensureVapidConfigured = () => {
     if (!vapidConfigured) {
         const { publicKey, privateKey, subject } = getVapidConfig();
-        if (publicKey && privateKey && !publicKey.startsWith('XXX')) {
+
+        console.log('[VAPID] Configuring...');
+        console.log('[VAPID] Public key exists:', !!publicKey);
+        console.log('[VAPID] Private key exists:', !!privateKey);
+        console.log('[VAPID] Private key length:', privateKey ? privateKey.length : 0);
+
+        if (!publicKey || publicKey.startsWith('XXX')) {
+            vapidError = 'VAPID public key not configured';
+            console.error('[VAPID] Error:', vapidError);
+            return false;
+        }
+
+        if (!privateKey || privateKey.length < 20) {
+            vapidError = 'VAPID private key decryption failed. Check NEST_INTEGRITY env var.';
+            console.error('[VAPID] Error:', vapidError);
+            return false;
+        }
+
+        try {
             webPush.setVapidDetails(subject, publicKey, privateKey);
             vapidConfigured = true;
+            console.log('[VAPID] Configured successfully!');
             return true;
+        } catch (err) {
+            vapidError = `VAPID config error: ${err.message}`;
+            console.error('[VAPID] Error:', vapidError);
+            return false;
         }
-        return false;
     }
     return true;
 };
+
+const getVapidError = () => vapidError;
 
 // Notification templates
 const templates = {
@@ -136,10 +161,11 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
     try {
         const total = get('SELECT COUNT(*) as count FROM push_subscriptions');
         const users = all(`
-            SELECT ps.user_id, u.nickname, ps.created_at 
+            SELECT ps.user_id, u.nickname, MAX(ps.created_at) as created_at, COUNT(*) as device_count 
             FROM push_subscriptions ps
             LEFT JOIN users u ON ps.user_id = u.id
-            ORDER BY ps.created_at DESC
+            GROUP BY ps.user_id
+            ORDER BY created_at DESC
             LIMIT 100
         `);
 
@@ -158,7 +184,8 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
     try {
         // Ensure VAPID is configured
         if (!ensureVapidConfigured()) {
-            return res.status(503).json({ error: 'Push notifications not configured. Set VAPID keys in database.' });
+            const specificError = getVapidError();
+            return res.status(503).json({ error: specificError || 'Push notifications not configured. Set VAPID keys in database.' });
         }
 
         const { template, title, body, target, userIds } = req.body;
