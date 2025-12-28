@@ -8,10 +8,24 @@ import { usePoints } from '../hooks/usePoints';
 import { useAuth } from '../hooks/useAuth';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { api } from '../utils/api';
-import NotificationCenter from '../components/NotificationCenter';
+import { useNotifications } from '../hooks/useNotifications';
+import NotificationBell from '../components/NotificationBell';
+import NotificationList from '../components/NotificationList';
+import NotificationPopup from '../components/NotificationPopup';
 
 const MapView = () => {
     const { user } = useAuth();
+    const {
+        notifications,
+        unreadCount,
+        popupMessage,
+        markAsRead,
+        markAllAsRead,
+        settings,
+        toggleSettings,
+        dismissPopup
+    } = useNotifications(user?.id);
+
     const {
         points,
         filters,
@@ -139,6 +153,12 @@ const MapView = () => {
 
     return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <NotificationPopup
+                message={popupMessage}
+                onDismiss={dismissPopup}
+                onMarkRead={markAsRead}
+            />
+
             {/* Toast Notification */}
             {toast && (
                 <div className={`toast ${toast.type}`} style={{
@@ -283,6 +303,16 @@ const MapView = () => {
                 <div className="bottom-sheet-handle" onClick={handleSheetClose} />
                 <div className="bottom-sheet-content">
 
+                    {activeSheet === 'notifications' && (
+                        <NotificationList
+                            notifications={notifications}
+                            markAsRead={markAsRead}
+                            markAllAsRead={markAllAsRead}
+                            settings={settings}
+                            toggleSettings={toggleSettings}
+                        />
+                    )}
+
                     {activeSheet === 'submit' && (
                         <SubmitPoint
                             onSubmit={handleSubmit}
@@ -381,7 +411,11 @@ const MapView = () => {
                     <span>⬇️</span>
                     Data
                 </button>
-                <NotificationCenter userId={user?.id} />
+                <NotificationBell
+                    unreadCount={unreadCount}
+                    active={activeSheet === 'notifications'}
+                    onClick={() => setActiveSheet('notifications')}
+                />
             </nav>
         </div>
     );
