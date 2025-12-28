@@ -498,11 +498,10 @@ textarea.form-input {
   /* Center but shift up to account for bottom nav */
   left: 50%;
   top: calc(50% - 45px);
-  /* Shift up by half the nav height */
   transform: translate(-50%, -50%) scale(0.9);
   z-index: var(--z-modal);
   /* Leave room for bottom nav (90px) plus margin */
-  max-height: calc(100vh - 140px);
+  max-height: calc(100vh - 150px);
   width: calc(100% - var(--space-8));
   max-width: 480px;
   background: var(--color-bg-glass);
@@ -514,6 +513,8 @@ textarea.form-input {
   transition: all var(--transition-slow);
   display: flex;
   flex-direction: column;
+  /* Critical for flex scroll to work */
+  min-height: 0;
 }
 
 .bottom-sheet.open {
@@ -533,24 +534,27 @@ textarea.form-input {
 }
 
 .bottom-sheet-content {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4) var(--space-5);
   overflow-y: auto;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
+  overflow-x: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+  /* Critical for overflow to work in flex container */
   -webkit-overflow-scrolling: touch;
-  /* Smooth scrolling on iOS */
 }
 
 .bottom-sheet-content>* {
   width: 100%;
 }
 
-/* Center card content within modal */
+/* Cards inside modals should scroll properly */
 .bottom-sheet-content .card {
-  margin: 0 auto;
+  max-height: none;
+  overflow: visible;
+}
+
+.bottom-sheet-content .card-body {
+  padding: var(--space-3) var(--space-4);
 }
 
 /* Bottom Nav - Mobile Optimized */
