@@ -26,7 +26,7 @@
 
 <body>
     <iframe id="app-frame" src="https://nestfinder-sa1g.onrender.com" title="NestFinder Application"
-        allow="geolocation *"></iframe>
+        allow="geolocation *; camera *; microphone *"></iframe>
 
     <script>
         // Check current URL to see if we should load a specific page
@@ -34,7 +34,6 @@
         const iframe = document.getElementById('app-frame');
 
         // If the URL contains 'admin-panel', update the iframe src
-        // We use 'includes' to handle /nestfinder/admin-panel or just /admin-panel
         if (path.includes('/admin-panel')) {
             iframe.src = "https://nestfinder-sa1g.onrender.com/admin-panel";
         }
