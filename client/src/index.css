@@ -621,15 +621,16 @@ textarea.form-input {
 
 .notification-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -6px;
+  /* Adjusted for larger size */
+  right: -6px;
   background: red;
   color: white;
-  font-size: 9px;
-  /* Reduced from 10px */
+  font-size: 10px;
+  /* Readable size */
   font-weight: bold;
-  height: 16px;
-  min-width: 16px;
+  height: 18px;
+  min-width: 18px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -637,9 +638,9 @@ textarea.form-input {
   border: 1px solid white;
   z-index: 10;
   line-height: 1;
-  /* Ensure vertical centering */
+  box-sizing: border-box;
+  /* Ensure border doesn't shrink content area */
   padding-bottom: 0;
-  /* Reset any padding */
 }
 
 .toast {
