@@ -492,29 +492,31 @@ textarea.form-input {
   z-index: 150;
 }
 
-/* Bottom Sheet */
+/* Bottom Sheet - Centered Modal Style */
 .bottom-sheet {
   position: fixed;
-  /* Position above the bottom nav */
-  bottom: 90px;
-  /* Height of expanded bottom nav */
-  left: 0;
-  right: 0;
+  /* Center vertically and horizontally */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
   z-index: var(--z-modal);
-  max-height: 60vh;
-  /* Reduced to ensure nav stays visible */
+  max-height: 70vh;
+  width: calc(100% - var(--space-8));
+  max-width: 500px;
   background: var(--color-bg-glass);
   border-radius: var(--radius-xl);
   backdrop-filter: blur(20px);
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
-  transform: translateY(calc(100% + 90px));
-  transition: transform var(--transition-slow);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-slow);
   overflow: hidden;
-  margin: 0 var(--space-2);
 }
 
 .bottom-sheet.open {
-  transform: translateY(0);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  visibility: visible;
 }
 
 .bottom-sheet-handle {
@@ -527,9 +529,16 @@ textarea.form-input {
 }
 
 .bottom-sheet-content {
-  padding: var(--space-4) var(--space-5) var(--space-4);
+  padding: var(--space-4) var(--space-5);
   overflow-y: auto;
-  max-height: calc(60vh - 40px);
+  max-height: calc(70vh - 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bottom-sheet-content>* {
+  width: 100%;
 }
 
 /* Bottom Nav - Mobile Optimized */
@@ -563,8 +572,9 @@ textarea.form-input {
 }
 
 .bottom-nav-item span {
-  font-size: 1.5rem;
-  /* Larger icons */
+  font-size: 1.75rem;
+  /* Even larger icons */
+  line-height: 1;
 }
 
 .bottom-nav-item:hover,
