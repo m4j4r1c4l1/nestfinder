@@ -77,26 +77,22 @@ export const useGeolocation = (apiKey) => { // apiKey not used for browser nativ
             } catch (e) {
                 clearTimeout(timeoutId);
                 reject(e);
-            }
-        });
-    };
-});
-    };
+            };
 
-// Function to get address from coordinates (Reverse Geocoding using OpenStreetMap Nominatim)
-const getAddress = async (lat, lng) => {
-    try {
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-            { headers: { 'User-Agent': 'NestFinder/1.0' } }
-        );
-        const data = await response.json();
-        return data.display_name || 'Unknown location';
-    } catch (e) {
-        console.error('Reverse geocoding error:', e);
-        return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    }
-};
+            // Function to get address from coordinates (Reverse Geocoding using OpenStreetMap Nominatim)
+            const getAddress = async (lat, lng) => {
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+                        { headers: { 'User-Agent': 'NestFinder/1.0' } }
+                    );
+                    const data = await response.json();
+                    return data.display_name || 'Unknown location';
+                } catch (e) {
+                    console.error('Reverse geocoding error:', e);
+                    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                }
+            };
 
-return { location, setLocation, error, loading, getCurrentLocation, getAddress };
-};
+            return { location, setLocation, error, loading, getCurrentLocation, getAddress };
+        };
