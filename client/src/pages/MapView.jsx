@@ -8,6 +8,7 @@ import { usePoints } from '../hooks/usePoints';
 import { useAuth } from '../hooks/useAuth';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { api } from '../utils/api';
+import NotificationCenter from '../components/NotificationCenter';
 
 const MapView = () => {
     const { user } = useAuth();
@@ -138,6 +139,8 @@ const MapView = () => {
 
     return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <NotificationCenter userId={user?.id} />
+
             {/* Toast Notification */}
             {toast && (
                 <div className={`toast ${toast.type}`} style={{
@@ -390,28 +393,6 @@ const MapView = () => {
                                         }}
                                     >
                                         Enable Notifications
-                                    </button>
-
-                                    <button
-                                        className="btn btn-secondary btn-block"
-                                        style={{ marginTop: 'var(--space-2)' }}
-                                        onClick={async () => {
-                                            try {
-                                                const reg = await navigator.serviceWorker.ready;
-                                                await reg.showNotification('🧪 Test Notification', {
-                                                    body: 'If you see this, display works!',
-                                                    icon: '/icons/icon-192.png',
-                                                    badge: '/icons/badge-72.png',
-                                                    vibrate: [100, 50, 100],
-                                                    data: { url: window.location.href }
-                                                });
-                                                setToast({ message: 'Sent test notification!', type: 'success' });
-                                            } catch (err) {
-                                                setToast({ message: `Test failed: ${err.message}`, type: 'error' });
-                                            }
-                                        }}
-                                    >
-                                        🧪 Test Local Notification
                                     </button>
 
                                     <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: 'var(--space-2)' }}>

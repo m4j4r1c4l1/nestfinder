@@ -148,6 +148,65 @@ router.post('/unsubscribe', (req, res) => {
 });
 
 // ========================================
+// IN-APP NOTIFICATION ROUTES
+// ========================================
+
+// Get unread notifications
+router.get('/notifications', (req, res) => {
+    try {
+        const userId = req.query.userId;
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID required' });
+        }
+
+        const notifications = all(
+            'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+            [userId]
+        );
+
+        res.json({ notifications });
+    } catch (error) {
+        console.error('Get notifications error:', error);
+        res.status(500).json({ error: 'Failed to get notifications' });
+    }
+});
+
+// Mark notification as read
+router.post('/notifications/:id/read', (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId } = req.body;
+
+        run(
+            'UPDATE notifications SET read = 1 WHERE id = ? AND user_id = ?',
+            [id, userId]
+        );
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Mark read error:', error);
+        res.status(500).json({ error: 'Failed to mark as read' });
+    }
+});
+
+// Mark all as read
+router.post('/notifications/read-all', (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        run(
+            'UPDATE notifications SET read = 1 WHERE user_id = ?',
+            [userId]
+        );
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Mark all read error:', error);
+        res.status(500).json({ error: 'Failed to mark all as read' });
+    }
+});
+
+// ========================================
 // ADMIN ROUTES
 // ========================================
 
@@ -233,7 +292,7 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
             return res.status(404).json({ error: 'No subscribers found for target' });
         }
 
-        // Send to all target subscriptions
+        // Send to all target subscriptions (Web Push)
         let successCount = 0;
         let failCount = 0;
         const failedEndpoints = [];
@@ -261,6 +320,25 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
                 }
             }
         }
+
+        // ALSO save to In-App Notifications table for persistence
+        // We determine target users based on selection
+        let targetUserIds = [];
+        if (target === 'all') {
+            const allUsers = all('SELECT id FROM users');
+            targetUserIds = allUsers.map(u => u.id);
+        } else if (userIds) {
+            targetUserIds = userIds;
+        }
+
+        // Insert notifications for each user
+        const stmt = getDb().prepare('INSERT INTO notifications (user_id, title, body, type, read) VALUES (?, ?, ?, ?, 0)');
+        const type = template || 'custom';
+
+        targetUserIds.forEach(uid => {
+            stmt.run([uid, notificationTitle, notificationBody, type]);
+        });
+        stmt.free();
 
         log('admin', 'push_notification_sent', null, {
             template,
