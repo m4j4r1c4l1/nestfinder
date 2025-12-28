@@ -48,8 +48,9 @@ const MapView = () => {
                 action: {
                     label: 'Enable Location',
                     onClick: () => {
-                        setToast(null); // Clear error
-                        getCurrentLocation(); // Retry manually (browser likes this)
+                        window.alert('Requesting location...'); // Debug intent
+                        setToast(null);
+                        getCurrentLocation().catch(e => window.alert('Manual Retry Error: ' + e.message));
                     }
                 }
             });
