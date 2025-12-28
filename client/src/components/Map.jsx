@@ -185,8 +185,24 @@ const RouteLayer = ({ route }) => {
 
 // Map click handler
 const MapClickHandler = ({ onMapClick }) => {
-    const map = useMapEvents({
+    useMapEvents({
         click: (e) => {
+            // Ignore clicks on UI controls (buttons, controls, etc.)
+            // Only trigger on actual map tile clicks
+            const target = e.originalEvent?.target;
+            if (target) {
+                // Check if click was on map tiles (not on buttons or other controls)
+                const isMapClick = target.classList.contains('leaflet-container') ||
+                    target.classList.contains('leaflet-tile') ||
+                    target.classList.contains('leaflet-pane') ||
+                    target.tagName === 'IMG' || // Map tiles are images
+                    target.closest('.leaflet-tile-pane');
+
+                if (!isMapClick) {
+                    return; // Don't trigger onMapClick for control clicks
+                }
+            }
+
             if (onMapClick) {
                 onMapClick({
                     latitude: e.latlng.lat,
