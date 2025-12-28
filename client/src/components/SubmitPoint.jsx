@@ -6,10 +6,26 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     const [inputMode, setInputMode] = useState(initialLocation ? 'map' : 'gps'); // 'gps', 'address', or 'map'
     const [address, setAddress] = useState('');
     const [manualAddress, setManualAddress] = useState({ city: '', street: '', number: '' });
-    const [notes, setNotes] = useState('');
+    const [tags, setTags] = useState([]); // Array of selected emoji tags
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
     const [error, setError] = useState('');
+
+    // Available tag options
+    const tagOptions = [
+        { id: 'single', emoji: '👤', label: 'One person' },
+        { id: 'group', emoji: '👥', label: 'Multiple' },
+        { id: 'children', emoji: '👶', label: 'Children' },
+        { id: 'animals', emoji: '🐕', label: 'Animals' }
+    ];
+
+    const toggleTag = (tagId) => {
+        setTags(prev =>
+            prev.includes(tagId)
+                ? prev.filter(t => t !== tagId)
+                : [...prev, tagId]
+        );
+    };
 
     // Handle initialLocation from map click
     useEffect(() => {
@@ -84,7 +100,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                 latitude: location.latitude,
                 longitude: location.longitude,
                 address,
-                notes
+                notes: tags.join(',') // Send tags as comma-separated string for backwards compatibility
             });
         } catch (err) {
             console.error('Submit point error:', err);
@@ -243,14 +259,47 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                     {error && <div style={{ color: 'var(--color-deactivated)', fontSize: '12px', marginTop: 'var(--space-2)' }}>{error}</div>}
 
                     <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
-                        <label className="form-label">Notes (Optional)</label>
-                        <textarea
-                            className="form-input"
-                            placeholder="Describe the location or situation..."
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            rows={3}
-                        />
+                        <label className="form-label">Who's there? (Optional)</label>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(4, 1fr)',
+                            gap: 'var(--space-2)',
+                            marginTop: 'var(--space-2)'
+                        }}>
+                            {tagOptions.map(tag => (
+                                <button
+                                    key={tag.id}
+                                    type="button"
+                                    onClick={() => toggleTag(tag.id)}
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: 'var(--space-1)',
+                                        padding: 'var(--space-3) var(--space-2)',
+                                        background: tags.includes(tag.id)
+                                            ? 'var(--color-primary-light)'
+                                            : 'var(--color-bg-secondary)',
+                                        border: tags.includes(tag.id)
+                                            ? '2px solid var(--color-primary)'
+                                            : '1px solid var(--color-border)',
+                                        borderRadius: 'var(--radius-lg)',
+                                        cursor: 'pointer',
+                                        transition: 'all var(--transition-fast)'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>{tag.emoji}</span>
+                                    <span style={{
+                                        fontSize: 'var(--font-size-xs)',
+                                        color: tags.includes(tag.id)
+                                            ? 'var(--color-primary)'
+                                            : 'var(--color-text-secondary)'
+                                    }}>
+                                        {tag.label}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="flex gap-2" style={{ marginTop: 'var(--space-4)' }}>
