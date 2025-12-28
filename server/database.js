@@ -97,6 +97,19 @@ export const initDatabase = async () => {
     );
   `);
 
+  db.run(`
+    -- Push subscriptions for Web Push notifications
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      endpoint TEXT UNIQUE NOT NULL,
+      p256dh TEXT NOT NULL,
+      auth TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+  `);
+
   // Create indexes
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_status ON points(status);`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_user ON points(user_id);`);
@@ -110,7 +123,14 @@ export const initDatabase = async () => {
     { key: 'deactivations_required', value: '3' },
     { key: 'deactivation_retention_days', value: '7' },
     { key: 'weekly_reminder_enabled', value: 'true' },
-    { key: 'app_name', value: 'NestFinder' }
+    { key: 'app_name', value: 'NestFinder' },
+    // VAPID keys for push notifications
+    // These are PLACEHOLDER values - actual keys are stored in the database only
+    // Generate new keys with: npx web-push generate-vapid-keys --json
+    // Then update via admin settings or directly in the database
+    { key: 'vapid_public_key', value: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' },
+    { key: 'vapid_private_key', value: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' },
+    { key: 'vapid_subject', value: 'mailto:admin@nestfinder.app' }
   ];
 
   defaultSettings.forEach(s => {
