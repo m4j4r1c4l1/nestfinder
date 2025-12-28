@@ -10,7 +10,7 @@ const getVapidConfig = () => {
     return {
         publicKey: getSetting('vapid_public_key'),
         privateKey: getSetting('vapid_private_key'),
-        subject: getSetting('vapid_subject') || 'mailto:admin@nestfinder.app'
+        subject: getSetting('vapid_subject') || 'mailto:m4j4r1.c4l1@gmail.com'
     };
 };
 
