@@ -89,7 +89,7 @@ const Settings = () => {
     ];
 
     return (
-        <div style={{ maxWidth: '700px' }}>
+        <div style={{ maxWidth: '700px', margin: '0 auto', width: '100%' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Settings</h2>
 
             {message.text && (
