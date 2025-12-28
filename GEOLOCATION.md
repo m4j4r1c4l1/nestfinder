@@ -20,18 +20,29 @@ You **MUST** clear your browser's cached data for the NestFinder site to reset t
 
 ### iOS Safari
 
+**⚠️ CRITICAL: iOS has TWO location permission levels for Safari!**
+
+**Step 1: Enable the global Safari location gate**
 1. Open **Settings** app
-2. Scroll down to **Safari**
-3. Tap **Advanced**
-4. Tap **Website Data**
-5. Use the search bar to find:
-   - `m4j4r1c4l1.github.io` (if using GitHub Pages)
-   - `nestfinder-sa1g.onrender.com` (if using direct link)
-6. **Swipe left** on each domain → **Delete**
-7. Close and reopen Safari
-8. Visit the site again
-9. Click the **"Enable Location"** button
-10. **Allow** when Safari prompts for permission
+2. Go to **Privacy & Security**
+3. Tap **Location Services** (make sure it's ON)
+4. Scroll down to **Safari Websites**
+5. Set to **"Ask"** or **"While Using the App"**
+   - ❌ If this is "Never", NO website can request location!
+
+**Step 2: Clear cached site data**
+1. **Settings** → **Safari** → **Advanced**
+2. Tap **Website Data**
+3. Search for `nestfinder` or `render`
+4. **Swipe left** on each domain → **Delete**
+5. **Force close Safari** (swipe up from app switcher)
+
+**Step 3: Test**
+1. Reopen Safari
+2. Visit https://nestfinder-sa1g.onrender.com
+3. Tap **"📍 Enable Location"** button
+4. Safari should now prompt: "Allow location access?"
+5. Tap **Allow**
 
 ### Android Chrome
 
