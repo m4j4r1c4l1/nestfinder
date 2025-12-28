@@ -29,15 +29,30 @@ const MapView = () => {
     const [toast, setToast] = useState(null);
     const [clickedLocation, setClickedLocation] = useState(null); // For map click to report
 
-    // Initialize location
+    // Initialize location - ONLY ONCE
     useEffect(() => {
+        // Try once silently. If it fails, we show the error toast with a button.
         getCurrentLocation().catch(() => { });
     }, []);
 
-    // Show geolocation errors
+    // Show geolocation errors with Retry Button
     useEffect(() => {
         if (geoError) {
-            showToast(geoError.message || 'Location access denied', 'error');
+            // Check if it's a denial or timeout to give better context
+            const isDenied = geoError.message?.toLowerCase().includes('denied');
+
+            setToast({
+                message: isDenied ? 'Location access needed for map features' : (geoError.message || 'Location failed'),
+                type: 'error',
+                // Add an action button to the toast
+                action: {
+                    label: 'Enable Location',
+                    onClick: () => {
+                        setToast(null); // Clear error
+                        getCurrentLocation(); // Retry manually (browser likes this)
+                    }
+                }
+            });
         }
     }, [geoError]);
 
@@ -138,9 +153,29 @@ const MapView = () => {
                     background: toast.type === 'error' ? 'var(--color-deactivated)' : 'var(--color-confirmed)',
                     color: 'white',
                     fontWeight: 500,
-                    boxShadow: 'var(--shadow-lg)'
+                    boxShadow: 'var(--shadow-lg)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem'
                 }}>
-                    {toast.message}
+                    <span>{toast.message}</span>
+                    {toast.action && (
+                        <button
+                            onClick={toast.action.onClick}
+                            style={{
+                                background: 'white',
+                                color: 'var(--color-deactivated)',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '4px 8px',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {toast.action.label}
+                        </button>
+                    )}
                 </div>
             )}
 
