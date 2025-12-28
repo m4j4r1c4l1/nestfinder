@@ -666,14 +666,14 @@ textarea.form-input {
 .notification-badge {
   position: absolute;
   top: 0px;
-  /* Closer to icon */
-  right: -2px;
-  /* Closer to icon */
+  right: 2px;
+  /* Moved left for better positioning */
   background: #ff3b30;
   color: white;
-  font-size: 8px !important;
-  /* Bigger for readability */
+  font-size: 9px !important;
+  /* Increased for better readability */
   font-weight: 900;
+  /* Already maximum bold */
   width: 14px;
   height: 14px;
   min-width: 14px;
