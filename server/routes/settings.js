@@ -44,8 +44,14 @@ router.put('/', requireAdmin, (req, res) => {
     for (const [key, value] of Object.entries(settings)) {
         let valueToStore = String(value);
 
+        // Check if this is a sensitive masked value
+        if (SENSITIVE_KEYS.includes(key) && value && value.startsWith('•')) {
+            console.log(`⏭️ Skipping update for masked key: ${key}`);
+            continue;
+        }
+
         // Encrypt sensitive values
-        if (SENSITIVE_KEYS.includes(key) && value && !value.startsWith('•')) {
+        if (SENSITIVE_KEYS.includes(key) && value) {
             // Only encrypt if it's a new value (not the masked placeholder)
             if (!value.startsWith('XXX')) {
                 valueToStore = encrypt(valueToStore);
