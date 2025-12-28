@@ -1,58 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './hooks/useAuth';
-import { usePushNotifications } from './hooks/usePushNotifications';
 import Home from './pages/Home';
 import MapView from './pages/MapView';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const App = () => {
     const { user, loading } = useAuth();
-    const pushNotifications = usePushNotifications();
     const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
     const [subscribing, setSubscribing] = useState(false);
     const [subscribeError, setSubscribeError] = useState(null);
 
+    // Check if push is supported
+    const isPushSupported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
     // Check if we should show notification prompt
     useEffect(() => {
-        if (user && pushNotifications.isSupported && !pushNotifications.isSubscribed) {
+        if (user && isPushSupported) {
             // Check if user has already dismissed the prompt
             const dismissed = localStorage.getItem('notificationPromptDismissed');
             if (!dismissed) {
-                // Show prompt after a delay
-                const timer = setTimeout(() => {
-                    setShowNotificationPrompt(true);
-                }, 5000);
-                return () => clearTimeout(timer);
+                // Check if already subscribed
+                navigator.serviceWorker.getRegistration().then(reg => {
+                    if (reg) {
+                        reg.pushManager.getSubscription().then(sub => {
+                            if (!sub) {
+                                // Not subscribed, show prompt after delay
+                                setTimeout(() => setShowNotificationPrompt(true), 5000);
+                            }
+                        });
+                    } else {
+                        // No service worker, show prompt
+                        setTimeout(() => setShowNotificationPrompt(true), 5000);
+                    }
+                });
             }
         }
-    }, [user, pushNotifications.isSupported, pushNotifications.isSubscribed]);
+    }, [user, isPushSupported]);
+
+    // URL base64 to Uint8Array for VAPID key
+    const urlBase64ToUint8Array = (base64String) => {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+        return outputArray;
+    };
 
     const handleEnableNotifications = async () => {
         setSubscribing(true);
         setSubscribeError(null);
 
         try {
-            // Add timeout to prevent infinite hang
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out')), 15000)
-            );
-
-            const subscribePromise = pushNotifications.subscribe(user?.id);
-
-            const success = await Promise.race([subscribePromise, timeoutPromise]);
-
-            if (success) {
-                setShowNotificationPrompt(false);
-            } else {
-                // Show actual error from hook if available
-                const hookError = pushNotifications.error;
-                if (hookError) {
-                    setSubscribeError(hookError);
-                } else {
-                    setSubscribeError('Permission denied. Click browser lock icon → Allow notifications.');
-                }
+            // Step 1: Request permission
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') {
+                setSubscribeError(`Permission: ${perm}`);
+                setSubscribing(false);
+                return;
             }
+
+            // Step 2: Register service worker
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            await navigator.serviceWorker.ready;
+
+            // Step 3: Get VAPID public key
+            const keyResponse = await fetch(`${API_URL}/api/push/vapid-public-key`);
+            const { publicKey, error } = await keyResponse.json();
+            if (error) {
+                setSubscribeError(`Server: ${error}`);
+                setSubscribing(false);
+                return;
+            }
+
+            // Step 4: Subscribe to push
+            const sub = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(publicKey)
+            });
+
+            // Step 5: Send subscription to server
+            await fetch(`${API_URL}/api/push/subscribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subscription: sub.toJSON(),
+                    userId: user?.id || 'anonymous'
+                })
+            });
+
+            // Success!
+            setShowNotificationPrompt(false);
+            localStorage.setItem('notificationsEnabled', 'true');
         } catch (err) {
-            console.error('Push subscription failed:', err);
+            console.error('Push subscription error:', err);
             setSubscribeError(err.message || 'Failed to enable');
         } finally {
             setSubscribing(false);
@@ -80,7 +122,7 @@ const App = () => {
         <>
             <MapView />
 
-            {/* Notification Permission Prompt - Requires user gesture for iOS */}
+            {/* Notification Permission Prompt */}
             {showNotificationPrompt && (
                 <div style={{
                     position: 'fixed',
