@@ -78,7 +78,8 @@ if (process.env.NODE_ENV === 'production') {
     app.use('/admin-panel', express.static(path.join(__dirname, '../admin/dist')));
 
     // Handle React routing for Admin
-    app.get('/admin-panel/*', (req, res) => {
+    // Handle React routing for Admin
+    app.get(['/admin-panel', '/admin-panel/*'], (req, res) => {
         res.sendFile(path.join(__dirname, '../admin/dist', 'index.html'));
     });
 
