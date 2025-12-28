@@ -18,8 +18,8 @@ self.addEventListener('push', (event) => {
     let data = {
         title: 'NestFinder',
         body: 'You have a new notification',
-        icon: '/icon-192.png',
-        badge: '/badge-72.png',
+        icon: '/icons/icon-192.png',
+        badge: '/icons/badge-72.png',
         data: { url: '/' }
     };
 
@@ -33,8 +33,8 @@ self.addEventListener('push', (event) => {
 
     const options = {
         body: data.body,
-        icon: data.icon || '/icon-192.png',
-        badge: data.badge || '/badge-72.png',
+        icon: data.icon || '/icons/icon-192.png',
+        badge: data.badge || '/icons/badge-72.png',
         vibrate: [100, 50, 100],
         data: data.data || { url: '/' },
         actions: [
