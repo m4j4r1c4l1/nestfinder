@@ -18,7 +18,7 @@ const Home = () => {
 
     return (
         <div className="welcome-screen">
-            <div className="welcome-logo" style={{ fontSize: '5rem' }}>🪹</div>
+            <div className="welcome-logo" style={{ fontSize: '6rem' }}>🪹</div>
             <h1 className="welcome-title">NestFinder</h1>
             <p className="welcome-subtitle">Finding nests for those without one.</p>
 
