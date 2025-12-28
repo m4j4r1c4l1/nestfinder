@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
+const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) => {
     const [routeData, setRouteData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -24,8 +24,20 @@ const RoutePanel = ({ points, onCalculate, onClear, userLocation }) => {
         setStatusFilter(prev => ({ ...prev, [status]: !prev[status] }));
     };
 
+    // Helper to check if a point is within the current map bounds
+    const isPointInBounds = (point) => {
+        if (!mapBounds) return true; // If no bounds, include all points
+        return (
+            point.latitude >= mapBounds.south &&
+            point.latitude <= mapBounds.north &&
+            point.longitude >= mapBounds.west &&
+            point.longitude <= mapBounds.east
+        );
+    };
+
+    // Filter points by BOTH status AND viewport bounds
     const getFilteredPoints = () => {
-        return points.filter(p => statusFilter[p.status]);
+        return points.filter(p => statusFilter[p.status] && isPointInBounds(p));
     };
 
     // OSRM Route with Nearest Neighbor ordering

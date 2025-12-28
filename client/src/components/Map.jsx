@@ -214,7 +214,41 @@ const MapClickHandler = ({ onMapClick }) => {
     return null;
 };
 
-const Map = ({ points = [], userLocation, onPointClick, onMapClick, route }) => {
+// Track map bounds for viewport-based filtering
+const BoundsTracker = ({ onBoundsChange }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        // Get initial bounds
+        const updateBounds = () => {
+            const bounds = map.getBounds();
+            if (onBoundsChange) {
+                onBoundsChange({
+                    north: bounds.getNorth(),
+                    south: bounds.getSouth(),
+                    east: bounds.getEast(),
+                    west: bounds.getWest()
+                });
+            }
+        };
+
+        // Update on load
+        updateBounds();
+
+        // Update on move/zoom
+        map.on('moveend', updateBounds);
+        map.on('zoomend', updateBounds);
+
+        return () => {
+            map.off('moveend', updateBounds);
+            map.off('zoomend', updateBounds);
+        };
+    }, [map, onBoundsChange]);
+
+    return null;
+};
+
+const Map = ({ points = [], userLocation, onPointClick, onMapClick, onBoundsChange, route }) => {
     // Default to London if no location yet
     const defaultCenter = [51.505, -0.09];
     const center = userLocation ? [userLocation.latitude, userLocation.longitude] : defaultCenter;
@@ -261,6 +295,7 @@ const Map = ({ points = [], userLocation, onPointClick, onMapClick, route }) => 
                 ))}
 
                 <InitialCenter center={center} userLocation={userLocation} />
+                <BoundsTracker onBoundsChange={onBoundsChange} />
                 <RouteLayer route={route} />
                 <MapClickHandler onMapClick={onMapClick} />
             </MapContainer>

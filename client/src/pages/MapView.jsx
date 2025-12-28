@@ -28,9 +28,11 @@ const MapView = () => {
     const [routePath, setRoutePath] = useState(null);
     const [toast, setToast] = useState(null);
     const [clickedLocation, setClickedLocation] = useState(null); // For map click to report
+    const [mapBounds, setMapBounds] = useState(null); // Track visible map area
 
     // DO NOT auto-request location on mobile - requires user gesture
     // Location is only requested when user clicks "Enable Location" button
+    // and is allowed from Global/Per-Website Settings (See GEOLOCATION.md)
 
     // Show geolocation errors
     useEffect(() => {
@@ -262,6 +264,7 @@ const MapView = () => {
                 userLocation={userLocation}
                 onPointClick={handlePointClick}
                 onMapClick={handleMapClick}
+                onBoundsChange={setMapBounds}
                 route={routePath}
             />
 
@@ -300,6 +303,7 @@ const MapView = () => {
                     {activeSheet === 'route' && (
                         <RoutePanel
                             points={points}
+                            mapBounds={mapBounds}
                             userLocation={userLocation}
                             onCalculate={handleRouteCalculate}
                             onClear={handleClearRoute}
