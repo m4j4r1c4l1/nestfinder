@@ -176,7 +176,7 @@ const MapView = () => {
             )}
 
             {/* Enable Location Banner - Shows when location not available */}
-            {!userLocation && permissionState !== 'granted' && (
+            {!userLocation && (
                 <div style={{
                     position: 'fixed',
                     top: 'var(--space-4)',
@@ -197,53 +197,62 @@ const MapView = () => {
                         Enable Your Location
                     </h3>
                     <p style={{ margin: '0 0 var(--space-3) 0', fontSize: '0.9rem', opacity: 0.95 }}>
-                        {permissionState === 'denied'
-                            ? 'Location blocked. Clear browser cache/site data to reset permissions.'
-                            : 'Get personalized routes and better navigation'
-                        }
+                        Tap below to enable location for personalized routes
                     </p>
                     <button
                         onClick={() => {
                             setToast(null); // Clear any existing toast
-                            getCurrentLocation().catch(err => {
-                                console.error('Location error:', err);
-                            });
+                            getCurrentLocation()
+                                .then(() => {
+                                    showToast('Location enabled!', 'success');
+                                })
+                                .catch(err => {
+                                    console.error('Location error:', err);
+                                    // Show specific guidance based on error
+                                    if (err.code === 1) {
+                                        showToast('Location denied. Check Settings → Privacy → Location Services → Safari', 'error');
+                                    } else if (err.code === 2) {
+                                        showToast('Location unavailable. Check your device GPS.', 'error');
+                                    } else if (err.code === 3 || err.message?.includes('timeout')) {
+                                        showToast('Location timed out. Try again or check GPS.', 'error');
+                                    }
+                                });
                         }}
-                        disabled={permissionState === 'denied'}
                         style={{
-                            background: permissionState === 'denied' ? '#ccc' : 'white',
-                            color: permissionState === 'denied' ? '#666' : '#667eea',
+                            background: 'white',
+                            color: '#667eea',
                             border: 'none',
                             borderRadius: 'var(--radius-md)',
                             padding: 'var(--space-3) var(--space-5)',
                             fontSize: '1rem',
                             fontWeight: 'bold',
-                            cursor: permissionState === 'denied' ? 'not-allowed' : 'pointer',
+                            cursor: 'pointer',
                             boxShadow: 'var(--shadow-md)',
                             transition: 'transform 0.2s',
                             width: '100%'
                         }}
                         onMouseDown={(e) => {
-                            if (permissionState !== 'denied') {
-                                e.currentTarget.style.transform = 'scale(0.98)';
-                            }
+                            e.currentTarget.style.transform = 'scale(0.98)';
                         }}
                         onMouseUp={(e) => {
                             e.currentTarget.style.transform = 'scale(1)';
                         }}
+                        onTouchStart={(e) => {
+                            e.currentTarget.style.transform = 'scale(0.98)';
+                        }}
+                        onTouchEnd={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
                     >
-                        {permissionState === 'denied' ? '🔒 Permission Denied' : '📍 Enable Location'}
+                        📍 Enable Location
                     </button>
-                    {permissionState === 'denied' && (
-                        <p style={{
-                            margin: 'var(--space-3) 0 0 0',
-                            fontSize: '0.75rem',
-                            opacity: 0.9,
-                            fontStyle: 'italic'
-                        }}>
-                            Clear site data in browser settings to reset
-                        </p>
-                    )}
+                    <p style={{
+                        margin: 'var(--space-3) 0 0 0',
+                        fontSize: '0.75rem',
+                        opacity: 0.85
+                    }}>
+                        On iOS: Settings → Privacy → Location Services → Safari → Allow
+                    </p>
                 </div>
             )}
 
