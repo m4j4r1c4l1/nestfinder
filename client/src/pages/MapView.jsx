@@ -20,7 +20,7 @@ const MapView = () => {
         deactivatePoint,
         reactivatePoint
     } = usePoints();
-    const { location: userLocation, getCurrentLocation, error: geoError } = useGeolocation();
+    const { location: userLocation, getCurrentLocation, error: geoError, permissionState } = useGeolocation();
 
     // UI State
     const [activeSheet, setActiveSheet] = useState(null);
@@ -29,33 +29,28 @@ const MapView = () => {
     const [toast, setToast] = useState(null);
     const [clickedLocation, setClickedLocation] = useState(null); // For map click to report
 
-    // Initialize location - ONLY ONCE
-    useEffect(() => {
-        // Try once silently. If it fails, we show the error toast with a button.
-        getCurrentLocation().catch(() => { });
-    }, []);
+    // DO NOT auto-request location on mobile - requires user gesture
+    // Location is only requested when user clicks "Enable Location" button
 
-    // Show geolocation errors with Retry Button
+    // Show geolocation errors
     useEffect(() => {
         if (geoError) {
-            // Check if it's a denial or timeout to give better context
-            const isDenied = geoError.message?.toLowerCase().includes('denied');
+            const isDenied = geoError.code === 1 || geoError.message?.toLowerCase().includes('denied');
 
-            setToast({
-                message: isDenied ? 'Location access needed for map features' : (geoError.message || 'Location failed'),
-                type: 'error',
-                // Add an action button to the toast
-                action: {
-                    label: 'Enable Location',
-                    onClick: () => {
-                        window.alert('Requesting location...'); // Debug intent
-                        setToast(null);
-                        getCurrentLocation().catch(e => window.alert('Manual Retry Error: ' + e.message));
-                    }
-                }
-            });
+            if (isDenied && permissionState === 'denied') {
+                setToast({
+                    message: 'Location blocked. Clear browser data and try again.',
+                    type: 'error',
+                    duration: 6000
+                });
+            } else {
+                setToast({
+                    message: geoError.message || 'Location request failed',
+                    type: 'error'
+                });
+            }
         }
-    }, [geoError]);
+    }, [geoError, permissionState]);
 
     // Auto-hide toast
     useEffect(() => {
@@ -176,6 +171,78 @@ const MapView = () => {
                         >
                             {toast.action.label}
                         </button>
+                    )}
+                </div>
+            )}
+
+            {/* Enable Location Banner - Shows when location not available */}
+            {!userLocation && permissionState !== 'granted' && (
+                <div style={{
+                    position: 'fixed',
+                    top: 'var(--space-4)',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 350,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    padding: 'var(--space-4)',
+                    borderRadius: 'var(--radius-lg)',
+                    boxShadow: 'var(--shadow-xl)',
+                    maxWidth: '90%',
+                    width: '400px',
+                    textAlign: 'center'
+                }}>
+                    <div style={{ fontSize: '1.5rem', marginBottom: 'var(--space-2)' }}>📍</div>
+                    <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: '1.1rem', fontWeight: 600 }}>
+                        Enable Your Location
+                    </h3>
+                    <p style={{ margin: '0 0 var(--space-3) 0', fontSize: '0.9rem', opacity: 0.95 }}>
+                        {permissionState === 'denied'
+                            ? 'Location blocked. Clear browser cache/site data to reset permissions.'
+                            : 'Get personalized routes and better navigation'
+                        }
+                    </p>
+                    <button
+                        onClick={() => {
+                            setToast(null); // Clear any existing toast
+                            getCurrentLocation().catch(err => {
+                                console.error('Location error:', err);
+                            });
+                        }}
+                        disabled={permissionState === 'denied'}
+                        style={{
+                            background: permissionState === 'denied' ? '#ccc' : 'white',
+                            color: permissionState === 'denied' ? '#666' : '#667eea',
+                            border: 'none',
+                            borderRadius: 'var(--radius-md)',
+                            padding: 'var(--space-3) var(--space-5)',
+                            fontSize: '1rem',
+                            fontWeight: 'bold',
+                            cursor: permissionState === 'denied' ? 'not-allowed' : 'pointer',
+                            boxShadow: 'var(--shadow-md)',
+                            transition: 'transform 0.2s',
+                            width: '100%'
+                        }}
+                        onMouseDown={(e) => {
+                            if (permissionState !== 'denied') {
+                                e.currentTarget.style.transform = 'scale(0.98)';
+                            }
+                        }}
+                        onMouseUp={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                    >
+                        {permissionState === 'denied' ? '🔒 Permission Denied' : '📍 Enable Location'}
+                    </button>
+                    {permissionState === 'denied' && (
+                        <p style={{
+                            margin: 'var(--space-3) 0 0 0',
+                            fontSize: '0.75rem',
+                            opacity: 0.9,
+                            fontStyle: 'italic'
+                        }}>
+                            Clear site data in browser settings to reset
+                        </p>
                     )}
                 </div>
             )}
