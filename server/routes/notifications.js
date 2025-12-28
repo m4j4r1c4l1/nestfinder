@@ -1,62 +1,8 @@
 import express from 'express';
-import webPush from 'web-push';
-import { getDb, run, get, all, log, getSetting } from '../database.js';
+import { getDb, run, get, all, log } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
-import { decrypt } from '../crypto.js';
 
 const router = express.Router();
-
-// Get VAPID keys from database (decrypts private key)
-const getVapidConfig = () => {
-    const encryptedPrivateKey = getSetting('vapid_private_key');
-    const privateKey = decrypt(encryptedPrivateKey);
-
-    return {
-        publicKey: getSetting('vapid_public_key'),
-        privateKey: privateKey,
-        subject: getSetting('vapid_subject') || 'mailto:m4j4r1.c4l1@gmail.com'
-    };
-};
-
-// Configure web-push lazily (keys read from database)
-let vapidConfigured = false;
-let vapidError = null;
-const ensureVapidConfigured = () => {
-    if (!vapidConfigured) {
-        const { publicKey, privateKey, subject } = getVapidConfig();
-
-        console.log('[VAPID] Configuring...');
-        console.log('[VAPID] Public key exists:', !!publicKey);
-        console.log('[VAPID] Private key exists:', !!privateKey);
-        console.log('[VAPID] Private key length:', privateKey ? privateKey.length : 0);
-
-        if (!publicKey || publicKey.startsWith('XXX')) {
-            vapidError = 'VAPID public key not configured';
-            console.error('[VAPID] Error:', vapidError);
-            return false;
-        }
-
-        if (!privateKey || privateKey.length < 20) {
-            vapidError = 'VAPID private key decryption failed. Check NEST_INTEGRITY env var.';
-            console.error('[VAPID] Error:', vapidError);
-            return false;
-        }
-
-        try {
-            webPush.setVapidDetails(subject, publicKey, privateKey);
-            vapidConfigured = true;
-            console.log('[VAPID] Configured successfully!');
-            return true;
-        } catch (err) {
-            vapidError = `VAPID config error: ${err.message}`;
-            console.error('[VAPID] Error:', vapidError);
-            return false;
-        }
-    }
-    return true;
-};
-
-const getVapidError = () => vapidError;
 
 // Notification templates
 const templates = {
@@ -81,71 +27,6 @@ const templates = {
         body: '' // Body will be filled by admin
     }
 };
-
-// ========================================
-// PUBLIC ROUTES (for clients)
-// ========================================
-
-// Get VAPID public key (for client subscription)
-router.get('/vapid-public-key', (req, res) => {
-    const { publicKey } = getVapidConfig();
-    if (!publicKey || publicKey.startsWith('XXX')) {
-        return res.status(503).json({ error: 'Push notifications not configured' });
-    }
-    res.json({ publicKey });
-});
-
-// Subscribe to push notifications
-router.post('/subscribe', (req, res) => {
-    try {
-        const { subscription, userId } = req.body;
-
-        if (!subscription || !subscription.endpoint || !subscription.keys) {
-            return res.status(400).json({ error: 'Invalid subscription data' });
-        }
-
-        const { endpoint, keys } = subscription;
-        const { p256dh, auth } = keys;
-
-        // Insert or update subscription (upsert by endpoint)
-        const existing = get('SELECT id FROM push_subscriptions WHERE endpoint = ?', [endpoint]);
-
-        if (existing) {
-            run(
-                `UPDATE push_subscriptions SET user_id = ?, p256dh = ?, auth = ? WHERE endpoint = ?`,
-                [userId || 'anonymous', p256dh, auth, endpoint]
-            );
-        } else {
-            run(
-                `INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)`,
-                [userId || 'anonymous', endpoint, p256dh, auth]
-            );
-        }
-
-        log(userId, 'push_subscribe', null, { endpoint: endpoint.substring(0, 50) });
-        res.json({ success: true, message: 'Subscription saved' });
-    } catch (error) {
-        console.error('Subscribe error:', error);
-        res.status(500).json({ error: 'Failed to save subscription' });
-    }
-});
-
-// Unsubscribe from push notifications
-router.post('/unsubscribe', (req, res) => {
-    try {
-        const { endpoint } = req.body;
-
-        if (!endpoint) {
-            return res.status(400).json({ error: 'Endpoint required' });
-        }
-
-        run('DELETE FROM push_subscriptions WHERE endpoint = ?', [endpoint]);
-        res.json({ success: true, message: 'Unsubscribed' });
-    } catch (error) {
-        console.error('Unsubscribe error:', error);
-        res.status(500).json({ error: 'Failed to unsubscribe' });
-    }
-});
 
 // ========================================
 // IN-APP NOTIFICATION ROUTES
@@ -215,16 +96,17 @@ router.get('/admin/templates', requireAdmin, (req, res) => {
     res.json({ templates });
 });
 
-// Get subscriber stats
+// Get subscriber stats (Adapted to count users since web push is removed)
 router.get('/admin/stats', requireAdmin, (req, res) => {
     try {
-        const total = get('SELECT COUNT(*) as count FROM push_subscriptions');
+        // Count total users
+        const total = get('SELECT COUNT(*) as count FROM users');
+
+        // List recent active users
         const users = all(`
-            SELECT ps.user_id, u.nickname, MAX(ps.created_at) as created_at, COUNT(*) as device_count 
-            FROM push_subscriptions ps
-            LEFT JOIN users u ON ps.user_id = u.id
-            GROUP BY ps.user_id
-            ORDER BY created_at DESC
+            SELECT id as user_id, nickname, created_at, last_active
+            FROM users 
+            ORDER BY last_active DESC 
             LIMIT 100
         `);
 
@@ -238,15 +120,9 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
     }
 });
 
-// Send notification
+// Send notification (In-App only)
 router.post('/admin/send', requireAdmin, async (req, res) => {
     try {
-        // Ensure VAPID is configured
-        if (!ensureVapidConfigured()) {
-            const specificError = getVapidError();
-            return res.status(503).json({ error: specificError || 'Push notifications not configured. Set VAPID keys in database.' });
-        }
-
         const { template, title, body, target, userIds } = req.body;
 
         // Build notification payload
@@ -260,75 +136,21 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
             notificationBody = body || 'You have a new notification';
         }
 
-        const payload = JSON.stringify({
-            title: notificationTitle,
-            body: notificationBody,
-            icon: '/icons/icon-192.png',
-            badge: '/icons/badge-72.png',
-            data: { url: '/', type: template || 'custom' }
-        });
-
-        // Get target subscriptions
-        let subscriptions;
-
-        if (target === 'all') {
-            subscriptions = all('SELECT * FROM push_subscriptions');
-        } else if (target === 'selected' && userIds && userIds.length > 0) {
-            const placeholders = userIds.map(() => '?').join(',');
-            subscriptions = all(
-                `SELECT * FROM push_subscriptions WHERE user_id IN (${placeholders})`,
-                userIds
-            );
-        } else if (target === 'one' && userIds && userIds.length === 1) {
-            subscriptions = all(
-                'SELECT * FROM push_subscriptions WHERE user_id = ?',
-                [userIds[0]]
-            );
-        } else {
-            return res.status(400).json({ error: 'Invalid target specification' });
-        }
-
-        if (subscriptions.length === 0) {
-            return res.status(404).json({ error: 'No subscribers found for target' });
-        }
-
-        // Send to all target subscriptions (Web Push)
-        let successCount = 0;
-        let failCount = 0;
-        const failedEndpoints = [];
-
-        for (const sub of subscriptions) {
-            const pushSubscription = {
-                endpoint: sub.endpoint,
-                keys: {
-                    p256dh: sub.p256dh,
-                    auth: sub.auth
-                }
-            };
-
-            try {
-                await webPush.sendNotification(pushSubscription, payload);
-                successCount++;
-            } catch (err) {
-                console.error('Push failed for:', sub.endpoint.substring(0, 50), err.message);
-                failCount++;
-
-                // If subscription is expired/invalid, remove it
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                    run('DELETE FROM push_subscriptions WHERE endpoint = ?', [sub.endpoint]);
-                    failedEndpoints.push(sub.endpoint);
-                }
-            }
-        }
-
-        // ALSO save to In-App Notifications table for persistence
-        // We determine target users based on selection
+        // Determine target users
         let targetUserIds = [];
         if (target === 'all') {
             const allUsers = all('SELECT id FROM users');
             targetUserIds = allUsers.map(u => u.id);
-        } else if (userIds) {
+        } else if (target === 'selected' && userIds && userIds.length > 0) {
             targetUserIds = userIds;
+        } else if (target === 'one' && userIds && userIds.length === 1) {
+            targetUserIds = userIds;
+        } else {
+            return res.status(400).json({ error: 'Invalid target specification' });
+        }
+
+        if (targetUserIds.length === 0) {
+            return res.status(404).json({ error: 'No users found for target' });
         }
 
         // Insert notifications for each user
@@ -340,18 +162,16 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
         });
         stmt.free();
 
-        log('admin', 'push_notification_sent', null, {
+        log('admin', 'notification_sent', null, {
             template,
             target,
-            successCount,
-            failCount
+            count: targetUserIds.length
         });
 
         res.json({
             success: true,
-            sent: successCount,
-            failed: failCount,
-            message: `Notification sent to ${successCount} subscriber(s)`
+            sent: targetUserIds.length,
+            message: `Notification sent to ${targetUserIds.length} users`
         });
     } catch (error) {
         console.error('Send notification error:', error);

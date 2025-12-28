@@ -167,8 +167,8 @@ const Notifications = () => {
                             {stats.totalSubscribers}
                         </div>
                         <div>
-                            <div style={{ fontWeight: 600 }}>Active Subscribers</div>
-                            <div className="text-muted text-sm">Users who can receive notifications</div>
+                            <div style={{ fontWeight: 600 }}>Total Users</div>
+                            <div className="text-muted text-sm">Users receiving In-App notifications</div>
                         </div>
                         <button
                             onClick={loadStats}
@@ -246,7 +246,7 @@ const Notifications = () => {
                         <label className="form-label">Send To</label>
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                             {[
-                                { id: 'all', label: '👥 All Subscribers' },
+                                { id: 'all', label: '👥 All Users' },
                                 { id: 'selected', label: '👤 Select Users' }
                             ].map(opt => (
                                 <button
@@ -304,19 +304,8 @@ const Notifications = () => {
                                                 onChange={() => toggleUser(sub.user_id)}
                                             />
                                             <span>{sub.nickname || sub.user_id}</span>
-                                            {sub.device_count > 1 && (
-                                                <span style={{
-                                                    background: '#eee',
-                                                    padding: '2px 6px',
-                                                    borderRadius: '10px',
-                                                    fontSize: '0.7rem',
-                                                    marginLeft: '4px'
-                                                }}>
-                                                    {sub.device_count} devices
-                                                </span>
-                                            )}
                                             <span className="text-muted text-sm" style={{ marginLeft: 'auto' }}>
-                                                {new Date(sub.created_at).toLocaleDateString()}
+                                                Last active: {sub.last_active ? new Date(sub.last_active).toLocaleDateString() : 'Never'}
                                             </span>
                                         </label>
                                     ))
