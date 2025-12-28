@@ -7,7 +7,7 @@ const router = express.Router();
 // Notification templates
 const templates = {
     new_points: {
-        title: '🐦 New Locations Reported',
+        title: '🪹 New Locations Reported',
         body: 'New assistance locations have been added near you. Check the map for updates!'
     },
     status_update: {

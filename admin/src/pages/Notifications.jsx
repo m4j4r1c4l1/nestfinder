@@ -6,8 +6,8 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 const templates = {
     new_points: {
         id: 'new_points',
-        name: '🐦 New Locations',
-        title: '🐦 New Locations Reported',
+        name: '🪹 New Locations',
+        title: '🪹 New Locations Reported',
         body: 'New assistance locations have been added. Check the map for updates!'
     },
     status_update: {
