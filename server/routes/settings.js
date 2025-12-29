@@ -10,10 +10,10 @@ let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
 
 // Sensitive settings that should be encrypted
-const SENSITIVE_KEYS = ['vapid_private_key'];
+const SENSITIVE_KEYS = [];
 
 // Sensitive settings that should be masked in responses
-const MASKED_KEYS = ['vapid_private_key'];
+const MASKED_KEYS = [];
 
 // Get all settings (public - for app config)
 router.get('/', (req, res) => {

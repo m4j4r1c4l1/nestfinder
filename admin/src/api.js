@@ -84,5 +84,15 @@ export const adminApi = {
             method: 'POST',
             body: JSON.stringify({ confirm: target.toUpperCase(), target }),
         });
+    },
+
+    deleteUser(userId) {
+        return this.fetch(`/admin/users/${userId}`, {
+            method: 'DELETE',
+        });
+    },
+
+    getNotifications() {
+        return this.fetch('/push/notifications');
     }
 };
