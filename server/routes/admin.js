@@ -27,7 +27,13 @@ router.get('/stats', (req, res) => {
         todayActions: get(`
       SELECT COUNT(*) as count FROM logs 
       WHERE date(created_at) = date('now')
-    `).count
+    `).count,
+        // Notification metrics
+        totalNotifications: get('SELECT COUNT(*) as count FROM notifications').count,
+        unreadNotifications: get('SELECT COUNT(*) as count FROM notifications WHERE read = 0').count,
+        readNotifications: get('SELECT COUNT(*) as count FROM notifications WHERE read = 1').count,
+        // Total confirmations (all votes)
+        totalConfirmations: get('SELECT COUNT(*) as count FROM confirmations').count
     };
 
     res.json({ stats });
