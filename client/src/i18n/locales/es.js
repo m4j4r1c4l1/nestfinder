@@ -204,7 +204,23 @@ export default {
         unavailable: 'Ubicación no disponible',
         timeout: 'Tiempo de espera agotado',
         enableLocation: 'Activar Ubicación',
-        requestingLocation: 'Obteniendo tu ubicación...'
+        requestingLocation: 'Obteniendo tu ubicación...',
+        // Location banner
+        enableTitle: 'Activa tu Ubicación',
+        enableSubtitle: 'Toca abajo para activar la ubicación y rutas personalizadas',
+        enableButton: '📍 Activar Ubicación',
+        locationEnabled: '¡Ubicación activada!',
+        locationBlocked: 'Ubicación bloqueada. Borra datos del navegador e intenta de nuevo.',
+        locationDenied: 'Ubicación denegada. Revisa {tip}',
+        locationUnavailable: 'Ubicación no disponible. Revisa el GPS de tu dispositivo.',
+        locationTimeout: 'Tiempo agotado. Intenta de nuevo o revisa el GPS.',
+        // Platform instructions
+        iosInstructions: 'iOS: Ajustes → Privacidad → Localización → Safari → Permitir',
+        androidInstructions: 'Android: Ajustes → Apps → Navegador → Permisos → Ubicación → Permitir',
+        desktopInstructions: 'Revisa la configuración de tu navegador para activar la ubicación',
+        iosTip: 'Ajustes → Privacidad → Localización → Safari',
+        androidTip: 'Ajustes → Apps → Navegador → Permisos → Ubicación',
+        browserSettings: 'configuración del navegador'
     },
 
     // Validation

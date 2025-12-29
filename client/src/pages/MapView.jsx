@@ -209,10 +209,16 @@ const MapView = () => {
                 const isAndroid = /android/i.test(userAgent);
 
                 const platformInstructions = isIOS
-                    ? 'iOS: Settings → Privacy → Location Services → Safari → Allow'
+                    ? t('geo.iosInstructions')
                     : isAndroid
-                        ? 'Android: Settings → Apps → Browser → Permissions → Location → Allow'
-                        : 'Check your browser settings to enable location access';
+                        ? t('geo.androidInstructions')
+                        : t('geo.desktopInstructions');
+
+                const platformTip = isIOS
+                    ? t('geo.iosTip')
+                    : isAndroid
+                        ? t('geo.androidTip')
+                        : t('geo.browserSettings');
 
                 return (
                     <div style={{
@@ -232,31 +238,26 @@ const MapView = () => {
                     }}>
                         <div style={{ fontSize: '1.5rem', marginBottom: 'var(--space-2)' }}>📍</div>
                         <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: '1.1rem', fontWeight: 600 }}>
-                            Enable Your Location
+                            {t('geo.enableTitle')}
                         </h3>
                         <p style={{ margin: '0 0 var(--space-3) 0', fontSize: '0.9rem', opacity: 0.95 }}>
-                            Tap below to enable location for personalized routes
+                            {t('geo.enableSubtitle')}
                         </p>
                         <button
                             onClick={() => {
                                 setToast(null);
                                 getCurrentLocation()
                                     .then(() => {
-                                        showToast('Location enabled!', 'success');
+                                        showToast(t('geo.locationEnabled'), 'success');
                                     })
                                     .catch(err => {
                                         console.error('Location error:', err);
                                         if (err.code === 1) {
-                                            const tip = isIOS
-                                                ? 'Settings → Privacy → Location Services → Safari'
-                                                : isAndroid
-                                                    ? 'Settings → Apps → Browser → Permissions → Location'
-                                                    : 'browser settings';
-                                            showToast(`Location denied. Check ${tip}`, 'error');
+                                            showToast(t('geo.locationDenied', { tip: platformTip }), 'error');
                                         } else if (err.code === 2) {
-                                            showToast('Location unavailable. Check your device GPS.', 'error');
+                                            showToast(t('geo.locationUnavailable'), 'error');
                                         } else if (err.code === 3 || err.message?.includes('timeout')) {
-                                            showToast('Location timed out. Try again or check GPS.', 'error');
+                                            showToast(t('geo.locationTimeout'), 'error');
                                         }
                                     });
                             }}
@@ -278,7 +279,7 @@ const MapView = () => {
                             onTouchStart={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
                             onTouchEnd={(e) => e.currentTarget.style.transform = 'scale(1)'}
                         >
-                            📍 Enable Location
+                            {t('geo.enableButton')}
                         </button>
                         <p style={{
                             margin: 'var(--space-3) 0 0 0',

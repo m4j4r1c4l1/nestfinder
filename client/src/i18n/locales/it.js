@@ -170,7 +170,21 @@ export default {
         unavailable: 'Posizione non disponibile',
         timeout: 'Tempo scaduto',
         enableLocation: 'Abilita Posizione',
-        requestingLocation: 'Ottenimento posizione...'
+        requestingLocation: 'Ottenimento posizione...',
+        enableTitle: 'Abilita la tua Posizione',
+        enableSubtitle: 'Tocca sotto per abilitare la posizione e i percorsi personalizzati',
+        enableButton: '📍 Abilita Posizione',
+        locationEnabled: 'Posizione abilitata!',
+        locationBlocked: 'Posizione bloccata. Cancella i dati del browser e riprova.',
+        locationDenied: 'Posizione negata. Controlla {tip}',
+        locationUnavailable: 'Posizione non disponibile. Controlla il GPS.',
+        locationTimeout: 'Tempo scaduto. Riprova o controlla il GPS.',
+        iosInstructions: 'iOS: Impostazioni → Privacy → Servizi di Localizzazione → Safari → Consenti',
+        androidInstructions: 'Android: Impostazioni → App → Browser → Autorizzazioni → Posizione → Consenti',
+        desktopInstructions: 'Controlla le impostazioni del browser per abilitare la posizione',
+        iosTip: 'Impostazioni → Privacy → Servizi di Localizzazione → Safari',
+        androidTip: 'Impostazioni → App → Browser → Autorizzazioni → Posizione',
+        browserSettings: 'impostazioni del browser'
     },
     validation: {
         required: 'Questo campo è obbligatorio',

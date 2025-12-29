@@ -170,7 +170,21 @@ export default {
         unavailable: 'Localisation indisponible',
         timeout: "Délai d'attente dépassé",
         enableLocation: 'Activer la localisation',
-        requestingLocation: 'Obtention de la position...'
+        requestingLocation: 'Obtention de la position...',
+        enableTitle: 'Activez votre localisation',
+        enableSubtitle: 'Appuyez ci-dessous pour activer la localisation et les itinéraires personnalisés',
+        enableButton: '📍 Activer la localisation',
+        locationEnabled: 'Localisation activée !',
+        locationBlocked: 'Localisation bloquée. Effacez les données du navigateur et réessayez.',
+        locationDenied: 'Localisation refusée. Vérifiez {tip}',
+        locationUnavailable: 'Localisation indisponible. Vérifiez le GPS de votre appareil.',
+        locationTimeout: 'Délai dépassé. Réessayez ou vérifiez le GPS.',
+        iosInstructions: 'iOS : Réglages → Confidentialité → Service de localisation → Safari → Autoriser',
+        androidInstructions: 'Android : Paramètres → Apps → Navigateur → Autorisations → Localisation → Autoriser',
+        desktopInstructions: 'Vérifiez les paramètres de votre navigateur pour activer la localisation',
+        iosTip: 'Réglages → Confidentialité → Service de localisation → Safari',
+        androidTip: 'Paramètres → Apps → Navigateur → Autorisations → Localisation',
+        browserSettings: 'paramètres du navigateur'
     },
     validation: {
         required: 'Ce champ est requis',

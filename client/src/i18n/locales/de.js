@@ -170,7 +170,21 @@ export default {
         unavailable: 'Standort nicht verfügbar',
         timeout: 'Zeitüberschreitung',
         enableLocation: 'Standort aktivieren',
-        requestingLocation: 'Standort wird ermittelt...'
+        requestingLocation: 'Standort wird ermittelt...',
+        enableTitle: 'Aktiviere deinen Standort',
+        enableSubtitle: 'Tippe unten, um Standort und personalisierte Routen zu aktivieren',
+        enableButton: '📍 Standort aktivieren',
+        locationEnabled: 'Standort aktiviert!',
+        locationBlocked: 'Standort blockiert. Browserdaten löschen und erneut versuchen.',
+        locationDenied: 'Standort verweigert. Prüfe {tip}',
+        locationUnavailable: 'Standort nicht verfügbar. GPS prüfen.',
+        locationTimeout: 'Zeitüberschreitung. Erneut versuchen oder GPS prüfen.',
+        iosInstructions: 'iOS: Einstellungen → Datenschutz → Ortungsdienste → Safari → Erlauben',
+        androidInstructions: 'Android: Einstellungen → Apps → Browser → Berechtigungen → Standort → Erlauben',
+        desktopInstructions: 'Browsereinstellungen prüfen, um Standort zu aktivieren',
+        iosTip: 'Einstellungen → Datenschutz → Ortungsdienste → Safari',
+        androidTip: 'Einstellungen → Apps → Browser → Berechtigungen → Standort',
+        browserSettings: 'Browsereinstellungen'
     },
     validation: {
         required: 'Dieses Feld ist erforderlich',
