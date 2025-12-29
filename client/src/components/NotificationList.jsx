@@ -1,16 +1,36 @@
 import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
-const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, toggleSettings }) => {
+const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, toggleSettings, onClose }) => {
     const { t } = useLanguage();
     return (
         <div className="card">
             {/* Header */}
             <div className="card-header flex-between items-center">
                 <h3 className="card-title">{t('inbox.title')}</h3>
-                <div className="notification-settings-toggle" onClick={toggleSettings} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{t('settings.popupMessages')}</span>
-                    <div className={`toggle-switch ${settings.realTime ? 'active' : ''}`}></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className="notification-settings-toggle" onClick={toggleSettings} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{t('settings.popupMessages')}</span>
+                        <div className={`toggle-switch ${settings.realTime ? 'active' : ''}`}></div>
+                    </div>
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '1.5rem',
+                                color: 'var(--color-text-secondary)',
+                                cursor: 'pointer',
+                                padding: 0,
+                                lineHeight: 1,
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}
+                        >
+                            &times;
+                        </button>
+                    )}
                 </div>
             </div>
 

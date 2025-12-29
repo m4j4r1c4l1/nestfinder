@@ -313,6 +313,7 @@ const MapView = () => {
                         markAllAsRead={markAllAsRead}
                         settings={settings}
                         toggleSettings={toggleSettings}
+                        onClose={handleSheetClose}
                     />
                 )}
 
