@@ -3,9 +3,9 @@
   <p align="center">
     <strong>A Progressive Web App for mapping and tracking resources for homeless assistance</strong>
     <br />
-    <a href="docs/USER_GUIDE.md"><strong>📱 User Guide</strong></a> ·
-    <a href="docs/FEATURES.md"><strong>🛠️ Technical Features</strong></a> ·
-
+    📱 User Guide: <a href="docs/USER_GUIDE.md"><strong>English</strong></a> · <a href="docs/es/USER_GUIDE.md"><strong>Español</strong></a>
+    <br />
+    🛠️ Features: <a href="docs/FEATURES.md"><strong>English</strong></a> · <a href="docs/es/FEATURES.md"><strong>Español</strong></a>
   </p>
 </p>
 
