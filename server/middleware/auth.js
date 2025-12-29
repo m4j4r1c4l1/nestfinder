@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { get } from '../database.js';
-import { JWT_SECRET } from '../routes/auth.js';
+import { NEST_INTEGRITY } from '../routes/auth.js';
 
 // Middleware to verify user exists
 export const requireUser = (req, res, next) => {
@@ -37,7 +37,7 @@ export const requireAdmin = (req, res, next) => {
 
     try {
         // Verify JWT token - automatically checks expiration
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, NEST_INTEGRITY);
 
         // Verify admin still exists in database
         const admin = get('SELECT * FROM admins WHERE id = ?', [decoded.adminId]);
