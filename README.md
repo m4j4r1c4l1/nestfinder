@@ -2,27 +2,74 @@
   <h1 align="center">🪹 NestFinder</h1>
   <p align="center">
     <strong>A Progressive Web App for mapping and tracking resources for homeless assistance</strong>
+    <br />
+    <a href="docs/USER_GUIDE.md"><strong>📱 User Guide</strong></a> ·
+    <a href="docs/FEATURES.md"><strong>🛠️ Technical Features</strong></a> ·
+    <a href="docs/DEPLOY.md"><strong>🚀 Deployment</strong></a>
   </p>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-18.2-61DAFB?style=flat-square&logo=react" alt="React">
-  <img src="https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=node.js" alt="Node.js">
-  <img src="https://img.shields.io/badge/Leaflet-Maps-199900?style=flat-square&logo=leaflet" alt="Leaflet">
+  <img src="https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js" alt="Node.js">
+  <img src="https://img.shields.io/badge/Translations-11_Languages-FF5722?style=flat-square" alt="Translations">
   <img src="https://img.shields.io/badge/PWA-Enabled-5A0FC8?style=flat-square&logo=pwa" alt="PWA">
 </p>
 
 ---
 
-## ✨ Features
+## 📖 Introduction
 
-- 🗺️ **Interactive Map** — View and navigate resource locations with Leaflet maps
-- 📍 **Submit Points** — Users can submit new resource locations with emoji tags
-- 🚶 **Route Planner** — Calculate optimal walking routes for visible points only ([docs](docs/ROUTE.md))
-- 📱 **Progressive Web App** — Works offline, installable on mobile devices
-- 🔐 **Anonymous Auth** — Privacy-first anonymous authentication
-- 📊 **Admin Dashboard** — Manage data, view logs, and configure settings
-- 📥 **Data Export** — Download data in various formats
+**NestFinder** is a community-driven tool designed to help locate and verify resources for those in need. Built as a fast, offline-capable Progressive Web App (PWA), it works seamlessly on mobile devices and desktops.
+
+![Screenshot: Main Map View](client/public/screenshots/map_view_placeholder.png)
+
+## ✨ Key Features
+
+- **🗺️ Interactive Map** — View resources with status markers (Verified/Pending).
+- **📍 Easy Reporting** — Submit locations via GPS, Map Tap, or Address.
+- **🚶 Smart Routing** — Calculate optimal walking paths to visible points.
+- **🌍 11 Languages** — Native support for EN, ES, FR, PT, IT, DE, NL, RU, AR, ZH, VAL.
+- **🔔 Real-time Alerts** — Push notifications for updates and verifications.
+- **📱 Installable App** — Add to home screen on iOS/Android (no store needed).
+
+👉 **[See Detailed Features List](docs/FEATURES.md)**
+
+---
+
+## 🚀 Quick Start
+
+### For Users
+No installation required! Just visit the web app.
+1. Open the [Web App](https://m4j4r1c4l1.github.io/nestfinder/).
+2. Enable Location when prompted.
+3. Start exploring!
+
+👉 **[Read the Full User Guide](docs/USER_GUIDE.md)**
+
+### For Developers (Installation)
+
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/m4j4r1c4l1/nestfinder.git
+   ```
+
+2. **Install dependencies**
+   ```bash
+   cd nestfinder
+   cd server && npm install
+   cd ../client && npm install
+   cd ../admin && npm install
+   ```
+
+3. **Run locally**
+   ```bash
+   # Terminal 1: API Server
+   cd server && npm run dev
+   
+   # Terminal 2: Client App
+   cd client && npm run dev
+   ```
 
 ---
 
@@ -30,102 +77,19 @@
 
 ```
 nestfinder/
-├── client/          # User-facing PWA (React + Vite)
-├── server/          # Backend API (Express + SQLite)
-└── admin/           # Admin dashboard (React + Vite)
+├── client/          # PWA Frontend (React + Vite + Leaflet)
+├── server/          # REST API + WebSocket (Express + SQLite)
+├── admin/           # Admin Dashboard (React + Vite)
+└── docs/            # Documentation
+    ├── USER_GUIDE.md    # 📱 End-user instructions
+    ├── FEATURES.md      # 🛠️ Technical deep-dive
+    ├── DEPLOY.md        # 🚀 Render deployment guide
+    └── GEOLOCATION.md   # 📍 Troubleshooting
 ```
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/m4j4r1c4l1/nestfinder.git
-cd nestfinder
-
-# Install server dependencies
-cd server && npm install
-
-# Install client dependencies
-cd ../client && npm install
-
-# Install admin dependencies
-cd ../admin && npm install
-```
-
-### Running the App
-
-**Start the API server:**
-```bash
-cd server
-npm run dev
-# Server runs on http://localhost:3000
-```
-
-**Start the client app:**
-```bash
-cd client
-npm run dev
-# Client runs on http://localhost:5173
-```
-
-**Start the admin dashboard:**
-```bash
-cd admin
-npm run dev
-# Admin runs on http://localhost:5174
-```
-
----
-
-## 🛠️ Tech Stack
-
-| Component | Technologies |
-|-----------|-------------|
-| **Client** | React 18, Vite, Leaflet, React Router, PWA |
-| **Server** | Node.js, Express, SQLite (sql.js), WebSocket |
-| **Admin** | React 18, Vite, Chart.js, Leaflet |
-
----
-
-## 📁 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/points` | Get all resource points |
-| `POST` | `/api/points` | Submit a new point |
-| `GET` | `/api/points/:id` | Get point details |
-| `POST` | `/api/auth/anonymous` | Anonymous authentication |
-| `GET` | `/api/admin/logs` | Get system logs (admin) |
-| `GET` | `/api/admin/settings` | Get app settings (admin) |
-
----
-
-## 🌿 Branch Strategy
-
-| Branch | Purpose |
-|--------|---------|
-| `master` | Production-ready code |
-| `develop` | Active development |
-| `feature/*` | New features |
-| `fix/*` | Bug fixes |
 
 ---
 
 ## 📄 License
 
 MIT © 2025 NestFinder
-
----
-
-<p align="center">
-  Made with ❤️ to help those in need
-</p>
+<p align="center">Made with ❤️ to help those in need</p>
