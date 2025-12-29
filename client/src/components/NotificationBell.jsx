@@ -1,6 +1,8 @@
 import React from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const NotificationBell = ({ unreadCount, onClick, active }) => {
+    const { t } = useLanguage();
     return (
         <button
             className={`bottom-nav-item ${active ? 'active' : ''}`}
@@ -15,7 +17,7 @@ const NotificationBell = ({ unreadCount, onClick, active }) => {
                     </span>
                 )}
             </div>
-            Messages
+            {t('nav.inbox')}
         </button>
     );
 };
