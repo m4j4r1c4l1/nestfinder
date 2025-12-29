@@ -5,6 +5,7 @@ import AdminMap from '../components/AdminMap';
 const Dashboard = ({ onNavigate }) => {
     const [stats, setStats] = useState(null);
     const [points, setPoints] = useState([]);
+    const [filteredPoints, setFilteredPoints] = useState(null); // null = show all, array = filtered
     const [loading, setLoading] = useState(true);
     const [modalData, setModalData] = useState(null);
 
@@ -117,8 +118,16 @@ const Dashboard = ({ onNavigate }) => {
                     break;
                 case 'totalConfirmations':
                     title = 'All Votes/Confirmations';
-                    // This would require a new endpoint, for now show message
-                    data = [{ message: 'Detailed confirmations view - endpoint to be added' }];
+                    const confirmsData = await adminApi.getConfirmations();
+                    data = confirmsData.confirmations.map(c => ({
+                        id: c.id,
+                        type: c.type,
+                        user: c.user_nickname || 'Anonymous',
+                        pointId: c.point_id,
+                        location: c.address || `${c.latitude?.toFixed(4)}, ${c.longitude?.toFixed(4)}`,
+                        pointStatus: c.point_status,
+                        created: new Date(c.created_at).toLocaleString()
+                    }));
                     break;
                 default:
                     return;
@@ -150,6 +159,17 @@ const Dashboard = ({ onNavigate }) => {
         }
     };
 
+    const handleStatusFilter = (status) => {
+        const filtered = points.filter(p => p.status === status);
+        setFilteredPoints(filtered);
+        // Scroll to map
+        document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const handleClearFilter = () => {
+        setFilteredPoints(null);
+    };
+
     if (loading) return <div className="flex-center" style={{ height: '100%' }}>Loading dashboard...</div>;
 
     const confirmed = points.filter(p => p.status === 'confirmed').length;
@@ -167,10 +187,23 @@ const Dashboard = ({ onNavigate }) => {
                 <div className="card" style={{ flex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{points.length} total points</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            {filteredPoints && (
+                                <button
+                                    onClick={handleClearFilter}
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                >
+                                    Clear Filter ({filteredPoints.length} points)
+                                </button>
+                            )}
+                            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                {(filteredPoints || points).length} {filteredPoints ? 'filtered' : 'total'} points
+                            </span>
+                        </div>
                     </div>
                     <div style={{ flex: 1, minHeight: '300px' }}>
-                        <AdminMap points={points} />
+                        <AdminMap points={filteredPoints || points} filteredPoints={filteredPoints} />
                     </div>
                 </div>
 
@@ -209,9 +242,9 @@ const Dashboard = ({ onNavigate }) => {
                             <span style={{ fontWeight: 600 }}>📊 Status Summary</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" />
-                            <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" />
-                            <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" />
+                            <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
+                            <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
+                            <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
                         </div>
                     </div>
                 </div>
@@ -295,10 +328,20 @@ const MetricRow = ({ label, value, onClick, color }) => (
 );
 
 // Status row with progress bar
-const StatusRow = ({ label, count, total, color, icon }) => {
+const StatusRow = ({ label, count, total, color, icon, onClick }) => {
     const percent = total > 0 ? (count / total * 100).toFixed(0) : 0;
     return (
-        <div>
+        <div
+            onClick={onClick}
+            style={{
+                cursor: onClick ? 'pointer' : 'default',
+                padding: onClick ? '0.5rem' : '0',
+                borderRadius: 'var(--radius-md)',
+                transition: 'background 0.2s ease'
+            }}
+            onMouseEnter={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-secondary)') : undefined}
+            onMouseLeave={onClick ? (e => e.currentTarget.style.background = 'transparent') : undefined}
+        >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
                     <span>{icon}</span>

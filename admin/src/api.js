@@ -93,6 +93,10 @@ export const adminApi = {
     },
 
     getNotifications() {
-        return this.fetch('/push/notifications');
+        return this.fetch('/admin/notifications');
+    },
+
+    getConfirmations() {
+        return this.fetch('/admin/confirmations');
     }
 };

@@ -175,6 +175,33 @@ router.delete('/users/:id', (req, res) => {
     }
 });
 
+// Get all notifications (admin only)
+router.get('/notifications', (req, res) => {
+    const notifications = all(`
+        SELECT n.*, u.nickname as user_nickname
+        FROM notifications n
+        LEFT JOIN users u ON n.user_id = u.id
+        ORDER BY n.created_at DESC
+    `);
+
+    res.json({ notifications });
+});
+
+// Get all confirmations (admin only)
+router.get('/confirmations', (req, res) => {
+    const confirmations = all(`
+        SELECT c.*, 
+               u.nickname as user_nickname,
+               p.latitude, p.longitude, p.address, p.status as point_status
+        FROM confirmations c
+        LEFT JOIN users u ON c.user_id = u.id
+        LEFT JOIN points p ON c.point_id = p.id
+        ORDER BY c.created_at DESC
+    `);
+
+    res.json({ confirmations });
+});
+
 
 // Get all points (for admin map)
 router.get('/points', (req, res) => {
