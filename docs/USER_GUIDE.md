@@ -117,7 +117,7 @@ If it still doesn't work, clear your browser cache and try again. See full [Geol
 The main screen is the map.
 
 - **My Location**: Tap the 📍 button (bottom right) to center on you.
-- **Filter**: Tap the funnel icon to show only specific points (e.g., confirmed only).
+- **Filter**: Tap the magnifying glass icon to show only specific points (e.g., confirmed only).
 
 <p align="center">
   <img src="images/feature_01_filter_panel.jpg" width="200" alt="Filter Panel" />
