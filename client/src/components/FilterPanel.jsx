@@ -1,6 +1,9 @@
 import React from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const FilterPanel = ({ filters, onChange, onClose }) => {
+    const { t } = useLanguage();
+
     const toggleStatus = (status) => {
         const current = filters.status;
         const next = current.includes(status)
@@ -10,18 +13,18 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
     };
 
     const statusOptions = [
-        { id: 'confirmed', label: 'Confirmed', color: 'var(--color-confirmed)' },
-        { id: 'pending', label: 'Pending', color: 'var(--color-pending)' },
-        { id: 'deactivated', label: 'Deactivated', color: 'var(--color-deactivated)' }
+        { id: 'confirmed', label: t('status.confirmed'), color: 'var(--color-confirmed)' },
+        { id: 'pending', label: t('status.pending'), color: 'var(--color-pending)' },
+        { id: 'deactivated', label: t('status.deactivated'), color: 'var(--color-deactivated)' }
     ];
 
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-title" style={{ marginBottom: 0 }}>Filters</h3>
+                <h3 className="card-title" style={{ marginBottom: 0 }}>{t('filters.title')}</h3>
             </div>
             <div className="card-body">
-                <label className="form-label">Show Status</label>
+                <label className="form-label">{t('point.status')}</label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                     {statusOptions.map(opt => (
                         <button
@@ -65,7 +68,7 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
                         className="btn btn-primary"
                         style={{ padding: '0.75rem 2rem' }}
                     >
-                        ✓ Done
+                        ✓ {t('filters.done')}
                     </button>
                 </div>
             </div>

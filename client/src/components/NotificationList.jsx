@@ -1,11 +1,13 @@
 import React from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, toggleSettings }) => {
+    const { t } = useLanguage();
     return (
         <div className="notification-list-container" style={{ padding: '0 16px 24px 16px' }}>
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Inbox</h3>
+                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t('inbox.title')}</h3>
                 <div className="notification-settings-toggle" onClick={toggleSettings}>
                     <span>Real-time Popup</span>
                     <div className={`toggle-switch ${settings.realTime ? 'active' : ''}`}></div>
@@ -26,7 +28,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             cursor: 'pointer'
                         }}
                     >
-                        Mark all as read
+                        {t('inbox.markAllRead')}
                     </button>
                 </div>
             )}
@@ -36,7 +38,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 {notifications.length === 0 ? (
                     <div className="notification-empty" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-light)' }}>
                         <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📭</div>
-                        No notifications yet
+                        {t('inbox.noMessages')}
                     </div>
                 ) : (
                     notifications.map(n => (

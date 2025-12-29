@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './hooks/useAuth';
+import { LanguageProvider } from './i18n/LanguageContext';
+import LanguagePicker from './components/LanguagePicker';
 import Home from './pages/Home';
 import MapView from './pages/MapView';
 
-const App = () => {
+const AppContent = () => {
     const { user, loading } = useAuth();
 
     if (loading) {
@@ -25,4 +27,14 @@ const App = () => {
     );
 };
 
+const App = () => {
+    return (
+        <LanguageProvider>
+            <LanguagePicker />
+            <AppContent />
+        </LanguageProvider>
+    );
+};
+
 export default App;
+

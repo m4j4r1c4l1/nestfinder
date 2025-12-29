@@ -7,6 +7,7 @@ import RoutePanel from '../components/RoutePanel';
 import { usePoints } from '../hooks/usePoints';
 import { useAuth } from '../hooks/useAuth';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useLanguage } from '../i18n/LanguageContext';
 import { api } from '../utils/api';
 import { useNotifications } from '../hooks/useNotifications';
 import NotificationBell from '../components/NotificationBell';
@@ -15,6 +16,7 @@ import NotificationPopup from '../components/NotificationPopup';
 
 const MapView = () => {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const {
         notifications,
         unreadCount,
@@ -90,7 +92,7 @@ const MapView = () => {
         // When user clicks map, open submit panel with that location
         setClickedLocation(coords);
         setActiveSheet('submit');
-        showToast('Location selected! Add details below.', 'success');
+        showToast(t('submit.selectOnMap'), 'success');
     };
 
     const handleSheetClose = () => {
@@ -101,16 +103,16 @@ const MapView = () => {
     const handleSubmit = async (data) => {
         await submitPoint(data);
         setActiveSheet(null);
-        showToast('Location submitted successfully!', 'success');
+        showToast(t('submit.success'), 'success');
     };
 
     const handleConfirm = async (pointId) => {
         try {
             await confirmPoint(pointId);
             setActiveSheet(null);
-            showToast('Point confirmed!', 'success');
+            showToast(t('point.confirmedMessage'), 'success');
         } catch (err) {
-            showToast(err.message || 'Failed to confirm point', 'error');
+            showToast(err.message || t('common.error'), 'error');
         }
     };
 
@@ -118,9 +120,9 @@ const MapView = () => {
         try {
             await deactivatePoint(pointId);
             setActiveSheet(null);
-            showToast('Point deactivated', 'success');
+            showToast(t('point.deactivatedMessage'), 'success');
         } catch (err) {
-            showToast(err.message || 'Failed to deactivate point', 'error');
+            showToast(err.message || t('common.error'), 'error');
         }
     };
 
@@ -128,9 +130,9 @@ const MapView = () => {
         try {
             await reactivatePoint(pointId);
             setActiveSheet(null);
-            showToast('Point reactivated - now pending confirmation', 'success');
+            showToast(t('point.reactivatedMessage'), 'success');
         } catch (err) {
-            showToast(err.message || 'Failed to reactivate point', 'error');
+            showToast(err.message || t('common.error'), 'error');
         }
     };
 
@@ -374,28 +376,28 @@ const MapView = () => {
                     onClick={() => setActiveSheet(activeSheet === 'route' ? null : 'route')}
                 >
                     <span>🚶</span>
-                    Route
+                    {t('map.route')}
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'submit' ? 'active' : ''}`}
                     onClick={() => setActiveSheet(activeSheet === 'submit' ? null : 'submit')}
                 >
                     <span style={{ fontSize: '2rem' }}>🪹</span>
-                    Report
+                    {t('nav.report')}
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'filter' ? 'active' : ''}`}
                     onClick={() => setActiveSheet(activeSheet === 'filter' ? null : 'filter')}
                 >
                     <span>🔍</span>
-                    Filter
+                    {t('map.filters')}
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'download' ? 'active' : ''}`}
                     onClick={() => setActiveSheet(activeSheet === 'download' ? null : 'download')}
                 >
                     <span>⬇️</span>
-                    Data
+                    {t('map.download')}
                 </button>
                 <NotificationBell
                     unreadCount={unreadCount}
