@@ -80,6 +80,7 @@ No installation required! Just visit the web app.
 nestfinder/
 ├── client/          # PWA Frontend (React + Vite + Leaflet)
 ├── server/          # REST API + WebSocket (Express + SQLite)
+├── admin/           # Admin Dashboard (React + Vite)
 └── docs/            # Documentation
     ├── images/              # Screenshots & diagrams
     ├── USER_GUIDE.md        # 📱 End-user instructions
