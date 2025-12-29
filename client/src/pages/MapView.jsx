@@ -4,6 +4,7 @@ import SubmitPoint from '../components/SubmitPoint';
 import PointDetails from '../components/PointDetails';
 import FilterPanel from '../components/FilterPanel';
 import RoutePanel from '../components/RoutePanel';
+import SettingsPanel from '../components/SettingsPanel';
 import { usePoints } from '../hooks/usePoints';
 import { useAuth } from '../hooks/useAuth';
 import { useGeolocation } from '../hooks/useGeolocation';
@@ -354,7 +355,7 @@ const MapView = () => {
 
                     {activeSheet === 'download' && (
                         <div className="card">
-                            <div className="card-header"><h3 className="card-title">Download & Settings</h3></div>
+                            <div className="card-header"><h3 className="card-title">{t('map.download')}</h3></div>
                             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 <button className="btn btn-primary btn-block" onClick={() => handleDownload('json')}>
                                     Download JSON
@@ -364,6 +365,10 @@ const MapView = () => {
                                 </button>
                             </div>
                         </div>
+                    )}
+
+                    {activeSheet === 'settings' && (
+                        <SettingsPanel onClose={handleSheetClose} />
                     )}
 
                 </div>
@@ -404,6 +409,13 @@ const MapView = () => {
                     active={activeSheet === 'notifications'}
                     onClick={() => setActiveSheet(activeSheet === 'notifications' ? null : 'notifications')}
                 />
+                <button
+                    className={`bottom-nav-item ${activeSheet === 'settings' ? 'active' : ''}`}
+                    onClick={() => setActiveSheet(activeSheet === 'settings' ? null : 'settings')}
+                >
+                    <span>⚙️</span>
+                    {t('nav.settings')}
+                </button>
             </nav>
         </div>
     );
