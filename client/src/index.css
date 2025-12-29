@@ -590,6 +590,11 @@ textarea.form-input {
 
 .bottom-sheet-content .card-body {
   padding: var(--space-4);
+  padding-bottom: var(--space-10);
+  /* 40px - Prevent touching bottom */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Bottom Nav - Mobile Optimized */
