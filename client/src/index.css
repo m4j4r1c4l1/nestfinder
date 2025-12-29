@@ -579,8 +579,9 @@ textarea.form-input {
   padding-top: 0;
   /* Increased bottom padding to prevent touching bottom */
   padding-bottom: var(--space-8);
-  /* Ensure space for home bar on mobile */
-  margin-bottom: env(safe-area-inset-bottom, 20px);
+  /* Vertical centering via margins */
+  margin-top: auto;
+  margin-bottom: auto;
   overflow-y: auto;
   overflow-x: hidden;
   flex: 0 1 auto;
