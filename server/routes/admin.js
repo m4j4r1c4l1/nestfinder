@@ -217,6 +217,31 @@ router.get('/points', (req, res) => {
     res.json({ points });
 });
 
+// Delete point (admin only)
+router.delete('/points/:id', (req, res) => {
+    const pointId = req.params.id;
+
+    const point = get('SELECT * FROM points WHERE id = ?', [pointId]);
+
+    if (!point) {
+        return res.status(404).json({ error: 'Point not found' });
+    }
+
+    try {
+        // Delete related data first
+        run('DELETE FROM confirmations WHERE point_id = ?', [pointId]);
+        run('DELETE FROM points WHERE id = ?', [pointId]);
+
+        res.json({
+            success: true,
+            message: `Point ${pointId} deleted successfully`
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to delete point' });
+    }
+});
+
 // Export logs
 router.get('/logs/export', (req, res) => {
     const { format = 'json', startDate, endDate } = req.query;

@@ -170,6 +170,26 @@ const Dashboard = ({ onNavigate }) => {
         setFilteredPoints(null);
     };
 
+    const handleDeletePoint = async (pointId) => {
+        if (!window.confirm('Are you sure you want to permanently delete this point? This cannot be undone.')) {
+            return;
+        }
+
+        try {
+            await adminApi.deletePoint(pointId);
+            // Update local state directly to be snappy
+            setPoints(points.filter(p => p.id !== pointId));
+            if (filteredPoints) {
+                setFilteredPoints(filteredPoints.filter(p => p.id !== pointId));
+            }
+            // Also refresh stats implicitly or just decr count? Refreshing is safer.
+            const statsData = await adminApi.getStats();
+            setStats(statsData.stats);
+        } catch (err) {
+            alert('Failed to delete point: ' + (err.message || 'Unknown error'));
+        }
+    };
+
     if (loading) return <div className="flex-center" style={{ height: '100%' }}>Loading dashboard...</div>;
 
     const confirmed = points.filter(p => p.status === 'confirmed').length;
@@ -208,7 +228,11 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
                     <div style={{ flex: 1, minHeight: '300px' }}>
-                        <AdminMap points={filteredPoints || points} filteredPoints={filteredPoints} />
+                        <AdminMap
+                            points={filteredPoints || points}
+                            filteredPoints={filteredPoints}
+                            onDelete={handleDeletePoint}
+                        />
                     </div>
                 </div>
 

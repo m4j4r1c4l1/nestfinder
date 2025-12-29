@@ -52,7 +52,7 @@ const MapResizer = () => {
     return null;
 };
 
-const AdminMap = ({ points, filteredPoints }) => {
+const AdminMap = ({ points, filteredPoints, onDelete }) => {
     // Set max bounds to prevent world wrapping
     const maxBounds = L.latLngBounds(
         L.latLng(-85, -180),  // Southwest
@@ -104,6 +104,24 @@ const AdminMap = ({ points, filteredPoints }) => {
                         Status: {point.status}<br />
                         Submitter: {point.submitter_nickname || 'Anon'}<br />
                         {point.address}
+                        {onDelete && (
+                            <button
+                                onClick={() => onDelete(point.id)}
+                                style={{
+                                    marginTop: '0.5rem',
+                                    background: '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '0.25rem 0.5rem',
+                                    cursor: 'pointer',
+                                    fontSize: '0.8rem',
+                                    width: '100%'
+                                }}
+                            >
+                                🗑️ Delete Point
+                            </button>
+                        )}
                     </Popup>
                 </Marker>
             ))}
