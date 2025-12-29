@@ -12,7 +12,15 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead }) => {
                     {(() => {
                         try {
                             const utcTime = message.created_at.replace(' ', 'T') + 'Z';
-                            return new Date(utcTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            return new Date(utcTime).toLocaleString('en-GB', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: false
+                            });
                         } catch (e) { return ''; }
                     })()}
                 </div>
