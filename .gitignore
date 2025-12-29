@@ -47,6 +47,3 @@ temp/
 
 # Local-only documentation
 docs/DEPLOY.md
-
-# Admin panel (local only)
-admin/
