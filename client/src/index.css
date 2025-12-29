@@ -583,7 +583,7 @@ textarea.form-input {
   margin-bottom: env(safe-area-inset-bottom, 20px);
   overflow-y: auto;
   overflow-x: hidden;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   /* Critical for overflow to work in flex container */
   -webkit-overflow-scrolling: touch;
