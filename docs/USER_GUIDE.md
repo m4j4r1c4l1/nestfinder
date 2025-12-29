@@ -4,7 +4,7 @@ Welcome to **NestFinder**! This guide will help you get started with the app on 
 
 ## 🚀 Getting Started
 
-NestFinder is a web app (PWA) that you can install directly on your phone without going to an App Store.
+NestFinder is a web app (PWA) that you can use directly on your phone without going to an App Store nor installing anything.
 
 ### Step 1: Open the App
 Visit: [https://m4j4r1c4l1.github.io/nestfinder/](https://m4j4r1c4l1.github.io/nestfinder/)
