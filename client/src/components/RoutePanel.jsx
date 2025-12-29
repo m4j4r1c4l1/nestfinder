@@ -189,7 +189,7 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) =
                         ))}
                     </div>
                     <div className="text-muted text-sm" style={{ marginTop: '0.5rem', textAlign: 'center' }}>
-                        {filteredCount} points selected
+                        {t('route.pointsSelected', { n: filteredCount })}
                     </div>
                 </div>
 

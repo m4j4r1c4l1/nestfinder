@@ -565,6 +565,8 @@ textarea.form-input {
 
 .bottom-sheet-content {
   padding: var(--space-4);
+  /* Ensure space for home bar on mobile */
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 20px));
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1 1 auto;

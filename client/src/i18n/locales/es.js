@@ -13,7 +13,7 @@ export default {
         map: 'Mapa',
         report: 'Reportar',
         profile: 'Perfil',
-        inbox: 'Bandeja',
+        inbox: 'Mensajes',
         settings: 'Ajustes'
     },
 

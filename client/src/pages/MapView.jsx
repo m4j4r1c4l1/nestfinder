@@ -366,10 +366,10 @@ const MapView = () => {
                             </div>
                             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 <button className="btn btn-primary btn-block" onClick={() => handleDownload('json')}>
-                                    Download JSON
+                                    {t('map.downloadJSON')}
                                 </button>
                                 <button className="btn btn-primary btn-block" onClick={() => handleDownload('csv')}>
-                                    Download CSV
+                                    {t('map.downloadCSV')}
                                 </button>
                             </div>
                         </div>
