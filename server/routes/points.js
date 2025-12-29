@@ -324,6 +324,9 @@ router.get('/export', (req, res) => {
     return res.send(csv);
   }
 
+  // JSON format
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', 'attachment; filename=nestfinder-points.json');
   res.json({ points, exported_at: new Date().toISOString() });
 });
 
