@@ -78,7 +78,33 @@ export const useNotifications = (userId) => {
     useEffect(() => {
         const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
-    }, [userId, settings.realTime]);
+    }, [userId]);
+
+    // Listen for settings changes from SettingsPanel
+    useEffect(() => {
+        const checkSettings = () => {
+            try {
+                const saved = localStorage.getItem('nestfinder_notify_settings');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.realTime !== settings.realTime) {
+                        setSettings(parsed);
+                    }
+                }
+            } catch (e) { }
+        };
+
+        // Check settings periodically (in case changed by another component)
+        const settingsInterval = setInterval(checkSettings, 1000);
+
+        // Also listen for storage events (works across tabs)
+        window.addEventListener('storage', checkSettings);
+
+        return () => {
+            clearInterval(settingsInterval);
+            window.removeEventListener('storage', checkSettings);
+        };
+    }, [settings.realTime]);
 
     const markAsRead = async (notification) => {
         if (!notification) return;
