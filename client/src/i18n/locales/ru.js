@@ -142,13 +142,14 @@ export default {
         popupMessages: 'Всплывающие сообщения',
         popupDescription: 'Показывать сообщения сразу'
     },
+    // Welcome Message (Home Page)
     welcome: {
-        title: 'Добро пожаловать в NestFinder!',
-        message1: 'Спасибо за то, что вы замечательный человек!',
-        message2: 'Каждый добрый поступок важен.',
-        message3: 'Вместе мы можем изменить мир к лучшему.',
-        callToAction: 'Помогайте находить и поддерживать тех, кто в этом нуждается.',
-        button: 'Начать'
+        title: 'NestFinder',
+        subtitle: 'Поиск убежищ, чтобы принести им облегчение ❤️',
+        nicknameLabel: 'Введите псевдоним для участия (необязательно)',
+        nicknamePlaceholder: 'Анонимный Помощник',
+        buttonStart: 'Начать Помогать',
+        buttonLoading: 'Запуск...'
     },
     common: {
         loading: 'Загрузка...',

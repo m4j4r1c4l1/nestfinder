@@ -142,13 +142,14 @@ export default {
         popupMessages: 'Popups en temps réel',
         popupDescription: 'Afficher les messages dès leur arrivée'
     },
+    // Welcome Message (Home Page)
     welcome: {
-        title: 'Bienvenue sur NestFinder !',
-        message1: "Merci d'être la personne formidable que vous êtes !",
-        message2: "Chaque acte de bonté compte quand on s'entraide.",
-        message3: 'Ensemble, nous pouvons faire la différence.',
-        callToAction: 'Aidez à localiser et assister ceux qui en ont besoin.',
-        button: 'Commencer'
+        title: 'NestFinder',
+        subtitle: 'Trouver des nids pour leur apporter un peu de soulagement ❤️',
+        nicknameLabel: 'Entrez un pseudo pour contribuer (optionnel)',
+        nicknamePlaceholder: 'Assistant Anonyme',
+        buttonStart: 'Commencer à aider',
+        buttonLoading: 'Démarrage...'
     },
     common: {
         loading: 'Chargement...',

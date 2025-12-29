@@ -142,13 +142,14 @@ export default {
         popupMessages: '实时弹窗',
         popupDescription: '收到消息时立即显示'
     },
+    // Welcome Message (Home Page)
     welcome: {
-        title: '欢迎来到 NestFinder！',
-        message1: '感谢您的善举！',
-        message2: '每一次互助都充满意义。',
-        message3: '我们可以共同改变社区。',
-        callToAction: '帮助定位并协助需要帮助的人。',
-        button: '开始使用'
+        title: 'NestFinder',
+        subtitle: '寻找巢穴，带给他们一丝慰藉 ❤️',
+        nicknameLabel: '输入昵称以贡献（可选）',
+        nicknamePlaceholder: '匿名助手',
+        buttonStart: '开始帮助',
+        buttonLoading: '启动中...'
     },
     common: {
         loading: '加载中...',

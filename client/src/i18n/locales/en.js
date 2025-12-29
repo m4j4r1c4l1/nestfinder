@@ -172,13 +172,14 @@ export default {
     },
 
     // Welcome Message
+    // Welcome Message (Home Page)
     welcome: {
-        title: 'Welcome to NestFinder!',
-        message1: 'Thank you for being the awesome human being you are!',
-        message2: 'Every act of kindness matters when we help each other.',
-        message3: 'Together we can make a difference in our community.',
-        callToAction: 'Help locate and assist those who need it most.',
-        button: "Let's Get Started"
+        title: 'NestFinder',
+        subtitle: 'Finding nests to bring them some relief ❤️',
+        nicknameLabel: 'Enter a nickname to contribute (optional)',
+        nicknamePlaceholder: 'Anonymous Helper',
+        buttonStart: 'Start Helping',
+        buttonLoading: 'Starting...'
     },
 
     // Common/Shared

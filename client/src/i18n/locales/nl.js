@@ -142,13 +142,14 @@ export default {
         popupMessages: 'Real-time Popups',
         popupDescription: 'Toon berichten direct bij ontvangst'
     },
+    // Welcome Message (Home Page)
     welcome: {
-        title: 'Welkom bij NestFinder!',
-        message1: 'Bedankt dat je zo\'n geweldig persoon bent!',
-        message2: 'Elke daad van vriendelijkheid telt als we elkaar helpen.',
-        message3: 'Samen kunnen we een verschil maken in de gemeenschap.',
-        callToAction: 'Help om degenen die het nodig hebben te lokaliseren en helpen.',
-        button: 'Aan de slag'
+        title: 'NestFinder',
+        subtitle: 'Nesten vinden om ze wat verlichting te brengen ❤️',
+        nicknameLabel: 'Vul een bijnaam in om bij te dragen (optioneel)',
+        nicknamePlaceholder: 'Anonieme Helper',
+        buttonStart: 'Start met Helpen',
+        buttonLoading: 'Starten...'
     },
     common: {
         loading: 'Laden...',
