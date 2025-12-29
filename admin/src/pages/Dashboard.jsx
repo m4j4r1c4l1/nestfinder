@@ -191,10 +191,15 @@ const Dashboard = ({ onNavigate }) => {
                             {filteredPoints && (
                                 <button
                                     onClick={handleClearFilter}
-                                    className="btn btn-secondary"
-                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                    className="btn"
+                                    style={{
+                                        padding: '0.4rem 0.75rem',
+                                        fontSize: '0.8rem',
+                                        background: 'var(--color-primary)',
+                                        color: 'white'
+                                    }}
                                 >
-                                    Clear Filter ({filteredPoints.length} points)
+                                    ✕ Show All Points
                                 </button>
                             )}
                             <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
@@ -238,8 +243,17 @@ const Dashboard = ({ onNavigate }) => {
 
                     {/* Status Summary */}
                     <div className="card" style={{ flex: 1 }}>
-                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
+                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 600 }}>📊 Status Summary</span>
+                            {filteredPoints && (
+                                <button
+                                    onClick={handleClearFilter}
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
+                                >
+                                    Show All
+                                </button>
+                            )}
                         </div>
                         <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
@@ -373,7 +387,7 @@ const Modal = ({ title, onClose, children }) => (
     >
         <div
             className="card"
-            style={{ width: '90%', maxWidth: '600px', maxHeight: '80vh', overflow: 'hidden' }}
+            style={{ width: '90%', maxWidth: '900px', maxHeight: '80vh', overflow: 'hidden' }}
             onClick={e => e.stopPropagation()}
         >
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
