@@ -153,10 +153,12 @@ You can download visible points for other uses.
 ### Viewing Messages
 Check the **Inbox** for updates on points you've reported or subscribed to.
 
+Unread messages will be shown as in the following picture:
+<p align="center"><img src="images/feature_05_inbox_notification_badge.jpg" width="200" alt="Inbox Badge" /></p>
+
 <p align="center">
-  <img src="images/feature_05_inbox_notification_badge.jpg" width="140" alt="Inbox Badge" />
-  <img src="images/feature_05_inbox_panel.jpg" width="140" alt="Inbox Panel" />
-  <img src="images/feature_05_inbox_popup.jpg" width="140" alt="Inbox Popup" />
+  <img src="images/feature_05_inbox_panel.jpg" width="180" alt="Inbox Panel" />
+  <img src="images/feature_05_inbox_popup.jpg" width="180" alt="Inbox Popup" />
 </p>
 
 ### Settings & Language
