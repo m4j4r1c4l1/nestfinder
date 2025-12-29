@@ -248,6 +248,8 @@ a:hover {
 
 .card-body {
   padding: var(--space-4);
+  padding-bottom: var(--space-6);
+  /* Lift content upwards */
 }
 
 /* Remove margin from last child to maintain uniform padding */
