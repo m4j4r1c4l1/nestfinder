@@ -355,7 +355,15 @@ const MapView = () => {
 
                     {activeSheet === 'download' && (
                         <div className="card">
-                            <div className="card-header"><h3 className="card-title">{t('map.download')}</h3></div>
+                            <div className="card-header flex-between items-center">
+                                <h3 className="card-title">{t('map.download')}</h3>
+                                <button
+                                    onClick={handleSheetClose}
+                                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                                >
+                                    &times;
+                                </button>
+                            </div>
                             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 <button className="btn btn-primary btn-block" onClick={() => handleDownload('json')}>
                                     Download JSON
