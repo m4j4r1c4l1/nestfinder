@@ -132,6 +132,11 @@ Tap any marker on the map to see details. You help the community by verifying re
 
 <p align="center"><img src="images/point_details.jpg" width="240" alt="Point Details" /></p>
 
+#### Point Status Flow
+Points move through different states based on community actions:
+
+<p align="center"><img src="images/point_status_flow.png" width="400" alt="Point Status Flow Diagram" /></p>
+
 ### Planning a Route
 Find the best walking path to visit multiple places.
 1. Move the map to show the area you want to visit.
@@ -153,13 +158,13 @@ You can download visible points for other uses.
 ### Viewing Messages
 Check the **Inbox** for updates on points you've reported or subscribed to.
 
-Unread messages will be shown as in the following picture:
-<p align="center"><img src="images/feature_05_inbox_notification_badge.jpg" width="200" alt="Inbox Badge" /></p>
-
 <p align="center">
   <img src="images/feature_05_inbox_panel.jpg" width="180" alt="Inbox Panel" />
   <img src="images/feature_05_inbox_popup.jpg" width="180" alt="Inbox Popup" />
 </p>
+
+Unread messages will be shown with a badge:
+<p align="center"><img src="images/feature_05_inbox_notification_badge.jpg" width="200" alt="Inbox Badge" /></p>
 
 ### Settings & Language
 Tap **Settings** ⚙️ to:
