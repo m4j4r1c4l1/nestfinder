@@ -36,6 +36,7 @@ const SettingsPanel = ({ onClose }) => {
             <div className="card-body">
                 {/* Notification Settings */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">{t('settings.notifications')}</label>
                     <div
                         onClick={togglePopup}
                         style={{
