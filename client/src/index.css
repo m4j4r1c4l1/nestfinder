@@ -549,6 +549,10 @@ textarea.form-input {
   justify-content: center;
   /* Critical for flex scroll to work */
   min-height: 0;
+  /* Add padding since Blue box is removed */
+  padding: var(--space-4);
+  padding-top: 0;
+  overflow-y: auto;
 
   /* DEBUG: RED - Outer Sheet Container */
   border: 4px solid red !important;
@@ -573,47 +577,28 @@ textarea.form-input {
   flex-shrink: 0;
 }
 
-.bottom-sheet-content {
-  padding: var(--space-4);
-  /* Top padding removed to move content up */
-  padding-top: 0;
-  /* Increased bottom padding to prevent touching bottom */
-  padding-bottom: var(--space-8);
-  /* Vertical centering via margins */
-  margin-top: auto;
-  margin-bottom: auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 0 1 auto;
-  min-height: 0;
-  /* Critical for overflow to work in flex container */
-  -webkit-overflow-scrolling: touch;
-
-  /* DEBUG: BLUE - Scrollable Content Area */
-  border: 4px solid blue !important;
-  background: rgba(0, 0, 255, 0.15) !important;
-}
-
-
+/* Blue box removed - these styles commented out for reference */
+/* .bottom-sheet-content { ... } */
 
 .bottom-sheet-content>* {
   width: 100%;
 }
 
-/* Cards inside modals should scroll properly */
-.bottom-sheet-content .card {
+/* Cards are now direct children of bottom-sheet (was inside content) */
+.bottom-sheet>.card {
   max-height: none;
   overflow: visible;
   margin: 0;
+  flex: 0 1 auto;
 
-  /* DEBUG: GREEN - Card Container (Outer Panel) */
+  /* DEBUG: GREEN - Card Container */
   border: 4px solid green !important;
   background: rgba(0, 255, 0, 0.15) !important;
 }
 
 
 
-.bottom-sheet-content .card-body {
+.bottom-sheet>.card .card-body {
   padding: var(--space-4);
   padding-bottom: var(--space-10);
   /* 40px - Prevent touching bottom */

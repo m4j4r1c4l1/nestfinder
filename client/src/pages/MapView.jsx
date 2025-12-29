@@ -304,83 +304,81 @@ const MapView = () => {
             {/* Bottom Sheet Container */}
             <div className={`bottom-sheet ${activeSheet ? 'open' : ''}`}>
                 <div className="bottom-sheet-handle" onClick={handleSheetClose} />
-                <div className="bottom-sheet-content">
 
-                    {activeSheet === 'notifications' && (
-                        <NotificationList
-                            notifications={notifications}
-                            markAsRead={markAsRead}
-                            markAllAsRead={markAllAsRead}
-                            settings={settings}
-                            toggleSettings={toggleSettings}
-                        />
-                    )}
+                {activeSheet === 'notifications' && (
+                    <NotificationList
+                        notifications={notifications}
+                        markAsRead={markAsRead}
+                        markAllAsRead={markAllAsRead}
+                        settings={settings}
+                        toggleSettings={toggleSettings}
+                    />
+                )}
 
-                    {activeSheet === 'submit' && (
-                        <SubmitPoint
-                            onSubmit={handleSubmit}
-                            onCancel={handleSheetClose}
-                            initialLocation={clickedLocation}
-                        />
-                    )}
+                {activeSheet === 'submit' && (
+                    <SubmitPoint
+                        onSubmit={handleSubmit}
+                        onCancel={handleSheetClose}
+                        initialLocation={clickedLocation}
+                    />
+                )}
 
-                    {activeSheet === 'details' && selectedPoint && (
-                        <PointDetails
-                            point={selectedPoint}
-                            user={user}
-                            onConfirm={() => handleConfirm(selectedPoint.id)}
-                            onDeactivate={() => handleDeactivate(selectedPoint.id)}
-                            onReactivate={() => handleReactivate(selectedPoint.id)}
-                            onClose={handleSheetClose}
-                        />
-                    )}
+                {activeSheet === 'details' && selectedPoint && (
+                    <PointDetails
+                        point={selectedPoint}
+                        user={user}
+                        onConfirm={() => handleConfirm(selectedPoint.id)}
+                        onDeactivate={() => handleDeactivate(selectedPoint.id)}
+                        onReactivate={() => handleReactivate(selectedPoint.id)}
+                        onClose={handleSheetClose}
+                    />
+                )}
 
-                    {activeSheet === 'filter' && (
-                        <FilterPanel
-                            filters={filters}
-                            onChange={updateFilters}
-                            onClose={handleSheetClose}
-                        />
-                    )}
+                {activeSheet === 'filter' && (
+                    <FilterPanel
+                        filters={filters}
+                        onChange={updateFilters}
+                        onClose={handleSheetClose}
+                    />
+                )}
 
-                    {activeSheet === 'route' && (
-                        <RoutePanel
-                            points={points}
-                            mapBounds={mapBounds}
-                            userLocation={userLocation}
-                            onCalculate={handleRouteCalculate}
-                            onClear={handleClearRoute}
-                            onClose={handleSheetClose}
-                        />
-                    )}
+                {activeSheet === 'route' && (
+                    <RoutePanel
+                        points={points}
+                        mapBounds={mapBounds}
+                        userLocation={userLocation}
+                        onCalculate={handleRouteCalculate}
+                        onClear={handleClearRoute}
+                        onClose={handleSheetClose}
+                    />
+                )}
 
-                    {activeSheet === 'download' && (
-                        <div className="card">
-                            <div className="card-header flex-between items-center">
-                                <h3 className="card-title">{t('map.download')}</h3>
-                                <button
-                                    onClick={handleSheetClose}
-                                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
-                                >
-                                    &times;
-                                </button>
-                            </div>
-                            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <button className="btn btn-primary btn-block" onClick={() => handleDownload('json')}>
-                                    {t('map.downloadJSON')}
-                                </button>
-                                <button className="btn btn-primary btn-block" onClick={() => handleDownload('csv')}>
-                                    {t('map.downloadCSV')}
-                                </button>
-                            </div>
+                {activeSheet === 'download' && (
+                    <div className="card">
+                        <div className="card-header flex-between items-center">
+                            <h3 className="card-title">{t('map.download')}</h3>
+                            <button
+                                onClick={handleSheetClose}
+                                style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                            >
+                                &times;
+                            </button>
                         </div>
-                    )}
+                        <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <button className="btn btn-primary btn-block" onClick={() => handleDownload('json')}>
+                                {t('map.downloadJSON')}
+                            </button>
+                            <button className="btn btn-primary btn-block" onClick={() => handleDownload('csv')}>
+                                {t('map.downloadCSV')}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
-                    {activeSheet === 'settings' && (
-                        <SettingsPanel onClose={handleSheetClose} />
-                    )}
+                {activeSheet === 'settings' && (
+                    <SettingsPanel onClose={handleSheetClose} />
+                )}
 
-                </div>
             </div>
 
             {/* Bottom Navigation */}
