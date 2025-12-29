@@ -42,10 +42,32 @@ class ApiClient {
       headers,
     });
 
-    const data = await response.json();
+    // Check if response is JSON before parsing
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+
+    let data;
+    try {
+      if (isJson) {
+        data = await response.json();
+      } else {
+        // Non-JSON response (likely HTML error page or plain text)
+        const text = await response.text();
+        console.error('Non-JSON response:', text.substring(0, 500));
+        throw new Error(`Server error: Expected JSON but received ${contentType || 'unknown content type'}`);
+      }
+    } catch (parseError) {
+      if (parseError.message.includes('Server error')) {
+        throw parseError;
+      }
+      // JSON parse failed
+      const text = await response.text();
+      console.error('JSON parse error. Response text:', text.substring(0, 500));
+      throw new Error('Invalid response from server. Please try again or contact support.');
+    }
 
     if (!response.ok) {
-      throw new Error(data.error || 'Something went wrong');
+      throw new Error(data.error || `Server error: ${response.status} ${response.statusText}`);
     }
 
     return data;
