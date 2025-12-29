@@ -350,6 +350,7 @@ const MapView = () => {
                             userLocation={userLocation}
                             onCalculate={handleRouteCalculate}
                             onClear={handleClearRoute}
+                            onClose={handleSheetClose}
                         />
                     )}
 
