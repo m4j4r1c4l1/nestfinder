@@ -1,0 +1,186 @@
+// Chinese translations
+export default {
+    _meta: {
+        code: 'zh',
+        name: 'Chinese',
+        nativeName: '中文',
+        flag: '🇨🇳'
+    },
+    nav: {
+        map: '地图',
+        report: '报告',
+        profile: '个人资料',
+        inbox: '收件箱',
+        settings: '设置'
+    },
+    map: {
+        searchPlaceholder: '搜索地点...',
+        locateMe: '我的位置',
+        filters: '筛选',
+        route: '路线',
+        download: '下载',
+        downloadGPX: '下载 GPX',
+        downloadKML: '下载 KML',
+        totalPoints: '总点数',
+        noResults: '未找到结果'
+    },
+    filters: {
+        title: '筛选点',
+        showConfirmed: '显示已确认',
+        showPending: '显示待审核',
+        showDeactivated: '显示已停用',
+        done: '完成',
+        reset: '重置'
+    },
+    status: {
+        confirmed: '已确认',
+        pending: '待审核',
+        deactivated: '已停用'
+    },
+    point: {
+        details: '地点详情',
+        status: '状态',
+        address: '地址',
+        notes: '备注',
+        submittedBy: '提交者',
+        confirmations: '确认数',
+        deactivations: '停用报告',
+        actions: '操作',
+        confirmBtn: '确认有效',
+        deactivateBtn: '报告无效',
+        reactivateBtn: '重新激活',
+        navigateBtn: '导航',
+        close: '关闭',
+        anonymous: '匿名',
+        confirmedMessage: '感谢确认！',
+        deactivatedMessage: '已报告为无效',
+        reactivatedMessage: '地点已重新激活！'
+    },
+    submit: {
+        title: '报告地点',
+        subtitle: '报告地点以帮助他人',
+        addressLabel: '地址',
+        addressPlaceholder: '输入地址或使用地图',
+        notesLabel: '备注（可选）',
+        notesPlaceholder: '更多详情...',
+        submitBtn: '提交报告',
+        submitting: '提交中...',
+        success: '地点报告成功！',
+        error: '提交失败，请重试。',
+        selectOnMap: '或在地图上选择',
+        currentLocation: '使用当前位置',
+        gpsMode: 'GPS',
+        mapMode: '地图',
+        addressMode: '地址',
+        currentLocationLabel: '当前位置',
+        tapToLocate: '点击定位',
+        selectedLocation: '已选位置',
+        locationSelected: '位置已选',
+        tapMapPrompt: '点击地图选择位置',
+        mapInstructions: '关闭此面板，在地图上点击您要报告的位置，面板将重新打开。',
+        cityLabel: '城市',
+        cityPlaceholder: '例如：北京',
+        streetLabel: '街道',
+        streetPlaceholder: '例如：长安街',
+        numberLabel: '门牌号',
+        numberPlaceholder: '例如：1号',
+        findLocation: '查找位置',
+        addressNotFound: '地址未找到。',
+        geocodeError: '地理编码错误。',
+        addressRequired: '请输入城市和街道',
+        locationRequired: '需要位置信息。请使用GPS、地图或地址。',
+        tagsLabel: '快速标签',
+        onePerson: '一个人',
+        multiple: '多人',
+        children: '儿童',
+        animals: '动物'
+    },
+    route: {
+        title: '路线规划',
+        optimizeRoute: '计算路线',
+        clearRoute: '清除路线',
+        calculating: '计算中...',
+        distance: '距离',
+        duration: '时长',
+        waypoints: '途经点',
+        noPoints: '没有可用点进行路线规划',
+        filterByStatus: '按状态筛选',
+        includeConfirmed: '包括已确认',
+        includePending: '包括待审核',
+        includeDeactivated: '包括已停用'
+    },
+    inbox: {
+        title: '消息',
+        noMessages: '暂无消息',
+        markAllRead: '全部标记为已读',
+        unread: '未读'
+    },
+    profile: {
+        title: '个人资料',
+        nickname: '昵称',
+        nicknamePlaceholder: '输入您的昵称',
+        language: '语言',
+        pointsSubmitted: '提交点数',
+        confirmationsMade: '确认次数',
+        saveChanges: '保存更改',
+        saving: '保存中...',
+        saved: '更改已保存！',
+        deviceId: '设备ID',
+        memberSince: '加入时间',
+        statistics: '统计数据'
+    },
+    language: {
+        title: '选择语言',
+        subtitle: '选择您的首选语言',
+        continue: '继续'
+    },
+    settings: {
+        notifications: '通知',
+        popupMessages: '实时弹窗',
+        popupDescription: '收到消息时立即显示'
+    },
+    welcome: {
+        title: '欢迎来到 NestFinder！',
+        message1: '感谢您的善举！',
+        message2: '每一次互助都充满意义。',
+        message3: '我们可以共同改变社区。',
+        callToAction: '帮助定位并协助需要帮助的人。',
+        button: '开始使用'
+    },
+    common: {
+        loading: '加载中...',
+        error: '发生错误',
+        retry: '重试',
+        cancel: '取消',
+        save: '保存',
+        delete: '删除',
+        confirm: '确认',
+        close: '关闭',
+        back: '返回',
+        next: '下一步',
+        yes: '是',
+        no: '否',
+        ok: '确定'
+    },
+    geo: {
+        permissionDenied: '位置权限被拒绝',
+        unavailable: '位置不可用',
+        timeout: '请求超时',
+        enableLocation: '开启定位',
+        requestingLocation: '正在获取位置...'
+    },
+    validation: {
+        required: '此项必填',
+        invalidAddress: '请输入有效地址',
+        tooShort: '太短',
+        tooLong: '太长'
+    },
+    time: {
+        justNow: '刚刚',
+        minutesAgo: '{n}分钟前',
+        hoursAgo: '{n}小时前',
+        daysAgo: '{n}天前',
+        today: '今天',
+        yesterday: '昨天'
+    }
+};

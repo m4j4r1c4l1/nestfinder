@@ -1,0 +1,186 @@
+// French translations
+export default {
+    _meta: {
+        code: 'fr',
+        name: 'French',
+        nativeName: 'Français',
+        flag: '🇫🇷'
+    },
+    nav: {
+        map: 'Carte',
+        report: 'Signaler',
+        profile: 'Profil',
+        inbox: 'Messages',
+        settings: 'Paramètres'
+    },
+    map: {
+        searchPlaceholder: 'Rechercher un lieu...',
+        locateMe: 'Ma position',
+        filters: 'Filtres',
+        route: 'Itinéraire',
+        download: 'Télécharger',
+        downloadGPX: 'Télécharger GPX',
+        downloadKML: 'Télécharger KML',
+        totalPoints: 'points totaux',
+        noResults: 'Aucun résultat trouvé'
+    },
+    filters: {
+        title: 'Filtrer les points',
+        showConfirmed: 'Confirmés',
+        showPending: 'En attente',
+        showDeactivated: 'Désactivés',
+        done: 'Terminé',
+        reset: 'Réinitialiser'
+    },
+    status: {
+        confirmed: 'Confirmé',
+        pending: 'En attente',
+        deactivated: 'Désactivé'
+    },
+    point: {
+        details: 'Détails du point',
+        status: 'Statut',
+        address: 'Adresse',
+        notes: 'Notes',
+        submittedBy: 'Signalé par',
+        confirmations: 'Confirmations',
+        deactivations: 'Signalements inactifs',
+        actions: 'Actions',
+        confirmBtn: 'Confirmer actif',
+        deactivateBtn: 'Signaler inactif',
+        reactivateBtn: 'Réactiver',
+        navigateBtn: 'Y aller',
+        close: 'Fermer',
+        anonymous: 'Anonyme',
+        confirmedMessage: 'Merci pour la confirmation !',
+        deactivatedMessage: 'Signalé comme inactif',
+        reactivatedMessage: 'Point réactivé !'
+    },
+    submit: {
+        title: 'Signaler un lieu',
+        subtitle: 'Aidez les autres en signalant un lieu',
+        addressLabel: 'Adresse',
+        addressPlaceholder: 'Entrez une adresse ou utilisez la carte',
+        notesLabel: 'Notes (optionnel)',
+        notesPlaceholder: 'Détails supplémentaires...',
+        submitBtn: 'Envoyer le signalement',
+        submitting: 'Envoi en cours...',
+        success: 'Lieu signalé avec succès !',
+        error: "Échec de l'envoi. Veuillez réessayer.",
+        selectOnMap: 'Ou touchez la carte pour sélectionner',
+        currentLocation: 'Utiliser ma position',
+        gpsMode: 'GPS',
+        mapMode: 'Carte',
+        addressMode: 'Adresse',
+        currentLocationLabel: 'Position actuelle',
+        tapToLocate: 'Touchez pour localiser',
+        selectedLocation: 'Lieu sélectionné',
+        locationSelected: 'Lieu sélectionné',
+        tapMapPrompt: 'Touchez la carte pour choisir un lieu',
+        mapInstructions: 'Fermez ce panneau, touchez la carte où vous voulez signaler, et il se rouvrira avec ce lieu.',
+        cityLabel: 'Ville',
+        cityPlaceholder: 'ex: Paris',
+        streetLabel: 'Rue',
+        streetPlaceholder: 'ex: Champs-Élysées',
+        numberLabel: 'Numéro',
+        numberPlaceholder: 'ex: 42',
+        findLocation: 'Trouver le lieu',
+        addressNotFound: 'Adresse non trouvée.',
+        geocodeError: 'Erreur de géocodage.',
+        addressRequired: 'Veuillez entrer au moins la ville et la rue',
+        locationRequired: 'Lieu requis. Utilisez le GPS, la carte ou une adresse.',
+        tagsLabel: 'Tags rapides',
+        onePerson: 'Une personne',
+        multiple: 'Plusieurs',
+        children: 'Enfants',
+        animals: 'Animaux'
+    },
+    route: {
+        title: "Calcul d'itinéraire",
+        optimizeRoute: "Calculer l'itinéraire",
+        clearRoute: "Effacer l'itinéraire",
+        calculating: 'Calcul en cours...',
+        distance: 'Distance',
+        duration: 'Durée',
+        waypoints: 'étapes',
+        noPoints: "Aucun point disponible pour l'itinéraire",
+        filterByStatus: 'Filtrer par statut',
+        includeConfirmed: 'Inclure confirmés',
+        includePending: 'Inclure en attente',
+        includeDeactivated: 'Inclure désactivés'
+    },
+    inbox: {
+        title: 'Messages',
+        noMessages: 'Aucun message',
+        markAllRead: 'Tout marquer comme lu',
+        unread: 'non lu'
+    },
+    profile: {
+        title: 'Profil',
+        nickname: 'Pseudo',
+        nicknamePlaceholder: 'Votre pseudo',
+        language: 'Langue',
+        pointsSubmitted: 'Points signalés',
+        confirmationsMade: 'Confirmations faites',
+        saveChanges: 'Enregistrer',
+        saving: 'Enregistrement...',
+        saved: 'Modifications enregistrées !',
+        deviceId: 'ID Appareil',
+        memberSince: 'Membre depuis',
+        statistics: 'Statistiques'
+    },
+    language: {
+        title: 'Choisir la langue',
+        subtitle: 'Sélectionnez votre langue préférée',
+        continue: 'Continuer'
+    },
+    settings: {
+        notifications: 'Notifications',
+        popupMessages: 'Popups en temps réel',
+        popupDescription: 'Afficher les messages dès leur arrivée'
+    },
+    welcome: {
+        title: 'Bienvenue sur NestFinder !',
+        message1: "Merci d'être la personne formidable que vous êtes !",
+        message2: "Chaque acte de bonté compte quand on s'entraide.",
+        message3: 'Ensemble, nous pouvons faire la différence.',
+        callToAction: 'Aidez à localiser et assister ceux qui en ont besoin.',
+        button: 'Commencer'
+    },
+    common: {
+        loading: 'Chargement...',
+        error: 'Une erreur est survenue',
+        retry: 'Réessayer',
+        cancel: 'Annuler',
+        save: 'Enregistrer',
+        delete: 'Supprimer',
+        confirm: 'Confirmer',
+        close: 'Fermer',
+        back: 'Retour',
+        next: 'Suivant',
+        yes: 'Oui',
+        no: 'Non',
+        ok: 'OK'
+    },
+    geo: {
+        permissionDenied: 'Accès localisation refusé',
+        unavailable: 'Localisation indisponible',
+        timeout: "Délai d'attente dépassé",
+        enableLocation: 'Activer la localisation',
+        requestingLocation: 'Obtention de la position...'
+    },
+    validation: {
+        required: 'Ce champ est requis',
+        invalidAddress: 'Veuillez entrer une adresse valide',
+        tooShort: 'Trop court',
+        tooLong: 'Trop long'
+    },
+    time: {
+        justNow: "À l'instant",
+        minutesAgo: 'Il y a {n} minutes',
+        hoursAgo: 'Il y a {n} heures',
+        daysAgo: 'Il y a {n} jours',
+        today: "Aujourd'hui",
+        yesterday: 'Hier'
+    }
+};

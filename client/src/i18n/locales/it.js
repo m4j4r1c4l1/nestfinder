@@ -1,0 +1,186 @@
+// Italian translations
+export default {
+    _meta: {
+        code: 'it',
+        name: 'Italian',
+        nativeName: 'Italiano',
+        flag: '🇮🇹'
+    },
+    nav: {
+        map: 'Mappa',
+        report: 'Segnala',
+        profile: 'Profilo',
+        inbox: 'Messaggi',
+        settings: 'Impostazioni'
+    },
+    map: {
+        searchPlaceholder: 'Cerca posizione...',
+        locateMe: 'La mia posizione',
+        filters: 'Filtri',
+        route: 'Percorso',
+        download: 'Scarica',
+        downloadGPX: 'Scarica GPX',
+        downloadKML: 'Scarica KML',
+        totalPoints: 'punti totali',
+        noResults: 'Nessun risultato trovato'
+    },
+    filters: {
+        title: 'Filtra Punti',
+        showConfirmed: 'Mostra Confermati',
+        showPending: 'Mostra In Attesa',
+        showDeactivated: 'Mostra Disattivati',
+        done: 'Fatto',
+        reset: 'Reimposta'
+    },
+    status: {
+        confirmed: 'Confermato',
+        pending: 'In attesa',
+        deactivated: 'Disattivato'
+    },
+    point: {
+        details: 'Dettagli Punto',
+        status: 'Stato',
+        address: 'Indirizzo',
+        notes: 'Note',
+        submittedBy: 'Inviato da',
+        confirmations: 'Conferme',
+        deactivations: 'Segnalazioni inattive',
+        actions: 'Azioni',
+        confirmBtn: 'Conferma Attivo',
+        deactivateBtn: 'Segnala Inattivo',
+        reactivateBtn: 'Riattiva',
+        navigateBtn: 'Naviga',
+        close: 'Chiudi',
+        anonymous: 'Anonimo',
+        confirmedMessage: 'Grazie per la conferma!',
+        deactivatedMessage: 'Segnalato come inattivo',
+        reactivatedMessage: 'Punto riattivato!'
+    },
+    submit: {
+        title: 'Segnala Posizione',
+        subtitle: 'Aiuta gli altri segnalando un luogo',
+        addressLabel: 'Indirizzo',
+        addressPlaceholder: 'Inserisci indirizzo o usa la mappa',
+        notesLabel: 'Note (opzionale)',
+        notesPlaceholder: 'Dettagli aggiuntivi...',
+        submitBtn: 'Invia Segnalazione',
+        submitting: 'Invio in corso...',
+        success: 'Posizione segnalata con successo!',
+        error: "Errore nell'invio. Riprova.",
+        selectOnMap: 'O tocca la mappa per selezionare',
+        currentLocation: 'Usa Posizione Attuale',
+        gpsMode: 'GPS',
+        mapMode: 'Mappa',
+        addressMode: 'Indirizzo',
+        currentLocationLabel: 'Posizione Attuale',
+        tapToLocate: 'Tocca per localizzare',
+        selectedLocation: 'Posizione Selezionata',
+        locationSelected: 'Posizione selezionata',
+        tapMapPrompt: 'Tocca sulla mappa per selezionare un luogo',
+        mapInstructions: 'Chiudi questo pannello, tocca sulla mappa dove vuoi segnalare, e si riaprirà con quel luogo.',
+        cityLabel: 'Città',
+        cityPlaceholder: 'es: Roma',
+        streetLabel: 'Via',
+        streetPlaceholder: 'es: Via del Corso',
+        numberLabel: 'Numero',
+        numberPlaceholder: 'es: 42',
+        findLocation: 'Trova Posizione',
+        addressNotFound: 'Indirizzo non trovato.',
+        geocodeError: 'Errore di geocodifica.',
+        addressRequired: 'Inserisci almeno città e via',
+        locationRequired: 'Posizione richiesta. Usa GPS, mappa o indirizzo.',
+        tagsLabel: 'Tag Rapidi',
+        onePerson: 'Una persona',
+        multiple: 'Più persone',
+        children: 'Bambini',
+        animals: 'Animali'
+    },
+    route: {
+        title: 'Pianificatore Percorso',
+        optimizeRoute: 'Calcola Percorso',
+        clearRoute: 'Cancella Percorso',
+        calculating: 'Calcolo in corso...',
+        distance: 'Distanza',
+        duration: 'Durata',
+        waypoints: 'tappe',
+        noPoints: 'Nessun punto disponibile per il percorso',
+        filterByStatus: 'Filtra per stato',
+        includeConfirmed: 'Includi Confermati',
+        includePending: 'Includi In Attesa',
+        includeDeactivated: 'Includi Disattivati'
+    },
+    inbox: {
+        title: 'Messaggi',
+        noMessages: 'Nessun messaggio',
+        markAllRead: 'Segna tutto come letto',
+        unread: 'non letti'
+    },
+    profile: {
+        title: 'Profilo',
+        nickname: 'Soprannome',
+        nicknamePlaceholder: 'Il tuo soprannome',
+        language: 'Lingua',
+        pointsSubmitted: 'Punti Inviati',
+        confirmationsMade: 'Conferme Effettuate',
+        saveChanges: 'Salva Modifiche',
+        saving: 'Salvataggio...',
+        saved: 'Modifiche salvate!',
+        deviceId: 'ID Dispositivo',
+        memberSince: 'Membro dal',
+        statistics: 'Statistiche'
+    },
+    language: {
+        title: 'Scegli Lingua',
+        subtitle: 'Seleziona la tua lingua preferita',
+        continue: 'Continua'
+    },
+    settings: {
+        notifications: 'Notifiche',
+        popupMessages: 'Popup in Tempo Reale',
+        popupDescription: 'Mostra messaggi appena arrivano'
+    },
+    welcome: {
+        title: 'Benvenuto su NestFinder!',
+        message1: 'Grazie per essere la persona fantastica che sei!',
+        message2: 'Ogni atto di gentilezza conta quando ci aiutiamo a vicenda.',
+        message3: 'Insieme possiamo fare la differenza nella comunità.',
+        callToAction: 'Aiuta a localizzare e assistere chi ne ha bisogno.',
+        button: 'Inizia'
+    },
+    common: {
+        loading: 'Caricamento...',
+        error: 'Si è verificato un errore',
+        retry: 'Riprova',
+        cancel: 'Annulla',
+        save: 'Salva',
+        delete: 'Elimina',
+        confirm: 'Conferma',
+        close: 'Chiudi',
+        back: 'Indietro',
+        next: 'Avanti',
+        yes: 'Sì',
+        no: 'No',
+        ok: 'OK'
+    },
+    geo: {
+        permissionDenied: 'Accesso alla posizione negato',
+        unavailable: 'Posizione non disponibile',
+        timeout: 'Tempo scaduto',
+        enableLocation: 'Abilita Posizione',
+        requestingLocation: 'Ottenimento posizione...'
+    },
+    validation: {
+        required: 'Questo campo è obbligatorio',
+        invalidAddress: 'Inserisci un indirizzo valido',
+        tooShort: 'Troppo corto',
+        tooLong: 'Troppo lungo'
+    },
+    time: {
+        justNow: 'Proprio ora',
+        minutesAgo: '{n} minuti fa',
+        hoursAgo: '{n} ore fa',
+        daysAgo: '{n} giorni fa',
+        today: 'Oggi',
+        yesterday: 'Ieri'
+    }
+};
