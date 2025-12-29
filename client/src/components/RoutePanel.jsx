@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
-const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) => {
+const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLocation }) => {
     const { t } = useLanguage();
     const [routeData, setRouteData] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -142,7 +142,7 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) =
             <div className="card-header flex-between items-center">
                 <h3 className="card-title">{t('route.title')}</h3>
                 <button
-                    onClick={onClear}
+                    onClick={onClose}
                     style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                 >
                     &times;

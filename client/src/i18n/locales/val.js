@@ -10,7 +10,7 @@ export default {
         map: 'Mapa',
         report: 'Reportar',
         profile: 'Perfil',
-        inbox: 'Bústia',
+        inbox: 'Missatges',
         settings: 'Ajustos'
     },
     map: {
