@@ -117,7 +117,7 @@ Si aún no funciona, limpia la caché del navegador e inténtalo de nuevo. Consu
 La pantalla principal es el mapa.
 
 - **Mi Ubicación**: Toca el botón 📍 (abajo a la derecha) para centrarte en tu posición.
-- **Filtrar**: Toca el icono de lupa para mostrar solo puntos específicos (ej., solo confirmados).
+- **Filtrar**: Toca el icono de la lupa 🔍 para mostrar solo puntos específicos (ej., solo confirmados).
 
 <p align="center">
   <img src="../images/feature_01_filter_panel.jpg" width="200" alt="Panel de Filtros" />
