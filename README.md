@@ -81,10 +81,11 @@ nestfinder/
 ├── server/          # REST API + WebSocket (Express + SQLite)
 ├── admin/           # Admin Dashboard (React + Vite)
 └── docs/            # Documentation
-    ├── USER_GUIDE.md    # 📱 End-user instructions
-    ├── FEATURES.md      # 🛠️ Technical deep-dive
-
-    └── GEOLOCATION.md   # 📍 Troubleshooting
+    ├── USER_GUIDE.md        # 📱 End-user instructions
+    ├── FEATURES.md          # 🛠️ Technical deep-dive
+    ├── GEOLOCATION.md       # 📍 Location troubleshooting
+    ├── ROUTE.md             # 🚶 Route planner details
+    └── LAYOUT_ARCHITECTURE.md  # 🏗️ UI layout system
 ```
 
 ---
