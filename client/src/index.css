@@ -562,7 +562,7 @@ textarea.form-input {
 }
 
 .bottom-sheet-content {
-  padding: var(--space-3) var(--space-4) var(--space-5);
+  padding: var(--space-4);
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1 1 auto;
@@ -579,7 +579,7 @@ textarea.form-input {
 .bottom-sheet-content .card {
   max-height: none;
   overflow: visible;
-  margin: var(--space-2) 0;
+  margin: 0;
 }
 
 .bottom-sheet-content .card-body {
