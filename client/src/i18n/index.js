@@ -9,15 +9,29 @@
 
 import en from './locales/en.js';
 import es from './locales/es.js';
+import fr from './locales/fr.js';
+import pt from './locales/pt.js';
+import val from './locales/val.js';
+import it from './locales/it.js';
+import de from './locales/de.js';
+import nl from './locales/nl.js';
+import ru from './locales/ru.js';
+import ar from './locales/ar.js';
+import zh from './locales/zh.js';
 
 // All available languages
 export const languages = {
     en,
     es,
-    // Add new languages here:
-    // fr: require('./locales/fr.js').default,
-    // de: require('./locales/de.js').default,
-    // pt: require('./locales/pt.js').default,
+    fr,
+    pt,
+    val,
+    it,
+    de,
+    nl,
+    ru,
+    ar,
+    zh
 };
 
 // Get language metadata for UI display
