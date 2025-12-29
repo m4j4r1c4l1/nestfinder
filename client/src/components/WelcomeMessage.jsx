@@ -42,84 +42,43 @@ const WelcomeMessage = ({ onClose }) => {
                 width: '100%',
                 textAlign: 'center',
                 boxShadow: '0 25px 80px rgba(0,0,0,0.5)',
-                color: 'white',
-                position: 'relative',
-                overflow: 'hidden'
+                color: 'white'
             }}>
-                {/* Decorative floating icons */}
-                <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '15px',
-                    fontSize: '1.5rem',
-                    opacity: 0.6
-                }}>❤️</div>
-                <div style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    fontSize: '1.2rem',
-                    opacity: 0.5
-                }}>🌟</div>
-                <div style={{
-                    position: 'absolute',
-                    bottom: '80px',
-                    left: '10px',
-                    fontSize: '1.3rem',
-                    opacity: 0.5
-                }}>🤲</div>
-                <div style={{
-                    position: 'absolute',
-                    bottom: '100px',
-                    right: '15px',
-                    fontSize: '1.2rem',
-                    opacity: 0.4
-                }}>💫</div>
-
                 {/* Main Icon */}
-                <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>
+                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
                     🪹
-                </div>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-                    💕🤝💕
                 </div>
 
                 {/* Title */}
                 <h2 style={{
-                    margin: '0 0 1rem 0',
-                    fontSize: '1.6rem',
+                    margin: '0 0 1.5rem 0',
+                    fontSize: '1.5rem',
                     fontWeight: 700
                 }}>
                     {t('welcome.title')}
                 </h2>
 
-                {/* Messages with icons */}
+                {/* Messages */}
                 <div style={{
                     marginBottom: '1.5rem',
-                    lineHeight: 1.7,
+                    lineHeight: 1.8,
                     fontSize: '0.95rem'
                 }}>
-                    <p style={{ margin: '0 0 0.8rem 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                        <span>✨</span>
-                        <span>{t('welcome.message1')}</span>
-                        <span>✨</span>
+                    <p style={{ margin: '0 0 0.8rem 0' }}>
+                        {t('welcome.message1')}
                     </p>
-                    <p style={{ margin: '0 0 0.8rem 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                        <span>🤝</span>
-                        <span>{t('welcome.message2')}</span>
+                    <p style={{ margin: '0 0 0.8rem 0' }}>
+                        {t('welcome.message2')}
                     </p>
-                    <p style={{ margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                        <span>💪</span>
-                        <span>{t('welcome.message3')}</span>
-                        <span>🌍</span>
+                    <p style={{ margin: 0 }}>
+                        {t('welcome.message3')}
                     </p>
                 </div>
 
-                {/* Hearts divider */}
+                {/* Rainbow hearts divider */}
                 <div style={{
                     margin: '1.5rem 0',
-                    fontSize: '1rem',
-                    opacity: 0.7
+                    fontSize: '1.2rem'
                 }}>
                     ❤️ 🧡 💛 💚 💙 💜
                 </div>
@@ -128,9 +87,9 @@ const WelcomeMessage = ({ onClose }) => {
                 <p style={{
                     margin: '0 0 1.5rem 0',
                     fontSize: '0.9rem',
-                    opacity: 0.95
+                    opacity: 0.9
                 }}>
-                    🏠 {t('welcome.callToAction')} 🏠
+                    {t('welcome.callToAction')}
                 </p>
 
                 {/* Button */}
@@ -152,7 +111,7 @@ const WelcomeMessage = ({ onClose }) => {
                     onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
                     onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
-                    🚀 {t('welcome.button')} 🚀
+                    {t('welcome.button')}
                 </button>
             </div>
         </div>
