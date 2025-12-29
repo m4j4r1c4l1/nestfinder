@@ -2,6 +2,22 @@
 
 Welcome to **NestFinder**! This guide will help you get started with the app on your mobile device or computer.
 
+---
+
+**Contents**
+- [🚀 Getting Started](#-getting-started)
+- [📍 Enable Location Services](#-enable-location-services)
+- [📖 Daily Usage](#-daily-usage)
+  - [Map View](#map-view)
+  - [Adding a Point](#adding-a-point)
+  - [Verifying Points](#verifying-points)
+  - [Planning a Route](#planning-a-route)
+  - [Exporting Data](#exporting-data)
+  - [Viewing Messages](#viewing-messages)
+  - [Settings & Language](#settings--language)
+
+---
+
 ## 🚀 Getting Started
 
 NestFinder is a web app (PWA) that you can use directly on your phone without going to an App Store nor installing anything.
@@ -164,11 +180,11 @@ Check the **Inbox** for updates on points you've reported or subscribed to.
 </p>
 
 Unread messages will be shown with a badge:
-<p align="center"><img src="images/feature_05_inbox_notification_badge.jpg" width="200" alt="Inbox Badge" /></p>
+<p align="center"><img src="images/feature_05_inbox_notification_badge.jpg" width="360" alt="Inbox Badge" /></p>
 
 ### Settings & Language
 Tap **Settings** ⚙️ to:
 - Change Language (EN, ES, FR, PT, etc.)
-- Turn notifications on/off
+- Toggle notification style (popup alerts vs. silent inbox)
 
 <p align="center"><img src="images/settings_panel.jpg" width="240" alt="Settings Panel" /></p>

@@ -2,6 +2,22 @@
 
 ¡Bienvenido a **NestFinder**! Esta guía te ayudará a comenzar a usar la app en tu dispositivo móvil u ordenador.
 
+---
+
+**Contenido**
+- [🚀 Primeros Pasos](#-primeros-pasos)
+- [📍 Activar Servicios de Ubicación](#-activar-servicios-de-ubicación)
+- [📖 Uso Diario](#-uso-diario)
+  - [Vista del Mapa](#vista-del-mapa)
+  - [Añadir un Punto](#añadir-un-punto)
+  - [Verificar Puntos](#verificar-puntos)
+  - [Planificar una Ruta](#planificar-una-ruta)
+  - [Exportar Datos](#exportar-datos)
+  - [Ver Mensajes](#ver-mensajes)
+  - [Configuración e Idioma](#configuración-e-idioma)
+
+---
+
 ## 🚀 Primeros Pasos
 
 NestFinder es una aplicación web (PWA) que puedes usar directamente en tu teléfono sin pasar por la App Store ni instalar nada.
@@ -164,11 +180,11 @@ Revisa el **Buzón** para actualizaciones sobre puntos que has reportado o a los
 </p>
 
 Los mensajes no leídos se mostrarán con una insignia:
-<p align="center"><img src="../images/feature_05_inbox_notification_badge.jpg" width="200" alt="Insignia de Buzón" /></p>
+<p align="center"><img src="../images/feature_05_inbox_notification_badge.jpg" width="360" alt="Insignia de Buzón" /></p>
 
 ### Configuración e Idioma
 Toca **Configuración** ⚙️ para:
 - Cambiar Idioma (EN, ES, FR, PT, etc.)
-- Activar/desactivar notificaciones
+- Cambiar estilo de notificaciones (alertas emergentes vs. buzón silencioso)
 
 <p align="center"><img src="../images/settings_panel.jpg" width="240" alt="Panel de Configuración" /></p>
