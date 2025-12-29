@@ -9,12 +9,12 @@ NestFinder is a web app (PWA) that you can install directly on your phone withou
 ### Step 1: Open the App
 Visit: [https://m4j4r1c4l1.github.io/nestfinder/](https://m4j4r1c4l1.github.io/nestfinder/)
 
-<p align="center">
-  <img src="images/landing_01_welcome.jpg" width="200" alt="Welcome Screen" />
-  <img src="images/landing_02_home.jpg" width="200" alt="Home Screen" />
-</p>
+<p align="center"><img src="images/landing_02_home.jpg" width="240" alt="Home Screen" /></p>
 
-### Step 2: Install to Home Screen
+### Step 2: Install to Home Screen (Optional)
+
+> [!TIP]
+> Installing to your home screen is **optional**. The app works perfectly in any browser! Installing just makes it easier to access and gives a more app-like experience.
 
 #### 🍏 iOS (iPhone/iPad)
 1. Tap the **Share** button (box with arrow) or **Menu** (three dots).
