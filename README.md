@@ -80,13 +80,19 @@ No installation required! Just visit the web app.
 nestfinder/
 ├── client/          # PWA Frontend (React + Vite + Leaflet)
 ├── server/          # REST API + WebSocket (Express + SQLite)
-├── admin/           # Admin Dashboard (React + Vite)
 └── docs/            # Documentation
+    ├── images/              # Screenshots & diagrams
     ├── USER_GUIDE.md        # 📱 End-user instructions
     ├── FEATURES.md          # 🛠️ Technical deep-dive
     ├── GEOLOCATION.md       # 📍 Location troubleshooting
     ├── ROUTE.md             # 🚶 Route planner details
-    └── LAYOUT_ARCHITECTURE.md  # 🏗️ UI layout system
+    ├── LAYOUT_ARCHITECTURE.md
+    └── es/                  # 🇪🇸 Spanish translations
+        ├── USER_GUIDE.md
+        ├── FEATURES.md
+        ├── GEOLOCATION.md
+        ├── ROUTE.md
+        └── LAYOUT_ARCHITECTURE.md
 ```
 
 ---
