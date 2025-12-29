@@ -1,4 +1,6 @@
+import jwt from 'jsonwebtoken';
 import { get } from '../database.js';
+import { JWT_SECRET } from '../routes/auth.js';
 
 // Middleware to verify user exists
 export const requireUser = (req, res, next) => {
@@ -23,7 +25,7 @@ export const requireUser = (req, res, next) => {
     next();
 };
 
-// Middleware to verify admin
+// Middleware to verify admin with JWT
 export const requireAdmin = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
@@ -33,18 +35,26 @@ export const requireAdmin = (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
 
-    // Simple token validation - in production use JWT
     try {
-        const [adminId, timestamp] = Buffer.from(token, 'base64').toString().split(':');
-        const admin = get('SELECT * FROM admins WHERE id = ?', [parseInt(adminId)]);
+        // Verify JWT token - automatically checks expiration
+        const decoded = jwt.verify(token, JWT_SECRET);
+
+        // Verify admin still exists in database
+        const admin = get('SELECT * FROM admins WHERE id = ?', [decoded.adminId]);
 
         if (!admin) {
-            return res.status(401).json({ error: 'Invalid admin token' });
+            return res.status(401).json({ error: 'Admin not found' });
         }
 
         req.admin = admin;
         next();
-    } catch (e) {
-        return res.status(401).json({ error: 'Invalid token format' });
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ error: 'Token expired, please login again' });
+        }
+        if (err.name === 'JsonWebTokenError') {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+        return res.status(401).json({ error: 'Authentication failed' });
     }
 };
