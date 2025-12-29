@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) => {
+    const { t } = useLanguage();
     const [routeData, setRouteData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -13,9 +15,9 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) =
     });
 
     const statusOptions = [
-        { id: 'confirmed', label: 'Confirmed', color: 'var(--color-confirmed)' },
-        { id: 'pending', label: 'Pending', color: 'var(--color-pending)' },
-        { id: 'deactivated', label: 'Deactivated', color: 'var(--color-deactivated)' }
+        { id: 'confirmed', label: t('status.confirmed'), color: 'var(--color-confirmed)' },
+        { id: 'pending', label: t('status.pending'), color: 'var(--color-pending)' },
+        { id: 'deactivated', label: t('status.deactivated'), color: 'var(--color-deactivated)' }
     ];
 
     const toggleStatus = (status) => {
@@ -138,12 +140,12 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) =
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-title">Route Planner</h3>
+                <h3 className="card-title">{t('route.title')}</h3>
             </div>
             <div className="card-body">
                 {/* Status Filter */}
                 <div className="mb-4">
-                    <label className="form-label">Include in route:</label>
+                    <label className="form-label">{t('route.filterByStatus')}:</label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                         {statusOptions.map(opt => (
                             <button
@@ -196,34 +198,34 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) =
                         <div className="route-info">
                             <div className="route-stat">
                                 <div className="route-stat-value">{routeData.distance}</div>
-                                <div className="route-stat-label">Kilometers</div>
+                                <div className="route-stat-label">{t('route.distance')}</div>
                             </div>
                             <div className="route-stat">
                                 <div className="route-stat-value">{routeData.time}</div>
-                                <div className="route-stat-label">Minutes</div>
+                                <div className="route-stat-label">{t('route.duration')}</div>
                             </div>
                         </div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', textAlign: 'center' }}>
-                            Visiting {routeData.pointCount} locations
+                            {routeData.pointCount} {t('route.waypoints')}
                         </div>
                         <button className="btn btn-secondary btn-block" onClick={handleClear}>
-                            Clear Route
+                            {t('route.clearRoute')}
                         </button>
                     </div>
                 ) : (
                     <div>
                         <p className="text-muted mb-4 text-sm" style={{ textAlign: 'center' }}>
-                            Calculate the optimal walking path to visit selected points.
+                            {t('route.noPoints')}
                         </p>
                         <button
                             className="btn btn-primary btn-block"
                             onClick={calculateRoute}
                             disabled={filteredCount < 2 || loading}
                         >
-                            {loading ? 'Calculating...' :
+                            {loading ? t('route.calculating') :
                                 filteredCount < 2
-                                    ? `Need ${2 - filteredCount} more points`
-                                    : `Calculate Route (${filteredCount} points)`}
+                                    ? t('route.noPoints')
+                                    : `${t('route.optimizeRoute')} (${filteredCount})`}
                         </button>
                     </div>
                 )}
