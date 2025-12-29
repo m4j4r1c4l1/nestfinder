@@ -159,7 +159,8 @@ class ApiClient {
       const ss = String(now.getSeconds()).padStart(2, '0');
       const timestamp = `${dd}${mm}${yyyy}-${hh}${min}${ss}`;
 
-      link.download = `nestfinder-nests-${timestamp}.${format === 'csv' ? 'csv' : 'json'}`;
+      const extMap = { csv: 'csv', json: 'json', gpx: 'gpx', kml: 'kml' };
+      link.download = `nestfinder-nests-${timestamp}.${extMap[format] || 'json'}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

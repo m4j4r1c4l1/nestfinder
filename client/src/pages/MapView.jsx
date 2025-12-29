@@ -373,6 +373,12 @@ const MapView = () => {
                             <button className="btn btn-primary btn-block" onClick={() => handleDownload('csv')}>
                                 {t('map.downloadCSV')}
                             </button>
+                            <button className="btn btn-primary btn-block" onClick={() => handleDownload('gpx')}>
+                                📍 {t('map.downloadGPX')}
+                            </button>
+                            <button className="btn btn-primary btn-block" onClick={() => handleDownload('kml')}>
+                                🌍 {t('map.downloadKML')}
+                            </button>
                         </div>
                     </div>
                 )}

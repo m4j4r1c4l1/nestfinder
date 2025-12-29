@@ -4,6 +4,17 @@ import { requireUser } from '../middleware/auth.js';
 
 const router = Router();
 
+// Helper to escape XML special characters
+const escapeXml = (str) => {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+};
+
 // Broadcast function will be injected from main server
 let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
@@ -322,6 +333,93 @@ router.get('/export', (req, res) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=nestfinder-nests.csv');
     return res.send(csv);
+  }
+
+  // GPX format - GPS Exchange Format
+  if (format === 'gpx') {
+    const gpxPoints = points.map(p => {
+      const name = p.address ? p.address.split(',')[0] : `Point ${p.id}`;
+      const desc = [
+        p.status ? `Status: ${p.status}` : '',
+        p.notes || '',
+        p.submitter ? `Submitted by: ${p.submitter}` : ''
+      ].filter(Boolean).join('\n');
+
+      return `  <wpt lat="${p.latitude}" lon="${p.longitude}">
+    <name>${escapeXml(name)}</name>
+    <desc>${escapeXml(desc)}</desc>
+    <time>${p.created_at}</time>
+    <sym>${p.status === 'confirmed' ? 'Flag, Green' : p.status === 'deactivated' ? 'Flag, Red' : 'Flag, Blue'}</sym>
+  </wpt>`;
+    }).join('\n');
+
+    const gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="NestFinder" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>NestFinder Export</name>
+    <time>${new Date().toISOString()}</time>
+  </metadata>
+${gpxPoints}
+</gpx>`;
+
+    res.setHeader('Content-Type', 'application/gpx+xml');
+    res.setHeader('Content-Disposition', 'attachment; filename=nestfinder-nests.gpx');
+    return res.send(gpx);
+  }
+
+  // KML format - Keyhole Markup Language (Google Earth)
+  if (format === 'kml') {
+    const styleMap = {
+      confirmed: '#confirmedStyle',
+      pending: '#pendingStyle',
+      deactivated: '#deactivatedStyle'
+    };
+
+    const kmlPoints = points.map(p => {
+      const name = p.address ? p.address.split(',')[0] : `Point ${p.id}`;
+      const desc = [
+        p.address || '',
+        p.status ? `Status: ${p.status}` : '',
+        p.notes || '',
+        p.submitter ? `Submitted by: ${p.submitter}` : '',
+        `Created: ${p.created_at}`
+      ].filter(Boolean).join('<br/>');
+
+      return `    <Placemark>
+      <name>${escapeXml(name)}</name>
+      <description><![CDATA[${desc}]]></description>
+      <styleUrl>${styleMap[p.status] || '#pendingStyle'}</styleUrl>
+      <Point>
+        <coordinates>${p.longitude},${p.latitude},0</coordinates>
+      </Point>
+      <ExtendedData>
+        <Data name="status"><value>${p.status}</value></Data>
+        <Data name="id"><value>${p.id}</value></Data>
+      </ExtendedData>
+    </Placemark>`;
+    }).join('\n');
+
+    const kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>NestFinder Export</name>
+    <description>Exported points from NestFinder</description>
+    <Style id="confirmedStyle">
+      <IconStyle><color>ff00ff00</color><Icon><href>http://maps.google.com/mapfiles/kml/paddle/grn-circle.png</href></Icon></IconStyle>
+    </Style>
+    <Style id="pendingStyle">
+      <IconStyle><color>ff00a5ff</color><Icon><href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href></Icon></IconStyle>
+    </Style>
+    <Style id="deactivatedStyle">
+      <IconStyle><color>ff0000ff</color><Icon><href>http://maps.google.com/mapfiles/kml/paddle/red-circle.png</href></Icon></IconStyle>
+    </Style>
+${kmlPoints}
+  </Document>
+</kml>`;
+
+    res.setHeader('Content-Type', 'application/vnd.google-earth.kml+xml');
+    res.setHeader('Content-Disposition', 'attachment; filename=nestfinder-nests.kml');
+    return res.send(kml);
   }
 
   // JSON format - pretty printed for readability

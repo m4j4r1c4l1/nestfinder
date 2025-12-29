@@ -28,6 +28,8 @@ export default {
         downloadKML: 'Descargar KML',
         downloadJSON: 'Descargar JSON',
         downloadCSV: 'Descargar CSV',
+        downloadGPX: 'Descargar GPX',
+        downloadKML: 'Descargar KML',
         totalPoints: 'puntos totales',
         noResults: 'No se encontraron resultados'
     },
