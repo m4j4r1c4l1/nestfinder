@@ -548,6 +548,10 @@ textarea.form-input {
   flex-direction: column;
   /* Critical for flex scroll to work */
   min-height: 0;
+
+  /* DEBUG: RED - Outer Sheet Container */
+  border: 4px solid red !important;
+  background: rgba(255, 0, 0, 0.15) !important;
 }
 
 
@@ -582,6 +586,10 @@ textarea.form-input {
   min-height: 0;
   /* Critical for overflow to work in flex container */
   -webkit-overflow-scrolling: touch;
+
+  /* DEBUG: BLUE - Scrollable Content Area */
+  border: 4px solid blue !important;
+  background: rgba(0, 0, 255, 0.15) !important;
 }
 
 
@@ -595,6 +603,10 @@ textarea.form-input {
   max-height: none;
   overflow: visible;
   margin: 0;
+
+  /* DEBUG: GREEN - Card Container (Outer Panel) */
+  border: 4px solid green !important;
+  background: rgba(0, 255, 0, 0.15) !important;
 }
 
 
@@ -606,6 +618,10 @@ textarea.form-input {
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  /* DEBUG: CYAN - Card Body (Inner Panel) */
+  border: 4px solid cyan !important;
+  background: rgba(0, 255, 255, 0.15) !important;
 }
 
 
