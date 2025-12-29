@@ -94,6 +94,5 @@ Check the **Inbox** for updates on points you've reported or subscribed to.
 Tap **Settings** ⚙️ to:
 - Change Language (EN, ES, FR, PT, etc.)
 - Turn notifications on/off
-- Update your nickname
 
 ![Screenshot: Settings Panel](path/to/settings_panel.png)
