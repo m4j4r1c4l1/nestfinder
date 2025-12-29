@@ -110,7 +110,7 @@ export default {
         includeConfirmed: '包括已确认',
         includePending: '包括待审核',
         includeDeactivated: '包括已停用',
-        pointsSelected: '已选择 {n} 个点'
+        pointsSelected: '已选点数：{n}'
     },
     inbox: {
         title: '消息',

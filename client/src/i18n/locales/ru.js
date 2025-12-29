@@ -110,7 +110,7 @@ export default {
         includeConfirmed: 'Вкл. подтвержденные',
         includePending: 'Вкл. на проверке',
         includeDeactivated: 'Вкл. неактивные',
-        pointsSelected: 'Выбрано {n} точек'
+        pointsSelected: 'Выбрано точек: {n}'
     },
     inbox: {
         title: 'Сообщения',
