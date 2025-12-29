@@ -546,6 +546,7 @@ textarea.form-input {
   transition: all var(--transition-slow);
   display: flex;
   flex-direction: column;
+  justify-content: center;
   /* Critical for flex scroll to work */
   min-height: 0;
 
