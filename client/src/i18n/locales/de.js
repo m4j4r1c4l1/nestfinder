@@ -110,7 +110,7 @@ export default {
         includeConfirmed: 'Bestätigte einbeziehen',
         includePending: 'Ausstehende einbeziehen',
         includeDeactivated: 'Deaktivierte einbeziehen',
-        pointsSelected: '{n} Punkte ausgewählt'
+        pointsSelected: 'Ausgewählte Punkte: {n}'
     },
     inbox: {
         title: 'Nachrichten',

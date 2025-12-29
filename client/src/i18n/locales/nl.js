@@ -110,7 +110,7 @@ export default {
         includeConfirmed: 'Inclusief Bevestigd',
         includePending: 'Inclusief In Behandeling',
         includeDeactivated: 'Inclusief Gedeactiveerd',
-        pointsSelected: '{n} punten geselecteerd'
+        pointsSelected: 'Geselecteerde punten: {n}'
     },
     inbox: {
         title: 'Berichten',

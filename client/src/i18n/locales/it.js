@@ -110,7 +110,7 @@ export default {
         includeConfirmed: 'Includi Confermati',
         includePending: 'Includi In Attesa',
         includeDeactivated: 'Includi Disattivati',
-        pointsSelected: '{n} punti selezionati'
+        pointsSelected: 'Punti selezionati: {n}'
     },
     inbox: {
         title: 'Messaggi',

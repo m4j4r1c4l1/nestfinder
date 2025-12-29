@@ -111,7 +111,7 @@ export default {
         includeConfirmed: 'مؤكدة',
         includePending: 'معلقة',
         includeDeactivated: 'معطلة',
-        pointsSelected: 'تم تحديد {n} نقطة'
+        pointsSelected: 'النقاط المحددة: {n}'
     },
     inbox: {
         title: 'الرسائل',

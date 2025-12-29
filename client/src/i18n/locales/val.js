@@ -110,7 +110,7 @@ export default {
         includeConfirmed: 'Incloure Confirmats',
         includePending: 'Incloure Pendents',
         includeDeactivated: 'Incloure Desactivats',
-        pointsSelected: '{n} punts seleccionats'
+        pointsSelected: 'Punts seleccionats: {n}'
     },
     inbox: {
         title: "Bústia d'entrada",
