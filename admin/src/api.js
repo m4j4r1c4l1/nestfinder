@@ -72,6 +72,12 @@ export const adminApi = {
         return this.fetch('/admin/points');
     },
 
+    deletePoint(pointId) {
+        return this.fetch(`/admin/points/${pointId}`, {
+            method: 'DELETE',
+        });
+    },
+
     changePassword(currentPassword, newPassword) {
         return this.fetch('/admin/password', {
             method: 'PUT',
