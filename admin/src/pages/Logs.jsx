@@ -59,13 +59,29 @@ const Logs = () => {
         <div>
             <div className="flex-between flex-center mb-4">
                 <h2>System Logs</h2>
-                <button
-                    className="btn btn-secondary"
-                    onClick={handleExportCSV}
-                    disabled={exporting}
-                >
-                    {exporting ? 'Exporting...' : 'Export CSV'}
-                </button>
+                <div className="flex gap-2">
+                    <input
+                        type="text"
+                        placeholder="Filter by Action..."
+                        className="form-control"
+                        onChange={(e) => setFilters(prev => ({ ...prev, action: e.target.value || undefined }))}
+                        style={{ width: '200px' }}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Filter by User ID..."
+                        className="form-control"
+                        onChange={(e) => setFilters(prev => ({ ...prev, userId: e.target.value || undefined }))}
+                        style={{ width: '200px' }}
+                    />
+                    <button
+                        className="btn btn-secondary"
+                        onClick={handleExportCSV}
+                        disabled={exporting}
+                    >
+                        {exporting ? 'Exporting...' : 'Export CSV'}
+                    </button>
+                </div>
             </div>
 
             <div className="card" style={{ overflowX: 'auto' }}>

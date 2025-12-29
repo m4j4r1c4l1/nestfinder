@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { run, get, log } from '../database.js';
+import { adminLoginLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -66,8 +67,11 @@ router.put('/nickname', (req, res) => {
 });
 
 // Admin login
-router.post('/admin/login', (req, res) => {
+// Admin login with rate limiting
+router.post('/admin/login', adminLoginLimiter, (req, res) => {
     const { username, password } = req.body;
+    const ip = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'] || 'Unknown';
 
     if (!username || !password) {
         return res.status(400).json({ error: 'Username and password required' });
@@ -76,6 +80,13 @@ router.post('/admin/login', (req, res) => {
     const admin = get('SELECT * FROM admins WHERE username = ?', [username]);
 
     if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
+        // Log failed attempt with security metadata
+        log('admin', 'admin_login_failed', null, {
+            username,
+            ip,
+            userAgent,
+            reason: 'Invalid credentials'
+        });
         return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -89,7 +100,12 @@ router.post('/admin/login', (req, res) => {
         { expiresIn: JWT_EXPIRATION }
     );
 
-    log('admin', 'admin_login', null, { username: admin.username });
+    // Log successful login with security metadata
+    log('admin', 'admin_login', null, {
+        username: admin.username,
+        ip,
+        userAgent
+    });
 
     res.json({
         token,
