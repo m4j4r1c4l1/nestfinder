@@ -1,9 +1,14 @@
 import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { run, get, log } from '../database.js';
 
 const router = Router();
+
+// JWT secret - use environment variable in production
+const JWT_SECRET = process.env.JWT_SECRET || 'nestfinder-admin-secret-change-in-production';
+const JWT_EXPIRATION = '24h';
 
 // Register new user (anonymous with optional nickname)
 router.post('/register', (req, res) => {
@@ -74,13 +79,25 @@ router.post('/admin/login', (req, res) => {
         return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Create simple token (in production, use JWT)
-    const token = Buffer.from(`${admin.id}:${Date.now()}`).toString('base64');
+    // Create JWT token with expiration
+    const token = jwt.sign(
+        {
+            adminId: admin.id,
+            username: admin.username
+        },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRATION }
+    );
+
+    log('admin', 'admin_login', null, { username: admin.username });
 
     res.json({
         token,
-        admin: { id: admin.id, username: admin.username }
+        admin: { id: admin.id, username: admin.username },
+        expiresIn: JWT_EXPIRATION
     });
 });
 
+// Export JWT_SECRET for middleware
+export { JWT_SECRET };
 export default router;
