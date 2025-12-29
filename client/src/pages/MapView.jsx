@@ -385,11 +385,11 @@ const MapView = () => {
             {/* Bottom Navigation */}
             <nav className="bottom-nav">
                 <button
-                    className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(activeSheet === 'route' ? null : 'route')}
+                    className={`bottom-nav-item ${activeSheet === 'filter' ? 'active' : ''}`}
+                    onClick={() => setActiveSheet(activeSheet === 'filter' ? null : 'filter')}
                 >
-                    <span>🚶</span>
-                    {t('map.route')}
+                    <span>🔍</span>
+                    {t('map.filters')}
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'submit' ? 'active' : ''}`}
@@ -399,11 +399,11 @@ const MapView = () => {
                     {t('nav.report')}
                 </button>
                 <button
-                    className={`bottom-nav-item ${activeSheet === 'filter' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(activeSheet === 'filter' ? null : 'filter')}
+                    className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
+                    onClick={() => setActiveSheet(activeSheet === 'route' ? null : 'route')}
                 >
-                    <span>🔍</span>
-                    {t('map.filters')}
+                    <span>🚶</span>
+                    {t('map.route')}
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'download' ? 'active' : ''}`}
