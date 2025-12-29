@@ -320,14 +320,15 @@ router.get('/export', (req, res) => {
     ].join('\n');
 
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=nestfinder-points.csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=nestfinder-nests.csv');
     return res.send(csv);
   }
 
-  // JSON format
+  // JSON format - pretty printed for readability
   res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Content-Disposition', 'attachment; filename=nestfinder-points.json');
-  res.json({ points, exported_at: new Date().toISOString() });
+  res.setHeader('Content-Disposition', 'attachment; filename=nestfinder-nests.json');
+  const jsonData = { points, exported_at: new Date().toISOString() };
+  res.send(JSON.stringify(jsonData, null, 2));
 });
 
 // Get points that need weekly validation (for original posters)

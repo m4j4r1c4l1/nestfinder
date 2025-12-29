@@ -148,7 +148,18 @@ class ApiClient {
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `nestfinder-points.${format === 'csv' ? 'csv' : 'json'}`;
+
+      // Generate timestamp: DDMMYYYY-HHMMss
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const yyyy = now.getFullYear();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const timestamp = `${dd}${mm}${yyyy}-${hh}${min}${ss}`;
+
+      link.download = `nestfinder-nests-${timestamp}.${format === 'csv' ? 'csv' : 'json'}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
