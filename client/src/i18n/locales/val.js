@@ -170,7 +170,21 @@ export default {
         unavailable: 'Ubicació no disponible',
         timeout: "Temps d'espera esgotat",
         enableLocation: 'Activar Ubicació',
-        requestingLocation: 'Obtenint la teua ubicació...'
+        requestingLocation: 'Obtenint la teua ubicació...',
+        enableTitle: 'Activa la teua Ubicació',
+        enableSubtitle: 'Prem a baix per a activar la ubicació i rutes personalitzades',
+        enableButton: '📍 Activar Ubicació',
+        locationEnabled: 'Ubicació activada!',
+        locationBlocked: 'Ubicació bloquejada. Esborra les dades del navegador i torna a intentar-ho.',
+        locationDenied: 'Ubicació denegada. Revisa {tip}',
+        locationUnavailable: 'Ubicació no disponible. Revisa el GPS del teu dispositiu.',
+        locationTimeout: "Temps esgotat. Torna a intentar-ho o revisa el GPS.",
+        iosInstructions: 'iOS: Ajustos → Privacitat → Servicis de Localització → Safari → Permetre',
+        androidInstructions: 'Android: Ajustos → Apps → Navegador → Permisos → Ubicació → Permetre',
+        desktopInstructions: 'Revisa la configuració del teu navegador per a activar la ubicació',
+        iosTip: 'Ajustos → Privacitat → Servicis de Localització → Safari',
+        androidTip: 'Ajustos → Apps → Navegador → Permisos → Ubicació',
+        browserSettings: 'configuració del navegador'
     },
     validation: {
         required: 'Aquest camp és requerit',

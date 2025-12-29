@@ -170,7 +170,21 @@ export default {
         unavailable: 'Localização indisponível',
         timeout: 'Tempo limite excedido',
         enableLocation: 'Ativar Localização',
-        requestingLocation: 'A obter localização...'
+        requestingLocation: 'A obter localização...',
+        enableTitle: 'Ative a sua Localização',
+        enableSubtitle: 'Toque abaixo para ativar a localização e rotas personalizadas',
+        enableButton: '📍 Ativar Localização',
+        locationEnabled: 'Localização ativada!',
+        locationBlocked: 'Localização bloqueada. Limpe os dados do navegador e tente novamente.',
+        locationDenied: 'Localização negada. Verifique {tip}',
+        locationUnavailable: 'Localização indisponível. Verifique o GPS do dispositivo.',
+        locationTimeout: 'Tempo esgotado. Tente novamente ou verifique o GPS.',
+        iosInstructions: 'iOS: Definições → Privacidade → Serviços de Localização → Safari → Permitir',
+        androidInstructions: 'Android: Definições → Apps → Navegador → Permissões → Localização → Permitir',
+        desktopInstructions: 'Verifique as definições do navegador para ativar a localização',
+        iosTip: 'Definições → Privacidade → Serviços de Localização → Safari',
+        androidTip: 'Definições → Apps → Navegador → Permissões → Localização',
+        browserSettings: 'definições do navegador'
     },
     validation: {
         required: 'Este campo é obrigatório',

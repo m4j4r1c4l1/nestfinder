@@ -204,7 +204,23 @@ export default {
         unavailable: 'Location unavailable',
         timeout: 'Location request timed out',
         enableLocation: 'Enable Location',
-        requestingLocation: 'Getting your location...'
+        requestingLocation: 'Getting your location...',
+        // Location banner
+        enableTitle: 'Enable Your Location',
+        enableSubtitle: 'Tap below to enable location for personalized routes',
+        enableButton: '📍 Enable Location',
+        locationEnabled: 'Location enabled!',
+        locationBlocked: 'Location blocked. Clear browser data and try again.',
+        locationDenied: 'Location denied. Check {tip}',
+        locationUnavailable: 'Location unavailable. Check your device GPS.',
+        locationTimeout: 'Location timed out. Try again or check GPS.',
+        // Platform instructions
+        iosInstructions: 'iOS: Settings → Privacy → Location Services → Safari → Allow',
+        androidInstructions: 'Android: Settings → Apps → Browser → Permissions → Location → Allow',
+        desktopInstructions: 'Check your browser settings to enable location access',
+        iosTip: 'Settings → Privacy → Location Services → Safari',
+        androidTip: 'Settings → Apps → Browser → Permissions → Location',
+        browserSettings: 'browser settings'
     },
 
     // Validation
