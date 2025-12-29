@@ -119,13 +119,26 @@ const Dashboard = ({ onNavigate }) => {
                     {/* Metrics */}
                     <div className="card" style={{ flex: 1 }}>
                         <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600 }}>📈 Metrics</span>
+                            <span style={{ fontWeight: 600 }}>📈 Activity Metrics</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <MetricRow label="Total Points" value={stats.totalPoints} onClick={() => handleStatClick('totalPoints')} color="var(--color-primary)" />
                             <MetricRow label="Active Users (7d)" value={stats.activeUsers} onClick={() => handleStatClick('activeUsers')} color="var(--color-confirmed)" />
                             <MetricRow label="New Reports Today" value={stats.todaySubmissions} onClick={() => handleStatClick('todayReports')} color="var(--color-pending)" />
                             <MetricRow label="Actions Today" value={stats.todayActions} onClick={() => handleStatClick('todayActions')} color="var(--color-accent)" />
+                        </div>
+                    </div>
+
+                    {/* Database Totals */}
+                    <div className="card" style={{ flex: 1 }}>
+                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600 }}>💾 Database Totals</span>
+                        </div>
+                        <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <MetricRow label="Total Users" value={stats.totalUsers} color="#3b82f6" />
+                            <MetricRow label="Total Notifications" value={stats.totalNotifications} color="#8b5cf6" />
+                            <MetricRow label="Unread Messages" value={stats.unreadNotifications} color="#f59e0b" />
+                            <MetricRow label="Total Votes" value={stats.totalConfirmations} color="#10b981" />
                         </div>
                     </div>
 

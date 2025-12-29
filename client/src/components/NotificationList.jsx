@@ -50,11 +50,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                 background: !n.read ? 'var(--color-bg-secondary)' : 'transparent',
                                 borderRadius: '8px',
                                 marginBottom: '8px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                borderLeft: !n.read ? '4px solid var(--color-primary)' : '4px solid transparent',
+                                opacity: n.read ? 0.65 : 1,
+                                transition: 'all 0.2s ease'
                             }}
                         >
                             <div className="notification-item-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                <span className="notification-title" style={{ fontWeight: 'bold' }}>{n.title}</span>
+                                <span className="notification-title" style={{ fontWeight: !n.read ? 'bold' : 'normal' }}>{n.title}</span>
                                 <span className="notification-time" style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>
                                     {new Date(n.created_at).toLocaleString('en-GB', {
                                         day: '2-digit',
