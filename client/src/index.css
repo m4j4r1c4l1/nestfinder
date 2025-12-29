@@ -235,19 +235,30 @@ a:hover {
   overflow: hidden;
 }
 
+/* Card Header - Standardized */
 .card-header {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4);
   border-bottom: 1px solid var(--color-border);
+  /* Ensure consistent height/alignment */
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .card-body {
-  padding: var(--space-5);
+  padding: var(--space-4);
+}
+
+/* Remove margin from last child to maintain uniform padding */
+.card-body>*:last-child {
+  margin-bottom: 0 !important;
 }
 
 .card-title {
-  font-size: var(--font-size-lg);
+  font-size: 1.15rem;
   font-weight: 600;
-  margin-bottom: var(--space-2);
+  margin: 0;
 }
 
 /* Glass Panel */
