@@ -130,7 +130,7 @@ export default {
         includeConfirmed: 'Include Confirmed',
         includePending: 'Include Pending',
         includeDeactivated: 'Include Deactivated',
-        pointsSelected: '{n} points selected'
+        pointsSelected: 'Points selected: {n}'
     },
 
     // Notifications/Inbox
