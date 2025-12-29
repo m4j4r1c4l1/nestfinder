@@ -4,87 +4,90 @@ import { useLanguage } from '../i18n/LanguageContext';
 const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, toggleSettings }) => {
     const { t } = useLanguage();
     return (
-        <div className="notification-list-container" style={{ padding: '0 16px 24px 16px' }}>
+        <div className="card">
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t('inbox.title')}</h3>
-                <div className="notification-settings-toggle" onClick={toggleSettings}>
-                    <span>Real-time Popup</span>
+            <div className="card-header flex-between items-center">
+                <h3 className="card-title">{t('inbox.title')}</h3>
+                <div className="notification-settings-toggle" onClick={toggleSettings} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{t('settings.popupMessages')}</span>
                     <div className={`toggle-switch ${settings.realTime ? 'active' : ''}`}></div>
                 </div>
             </div>
 
-            {/* Actions */}
-            {notifications.some(n => !n.read) && (
-                <div style={{ textAlign: 'right', marginBottom: '12px' }}>
-                    <button
-                        onClick={markAllAsRead}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--color-primary)',
-                            fontSize: '0.9rem',
-                            fontWeight: 600,
-                            cursor: 'pointer'
-                        }}
-                    >
-                        {t('inbox.markAllRead')}
-                    </button>
-                </div>
-            )}
-
-            {/* List */}
-            <div className="notification-list">
-                {notifications.length === 0 ? (
-                    <div className="notification-empty" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-light)' }}>
-                        <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📭</div>
-                        {t('inbox.noMessages')}
-                    </div>
-                ) : (
-                    notifications.map(n => (
-                        <div
-                            key={n.id}
-                            className={`notification-item ${!n.read ? 'unread' : ''}`}
-                            onClick={() => markAsRead(n)}
+            {/* Body */}
+            <div className="card-body">
+                {/* Actions */}
+                {notifications.some(n => !n.read) && (
+                    <div style={{ textAlign: 'right', marginBottom: '12px' }}>
+                        <button
+                            onClick={markAllAsRead}
                             style={{
-                                padding: '12px',
-                                borderBottom: '1px solid var(--color-border)',
-                                background: !n.read ? 'var(--color-bg-secondary)' : 'transparent',
-                                borderRadius: '8px',
-                                marginBottom: '8px',
-                                cursor: 'pointer',
-                                borderLeft: !n.read ? '4px solid var(--color-primary)' : '4px solid transparent',
-                                opacity: n.read ? 0.65 : 1,
-                                transition: 'all 0.2s ease'
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--color-primary)',
+                                fontSize: '0.9rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
                             }}
                         >
-                            <div className="notification-item-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                <span className="notification-title" style={{ fontWeight: !n.read ? 'bold' : 'normal' }}>{n.title}</span>
-                                <span className="notification-time" style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>
-                                    {(() => {
-                                        try {
-                                            // Fix timezone: SQLite returns "YYYY-MM-DD HH:MM:SS" (UTC)
-                                            // Convert to ISO "YYYY-MM-DDTHH:MM:SSZ" to force UTC parsing
-                                            const utcTime = n.created_at.replace(' ', 'T') + 'Z';
-                                            return new Date(utcTime).toLocaleString('en-GB', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                                second: '2-digit',
-                                                hour12: false
-                                            });
-                                        } catch (e) {
-                                            return n.created_at;
-                                        }
-                                    })()}
-                                </span>
-                            </div>
-                            <div className="notification-body" style={{ color: 'var(--color-text)', fontSize: '0.95rem' }}>{n.body}</div>
-                        </div>
-                    ))
+                            {t('inbox.markAllRead')}
+                        </button>
+                    </div>
                 )}
+
+                {/* List */}
+                <div className="notification-list">
+                    {notifications.length === 0 ? (
+                        <div className="notification-empty" style={{ textAlign: 'center', padding: 'var(--space-4) 0', color: 'var(--color-text-light)' }}>
+                            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📭</div>
+                            {t('inbox.noMessages')}
+                        </div>
+                    ) : (
+                        notifications.map(n => (
+                            <div
+                                key={n.id}
+                                className={`notification-item ${!n.read ? 'unread' : ''}`}
+                                onClick={() => markAsRead(n)}
+                                style={{
+                                    padding: '12px',
+                                    borderBottom: '1px solid var(--color-border)',
+                                    background: !n.read ? 'var(--color-bg-secondary)' : 'transparent',
+                                    borderRadius: '8px',
+                                    marginBottom: '8px',
+                                    cursor: 'pointer',
+                                    borderLeft: !n.read ? '4px solid var(--color-primary)' : '4px solid transparent',
+                                    opacity: n.read ? 0.65 : 1,
+                                    transition: 'all 0.2s ease'
+                                }}
+                            >
+                                <div className="notification-item-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                    <span className="notification-title" style={{ fontWeight: !n.read ? 'bold' : 'normal' }}>{n.title}</span>
+                                    <span className="notification-time" style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>
+                                        {(() => {
+                                            try {
+                                                // Fix timezone: SQLite returns "YYYY-MM-DD HH:MM:SS" (UTC)
+                                                // Convert to ISO "YYYY-MM-DDTHH:MM:SSZ" to force UTC parsing
+                                                const utcTime = n.created_at.replace(' ', 'T') + 'Z';
+                                                return new Date(utcTime).toLocaleString('en-GB', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    second: '2-digit',
+                                                    hour12: false
+                                                });
+                                            } catch (e) {
+                                                return n.created_at;
+                                            }
+                                        })()}
+                                    </span>
+                                </div>
+                                <div className="notification-body" style={{ color: 'var(--color-text)', fontSize: '0.95rem' }}>{n.body}</div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     );
