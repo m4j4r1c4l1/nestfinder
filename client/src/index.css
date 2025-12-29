@@ -546,7 +546,8 @@ textarea.form-input {
   transition: all var(--transition-slow);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* Changed from justify-content:center to allow safe scrolling */
+  /* Centering is now done via margin:auto on Green cards */
   /* Critical for flex scroll to work */
   min-height: 0;
   /* Add padding since Blue box is removed */
@@ -588,7 +589,7 @@ textarea.form-input {
 .bottom-sheet>.card {
   max-height: none;
   overflow: visible;
-  margin: 0;
+  margin: auto 0;
   flex: 0 1 auto;
 
   /* DEBUG: GREEN - Card Container */
