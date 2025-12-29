@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
-const NOTIFICATION_PREF_KEY = 'nestfinder_notification_popup';
+const NOTIFICATION_PREF_KEY = 'nestfinder_notify_settings';
 
 const SettingsPanel = ({ onClose }) => {
     const { t, language, setLanguage, availableLanguages } = useLanguage();
     const [popupEnabled, setPopupEnabled] = useState(() => {
-        const stored = localStorage.getItem(NOTIFICATION_PREF_KEY);
-        return stored === null ? true : stored === 'true';
+        try {
+            const stored = localStorage.getItem(NOTIFICATION_PREF_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                return parsed.realTime !== false;
+            }
+        } catch (e) { }
+        return true;
     });
 
     const togglePopup = () => {
         const newValue = !popupEnabled;
         setPopupEnabled(newValue);
-        localStorage.setItem(NOTIFICATION_PREF_KEY, String(newValue));
+        localStorage.setItem(NOTIFICATION_PREF_KEY, JSON.stringify({ realTime: newValue }));
     };
 
     return (

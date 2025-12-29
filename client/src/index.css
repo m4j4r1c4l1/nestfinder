@@ -561,17 +561,17 @@ textarea.form-input {
 /* Bottom Nav - Mobile Optimized */
 .bottom-nav {
   display: flex;
-  min-height: 80px;
+  min-height: 70px;
   /* Dark Elegant Floating Island */
   position: fixed;
-  bottom: 24px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 500px;
+  width: calc(100% - 24px);
+  max-width: 600px;
   border-radius: 32px;
   /* Large fully rounded corners */
-  background: rgba(20, 25, 35, 0.9);
+  background: rgba(20, 25, 35, 0.95);
   /* Deep Dark Blue/Black */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -581,7 +581,7 @@ textarea.form-input {
   border: 1px solid rgba(255, 255, 255, 0.1);
   justify-content: space-evenly;
   z-index: 1000;
-  padding: 0 16px;
+  padding: 0 8px;
   margin: 0;
 }
 
@@ -591,17 +591,17 @@ textarea.form-input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  padding: 12px 8px;
-  /* Consistent padding for alignment */
-  font-size: var(--font-size-sm);
+  gap: 2px;
+  padding: 8px 4px;
+  /* Reduced padding for 6 items */
+  font-size: 0.7rem;
   font-weight: 600;
   background: none;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  border-radius: 20px;
+  border-radius: 16px;
   color: #94a3b8;
   /* Default text color */
 }
