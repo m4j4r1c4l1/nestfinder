@@ -992,6 +992,51 @@ textarea.form-input {
   background: var(--color-deactivated);
 }
 
+/* Notification Popup - Centered Modal */
+.notification-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+}
+
+.notification-popup {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--color-border);
+  animation: popup-enter 0.3s ease-out;
+}
+
+@keyframes popup-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.notification-popup h3 {
+  color: var(--color-text-primary);
+}
+
+.notification-popup p {
+  color: var(--color-text-secondary);
+}
+
 /* Safe areas for mobile */
 @supports (padding-top: env(safe-area-inset-top)) {
 
