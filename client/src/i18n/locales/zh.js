@@ -23,6 +23,8 @@ export default {
         downloadKML: '下载 KML',
         downloadJSON: '下载 JSON',
         downloadCSV: '下载 CSV',
+        downloadGPX: '下载 GPX',
+        downloadKML: '下载 KML',
         totalPoints: '总点数',
         noResults: '未找到结果'
     },
