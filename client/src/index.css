@@ -248,8 +248,10 @@ a:hover {
 
 .card-body {
   padding: var(--space-4);
-  padding-bottom: var(--space-8);
-  /* Lift content upwards (32px) */
+  /* Ensure inner content is vertically centered */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Remove margin from last child to maintain uniform padding */
