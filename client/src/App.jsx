@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { LanguageProvider } from './i18n/LanguageContext';
 import LanguagePicker from './components/LanguagePicker';
+import WelcomeMessage from './components/WelcomeMessage';
 import Home from './pages/Home';
 import MapView from './pages/MapView';
 
@@ -30,6 +31,7 @@ const AppContent = () => {
 const App = () => {
     return (
         <LanguageProvider>
+            <WelcomeMessage />
             <LanguagePicker />
             <AppContent />
         </LanguageProvider>
@@ -37,4 +39,5 @@ const App = () => {
 };
 
 export default App;
+
 

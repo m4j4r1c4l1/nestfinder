@@ -13,7 +13,8 @@ export default {
         map: 'Mapa',
         report: 'Reportar',
         profile: 'Perfil',
-        inbox: 'Bandeja'
+        inbox: 'Bandeja',
+        settings: 'Ajustes'
     },
 
     // Map View
@@ -158,6 +159,23 @@ export default {
         title: 'Elegir Idioma',
         subtitle: 'Selecciona tu idioma preferido',
         continue: 'Continuar'
+    },
+
+    // Settings
+    settings: {
+        notifications: 'Notificaciones',
+        popupMessages: 'Popups en Tiempo Real',
+        popupDescription: 'Mostrar mensajes inmediatamente al recibirlos'
+    },
+
+    // Welcome Message
+    welcome: {
+        title: '¡Bienvenido a NestFinder!',
+        message1: '¡Gracias por ser el maravilloso ser humano que eres!',
+        message2: 'Cada acto de bondad cuenta cuando nos ayudamos mutuamente.',
+        message3: 'Juntos podemos hacer la diferencia en nuestra comunidad.',
+        callToAction: 'Ayuda a localizar y asistir a quienes más lo necesitan.',
+        button: 'Comenzar'
     },
 
     // Common/Shared
