@@ -143,13 +143,23 @@ export default {
         popupDescription: 'Показывать сообщения сразу'
     },
     // Welcome Message (Home Page)
+    // Welcome Message (Home Page & Modal)
     welcome: {
+        // Home Screen
         title: 'NestFinder',
-        subtitle: 'Поиск убежищ, чтобы принести им облегчение ❤️',
+        subtitle: 'Поиск Убежищ ❤️ Принося Облегчение',
         nicknameLabel: 'Введите псевдоним для участия (необязательно)',
         nicknamePlaceholder: 'Анонимный Помощник',
         buttonStart: 'Начать Помогать',
-        buttonLoading: 'Запуск...'
+        buttonLoading: 'Запуск...',
+
+        // Welcome Modal
+        modalTitle: 'Добро пожаловать в NestFinder!',
+        message1: 'Спасибо за то, что вы замечательный человек!',
+        message2: 'Каждый добрый поступок важен.',
+        message3: 'Вместе мы можем изменить мир к лучшему.',
+        callToAction: 'Помогайте находить и поддерживать тех, кто в этом нуждается.',
+        button: 'Начать'
     },
     common: {
         loading: 'Загрузка...',

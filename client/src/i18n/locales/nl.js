@@ -143,13 +143,23 @@ export default {
         popupDescription: 'Toon berichten direct bij ontvangst'
     },
     // Welcome Message (Home Page)
+    // Welcome Message (Home Page & Modal)
     welcome: {
+        // Home Screen
         title: 'NestFinder',
-        subtitle: 'Nesten vinden om ze wat verlichting te brengen ❤️',
+        subtitle: 'Nesten Vinden ❤️ Verlichting Brengen',
         nicknameLabel: 'Vul een bijnaam in om bij te dragen (optioneel)',
         nicknamePlaceholder: 'Anonieme Helper',
         buttonStart: 'Start met Helpen',
-        buttonLoading: 'Starten...'
+        buttonLoading: 'Starten...',
+
+        // Welcome Modal
+        modalTitle: 'Welkom bij NestFinder!',
+        message1: 'Bedankt dat je zo\'n geweldig persoon bent!',
+        message2: 'Elke daad van vriendelijkheid telt als we elkaar helpen.',
+        message3: 'Samen kunnen we een verschil maken in de gemeenschap.',
+        callToAction: 'Help om degenen die het nodig hebben te lokaliseren en helpen.',
+        button: 'Aan de slag'
     },
     common: {
         loading: 'Laden...',

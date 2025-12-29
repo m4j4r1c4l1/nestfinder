@@ -143,13 +143,23 @@ export default {
         popupDescription: 'Mostrar missatges immediatament'
     },
     // Welcome Message (Home Page)
+    // Welcome Message (Home Page & Modal)
     welcome: {
+        // Home Screen
         title: 'NestFinder',
-        subtitle: 'Trobant nius per a donar-los un poc d\'alleujament ❤️',
+        subtitle: 'Trobant Nius ❤️ Portant Alleujament',
         nicknameLabel: 'Introdueix un sobrenom per a contribuir (opcional)',
         nicknamePlaceholder: 'Ajudant Anònim',
         buttonStart: 'Començar a Ajudar',
-        buttonLoading: 'Iniciant...'
+        buttonLoading: 'Iniciant...',
+
+        // Welcome Modal
+        modalTitle: 'Benvingut a NestFinder!',
+        message1: "Gràcies per ser la persona meravellosa que eres!",
+        message2: "Cada acte de bondat compta quan ens ajudem mútuament.",
+        message3: 'Junts podem fer la diferència en la nostra comunitat.',
+        callToAction: 'Ajuda a localitzar i assistir a qui més ho necessita.',
+        button: 'Començar'
     },
     common: {
         loading: 'Carregant...',
