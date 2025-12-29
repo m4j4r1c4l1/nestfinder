@@ -32,6 +32,7 @@
 - **🌍 11 Languages** — Native support for EN, ES, FR, PT, IT, DE, NL, RU, AR, ZH, VAL.
 - **🔔 Real-time Alerts** — Push notifications for updates and verifications.
 - **📱 Installable App** — Add to home screen on iOS/Android (no store needed).
+- **📥 Data Export** — Download points in JSON, CSV, GPX, or KML formats.
 
 👉 **[See Detailed Features List](docs/FEATURES.md)**
 
