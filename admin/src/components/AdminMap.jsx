@@ -52,12 +52,28 @@ const MapResizer = () => {
     return null;
 };
 
-const AdminMap = ({ points }) => {
+const AdminMap = ({ points, filteredPoints }) => {
     // Set max bounds to prevent world wrapping
     const maxBounds = L.latLngBounds(
         L.latLng(-85, -180),  // Southwest
         L.latLng(85, 180)     // Northeast
     );
+
+    // Component to fit bounds when filtered
+    const FitBounds = () => {
+        const map = useMap();
+
+        useEffect(() => {
+            if (filteredPoints && filteredPoints.length > 0) {
+                const bounds = L.latLngBounds(
+                    filteredPoints.map(p => [p.latitude, p.longitude])
+                );
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            }
+        }, [filteredPoints, map]);
+
+        return null;
+    };
 
     return (
         <MapContainer
@@ -70,6 +86,7 @@ const AdminMap = ({ points }) => {
             style={{ height: '100%', width: '100%', borderRadius: 'var(--radius-lg)', minHeight: '300px' }}
         >
             <MapResizer />
+            <FitBounds />
             <TileLayer
                 attribution='&copy; OSM'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
