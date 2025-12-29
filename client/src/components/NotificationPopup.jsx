@@ -8,6 +8,14 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead }) => {
             <div className="notification-popup" onClick={e => e.stopPropagation()}>
                 <span className="notification-popup-icon" style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>🔔</span>
                 <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem' }}>{message.title}</h3>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '12px' }}>
+                    {(() => {
+                        try {
+                            const utcTime = message.created_at.replace(' ', 'T') + 'Z';
+                            return new Date(utcTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        } catch (e) { return ''; }
+                    })()}
+                </div>
                 <p style={{ margin: '0 0 24px 0', color: '#666', lineHeight: '1.5' }}>{message.body}</p>
                 <button
                     className="btn btn-primary btn-block"

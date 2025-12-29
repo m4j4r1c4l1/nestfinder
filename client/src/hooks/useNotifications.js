@@ -86,7 +86,7 @@ export const useNotifications = (userId) => {
     useEffect(() => {
         const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
-    }, [userId]);
+    }, [userId, settings]);
 
     // Listen for settings changes from SettingsPanel
     useEffect(() => {
