@@ -9,7 +9,15 @@ export const useNotifications = (userId) => {
     const [loading, setLoading] = useState(true);
     const [settings, setSettings] = useState(() => {
         const saved = localStorage.getItem('nestfinder_notify_settings');
-        return saved ? JSON.parse(saved) : { realTime: true };
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) { }
+        }
+        // First time: write default settings to localStorage
+        const defaultSettings = { realTime: true };
+        localStorage.setItem('nestfinder_notify_settings', JSON.stringify(defaultSettings));
+        return defaultSettings;
     });
 
     const maxKnownIdRef = useRef(0);
