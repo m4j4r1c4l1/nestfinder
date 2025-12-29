@@ -22,6 +22,8 @@ export default {
         download: 'تنزيل',
         downloadGPX: 'تنزيل GPX',
         downloadKML: 'تنزيل KML',
+        downloadJSON: 'تنزيل JSON',
+        downloadCSV: 'تنزيل CSV',
         totalPoints: 'إجمالي النقاط',
         noResults: 'لا توجد نتائج'
     },

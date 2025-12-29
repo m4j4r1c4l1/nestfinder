@@ -21,6 +21,8 @@ export default {
         download: 'Scarica',
         downloadGPX: 'Scarica GPX',
         downloadKML: 'Scarica KML',
+        downloadJSON: 'Scarica JSON',
+        downloadCSV: 'Scarica CSV',
         totalPoints: 'punti totali',
         noResults: 'Nessun risultato trovato'
     },
@@ -107,7 +109,8 @@ export default {
         filterByStatus: 'Filtra per stato',
         includeConfirmed: 'Includi Confermati',
         includePending: 'Includi In Attesa',
-        includeDeactivated: 'Includi Disattivati'
+        includeDeactivated: 'Includi Disattivati',
+        pointsSelected: '{n} punti selezionati'
     },
     inbox: {
         title: 'Messaggi',

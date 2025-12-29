@@ -21,6 +21,8 @@ export default {
         download: '下载',
         downloadGPX: '下载 GPX',
         downloadKML: '下载 KML',
+        downloadJSON: '下载 JSON',
+        downloadCSV: '下载 CSV',
         totalPoints: '总点数',
         noResults: '未找到结果'
     },
@@ -107,7 +109,8 @@ export default {
         filterByStatus: '按状态筛选',
         includeConfirmed: '包括已确认',
         includePending: '包括待审核',
-        includeDeactivated: '包括已停用'
+        includeDeactivated: '包括已停用',
+        pointsSelected: '已选择 {n} 个点'
     },
     inbox: {
         title: '消息',

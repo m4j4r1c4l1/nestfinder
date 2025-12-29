@@ -21,6 +21,8 @@ export default {
         download: 'Descarregar',
         downloadGPX: 'Descarregar GPX',
         downloadKML: 'Descarregar KML',
+        downloadJSON: 'Descarregar JSON',
+        downloadCSV: 'Descarregar CSV',
         totalPoints: 'punts totals',
         noResults: "No s'han trobat resultats"
     },
@@ -107,7 +109,8 @@ export default {
         filterByStatus: "Filtrar per estat",
         includeConfirmed: 'Incloure Confirmats',
         includePending: 'Incloure Pendents',
-        includeDeactivated: 'Incloure Desactivats'
+        includeDeactivated: 'Incloure Desactivats',
+        pointsSelected: '{n} punts seleccionats'
     },
     inbox: {
         title: "Bústia d'entrada",
