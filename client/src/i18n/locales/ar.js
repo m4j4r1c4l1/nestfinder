@@ -110,7 +110,8 @@ export default {
         filterByStatus: 'تصفية الحالة',
         includeConfirmed: 'مؤكدة',
         includePending: 'معلقة',
-        includeDeactivated: 'معطلة'
+        includeDeactivated: 'معطلة',
+        pointsSelected: 'تم تحديد {n} نقطة'
     },
     inbox: {
         title: 'الرسائل',
