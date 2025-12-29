@@ -143,13 +143,23 @@ export default {
         popupDescription: 'Nachrichten sofort anzeigen'
     },
     // Welcome Message (Home Page)
+    // Welcome Message (Home Page & Modal)
     welcome: {
+        // Home Screen
         title: 'NestFinder',
-        subtitle: 'Nester finden, um ihnen etwas Linderung zu verschaffen ❤️',
+        subtitle: 'Nester Finden ❤️ Linderung Bringen',
         nicknameLabel: 'Gib einen Spitznamen ein, um beizutragen (optional)',
         nicknamePlaceholder: 'Anonymer Helfer',
         buttonStart: 'Helfen Starten',
-        buttonLoading: 'Starte...'
+        buttonLoading: 'Starte...',
+
+        // Welcome Modal
+        modalTitle: 'Willkommen bei NestFinder!',
+        message1: 'Danke, dass Sie so ein toller Mensch sind!',
+        message2: 'Jeder Akt der Freundlichkeit zählt.',
+        message3: 'Gemeinsam können wir einen Unterschied machen.',
+        callToAction: 'Helfen Sie, Bedürftige zu finden und zu unterstützen.',
+        button: 'Los geht\'s'
     },
     common: {
         loading: 'Laden...',

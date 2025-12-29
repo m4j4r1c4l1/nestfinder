@@ -55,7 +55,7 @@ const WelcomeMessage = ({ onClose }) => {
                     fontSize: '1.5rem',
                     fontWeight: 700
                 }}>
-                    {t('welcome.title')}
+                    {t('welcome.modalTitle')}
                 </h2>
 
                 {/* Messages */}

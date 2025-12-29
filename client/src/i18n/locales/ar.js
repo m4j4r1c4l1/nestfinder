@@ -144,13 +144,23 @@ export default {
         popupDescription: 'عرض الرسائل فوراً'
     },
     // Welcome Message (Home Page)
+    // Welcome Message (Home Page & Modal)
     welcome: {
+        // Home Screen
         title: 'NestFinder',
-        subtitle: 'البحث عن أعشاش لمنحهم بعض الراحة ❤️',
+        subtitle: 'إيجاد المأوى ❤️ جلب الراحة',
         nicknameLabel: 'أدخل اسم مستعار للمساهمة (اختياري)',
         nicknamePlaceholder: 'مساعد مجهول',
         buttonStart: 'ابدأ المساعدة',
-        buttonLoading: 'جار البدء...'
+        buttonLoading: 'جار البدء...',
+
+        // Welcome Modal
+        modalTitle: 'مرحبًا في NestFinder!',
+        message1: 'شكراً لكونك رائعاً!',
+        message2: 'المساعدة تحدث فرقاً.',
+        message3: 'معاً نصنع التغيير.',
+        callToAction: 'ساعد من يحتاج للمساعدة.',
+        button: 'ابدأ'
     },
     common: {
         loading: 'تحميل...',
