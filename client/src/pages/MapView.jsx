@@ -366,18 +366,18 @@ const MapView = () => {
                                 &times;
                             </button>
                         </div>
-                        <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <button className="btn btn-primary btn-block" onClick={() => handleDownload('json')}>
-                                {t('map.downloadJSON')}
+                        <div className="card-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                            <button className="btn btn-primary" onClick={() => handleDownload('json')} style={{ padding: '12px 8px' }}>
+                                📄 JSON
                             </button>
-                            <button className="btn btn-primary btn-block" onClick={() => handleDownload('csv')}>
-                                {t('map.downloadCSV')}
+                            <button className="btn btn-primary" onClick={() => handleDownload('csv')} style={{ padding: '12px 8px' }}>
+                                📊 CSV
                             </button>
-                            <button className="btn btn-primary btn-block" onClick={() => handleDownload('gpx')}>
-                                📍 {t('map.downloadGPX')}
+                            <button className="btn btn-primary" onClick={() => handleDownload('gpx')} style={{ padding: '12px 8px' }}>
+                                📍 GPX
                             </button>
-                            <button className="btn btn-primary btn-block" onClick={() => handleDownload('kml')}>
-                                🌍 {t('map.downloadKML')}
+                            <button className="btn btn-primary" onClick={() => handleDownload('kml')} style={{ padding: '12px 8px' }}>
+                                🌍 KML
                             </button>
                         </div>
                     </div>

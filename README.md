@@ -22,7 +22,7 @@
 
 **NestFinder** is a community-driven tool designed to help locate and verify resources for those in need. Built as a fast, offline-capable Progressive Web App (PWA), it works seamlessly on mobile devices and desktops.
 
-![Screenshot: Main Map View](docs/images/map_view.jpg)
+<p align="center"><img src="docs/images/map_view.jpg" width="300" alt="Screenshot: Main Map View" /></p>
 
 ## ✨ Key Features
 
