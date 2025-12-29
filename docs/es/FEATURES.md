@@ -2,6 +2,16 @@
 
 Este documento proporciona una descripción técnica detallada de las características, arquitectura y capacidades de la aplicación.
 
+---
+
+**Contenido**
+- [🏗️ Visión General de la Arquitectura](#️-visión-general-de-la-arquitectura)
+- [🗺️ Características Principales](#️-características-principales)
+- [🔒 Seguridad y Privacidad](#-seguridad-y-privacidad)
+- [📥 Exportación de Datos](#-exportación-de-datos)
+
+---
+
 ## 🏗️ Visión General de la Arquitectura
 
 NestFinder está construida como una **Aplicación Web Progresiva (PWA)** usando una pila moderna de React.

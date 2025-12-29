@@ -2,6 +2,16 @@
 
 This document provides a detailed technical overview of the application's features, architecture, and capabilities.
 
+---
+
+**Contents**
+- [🏗️ Architecture Overview](#️-architecture-overview)
+- [🗺️ Core Features](#️-core-features)
+- [🔒 Security & Privacy](#-security--privacy)
+- [📥 Data Export](#-data-export)
+
+---
+
 ## 🏗️ Architecture Overview
 
 NestFinder is built as a **Progressive Web App (PWA)** using a modern React stack.
