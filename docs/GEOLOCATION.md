@@ -12,26 +12,32 @@ If you see an error saying location was denied or blocked, your browser has like
 
 1. **System Level**:
    - Go to **Settings** → **Privacy & Security** → **Location Services**.
-   - <img src="images/ios_step1_menu.jpg" width="250" />
+   <p align="center"><img src="images/ios_step1_menu.jpg" width="250" /></p>
+   
    - Ensure it is **ON**.
-   - <img src="images/ios_step2_toggle.jpg" width="250" />
+   <p align="center"><img src="images/ios_step2_toggle.jpg" width="250" /></p>
+   
    - *If you see this system prompt, tap "Allow While Using App":*
-   - <img src="images/ios_system_permission_prompt.jpg" width="250" />
+   <p align="center"><img src="images/ios_system_permission_prompt.jpg" width="250" /></p>
 
 2. **Browser Level (Safari)**:
    - In the same menu, scroll down to **Safari Websites**.
-   - <img src="images/ios_step3_applist.jpg" width="250" />
+   <p align="center"><img src="images/ios_step3_applist.jpg" width="250" /></p>
+   
    - Set to **"While Using the App"** (or "Ask Next Time") and check **Precise Location**.
-   - <img src="images/ios_step4_permissions.jpg" width="250" />
+   <p align="center"><img src="images/ios_step4_permissions.jpg" width="250" /></p>
+   
    - *If set to "Never", Safari will auto-block all sites.*
 
 3. **Method 2: Global Safari Settings**:
    - Go to **Settings** and find **Safari** (or search in Apps).
-   - <img src="images/ios_safari_app_search.jpg" width="250" />
+   <p align="center"><img src="images/ios_safari_app_search.jpg" width="250" /></p>
+   
    - Scroll to **Settings for Websites** and tap **Location**.
-   - <img src="images/ios_safari_settings_location.jpg" width="250" />
+   <p align="center"><img src="images/ios_safari_settings_location.jpg" width="250" /></p>
+   
    - Ensure it is set to **"Ask"** or "Allow".
-   - <img src="images/ios_safari_global_policy.jpg" width="250" />
+   <p align="center"><img src="images/ios_safari_global_policy.jpg" width="250" /></p>
 
 **To clear a specific block:**
 1. Go to **Settings** → **Safari** → **Advanced** → **Website Data**.
