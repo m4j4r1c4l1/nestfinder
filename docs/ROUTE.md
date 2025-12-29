@@ -46,6 +46,7 @@ Routes are calculated using [OSRM](https://router.project-osrm.org/) (Open Sourc
 - Walking mode directions
 - Real street paths (not straight lines)
 - Free, no API key required
+- 
 
 ### Map Bounds Tracking
 ```javascript
@@ -70,6 +71,16 @@ const isPointInBounds = (point) => {
 // Combined filter: status + viewport
 points.filter(p => statusFilter[p.status] && isPointInBounds(p));
 ```
+
+### Algorithms & Optimization
+
+#### The Traveling Salesman Problem (TSP)
+The challenge of visiting multiple nests in the most efficient order is a variation of the classic [Traveling Salesman Problem (TSP)](https://en.wikipedia.org/wiki/Travelling_salesman_problem). While finding the *absolute* perfect route is computationally intensive (NP-hard), NestFinder uses heuristic approaches to provide a near-optimal path quickly.
+
+#### Pathfinding & Contraction Hierarchies
+To calculate the actual walking path between two points, we rely on **OSRM**, which utilizes advanced techniques:
+- **Dijkstra's Algorithm Variants**: At its core, pathfinding calculates the shortest path on a weighted graph (road network).
+- **Contraction Hierarchies**: OSRM significantly accelerates this using [Contraction Hierarchies](https://en.wikipedia.org/wiki/Contraction_hierarchies). This technique pre-processes the map to create "shortcuts" between important nodes, reducing the search space from millions of nodes to a manageable few, enabling sub-second route calculation.
 
 ---
 
