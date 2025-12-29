@@ -24,11 +24,11 @@ const SettingsPanel = ({ onClose }) => {
 
     return (
         <div className="card">
-            <div className="card-header flex-between flex-center">
-                <h3 className="card-title" style={{ marginBottom: 0 }}>{t('nav.settings')}</h3>
+            <div className="card-header flex-between items-center">
+                <h3 className="card-title">{t('nav.settings')}</h3>
                 <button
                     onClick={onClose}
-                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer' }}
+                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                 >
                     &times;
                 </button>

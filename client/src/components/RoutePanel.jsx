@@ -139,8 +139,14 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, userLocation }) =
 
     return (
         <div className="card">
-            <div className="card-header">
+            <div className="card-header flex-between items-center">
                 <h3 className="card-title">{t('route.title')}</h3>
+                <button
+                    onClick={onClear}
+                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                >
+                    &times;
+                </button>
             </div>
             <div className="card-body">
                 {/* Status Filter */}
