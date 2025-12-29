@@ -170,7 +170,21 @@ export default {
         unavailable: 'Locatie niet beschikbaar',
         timeout: 'Time-out',
         enableLocation: 'Locatie Aanzetten',
-        requestingLocation: 'Locatie ophalen...'
+        requestingLocation: 'Locatie ophalen...',
+        enableTitle: 'Zet je locatie aan',
+        enableSubtitle: 'Tik hieronder om locatie en gepersonaliseerde routes aan te zetten',
+        enableButton: '📍 Locatie Aanzetten',
+        locationEnabled: 'Locatie aangezet!',
+        locationBlocked: 'Locatie geblokkeerd. Wis browsergegevens en probeer opnieuw.',
+        locationDenied: 'Locatie geweigerd. Controleer {tip}',
+        locationUnavailable: 'Locatie niet beschikbaar. Controleer GPS.',
+        locationTimeout: 'Time-out. Probeer opnieuw of controleer GPS.',
+        iosInstructions: 'iOS: Instellingen → Privacy → Locatievoorzieningen → Safari → Toestaan',
+        androidInstructions: 'Android: Instellingen → Apps → Browser → Machtigingen → Locatie → Toestaan',
+        desktopInstructions: 'Controleer browserinstellingen om locatie aan te zetten',
+        iosTip: 'Instellingen → Privacy → Locatievoorzieningen → Safari',
+        androidTip: 'Instellingen → Apps → Browser → Machtigingen → Locatie',
+        browserSettings: 'browserinstellingen'
     },
     validation: {
         required: 'Dit veld is verplicht',

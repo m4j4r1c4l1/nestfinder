@@ -170,7 +170,21 @@ export default {
         unavailable: '位置不可用',
         timeout: '请求超时',
         enableLocation: '开启定位',
-        requestingLocation: '正在获取位置...'
+        requestingLocation: '正在获取位置...',
+        enableTitle: '开启您的位置',
+        enableSubtitle: '点击下方开启位置服务和个性化路线',
+        enableButton: '📍 开启定位',
+        locationEnabled: '位置已开启！',
+        locationBlocked: '位置被阻止。请清除浏览器数据后重试。',
+        locationDenied: '位置被拒绝。请检查{tip}',
+        locationUnavailable: '位置不可用。请检查GPS。',
+        locationTimeout: '请求超时。请重试或检查GPS。',
+        iosInstructions: 'iOS：设置 → 隐私 → 定位服务 → Safari → 允许',
+        androidInstructions: 'Android：设置 → 应用 → 浏览器 → 权限 → 位置 → 允许',
+        desktopInstructions: '请检查浏览器设置以开启位置服务',
+        iosTip: '设置 → 隐私 → 定位服务 → Safari',
+        androidTip: '设置 → 应用 → 浏览器 → 权限 → 位置',
+        browserSettings: '浏览器设置'
     },
     validation: {
         required: '此项必填',
