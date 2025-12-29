@@ -136,10 +136,27 @@ class ApiClient {
     });
   }
 
-  downloadPoints(format = 'json', status) {
+  async downloadPoints(format = 'json', status) {
     let url = `${API_URL}/points/export?format=${format}`;
     if (status) url += `&status=${status}`;
-    window.location.href = url;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `nestfinder-points.${format === 'csv' ? 'csv' : 'json'}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      throw error;
+    }
   }
 
   // Settings
