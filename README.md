@@ -5,7 +5,7 @@
     <br />
     <a href="docs/USER_GUIDE.md"><strong>📱 User Guide</strong></a> ·
     <a href="docs/FEATURES.md"><strong>🛠️ Technical Features</strong></a> ·
-    <a href="docs/DEPLOY.md"><strong>🚀 Deployment</strong></a>
+
   </p>
 </p>
 
@@ -22,7 +22,7 @@
 
 **NestFinder** is a community-driven tool designed to help locate and verify resources for those in need. Built as a fast, offline-capable Progressive Web App (PWA), it works seamlessly on mobile devices and desktops.
 
-![Screenshot: Main Map View](client/public/screenshots/map_view_placeholder.png)
+![Screenshot: Main Map View](docs/images/map_view.jpg)
 
 ## ✨ Key Features
 
@@ -83,7 +83,7 @@ nestfinder/
 └── docs/            # Documentation
     ├── USER_GUIDE.md    # 📱 End-user instructions
     ├── FEATURES.md      # 🛠️ Technical deep-dive
-    ├── DEPLOY.md        # 🚀 Render deployment guide
+
     └── GEOLOCATION.md   # 📍 Troubleshooting
 ```
 
