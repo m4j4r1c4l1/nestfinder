@@ -21,6 +21,8 @@ export default {
         download: 'Downloaden',
         downloadGPX: 'GPX downloaden',
         downloadKML: 'KML downloaden',
+        downloadJSON: 'JSON downloaden',
+        downloadCSV: 'CSV downloaden',
         totalPoints: 'totaal punten',
         noResults: 'Geen resultaten gevonden'
     },
@@ -107,7 +109,8 @@ export default {
         filterByStatus: 'Filteren op status',
         includeConfirmed: 'Inclusief Bevestigd',
         includePending: 'Inclusief In Behandeling',
-        includeDeactivated: 'Inclusief Gedeactiveerd'
+        includeDeactivated: 'Inclusief Gedeactiveerd',
+        pointsSelected: '{n} punten geselecteerd'
     },
     inbox: {
         title: 'Berichten',

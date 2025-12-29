@@ -21,6 +21,8 @@ export default {
         download: 'Скачать',
         downloadGPX: 'Скачать GPX',
         downloadKML: 'Скачать KML',
+        downloadJSON: 'Скачать JSON',
+        downloadCSV: 'Скачать CSV',
         totalPoints: 'всего точек',
         noResults: 'Результаты не найдены'
     },
@@ -107,7 +109,8 @@ export default {
         filterByStatus: 'Фильтр по статусу',
         includeConfirmed: 'Вкл. подтвержденные',
         includePending: 'Вкл. на проверке',
-        includeDeactivated: 'Вкл. неактивные'
+        includeDeactivated: 'Вкл. неактивные',
+        pointsSelected: 'Выбрано {n} точек'
     },
     inbox: {
         title: 'Сообщения',
