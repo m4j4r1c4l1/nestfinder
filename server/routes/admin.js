@@ -147,6 +147,35 @@ router.get('/users/:id', (req, res) => {
     });
 });
 
+// Delete user (admin only)
+router.delete('/users/:id', (req, res) => {
+    const userId = req.params.id;
+
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
+
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    try {
+        // Delete all related data (cascade)
+        run('DELETE FROM confirmations WHERE user_id = ?', [userId]);
+        run('DELETE FROM notifications WHERE user_id = ?', [userId]);
+        run('DELETE FROM push_subscriptions WHERE user_id = ?', [userId]);
+        run('DELETE FROM logs WHERE user_id = ?', [userId]);
+        run('DELETE FROM points WHERE user_id = ?', [userId]);
+        run('DELETE FROM users WHERE id = ?', [userId]);
+
+        res.json({
+            success: true,
+            message: `User ${user.nickname || user.id} deleted successfully`
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
+
+
 // Get all points (for admin map)
 router.get('/points', (req, res) => {
     const points = all(`

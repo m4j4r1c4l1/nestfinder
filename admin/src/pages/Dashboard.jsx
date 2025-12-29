@@ -80,12 +80,73 @@ const Dashboard = ({ onNavigate }) => {
                             time: new Date(l.created_at).toLocaleTimeString()
                         }));
                     break;
+                case 'totalUsers':
+                    title = 'All Users';
+                    const allUsersData = await adminApi.getUsers();
+                    data = allUsersData.users.map(u => ({
+                        userId: u.id,
+                        nickname: u.nickname || 'Anonymous',
+                        points: u.points_count,
+                        actions: u.actions_count,
+                        lastActive: new Date(u.last_active).toLocaleString(),
+                        created: new Date(u.created_at).toLocaleString()
+                    }));
+                    break;
+                case 'totalNotifications':
+                    title = 'All Notifications';
+                    const allNotifs = await adminApi.getNotifications();
+                    data = allNotifs.notifications.map(n => ({
+                        id: n.id,
+                        title: n.title,
+                        body: n.body.substring(0, 50) + (n.body.length > 50 ? '...' : ''),
+                        read: n.read ? 'Yes' : 'No',
+                        created: new Date(n.created_at).toLocaleString()
+                    }));
+                    break;
+                case 'unreadNotifications':
+                    title = 'Unread Notifications';
+                    const unreadNotifs = await adminApi.getNotifications();
+                    data = unreadNotifs.notifications
+                        .filter(n => !n.read)
+                        .map(n => ({
+                            id: n.id,
+                            title: n.title,
+                            body: n.body.substring(0, 50) + (n.body.length > 50 ? '...' : ''),
+                            created: new Date(n.created_at).toLocaleString()
+                        }));
+                    break;
+                case 'totalConfirmations':
+                    title = 'All Votes/Confirmations';
+                    // This would require a new endpoint, for now show message
+                    data = [{ message: 'Detailed confirmations view - endpoint to be added' }];
+                    break;
                 default:
                     return;
             }
             setModalData({ type, title, data });
         } catch (err) {
             console.error('Failed to fetch details:', err);
+        }
+    };
+
+    const handleDeleteUser = async (userId) => {
+        if (!window.confirm('Are you sure you want to delete this user? This will also delete all their points, confirmations, and logs. This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            await adminApi.deleteUser(userId);
+            // Refresh data
+            const [statsData, pointsData] = await Promise.all([
+                adminApi.getStats(),
+                adminApi.getPoints()
+            ]);
+            setStats(statsData.stats);
+            setPoints(pointsData.points);
+            setModalData(null);
+            alert('User deleted successfully');
+        } catch (err) {
+            alert('Failed to delete user: ' + (err.message || 'Unknown error'));
         }
     };
 
@@ -135,10 +196,10 @@ const Dashboard = ({ onNavigate }) => {
                             <span style={{ fontWeight: 600 }}>💾 Database Totals</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <MetricRow label="Total Users" value={stats.totalUsers} color="#3b82f6" />
-                            <MetricRow label="Total Notifications" value={stats.totalNotifications} color="#8b5cf6" />
-                            <MetricRow label="Unread Messages" value={stats.unreadNotifications} color="#f59e0b" />
-                            <MetricRow label="Total Votes" value={stats.totalConfirmations} color="#10b981" />
+                            <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
+                            <MetricRow label="Total Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
+                            <MetricRow label="Unread Messages" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
+                            <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
                         </div>
                     </div>
 
@@ -171,6 +232,9 @@ const Dashboard = ({ onNavigate }) => {
                                                 {key.replace(/([A-Z])/g, ' $1')}
                                             </th>
                                         ))}
+                                        {modalData.type === 'totalUsers' && (
+                                            <th style={{ padding: '0.5rem', color: 'var(--color-text-secondary)' }}>Actions</th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,6 +243,22 @@ const Dashboard = ({ onNavigate }) => {
                                             {Object.values(row).map((val, j) => (
                                                 <td key={j} style={{ padding: '0.5rem' }}>{val}</td>
                                             ))}
+                                            {modalData.type === 'totalUsers' && (
+                                                <td style={{ padding: '0.5rem' }}>
+                                                    <button
+                                                        className="btn"
+                                                        style={{
+                                                            background: '#ef4444',
+                                                            color: 'white',
+                                                            padding: '0.25rem 0.5rem',
+                                                            fontSize: '0.75rem'
+                                                        }}
+                                                        onClick={() => handleDeleteUser(row.userId)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -202,12 +282,12 @@ const MetricRow = ({ label, value, onClick, color }) => (
             padding: '0.6rem 0.75rem',
             background: 'var(--color-bg-tertiary)',
             borderRadius: 'var(--radius-md)',
-            cursor: 'pointer',
+            cursor: onClick ? 'pointer' : 'default',
             transition: 'all 0.2s ease',
             borderLeft: `3px solid ${color}`
         }}
-        onMouseEnter={e => e.currentTarget.style.background = 'var(--color-bg-secondary)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'var(--color-bg-tertiary)'}
+        onMouseEnter={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-secondary)') : undefined}
+        onMouseLeave={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-tertiary)') : undefined}
     >
         <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{label}</span>
         <span style={{ fontSize: '1.25rem', fontWeight: 700, color }}>{value}</span>
