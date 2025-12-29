@@ -7,7 +7,7 @@ import { run, get, log } from '../database.js';
 const router = Router();
 
 // JWT secret - use environment variable in production
-const JWT_SECRET = process.env.JWT_SECRET || 'nestfinder-admin-secret-change-in-production';
+const NEST_INTEGRITY = process.env.NEST_INTEGRITY || 'nestfinder-admin-secret-change-in-production';
 const JWT_EXPIRATION = '24h';
 
 // Register new user (anonymous with optional nickname)
@@ -85,7 +85,7 @@ router.post('/admin/login', (req, res) => {
             adminId: admin.id,
             username: admin.username
         },
-        JWT_SECRET,
+        NEST_INTEGRITY,
         { expiresIn: JWT_EXPIRATION }
     );
 
@@ -99,5 +99,5 @@ router.post('/admin/login', (req, res) => {
 });
 
 // Export JWT_SECRET for middleware
-export { JWT_SECRET };
+export { NEST_INTEGRITY };
 export default router;
