@@ -80,7 +80,37 @@ export default {
         success: '¡Ubicación reportada exitosamente!',
         error: 'Error al enviar. Intenta de nuevo.',
         selectOnMap: 'O toca el mapa para seleccionar ubicación',
-        currentLocation: 'Usar Ubicación Actual'
+        currentLocation: 'Usar Ubicación Actual',
+        // Mode labels
+        gpsMode: 'GPS',
+        mapMode: 'Mapa',
+        addressMode: 'Dirección',
+        // GPS mode
+        currentLocationLabel: 'Ubicación Actual',
+        tapToLocate: 'Toca el botón para encontrar ubicación',
+        // Map mode
+        selectedLocation: 'Ubicación Seleccionada',
+        locationSelected: 'Ubicación seleccionada',
+        tapMapPrompt: 'Toca el mapa para seleccionar una ubicación',
+        mapInstructions: 'Cierra este panel, toca en el mapa donde quieras reportar, y se abrirá de nuevo con esa ubicación.',
+        // Address mode
+        cityLabel: 'Ciudad',
+        cityPlaceholder: 'ej., Madrid',
+        streetLabel: 'Calle',
+        streetPlaceholder: 'ej., Gran Vía',
+        numberLabel: 'Número',
+        numberPlaceholder: 'ej., 42',
+        findLocation: 'Buscar Ubicación',
+        addressNotFound: 'Dirección no encontrada. Intenta otro formato.',
+        geocodeError: 'Error al buscar dirección. Verifica tu conexión.',
+        addressRequired: 'Ingresa al menos ciudad y calle',
+        locationRequired: 'Ubicación requerida. Usa GPS, toca el mapa, o ingresa una dirección.',
+        // Tags
+        tagsLabel: 'Etiquetas Rápidas',
+        onePerson: 'Una persona',
+        multiple: 'Varias',
+        children: 'Niños',
+        animals: 'Animales'
     },
 
     // Route Panel

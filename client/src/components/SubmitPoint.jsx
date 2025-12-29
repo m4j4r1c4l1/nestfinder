@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
+    const { t } = useLanguage();
     const { location, loading: locLoading, getCurrentLocation, getAddress, setLocation } = useGeolocation();
     const [inputMode, setInputMode] = useState(initialLocation ? 'map' : 'gps'); // 'gps', 'address', or 'map'
     const [address, setAddress] = useState('');
@@ -11,12 +13,12 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     const [isGeocoding, setIsGeocoding] = useState(false);
     const [error, setError] = useState('');
 
-    // Available tag options
+    // Available tag options - use translated labels
     const tagOptions = [
-        { id: 'single', emoji: '👤', label: 'One person' },
-        { id: 'group', emoji: '👥', label: 'Multiple' },
-        { id: 'children', emoji: '👶', label: 'Children' },
-        { id: 'animals', emoji: '🐕', label: 'Animals' }
+        { id: 'single', emoji: '👤', label: t('submit.onePerson') },
+        { id: 'group', emoji: '👥', label: t('submit.multiple') },
+        { id: 'children', emoji: '👶', label: t('submit.children') },
+        { id: 'animals', emoji: '🐕', label: t('submit.animals') }
     ];
 
     const toggleTag = (tagId) => {
@@ -46,14 +48,14 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
             const addr = await getAddress(loc.latitude, loc.longitude);
             setAddress(addr);
         } catch (err) {
-            setError('Could not get location. Ensure GPS is enabled.');
+            setError(t('geo.unavailable'));
         }
     };
 
     const handleGeocodeAddress = async () => {
         const fullAddress = `${manualAddress.street} ${manualAddress.number}, ${manualAddress.city}`;
         if (!manualAddress.city || !manualAddress.street) {
-            setError('Please enter at least city and street');
+            setError(t('submit.addressRequired'));
             return;
         }
 
@@ -67,7 +69,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
             const data = await response.json();
 
             if (data.length === 0) {
-                setError('Address not found. Try a different format.');
+                setError(t('submit.addressNotFound'));
                 setIsGeocoding(false);
                 return;
             }
@@ -81,7 +83,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
             }
             setAddress(result.display_name);
         } catch (err) {
-            setError('Failed to geocode address. Check your connection.');
+            setError(t('submit.geocodeError'));
         } finally {
             setIsGeocoding(false);
         }
@@ -90,7 +92,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!location) {
-            setError('Location is required. Use GPS, click on map, or enter an address.');
+            setError(t('submit.locationRequired'));
             return;
         }
 
@@ -104,7 +106,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
             });
         } catch (err) {
             console.error('Submit point error:', err);
-            setError(err.message || 'Failed to submit. Try again.');
+            setError(err.message || t('submit.error'));
             setIsSubmitting(false);
         }
     };
@@ -112,7 +114,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     return (
         <div className="card">
             <div className="card-header flex-between flex-center">
-                <h3 className="card-title" style={{ marginBottom: 0 }}>Report Location</h3>
+                <h3 className="card-title" style={{ marginBottom: 0 }}>{t('submit.title')}</h3>
                 <button
                     type="button"
                     onClick={onCancel}
@@ -131,21 +133,21 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                             className={`toggle-btn ${inputMode === 'gps' ? 'active' : ''}`}
                             onClick={() => setInputMode('gps')}
                         >
-                            📍 GPS
+                            📍 {t('submit.gpsMode')}
                         </button>
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'map' ? 'active' : ''}`}
                             onClick={() => setInputMode('map')}
                         >
-                            🗺️ Map
+                            🗺️ {t('submit.mapMode')}
                         </button>
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'address' ? 'active' : ''}`}
                             onClick={() => setInputMode('address')}
                         >
-                            🏠 Address
+                            🏠 {t('submit.addressMode')}
                         </button>
                     </div>
                 </div>
@@ -153,13 +155,13 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                 <form onSubmit={handleSubmit}>
                     {inputMode === 'gps' && (
                         <div className="form-group">
-                            <label className="form-label">Current Location</label>
+                            <label className="form-label">{t('submit.currentLocationLabel')}</label>
                             <div className="flex gap-2">
                                 <input
                                     type="text"
                                     className="form-input"
                                     value={address || (location ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : '')}
-                                    placeholder="Tap button to find location"
+                                    placeholder={t('submit.tapToLocate')}
                                     readOnly
                                 />
                                 <button
@@ -176,7 +178,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
 
                     {inputMode === 'map' && (
                         <div className="form-group">
-                            <label className="form-label">Selected Location</label>
+                            <label className="form-label">{t('submit.selectedLocation')}</label>
                             <div style={{
                                 padding: 'var(--space-3)',
                                 background: location ? 'var(--color-confirmed-light)' : 'var(--color-bg-tertiary)',
@@ -186,7 +188,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                 {location ? (
                                     <>
                                         <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>
-                                            ✅ Location selected
+                                            ✅ {t('submit.locationSelected')}
                                         </div>
                                         <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
                                             {address || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`}
@@ -194,13 +196,13 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                     </>
                                 ) : (
                                     <div style={{ color: 'var(--color-text-muted)' }}>
-                                        👆 Tap on the map to select a location
+                                        👆 {t('submit.tapMapPrompt')}
                                     </div>
                                 )}
                             </div>
                             {!location && (
                                 <div style={{ marginTop: 'var(--space-2)', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                    Close this panel, tap on the map where you want to report, and it will open again with that location.
+                                    {t('submit.mapInstructions')}
                                 </div>
                             )}
                         </div>
@@ -209,32 +211,32 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                     {inputMode === 'address' && (
                         <div>
                             <div className="form-group">
-                                <label className="form-label">City</label>
+                                <label className="form-label">{t('submit.cityLabel')}</label>
                                 <input
                                     type="text"
                                     className="form-input"
-                                    placeholder="e.g., Madrid"
+                                    placeholder={t('submit.cityPlaceholder')}
                                     value={manualAddress.city}
                                     onChange={(e) => setManualAddress({ ...manualAddress, city: e.target.value })}
                                 />
                             </div>
                             <div className="flex gap-2">
                                 <div className="form-group" style={{ flex: 2 }}>
-                                    <label className="form-label">Street</label>
+                                    <label className="form-label">{t('submit.streetLabel')}</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="e.g., Gran Vía"
+                                        placeholder={t('submit.streetPlaceholder')}
                                         value={manualAddress.street}
                                         onChange={(e) => setManualAddress({ ...manualAddress, street: e.target.value })}
                                     />
                                 </div>
                                 <div className="form-group" style={{ flex: 1 }}>
-                                    <label className="form-label">Number</label>
+                                    <label className="form-label">{t('submit.numberLabel')}</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="e.g., 42"
+                                        placeholder={t('submit.numberPlaceholder')}
                                         value={manualAddress.number}
                                         onChange={(e) => setManualAddress({ ...manualAddress, number: e.target.value })}
                                     />
@@ -246,7 +248,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                 onClick={handleGeocodeAddress}
                                 disabled={isGeocoding || !manualAddress.city || !manualAddress.street}
                             >
-                                {isGeocoding ? 'Searching...' : '🔍 Find Location'}
+                                {isGeocoding ? t('common.loading') : `🔍 ${t('submit.findLocation')}`}
                             </button>
                             {location && address && inputMode === 'address' && (
                                 <div style={{ marginTop: 'var(--space-3)', padding: 'var(--space-3)', background: 'var(--color-confirmed-light)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
@@ -259,7 +261,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                     {error && <div style={{ color: 'var(--color-deactivated)', fontSize: '12px', marginTop: 'var(--space-2)' }}>{error}</div>}
 
                     <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
-                        <label className="form-label">Who's there? (Optional)</label>
+                        <label className="form-label">{t('submit.tagsLabel')}</label>
                         <div style={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(4, 1fr)',
@@ -308,12 +310,12 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                             className="btn btn-primary btn-block"
                             disabled={isSubmitting || !location}
                         >
-                            {isSubmitting ? 'Submitting...' : 'Submit Location'}
+                            {isSubmitting ? t('submit.submitting') : t('submit.submitBtn')}
                         </button>
                     </div>
 
                     <p className="text-muted text-center text-sm" style={{ marginTop: 'var(--space-4)' }}>
-                        This helps us track where assistance is needed.
+                        {t('submit.subtitle')}
                     </p>
                 </form>
             </div>

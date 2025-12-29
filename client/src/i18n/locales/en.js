@@ -80,7 +80,37 @@ export default {
         success: 'Location reported successfully!',
         error: 'Failed to submit. Please try again.',
         selectOnMap: 'Or tap on the map to select location',
-        currentLocation: 'Use Current Location'
+        currentLocation: 'Use Current Location',
+        // Mode labels
+        gpsMode: 'GPS',
+        mapMode: 'Map',
+        addressMode: 'Address',
+        // GPS mode
+        currentLocationLabel: 'Current Location',
+        tapToLocate: 'Tap button to find location',
+        // Map mode
+        selectedLocation: 'Selected Location',
+        locationSelected: 'Location selected',
+        tapMapPrompt: 'Tap on the map to select a location',
+        mapInstructions: 'Close this panel, tap on the map where you want to report, and it will open again with that location.',
+        // Address mode
+        cityLabel: 'City',
+        cityPlaceholder: 'e.g., Madrid',
+        streetLabel: 'Street',
+        streetPlaceholder: 'e.g., Gran Vía',
+        numberLabel: 'Number',
+        numberPlaceholder: 'e.g., 42',
+        findLocation: 'Find Location',
+        addressNotFound: 'Address not found. Try a different format.',
+        geocodeError: 'Failed to geocode address. Check your connection.',
+        addressRequired: 'Please enter at least city and street',
+        locationRequired: 'Location is required. Use GPS, click on map, or enter an address.',
+        // Tags
+        tagsLabel: 'Quick Tags',
+        onePerson: 'One person',
+        multiple: 'Multiple',
+        children: 'Children',
+        animals: 'Animals'
     },
 
     // Route Panel  

@@ -1,6 +1,9 @@
 import React from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onClose }) => {
+    const { t } = useLanguage();
+
     if (!point) return null;
 
     const isPoster = user && point.user_id === user.id;
@@ -10,12 +13,22 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
+    // Get translated status
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'confirmed': return t('status.confirmed');
+            case 'pending': return t('status.pending');
+            case 'deactivated': return t('status.deactivated');
+            default: return status;
+        }
+    };
+
     return (
         <div className="card">
             <div className="card-header flex-between flex-center">
                 <div className={`badge badge-${point.status}`}>
                     <span className={`status-dot ${point.status}`}></span>
-                    {point.status.toUpperCase()}
+                    {getStatusLabel(point.status).toUpperCase()}
                 </div>
                 <button
                     onClick={onClose}
@@ -31,7 +44,7 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
                 </div>
 
                 <div className="point-detail-meta mb-4">
-                    Reported by {point.submitter_nickname || 'Anonymous'} • {date}
+                    {t('point.submittedBy')} {point.submitter_nickname || t('point.anonymous')} • {date}
                 </div>
 
                 {point.notes && (
@@ -47,8 +60,8 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
                 )}
 
                 <div className="flex gap-4 mb-4 text-sm text-muted">
-                    <div>👍 {point.confirm_count || 0} Confirmations</div>
-                    <div>🚫 {point.deactivate_count || 0} Deactivations</div>
+                    <div>👍 {point.confirm_count || 0} {t('point.confirmations')}</div>
+                    <div>🚫 {point.deactivate_count || 0} {t('point.deactivations')}</div>
                 </div>
 
                 <div className="point-detail-actions flex-col">
@@ -58,7 +71,7 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
                             className="btn btn-primary btn-block"
                             onClick={() => onReactivate(point.id)}
                         >
-                            🔄 Reactivate this location
+                            🔄 {t('point.reactivateBtn')}
                         </button>
                     ) : (
                         /* Active/Pending points: show confirm and deactivate */
@@ -67,14 +80,14 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
                                 className="btn btn-success btn-block"
                                 onClick={() => onConfirm(point.id)}
                             >
-                                Yes, I see help needed here
+                                {t('point.confirmBtn')}
                             </button>
 
                             <button
                                 className="btn btn-danger btn-block"
                                 onClick={() => onDeactivate(point.id)}
                             >
-                                {isPoster ? 'Remove my report' : 'No one is here / Resolved'}
+                                {t('point.deactivateBtn')}
                             </button>
                         </>
                     )}
@@ -85,3 +98,4 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
 };
 
 export default PointDetails;
+
