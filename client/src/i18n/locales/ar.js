@@ -143,13 +143,14 @@ export default {
         popupMessages: 'نوافذ فورية',
         popupDescription: 'عرض الرسائل فوراً'
     },
+    // Welcome Message (Home Page)
     welcome: {
-        title: 'مرحبًا في NestFinder!',
-        message1: 'شكراً لكونك رائعاً!',
-        message2: 'المساعدة تحدث فرقاً.',
-        message3: 'معاً نصنع التغيير.',
-        callToAction: 'ساعد من يحتاج للمساعدة.',
-        button: 'ابدأ'
+        title: 'NestFinder',
+        subtitle: 'البحث عن أعشاش لمنحهم بعض الراحة ❤️',
+        nicknameLabel: 'أدخل اسم مستعار للمساهمة (اختياري)',
+        nicknamePlaceholder: 'مساعد مجهول',
+        buttonStart: 'ابدأ المساعدة',
+        buttonLoading: 'جار البدء...'
     },
     common: {
         loading: 'تحميل...',

@@ -142,13 +142,14 @@ export default {
         popupMessages: 'Echtzeit-Popups',
         popupDescription: 'Nachrichten sofort anzeigen'
     },
+    // Welcome Message (Home Page)
     welcome: {
-        title: 'Willkommen bei NestFinder!',
-        message1: 'Danke, dass Sie so ein toller Mensch sind!',
-        message2: 'Jeder Akt der Freundlichkeit zählt.',
-        message3: 'Gemeinsam können wir einen Unterschied machen.',
-        callToAction: 'Helfen Sie, Bedürftige zu finden und zu unterstützen.',
-        button: 'Los geht\'s'
+        title: 'NestFinder',
+        subtitle: 'Nester finden, um ihnen etwas Linderung zu verschaffen ❤️',
+        nicknameLabel: 'Gib einen Spitznamen ein, um beizutragen (optional)',
+        nicknamePlaceholder: 'Anonymer Helfer',
+        buttonStart: 'Helfen Starten',
+        buttonLoading: 'Starte...'
     },
     common: {
         loading: 'Laden...',
