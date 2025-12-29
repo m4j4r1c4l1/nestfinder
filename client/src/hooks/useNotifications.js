@@ -21,6 +21,7 @@ export const useNotifications = (userId) => {
     });
 
     const maxKnownIdRef = useRef(0);
+    const initialLoaded = useRef(false);
 
     const toggleSettings = () => {
         const newSettings = { ...settings, realTime: !settings.realTime };
@@ -41,7 +42,8 @@ export const useNotifications = (userId) => {
                 const latestId = data.notifications[0].id;
 
                 // Detect NEW messages for popup
-                if (maxKnownIdRef.current > 0 && latestId > maxKnownIdRef.current) {
+                // Show popup if we have loaded initially AND this is a new ID
+                if (initialLoaded.current && latestId > maxKnownIdRef.current) {
                     const newMsg = data.notifications[0];
                     if (settings.realTime && !newMsg.read) {
                         setPopupMessage(newMsg);
@@ -55,6 +57,7 @@ export const useNotifications = (userId) => {
                 setNotifications([]);
                 setUnreadCount(0);
             }
+            initialLoaded.current = true;
         } catch (err) {
             console.error('Failed to fetch notifications:', err);
         } finally {
@@ -64,7 +67,7 @@ export const useNotifications = (userId) => {
 
     // Initial load
     useEffect(() => {
-        if (userId && maxKnownIdRef.current === 0) {
+        if (userId && !initialLoaded.current) {
             fetch(`${API_URL}/api/push/notifications?userId=${userId}`)
                 .then(res => res.json())
                 .then(data => {
@@ -73,6 +76,7 @@ export const useNotifications = (userId) => {
                         setNotifications(data.notifications);
                         setUnreadCount(data.notifications.filter(n => !n.read).length);
                     }
+                    initialLoaded.current = true;
                     setLoading(false);
                 })
                 .catch(err => {
