@@ -8,12 +8,13 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     const [inputMode, setInputMode] = useState(initialLocation ? 'map' : 'gps'); // 'gps', 'address', or 'map'
     const [address, setAddress] = useState('');
     const [manualAddress, setManualAddress] = useState({ city: '', street: '', number: '' });
-    const [tags, setTags] = useState([]); // Array of selected emoji tags
+    const [tags, setTags] = useState([]); // 'Who' tags
+    const [needs, setNeeds] = useState([]); // 'What' tags
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
     const [error, setError] = useState('');
 
-    // Available tag options - use translated labels
+    // 'Who' tag options
     const tagOptions = [
         { id: 'single', emoji: '👤', label: t('submit.onePerson') },
         { id: 'group', emoji: '👥', label: t('submit.multiple') },
@@ -21,11 +22,28 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         { id: 'animals', emoji: '🐕', label: t('submit.animals') }
     ];
 
+    // 'What' need options
+    const needOptions = [
+        { id: 'clothes', emoji: '👕', label: t('submit.needClothes') },
+        { id: 'food', emoji: '🍲', label: t('submit.needFood') },
+        { id: 'medicine', emoji: '💊', label: t('submit.needMedicine') },
+        { id: 'water', emoji: '💧', label: t('submit.needWater') },
+        { id: 'shelter', emoji: '⛺', label: t('submit.needShelter') }
+    ];
+
     const toggleTag = (tagId) => {
         setTags(prev =>
             prev.includes(tagId)
                 ? prev.filter(t => t !== tagId)
                 : [...prev, tagId]
+        );
+    };
+
+    const toggleNeed = (needId) => {
+        setNeeds(prev =>
+            prev.includes(needId)
+                ? prev.filter(n => n !== needId)
+                : [...prev, needId]
         );
     };
 
@@ -102,7 +120,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                 latitude: location.latitude,
                 longitude: location.longitude,
                 address,
-                notes: tags.join(',') // Send tags as comma-separated string for backwards compatibility
+                notes: [...tags, ...needs].join(',') // Send all tags as comma-separated string
             });
         } catch (err) {
             console.error('Submit point error:', err);
@@ -298,6 +316,51 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                             : 'var(--color-text-secondary)'
                                     }}>
                                         {tag.label}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
+                        <label className="form-label">{t('submit.needsLabel')}</label>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(5, 1fr)',
+                            gap: 'var(--space-2)',
+                            marginTop: 'var(--space-2)'
+                        }}>
+                            {needOptions.map(need => (
+                                <button
+                                    key={need.id}
+                                    type="button"
+                                    onClick={() => toggleNeed(need.id)}
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: 'var(--space-1)',
+                                        padding: 'var(--space-3) var(--space-1)',
+                                        background: needs.includes(need.id)
+                                            ? 'var(--color-primary-light)'
+                                            : 'var(--color-bg-secondary)',
+                                        border: needs.includes(need.id)
+                                            ? '2px solid var(--color-primary)'
+                                            : '1px solid var(--color-border)',
+                                        borderRadius: 'var(--radius-lg)',
+                                        cursor: 'pointer',
+                                        transition: 'all var(--transition-fast)'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.4rem' }}>{need.emoji}</span>
+                                    <span style={{
+                                        fontSize: '0.7rem',
+                                        textAlign: 'center',
+                                        color: needs.includes(need.id)
+                                            ? 'var(--color-primary)'
+                                            : 'var(--color-text-secondary)'
+                                    }}>
+                                        {need.label}
                                     </span>
                                 </button>
                             ))}

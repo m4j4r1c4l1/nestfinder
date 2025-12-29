@@ -115,7 +115,13 @@ export default {
         onePerson: 'One person',
         multiple: 'Multiple',
         children: 'Children',
-        animals: 'Animals'
+        animals: 'Animals',
+        needsLabel: 'What do they need?',
+        needFood: 'Food',
+        needWater: 'Water',
+        needClothes: 'Clothes',
+        needMedicine: 'Medicine',
+        needShelter: 'Shelter'
     },
 
     // Route Panel  
