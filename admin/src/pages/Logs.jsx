@@ -9,31 +9,29 @@ const Logs = () => {
     const [filters, setFilters] = useState({ limit: 50 });
     const [exporting, setExporting] = useState(false);
 
-    // Helper to get fancy colors for actions (Vibrant Warm Palette)
+    // Helper to get matching colors for actions (Vibrant Warm Palette)
+    // Returns solid RGB values for text/border
     const getActionColor = (action) => {
-        if (!action) return 'var(--color-bg-tertiary)';
+        if (!action) return '148, 163, 184'; // Slate-400 (Grey)
         const a = action.toLowerCase();
-        // Using stronger opacity or brighter base colors to avoid "muddy/brown" look
-        if (a.includes('login')) return 'rgba(252, 211, 77, 0.2)'; // Amber-400 equivalent (Bright Gold)
-        if (a.includes('create') || a.includes('submit')) return 'rgba(251, 146, 60, 0.2)'; // Orange-400 (Bright Orange)
-        if (a.includes('delete') || a.includes('reject')) return 'rgba(244, 63, 94, 0.2)'; // Rose-500 (Vibrant Red/Pink)
-        if (a.includes('update') || a.includes('edit')) return 'rgba(244, 114, 182, 0.2)'; // Pink-400 (Hot Pink)
-        if (a.includes('admin')) return 'rgba(192, 132, 252, 0.25)'; // Purple-400 (Bright Purple)
-        return 'var(--color-bg-tertiary)';
+        if (a.includes('login')) return '250, 204, 21'; // Yellow-400
+        if (a.includes('create') || a.includes('submit')) return '251, 146, 60'; // Orange-400
+        if (a.includes('delete') || a.includes('reject')) return '244, 63, 94'; // Rose-500
+        if (a.includes('update') || a.includes('edit')) return '244, 114, 182'; // Pink-400
+        if (a.includes('admin')) return '192, 132, 252'; // Purple-400
+        return '148, 163, 184'; // Default Grey
     };
 
     const getActionStyle = (action) => {
-        const color = getActionColor(action);
-        // Add a "glow" border effect for specific high-value actions
-        const isImportant = action.toLowerCase().includes('admin');
-        const pinkBorder = 'rgba(219, 39, 119, 0.5)';
-        const pinkShadow = 'rgba(219, 39, 119, 0.1)';
+        const baseColor = getActionColor(action);
+        const isImportant = action && action.toLowerCase().includes('admin');
 
         return {
-            background: color,
-            color: 'var(--color-text-primary)',
-            border: isImportant ? `1px solid ${pinkBorder}` : '1px solid transparent',
-            boxShadow: isImportant ? `0 0 10px ${pinkShadow}` : 'none'
+            background: `rgba(${baseColor}, 0.15)`, // Subtle tinted background
+            color: `rgb(${baseColor})`, // Solid vibrant text
+            border: `1px solid rgba(${baseColor}, 0.3)`, // Subtle matching border
+            boxShadow: isImportant ? `0 0 10px rgba(${baseColor}, 0.2)` : 'none',
+            textShadow: '0 0 1px rgba(0,0,0,0.5)' // Typos happen, legible text is key
         };
     };
 
