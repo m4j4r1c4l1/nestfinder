@@ -43,6 +43,7 @@ Visit: [https://m4j4r1c4l1.github.io/nestfinder/](https://m4j4r1c4l1.github.io/n
 <p align="center"><img src="images/ios_install_03_add.jpg" width="200" alt="Add to Home Screen" /></p>
 
 3. Tap **Add**.
+<p align="center"><img src="images/add_to_home_screen.jpg" width="200" alt="Tap Add Button" /></p>
 
 4. Success!
 <p align="center"><img src="images/ios_install_04_result.jpg" width="200" alt="Home Screen Icon" /></p>

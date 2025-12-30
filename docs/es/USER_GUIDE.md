@@ -43,6 +43,7 @@ Visita: [https://m4j4r1c4l1.github.io/nestfinder/](https://m4j4r1c4l1.github.io/
 <p align="center"><img src="../images/ios_install_03_add.jpg" width="200" alt="Añadir a Pantalla de Inicio" /></p>
 
 3. Toca **Añadir**.
+<p align="center"><img src="../images/add_to_home_screen.jpg" width="200" alt="Toca Botón Añadir" /></p>
 
 4. ¡Listo!
 <p align="center"><img src="../images/ios_install_04_result.jpg" width="200" alt="Icono en Pantalla de Inicio" /></p>
