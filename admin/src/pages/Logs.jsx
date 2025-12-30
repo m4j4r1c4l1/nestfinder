@@ -9,15 +9,15 @@ const Logs = () => {
     const [filters, setFilters] = useState({ limit: 50 });
     const [exporting, setExporting] = useState(false);
 
-    // Helper to get fancy colors for actions
+    // Helper to get fancy colors for actions (Warmer Palette)
     const getActionColor = (action) => {
         if (!action) return 'var(--color-bg-tertiary)';
         const a = action.toLowerCase();
-        if (a.includes('login')) return 'rgba(59, 130, 246, 0.2)'; // Blue tint
-        if (a.includes('create') || a.includes('submit')) return 'rgba(16, 185, 129, 0.2)'; // Green tint
-        if (a.includes('delete') || a.includes('reject')) return 'rgba(239, 68, 68, 0.2)'; // Red tint
-        if (a.includes('update') || a.includes('edit')) return 'rgba(245, 158, 11, 0.2)'; // Orange tint
-        if (a.includes('admin')) return 'rgba(139, 92, 246, 0.3)'; // Purple tint (Admin)
+        if (a.includes('login')) return 'rgba(250, 204, 21, 0.2)'; // Warm Yellow
+        if (a.includes('create') || a.includes('submit')) return 'rgba(251, 146, 60, 0.2)'; // Warm Orange
+        if (a.includes('delete') || a.includes('reject')) return 'rgba(225, 29, 72, 0.2)'; // Rose Red
+        if (a.includes('update') || a.includes('edit')) return 'rgba(244, 114, 182, 0.2)'; // Pink
+        if (a.includes('admin')) return 'rgba(219, 39, 119, 0.3)'; // Deep Pink/Fuchsia (Admin)
         return 'var(--color-bg-tertiary)';
     };
 
@@ -25,11 +25,14 @@ const Logs = () => {
         const color = getActionColor(action);
         // Add a "glow" border effect for specific high-value actions
         const isImportant = action.toLowerCase().includes('admin');
+        const pinkBorder = 'rgba(219, 39, 119, 0.5)';
+        const pinkShadow = 'rgba(219, 39, 119, 0.1)';
+
         return {
             background: color,
             color: 'var(--color-text-primary)',
-            border: isImportant ? '1px solid rgba(139, 92, 246, 0.5)' : '1px solid transparent',
-            boxShadow: isImportant ? '0 0 10px rgba(139, 92, 246, 0.1)' : 'none'
+            border: isImportant ? `1px solid ${pinkBorder}` : '1px solid transparent',
+            boxShadow: isImportant ? `0 0 10px ${pinkShadow}` : 'none'
         };
     };
 
