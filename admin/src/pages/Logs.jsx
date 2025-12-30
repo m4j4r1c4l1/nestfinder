@@ -9,15 +9,16 @@ const Logs = () => {
     const [filters, setFilters] = useState({ limit: 50 });
     const [exporting, setExporting] = useState(false);
 
-    // Helper to get fancy colors for actions (Warmer Palette)
+    // Helper to get fancy colors for actions (Vibrant Warm Palette)
     const getActionColor = (action) => {
         if (!action) return 'var(--color-bg-tertiary)';
         const a = action.toLowerCase();
-        if (a.includes('login')) return 'rgba(250, 204, 21, 0.2)'; // Warm Yellow
-        if (a.includes('create') || a.includes('submit')) return 'rgba(251, 146, 60, 0.2)'; // Warm Orange
-        if (a.includes('delete') || a.includes('reject')) return 'rgba(225, 29, 72, 0.2)'; // Rose Red
-        if (a.includes('update') || a.includes('edit')) return 'rgba(244, 114, 182, 0.2)'; // Pink
-        if (a.includes('admin')) return 'rgba(219, 39, 119, 0.3)'; // Deep Pink/Fuchsia (Admin)
+        // Using stronger opacity or brighter base colors to avoid "muddy/brown" look
+        if (a.includes('login')) return 'rgba(252, 211, 77, 0.2)'; // Amber-400 equivalent (Bright Gold)
+        if (a.includes('create') || a.includes('submit')) return 'rgba(251, 146, 60, 0.2)'; // Orange-400 (Bright Orange)
+        if (a.includes('delete') || a.includes('reject')) return 'rgba(244, 63, 94, 0.2)'; // Rose-500 (Vibrant Red/Pink)
+        if (a.includes('update') || a.includes('edit')) return 'rgba(244, 114, 182, 0.2)'; // Pink-400 (Hot Pink)
+        if (a.includes('admin')) return 'rgba(192, 132, 252, 0.25)'; // Purple-400 (Bright Purple)
         return 'var(--color-bg-tertiary)';
     };
 
