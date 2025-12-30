@@ -240,7 +240,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                 <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
 
                     {/* 1. Activity Metrics */}
-                    <div className="card">
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📈 Activity Metrics</span>
                         </div>
@@ -253,7 +253,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                     </div>
 
                     {/* 2. Status Summary */}
-                    <div className="card">
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
@@ -274,7 +274,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                     </div>
 
                     {/* 3. Database Totals */}
-                    <div className="card">
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>💾 Database Totals</span>
                         </div>
@@ -303,7 +303,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                     </div>
 
                     {/* 4. System Status */}
-                    <div className="card">
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>🖥️ System Status</span>
                         </div>
