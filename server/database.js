@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const DB_PATH = join(__dirname, 'db', 'nestfinder.db');
+export const DB_PATH = join(__dirname, 'db', 'nestfinder.db');
 
 let db = null;
 

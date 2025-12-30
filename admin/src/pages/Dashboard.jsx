@@ -283,6 +283,20 @@ const Dashboard = ({ onNavigate }) => {
                             <MetricRow label="Total Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
                             <MetricRow label="Unread Messages" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
                             <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
+
+                            <button
+                                className="btn btn-primary"
+                                style={{ marginTop: '0.5rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                                onClick={async () => {
+                                    try {
+                                        await adminApi.downloadBackup();
+                                    } catch (err) {
+                                        alert('Failed to download backup: ' + err.message);
+                                    }
+                                }}
+                            >
+                                📥 Download DB Backup
+                            </button>
                         </div>
                     </div>
 

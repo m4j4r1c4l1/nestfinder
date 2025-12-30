@@ -112,5 +112,23 @@ export const adminApi = {
 
     getConfirmations() {
         return this.fetch('/admin/confirmations');
+    },
+
+    async downloadBackup() {
+        const response = await fetch(`${API_URL}/admin/backup`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        if (!response.ok) throw new Error('Download failed');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nestfinder_backup_${new Date().toISOString().split('T')[0]}.db`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
     }
 };
