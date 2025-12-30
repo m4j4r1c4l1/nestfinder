@@ -11,19 +11,30 @@ const Logs = () => {
 
     // Helper to get matching colors for actions (Vibrant Warm Palette)
     // Returns solid RGB values for text/border
-    const getActionColor = (action) => {
+    const getActionBaseColor = (action) => {
         if (!action) return '148, 163, 184'; // Slate-400 (Grey)
         const a = action.toLowerCase();
-        if (a.includes('login')) return '250, 204, 21'; // Yellow-400
-        if (a.includes('create') || a.includes('submit')) return '251, 146, 60'; // Orange-400
-        if (a.includes('delete') || a.includes('reject')) return '244, 63, 94'; // Rose-500
-        if (a.includes('update') || a.includes('edit')) return '244, 114, 182'; // Pink-400
-        if (a.includes('admin')) return '192, 132, 252'; // Purple-400
+
+        // Admin actions -> RED (User request)
+        if (a.includes('admin')) return '239, 68, 68'; // Red-500
+
+        // Auth/Registration -> BLUE (User request)
+        if (a.includes('login') || a.includes('register')) return '59, 130, 246'; // Blue-500
+
+        // Creation/Submission/Confirmation -> GREEN (User request)
+        if (a.includes('create') || a.includes('submit') || a.includes('confirm') || a.includes('validate')) return '34, 197, 94'; // Green-500
+
+        // Deletion/Rejection -> PURPLE (Distinct from Admin Red)
+        if (a.includes('delete') || a.includes('reject') || a.includes('deactivate')) return '168, 85, 247'; // Purple-500
+
+        // Updates -> ORANGE
+        if (a.includes('update') || a.includes('edit')) return '249, 115, 22'; // Orange-500
+
         return '148, 163, 184'; // Default Grey
     };
 
     const getActionStyle = (action) => {
-        const baseColor = getActionColor(action);
+        const baseColor = getActionBaseColor(action);
         const isImportant = action && action.toLowerCase().includes('admin');
 
         return {
