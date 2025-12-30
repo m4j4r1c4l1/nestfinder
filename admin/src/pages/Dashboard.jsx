@@ -270,22 +270,54 @@ const Dashboard = ({ onNavigate }) => {
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: 'var(--color-text-secondary)' }}>Uptime</span>
-                                        <span style={{ fontWeight: 500 }}>{(stats.system.uptime / 3600).toFixed(1)}h</span>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: 'var(--color-text-secondary)' }}>Memory</span>
                                         <span style={{ fontWeight: 500 }}>
-                                            {Math.round(stats.system.memoryUsage.rss / 1024 / 1024)}MB /
-                                            {Math.round(stats.system.totalMemory / 1024 / 1024 / 1024)}GB
+                                            {(() => {
+                                                const u = stats.system.uptime || 0;
+                                                const h = Math.floor(u / 3600);
+                                                const m = Math.floor((u % 3600) / 60);
+                                                if (h > 0) return `${h}h ${m}m`;
+                                                return `${m}m`;
+                                            })()}
                                         </span>
                                     </div>
-                                    <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden', marginTop: '0.25rem' }}>
-                                        <div style={{
-                                            width: `${(stats.system.memoryUsage.rss / stats.system.totalMemory) * 100}%`,
-                                            height: '100%',
-                                            background: '#3b82f6'
-                                        }}></div>
+
+                                    {/* Memory Usage */}
+                                    <div style={{ marginTop: '0.5rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', marginBottom: '0.2rem' }}>
+                                            <span style={{ color: 'var(--color-text-secondary)' }}>Memory</span>
+                                            <span style={{ fontWeight: 500 }}>
+                                                {Math.round(stats.system.memoryUsage.rss / 1024 / 1024)}MB /
+                                                {Math.round(stats.system.totalMemory / 1024 / 1024 / 1024)}GB
+                                            </span>
+                                        </div>
+                                        <div style={{ height: 8, background: 'var(--color-bg-tertiary)', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
+                                            <div style={{
+                                                width: `${(stats.system.memoryUsage.rss / stats.system.totalMemory) * 100}%`,
+                                                height: '100%',
+                                                background: 'linear-gradient(90deg, #3b82f6, #06b6d4)'
+                                            }}></div>
+                                        </div>
                                     </div>
+
+                                    {/* Disk Usage (if available) */}
+                                    {stats.system.disk && (
+                                        <div style={{ marginTop: '0.5rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', marginBottom: '0.2rem' }}>
+                                                <span style={{ color: 'var(--color-text-secondary)' }}>Disk (/)</span>
+                                                <span style={{ fontWeight: 500 }}>
+                                                    {Math.round(stats.system.disk.used / 1024 / 1024 / 1024)}GB /
+                                                    {Math.round(stats.system.disk.total / 1024 / 1024 / 1024)}GB
+                                                </span>
+                                            </div>
+                                            <div style={{ height: 8, background: 'var(--color-bg-tertiary)', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
+                                                <div style={{
+                                                    width: `${(stats.system.disk.used / stats.system.disk.total) * 100}%`,
+                                                    height: '100%',
+                                                    background: 'linear-gradient(90deg, #8b5cf6, #d946ef)'
+                                                }}></div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
