@@ -61,10 +61,10 @@ Un sistema de envío versátil que soporta tres modos:
 
 ### 6. Sistema de Notificaciones
 Funciones de participación del usuario en tiempo real.
-- **Notificaciones Push**: Notificaciones web push protegidas por VAPID.
-- **Toast en la App**: Mensajes emergentes no intrusivos para retroalimentación inmediata.
-- **Buzón**: Almacenamiento persistente de mensajes para actualizaciones (ej., "Tu punto fue confirmado").
-- **Difusiones del Admin**: Soporte para anuncios a nivel de sistema.
+- **Notificaciones en la App**: Sistema de buzón persistente para almacenar mensajes y actualizaciones.
+- **Popups Toast**: Mensajes emergentes en tiempo real no intrusivos para retroalimentación inmediata.
+- **Almacenamiento de Mensajes**: Todas las notificaciones almacenadas en el buzón para visualización posterior.
+- **Difusiones del Admin**: Soporte para anuncios a nivel de sistema para todos los usuarios.
 
 ### 7. Capacidades PWA Offline
 Diseñada para entornos de baja conectividad.
