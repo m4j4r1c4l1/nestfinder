@@ -64,13 +64,18 @@ const AdminMap = ({ points, filteredPoints, onDelete }) => {
         const map = useMap();
 
         useEffect(() => {
-            if (filteredPoints && filteredPoints.length > 0) {
+            const targetPoints = (filteredPoints && filteredPoints.length > 0) ? filteredPoints : points;
+
+            if (targetPoints && targetPoints.length > 0) {
                 const bounds = L.latLngBounds(
-                    filteredPoints.map(p => [p.latitude, p.longitude])
+                    targetPoints.map(p => [p.latitude, p.longitude])
                 );
-                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+                // Valid bounds check
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+                }
             }
-        }, [filteredPoints, map]);
+        }, [filteredPoints, points, map]);
 
         return null;
     };
