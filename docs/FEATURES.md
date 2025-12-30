@@ -61,10 +61,10 @@ A versatile submission system supporting three modes:
 
 ### 6. Notification System
 Real-time user engagement features.
-- **Push Notifications**: VAPID-protected web push notifications.
-- **In-App Toast**: Non-intrusive popup messages for immediate feedback.
-- **Inbox**: Persistent message storage for updates (e.g., "Your point was confirmed").
-- **Admin Broadcasts**: Support for system-wide announcements.
+- **In-App Notifications**: Persistent inbox system for storing messages and updates.
+- **Toast Popups**: Non-intrusive real-time popup messages for immediate feedback.
+- **Message Storage**: All notifications stored in the inbox for later viewing.
+- **Admin Broadcasts**: Support for system-wide announcements to all users.
 
 ### 7. Offline PWA Capabilities
 Designed for low-connectivity environments.
