@@ -2,7 +2,7 @@ import { Router } from 'express';
 import os from 'os';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { get, all, run, resetDatabase } from '../database.js';
+import { getDb, run, get, all, log, getSetting, saveDatabase, DB_PATH } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
 
@@ -408,6 +408,30 @@ router.post('/reset', (req, res) => {
         res.json({ success: true, message: msgs[target] });
     } catch (err) {
         res.status(500).json({ error: 'Failed to reset database' });
+    }
+});
+
+// Download Database Backup
+router.get('/backup', (req, res) => {
+    try {
+        // 1. Force save to disk to ensure backup is fresh
+        saveDatabase();
+
+        // 2. Serve the file
+        // We use import { DB_PATH } from '../database.js' which we need to add to imports
+
+
+        res.download(DB_PATH, `nestfinder_backup_${new Date().toISOString().split('T')[0]}.db`, (err) => {
+            if (err) {
+                console.error('Download error:', err);
+                if (!res.headersSent) {
+                    res.status(500).json({ error: 'Failed to download backup' });
+                }
+            }
+        });
+    } catch (err) {
+        console.error('Backup error:', err);
+        res.status(500).json({ error: 'Failed to generate backup' });
     }
 });
 
