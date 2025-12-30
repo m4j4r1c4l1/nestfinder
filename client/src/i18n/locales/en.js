@@ -138,7 +138,8 @@ export default {
         includeConfirmed: 'Include Confirmed',
         includePending: 'Include Pending',
         includeDeactivated: 'Include Deactivated',
-        pointsSelected: 'Points selected: {n}'
+        pointsSelected: 'Points selected: {n}',
+        readyDescription: 'Calculate optimized walking path visiting all selected points.'
     },
 
     // Notifications/Inbox
