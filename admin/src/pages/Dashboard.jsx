@@ -237,10 +237,10 @@ const Dashboard = ({ onNavigate }) => {
                 </div>
 
                 {/* Right Sidebar - Metrics + Status */}
-                <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
 
-                    {/* Metrics */}
-                    <div className="card" style={{ flex: 1 }}>
+                    {/* 1. Activity Metrics */}
+                    <div className="card">
                         <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600 }}>📈 Activity Metrics</span>
                         </div>
@@ -252,8 +252,42 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* System Status */}
-                    <div className="card" style={{ flex: 1 }}>
+                    {/* 2. Status Summary */}
+                    <div className="card">
+                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 600 }}>📊 Status Summary</span>
+                            {filteredPoints && (
+                                <button
+                                    onClick={handleClearFilter}
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
+                                >
+                                    Show All
+                                </button>
+                            )}
+                        </div>
+                        <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
+                            <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
+                            <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
+                        </div>
+                    </div>
+
+                    {/* 3. Database Totals */}
+                    <div className="card">
+                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600 }}>💾 Database Totals</span>
+                        </div>
+                        <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
+                            <MetricRow label="Total Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
+                            <MetricRow label="Unread Messages" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
+                            <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
+                        </div>
+                    </div>
+
+                    {/* 4. System Status */}
+                    <div className="card">
                         <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600 }}>🖥️ System Status</span>
                         </div>
@@ -345,40 +379,6 @@ const Dashboard = ({ onNavigate }) => {
                                     )}
                                 </>
                             )}
-                        </div>
-                    </div>
-
-                    {/* Database Totals */}
-                    <div className="card" style={{ flex: 1 }}>
-                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600 }}>💾 Database Totals</span>
-                        </div>
-                        <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
-                            <MetricRow label="Total Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
-                            <MetricRow label="Unread Messages" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
-                            <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
-                        </div>
-                    </div>
-
-                    {/* Status Summary */}
-                    <div className="card" style={{ flex: 1 }}>
-                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: 600 }}>📊 Status Summary</span>
-                            {filteredPoints && (
-                                <button
-                                    onClick={handleClearFilter}
-                                    className="btn btn-secondary"
-                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
-                                >
-                                    Show All
-                                </button>
-                            )}
-                        </div>
-                        <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
-                            <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
-                            <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
                         </div>
                     </div>
                 </div>
