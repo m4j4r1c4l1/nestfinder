@@ -252,6 +252,45 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
+                    {/* System Status */}
+                    <div className="card" style={{ flex: 1 }}>
+                        <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600 }}>🖥️ System Status</span>
+                        </div>
+                        <div className="card-body" style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem' }}>
+                            {stats.system && (
+                                <>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Platform</span>
+                                        <span style={{ fontWeight: 500 }}>{stats.system.platform.split(' ')[0]}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Node.js</span>
+                                        <span style={{ fontWeight: 500 }}>{stats.system.nodeVersion}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Uptime</span>
+                                        <span style={{ fontWeight: 500 }}>{(stats.system.uptime / 3600).toFixed(1)}h</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Memory</span>
+                                        <span style={{ fontWeight: 500 }}>
+                                            {Math.round(stats.system.memoryUsage.rss / 1024 / 1024)}MB /
+                                            {Math.round(stats.system.totalMemory / 1024 / 1024 / 1024)}GB
+                                        </span>
+                                    </div>
+                                    <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden', marginTop: '0.25rem' }}>
+                                        <div style={{
+                                            width: `${(stats.system.memoryUsage.rss / stats.system.totalMemory) * 100}%`,
+                                            height: '100%',
+                                            background: '#3b82f6'
+                                        }}></div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Database Totals */}
                     <div className="card" style={{ flex: 1 }}>
                         <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)' }}>
@@ -289,55 +328,57 @@ const Dashboard = ({ onNavigate }) => {
             </div>
 
             {/* Modal */}
-            {modalData && (
-                <Modal title={modalData.title} onClose={() => setModalData(null)}>
-                    {modalData.data.length === 0 ? (
-                        <p className="text-muted text-center">No data available</p>
-                    ) : (
-                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
-                                        {Object.keys(modalData.data[0]).map(key => (
-                                            <th key={key} style={{ padding: '0.5rem', textTransform: 'capitalize', color: 'var(--color-text-secondary)' }}>
-                                                {key.replace(/([A-Z])/g, ' $1')}
-                                            </th>
-                                        ))}
-                                        {modalData.type === 'totalUsers' && (
-                                            <th style={{ padding: '0.5rem', color: 'var(--color-text-secondary)' }}>Actions</th>
-                                        )}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {modalData.data.map((row, i) => (
-                                        <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                            {Object.values(row).map((val, j) => (
-                                                <td key={j} style={{ padding: '0.5rem' }}>{val}</td>
+            {
+                modalData && (
+                    <Modal title={modalData.title} onClose={() => setModalData(null)}>
+                        {modalData.data.length === 0 ? (
+                            <p className="text-muted text-center">No data available</p>
+                        ) : (
+                            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
+                                            {Object.keys(modalData.data[0]).map(key => (
+                                                <th key={key} style={{ padding: '0.5rem', textTransform: 'capitalize', color: 'var(--color-text-secondary)' }}>
+                                                    {key.replace(/([A-Z])/g, ' $1')}
+                                                </th>
                                             ))}
                                             {modalData.type === 'totalUsers' && (
-                                                <td style={{ padding: '0.5rem' }}>
-                                                    <button
-                                                        className="btn"
-                                                        style={{
-                                                            background: '#ef4444',
-                                                            color: 'white',
-                                                            padding: '0.25rem 0.5rem',
-                                                            fontSize: '0.75rem'
-                                                        }}
-                                                        onClick={() => handleDeleteUser(row.userId)}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </td>
+                                                <th style={{ padding: '0.5rem', color: 'var(--color-text-secondary)' }}>Actions</th>
                                             )}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </Modal>
-            )}
+                                    </thead>
+                                    <tbody>
+                                        {modalData.data.map((row, i) => (
+                                            <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                                {Object.values(row).map((val, j) => (
+                                                    <td key={j} style={{ padding: '0.5rem' }}>{val}</td>
+                                                ))}
+                                                {modalData.type === 'totalUsers' && (
+                                                    <td style={{ padding: '0.5rem' }}>
+                                                        <button
+                                                            className="btn"
+                                                            style={{
+                                                                background: '#ef4444',
+                                                                color: 'white',
+                                                                padding: '0.25rem 0.5rem',
+                                                                fontSize: '0.75rem'
+                                                            }}
+                                                            onClick={() => handleDeleteUser(row.userId)}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </Modal>
+                )
+            }
         </div>
     );
 };
