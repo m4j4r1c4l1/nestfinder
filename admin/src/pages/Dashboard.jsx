@@ -197,8 +197,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
     const deactivated = points.filter(p => p.status === 'deactivated').length;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
-            <h2 style={{ margin: 0 }}>Dashboard Overview</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.75rem' }}>
+            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Dashboard Overview</h2>
 
             {/* Main Content: Map + Right Sidebar */}
             <div style={{ flex: 1, display: 'flex', gap: '1rem', minHeight: 0 }}>
@@ -237,14 +237,14 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                 </div>
 
                 {/* Right Sidebar - Metrics + Status */}
-                <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto' }}>
+                <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
 
                     {/* 1. Activity Metrics */}
                     <div className="card">
-                        <div className="card-header" style={{ padding: '0.4rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📈 Activity</span>
+                        <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📈 Activity Metrics</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                             <MetricRow label="Total Points" value={stats.totalPoints} onClick={() => handleStatClick('totalPoints')} color="var(--color-primary)" />
                             <MetricRow label="Active Users (7d)" value={stats.activeUsers} onClick={() => handleStatClick('activeUsers')} color="var(--color-confirmed)" />
                             <MetricRow label="New Reports Today" value={stats.todaySubmissions} onClick={() => handleStatClick('todayReports')} color="var(--color-pending)" />
@@ -254,19 +254,19 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 2. Status Summary */}
                     <div className="card">
-                        <div className="card-header" style={{ padding: '0.4rem 0.6rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📊 Status</span>
+                        <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
                                 <button
                                     onClick={handleClearFilter}
                                     className="btn btn-secondary"
-                                    style={{ padding: '0.15rem 0.3rem', fontSize: '0.6rem' }}
+                                    style={{ padding: '0.15rem 0.4rem', fontSize: '0.65rem' }}
                                 >
-                                    All
+                                    Show All
                                 </button>
                             )}
                         </div>
-                        <div className="card-body" style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                             <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
                             <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
                             <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
@@ -275,19 +275,19 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 3. Database Totals */}
                     <div className="card">
-                        <div className="card-header" style={{ padding: '0.4rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>💾 Database</span>
+                        <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>💾 Database Totals</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                            <MetricRow label="Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
-                            <MetricRow label="Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
-                            <MetricRow label="Unread" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
-                            <MetricRow label="Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
+                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
+                            <MetricRow label="Total Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
+                            <MetricRow label="Unread Messages" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
+                            <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
 
                             {showBackup && (
                                 <button
                                     className="btn btn-primary"
-                                    style={{ marginTop: '0.3rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', padding: '0.4rem', fontSize: '0.8rem' }}
+                                    style={{ marginTop: '0.25rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', padding: '0.35rem', fontSize: '0.8rem' }}
                                     onClick={async () => {
                                         try {
                                             await adminApi.downloadBackup();
@@ -296,7 +296,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                         }
                                     }}
                                 >
-                                    📥 Backup
+                                    📥 Download DB Backup
                                 </button>
                             )}
                         </div>
@@ -304,20 +304,32 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 4. System Status */}
                     <div className="card">
-                        <div className="card-header" style={{ padding: '0.4rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>🖥️ System</span>
+                        <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>🖥️ System Status</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.75rem' }}>
+                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.75rem' }}>
                             {stats.system && (
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: 'var(--color-text-secondary)' }}>OS</span>
-                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>
-                                            {stats.system.distro.split(' ')[0]}
-                                        </span>
+                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>{stats.system.distro}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: 'var(--color-text-secondary)' }}>Node</span>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Host</span>
+                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>{stats.system.hostname}</span>
+                                    </div>
+                                    {stats.system.ips && stats.system.ips.length > 0 && (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <span style={{ color: 'var(--color-text-secondary)' }}>IPs</span>
+                                            <div style={{ textAlign: 'right' }}>
+                                                {stats.system.ips.map((net, i) => (
+                                                    <div key={i} style={{ fontWeight: 500, fontSize: '0.7rem' }}>{net.ip}</div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Node.js</span>
                                         <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>{stats.system.nodeVersion}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -334,8 +346,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                     </div>
 
                                     {/* Memory Usage */}
-                                    <div style={{ marginTop: '0.3rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', marginBottom: '0.15rem' }}>
+                                    <div style={{ marginTop: '0.2rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', marginBottom: '0.1rem' }}>
                                             <span style={{ color: 'var(--color-text-secondary)' }}>Memory</span>
                                             <span style={{ fontWeight: 500 }}>
                                                 {Math.round(stats.system.memoryUsage.rss / 1024 / 1024)}MB /
@@ -353,9 +365,9 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                                     {/* Disk Usage (if available) */}
                                     {stats.system.disk && (
-                                        <div style={{ marginTop: '0.3rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', marginBottom: '0.15rem' }}>
-                                                <span style={{ color: 'var(--color-text-secondary)' }}>Disk</span>
+                                        <div style={{ marginTop: '0.2rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', marginBottom: '0.1rem' }}>
+                                                <span style={{ color: 'var(--color-text-secondary)' }}>Disk (/)</span>
                                                 <span style={{ fontWeight: 500 }}>
                                                     {Math.round(stats.system.disk.used / 1024 / 1024 / 1024)}GB /
                                                     {Math.round(stats.system.disk.total / 1024 / 1024 / 1024)}GB

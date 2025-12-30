@@ -279,7 +279,7 @@ const App = () => {
             </aside>
 
             {/* Main Content */}
-            <main style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <main style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                 {view === 'dashboard' && <Dashboard showBackup={backupEnabled} />}
                 {view === 'notifications' && <Notifications />}
                 {view === 'logs' && <Logs />}
