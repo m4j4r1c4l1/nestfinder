@@ -221,7 +221,10 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLoca
                 ) : (
                     <div>
                         <p className="text-muted mb-4 text-sm" style={{ textAlign: 'center' }}>
-                            {t('route.noPoints')}
+                            {filteredCount < 2
+                                ? t('route.noPoints')
+                                : t('route.readyDescription', { defaultValue: 'Calculate optimized walking path visiting all selected points.' })
+                            }
                         </p>
                         <button
                             className="btn btn-primary btn-block"

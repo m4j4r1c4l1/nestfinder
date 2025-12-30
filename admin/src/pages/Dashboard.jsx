@@ -266,14 +266,27 @@ const Dashboard = ({ onNavigate }) => {
                                             {stats.system.distro}
                                         </span>
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: 'var(--color-text-secondary)' }}>Host</span>
-                                        <span style={{ fontWeight: 500 }}>{stats.system.hostname}</span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                        <span style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', marginRight: '1rem' }}>Host</span>
+                                        <span style={{
+                                            fontWeight: 500,
+                                            textAlign: 'right',
+                                            wordBreak: 'break-all',
+                                            lineHeight: '1.2'
+                                        }}>
+                                            {stats.system.hostname}
+                                        </span>
                                     </div>
                                     {stats.system.ips && stats.system.ips.length > 0 && (
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ color: 'var(--color-text-secondary)' }}>IP</span>
-                                            <span style={{ fontWeight: 500 }}>{stats.system.ips[0].ip}</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <span style={{ color: 'var(--color-text-secondary)', marginRight: '1rem' }}>IPs</span>
+                                            <div style={{ textAlign: 'right' }}>
+                                                {stats.system.ips.map((net, i) => (
+                                                    <div key={i} style={{ fontWeight: 500, fontSize: '0.85rem' }}>
+                                                        {net.ip}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
