@@ -36,7 +36,9 @@ router.get('/stats', (req, res) => {
     try {
         // OS Distro (Try /etc/issue then /etc/os-release)
         try {
-            osDistro = execSync('head -n 1 /etc/issue').toString().trim();
+            const issue = execSync('head -n 1 /etc/issue').toString().trim();
+            // Remove \n, \l and other escape sequences commonly found in /etc/issue
+            osDistro = issue.replace(/\\[nl]/g, '').trim();
         } catch (e) {
             // Fallback to pretty name from os-release if issue fails
             const osRelease = fs.readFileSync('/etc/os-release', 'utf8');
@@ -53,9 +55,9 @@ router.get('/stats', (req, res) => {
         const nets = os.networkInterfaces();
         for (const name of Object.keys(nets)) {
             for (const net of nets[name]) {
-                // Skip internal (i.e. 127.0.0.1) and non-IPv4
-                if (net.family === 'IPv4' && !net.internal) {
-                    networkIps.push({ name, ip: net.address });
+                // Include all IPv4, exclude only localhost (127.0.0.1)
+                if (net.family === 'IPv4' && net.address !== '127.0.0.1') {
+                    networkIps.push({ name, ip: net.address, internal: net.internal });
                 }
             }
         }
