@@ -237,14 +237,14 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                 </div>
 
                 {/* Right Sidebar - Metrics + Status */}
-                <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '0.75rem', overflowY: 'auto' }}>
+                <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto' }}>
 
                     {/* 1. Activity Metrics */}
                     <div className="card">
-                        <div className="card-header" style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📈 Activity Metrics</span>
+                        <div className="card-header" style={{ padding: '0.4rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📈 Activity</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <div className="card-body" style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                             <MetricRow label="Total Points" value={stats.totalPoints} onClick={() => handleStatClick('totalPoints')} color="var(--color-primary)" />
                             <MetricRow label="Active Users (7d)" value={stats.activeUsers} onClick={() => handleStatClick('activeUsers')} color="var(--color-confirmed)" />
                             <MetricRow label="New Reports Today" value={stats.todaySubmissions} onClick={() => handleStatClick('todayReports')} color="var(--color-pending)" />
@@ -254,19 +254,19 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 2. Status Summary */}
                     <div className="card">
-                        <div className="card-header" style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📊 Status Summary</span>
+                        <div className="card-header" style={{ padding: '0.4rem 0.6rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📊 Status</span>
                             {filteredPoints && (
                                 <button
                                     onClick={handleClearFilter}
                                     className="btn btn-secondary"
-                                    style={{ padding: '0.2rem 0.4rem', fontSize: '0.65rem' }}
+                                    style={{ padding: '0.15rem 0.3rem', fontSize: '0.6rem' }}
                                 >
-                                    Show All
+                                    All
                                 </button>
                             )}
                         </div>
-                        <div className="card-body" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                        <div className="card-body" style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
                             <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
                             <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
@@ -275,19 +275,19 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 3. Database Totals */}
                     <div className="card">
-                        <div className="card-header" style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Totals</span>
+                        <div className="card-header" style={{ padding: '0.4rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>💾 Database</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                            <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
-                            <MetricRow label="Total Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
-                            <MetricRow label="Unread Messages" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
-                            <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
+                        <div className="card-body" style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                            <MetricRow label="Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
+                            <MetricRow label="Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
+                            <MetricRow label="Unread" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
+                            <MetricRow label="Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
 
                             {showBackup && (
                                 <button
                                     className="btn btn-primary"
-                                    style={{ marginTop: '0.4rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', fontSize: '0.85rem' }}
+                                    style={{ marginTop: '0.3rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', padding: '0.4rem', fontSize: '0.8rem' }}
                                     onClick={async () => {
                                         try {
                                             await adminApi.downloadBackup();
@@ -296,7 +296,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                         }
                                     }}
                                 >
-                                    📥 Download DB Backup
+                                    📥 Backup
                                 </button>
                             )}
                         </div>
@@ -304,49 +304,25 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 4. System Status */}
                     <div className="card">
-                        <div className="card-header" style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🖥️ System Status</span>
+                        <div className="card-header" style={{ padding: '0.4rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>🖥️ System</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.8rem' }}>
+                        <div className="card-body" style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.75rem' }}>
                             {stats.system && (
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: 'var(--color-text-secondary)' }}>OS</span>
-                                        <span style={{ fontWeight: 500, fontSize: '0.75rem', textAlign: 'right' }}>
-                                            {stats.system.distro}
+                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>
+                                            {stats.system.distro.split(' ')[0]}
                                         </span>
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                        <span style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', marginRight: '1rem' }}>Host</span>
-                                        <span style={{
-                                            fontWeight: 500,
-                                            textAlign: 'right',
-                                            wordBreak: 'break-all',
-                                            lineHeight: '1.2',
-                                            fontSize: '0.75rem'
-                                        }}>
-                                            {stats.system.hostname}
-                                        </span>
-                                    </div>
-                                    {stats.system.ips && stats.system.ips.length > 0 && (
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                            <span style={{ color: 'var(--color-text-secondary)', marginRight: '1rem' }}>IPs</span>
-                                            <div style={{ textAlign: 'right' }}>
-                                                {stats.system.ips.map((net, i) => (
-                                                    <div key={i} style={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                                                        {net.ip}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: 'var(--color-text-secondary)' }}>Node.js</span>
-                                        <span style={{ fontWeight: 500, fontSize: '0.75rem' }}>{stats.system.nodeVersion}</span>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Node</span>
+                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>{stats.system.nodeVersion}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: 'var(--color-text-secondary)' }}>Uptime</span>
-                                        <span style={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>
                                             {(() => {
                                                 const u = stats.system.uptime || 0;
                                                 const h = Math.floor(u / 3600);
@@ -358,15 +334,15 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                     </div>
 
                                     {/* Memory Usage */}
-                                    <div style={{ marginTop: '0.4rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginBottom: '0.2rem' }}>
+                                    <div style={{ marginTop: '0.3rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', marginBottom: '0.15rem' }}>
                                             <span style={{ color: 'var(--color-text-secondary)' }}>Memory</span>
                                             <span style={{ fontWeight: 500 }}>
                                                 {Math.round(stats.system.memoryUsage.rss / 1024 / 1024)}MB /
                                                 {Math.round(stats.system.totalMemory / 1024 / 1024 / 1024)}GB
                                             </span>
                                         </div>
-                                        <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
+                                        <div style={{ height: 4, background: 'var(--color-bg-tertiary)', borderRadius: 2, overflow: 'hidden', display: 'flex' }}>
                                             <div style={{
                                                 width: `${(stats.system.memoryUsage.rss / stats.system.totalMemory) * 100}%`,
                                                 height: '100%',
@@ -377,15 +353,15 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                                     {/* Disk Usage (if available) */}
                                     {stats.system.disk && (
-                                        <div style={{ marginTop: '0.4rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginBottom: '0.2rem' }}>
-                                                <span style={{ color: 'var(--color-text-secondary)' }}>Disk (/)</span>
+                                        <div style={{ marginTop: '0.3rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', marginBottom: '0.15rem' }}>
+                                                <span style={{ color: 'var(--color-text-secondary)' }}>Disk</span>
                                                 <span style={{ fontWeight: 500 }}>
                                                     {Math.round(stats.system.disk.used / 1024 / 1024 / 1024)}GB /
                                                     {Math.round(stats.system.disk.total / 1024 / 1024 / 1024)}GB
                                                 </span>
                                             </div>
-                                            <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
+                                            <div style={{ height: 4, background: 'var(--color-bg-tertiary)', borderRadius: 2, overflow: 'hidden', display: 'flex' }}>
                                                 <div style={{
                                                     width: `${(stats.system.disk.used / stats.system.disk.total) * 100}%`,
                                                     height: '100%',
@@ -465,7 +441,7 @@ const MetricRow = ({ label, value, onClick, color }) => (
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '0.5rem 0.6rem',
+            padding: '0.4rem 0.5rem',
             background: 'var(--color-bg-tertiary)',
             borderRadius: 'var(--radius-md)',
             cursor: onClick ? 'pointer' : 'default',
@@ -475,8 +451,8 @@ const MetricRow = ({ label, value, onClick, color }) => (
         onMouseEnter={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-secondary)') : undefined}
         onMouseLeave={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-tertiary)') : undefined}
     >
-        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>{label}</span>
-        <span style={{ fontSize: '1.15rem', fontWeight: 700, color }}>{value}</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{label}</span>
+        <span style={{ fontSize: '1.05rem', fontWeight: 700, color }}>{value}</span>
     </div>
 );
 
@@ -488,21 +464,21 @@ const StatusRow = ({ label, count, total, color, icon, onClick }) => {
             onClick={onClick}
             style={{
                 cursor: onClick ? 'pointer' : 'default',
-                padding: onClick ? '0.5rem' : '0',
+                padding: onClick ? '0.4rem' : '0',
                 borderRadius: 'var(--radius-md)',
                 transition: 'background 0.2s ease'
             }}
             onMouseEnter={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-secondary)') : undefined}
             onMouseLeave={onClick ? (e => e.currentTarget.style.background = 'transparent') : undefined}
         >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
                     <span>{icon}</span>
                     {label}
                 </span>
-                <span style={{ fontWeight: 600, color }}>{count}</span>
+                <span style={{ fontWeight: 600, color, fontSize: '0.9rem' }}>{count}</span>
             </div>
-            <div style={{ height: 6, background: 'var(--color-bg-tertiary)', borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{ height: 4, background: 'var(--color-bg-tertiary)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{ width: `${percent}%`, height: '100%', background: color, transition: 'width 0.3s ease' }}></div>
             </div>
         </div>
