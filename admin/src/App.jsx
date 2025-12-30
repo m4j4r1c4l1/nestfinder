@@ -219,7 +219,7 @@ const App = () => {
                                 color: 'var(--color-primary)',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.1em',
-                                cursor: 'pointer',
+                                cursor: 'default',
                                 userSelect: 'none'
                             }}
                         >

@@ -151,6 +151,9 @@ export const initDatabase = async () => {
   const adminPassword = bcrypt.hashSync('admin123', 10);
   db.run(`INSERT OR IGNORE INTO admins (username, password_hash) VALUES (?, ?)`, ['admin', adminPassword]);
 
+  // Clean up legacy VAPID keys if they exist (Run on every start to ensure production is cleaned)
+  db.run(`DELETE FROM settings WHERE key IN ('vapid_public_key', 'vapid_private_key')`);
+
   // Save to file
   saveDatabase();
 
