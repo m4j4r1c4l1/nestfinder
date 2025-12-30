@@ -112,7 +112,8 @@ export default {
         includeConfirmed: 'Incloure Confirmats',
         includePending: 'Incloure Pendents',
         includeDeactivated: 'Incloure Desactivats',
-        pointsSelected: 'Punts seleccionats: {n}'
+        pointsSelected: 'Punts seleccionats: {n}',
+        readyDescription: 'Calcula una ruta a peu optimitzada visitant tots els punts seleccionats.'
     },
     inbox: {
         title: "Bústia d'entrada",

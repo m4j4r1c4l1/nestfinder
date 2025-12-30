@@ -112,7 +112,8 @@ export default {
         includeConfirmed: '包括已确认',
         includePending: '包括待审核',
         includeDeactivated: '包括已停用',
-        pointsSelected: '已选点数：{n}'
+        pointsSelected: '已选点数：{n}',
+        readyDescription: 'Calculate optimized walking path visiting all selected points.'
     },
     inbox: {
         title: '消息',

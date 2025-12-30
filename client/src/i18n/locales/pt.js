@@ -112,7 +112,8 @@ export default {
         includeConfirmed: 'Incluir Confirmados',
         includePending: 'Incluir Pendentes',
         includeDeactivated: 'Incluir Desativados',
-        pointsSelected: 'Pontos selecionados: {n}'
+        pointsSelected: 'Pontos selecionados: {n}',
+        readyDescription: 'Calcule uma rota a pé otimizada visitando todos os pontos selecionados.'
     },
     inbox: {
         title: 'Mensagens',

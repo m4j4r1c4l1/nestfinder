@@ -112,7 +112,8 @@ export default {
         includeConfirmed: 'Inclusief Bevestigd',
         includePending: 'Inclusief In Behandeling',
         includeDeactivated: 'Inclusief Gedeactiveerd',
-        pointsSelected: 'Geselecteerde punten: {n}'
+        pointsSelected: 'Geselecteerde punten: {n}',
+        readyDescription: 'Bereken een geoptimaliseerde wandelroute langs alle geselecteerde punten.'
     },
     inbox: {
         title: 'Berichten',

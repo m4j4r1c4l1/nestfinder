@@ -112,7 +112,8 @@ export default {
         includeConfirmed: 'Includi Confermati',
         includePending: 'Includi In Attesa',
         includeDeactivated: 'Includi Disattivati',
-        pointsSelected: 'Punti selezionati: {n}'
+        pointsSelected: 'Punti selezionati: {n}',
+        readyDescription: 'Calcola un percorso a piedi ottimizzato visitando tutti i punti selezionati.'
     },
     inbox: {
         title: 'Messaggi',

@@ -112,7 +112,8 @@ export default {
         includeConfirmed: 'Bestätigte einbeziehen',
         includePending: 'Ausstehende einbeziehen',
         includeDeactivated: 'Deaktivierte einbeziehen',
-        pointsSelected: 'Ausgewählte Punkte: {n}'
+        pointsSelected: 'Ausgewählte Punkte: {n}',
+        readyDescription: 'Berechnen Sie eine optimierte Route zu allen ausgewählten Punkten.'
     },
     inbox: {
         title: 'Nachrichten',
