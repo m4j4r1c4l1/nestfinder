@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import os from 'os';
+import { execSync } from 'child_process';
 import { get, all, run, resetDatabase } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
@@ -11,6 +12,26 @@ router.use(requireAdmin);
 
 // Get dashboard stats
 router.get('/stats', (req, res) => {
+    // Get disk usage (Linux/Mac only, fallback for Windows)
+    let disk = null;
+    try {
+        // Run df -k / and parse output
+        // Filesystem     1K-blocks    Used Available Use% Mounted on
+        const output = execSync('df -k /').toString();
+        const lines = output.trim().split('\n');
+        if (lines.length >= 2) {
+            const parts = lines[1].split(/\s+/);
+            if (parts.length >= 6) {
+                const total = parseInt(parts[1]) * 1024; // KB -> Bytes
+                const used = parseInt(parts[2]) * 1024;
+                const free = parseInt(parts[3]) * 1024;
+                disk = { total, used, free };
+            }
+        }
+    } catch (err) {
+        // Ignore errors (e.g. on Windows)
+    }
+
     const stats = {
         totalPoints: get('SELECT COUNT(*) as count FROM points').count,
         pendingPoints: get('SELECT COUNT(*) as count FROM points WHERE status = ?', ['pending']).count,
@@ -43,11 +64,19 @@ router.get('/stats', (req, res) => {
             loadAvg: os.loadavg(),
             uptime: process.uptime(),
             platform: `${os.type()} ${os.release()} (${os.arch()})`,
-            nodeVersion: process.version
+            nodeVersion: process.version,
+            disk // { total, used, free } or null
         }
     };
 
     res.json({ stats });
+});
+
+// Get distinct log actions for filters
+router.get('/logs/actions', (req, res) => {
+    // Select distinct actions for autocomplete
+    const actions = all('SELECT DISTINCT action FROM logs ORDER BY action ASC');
+    res.json({ actions: actions.map(a => a.action) });
 });
 
 // Get logs with pagination and filters

@@ -19,6 +19,8 @@ import adminRoutes from './routes/admin.js';
 import notificationsRoutes from './routes/notifications.js';
 
 const app = express();
+// Enable trust proxy for Render/load balancers
+app.set('trust proxy', 1);
 const server = createServer(app);
 
 // WebSocket server for real-time updates
