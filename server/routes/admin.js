@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import os from 'os';
 import { get, all, run, resetDatabase } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
@@ -33,7 +34,17 @@ router.get('/stats', (req, res) => {
         unreadNotifications: get('SELECT COUNT(*) as count FROM notifications WHERE read = 0').count,
         readNotifications: get('SELECT COUNT(*) as count FROM notifications WHERE read = 1').count,
         // Total confirmations (all votes)
-        totalConfirmations: get('SELECT COUNT(*) as count FROM confirmations').count
+        totalConfirmations: get('SELECT COUNT(*) as count FROM confirmations').count,
+        // System metrics
+        system: {
+            memoryUsage: process.memoryUsage(),
+            totalMemory: os.totalmem(),
+            freeMemory: os.freemem(),
+            loadAvg: os.loadavg(),
+            uptime: process.uptime(),
+            platform: `${os.type()} ${os.release()} (${os.arch()})`,
+            nodeVersion: process.version
+        }
     };
 
     res.json({ stats });
