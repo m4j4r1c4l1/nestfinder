@@ -138,7 +138,8 @@ export default {
         includeConfirmed: 'Incluir Confirmados',
         includePending: 'Incluir Pendientes',
         includeDeactivated: 'Incluir Desactivados',
-        pointsSelected: 'Puntos seleccionados: {n}'
+        pointsSelected: 'Puntos seleccionados: {n}',
+        readyDescription: 'Calcula una ruta a pie optimizada visitando todos los puntos seleccionados.'
     },
 
     // Notifications/Inbox

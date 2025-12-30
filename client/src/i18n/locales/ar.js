@@ -113,7 +113,8 @@ export default {
         includeConfirmed: 'مؤكدة',
         includePending: 'معلقة',
         includeDeactivated: 'معطلة',
-        pointsSelected: 'النقاط المحددة: {n}'
+        pointsSelected: 'النقاط المحددة: {n}',
+        readyDescription: 'Calculate optimized walking path visiting all selected points.'
     },
     inbox: {
         title: 'الرسائل',

@@ -112,7 +112,8 @@ export default {
         includeConfirmed: 'Вкл. подтвержденные',
         includePending: 'Вкл. на проверке',
         includeDeactivated: 'Вкл. неактивные',
-        pointsSelected: 'Выбрано точек: {n}'
+        pointsSelected: 'Выбрано точек: {n}',
+        readyDescription: 'Calculate optimized walking path visiting all selected points.'
     },
     inbox: {
         title: 'Сообщения',
