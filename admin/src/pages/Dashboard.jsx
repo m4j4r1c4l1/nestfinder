@@ -266,7 +266,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                 </button>
                             )}
                         </div>
-                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <div className="card-body" style={{ padding: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                             <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
                             <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
                             <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
@@ -476,21 +476,21 @@ const StatusRow = ({ label, count, total, color, icon, onClick }) => {
             onClick={onClick}
             style={{
                 cursor: onClick ? 'pointer' : 'default',
-                padding: onClick ? '0.4rem' : '0',
+                padding: onClick ? '0.25rem' : '0',
                 borderRadius: 'var(--radius-md)',
                 transition: 'background 0.2s ease'
             }}
             onMouseEnter={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-secondary)') : undefined}
             onMouseLeave={onClick ? (e => e.currentTarget.style.background = 'transparent') : undefined}
         >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.1rem' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem' }}>
                     <span>{icon}</span>
                     {label}
                 </span>
-                <span style={{ fontWeight: 600, color, fontSize: '0.9rem' }}>{count}</span>
+                <span style={{ fontWeight: 600, color, fontSize: '0.85rem' }}>{count}</span>
             </div>
-            <div style={{ height: 4, background: 'var(--color-bg-tertiary)', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ height: 3, background: 'var(--color-bg-tertiary)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{ width: `${percent}%`, height: '100%', background: color, transition: 'width 0.3s ease' }}></div>
             </div>
         </div>
