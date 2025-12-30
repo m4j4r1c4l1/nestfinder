@@ -48,64 +48,65 @@ export const adminApi = {
         return this.fetch('/admin/stats');
     },
 
-    const params = new URLSearchParams(filters);
-    return this.fetch(`/admin/logs?${params}`);
-},
+    getLogs(filters = {}) {
+        const params = new URLSearchParams(filters);
+        return this.fetch(`/admin/logs?${params}`);
+    },
 
     getLogActions() {
         return this.fetch('/admin/logs/actions');
     },
 
-        getSettings() {
-    return this.fetch('/settings');
-},
+    getSettings() {
+        return this.fetch('/settings');
+    },
 
-updateSettings(settings) {
-    return this.fetch('/settings', {
-        method: 'PUT',
-        body: JSON.stringify({ settings }),
-    });
-},
+    updateSettings(settings) {
+        return this.fetch('/settings', {
+            method: 'PUT',
+            body: JSON.stringify({ settings }),
+        });
+    },
 
-getUsers() {
-    return this.fetch('/admin/users');
-},
+    getUsers() {
+        return this.fetch('/admin/users');
+    },
 
-getPoints() {
-    return this.fetch('/admin/points');
-},
+    getPoints() {
+        return this.fetch('/admin/points');
+    },
 
-deletePoint(pointId) {
-    return this.fetch(`/admin/points/${pointId}`, {
-        method: 'DELETE',
-    });
-},
+    deletePoint(pointId) {
+        return this.fetch(`/admin/points/${pointId}`, {
+            method: 'DELETE',
+        });
+    },
 
-changePassword(currentPassword, newPassword) {
-    return this.fetch('/admin/password', {
-        method: 'PUT',
-        body: JSON.stringify({ currentPassword, newPassword }),
-    });
-},
+    changePassword(currentPassword, newPassword) {
+        return this.fetch('/admin/password', {
+            method: 'PUT',
+            body: JSON.stringify({ currentPassword, newPassword }),
+        });
+    },
 
-resetDatabase(target = 'all') {
-    return this.fetch('/admin/reset', {
-        method: 'POST',
-        body: JSON.stringify({ confirm: target.toUpperCase(), target }),
-    });
-},
+    resetDatabase(target = 'all') {
+        return this.fetch('/admin/reset', {
+            method: 'POST',
+            body: JSON.stringify({ confirm: target.toUpperCase(), target }),
+        });
+    },
 
-deleteUser(userId) {
-    return this.fetch(`/admin/users/${userId}`, {
-        method: 'DELETE',
-    });
-},
+    deleteUser(userId) {
+        return this.fetch(`/admin/users/${userId}`, {
+            method: 'DELETE',
+        });
+    },
 
-getNotifications() {
-    return this.fetch('/admin/notifications');
-},
+    getNotifications() {
+        return this.fetch('/admin/notifications');
+    },
 
-getConfirmations() {
-    return this.fetch('/admin/confirmations');
-}
+    getConfirmations() {
+        return this.fetch('/admin/confirmations');
+    }
 };
