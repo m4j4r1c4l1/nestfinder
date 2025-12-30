@@ -21,15 +21,15 @@ const Home = () => {
 
     return (
         <div className="welcome-screen">
-            <div className="welcome-logo" style={{ fontSize: '6rem' }}>🪹</div>
-            <h1 className="welcome-title">{t('welcome.title')}</h1>
-            <p className="welcome-subtitle">{t('welcome.subtitle')}</p>
-
-            {/* Testing Mode Notice - Configurable via config.js */}
+            {/* Testing Mode Notice - Positioned at top */}
             {config.SHOW_TESTING_NOTICE && (
                 <div style={{
+                    position: 'absolute',
+                    top: '2rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
                     maxWidth: '420px',
-                    margin: '1.5rem auto 1rem',
+                    width: 'calc(100% - 2rem)',
                     padding: '0.75rem 1.25rem',
                     background: 'rgba(255, 255, 255, 0.08)',
                     border: '1px solid rgba(255, 255, 255, 0.15)',
@@ -62,6 +62,11 @@ const Home = () => {
                     </p>
                 </div>
             )}
+
+            <div className="welcome-logo" style={{ fontSize: '6rem' }}>🪹</div>
+            <h1 className="welcome-title">{t('welcome.title')}</h1>
+            <p className="welcome-subtitle">{t('welcome.subtitle')}</p>
+
 
             <form className="welcome-form" onSubmit={handleStart}>
                 <div className="form-group">
