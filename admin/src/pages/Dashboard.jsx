@@ -261,9 +261,21 @@ const Dashboard = ({ onNavigate }) => {
                             {stats.system && (
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: 'var(--color-text-secondary)' }}>Platform</span>
-                                        <span style={{ fontWeight: 500 }}>{stats.system.platform.split(' ')[0]}</span>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>OS</span>
+                                        <span style={{ fontWeight: 500, fontSize: '0.8rem', textAlign: 'right' }}>
+                                            {stats.system.distro}
+                                        </span>
                                     </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Host</span>
+                                        <span style={{ fontWeight: 500 }}>{stats.system.hostname}</span>
+                                    </div>
+                                    {stats.system.ips && stats.system.ips.length > 0 && (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <span style={{ color: 'var(--color-text-secondary)' }}>IP</span>
+                                            <span style={{ fontWeight: 500 }}>{stats.system.ips[0].ip}</span>
+                                        </div>
+                                    )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: 'var(--color-text-secondary)' }}>Node.js</span>
                                         <span style={{ fontWeight: 500 }}>{stats.system.nodeVersion}</span>

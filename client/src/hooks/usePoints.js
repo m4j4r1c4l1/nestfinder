@@ -64,7 +64,13 @@ export const usePoints = () => {
     const handleRealtimeUpdate = (message) => {
         switch (message.type) {
             case 'point_added':
-                setPoints(prev => [message.point, ...prev]);
+                setPoints(prev => {
+                    // Check if point already exists (avoid duplicates from optimistic update)
+                    if (prev.some(p => p.id === message.point.id)) {
+                        return prev;
+                    }
+                    return [message.point, ...prev];
+                });
                 break;
             case 'point_updated':
                 setPoints(prev => prev.map(p => p.id === message.point.id ? message.point : p));
@@ -78,8 +84,14 @@ export const usePoints = () => {
     };
 
     const submitPoint = async (data) => {
+        // Optimistic update: assume success or use result from API (if returns point)
         const result = await api.submitPoint(data);
-        // Optimistic update handled by WS usually, but can add here if WS fails
+        if (result && result.point) {
+            setPoints(prev => {
+                if (prev.some(p => p.id === result.point.id)) return prev;
+                return [result.point, ...prev];
+            });
+        }
         return result;
     };
 

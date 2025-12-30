@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import os from 'os';
+import fs from 'fs';
 import { execSync } from 'child_process';
 import { get, all, run, resetDatabase } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
@@ -14,23 +15,51 @@ router.use(requireAdmin);
 router.get('/stats', (req, res) => {
     // Get disk usage (Linux/Mac only, fallback for Windows)
     let disk = null;
+    let osDistro = 'Unknown';
+    let networkIps = [];
+
     try {
-        // Run df -k / and parse output
-        // Filesystem     1K-blocks    Used Available Use% Mounted on
+        // Disk Usage
         const output = execSync('df -k /').toString();
         const lines = output.trim().split('\n');
         if (lines.length >= 2) {
             const parts = lines[1].split(/\s+/);
             if (parts.length >= 6) {
-                const total = parseInt(parts[1]) * 1024; // KB -> Bytes
+                const total = parseInt(parts[1]) * 1024;
                 const used = parseInt(parts[2]) * 1024;
                 const free = parseInt(parts[3]) * 1024;
                 disk = { total, used, free };
             }
         }
-    } catch (err) {
-        // Ignore errors (e.g. on Windows)
+    } catch (err) { }
+
+    try {
+        // OS Distro (Try /etc/issue then /etc/os-release)
+        try {
+            osDistro = execSync('head -n 1 /etc/issue').toString().trim();
+        } catch (e) {
+            // Fallback to pretty name from os-release if issue fails
+            const osRelease = fs.readFileSync('/etc/os-release', 'utf8');
+            const match = osRelease.match(/PRETTY_NAME="([^"]+)"/);
+            if (match) osDistro = match[1];
+        }
+    } catch (e) {
+        // Fallback to standard OS type if file reading fails (e.g. Windows)
+        osDistro = `${os.type()} ${os.release()}`;
     }
+
+    try {
+        // Network IPs
+        const nets = os.networkInterfaces();
+        for (const name of Object.keys(nets)) {
+            for (const net of nets[name]) {
+                // Skip internal (i.e. 127.0.0.1) and non-IPv4
+                if (net.family === 'IPv4' && !net.internal) {
+                    networkIps.push({ name, ip: net.address });
+                }
+            }
+        }
+    } catch (e) { }
 
     const stats = {
         totalPoints: get('SELECT COUNT(*) as count FROM points').count,
@@ -64,8 +93,11 @@ router.get('/stats', (req, res) => {
             loadAvg: os.loadavg(),
             uptime: process.uptime(),
             platform: `${os.type()} ${os.release()} (${os.arch()})`,
+            distro: osDistro,
+            hostname: os.hostname(),
+            ips: networkIps,
             nodeVersion: process.version,
-            disk // { total, used, free } or null
+            disk
         }
     };
 

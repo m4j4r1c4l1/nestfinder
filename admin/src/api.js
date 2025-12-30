@@ -49,7 +49,11 @@ export const adminApi = {
     },
 
     getLogs(filters = {}) {
-        const params = new URLSearchParams(filters);
+        // Remove undefined/null/empty values to prevent "undefined" string in URL
+        const cleanFilters = Object.fromEntries(
+            Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+        );
+        const params = new URLSearchParams(cleanFilters);
         return this.fetch(`/admin/logs?${params}`);
     },
 
