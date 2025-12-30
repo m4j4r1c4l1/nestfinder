@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { adminApi } from '../api';
 import AdminMap from '../components/AdminMap';
 
-const Dashboard = ({ onNavigate }) => {
+const Dashboard = ({ onNavigate, showBackup }) => {
     const [stats, setStats] = useState(null);
     const [points, setPoints] = useState([]);
     const [filteredPoints, setFilteredPoints] = useState(null); // null = show all, array = filtered
@@ -284,19 +284,21 @@ const Dashboard = ({ onNavigate }) => {
                             <MetricRow label="Unread Messages" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
                             <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
 
-                            <button
-                                className="btn btn-primary"
-                                style={{ marginTop: '0.5rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
-                                onClick={async () => {
-                                    try {
-                                        await adminApi.downloadBackup();
-                                    } catch (err) {
-                                        alert('Failed to download backup: ' + err.message);
-                                    }
-                                }}
-                            >
-                                📥 Download DB Backup
-                            </button>
+                            {showBackup && (
+                                <button
+                                    className="btn btn-primary"
+                                    style={{ marginTop: '0.5rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                                    onClick={async () => {
+                                        try {
+                                            await adminApi.downloadBackup();
+                                        } catch (err) {
+                                            alert('Failed to download backup: ' + err.message);
+                                        }
+                                    }}
+                                >
+                                    📥 Download DB Backup
+                                </button>
+                            )}
                         </div>
                     </div>
 

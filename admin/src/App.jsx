@@ -156,6 +156,8 @@ const Login = ({ onLogin }) => {
 const App = () => {
     const [token, setToken] = useState(localStorage.getItem('nestfinder_admin_token'));
     const [view, setView] = useState('dashboard');
+    const [backupEnabled, setBackupEnabled] = useState(false);
+    const [clickCount, setClickCount] = useState(0);
 
     if (!token) {
         return <Login onLogin={setToken} />;
@@ -164,6 +166,20 @@ const App = () => {
     const handleLogout = () => {
         adminApi.logout();
         setToken(null);
+    };
+
+    const handleSecretClick = () => {
+        setClickCount(prev => {
+            const newCount = prev + 1;
+            if (newCount === 3) {
+                setBackupEnabled(b => !b);
+                return 0; // Reset
+            }
+            return newCount;
+        });
+
+        // Reset click count if too slow (1 second pause resets sequence)
+        setTimeout(() => setClickCount(0), 1000);
     };
 
     const navItems = [
@@ -196,7 +212,19 @@ const App = () => {
                     <span style={{ fontSize: '1.5rem' }}>🪹</span>
                     <div>
                         <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>NestFinder</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Admin</div>
+                        <div
+                            onClick={handleSecretClick}
+                            style={{
+                                fontSize: '0.65rem',
+                                color: 'var(--color-primary)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.1em',
+                                cursor: 'pointer',
+                                userSelect: 'none'
+                            }}
+                        >
+                            Admin
+                        </div>
                     </div>
                 </div>
 
@@ -252,7 +280,7 @@ const App = () => {
 
             {/* Main Content */}
             <main style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                {view === 'dashboard' && <Dashboard />}
+                {view === 'dashboard' && <Dashboard showBackup={backupEnabled} />}
                 {view === 'notifications' && <Notifications />}
                 {view === 'logs' && <Logs />}
                 {view === 'settings' && <Settings />}
