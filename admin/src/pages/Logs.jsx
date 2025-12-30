@@ -16,7 +16,10 @@ const Logs = () => {
         const a = action.toLowerCase();
 
         // Admin actions -> RED (User request)
-        if (a.includes('admin')) return '239, 68, 68'; // Red-500
+        if (a.includes('admin') && !a.includes('notification')) return '239, 68, 68'; // Red-500
+
+        // Notifications -> YELLOW WARM (User request)
+        if (a.includes('notification')) return '234, 179, 8'; // Yellow-500 (Warm Amber)
 
         // Auth/Registration -> BLUE (User request)
         if (a.includes('login') || a.includes('register')) return '59, 130, 246'; // Blue-500
