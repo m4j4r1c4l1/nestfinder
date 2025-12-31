@@ -107,31 +107,31 @@ const Notifications = () => {
                 </div>
                 <div className="card-body">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                        <div style={{ background: '#fef3c7', padding: '1rem', borderRadius: '8px', border: '3px solid #f59e0b' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#b45309' }}>
+                        <div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
                                 {stats.totalSubscribers}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 600, color: '#92400e' }}>Total Users</div>
-                                <div className="text-muted text-sm">Registered users (YELLOW)</div>
+                                <div style={{ fontWeight: 600 }}>Total Users</div>
+                                <div className="text-muted text-sm">Registered users</div>
                             </div>
                         </div>
-                        <div style={{ background: '#dbeafe', padding: '1rem', borderRadius: '8px', border: '3px solid #3b82f6' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1d4ed8' }}>
+                        <div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
                                 {stats.notificationMetrics?.total || 0}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 600, color: '#1e40af' }}>Total Messages</div>
-                                <div className="text-muted text-sm">In database (BLUE)</div>
+                                <div style={{ fontWeight: 600 }}>Total Messages</div>
+                                <div className="text-muted text-sm">In database</div>
                             </div>
                         </div>
-                        <div style={{ background: '#d1fae5', padding: '1rem', borderRadius: '8px', border: '3px solid #10b981' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#047857' }}>
+                        <div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
                                 {stats.notificationMetrics?.unread || 0}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 600, color: '#065f46' }}>Unread Messages</div>
-                                <div className="text-muted text-sm">Pending delivery (GREEN)</div>
+                                <div style={{ fontWeight: 600 }}>Unread Messages</div>
+                                <div className="text-muted text-sm">Pending delivery</div>
                             </div>
                         </div>
                     </div>
@@ -283,11 +283,11 @@ const ComposeSection = ({ subscribers, onSent }) => {
 
     return (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <div className="card-header"><h3>Compose Notification</h3></div>
+            <div className="card-header"><h3>✉️ Compose Notification</h3></div>
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', paddingBottom: '0.5rem' }}>
                         {Object.values(templates).map(tmpl => (
                             <button
                                 key={tmpl.id}
@@ -384,17 +384,17 @@ const HistorySection = () => {
     return (
         <div className="card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3>Sent History</h3>
+                <h3>📜 Sent History</h3>
                 <button onClick={loadHistory} className="btn btn-sm btn-secondary">🔄 Refresh</button>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: '#f1f5f9', zIndex: 1 }}>
-                            <tr style={{ textAlign: 'left', color: '#475569' }}>
-                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Timestamp</th>
-                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Message</th>
-                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Target</th>
+                        <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                            <tr style={{ textAlign: 'left' }}>
+                                <th style={{ padding: '1rem', borderBottom: '3px solid #f59e0b', fontWeight: 600, background: '#fef3c7', color: '#92400e' }}>Timestamp (YELLOW)</th>
+                                <th style={{ padding: '1rem', borderBottom: '3px solid #3b82f6', fontWeight: 600, background: '#dbeafe', color: '#1e40af' }}>Message (BLUE)</th>
+                                <th style={{ padding: '1rem', borderBottom: '3px solid #10b981', fontWeight: 600, background: '#d1fae5', color: '#065f46' }}>Target (GREEN)</th>
                             </tr>
                         </thead>
                         <tbody>
