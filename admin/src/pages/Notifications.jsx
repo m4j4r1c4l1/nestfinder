@@ -403,7 +403,7 @@ const HistorySection = () => {
                                         }}
                                         className="history-row"
                                         onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = ''}
                                     >
                                         <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
                                             {new Date(log.created_at).toLocaleString()}
