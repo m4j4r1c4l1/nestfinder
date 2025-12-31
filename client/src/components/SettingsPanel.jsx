@@ -40,7 +40,7 @@ const SettingsPanel = ({ onClose }) => {
 
 
     return (
-        <div className="card">
+        <div className="card" style={{ background: 'var(--color-bg-tertiary)' }}>
             <div className="card-header flex-between items-center">
                 <h3 className="card-title">{t('nav.settings')}</h3>
                 <button
@@ -108,9 +108,9 @@ const SettingsPanel = ({ onClose }) => {
                             justifyContent: 'center',
                             gap: '0.5rem',
                             padding: '1rem',
-                            background: showCopied ? 'var(--color-confirmed)' : 'var(--color-bg-secondary)',
-                            color: showCopied ? 'white' : 'var(--color-text-primary)',
-                            border: '1px solid var(--color-border)',
+                            background: showCopied ? 'var(--color-confirmed)' : 'var(--color-primary)',
+                            color: 'white',
+                            border: 'none',
                             transition: 'all 0.3s'
                         }}
                     >
