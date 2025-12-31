@@ -12,8 +12,5 @@ export default defineConfig({
                 changeOrigin: true
             }
         }
-    },
-    optimizeDeps: {
-        include: ['qrcode']
     }
 });
