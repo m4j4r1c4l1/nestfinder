@@ -91,7 +91,7 @@ const Notifications = () => {
     };
 
     return (
-        <div className="notifications-page">
+        <div className="notifications-page" style={{ maxWidth: '800px' }}>
             <div className="page-header" style={{ marginBottom: '1rem' }}>
                 <h1>🔔 In-App Notifications</h1>
                 <p className="text-muted">Manage and track app notifications</p>
@@ -392,7 +392,7 @@ const HistorySection = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 1 }}>
                             <tr style={{ textAlign: 'left', color: '#475569' }}>
-                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Date</th>
+                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Timestamp</th>
                                 <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Message</th>
                                 <th style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>Target</th>
                             </tr>
@@ -425,7 +425,7 @@ const HistorySection = () => {
                                         </td>
                                         <td style={{ padding: '1rem' }}>
                                             <div style={{ fontWeight: 600, color: '#1e293b' }}>{meta.title}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#1e293b' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
                                         </td>
                                         <td style={{ padding: '1rem' }}>
                                             <span style={{

@@ -191,14 +191,20 @@ const App = () => {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
+            {/* Sidebar - Fixed */}
             <aside style={{
                 width: '220px',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                height: '100vh',
                 background: 'var(--color-bg-secondary)',
                 borderRight: '1px solid var(--color-border)',
                 display: 'flex',
                 flexDirection: 'column',
-                padding: '1.5rem 1rem'
+                padding: '1.5rem 1rem',
+                zIndex: 100,
+                overflowY: 'auto'
             }}>
                 {/* Logo */}
                 <div style={{
@@ -278,8 +284,8 @@ const App = () => {
                 </button>
             </aside>
 
-            {/* Main Content */}
-            <main style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            {/* Main Content - Offset for fixed sidebar */}
+            <main style={{ flex: 1, padding: '1.5rem', marginLeft: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', height: '100vh' }}>
                 {view === 'dashboard' && <Dashboard showBackup={backupEnabled} />}
                 {view === 'notifications' && <Notifications />}
                 {view === 'logs' && <Logs />}
