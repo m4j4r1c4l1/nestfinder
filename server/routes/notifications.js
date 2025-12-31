@@ -45,6 +45,15 @@ router.get('/notifications', (req, res) => {
             [userId]
         );
 
+        // Mark fetched notifications as delivered (if not already)
+        // This provides the "Double Tick" status
+        const undeliveredIds = notifications.filter(n => !n.delivered).map(n => n.id);
+        if (undeliveredIds.length > 0) {
+            run(
+                `UPDATE notifications SET delivered = 1 WHERE id IN (${undeliveredIds.join(',')})`
+            );
+        }
+
         res.json({ notifications });
     } catch (error) {
         console.error('Get notifications error:', error);
@@ -161,20 +170,24 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
             return res.status(404).json({ error: 'No users found for target' });
         }
 
+        // Generate a batch ID for this broadcast
+        const batchId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+
         // Insert notifications for each user
-        const stmt = getDb().prepare('INSERT INTO notifications (user_id, title, body, type, image_url, read) VALUES (?, ?, ?, ?, ?, 0)');
+        const stmt = getDb().prepare('INSERT INTO notifications (user_id, title, body, type, image_url, read, delivered, batch_id) VALUES (?, ?, ?, ?, ?, 0, 0, ?)');
         const type = template || 'custom';
         const image = req.body.imageUrl || null;
 
         targetUserIds.forEach(uid => {
-            stmt.run([uid, notificationTitle, notificationBody, type, image]);
+            stmt.run([uid, notificationTitle, notificationBody, type, image, batchId]);
         });
         stmt.free();
 
-        log('admin', 'notification_sent', null, {
+        log('admin', 'notification_sent', batchId, {
             template,
             target,
-            count: targetUserIds.length
+            count: targetUserIds.length,
+            title: notificationTitle
         });
 
         res.json({
@@ -205,6 +218,52 @@ router.delete('/admin/notifications/clear-all', requireAdmin, (req, res) => {
     } catch (error) {
         console.error('Clear notifications error:', error);
         res.status(500).json({ error: 'Failed to clear notifications' });
+    }
+});
+
+// Get batch details (for Admin "Message Details" view)
+router.get('/admin/notifications/batch/:batchId', requireAdmin, (req, res) => {
+    try {
+        const { batchId } = req.params;
+
+        // Get notifications in this batch joined with users
+        const rows = all(`
+            SELECT 
+                n.id, n.user_id, n.read, n.delivered, n.created_at,
+                u.nickname, u.device_id
+            FROM notifications n
+            LEFT JOIN users u ON n.user_id = u.id
+            WHERE n.batch_id = ?
+            ORDER BY n.read DESC, n.delivered DESC
+        `, [batchId]);
+
+        // Calculate stats
+        const stats = {
+            total: rows.length,
+            delivered: rows.filter(r => r.delivered).length,
+            read: rows.filter(r => r.read).length
+        };
+
+        res.json({ messages: rows, stats });
+    } catch (error) {
+        console.error('Batch details error:', error);
+        res.status(500).json({ error: 'Failed to get batch details' });
+    }
+});
+
+// Get notification history (logs)
+router.get('/admin/notifications/history', requireAdmin, (req, res) => {
+    try {
+        const logs = all(
+            `SELECT * FROM logs 
+             WHERE action = 'notification_sent' 
+             ORDER BY created_at DESC 
+             LIMIT 50`
+        );
+        res.json({ logs });
+    } catch (error) {
+        console.error('History error:', error);
+        res.status(500).json({ error: 'Failed to get history' });
     }
 });
 

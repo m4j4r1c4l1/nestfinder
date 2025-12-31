@@ -130,9 +130,18 @@ export const initDatabase = async () => {
   // Migration: Add image_url to notifications if not exists
   try {
     db.run("ALTER TABLE notifications ADD COLUMN image_url TEXT");
-  } catch (e) {
-    // Column likely exists, ignore error
-  }
+  } catch (e) { /* Column exists */ }
+
+  // Migration: Add batch_id to notifications (for grouping broadcasts)
+  try {
+    db.run("ALTER TABLE notifications ADD COLUMN batch_id TEXT");
+    db.run("CREATE INDEX IF NOT EXISTS idx_notifications_batch ON notifications(batch_id)");
+  } catch (e) { /* Column exists */ }
+
+  // Migration: Add delivered to notifications (for tracking receipt)
+  try {
+    db.run("ALTER TABLE notifications ADD COLUMN delivered BOOLEAN DEFAULT 0");
+  } catch (e) { /* Column exists */ }
 
   // Create indexes
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_status ON points(status);`);
