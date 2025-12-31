@@ -24,12 +24,16 @@ const SettingsPanel = ({ onClose }) => {
         localStorage.setItem(NOTIFICATION_PREF_KEY, JSON.stringify({ realTime: newValue }));
     };
 
-    const [showCopied, setShowCopied] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     const handleShare = async () => {
+        // Try native share on mobile/supported devices
         let shared = false;
         if (navigator.share) {
             try {
+                // On mobile, native share is usually better.
+                // But on desktop, it might be limited.
+                // We'll try it, and if it throws or is aborted, we handle it.
                 await navigator.share({
                     title: 'NestFinder',
                     text: t('welcome.subtitle'),
@@ -37,21 +41,48 @@ const SettingsPanel = ({ onClose }) => {
                 });
                 shared = true;
             } catch (err) {
-                // If user aborted share dialog, don't fall back to copy
+                // If error is strictly 'AbortError', user cancelled native sheet, so do nothing.
                 if (err.name === 'AbortError') return;
-                console.error('Error sharing:', err);
+                // Otherwise, fall through to modal
             }
         }
 
+        // If native share didn't happen (unsupported or failed non-abort), show custom modal
         if (!shared) {
-            try {
-                await navigator.clipboard.writeText(APP_URL);
-                setShowCopied(true);
-                setTimeout(() => setShowCopied(false), 2000);
-            } catch (clipboardErr) {
-                console.error('Clipboard failed:', clipboardErr);
-            }
+            setShowShareModal(true);
         }
+    };
+
+    const handleCopyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(APP_URL);
+            setShowCopied(true);
+            setTimeout(() => setShowCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy', err);
+        }
+    };
+
+    const shareSocial = (platform) => {
+        const text = encodeURIComponent(t('welcome.subtitle'));
+        const url = encodeURIComponent(APP_URL);
+        let link = '';
+
+        switch (platform) {
+            case 'whatsapp':
+                link = `https://wa.me/?text=${text}%20${url}`;
+                break;
+            case 'telegram':
+                link = `https://t.me/share/url?url=${url}&text=${text}`;
+                break;
+            case 'twitter':
+                link = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+                break;
+            default:
+                return;
+        }
+        window.open(link, '_blank');
+        setShowShareModal(false);
     };
 
     return (
@@ -125,16 +156,118 @@ const SettingsPanel = ({ onClose }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                background: showCopied ? 'var(--color-success)' : 'var(--color-primary)',
+                                background: 'var(--color-primary)',
                                 color: 'white',
                                 border: 'none',
                                 transition: 'background 0.3s'
                             }}
                         >
-                            {showCopied ? '✓ ' + t('settings.linkCopied') : '🔗 ' + (t('settings.shareLink') || 'Share Link')}
+                            🔗 {t('settings.shareLink') || 'Share Link'}
                         </button>
                     </div>
                 </div>
+
+                {/* Share Modal Overlay */}
+                {showShareModal && (
+                    <div style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0,0,0,0.5)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px'
+                    }} onClick={(e) => {
+                        if (e.target === e.currentTarget) setShowShareModal(false);
+                    }}>
+                        <div style={{
+                            background: 'var(--color-bg)',
+                            borderRadius: 'var(--radius-lg)',
+                            padding: '1.5rem',
+                            width: '100%',
+                            maxWidth: '320px',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+                            animation: 'slideUp 0.3s ease-out'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                <h3 style={{ margin: 0 }}>{t('settings.shareLink')}</h3>
+                                <button
+                                    onClick={() => setShowShareModal(false)}
+                                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0 }}
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                <button
+                                    onClick={() => shareSocial('whatsapp')}
+                                    style={{
+                                        border: 'none',
+                                        background: '#25D366',
+                                        color: 'white',
+                                        padding: '0.8rem',
+                                        borderRadius: 'var(--radius-md)',
+                                        fontWeight: 'bold',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    💬 WhatsApp
+                                </button>
+                                <button
+                                    onClick={() => shareSocial('telegram')}
+                                    style={{
+                                        border: 'none',
+                                        background: '#0088cc',
+                                        color: 'white',
+                                        padding: '0.8rem',
+                                        borderRadius: 'var(--radius-md)',
+                                        fontWeight: 'bold',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    ✈️ Telegram
+                                </button>
+                                <button
+                                    onClick={() => shareSocial('twitter')}
+                                    style={{
+                                        border: 'none',
+                                        background: 'black',
+                                        color: 'white',
+                                        padding: '0.8rem',
+                                        borderRadius: 'var(--radius-md)',
+                                        fontWeight: 'bold',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    ✖️ X (Twitter)
+                                </button>
+                                <button
+                                    onClick={handleCopyLink}
+                                    style={{
+                                        border: '1px solid var(--color-border)',
+                                        background: showCopied ? 'var(--color-success)' : 'var(--color-bg-secondary)',
+                                        color: showCopied ? 'white' : 'var(--color-text)',
+                                        padding: '0.8rem',
+                                        borderRadius: 'var(--radius-md)',
+                                        fontWeight: 'bold',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {showCopied ? `✓ ${t('settings.linkCopied')}` : `📋 ${t('settings.copyLink')}`}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Notification Settings */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
