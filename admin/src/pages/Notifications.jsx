@@ -432,14 +432,24 @@ const HistorySection = () => {
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
                                 <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Timestamp</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Message</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Title</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Body</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Image</th>
                                 <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Target</th>
                             </tr>
                         </thead>
                         <tbody>
                             {logs.map(log => {
                                 const meta = JSON.parse(log.metadata || '{}');
-                                const date = new Date(log.created_at);
+                                // Use DateTimeCell logic here manually or reuse if refactored. 
+                                // Since DateTimeCell is inside Modal, let's duplicate the fix logic here or assume local fix.
+                                // NOTE: DateTimeCell is now inside DetailModal in my previous step, I should have moved it out.
+                                // I will implement inline fix here.
+                                let safeIso = log.created_at;
+                                if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
+                                if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) { safeIso += 'Z'; }
+                                const date = new Date(safeIso);
+
                                 return (
                                     <tr
                                         key={log.id}
@@ -454,7 +464,7 @@ const HistorySection = () => {
                                         }}
                                         className="history-row"
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.1)'; // Slight blue hover
+                                            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.1)';
                                         }}
                                         onMouseLeave={(e) => {
                                             e.currentTarget.style.background = 'transparent';
@@ -468,14 +478,26 @@ const HistorySection = () => {
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                             <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
-                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                                                {meta.body ? meta.body.substring(0, 50) + (meta.body.length > 50 ? '...' : '') : meta.template}
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                                                {meta.body ? (meta.body.length > 40 ? meta.body.substring(0, 40) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
                                             </div>
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
                                             <span style={{
-                                                background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8',
-                                                padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 500, border: '1px solid rgba(56, 189, 248, 0.2)'
+                                                fontSize: '0.8rem',
+                                                color: meta.image || (meta.template && meta.template.includes('img')) ? '#4ade80' : '#64748b',
+                                                background: meta.image ? 'rgba(74, 222, 128, 0.1)' : 'transparent',
+                                                padding: '2px 8px', borderRadius: '4px'
+                                            }}>
+                                                {meta.image ? 'Yes' : 'No'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                                            <span style={{
+                                                background: 'rgba(74, 222, 128, 0.15)', color: '#4ade80', // Light Green as requested
+                                                padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 500, border: '1px solid rgba(74, 222, 128, 0.2)'
                                             }}>
                                                 {meta.count} users
                                             </span>
@@ -518,14 +540,26 @@ const DetailModal = ({ batchId, onClose }) => {
         fetchDetails();
     }, [batchId]);
 
-    // Format helper for 2-line date/time
+    // Format helper for 2-line date/time (Fixing SQLite UTC assumption)
     const DateTimeCell = ({ isoString, color = '#e2e8f0' }) => {
         if (!isoString) return <span style={{ color: '#64748b' }}>-</span>;
-        const date = new Date(isoString);
+
+        // SQLite CURRENT_TIMESTAMP returns "YYYY-MM-DD HH:MM:SS" which JS parses as Local. 
+        // We must treat it as UTC by appending 'Z' if missing.
+        let safeIso = isoString;
+        if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) {
+            safeIso += 'Z';
+        }
+        // Also handle "T" separator if standard ISO
+        if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) {
+            safeIso += 'Z';
+        }
+
+        const date = new Date(safeIso);
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString()}</span>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
         );
     };
@@ -594,13 +628,13 @@ const DetailModal = ({ batchId, onClose }) => {
                                                 <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Anonymous'}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                 <DateTimeCell isoString={msg.created_at} />
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                 <DateTimeCell isoString={msg.delivered_at} />
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                 <DateTimeCell isoString={msg.read_at} />
                                             </td>
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
@@ -611,7 +645,7 @@ const DetailModal = ({ batchId, onClose }) => {
                                                         ) : msg.delivered ? (
                                                             <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓✓</span>
                                                         ) : (
-                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓</span> // Single tick shifted slightly Left as requested
+                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓</span>
                                                         )}
                                                     </div>
                                                     <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8' }}>
@@ -635,5 +669,6 @@ const DetailModal = ({ batchId, onClose }) => {
 
     return ReactDOM.createPortal(modalContent, document.body);
 };
+
 
 export default Notifications;

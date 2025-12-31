@@ -147,9 +147,14 @@ export const initDatabase = async () => {
   try {
     db.run("ALTER TABLE notifications ADD COLUMN delivered_at DATETIME");
   } catch (e) { /* Column exists */ }
+  // Backfill existing (safe to run always)
+  db.run("UPDATE notifications SET delivered_at = created_at WHERE delivered = 1 AND delivered_at IS NULL");
+
   try {
     db.run("ALTER TABLE notifications ADD COLUMN read_at DATETIME");
   } catch (e) { /* Column exists */ }
+  // Backfill existing (safe to run always)
+  db.run("UPDATE notifications SET read_at = created_at WHERE read = 1 AND read_at IS NULL");
 
   // Create indexes
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_status ON points(status);`);
