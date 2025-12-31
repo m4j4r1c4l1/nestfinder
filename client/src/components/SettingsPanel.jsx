@@ -16,6 +16,7 @@ const SettingsPanel = ({ onClose }) => {
         } catch (e) { }
         return true;
     });
+    const [showCopied, setShowCopied] = useState(false);
 
     const togglePopup = () => {
         const newValue = !popupEnabled;
