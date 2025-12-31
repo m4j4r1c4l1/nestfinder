@@ -34,17 +34,17 @@ const templates = {
         title: '🚨 Urgent Notice',
         body: ''
     },
-    custom: {
-        id: 'custom',
-        name: '✏️ Custom Message',
-        title: '',
-        body: ''
-    },
     new_feature: {
         id: 'new_feature',
         name: '✨ New Feature',
         title: '✨ New Feature Available!',
         body: 'We just released a new feature to help you find nests even faster.'
+    },
+    custom: {
+        id: 'custom',
+        name: '✏️ Custom Message',
+        title: '',
+        body: ''
     }
 };
 
@@ -203,6 +203,19 @@ const Notifications = () => {
         );
     });
 
+    // Handle Image Upload
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 8 * 1024 * 1024) {
+            setResult({ success: false, message: 'Image size too large (max 8MB)' });
+            return;
+        }
+        const reader = new FileReader();
+        reader.onloadend = () => setImageUrl(reader.result);
+        reader.readAsDataURL(file);
+    };
+
     return (
         <div className="notifications-page">
             <div className="page-header">
@@ -326,17 +339,52 @@ const Notifications = () => {
                         />
                     </div>
 
-                    {/* Image URL */}
+                    {/* Image Upload Section */}
                     <div className="form-group" style={{ marginTop: '1rem' }}>
-                        <label className="form-label">Image URL (Optional)</label>
-                        <input
-                            type="text"
-                            className="form-input"
-                            value={imageUrl}
-                            onChange={(e) => setImageUrl(e.target.value)}
-                            placeholder="https://example.com/image.jpg"
-                        />
+                        <label className="form-label">Image (Upload or URL)</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={imageUrl}
+                                onChange={(e) => setImageUrl(e.target.value)}
+                                placeholder="https://... or upload ->"
+                                style={{ flex: 1 }}
+                            />
+                            <label className="btn btn-secondary" style={{ cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span>📂 Upload</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    style={{ display: 'none' }}
+                                />
+                            </label>
+                        </div>
+                        {imageUrl && (
+                            <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: '#f8fafc', borderRadius: '4px', display: 'inline-block' }}>
+                                <div style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Preview:</span>
+                                    <button
+                                        onClick={() => setImageUrl('')}
+                                        style={{
+                                            background: '#ef4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            padding: '0.1rem 0.5rem',
+                                            fontSize: '0.75rem',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                                <img src={imageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', borderRadius: '4px' }} />
+                            </div>
+                        )}
                     </div>
+
 
                     {/* Body */}
                     <div className="form-group" style={{ marginTop: '1rem' }}>

@@ -193,14 +193,14 @@ const SettingsPanel = ({ onClose }) => {
                         if (e.target === e.currentTarget) setShowShareModal(false);
                     }}>
                         <div style={{
-                            background: 'var(--color-bg)',
+                            background: 'var(--color-bg-secondary)',
                             borderRadius: 'var(--radius-lg)',
                             padding: '1.5rem',
                             width: '100%',
                             maxWidth: '320px',
                             boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
                             animation: 'slideUp 0.3s ease-out',
-                            color: 'var(--color-text)'
+                            color: 'var(--color-text-primary)'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                 <h3 style={{ margin: 0 }}>{t('settings.shareLink')}</h3>
