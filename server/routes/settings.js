@@ -33,6 +33,14 @@ router.get('/', (req, res) => {
     res.json({ settings: publicSettings });
 });
 
+// Public endpoint for client app config (testing banner only)
+router.get('/app-config', (req, res) => {
+    res.json({
+        testing_banner_enabled: getSetting('testing_banner_enabled') === 'true',
+        testing_banner_text: getSetting('testing_banner_text') || 'Beta Testing'
+    });
+});
+
 // Update settings (admin only)
 router.put('/', requireAdmin, (req, res) => {
     const { settings } = req.body;
