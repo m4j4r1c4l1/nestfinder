@@ -4,7 +4,7 @@ This guide is for troubleshooting specific location issues. For general setup, s
 
 ## Problem: "Location Access Denied"
 
-If you see an error saying location was denied or blocked, your browser has likely saved a "No" answer from a previous visit.
+If you see an error saying location was denied or blocked, this is most commonly caused by system or app settings that have location disabled. If you've used the app before, it could also be that your browser saved a "No" answer from a previous visit.
 
 ### 🍏 Fix for iOS (iPhone/iPad)
 
@@ -16,9 +16,6 @@ If you see an error saying location was denied or blocked, your browser has like
    
    - Ensure it is **ON**.
    <p align="center"><img src="images/ios_step2_toggle.jpg" width="250" /></p>
-   
-   - *If you see this system prompt, tap "Allow While Using App":*
-   <p align="center"><img src="images/ios_system_permission_prompt.jpg" width="250" /></p>
 
 2. **Browser Level (Safari)**:
    - In the same menu, scroll down to **Safari Websites**.

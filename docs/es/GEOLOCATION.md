@@ -4,7 +4,7 @@ Esta guía es para solucionar problemas específicos de ubicación. Para la conf
 
 ## Problema: "Acceso a Ubicación Denegado"
 
-Si ves un error diciendo que la ubicación fue denegada o bloqueada, tu navegador probablemente guardó una respuesta "No" de una visita anterior.
+Si ves un error diciendo que la ubicación fue denegada o bloqueada, lo más común es que sea causado por ajustes del sistema o de la app que tienen la ubicación desactivada. Si has usado la app antes, también podría ser que tu navegador guardó una respuesta "No" de una visita anterior.
 
 ### 🍏 Solución para iOS (iPhone/iPad)
 
@@ -16,9 +16,6 @@ Si ves un error diciendo que la ubicación fue denegada o bloqueada, tu navegado
    
    - Asegúrate de que esté **ACTIVADO**.
    <p align="center"><img src="../images/ios_step2_toggle.jpg" width="250" /></p>
-   
-   - *Si ves este mensaje del sistema, toca "Permitir mientras se usa la app":*
-   <p align="center"><img src="../images/ios_system_permission_prompt.jpg" width="250" /></p>
 
 2. **Nivel del Navegador (Safari)**:
    - En el mismo menú, desplázate hasta **Sitios web de Safari**.

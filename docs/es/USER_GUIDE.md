@@ -108,6 +108,10 @@ Si ves un banner morado diciendo "Activa tu Ubicación", toca el botón **Activa
 
 <p align="center"><img src="../images/landing_03_location_prompt.jpg" width="250" alt="Banner Activar Ubicación" /></p>
 
+Si ves este mensaje del sistema de iOS, toca "**Permitir mientras se usa la app**":
+
+<p align="center"><img src="../images/ios_system_permission_prompt.jpg" width="250" alt="Mensaje de Permiso del Sistema iOS" /></p>
+
 Si aún no funciona, limpia la caché del navegador e inténtalo de nuevo. Consulta la guía completa de [Solución de Problemas de Geolocalización](GEOLOCATION.md).
 
 ---
