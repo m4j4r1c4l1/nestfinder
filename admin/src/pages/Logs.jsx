@@ -157,7 +157,7 @@ const Logs = () => {
             </div>
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <div style={{ overflowX: 'auto', flex: 1, maxHeight: 'calc(100vh - 250px)' }}>
+                <div style={{ overflowX: 'auto', flex: 1, maxHeight: 'calc(100vh - 180px)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead style={{ position: 'sticky', top: 0, background: 'var(--color-bg-secondary)', zIndex: 1 }}>
                             <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>

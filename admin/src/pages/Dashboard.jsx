@@ -241,8 +241,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 1. Activity Metrics */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.15rem 0.5rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📈 Activity Metrics</span>
+                        <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📈 Activity Metrics</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                             <MetricRow label="Total Points" value={stats.totalPoints} onClick={() => handleStatClick('totalPoints')} color="var(--color-primary)" />
@@ -254,8 +254,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 2. Status Summary - reduced height */}
                     <div className="card" style={{ flex: 0.8, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.15rem 0.5rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📊 Status Summary</span>
+                        <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
                                 <button
                                     onClick={handleClearFilter}
@@ -275,8 +275,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 3. Database Totals */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.15rem 0.5rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>💾 Database Totals</span>
+                        <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Totals</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                             <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
