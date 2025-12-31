@@ -631,7 +631,6 @@ textarea.form-input {
   border: 4px solid #3b82f6 !important;
   /* Even darker: #0f172a - deepest slate */
   background: #0f172a !important;
-  position: relative !important;
 }
 
 /* DEBUG: Display color code on outer panel */
