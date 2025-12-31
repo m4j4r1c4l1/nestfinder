@@ -287,7 +287,7 @@ const ComposeSection = ({ subscribers, onSent }) => {
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', paddingBottom: '0.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, auto)', gap: '0.5rem', justifyContent: 'center', paddingBottom: '0.5rem' }}>
                         {Object.values(templates).map(tmpl => (
                             <button
                                 key={tmpl.id}
@@ -420,19 +420,19 @@ const HistorySection = () => {
                                             e.currentTarget.style.borderLeft = 'none';
                                         }}
                                     >
-                                        <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem', background: '#fef3c7', borderLeft: '3px solid #f59e0b', color: '#92400e' }}>
-                                            {new Date(log.created_at).toLocaleString()} (YELLOW)
+                                        <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem', color: '#64748b' }}>
+                                            {new Date(log.created_at).toLocaleString()}
                                         </td>
-                                        <td style={{ padding: '1rem', background: '#dbeafe', borderLeft: '3px solid #3b82f6' }}>
-                                            <div style={{ fontWeight: 600, color: '#1e40af' }}>{meta.title} (BLUE)</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#3b82f6' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
+                                        <td style={{ padding: '1rem' }}>
+                                            <div style={{ fontWeight: 600, color: '#64748b' }}>{meta.title}</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
                                         </td>
-                                        <td style={{ padding: '1rem', background: '#d1fae5', borderLeft: '3px solid #10b981' }}>
+                                        <td style={{ padding: '1rem' }}>
                                             <span style={{
-                                                background: '#065f46', color: 'white',
+                                                background: '#e0f2fe', color: '#0369a1',
                                                 padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem'
                                             }}>
-                                                {meta.count} users (GREEN)
+                                                {meta.count} users
                                             </span>
                                         </td>
                                     </tr>
