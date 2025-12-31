@@ -50,7 +50,7 @@ router.get('/notifications', (req, res) => {
         const undeliveredIds = notifications.filter(n => !n.delivered).map(n => n.id);
         if (undeliveredIds.length > 0) {
             run(
-                `UPDATE notifications SET delivered = 1 WHERE id IN (${undeliveredIds.join(',')})`
+                `UPDATE notifications SET delivered = 1, delivered_at = CURRENT_TIMESTAMP WHERE id IN (${undeliveredIds.join(',')})`
             );
         }
 
@@ -68,7 +68,7 @@ router.post('/notifications/:id/read', (req, res) => {
         const { userId } = req.body;
 
         run(
-            'UPDATE notifications SET read = 1 WHERE id = ? AND user_id = ?',
+            'UPDATE notifications SET read = 1, read_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?',
             [id, userId]
         );
 
@@ -229,7 +229,7 @@ router.get('/admin/notifications/batch/:batchId', requireAdmin, (req, res) => {
         // Get notifications in this batch joined with users
         const rows = all(`
             SELECT 
-                n.id, n.user_id, n.read, n.delivered, n.created_at,
+                n.id, n.user_id, n.read, n.delivered, n.created_at, n.delivered_at, n.read_at,
                 u.nickname, u.device_id
             FROM notifications n
             LEFT JOIN users u ON n.user_id = u.id

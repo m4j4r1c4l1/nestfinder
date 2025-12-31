@@ -143,6 +143,14 @@ export const initDatabase = async () => {
     db.run("ALTER TABLE notifications ADD COLUMN delivered BOOLEAN DEFAULT 0");
   } catch (e) { /* Column exists */ }
 
+  // Migration: Add timestamps for delivery/read
+  try {
+    db.run("ALTER TABLE notifications ADD COLUMN delivered_at DATETIME");
+  } catch (e) { /* Column exists */ }
+  try {
+    db.run("ALTER TABLE notifications ADD COLUMN read_at DATETIME");
+  } catch (e) { /* Column exists */ }
+
   // Create indexes
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_status ON points(status);`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_user ON points(user_id);`);
