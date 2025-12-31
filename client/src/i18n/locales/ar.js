@@ -144,7 +144,11 @@ export default {
     settings: {
         notifications: 'إشعارات',
         popupMessages: 'نوافذ فورية',
-        popupDescription: 'عرض الرسائل فوراً'
+        popupDescription: 'عرض الرسائل فوراً',
+        shareApp: 'مشاركة التطبيق',
+        scanToShare: 'امسح لفتح NestFinder',
+        copyLink: 'نسخ الرابط',
+        linkCopied: 'تم نسخ الرابط!'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
