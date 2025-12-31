@@ -404,16 +404,16 @@ const HistorySection = () => {
                                     <tr
                                         key={log.id}
                                         onClick={() => {
-                                            const batchId = log.target_id || log.id;
-                                            console.log('Clicked row:', log.id, 'target_id:', log.target_id, 'using batchId:', batchId);
-                                            if (batchId) setSelectedBatchId(batchId);
+                                            if (log.target_id) setSelectedBatchId(log.target_id);
                                         }}
                                         style={{
                                             borderBottom: '1px solid #e2e8f0',
-                                            cursor: 'pointer',
+                                            cursor: log.target_id ? 'pointer' : 'default',
                                             transition: 'all 0.2s ease',
-                                            background: 'transparent'
+                                            background: 'transparent',
+                                            opacity: log.target_id ? 1 : 0.7
                                         }}
+                                        title={log.target_id ? 'Click for details' : 'No details available'}
                                         className="history-row"
                                         onMouseEnter={(e) => {
                                             e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)';
