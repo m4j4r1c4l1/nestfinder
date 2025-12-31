@@ -388,7 +388,7 @@ const HistorySection = () => {
                 <div>
                     <button
                         onClick={async () => {
-                            if (!window.confirm('Are you sure you want to delete invalid log entries?')) return;
+                            if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?\nThis will remove all records of sent notifications from this list.')) return;
                             try {
                                 const token = localStorage.getItem('nestfinder_admin_token');
                                 const res = await fetch(`${API_URL}/api/push/admin/notifications/cleanup`, {
@@ -404,8 +404,9 @@ const HistorySection = () => {
                         }}
                         className="btn btn-sm btn-danger"
                         style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white' }}
+                        title="Delete all sent history logs"
                     >
-                        🗑️ Cleanup
+                        🗑️ Clear History
                     </button>
                     <button onClick={loadHistory} className="btn btn-sm btn-secondary">🔄 Refresh</button>
                 </div>

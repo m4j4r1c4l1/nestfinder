@@ -251,36 +251,26 @@ router.get('/admin/notifications/batch/:batchId', requireAdmin, (req, res) => {
     }
 });
 
-// Clean up invalid logs (admin only)
+// Clean up/Clear all sent notification logs (admin only)
 router.post('/admin/notifications/cleanup', requireAdmin, (req, res) => {
     try {
-        // 1. Delete logs with null/empty target_id
-        const res1 = run(`DELETE FROM logs WHERE action = 'notification_sent' AND (target_id IS NULL OR target_id = '')`);
+        // Delete ALL logs regarding sent notifications
+        const result = run("DELETE FROM logs WHERE action = 'notification_sent'");
 
-        // 2. Delete orphaned logs (valid ID but no corresponding notification records)
-        // This handles cases where notifications were deleted but logs remain
-        const res2 = run(`
-            DELETE FROM logs 
-            WHERE action = 'notification_sent' 
-            AND target_id NOT IN (SELECT DISTINCT batch_id FROM notifications WHERE batch_id IS NOT NULL)
-        `);
-
-        log('admin', 'logs_cleanup', null, {
-            deletedInvalid: res1?.changes || 0,
-            deletedOrphaned: res2?.changes || 0
+        log('admin', 'history_cleared', null, {
+            deletedCount: result?.changes || 0
         });
 
         res.json({
             success: true,
-            message: `Cleanup complete. Removed ${res1?.changes || 0} invalid and ${res2?.changes || 0} orphaned entries.`,
+            message: `Sent history cleared. Removed ${result?.changes || 0} entries.`,
             stats: {
-                invalid: res1?.changes || 0,
-                orphaned: res2?.changes || 0
+                deleted: result?.changes || 0
             }
         });
     } catch (error) {
         console.error('Cleanup error:', error);
-        res.status(500).json({ error: 'Failed to cleanup logs' });
+        res.status(500).json({ error: 'Failed to clear history' });
     }
 });
 
