@@ -24,8 +24,23 @@ const SettingsPanel = ({ onClose }) => {
         localStorage.setItem(NOTIFICATION_PREF_KEY, JSON.stringify({ realTime: newValue }));
     };
 
-    const handleCopyLink = () => {
-        navigator.clipboard.writeText(APP_URL);
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'NestFinder',
+                    text: t('welcome.subtitle'),
+                    url: APP_URL
+                });
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Error sharing:', err);
+                    navigator.clipboard.writeText(APP_URL);
+                }
+            }
+        } else {
+            navigator.clipboard.writeText(APP_URL);
+        }
     };
 
     return (
@@ -73,9 +88,10 @@ const SettingsPanel = ({ onClose }) => {
                                 transform: 'translate(-50%, -50%)',
                                 background: 'white',
                                 borderRadius: '50%',
-                                padding: '4px',
-                                fontSize: '1.5rem',
-                                lineHeight: 1
+                                padding: '5px',
+                                fontSize: '2.5rem',
+                                lineHeight: 1,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                             }}>
                                 🪹
                             </div>
@@ -88,17 +104,20 @@ const SettingsPanel = ({ onClose }) => {
                             {t('settings.scanToShare')}
                         </div>
                         <button
-                            onClick={handleCopyLink}
+                            onClick={handleShare}
                             className="btn btn-secondary"
                             style={{
-                                fontSize: '0.8rem',
-                                padding: '0.5rem 1rem',
+                                fontSize: '0.9rem',
+                                padding: '0.6rem 1.2rem',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.4rem'
+                                gap: '0.5rem',
+                                background: 'var(--color-primary)',
+                                color: 'white',
+                                border: 'none'
                             }}
                         >
-                            📋 {t('settings.copyLink')}
+                            🔗 {t('settings.shareLink') || 'Share Link'}
                         </button>
                     </div>
                 </div>
