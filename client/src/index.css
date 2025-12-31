@@ -544,12 +544,12 @@ textarea.form-input {
   width: calc(100% - var(--space-8));
   max-width: 480px;
 
-  /* Restore Glass Effect */
-  background: var(--color-bg-glass);
-  border: 1px solid var(--color-border);
+  /* Container is transparent - only the card has the glass effect */
+  background: transparent;
+  border: none;
   border-radius: var(--radius-xl);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  backdrop-filter: none;
+  box-shadow: none;
 
   opacity: 0;
   visibility: hidden;
@@ -566,14 +566,11 @@ textarea.form-input {
   overflow-y: auto;
 }
 
-/* Prevent double-layer glass: Make inner card transparent */
+/* Card retains original glass styling for dark-grey effect */
 .bottom-sheet>.card {
   margin: auto 0;
   flex: 0 1 auto;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
+  /* Card uses default .card styles - no overrides needed */
 }
 
 .bottom-sheet.open {
