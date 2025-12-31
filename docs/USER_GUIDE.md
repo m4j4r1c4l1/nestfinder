@@ -108,6 +108,10 @@ If you see a purple banner saying "Enable Your Location", tap the **Enable Locat
 
 <p align="center"><img src="images/landing_03_location_prompt.jpg" width="250" alt="Enable Location Banner" /></p>
 
+If you see this iOS system prompt, tap "**Allow While Using App**":
+
+<p align="center"><img src="images/ios_system_permission_prompt.jpg" width="250" alt="iOS System Permission Prompt" /></p>
+
 If it still doesn't work, clear your browser cache and try again. See full [Geolocation Troubleshooting](GEOLOCATION.md).
 
 ---
