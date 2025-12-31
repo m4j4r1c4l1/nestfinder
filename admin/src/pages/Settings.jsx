@@ -120,9 +120,18 @@ const Settings = () => {
                 </div>
                 <div className="card-body" style={{ padding: '1.5rem' }}>
                     <form onSubmit={handleSave}>
+                        {/* App Name Section */}
                         <div className="form-group">
                             <label className="form-label">App Name</label>
                             <input name="app_name" className="form-input" value={settings.app_name || ''} onChange={handleChange} />
+                        </div>
+
+                        {/* Separator */}
+                        <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1.5rem 0' }} />
+
+                        {/* Thresholds Section */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>⚙️ Thresholds</span>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div className="form-group">
@@ -141,15 +150,22 @@ const Settings = () => {
                                 Deactivated points are removed from the map after this many days
                             </div>
                         </div>
-                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <div className="form-group" style={{ marginBottom: '0' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                                 <input type="checkbox" name="weekly_reminder_enabled" checked={settings.weekly_reminder_enabled === 'true'} onChange={(e) => setSettings({ ...settings, weekly_reminder_enabled: e.target.checked ? 'true' : 'false' })} style={{ width: 18, height: 18 }} />
                                 Enable Weekly Validation Reminders
                             </label>
                         </div>
 
-                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                            <label className="form-label">Client Polling Interval (seconds)</label>
+                        {/* Separator */}
+                        <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1.5rem 0' }} />
+
+                        {/* Client Polling Section */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>📡 Client Message Polling</span>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '0' }}>
+                            <label className="form-label">Client Message Polling Interval (seconds)</label>
                             <input
                                 type="number"
                                 className="form-input"
@@ -168,35 +184,35 @@ const Settings = () => {
                             </div>
                         </div>
 
-                        {/* Testing Banner Settings */}
-                        <div style={{ padding: '1rem', background: 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                                <span style={{ fontSize: '1.1rem' }}>🧪</span>
-                                <span style={{ fontWeight: 600 }}>Testing Banner</span>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                    <input
-                                        type="checkbox"
-                                        name="testing_banner_enabled"
-                                        checked={settings.testing_banner_enabled === 'true'}
-                                        onChange={(e) => setSettings({ ...settings, testing_banner_enabled: e.target.checked ? 'true' : 'false' })}
-                                        style={{ width: 18, height: 18 }}
-                                    />
-                                    Show testing banner on client app
-                                </label>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label" style={{ fontSize: '0.85rem' }}>Badge Text</label>
+                        {/* Separator */}
+                        <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1.5rem 0' }} />
+
+                        {/* Testing Banner Section */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>🧪 Testing Banner</span>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                                 <input
-                                    name="testing_banner_text"
-                                    className="form-input"
-                                    value={settings.testing_banner_text || 'Beta Testing'}
-                                    onChange={handleChange}
-                                    placeholder="e.g., Beta Testing, Alpha, Preview"
-                                    style={{ fontSize: '0.9rem' }}
+                                    type="checkbox"
+                                    name="testing_banner_enabled"
+                                    checked={settings.testing_banner_enabled === 'true'}
+                                    onChange={(e) => setSettings({ ...settings, testing_banner_enabled: e.target.checked ? 'true' : 'false' })}
+                                    style={{ width: 18, height: 18 }}
                                 />
-                            </div>
+                                Show testing banner on client app
+                            </label>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.85rem' }}>Badge Text</label>
+                            <input
+                                name="testing_banner_text"
+                                className="form-input"
+                                value={settings.testing_banner_text || 'Beta Testing'}
+                                onChange={handleChange}
+                                placeholder="e.g., Beta Testing, Alpha, Preview"
+                                style={{ fontSize: '0.9rem', background: 'var(--color-bg-tertiary)' }}
+                            />
                         </div>
 
                         <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem 2rem' }}>

@@ -156,60 +156,72 @@ const Logs = () => {
                 </div>
             </div>
 
-            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <div style={{ overflowX: 'auto', flex: 1, maxHeight: 'calc(100vh - 180px)' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: 'var(--color-bg-secondary)', zIndex: 1 }}>
-                            <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
-                                <th style={{ padding: '1rem' }}>Time</th>
-                                <th style={{ padding: '1rem' }}>Action</th>
-                                <th style={{ padding: '1rem' }}>User</th>
-                                <th style={{ padding: '1rem' }}>Details</th>
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
+                <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1, maxHeight: 'calc(100vh - 230px)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                        <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
+                            <tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8' }}>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Time</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Action</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>User</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Details</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {logs.map(log => (
-                                <tr key={log.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                    <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--color-text-muted)' }}>
-                                        {new Date(log.created_at).toLocaleString()}
-                                    </td>
-                                    <td style={{ padding: '1rem' }}>
-                                        <span className="badge" style={{
-                                            padding: '0.25rem 0.5rem',
-                                            borderRadius: '4px',
-                                            fontWeight: 500,
-                                            fontSize: '0.85rem',
-                                            ...getActionStyle(log.action)
-                                        }}>
-                                            {log.action}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '1rem' }}>
-                                        {log.user_nickname || <span className="text-muted">{log.user_id?.substring(0, 8)}...</span>}
-                                    </td>
-                                    <td style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                        {log.metadata ? JSON.stringify(log.metadata) : '-'}
-                                    </td>
-                                </tr>
-                            ))}
+                            {logs.map(log => {
+                                // Timezone fix for display
+                                let safeIso = log.created_at;
+                                if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
+                                const date = new Date(safeIso);
+
+                                return (
+                                    <tr key={log.id} style={{ borderBottom: '1px solid #334155' }}>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <span className="badge" style={{
+                                                padding: '0.25rem 0.5rem',
+                                                borderRadius: '4px',
+                                                fontWeight: 500,
+                                                fontSize: '0.85rem',
+                                                ...getActionStyle(log.action)
+                                            }}>
+                                                {log.action}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0' }}>
+                                            {log.user_nickname || <span style={{ color: '#64748b' }}>{log.user_id?.substring(0, 8)}...</span>}
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#94a3b8', verticalAlign: 'middle' }}>
+                                            {log.metadata ? JSON.stringify(log.metadata) : '-'}
+                                        </td>
+                                    </tr>
+                                )
+                            })}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <div className="flex-center gap-4 mt-auto" style={{ padding: '1rem' }}>
+            <div className="flex-center gap-4" style={{ padding: '1rem', background: '#1e293b', borderRadius: '8px', marginTop: '0.5rem', border: '1px solid #334155' }}>
                 <button
-                    className="btn btn-secondary"
+                    className="btn"
                     disabled={page <= 1}
                     onClick={() => setPage(p => p - 1)}
+                    style={{ background: '#334155', color: '#e2e8f0', border: '1px solid #475569' }}
                 >
                     Previous
                 </button>
-                <span className="text-muted">Page {page} of {totalPages}</span>
+                <span style={{ color: '#94a3b8' }}>Page {page} of {totalPages}</span>
                 <button
-                    className="btn btn-secondary"
+                    className="btn"
                     disabled={page >= totalPages}
                     onClick={() => setPage(p => p + 1)}
+                    style={{ background: '#334155', color: '#e2e8f0', border: '1px solid #475569' }}
                 >
                     Next
                 </button>

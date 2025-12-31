@@ -141,7 +141,7 @@ const Notifications = () => {
             </div>
 
             {/* Compose Section */}
-            <ComposeSection subscribers={subscribers} onSent={loadStats} />
+            <ComposeSection subscribers={subscribers} totalSubscribers={stats.totalSubscribers} onSent={loadStats} />
 
             {/* History Section */}
             <HistorySection />
@@ -151,7 +151,7 @@ const Notifications = () => {
 
 // --- Sub-components ---
 
-const ComposeSection = ({ subscribers, onSent }) => {
+const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [selectedTemplate, setSelectedTemplate] = useState('announcement');
     const [title, setTitle] = useState(templates.announcement.title);
     const [body, setBody] = useState('');
@@ -351,14 +351,14 @@ const ComposeSection = ({ subscribers, onSent }) => {
                                 className={`btn ${target === 'all' ? 'btn-primary' : 'btn-secondary'}`}
                                 style={{ flex: 1 }}
                             >
-                                All Users ({subscribers.length})
+                                All Users ({totalSubscribers || subscribers.length})
                             </button>
                             <button
-                                onClick={() => setTarget('selected')}
+                                onClick={() => setTarget(target === 'selected' ? 'all' : 'selected')}
                                 className={`btn ${target === 'selected' ? 'btn-primary' : 'btn-secondary'}`}
                                 style={{ flex: 1 }}
                             >
-                                Select Users
+                                {target === 'selected' ? 'Hide Users' : 'Select Users'}
                             </button>
                         </div>
                         <button
@@ -385,7 +385,7 @@ const ComposeSection = ({ subscribers, onSent }) => {
                     )}
                 </div>
 
-                {result && <div style={{ marginTop: '1rem', padding: '0.5rem', borderRadius: '4px', background: result.success ? '#dcfce7' : '#fee2e2', color: result.success ? '#166534' : '#991b1b' }}>{result.message}</div>}
+                {result && <div style={{ marginTop: '1rem', padding: '0.5rem', borderRadius: '4px', background: result.success ? '#dcfce7' : '#fee2e2', color: result.success ? '#166534' : '#991b1b', textAlign: 'center' }}>{result.message}</div>}
 
                 <button onClick={handleSend} disabled={sending} className="btn btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
                     {sending ? 'Sending...' : 'Send Notification'}

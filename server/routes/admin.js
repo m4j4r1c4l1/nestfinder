@@ -63,6 +63,13 @@ router.get('/stats', (req, res) => {
         }
     } catch (e) { }
 
+    // Get DB file size
+    let dbSizeBytes = 0;
+    try {
+        const dbStats = fs.statSync(DB_PATH);
+        dbSizeBytes = dbStats.size;
+    } catch (e) { /* ignore */ }
+
     const stats = {
         totalPoints: get('SELECT COUNT(*) as count FROM points').count,
         pendingPoints: get('SELECT COUNT(*) as count FROM points WHERE status = ?', ['pending']).count,
@@ -87,6 +94,8 @@ router.get('/stats', (req, res) => {
         readNotifications: get('SELECT COUNT(*) as count FROM notifications WHERE read = 1').count,
         // Total confirmations (all votes)
         totalConfirmations: get('SELECT COUNT(*) as count FROM confirmations').count,
+        // Database size
+        dbSizeBytes,
         // System metrics
         system: {
             memoryUsage: process.memoryUsage(),
