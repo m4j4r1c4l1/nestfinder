@@ -40,7 +40,7 @@ const SettingsPanel = ({ onClose }) => {
 
 
     return (
-        <div className="card debug-border-orange">
+        <div className="card">
             <div className="card-header flex-between items-center">
                 <h3 className="card-title">{t('nav.settings')}</h3>
                 <button
