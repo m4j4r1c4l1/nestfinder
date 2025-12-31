@@ -108,7 +108,7 @@ const SettingsPanel = ({ onClose }) => {
                                 justifyContent: 'center',
                                 gap: '0.5rem',
                                 padding: '0.75rem 1.5rem',
-                                minWidth: '180px',
+                                minWidth: '220px',
                                 background: showCopied ? 'var(--color-confirmed)' : 'var(--color-primary)',
                                 color: 'white',
                                 border: 'none',
