@@ -288,10 +288,12 @@ const ComposeSection = ({ subscribers, onSent }) => {
                                 onClick={() => handleTemplateChange(tmpl.id)}
                                 style={{
                                     padding: '0.5rem 1rem',
-                                    border: selectedTemplate === tmpl.id ? '2px solid var(--primary-color)' : '1px solid #ddd',
+                                    border: selectedTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #ddd',
                                     borderRadius: '20px',
-                                    background: selectedTemplate === tmpl.id ? 'var(--primary-light)' : 'white',
-                                    cursor: 'pointer', whiteSpace: 'nowrap'
+                                    background: selectedTemplate === tmpl.id ? '#dbeafe' : 'white',
+                                    color: '#1e293b',
+                                    cursor: 'pointer', whiteSpace: 'nowrap',
+                                    fontWeight: selectedTemplate === tmpl.id ? 600 : 400
                                 }}
                             >
                                 {tmpl.name}
@@ -397,20 +399,21 @@ const HistorySection = () => {
                                         key={log.id}
                                         onClick={() => setSelectedBatchId(log.target_id)}
                                         style={{
-                                            borderBottom: '1px solid #eee',
+                                            borderBottom: '1px solid #e2e8f0',
                                             cursor: 'pointer',
-                                            transition: 'background 0.2s'
+                                            transition: 'background 0.2s',
+                                            background: 'white'
                                         }}
                                         className="history-row"
                                         onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = ''}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                                     >
-                                        <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                                        <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem', color: '#64748b' }}>
                                             {new Date(log.created_at).toLocaleString()}
                                         </td>
                                         <td style={{ padding: '1rem' }}>
                                             <div style={{ fontWeight: 600, color: '#1e293b' }}>{meta.title}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#475569' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
                                         </td>
                                         <td style={{ padding: '1rem' }}>
                                             <span style={{

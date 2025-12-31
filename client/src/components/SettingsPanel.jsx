@@ -60,10 +60,12 @@ const SettingsPanel = ({ onClose }) => {
                     <div style={{
                         display: 'flex',
                         justifyContent: 'center',
-                        padding: 'var(--space-4)',
+                        padding: '0.5rem',
                         background: 'white',
                         borderRadius: 'var(--radius-md)',
-                        marginBottom: 'var(--space-3)'
+                        marginBottom: 'var(--space-3)',
+                        width: 'fit-content',
+                        margin: '0 auto var(--space-3) auto'
                     }}>
                         <div style={{ position: 'relative', display: 'inline-block' }}>
                             <QRCodeCanvas
@@ -82,12 +84,12 @@ const SettingsPanel = ({ onClose }) => {
                                 transform: 'translate(-50%, -50%)',
                                 background: 'white',
                                 borderRadius: '50%',
-                                width: '40px',
-                                height: '40px',
+                                width: '48px',
+                                height: '48px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '24px'
+                                fontSize: '32px'
                             }}>
                                 🪹
                             </div>
