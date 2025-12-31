@@ -103,6 +103,15 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         })()}
                                     </span>
                                 </div>
+                                {n.image_url && (
+                                    <div style={{ marginBottom: '8px', textAlign: 'center' }}>
+                                        <img
+                                            src={n.image_url}
+                                            alt="Notification"
+                                            style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px' }}
+                                        />
+                                    </div>
+                                )}
                                 <div className="notification-body" style={{ color: 'var(--color-text)', fontSize: '0.95rem' }}>{n.body}</div>
                             </div>
                         ))

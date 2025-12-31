@@ -39,6 +39,12 @@ const templates = {
         name: '✏️ Custom Message',
         title: '',
         body: ''
+    },
+    new_feature: {
+        id: 'new_feature',
+        name: '✨ New Feature',
+        title: '✨ New Feature Available!',
+        body: 'We just released a new feature to help you find nests even faster.'
     }
 };
 
@@ -46,6 +52,7 @@ const Notifications = () => {
     const [selectedTemplate, setSelectedTemplate] = useState('announcement');
     const [title, setTitle] = useState(templates.announcement.title);
     const [body, setBody] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
     const [target, setTarget] = useState('all');
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [subscribers, setSubscribers] = useState([]);
@@ -128,6 +135,7 @@ const Notifications = () => {
                     template: selectedTemplate,
                     title,
                     body,
+                    imageUrl,
                     target,
                     userIds: target === 'all' ? [] : selectedUsers
                 })
@@ -142,6 +150,7 @@ const Notifications = () => {
                 });
                 // Reset form
                 setBody('');
+                setImageUrl('');
             } else {
                 setResult({ success: false, message: data.error || 'Failed to send' });
             }
@@ -314,6 +323,18 @@ const Notifications = () => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Notification title..."
+                        />
+                    </div>
+
+                    {/* Image URL */}
+                    <div className="form-group" style={{ marginTop: '1rem' }}>
+                        <label className="form-label">Image URL (Optional)</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            value={imageUrl}
+                            onChange={(e) => setImageUrl(e.target.value)}
+                            placeholder="https://example.com/image.jpg"
                         />
                     </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -78,6 +79,13 @@ const SettingsPanel = ({ onClose }) => {
             case 'twitter':
                 link = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
                 break;
+            case 'instagram':
+                // Instagram doesn't support web share URL efficiently.
+                // We'll just copy the link and notify user, or open instagram.com
+                // For now, let's copy link and open instagram.
+                handleCopyLink();
+                setTimeout(() => window.open('https://instagram.com', '_blank'), 1000);
+                return;
             default:
                 return;
         }
@@ -167,8 +175,8 @@ const SettingsPanel = ({ onClose }) => {
                     </div>
                 </div>
 
-                {/* Share Modal Overlay */}
-                {showShareModal && (
+                {/* Share Modal Overlay - Portaled to document.body */}
+                {showShareModal && createPortal(
                     <div style={{
                         position: 'fixed',
                         top: 0,
@@ -176,7 +184,7 @@ const SettingsPanel = ({ onClose }) => {
                         right: 0,
                         bottom: 0,
                         background: 'rgba(0,0,0,0.5)',
-                        zIndex: 9999,
+                        zIndex: 99999,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -191,13 +199,14 @@ const SettingsPanel = ({ onClose }) => {
                             width: '100%',
                             maxWidth: '320px',
                             boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-                            animation: 'slideUp 0.3s ease-out'
+                            animation: 'slideUp 0.3s ease-out',
+                            color: 'var(--color-text)'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                 <h3 style={{ margin: 0 }}>{t('settings.shareLink')}</h3>
                                 <button
                                     onClick={() => setShowShareModal(false)}
-                                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0 }}
+                                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-text)' }}
                                 >
                                     &times;
                                 </button>
@@ -249,6 +258,21 @@ const SettingsPanel = ({ onClose }) => {
                                     ✖️ X (Twitter)
                                 </button>
                                 <button
+                                    onClick={() => shareSocial('instagram')}
+                                    style={{
+                                        border: 'none',
+                                        background: 'linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d)',
+                                        color: 'white',
+                                        padding: '0.8rem',
+                                        borderRadius: 'var(--radius-md)',
+                                        fontWeight: 'bold',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    📸 Instagram
+                                </button>
+                                <button
                                     onClick={handleCopyLink}
                                     style={{
                                         border: '1px solid var(--color-border)',
@@ -266,7 +290,8 @@ const SettingsPanel = ({ onClose }) => {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </div>,
+                    document.body
                 )}
 
                 {/* Notification Settings */}
