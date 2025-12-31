@@ -148,6 +148,26 @@ const Settings = () => {
                             </label>
                         </div>
 
+                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                            <label className="form-label">Client Polling Interval (seconds)</label>
+                            <input
+                                type="number"
+                                className="form-input"
+                                value={Math.floor(parseInt(settings.polling_interval_ms || '60000', 10) / 1000)}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    if (!isNaN(val) && val >= 5) {
+                                        setSettings({ ...settings, polling_interval_ms: (val * 1000).toString() });
+                                    }
+                                }}
+                                min="5"
+                                max="3600"
+                            />
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
+                                Frequency of client check-ins (Default: 60s). Lower values increase server load.
+                            </div>
+                        </div>
+
                         {/* Testing Banner Settings */}
                         <div style={{ padding: '1rem', background: 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>

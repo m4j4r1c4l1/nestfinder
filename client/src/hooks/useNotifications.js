@@ -65,8 +65,20 @@ export const useNotifications = (userId) => {
         }
     };
 
-    // Initial load
+    const [pollingInterval, setPollingInterval] = useState(60000);
+
+    // Initial load & Config Fetch
     useEffect(() => {
+        // Fetch Polling Config
+        fetch(`${API_URL}/api/settings/app-config`)
+            .then(res => res.json())
+            .then(config => {
+                if (config.polling_interval_ms && config.polling_interval_ms >= 5000) {
+                    setPollingInterval(config.polling_interval_ms);
+                }
+            })
+            .catch(err => console.error('Config fetch failed', err));
+
         if (userId && !initialLoaded.current) {
             fetch(`${API_URL}/api/push/notifications?userId=${userId}`)
                 .then(res => res.json())
@@ -86,11 +98,11 @@ export const useNotifications = (userId) => {
         }
     }, [userId]);
 
-    // Poll every 60 seconds
+    // Poll Dynamically
     useEffect(() => {
-        const interval = setInterval(fetchNotifications, 60000);
+        const interval = setInterval(fetchNotifications, pollingInterval);
         return () => clearInterval(interval);
-    }, [userId, settings]);
+    }, [userId, settings, pollingInterval]);
 
     // Listen for settings changes from SettingsPanel
     useEffect(() => {
@@ -99,6 +111,7 @@ export const useNotifications = (userId) => {
                 const saved = localStorage.getItem('nestfinder_notify_settings');
                 if (saved) {
                     const parsed = JSON.parse(saved);
+                    // Deep compare or specific check? Usually just realTime changes
                     if (parsed.realTime !== settings.realTime) {
                         setSettings(parsed);
                     }
