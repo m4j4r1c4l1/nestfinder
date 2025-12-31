@@ -240,7 +240,7 @@ router.get('/admin/notifications/batch/:batchId', requireAdmin, (req, res) => {
         // Calculate stats
         const stats = {
             total: rows.length,
-            delivered: rows.filter(r => r.delivered).length,
+            delivered: rows.filter(r => r.delivered && !r.read).length,
             read: rows.filter(r => r.read).length
         };
 
