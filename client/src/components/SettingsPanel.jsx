@@ -98,6 +98,7 @@ const SettingsPanel = ({ onClose }) => {
             <div className="card-header flex-between items-center">
                 <h3 className="card-title">{t('nav.settings')}</h3>
                 <button
+                    type="button"
                     onClick={onClose}
                     style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                 >
@@ -156,7 +157,11 @@ const SettingsPanel = ({ onClose }) => {
                             {t('settings.scanToShare').split('NestFinder')[1] || ''}
                         </div>
                         <button
-                            onClick={handleShare}
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleShare();
+                            }}
                             className="btn btn-secondary"
                             style={{
                                 fontSize: '0.9rem',
@@ -205,6 +210,7 @@ const SettingsPanel = ({ onClose }) => {
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                 <h3 style={{ margin: 0 }}>{t('settings.shareLink')}</h3>
                                 <button
+                                    type="button"
                                     onClick={() => setShowShareModal(false)}
                                     style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, color: 'var(--color-text)' }}
                                 >
@@ -213,6 +219,7 @@ const SettingsPanel = ({ onClose }) => {
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                                 <button
+                                    type="button"
                                     onClick={() => shareSocial('whatsapp')}
                                     style={{
                                         border: 'none',
@@ -228,6 +235,7 @@ const SettingsPanel = ({ onClose }) => {
                                     💬 WhatsApp
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => shareSocial('telegram')}
                                     style={{
                                         border: 'none',
@@ -243,6 +251,7 @@ const SettingsPanel = ({ onClose }) => {
                                     ✈️ Telegram
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => shareSocial('twitter')}
                                     style={{
                                         border: 'none',
@@ -258,6 +267,7 @@ const SettingsPanel = ({ onClose }) => {
                                     ✖️ X (Twitter)
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => shareSocial('instagram')}
                                     style={{
                                         border: 'none',
@@ -273,6 +283,7 @@ const SettingsPanel = ({ onClose }) => {
                                     📸 Instagram
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={handleCopyLink}
                                     style={{
                                         border: '1px solid var(--color-border)',
@@ -347,6 +358,7 @@ const SettingsPanel = ({ onClose }) => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                         {availableLanguages.map(lang => (
                             <button
+                                type="button"
                                 key={lang.code}
                                 onClick={() => setLanguage(lang.code)}
                                 style={{
