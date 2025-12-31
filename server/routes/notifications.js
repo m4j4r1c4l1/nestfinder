@@ -187,7 +187,10 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
             template,
             target,
             count: targetUserIds.length,
-            title: notificationTitle
+            title: notificationTitle,
+            body: notificationBody,
+            image: image,
+            isShareApp: template === 'share_app' // Helpful flag
         });
 
         res.json({

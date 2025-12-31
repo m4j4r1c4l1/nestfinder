@@ -344,9 +344,31 @@ const ComposeSection = ({ subscribers, onSent }) => {
 
                 <div className="form-group" style={{ marginTop: '1rem' }}>
                     <label className="form-label">Target</label>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button onClick={() => setTarget('all')} className={`btn ${target === 'all' ? 'btn-primary' : 'btn-secondary'}`}>All Users</button>
-                        <button onClick={() => setTarget('selected')} className={`btn ${target === 'selected' ? 'btn-primary' : 'btn-secondary'}`}>Select Users</button>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
+                            <button
+                                onClick={() => setTarget('all')}
+                                className={`btn ${target === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                                style={{ flex: 1 }}
+                            >
+                                All Users ({stats.totalSubscribers})
+                            </button>
+                            <button
+                                onClick={() => setTarget('selected')}
+                                className={`btn ${target === 'selected' ? 'btn-primary' : 'btn-secondary'}`}
+                                style={{ flex: 1 }}
+                            >
+                                Select Users
+                            </button>
+                        </div>
+                        <button
+                            onClick={loadStats}
+                            className="btn btn-secondary"
+                            style={{ padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            title="Refresh User List"
+                        >
+                            🔄
+                        </button>
                     </div>
                     {target === 'selected' && (
                         <div style={{ marginTop: '0.5rem', border: '1px solid #ddd', borderRadius: '8px', padding: '0.5rem' }}>
@@ -559,12 +581,15 @@ const DetailModal = ({ batchId, onClose }) => {
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString()}</span>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                {/* Restored seconds */}
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
             </div>
         );
     };
 
     // Modal Content
+    const pendingCount = details ? details.stats.total - details.stats.delivered - details.stats.read : 0;
+
     const modalContent = (
         <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -589,10 +614,15 @@ const DetailModal = ({ batchId, onClose }) => {
 
                 {/* Fixed Stats Section */}
                 <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
                         <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
                             <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{details?.stats?.total || 0}</div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Sent</div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</div>
+                        </div>
+                        {/* New SENT (Pending) Box */}
+                        <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{pendingCount}</div>
+                            <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sent</div>
                         </div>
                         <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                             <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{details?.stats?.delivered || 0}</div>
