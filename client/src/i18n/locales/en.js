@@ -181,6 +181,7 @@ export default {
         shareApp: 'Share App',
         scanToShare: 'Scan to open NestFinder',
         copyLink: 'Copy Link',
+        shareLink: 'Share Link',
         linkCopied: 'Link copied!'
     },
 

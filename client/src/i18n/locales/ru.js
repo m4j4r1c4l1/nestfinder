@@ -147,6 +147,7 @@ export default {
         shareApp: 'Поделиться',
         scanToShare: 'Сканируйте для NestFinder',
         copyLink: 'Копировать ссылку',
+        shareLink: 'Поделиться ссылкой',
         linkCopied: 'Ссылка скопирована!'
     },
     // Welcome Message (Home Page)
