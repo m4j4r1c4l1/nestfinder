@@ -401,12 +401,18 @@ const HistorySection = () => {
                                         style={{
                                             borderBottom: '1px solid #e2e8f0',
                                             cursor: 'pointer',
-                                            transition: 'background 0.2s',
-                                            background: 'white'
+                                            transition: 'all 0.2s ease',
+                                            background: 'transparent'
                                         }}
                                         className="history-row"
-                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)';
+                                            e.currentTarget.style.borderLeft = '3px solid #10b981';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'transparent';
+                                            e.currentTarget.style.borderLeft = 'none';
+                                        }}
                                     >
                                         <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem', color: '#64748b' }}>
                                             {new Date(log.created_at).toLocaleString()}
