@@ -91,7 +91,7 @@ const Notifications = () => {
     };
 
     return (
-        <div className="notifications-page" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div className="notifications-page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
             <div className="page-header" style={{ marginBottom: '1rem' }}>
                 <h1>🔔 In-App Notifications</h1>
                 <p className="text-muted">Manage and track app notifications</p>
@@ -107,31 +107,31 @@ const Notifications = () => {
                 </div>
                 <div className="card-body">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                        <div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
+                        <div style={{ background: '#fef3c7', padding: '1rem', borderRadius: '8px', border: '3px solid #f59e0b' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#b45309' }}>
                                 {stats.totalSubscribers}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 600 }}>Total Users</div>
-                                <div className="text-muted text-sm">Registered users</div>
+                                <div style={{ fontWeight: 600, color: '#92400e' }}>Total Users</div>
+                                <div className="text-muted text-sm">Registered users (YELLOW)</div>
                             </div>
                         </div>
-                        <div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                        <div style={{ background: '#dbeafe', padding: '1rem', borderRadius: '8px', border: '3px solid #3b82f6' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1d4ed8' }}>
                                 {stats.notificationMetrics?.total || 0}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 600 }}>Total Messages</div>
-                                <div className="text-muted text-sm">In database</div>
+                                <div style={{ fontWeight: 600, color: '#1e40af' }}>Total Messages</div>
+                                <div className="text-muted text-sm">In database (BLUE)</div>
                             </div>
                         </div>
-                        <div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                        <div style={{ background: '#d1fae5', padding: '1rem', borderRadius: '8px', border: '3px solid #10b981' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#047857' }}>
                                 {stats.notificationMetrics?.unread || 0}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 600 }}>Unread Messages</div>
-                                <div className="text-muted text-sm">Pending delivery</div>
+                                <div style={{ fontWeight: 600, color: '#065f46' }}>Unread Messages</div>
+                                <div className="text-muted text-sm">Pending delivery (GREEN)</div>
                             </div>
                         </div>
                     </div>
@@ -287,7 +287,7 @@ const ComposeSection = ({ subscribers, onSent }) => {
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>
-                    <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingBottom: '0.5rem' }}>
                         {Object.values(templates).map(tmpl => (
                             <button
                                 key={tmpl.id}
