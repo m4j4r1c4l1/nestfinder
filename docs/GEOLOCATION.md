@@ -17,7 +17,6 @@ If you see an error saying location was denied or blocked, this is most commonly
    - Ensure it is **ON**.
    <p align="center"><img src="images/ios_step2_toggle.jpg" width="250" /></p>
 
-2. **Browser Level (Safari)**:
    - In the same menu, scroll down to **Safari Websites**.
    <p align="center"><img src="images/ios_step3_applist.jpg" width="250" /></p>
    
@@ -26,7 +25,7 @@ If you see an error saying location was denied or blocked, this is most commonly
    
    - *If set to "Never", Safari will auto-block all sites.*
 
-3. **Method 2: Global Safari Settings**:
+2. **App Level**:
    - Go to **Settings** and find **Safari** (or search in Apps).
    <p align="center"><img src="images/ios_safari_app_search.jpg" width="250" /></p>
    

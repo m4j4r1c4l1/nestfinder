@@ -88,6 +88,7 @@ nestfinder/
     ├── GEOLOCATION.md       # 📍 Location troubleshooting
     ├── ROUTE.md             # 🚶 Route planner details
     ├── LAYOUT_ARCHITECTURE.md
+    ├── API.md               # 🔌 REST API documentation
     └── es/                  # 🇪🇸 Spanish translations
         ├── USER_GUIDE.md
         ├── FEATURES.md
