@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import * as QRCode from 'qrcode';
+import QRious from 'qrious';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 const APP_URL = 'https://nestfinder-sa1g.onrender.com';
@@ -153,37 +153,55 @@ const ComposeSection = ({ subscribers, onSent }) => {
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
 
-    // Generate Custom QR Code
+    // Generate Custom QR Code with Emoji Center
     const generateQRCode = async () => {
         try {
-            const qrDataUrl = await QRCode.toDataURL(APP_URL, {
-                errorCorrectionLevel: 'H',
-                margin: 2,
-                color: { dark: '#1e293b', light: '#ffffff' },
-                width: 500
+            // 1. Generate QR Data URL using QRious
+            const qr = new QRious({
+                value: APP_URL,
+                size: 500,
+                level: 'H',
+                padding: 0,
+                background: 'white',
+                foreground: '#1e293b'
             });
+            const qrDataUrl = qr.toDataURL();
+
+            // 2. Load into Image to draw on Canvas
             const img = new Image();
             img.src = qrDataUrl;
             await new Promise(r => img.onload = r);
+
+            // 3. Create Canvas
             const canvas = document.createElement('canvas');
             canvas.width = img.width;
             canvas.height = img.height;
             const ctx = canvas.getContext('2d');
+
+            // 4. Draw QR
             ctx.drawImage(img, 0, 0);
+
+            // 5. Draw Center Emoji (🪹)
+            // White circle background for emoji
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = canvas.width / 6;
+
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
             ctx.fillStyle = 'white';
             ctx.fill();
+
+            // Draw Emoji
             ctx.font = `${radius * 1.5}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            // Offset y slightly because emojis usually sit a bit high
             ctx.fillText('🪹', centerX, centerY + (radius * 0.1));
+
             return canvas.toDataURL('image/png');
         } catch (err) {
-            console.error('QR Gen failed:', err);
+            console.error('QR Generation failed:', err);
             return '';
         }
     };
