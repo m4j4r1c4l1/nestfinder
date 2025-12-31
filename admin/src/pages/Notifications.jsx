@@ -427,18 +427,19 @@ const HistorySection = () => {
                 </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: '#334155', zIndex: 1 }}>
-                            <tr style={{ textAlign: 'left', color: '#64748b' }}>
-                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Timestamp</th>
-                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Message</th>
-                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Target</th>
+                <div style={{ maxHeight: '400px', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                        <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
+                            <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Timestamp</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Message</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Target</th>
                             </tr>
                         </thead>
                         <tbody>
                             {logs.map(log => {
                                 const meta = JSON.parse(log.metadata || '{}');
+                                const date = new Date(log.created_at);
                                 return (
                                     <tr
                                         key={log.id}
@@ -446,34 +447,35 @@ const HistorySection = () => {
                                             if (log.target_id) setSelectedBatchId(log.target_id);
                                         }}
                                         style={{
-                                            borderBottom: '1px solid #e2e8f0',
+                                            borderBottom: '1px solid #334155',
                                             cursor: log.target_id ? 'pointer' : 'default',
                                             transition: 'all 0.2s ease',
-                                            background: 'transparent',
-                                            opacity: log.target_id ? 1 : 0.7
+                                            background: 'transparent'
                                         }}
-                                        title={log.target_id ? 'Click for details' : 'No details available'}
                                         className="history-row"
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)';
-                                            e.currentTarget.style.borderLeft = '3px solid #10b981';
+                                            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.1)'; // Slight blue hover
                                         }}
                                         onMouseLeave={(e) => {
                                             e.currentTarget.style.background = 'transparent';
-                                            e.currentTarget.style.borderLeft = 'none';
                                         }}
                                     >
-                                        <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem', color: '#64748b' }}>
-                                            {new Date(log.created_at).toLocaleString()}
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
                                         </td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <div style={{ fontWeight: 600, color: '#64748b' }}>{meta.title}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
+                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                {meta.body ? meta.body.substring(0, 50) + (meta.body.length > 50 ? '...' : '') : meta.template}
+                                            </div>
                                         </td>
-                                        <td style={{ padding: '1rem' }}>
+                                        <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
                                             <span style={{
-                                                background: '#e0f2fe', color: '#0369a1',
-                                                padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem'
+                                                background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8',
+                                                padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 500, border: '1px solid rgba(56, 189, 248, 0.2)'
                                             }}>
                                                 {meta.count} users
                                             </span>
@@ -483,7 +485,7 @@ const HistorySection = () => {
                             })}
                         </tbody>
                     </table>
-                    {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No history found</div>}
+                    {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
                 </div>
             </div>
 
@@ -516,10 +518,16 @@ const DetailModal = ({ batchId, onClose }) => {
         fetchDetails();
     }, [batchId]);
 
-    // Format helper
-    const formatTime = (isoString) => {
-        if (!isoString) return '-';
-        return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    // Format helper for 2-line date/time
+    const DateTimeCell = ({ isoString, color = '#e2e8f0' }) => {
+        if (!isoString) return <span style={{ color: '#64748b' }}>-</span>;
+        const date = new Date(isoString);
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString()}</span>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+            </div>
+        );
     };
 
     // Modal Content
@@ -530,7 +538,7 @@ const DetailModal = ({ batchId, onClose }) => {
             display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem'
         }} onClick={(e) => e.target === e.currentTarget && onClose()}>
             <div style={{
-                background: '#1e293b', // Slate 800 (Dark Theme)
+                background: '#1e293b',
                 color: '#f8fafc',
                 borderRadius: '16px',
                 width: '100%', maxWidth: '900px',
@@ -571,46 +579,42 @@ const DetailModal = ({ batchId, onClose }) => {
                         <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'hidden' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                 <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
-                                    <tr style={{ color: '#94a3b8', textAlign: 'left', borderBottom: '1px solid #334155' }}>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>User</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Sent</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Received</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Read</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Status</th>
+                                    <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Sent</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Received</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Read</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {details.messages.map(msg => (
                                         <tr key={msg.id} style={{ borderBottom: '1px solid #334155' }}>
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                                <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Guest'}</div>
+                                                <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Anonymous'}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', color: '#64748b', verticalAlign: 'middle' }}>
-                                                {formatTime(msg.created_at)}
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                                <DateTimeCell isoString={msg.created_at} />
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', verticalAlign: 'middle' }}>
-                                                {formatTime(msg.delivered_at)}
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                                <DateTimeCell isoString={msg.delivered_at} />
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', verticalAlign: 'middle' }}>
-                                                {formatTime(msg.read_at)}
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                                <DateTimeCell isoString={msg.read_at} />
                                             </td>
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    {/* Fixed width icon container with center alignment */}
                                                     <div style={{ width: '40px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center', marginRight: '8px' }}>
                                                         {msg.read ? (
-                                                            <span style={{ color: '#3b82f6', transform: 'translateX(-2px)' }}>✓✓</span> // Blue Ticks, slightly shifted Left
+                                                            <span style={{ color: '#3b82f6', transform: 'translateX(-2px)' }}>✓✓</span>
                                                         ) : msg.delivered ? (
-                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓✓</span> // Green Ticks, slightly shifted Left
+                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓✓</span>
                                                         ) : (
-                                                            <span style={{ color: '#22c55e' }}>✓</span>  // Green Tick (Sent), Centered
+                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓</span> // Single tick shifted slightly Left as requested
                                                         )}
                                                     </div>
-                                                    <span style={{
-                                                        fontSize: '0.85rem', fontWeight: 500,
-                                                        color: '#94a3b8' // Uniform Grey color for text
-                                                    }}>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8' }}>
                                                         {msg.read ? 'Read' : msg.delivered ? 'Delivered' : 'Sent'}
                                                     </span>
                                                 </div>
