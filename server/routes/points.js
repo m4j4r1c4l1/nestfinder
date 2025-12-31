@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { run, get, all, log, getSetting } from '../database.js';
 import { requireUser } from '../middleware/auth.js';
+import { submitPointLimiter, voteLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -67,8 +68,8 @@ router.get('/', (req, res) => {
   res.json({ points });
 });
 
-// Submit new point
-router.post('/', requireUser, (req, res) => {
+// Submit new point (rate limited: 20/hour)
+router.post('/', submitPointLimiter, requireUser, (req, res) => {
   const { latitude, longitude, address, notes } = req.body;
 
   if (latitude === undefined || longitude === undefined) {
@@ -96,8 +97,8 @@ router.post('/', requireUser, (req, res) => {
   res.status(201).json({ point });
 });
 
-// Confirm a point
-router.post('/:id/confirm', requireUser, (req, res) => {
+// Confirm a point (rate limited: 30/hour)
+router.post('/:id/confirm', voteLimiter, requireUser, (req, res) => {
   const pointId = parseInt(req.params.id);
   const userId = req.user.id;
 
@@ -159,8 +160,8 @@ router.post('/:id/confirm', requireUser, (req, res) => {
   res.json({ point: updatedPoint });
 });
 
-// Deactivate a point
-router.post('/:id/deactivate', requireUser, (req, res) => {
+// Deactivate a point (rate limited: 30/hour)
+router.post('/:id/deactivate', voteLimiter, requireUser, (req, res) => {
   const pointId = parseInt(req.params.id);
   const userId = req.user.id;
 

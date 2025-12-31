@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { run, get, log } from '../database.js';
-import { adminLoginLimiter } from '../middleware/rateLimiter.js';
+import { adminLoginLimiter, registerLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -12,7 +12,7 @@ const NEST_INTEGRITY = process.env.NEST_INTEGRITY || 'nestfinder-admin-secret-ch
 const JWT_EXPIRATION = '24h';
 
 // Register new user (anonymous with optional nickname)
-router.post('/register', (req, res) => {
+router.post('/register', registerLimiter, (req, res) => {
     const { deviceId, nickname } = req.body;
 
     if (!deviceId) {

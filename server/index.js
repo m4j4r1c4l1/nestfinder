@@ -56,9 +56,24 @@ const broadcast = (data) => {
 setPointsBroadcast(broadcast);
 setSettingsBroadcast(broadcast);
 
+// Import rate limiters
+import { apiLimiter } from './middleware/rateLimiter.js';
+
 // Middleware
-app.use(cors());
+// CORS - restrict origins in production
+const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? [
+        'https://m4j4r1c4l1.github.io',
+        'https://nestfinder.onrender.com',
+        process.env.CORS_ORIGIN // Allow custom origin from env
+    ].filter(Boolean)
+    : true; // Allow all in development
+
+app.use(cors(allowedOrigins === true ? {} : { origin: allowedOrigins }));
 app.use(express.json({ limit: '10mb' }));
+
+// Global API rate limiter - 60 requests/min per IP
+app.use('/api', apiLimiter);
 
 // Request logging
 app.use((req, res, next) => {
