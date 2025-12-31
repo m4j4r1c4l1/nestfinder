@@ -14,6 +14,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import NotificationBell from '../components/NotificationBell';
 import NotificationList from '../components/NotificationList';
 import NotificationPopup from '../components/NotificationPopup';
+import config from '../config';
 
 const MapView = () => {
     const { user } = useAuth();
@@ -301,6 +302,46 @@ const MapView = () => {
                 onBoundsChange={setMapBounds}
                 route={routePath}
             />
+
+            {/* Testing Mode Banner - Low z-index so panels appear over it */}
+            {config.SHOW_TESTING_NOTICE && (
+                <div style={{
+                    position: 'fixed',
+                    top: '0.5rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 100,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '999px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                }}>
+                    <span style={{
+                        background: config.testingMode.badgeColor,
+                        color: '#000',
+                        fontSize: '0.6rem',
+                        fontWeight: 700,
+                        padding: '0.15rem 0.4rem',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                    }}>
+                        {config.testingMode.badgeText}
+                    </span>
+                    <span style={{
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        fontSize: '0.7rem',
+                        fontWeight: 500
+                    }}>
+                        Testing Phase
+                    </span>
+                </div>
+            )}
 
             {/* Bottom Sheet Container */}
             <div className={`bottom-sheet ${activeSheet ? 'open' : ''}`}>
