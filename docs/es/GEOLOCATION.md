@@ -17,7 +17,6 @@ Si ves un error diciendo que la ubicación fue denegada o bloqueada, lo más com
    - Asegúrate de que esté **ACTIVADO**.
    <p align="center"><img src="../images/ios_step2_toggle.jpg" width="250" /></p>
 
-2. **Nivel del Navegador (Safari)**:
    - En el mismo menú, desplázate hasta **Sitios web de Safari**.
    <p align="center"><img src="../images/ios_step3_applist.jpg" width="250" /></p>
    
@@ -26,7 +25,7 @@ Si ves un error diciendo que la ubicación fue denegada o bloqueada, lo más com
    
    - *Si está configurado como "Nunca", Safari bloqueará automáticamente todos los sitios.*
 
-3. **Método 2: Configuración Global de Safari**:
+2. **Nivel de la App**:
    - Ve a **Ajustes** y busca **Safari** (o busca en Apps).
    <p align="center"><img src="../images/ios_safari_app_search.jpg" width="250" /></p>
    
