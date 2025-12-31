@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import QRious from 'qrious';
+
+import QRCode from 'qrcode';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 const APP_URL = 'https://nestfinder-sa1g.onrender.com';
