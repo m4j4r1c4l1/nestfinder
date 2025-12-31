@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../i18n/LanguageContext';
-import config from '../config';
+import { api } from '../utils/api';
 
 const Home = () => {
     const { login } = useAuth();
     const { t } = useLanguage();
     const [nickname, setNickname] = useState('');
     const [loading, setLoading] = useState(false);
+    const [appConfig, setAppConfig] = useState(null);
+
+    // Fetch app config for testing banner settings
+    useEffect(() => {
+        api.getAppConfig()
+            .then(config => setAppConfig(config))
+            .catch(err => console.error('Failed to fetch app config:', err));
+    }, []);
 
     const handleStart = async (e) => {
         e.preventDefault();
@@ -22,7 +30,7 @@ const Home = () => {
     return (
         <div className="welcome-screen">
             {/* Testing Mode Notice - Positioned at top */}
-            {config.SHOW_TESTING_NOTICE && (
+            {appConfig?.testing_banner_enabled && (
                 <div style={{
                     position: 'absolute',
                     top: '2rem',
@@ -40,17 +48,17 @@ const Home = () => {
                     <div style={{
                         display: 'inline-block',
                         padding: '0.2rem 0.6rem',
-                        background: `${config.testingMode.badgeColor}33`,
-                        border: `1px solid ${config.testingMode.badgeColor}66`,
+                        background: 'rgba(255, 193, 7, 0.2)',
+                        border: '1px solid rgba(255, 193, 7, 0.4)',
                         borderRadius: 'var(--radius-md)',
                         fontSize: '0.7rem',
                         fontWeight: 600,
                         letterSpacing: '0.05em',
-                        color: config.testingMode.badgeColor,
+                        color: '#ffc107',
                         marginBottom: '0.5rem',
                         textTransform: 'uppercase'
                     }}>
-                        {config.testingMode.badgeText}
+                        {appConfig.testing_banner_text}
                     </div>
                     <p style={{
                         margin: 0,
@@ -58,7 +66,7 @@ const Home = () => {
                         color: 'rgba(255, 255, 255, 0.85)',
                         lineHeight: 1.5
                     }}>
-                        {config.testingMode.message}
+                        This app is in testing phase. Your feedback helps us improve.
                     </p>
                 </div>
             )}

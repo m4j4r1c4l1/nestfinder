@@ -139,6 +139,38 @@ const Settings = () => {
                                 Enable Weekly Validation Reminders
                             </label>
                         </div>
+
+                        {/* Testing Banner Settings */}
+                        <div style={{ padding: '1rem', background: 'var(--color-bg-tertiary)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                <span style={{ fontSize: '1.1rem' }}>🧪</span>
+                                <span style={{ fontWeight: 600 }}>Testing Banner</span>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        name="testing_banner_enabled"
+                                        checked={settings.testing_banner_enabled === 'true'}
+                                        onChange={(e) => setSettings({ ...settings, testing_banner_enabled: e.target.checked ? 'true' : 'false' })}
+                                        style={{ width: 18, height: 18 }}
+                                    />
+                                    Show testing banner on client app
+                                </label>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.85rem' }}>Badge Text</label>
+                                <input
+                                    name="testing_banner_text"
+                                    className="form-input"
+                                    value={settings.testing_banner_text || 'Beta Testing'}
+                                    onChange={handleChange}
+                                    placeholder="e.g., Beta Testing, Alpha, Preview"
+                                    style={{ fontSize: '0.9rem' }}
+                                />
+                            </div>
+                        </div>
+
                         <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem 2rem' }}>
                             {saving ? 'Saving...' : 'Save Settings'}
                         </button>

@@ -14,7 +14,6 @@ import { useNotifications } from '../hooks/useNotifications';
 import NotificationBell from '../components/NotificationBell';
 import NotificationList from '../components/NotificationList';
 import NotificationPopup from '../components/NotificationPopup';
-import config from '../config';
 
 const MapView = () => {
     const { user } = useAuth();
@@ -48,6 +47,14 @@ const MapView = () => {
     const [toast, setToast] = useState(null);
     const [clickedLocation, setClickedLocation] = useState(null); // For map click to report
     const [mapBounds, setMapBounds] = useState(null); // Track visible map area
+    const [appConfig, setAppConfig] = useState(null); // Testing banner settings
+
+    // Fetch app config for testing banner
+    useEffect(() => {
+        api.getAppConfig()
+            .then(config => setAppConfig(config))
+            .catch(err => console.error('Failed to fetch app config:', err));
+    }, []);
 
     // DO NOT auto-request location on mobile - requires user gesture
     // Location is only requested when user clicks "Enable Location" button
@@ -304,7 +311,7 @@ const MapView = () => {
             />
 
             {/* Testing Mode Banner - Low z-index so panels appear over it */}
-            {config.SHOW_TESTING_NOTICE && (
+            {appConfig?.testing_banner_enabled && (
                 <div style={{
                     position: 'fixed',
                     top: '0.5rem',
@@ -322,7 +329,7 @@ const MapView = () => {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
                 }}>
                     <span style={{
-                        background: config.testingMode.badgeColor,
+                        background: '#ffc107',
                         color: '#000',
                         fontSize: '0.6rem',
                         fontWeight: 700,
@@ -331,7 +338,7 @@ const MapView = () => {
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px'
                     }}>
-                        {config.testingMode.badgeText}
+                        {appConfig.testing_banner_text}
                     </span>
                     <span style={{
                         color: 'rgba(255, 255, 255, 0.9)',

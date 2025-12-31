@@ -140,7 +140,9 @@ export const initDatabase = async () => {
     { key: 'deactivations_required', value: '3' },
     { key: 'deactivation_retention_days', value: '7' },
     { key: 'weekly_reminder_enabled', value: 'true' },
-    { key: 'app_name', value: 'NestFinder' }
+    { key: 'app_name', value: 'NestFinder' },
+    { key: 'testing_banner_enabled', value: 'true' },
+    { key: 'testing_banner_text', value: 'Beta Testing' }
   ];
 
   defaultSettings.forEach(s => {

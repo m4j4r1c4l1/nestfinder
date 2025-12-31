@@ -176,6 +176,11 @@ class ApiClient {
     return this.fetch('/settings');
   }
 
+  // Public app config (testing banner settings)
+  getAppConfig() {
+    return this.fetch('/settings/app-config');
+  }
+
   updateSettings(settings) {
     return this.fetch('/settings', {
       method: 'PUT',
