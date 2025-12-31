@@ -162,11 +162,12 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
         }
 
         // Insert notifications for each user
-        const stmt = getDb().prepare('INSERT INTO notifications (user_id, title, body, type, read) VALUES (?, ?, ?, ?, 0)');
+        const stmt = getDb().prepare('INSERT INTO notifications (user_id, title, body, type, image_url, read) VALUES (?, ?, ?, ?, ?, 0)');
         const type = template || 'custom';
+        const image = req.body.imageUrl || null;
 
         targetUserIds.forEach(uid => {
-            stmt.run([uid, notificationTitle, notificationBody, type]);
+            stmt.run([uid, notificationTitle, notificationBody, type, image]);
         });
         stmt.free();
 

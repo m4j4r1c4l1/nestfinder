@@ -252,8 +252,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                         </div>
                     </div>
 
-                    {/* 2. Status Summary */}
-                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* 2. Status Summary - reduced height */}
+                    <div className="card" style={{ flex: 0.7, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
@@ -266,7 +266,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                 </button>
                             )}
                         </div>
-                        <div className="card-body" style={{ padding: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                        <div className="card-body" style={{ padding: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', overflow: 'auto' }}>
                             <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
                             <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
                             <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
@@ -302,12 +302,12 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                         </div>
                     </div>
 
-                    {/* 4. System Status */}
-                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* 4. System Status - increased height */}
+                    <div className="card" style={{ flex: 1.3, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>🖥️ System Status</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.75rem' }}>
+                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.75rem', overflowY: 'auto' }}>
                             {stats.system && (
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -483,7 +483,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                     </Modal>
                 )
             }
-        </div>
+        </div >
     );
 };
 

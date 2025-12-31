@@ -127,6 +127,13 @@ export const initDatabase = async () => {
   db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);`);
 
+  // Migration: Add image_url to notifications if not exists
+  try {
+    db.run("ALTER TABLE notifications ADD COLUMN image_url TEXT");
+  } catch (e) {
+    // Column likely exists, ignore error
+  }
+
   // Create indexes
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_status ON points(status);`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_points_user ON points(user_id);`);

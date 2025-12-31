@@ -24,6 +24,15 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead }) => {
                         } catch (e) { return ''; }
                     })()}
                 </div>
+                {message.image_url && (
+                    <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                        <img
+                            src={message.image_url}
+                            alt="Notification"
+                            style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px' }}
+                        />
+                    </div>
+                )}
                 <p style={{ margin: '0 0 24px 0', color: '#666', lineHeight: '1.5' }}>{message.body}</p>
                 <button
                     className="btn btn-primary btn-block"
