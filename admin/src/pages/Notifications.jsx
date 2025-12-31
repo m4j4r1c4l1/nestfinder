@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 
 
 
@@ -66,9 +67,11 @@ const Notifications = () => {
     });
     const [loading, setLoading] = useState(false);
 
-    // Initial Load
+    // Initial Load & Auto-Refresh
     useEffect(() => {
         loadStats();
+        const interval = setInterval(loadStats, 10000);
+        return () => clearInterval(interval);
     }, []);
 
     const loadStats = async () => {
@@ -101,9 +104,6 @@ const Notifications = () => {
             <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3>📊 Metrics</h3>
-                    <button onClick={loadStats} className="btn btn-sm btn-secondary" disabled={loading}>
-                        {loading ? '⏳' : '🔄'} Refresh
-                    </button>
                 </div>
                 <div className="card-body">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
@@ -160,11 +160,18 @@ const ComposeSection = ({ subscribers, onSent }) => {
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
 
+    // Auto-dismiss result message
+    useEffect(() => {
+        if (result) {
+            const timer = setTimeout(() => setResult(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [result]);
+
     // Generate Custom QR Code with Emoji Center
     const generateQRCode = async () => {
         try {
             // 1. Generate QR Data URL using 'qrcode' package
-            const QRCode = (await import('qrcode')).default;
             const qrDataUrl = await QRCode.toDataURL(APP_URL, {
                 width: 500,
                 margin: 0,
@@ -217,8 +224,12 @@ const ComposeSection = ({ subscribers, onSent }) => {
     const handleTemplateChange = async (templateId) => {
         setSelectedTemplate(templateId);
         const tmpl = templates[templateId];
+
+        // Clear fields and set new values
         setTitle(tmpl.title);
-        if (tmpl.body) setBody(tmpl.body);
+        setBody(tmpl.body || '');
+        setImageUrl(''); // Reset image
+
         if (templateId === 'share_app') {
             const qrImage = await generateQRCode();
             setImageUrl(qrImage);
@@ -367,6 +378,8 @@ const HistorySection = () => {
 
     useEffect(() => {
         loadHistory();
+        const interval = setInterval(loadHistory, 10000);
+        return () => clearInterval(interval);
     }, []);
 
     const loadHistory = async () => {
@@ -409,7 +422,6 @@ const HistorySection = () => {
                     >
                         🗑️ Clear History
                     </button>
-                    <button onClick={loadHistory} className="btn btn-sm btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
