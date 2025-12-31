@@ -8,6 +8,8 @@ const Logs = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [filters, setFilters] = useState({ limit: 50 });
     const [exporting, setExporting] = useState(false);
+    const [sortColumn, setSortColumn] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
 
     // Helper to get matching colors for actions (Vibrant Warm Palette)
     // Returns solid RGB values for text/border
@@ -157,18 +159,46 @@ const Logs = () => {
             </div>
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
-                <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1, maxHeight: 'calc(100vh - 230px)' }}>
+                <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1, maxHeight: 'calc(100vh - 180px)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
-                            <tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8' }}>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Time</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Action</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>User</th>
+                            <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
+                                <th
+                                    onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'desc'); }}
+                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th
+                                    onClick={() => { setSortColumn('action'); setSortDirection(d => sortColumn === 'action' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    Action {sortColumn === 'action' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th
+                                    onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    User {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
                                 <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Details</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {logs.map(log => {
+                            {[...logs].sort((a, b) => {
+                                let aVal = a[sortColumn] || '';
+                                let bVal = b[sortColumn] || '';
+                                if (sortColumn === 'created_at') {
+                                    aVal = new Date(aVal).getTime();
+                                    bVal = new Date(bVal).getTime();
+                                } else {
+                                    aVal = String(aVal).toLowerCase();
+                                    bVal = String(bVal).toLowerCase();
+                                }
+                                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                                return 0;
+                            }).map(log => {
                                 // Timezone fix for display
                                 let safeIso = log.created_at;
                                 if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
@@ -182,7 +212,7 @@ const Logs = () => {
                                                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                             <span className="badge" style={{
                                                 padding: '0.25rem 0.5rem',
                                                 borderRadius: '4px',
@@ -194,7 +224,7 @@ const Logs = () => {
                                             </span>
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0' }}>
-                                            {log.user_nickname || <span style={{ color: '#64748b' }}>{log.user_id?.substring(0, 8)}...</span>}
+                                            {log.user_nickname || <span style={{ color: '#64748b' }}>{log.user_id?.substring(0, 13)}...</span>}
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#94a3b8', verticalAlign: 'middle' }}>
                                             {log.metadata ? JSON.stringify(log.metadata) : '-'}
@@ -207,23 +237,40 @@ const Logs = () => {
                 </div>
             </div>
 
-            <div className="flex-center gap-4" style={{ padding: '1rem', background: '#1e293b', borderRadius: '8px', marginTop: '0.5rem', border: '1px solid #334155' }}>
+            {/* Pagination - simple row of icons */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', marginTop: '0.5rem' }}>
                 <button
-                    className="btn"
+                    onClick={() => setPage(1)}
                     disabled={page <= 1}
-                    onClick={() => setPage(p => p - 1)}
-                    style={{ background: '#334155', color: '#e2e8f0', border: '1px solid #475569' }}
+                    style={{ background: 'none', border: 'none', color: page <= 1 ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page <= 1 ? 'default' : 'pointer', padding: '0.25rem' }}
+                    title="First Page"
                 >
-                    Previous
+                    ◀◀
                 </button>
-                <span style={{ color: '#94a3b8' }}>Page {page} of {totalPages}</span>
                 <button
-                    className="btn"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage(p => p + 1)}
-                    style={{ background: '#334155', color: '#e2e8f0', border: '1px solid #475569' }}
+                    onClick={() => setPage(p => p - 1)}
+                    disabled={page <= 1}
+                    style={{ background: 'none', border: 'none', color: page <= 1 ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page <= 1 ? 'default' : 'pointer', padding: '0.25rem' }}
+                    title="Previous Page"
                 >
-                    Next
+                    ◀
+                </button>
+                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{page} / {totalPages}</span>
+                <button
+                    onClick={() => setPage(p => p + 1)}
+                    disabled={page >= totalPages}
+                    style={{ background: 'none', border: 'none', color: page >= totalPages ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page >= totalPages ? 'default' : 'pointer', padding: '0.25rem' }}
+                    title="Next Page"
+                >
+                    ▶
+                </button>
+                <button
+                    onClick={() => setPage(totalPages)}
+                    disabled={page >= totalPages}
+                    style={{ background: 'none', border: 'none', color: page >= totalPages ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page >= totalPages ? 'default' : 'pointer', padding: '0.25rem' }}
+                    title="Last Page"
+                >
+                    ▶▶
                 </button>
             </div>
         </div>

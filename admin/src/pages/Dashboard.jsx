@@ -252,8 +252,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                         </div>
                     </div>
 
-                    {/* 2. Status Summary - reduced height */}
-                    <div className="card" style={{ flex: 0.8, display: 'flex', flexDirection: 'column' }}>
+                    {/* 2. Status Summary - adjusted flex */}
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
@@ -266,7 +266,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                 </button>
                             )}
                         </div>
-                        <div className="card-body" style={{ padding: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', overflow: 'auto' }}>
+                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', overflow: 'auto', flex: 1 }}>
                             <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
                             <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
                             <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
@@ -274,16 +274,16 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                     </div>
 
                     {/* 3. Database Totals */}
-                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div className="card" style={{ flex: 1.2, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Totals</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                             <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
                             <MetricRow label="Total Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
                             <MetricRow label="Unread Messages" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
                             <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
-                            <MetricRow label="Database Size" value={stats.dbSizeBytes ? (stats.dbSizeBytes >= 1048576 ? (stats.dbSizeBytes / 1048576).toFixed(2) + ' MB' : (stats.dbSizeBytes / 1024).toFixed(1) + ' KB') : '-'} color="#94a3b8" />
+                            <MetricRow label="DB Size" value={stats.dbSizeBytes ? (stats.dbSizeBytes >= 1048576 ? (stats.dbSizeBytes / 1048576).toFixed(2) + ' MB' : (stats.dbSizeBytes / 1024).toFixed(1) + ' KB') : '-'} color="#94a3b8" />
 
                             {showBackup && (
                                 <button
@@ -303,8 +303,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                         </div>
                     </div>
 
-                    {/* 4. System Status - fixed height */}
-                    <div className="card" style={{ flex: 1.2, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {/* 4. System Status */}
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🖥️ System Status</span>
                         </div>
