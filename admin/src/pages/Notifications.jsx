@@ -99,6 +99,12 @@ const Notifications = () => {
 
             {/* Stats Summary */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3>📊 Metrics</h3>
+                    <button onClick={loadStats} className="btn btn-sm btn-secondary" disabled={loading}>
+                        {loading ? '⏳' : '🔄'} Refresh
+                    </button>
+                </div>
                 <div className="card-body">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
                         <div>
@@ -384,10 +390,10 @@ const HistorySection = () => {
             <div className="card-body" style={{ padding: 0 }}>
                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 1 }}>
-                            <tr style={{ textAlign: 'left', color: '#64748b' }}>
-                                <th style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>Date</th>
-                                <th style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>Message</th>
+                        <thead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 1 }}>
+                            <tr style={{ textAlign: 'left', color: '#475569' }}>
+                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Date</th>
+                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Message</th>
                                 <th style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>Target</th>
                             </tr>
                         </thead>
@@ -419,7 +425,7 @@ const HistorySection = () => {
                                         </td>
                                         <td style={{ padding: '1rem' }}>
                                             <div style={{ fontWeight: 600, color: '#1e293b' }}>{meta.title}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#475569' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
                                         </td>
                                         <td style={{ padding: '1rem' }}>
                                             <span style={{
