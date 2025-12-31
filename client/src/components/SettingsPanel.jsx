@@ -156,11 +156,18 @@ const SettingsPanel = ({ onClose }) => {
                             <strong>NestFinder</strong>
                             {t('settings.scanToShare').split('NestFinder')[1] || ''}
                         </div>
-                        <button
-                            type="button"
+                        <div
+                            role="button"
+                            tabIndex={0}
                             onClick={(e) => {
                                 e.preventDefault();
                                 handleShare();
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleShare();
+                                }
                             }}
                             className="btn btn-secondary"
                             style={{
@@ -176,7 +183,7 @@ const SettingsPanel = ({ onClose }) => {
                             }}
                         >
                             🔗 {t('settings.shareLink') || 'Share Link'}
-                        </button>
+                        </div>
                     </div>
                 </div>
 
@@ -302,7 +309,7 @@ const SettingsPanel = ({ onClose }) => {
                             </div>
                         </div>
                     </div>,
-                    document.body
+                    document.getElementById('root') || document.body
                 )}
 
                 {/* Notification Settings */}
