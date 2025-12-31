@@ -403,7 +403,11 @@ const HistorySection = () => {
                                 return (
                                     <tr
                                         key={log.id}
-                                        onClick={() => setSelectedBatchId(log.target_id)}
+                                        onClick={() => {
+                                            const batchId = log.target_id || log.id;
+                                            console.log('Clicked row:', log.id, 'target_id:', log.target_id, 'using batchId:', batchId);
+                                            if (batchId) setSelectedBatchId(batchId);
+                                        }}
                                         style={{
                                             borderBottom: '1px solid #e2e8f0',
                                             cursor: 'pointer',
