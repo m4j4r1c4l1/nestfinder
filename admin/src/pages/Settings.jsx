@@ -203,7 +203,7 @@ const Settings = () => {
                                 Show testing banner on client app
                             </label>
                         </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
+                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                             <label className="form-label" style={{ fontSize: '0.85rem' }}>Badge Text</label>
                             <input
                                 name="testing_banner_text"
