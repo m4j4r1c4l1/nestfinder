@@ -64,7 +64,7 @@ import { apiLimiter } from './middleware/rateLimiter.js';
 const allowedOrigins = process.env.NODE_ENV === 'production'
     ? [
         'https://m4j4r1c4l1.github.io',
-        'https://nestfinder.onrender.com',
+        'https://nestfinder-sa1g.onrender.com',
         process.env.CORS_ORIGIN // Allow custom origin from env
     ].filter(Boolean)
     : true; // Allow all in development
