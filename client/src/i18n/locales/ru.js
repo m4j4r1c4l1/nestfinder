@@ -144,7 +144,7 @@ export default {
         notifications: 'Уведомления',
         popupMessages: 'Всплывающие сообщения',
         popupDescription: 'Показывать сообщения сразу',
-        shareApp: 'Поделиться',
+        shareApp: 'Поделиться NestFinder',
         scanToShare: 'Сканируйте для NestFinder',
         copyLink: 'Копировать ссылку',
         shareLink: 'Поделиться ссылкой',

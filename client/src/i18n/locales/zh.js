@@ -144,7 +144,7 @@ export default {
         notifications: '通知',
         popupMessages: '实时弹窗',
         popupDescription: '收到消息时立即显示',
-        shareApp: '分享应用',
+        shareApp: '分享 NestFinder',
         scanToShare: '扫码打开 NestFinder',
         copyLink: '复制链接',
         shareLink: '分享链接',

@@ -145,7 +145,7 @@ export default {
         notifications: 'إشعارات',
         popupMessages: 'نوافذ فورية',
         popupDescription: 'عرض الرسائل فوراً',
-        shareApp: 'مشاركة التطبيق',
+        shareApp: 'مشاركة NestFinder',
         scanToShare: 'امسح لفتح NestFinder',
         copyLink: 'نسخ الرابط',
         shareLink: 'مشاركة الرابط',
