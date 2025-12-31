@@ -241,7 +241,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 1. Activity Metrics */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                        <div className="card-header" style={{ padding: '0.15rem 0.5rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📈 Activity Metrics</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -253,8 +253,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                     </div>
 
                     {/* 2. Status Summary - reduced height */}
-                    <div className="card" style={{ flex: 0.7, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="card" style={{ flex: 0.8, display: 'flex', flexDirection: 'column' }}>
+                        <div className="card-header" style={{ padding: '0.15rem 0.5rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
                                 <button
@@ -275,7 +275,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 3. Database Totals */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                        <div className="card-header" style={{ padding: '0.15rem 0.5rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>💾 Database Totals</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -303,8 +303,8 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                     </div>
 
                     {/* 4. System Status - increased height */}
-                    <div className="card" style={{ flex: 1.3, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                        <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                    <div className="card" style={{ flex: 1.2, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                        <div className="card-header" style={{ padding: '0.15rem 0.5rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>🖥️ System Status</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.75rem', overflowY: 'auto' }}>
@@ -411,19 +411,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                         </div>
                                     )}
 
-                                    {/* Render Instance Info */}
-                                    {stats.system.render && (
-                                        <div style={{ marginTop: '0.15rem', padding: '0.2rem', background: 'var(--color-bg-tertiary)', borderRadius: 4, fontSize: '0.65rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span style={{ color: 'var(--color-text-secondary)' }}>Render</span>
-                                                <span style={{ fontWeight: 500 }}>{stats.system.render.service}</span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span style={{ color: 'var(--color-text-secondary)' }}>Region</span>
-                                                <span style={{ fontWeight: 500 }}>{stats.system.render.region}</span>
-                                            </div>
-                                        </div>
-                                    )}
+
                                 </>
                             )}
                         </div>
