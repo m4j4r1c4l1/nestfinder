@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { QRCodeSVG } from 'qrcode.react';
 
 const NOTIFICATION_PREF_KEY = 'nestfinder_notify_settings';
+const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder';
 
 const SettingsPanel = ({ onClose }) => {
     const { t, language, setLanguage, availableLanguages } = useLanguage();
@@ -20,6 +22,10 @@ const SettingsPanel = ({ onClose }) => {
         const newValue = !popupEnabled;
         setPopupEnabled(newValue);
         localStorage.setItem(NOTIFICATION_PREF_KEY, JSON.stringify({ realTime: newValue }));
+    };
+
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(APP_URL);
     };
 
     return (
@@ -82,7 +88,7 @@ const SettingsPanel = ({ onClose }) => {
                 </div>
 
                 {/* Language Selection */}
-                <div className="form-group">
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('profile.language')}</label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                         {availableLanguages.map(lang => (
@@ -122,10 +128,57 @@ const SettingsPanel = ({ onClose }) => {
                         ))}
                     </div>
                 </div>
+
+                {/* Share App */}
+                <div className="form-group">
+                    <label className="form-label">{t('settings.shareApp') || 'Share App'}</label>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        padding: 'var(--space-4)',
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--color-border)',
+                        gap: 'var(--space-3)'
+                    }}>
+                        <div style={{
+                            padding: '0.75rem',
+                            background: 'white',
+                            borderRadius: 'var(--radius-md)'
+                        }}>
+                            <QRCodeSVG
+                                value={APP_URL}
+                                size={120}
+                                level="M"
+                                includeMargin={false}
+                            />
+                        </div>
+                        <div style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--color-text-secondary)',
+                            textAlign: 'center'
+                        }}>
+                            {t('settings.scanToShare') || 'Scan to open NestFinder'}
+                        </div>
+                        <button
+                            onClick={handleCopyLink}
+                            className="btn btn-secondary"
+                            style={{
+                                fontSize: '0.8rem',
+                                padding: '0.5rem 1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem'
+                            }}
+                        >
+                            📋 {t('settings.copyLink') || 'Copy Link'}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
 
 export default SettingsPanel;
-
