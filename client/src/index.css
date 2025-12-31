@@ -544,8 +544,8 @@ textarea.form-input {
   width: calc(100% - var(--space-8));
   max-width: 480px;
 
-  /* Container has the glass effect */
-  background: var(--color-bg-glass);
+  /* Container has LIGHTER glass effect */
+  background: var(--color-bg-glass-light);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   backdrop-filter: blur(20px);
@@ -566,13 +566,13 @@ textarea.form-input {
   overflow-y: auto;
 }
 
-/* Inner card is transparent to prevent double-layer glass effect */
+/* Inner card has DARKER glass for visual distinction */
 .bottom-sheet>.card {
   margin: auto 0;
   flex: 0 1 auto;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+  background: var(--color-bg-glass) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-md) !important;
   backdrop-filter: none !important;
 }
 
