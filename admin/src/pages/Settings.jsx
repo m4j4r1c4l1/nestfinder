@@ -23,6 +23,14 @@ const Settings = () => {
         });
     }, []);
 
+    // Auto-hide success messages after 4 seconds
+    useEffect(() => {
+        if (message.text && message.type === 'success') {
+            const timer = setTimeout(() => setMessage({ text: '', type: '' }), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [message]);
+
     const handleChange = (e) => {
         setSettings({ ...settings, [e.target.name]: e.target.value });
     };
