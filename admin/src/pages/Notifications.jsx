@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
+const APP_URL = 'https://nestfinder-sa1g.onrender.com'; // Hardcoded for now or env var using VITE_CLIENT_URL
 
 // Notification templates
 const templates = {
+    share_app: {
+        id: 'share_app',
+        name: '🤝 Share App',
+        title: 'Spread the Warmth 🪹',
+        body: 'Know someone who could help or needs assistance? Share NestFinder with your community and help us grow our network of support.'
+    },
     new_points: {
         id: 'new_points',
         name: '🪹 New Locations',
@@ -147,13 +155,79 @@ const Notifications = () => {
         }
     };
 
+    // Generate Custom QR Code with Emoji Center
+    const generateQRCode = async () => {
+        try {
+            // 1. Generate standard QR code
+            const qrDataUrl = await QRCode.toDataURL(APP_URL, {
+                errorCorrectionLevel: 'H',
+                margin: 2,
+                color: {
+                    dark: '#1e293b', // Slate 800
+                    light: '#ffffff'
+                },
+                width: 500
+            });
+
+            // 2. Load into Image to draw on Canvas
+            const img = new Image();
+            img.src = qrDataUrl;
+            await new Promise(r => img.onload = r);
+
+            // 3. Create Canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+
+            // 4. Draw QR
+            ctx.drawImage(img, 0, 0);
+
+            // 5. Draw Center Emoji (🪹)
+            // White circle background for emoji
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 6;
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            // Optional border
+            // ctx.lineWidth = 5;
+            // ctx.strokeStyle = '#1e293b';
+            // ctx.stroke();
+
+            // Draw Emoji
+            ctx.font = `${radius * 1.5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            // Offset y slightly because emojis usually sit a bit high
+            ctx.fillText('🪹', centerX, centerY + (radius * 0.1));
+
+            return canvas.toDataURL('image/png');
+        } catch (err) {
+            console.error('QR Generation failed:', err);
+            return '';
+        }
+    };
+
     // Handle template selection
-    const handleTemplateChange = (templateId) => {
+    const handleTemplateChange = async (templateId) => {
         setSelectedTemplate(templateId);
         const tmpl = templates[templateId];
         setTitle(tmpl.title);
         if (tmpl.body) {
             setBody(tmpl.body);
+        }
+
+        // Auto-generate QR for "Share App" template
+        if (templateId === 'share_app') {
+            const qrImage = await generateQRCode();
+            setImageUrl(qrImage);
+        } else {
+            // Keep existing image if switching away, or clear? 
+            // Better to let user clear manually if they want to keep it.
         }
     };
 
@@ -209,8 +283,6 @@ const Notifications = () => {
                 // Reset form
                 setBody('');
                 setImageUrl('');
-                // Switch to history tab to see it
-                // setTimeout(() => setActiveTab('history'), 1500); 
             } else {
                 setResult({ success: false, message: data.error || 'Failed to send' });
             }
@@ -241,6 +313,7 @@ const Notifications = () => {
                     success: true,
                     message: `✅ ${data.message}`
                 });
+                // Reload stats to update metrics
                 await loadStats();
             } else {
                 const data = await response.json();
@@ -320,36 +393,77 @@ const Notifications = () => {
                     <div className="card" style={{ marginBottom: '1.5rem' }}>
                         <div className="card-body">
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                                {/* Stats content same as before ... */}
+                                {/* Total Users */}
                                 <div>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
+                                    <div style={{
+                                        fontSize: '2rem',
+                                        fontWeight: 'bold',
+                                        color: 'var(--primary-color, #3b82f6)'
+                                    }}>
                                         {stats.totalSubscribers}
                                     </div>
-                                    <div><div style={{ fontWeight: 600 }}>Total Users</div><div className="text-muted text-sm">Registered</div></div>
+                                    <div>
+                                        <div style={{ fontWeight: 600 }}>Total Users</div>
+                                        <div className="text-muted text-sm">Registered users</div>
+                                    </div>
                                 </div>
+
+                                {/* Total Notifications */}
                                 <div>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                    <div style={{
+                                        fontSize: '2rem',
+                                        fontWeight: 'bold',
+                                        color: '#8b5cf6'
+                                    }}>
                                         {stats.notificationMetrics?.total || 0}
                                     </div>
-                                    <div><div style={{ fontWeight: 600 }}>Total Messages</div><div className="text-muted text-sm">Sent</div></div>
+                                    <div>
+                                        <div style={{ fontWeight: 600 }}>Total Messages</div>
+                                        <div className="text-muted text-sm">In database</div>
+                                    </div>
                                 </div>
+
+                                {/* Unread Notifications */}
                                 <div>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                    <div style={{
+                                        fontSize: '2rem',
+                                        fontWeight: 'bold',
+                                        color: '#f59e0b'
+                                    }}>
                                         {stats.notificationMetrics?.unread || 0}
                                     </div>
-                                    <div><div style={{ fontWeight: 600 }}>Unread</div><div className="text-muted text-sm">Pending</div></div>
+                                    <div>
+                                        <div style={{ fontWeight: 600 }}>Unread Messages</div>
+                                        <div className="text-muted text-sm">Pending delivery</div>
+                                    </div>
                                 </div>
                             </div>
+
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                                <button onClick={loadStats} disabled={loading} className="btn btn-secondary btn-sm">🔄 Refresh</button>
-                                <button onClick={handleClearNotifications} disabled={loading} className="btn btn-secondary btn-sm" style={{ marginLeft: 'auto', background: '#dc2626', color: 'white' }}>🗑️ Clear All</button>
+                                <button
+                                    onClick={loadStats}
+                                    disabled={loading}
+                                    className="btn btn-secondary btn-sm"
+                                >
+                                    🔄 Refresh
+                                </button>
+                                <button
+                                    onClick={handleClearNotifications}
+                                    disabled={loading}
+                                    className="btn btn-secondary btn-sm"
+                                    style={{ marginLeft: 'auto', background: '#dc2626', color: 'white' }}
+                                >
+                                    🗑️ Clear All Notifications
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     {/* Compose Card */}
                     <div className="card">
-                        <div className="card-header"><h3>Compose Notification</h3></div>
+                        <div className="card-header">
+                            <h3>Compose Notification</h3>
+                        </div>
                         <div className="card-body">
                             {/* Template Selection */}
                             <div className="form-group">
@@ -361,9 +475,13 @@ const Notifications = () => {
                                             onClick={() => handleTemplateChange(tmpl.id)}
                                             style={{
                                                 padding: '0.75rem',
-                                                border: selectedTemplate === tmpl.id ? '2px solid var(--primary-color, #3b82f6)' : '1px solid #ddd',
+                                                border: selectedTemplate === tmpl.id
+                                                    ? '2px solid var(--primary-color, #3b82f6)'
+                                                    : '1px solid #ddd',
                                                 borderRadius: '8px',
-                                                background: selectedTemplate === tmpl.id ? 'var(--primary-light, #eff6ff)' : 'white',
+                                                background: selectedTemplate === tmpl.id
+                                                    ? 'var(--primary-light, #eff6ff)'
+                                                    : 'white',
                                                 cursor: 'pointer',
                                                 textAlign: 'left',
                                                 fontSize: '0.9rem'
@@ -375,53 +493,183 @@ const Notifications = () => {
                                 </div>
                             </div>
 
-                            {/* Title & Image & Body & Target (Same as before) */}
+                            {/* Title */}
                             <div className="form-group" style={{ marginTop: '1rem' }}>
                                 <label className="form-label">Title</label>
-                                <input type="text" className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} />
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="Notification title..."
+                                />
                             </div>
 
+                            {/* Image Upload Section */}
                             <div className="form-group" style={{ marginTop: '1rem' }}>
-                                <label className="form-label">Image</label>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <input type="text" className="form-input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." style={{ flex: 1 }} />
-                                    <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>📂 <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} /></label>
+                                <label className="form-label">Image (Upload or URL)</label>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        value={imageUrl}
+                                        onChange={(e) => setImageUrl(e.target.value)}
+                                        placeholder="https://... or upload ->"
+                                        style={{ flex: 1 }}
+                                    />
+                                    <label className="btn btn-secondary" style={{ cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span>📂 Upload</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </label>
                                 </div>
+                                {imageUrl && (
+                                    <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: '#f8fafc', borderRadius: '4px', display: 'inline-block' }}>
+                                        <div style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Preview:</span>
+                                            <button
+                                                onClick={() => setImageUrl('')}
+                                                style={{
+                                                    background: '#ef4444',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    padding: '0.1rem 0.5rem',
+                                                    fontSize: '0.75rem',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                        <img src={imageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', borderRadius: '4px' }} />
+                                    </div>
+                                )}
                             </div>
 
+
+                            {/* Body */}
                             <div className="form-group" style={{ marginTop: '1rem' }}>
                                 <label className="form-label">Message</label>
-                                <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
+                                <textarea
+                                    className="form-input"
+                                    value={body}
+                                    onChange={(e) => setBody(e.target.value)}
+                                    placeholder="Write your message here..."
+                                    rows={4}
+                                    style={{ resize: 'vertical' }}
+                                />
                             </div>
 
+                            {/* Target Selection */}
                             <div className="form-group" style={{ marginTop: '1rem' }}>
                                 <label className="form-label">Send To</label>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    {[{ id: 'all', label: '👥 All Users' }, { id: 'selected', label: '👤 Select Users' }].map(opt => (
-                                        <button key={opt.id} onClick={() => setTarget(opt.id)} style={{ padding: '0.5rem 1rem', border: target === opt.id ? '2px solid blue' : '1px solid #ddd', borderRadius: '6px', cursor: 'pointer' }}>{opt.label}</button>
+                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                    {[
+                                        { id: 'all', label: '👥 All Users' },
+                                        { id: 'selected', label: '👤 Select Users' }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => setTarget(opt.id)}
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                border: target === opt.id
+                                                    ? '2px solid var(--primary-color, #3b82f6)'
+                                                    : '1px solid #ddd',
+                                                borderRadius: '6px',
+                                                background: target === opt.id
+                                                    ? 'var(--primary-light, #eff6ff)'
+                                                    : 'white',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            {opt.label}
+                                        </button>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* User Selection Logic */}
+                            {/* User Selection (if selected target) */}
                             {target === 'selected' && (
                                 <div className="form-group" style={{ marginTop: '1rem' }}>
-                                    <input type="text" className="form-input" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                                    <div style={{ maxHeight: '200px', overflow: 'auto', border: '1px solid #ddd', padding: '0.5rem', marginTop: '0.5rem' }}>
-                                        {filteredSubscribers.map((sub, idx) => (
-                                            <label key={idx} style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem' }}>
-                                                <input type="checkbox" checked={selectedUsers.includes(sub.user_id)} onChange={() => toggleUser(sub.user_id)} />
-                                                {sub.nickname || sub.user_id}
-                                            </label>
-                                        ))}
+                                    <label className="form-label">Select Users ({selectedUsers.length} selected)</label>
+
+                                    {/* Search Input */}
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="🔍 Search by nickname or ID..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        style={{ marginBottom: '0.5rem' }}
+                                    />
+
+                                    <div style={{
+                                        maxHeight: '200px',
+                                        overflow: 'auto',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '8px',
+                                        padding: '0.5rem'
+                                    }}>
+                                        {filteredSubscribers.length === 0 ? (
+                                            <div className="text-muted text-center" style={{ padding: '1rem' }}>
+                                                {searchQuery ? 'No users match your search' : 'No users found'}
+                                            </div>
+                                        ) : (
+                                            filteredSubscribers.map((sub, idx) => (
+                                                <label
+                                                    key={sub.user_id + idx}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        padding: '0.5rem',
+                                                        cursor: 'pointer',
+                                                        borderBottom: '1px solid #eee'
+                                                    }}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedUsers.includes(sub.user_id)}
+                                                        onChange={() => toggleUser(sub.user_id)}
+                                                    />
+                                                    <span>{sub.nickname || sub.user_id}</span>
+                                                    <span className="text-muted text-sm" style={{ marginLeft: 'auto' }}>
+                                                        Last active: {sub.last_active ? new Date(sub.last_active).toLocaleDateString() : 'Never'}
+                                                    </span>
+                                                </label>
+                                            ))
+                                        )}
                                     </div>
                                 </div>
                             )}
 
-                            {result && <div style={{ marginTop: '1rem', padding: '1rem', background: result.success ? '#dcfce7' : '#fef2f2' }}>{result.message}</div>}
+                            {/* Result Message */}
+                            {result && (
+                                <div style={{
+                                    marginTop: '1rem',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    background: result.success ? '#dcfce7' : '#fef2f2',
+                                    color: result.success ? '#166534' : '#991b1b'
+                                }}>
+                                    {result.message}
+                                </div>
+                            )}
 
-                            <button onClick={handleSend} disabled={sending || !body.trim()} className="btn btn-primary" style={{ marginTop: '1.5rem', width: '100%' }}>
-                                {sending ? 'Sending...' : 'Send Notification'}
+                            {/* Send Button */}
+                            <button
+                                onClick={handleSend}
+                                disabled={sending || !body.trim()}
+                                className="btn btn-primary"
+                                style={{ marginTop: '1.5rem', width: '100%' }}
+                            >
+                                {sending ? '📤 Sending...' : '📤 Send Notification'}
                             </button>
                         </div>
                     </div>
