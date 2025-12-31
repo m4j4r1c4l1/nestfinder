@@ -13,10 +13,5 @@ export default defineConfig({
                 changeOrigin: true
             }
         }
-    },
-    resolve: {
-        alias: {
-            qrcode: path.resolve(__dirname, 'node_modules/qrcode/lib/browser.js')
-        }
     }
 });
