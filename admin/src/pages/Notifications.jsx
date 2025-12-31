@@ -390,8 +390,8 @@ const HistorySection = () => {
             <div className="card-body" style={{ padding: 0 }}>
                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: '#f1f5f9', zIndex: 1 }}>
-                            <tr style={{ textAlign: 'left', color: '#475569' }}>
+                        <thead style={{ position: 'sticky', top: 0, background: '#334155', zIndex: 1 }}>
+                            <tr style={{ textAlign: 'left', color: '#64748b' }}>
                                 <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Timestamp</th>
                                 <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Message</th>
                                 <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Target</th>

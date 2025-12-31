@@ -40,7 +40,7 @@ const SettingsPanel = ({ onClose }) => {
 
 
     return (
-        <div className="card" style={{ background: 'var(--color-bg-tertiary)' }}>
+        <div className="card" style={{ background: 'var(--color-bg-secondary)' }}>
             <div className="card-header flex-between items-center">
                 <h3 className="card-title">{t('nav.settings')}</h3>
                 <button
@@ -97,27 +97,30 @@ const SettingsPanel = ({ onClose }) => {
                     </div>
 
                     {/* Copy Link Button */}
-                    <div
-                        role="button"
-                        className="btn btn-secondary"
-                        onClick={handleCopyLink}
-                        style={{
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                            padding: '1rem',
-                            background: showCopied ? 'var(--color-confirmed)' : 'var(--color-primary)',
-                            color: 'white',
-                            border: 'none',
-                            transition: 'all 0.3s'
-                        }}
-                    >
-                        <span style={{ fontSize: '1.2rem' }}>{showCopied ? '✓' : '🔗'}</span>
-                        <span style={{ fontWeight: 600 }}>
-                            {showCopied ? t('settings.linkCopied') : t('settings.shareLink')}
-                        </span>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div
+                            role="button"
+                            className="btn btn-secondary"
+                            onClick={handleCopyLink}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem',
+                                padding: '0.75rem 2rem',
+                                background: showCopied ? 'var(--color-confirmed)' : 'var(--color-primary)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: 'var(--radius-md)',
+                                transition: 'all 0.3s',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.2rem' }}>{showCopied ? '✓' : '🔗'}</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {showCopied ? t('settings.linkCopied') : t('settings.shareLink')}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
