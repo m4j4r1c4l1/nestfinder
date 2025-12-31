@@ -544,15 +544,13 @@ textarea.form-input {
   width: calc(100% - var(--space-8));
   max-width: 480px;
 
-  /* DEBUG LAYERS */
-  background: rgba(255, 0, 0, 0.2) !important;
-  /* RED LAYER = Container */
-  border: 4px solid red !important;
+  /* Visuals removed to prevent double-layer overlay issues */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  box-shadow: none;
 
-  /* background: var(--color-bg-glass); */
-  /* border-radius: var(--radius-xl); */
-  backdrop-filter: blur(20px);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-slow);
@@ -568,10 +566,10 @@ textarea.form-input {
   overflow-y: auto;
 }
 
-/* DEBUG: Make inner card Blue */
+/* Remove debug border from card */
 .bottom-sheet>.card {
-  border: 4px solid blue !important;
-  /* BLUE LAYER = Content */
+  margin: auto 0;
+  flex: 0 1 auto;
 }
 
 .bottom-sheet.open {
@@ -583,8 +581,7 @@ textarea.form-input {
 .bottom-sheet-handle {
   width: 40px;
   height: 4px;
-  background: lime !important;
-  /* LIME = Handle */
+  background: var(--color-text-muted);
   border-radius: var(--radius-full);
   margin: var(--space-3) auto;
   cursor: pointer;
