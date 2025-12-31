@@ -1,13 +1,47 @@
 import jwt from 'jsonwebtoken';
-import { get } from '../database.js';
+import { get, run } from '../database.js';
 import { NEST_INTEGRITY } from '../routes/auth.js';
 
-// Middleware to verify user exists
+// Middleware to verify user with JWT token
 export const requireUser = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    // Try JWT token first (preferred)
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+
+        try {
+            const decoded = jwt.verify(token, NEST_INTEGRITY);
+
+            // Check it's a user token (not admin)
+            if (decoded.type !== 'user') {
+                return res.status(401).json({ error: 'Invalid token type' });
+            }
+
+            const user = get('SELECT * FROM users WHERE id = ?', [decoded.userId]);
+
+            if (!user) {
+                return res.status(401).json({ error: 'User not found' });
+            }
+
+            // Update last active
+            run('UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?', [decoded.userId]);
+
+            req.user = user;
+            return next();
+        } catch (err) {
+            if (err.name === 'TokenExpiredError') {
+                return res.status(401).json({ error: 'Token expired, please re-register' });
+            }
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+    }
+
+    // Fallback to x-user-id header for backward compatibility (deprecated)
     const userId = req.headers['x-user-id'];
 
     if (!userId) {
-        return res.status(401).json({ error: 'User ID required' });
+        return res.status(401).json({ error: 'Authorization required' });
     }
 
     const user = get('SELECT * FROM users WHERE id = ?', [userId]);
@@ -16,12 +50,11 @@ export const requireUser = (req, res, next) => {
         return res.status(401).json({ error: 'Invalid user' });
     }
 
-    // Update last active (fire and forget)
-    import('../database.js').then(db => {
-        db.run('UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
-    });
+    // Update last active
+    run('UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
 
     req.user = user;
+    req._usingDeprecatedAuth = true; // Flag for logging
     next();
 };
 

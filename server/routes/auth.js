@@ -10,6 +10,16 @@ const router = Router();
 // JWT secret - use environment variable in production
 const NEST_INTEGRITY = process.env.NEST_INTEGRITY || 'nestfinder-admin-secret-change-in-production';
 const JWT_EXPIRATION = '24h';
+const USER_TOKEN_EXPIRATION = '30d'; // User tokens last longer
+
+// Helper to generate user token
+const generateUserToken = (userId) => {
+    return jwt.sign(
+        { userId, type: 'user' },
+        NEST_INTEGRITY,
+        { expiresIn: USER_TOKEN_EXPIRATION }
+    );
+};
 
 // Register new user (anonymous with optional nickname)
 router.post('/register', registerLimiter, (req, res) => {
@@ -24,8 +34,13 @@ router.post('/register', registerLimiter, (req, res) => {
 
     if (existing) {
         log(existing.id, 'login', null, { method: 'existing_device' });
+
+        // Generate token for returning user
+        const token = generateUserToken(existing.id);
+
         return res.json({
             user: existing,
+            token,
             isNew: false
         });
     }
@@ -42,8 +57,12 @@ router.post('/register', registerLimiter, (req, res) => {
 
     log(userId, 'register', null, { nickname });
 
+    // Generate token for new user
+    const token = generateUserToken(userId);
+
     res.status(201).json({
         user,
+        token,
         isNew: true
     });
 });
