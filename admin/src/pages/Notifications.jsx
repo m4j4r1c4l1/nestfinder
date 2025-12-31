@@ -540,87 +540,87 @@ const DetailModal = ({ batchId, onClose }) => {
                 border: '1px solid #334155'
             }}>
                 {/* Header */}
-                <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>Message Details</h3>
                     <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                 </div>
 
-                <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1 }}>
+                {/* Fixed Stats Section */}
+                <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{details?.stats?.total || 0}</div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Sent</div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{details?.stats?.delivered || 0}</div>
+                            <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Delivered</div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{details?.stats?.read || 0}</div>
+                            <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Read</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Scrollable Table Area */}
+                <div style={{ padding: '0 1.5rem 1.5rem', overflowY: 'auto', flex: 1 }}>
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Loading details...</div>
                     ) : details ? (
-                        <>
-                            {/* Vivid Stats Boxes */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-                                <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
-                                    <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{details.stats.total}</div>
-                                    <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Sent</div>
-                                </div>
-                                <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                                    <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{details.stats.delivered}</div>
-                                    <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Delivered</div>
-                                </div>
-                                <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                                    <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{details.stats.read}</div>
-                                    <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Read</div>
-                                </div>
-                            </div>
-
-                            {/* Table */}
-                            <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'hidden' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                    <thead>
-                                        <tr style={{ background: '#0f172a', color: '#94a3b8', textAlign: 'left', borderBottom: '1px solid #334155' }}>
-                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>User</th>
-                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Sent At</th>
-                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Received At</th>
-                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Read At</th>
-                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {details.messages.map(msg => (
-                                            <tr key={msg.id} style={{ borderBottom: '1px solid #334155' }}>
-                                                <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                                    <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Guest'}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
-                                                </td>
-                                                <td style={{ padding: '0.5rem 1rem', color: '#64748b', verticalAlign: 'middle' }}>
-                                                    {formatTime(msg.created_at)}
-                                                </td>
-                                                <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', verticalAlign: 'middle' }}>
-                                                    {formatTime(msg.delivered_at)}
-                                                </td>
-                                                <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', verticalAlign: 'middle' }}>
-                                                    {formatTime(msg.read_at)}
-                                                </td>
-                                                <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                        {/* Fixed width icon container for alignment */}
-                                                        <div style={{ width: '32px', fontSize: '1.2rem', lineHeight: 1 }}>
-                                                            {msg.read ? (
-                                                                <span style={{ color: '#3b82f6' }}>✓✓</span> // Blue Ticks
-                                                            ) : msg.delivered ? (
-                                                                <span style={{ color: '#22c55e' }}>✓✓</span> // Green Ticks
-                                                            ) : (
-                                                                <span style={{ color: '#22c55e' }}>✓</span>  // Green Tick (Sent)
-                                                            )}
-                                                        </div>
-                                                        <span style={{
-                                                            fontSize: '0.85rem', fontWeight: 500,
-                                                            color: msg.read ? '#60a5fa' : msg.delivered ? '#4ade80' : '#94a3b8'
-                                                        }}>
-                                                            {msg.read ? 'Read' : msg.delivered ? 'Delivered' : 'Sent'}
-                                                        </span>
+                        <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'hidden' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
+                                    <tr style={{ color: '#94a3b8', textAlign: 'left', borderBottom: '1px solid #334155' }}>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>User</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Sent</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Received</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Read</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {details.messages.map(msg => (
+                                        <tr key={msg.id} style={{ borderBottom: '1px solid #334155' }}>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                                <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Guest'}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', color: '#64748b', verticalAlign: 'middle' }}>
+                                                {formatTime(msg.created_at)}
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', verticalAlign: 'middle' }}>
+                                                {formatTime(msg.delivered_at)}
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', verticalAlign: 'middle' }}>
+                                                {formatTime(msg.read_at)}
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    {/* Fixed width icon container with center alignment */}
+                                                    <div style={{ width: '40px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center', marginRight: '8px' }}>
+                                                        {msg.read ? (
+                                                            <span style={{ color: '#3b82f6', transform: 'translateX(-2px)' }}>✓✓</span> // Blue Ticks, slightly shifted Left
+                                                        ) : msg.delivered ? (
+                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓✓</span> // Green Ticks, slightly shifted Left
+                                                        ) : (
+                                                            <span style={{ color: '#22c55e' }}>✓</span>  // Green Tick (Sent), Centered
+                                                        )}
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                {details.messages.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No recipients found</div>}
-                            </div>
-                        </>
+                                                    <span style={{
+                                                        fontSize: '0.85rem', fontWeight: 500,
+                                                        color: '#94a3b8' // Uniform Grey color for text
+                                                    }}>
+                                                        {msg.read ? 'Read' : msg.delivered ? 'Delivered' : 'Sent'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            {details.messages.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No recipients found</div>}
+                        </div>
                     ) : (
                         <div style={{ color: '#ef4444', textAlign: 'center', padding: '2rem' }}>Error loading details</div>
                     )}
