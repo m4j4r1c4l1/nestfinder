@@ -163,16 +163,17 @@ const ComposeSection = ({ subscribers, onSent }) => {
     // Generate Custom QR Code with Emoji Center
     const generateQRCode = async () => {
         try {
-            // 1. Generate QR Data URL using window.QRious
-            const qr = new window.QRious({
-                value: APP_URL,
-                size: 500,
-                level: 'H',
-                padding: 0,
-                background: 'white',
-                foreground: '#1e293b'
+            // 1. Generate QR Data URL using 'qrcode' package
+            const QRCode = (await import('qrcode')).default;
+            const qrDataUrl = await QRCode.toDataURL(APP_URL, {
+                width: 500,
+                margin: 0,
+                color: {
+                    dark: '#1e293b',
+                    light: '#ffffff'
+                },
+                errorCorrectionLevel: 'H'
             });
-            const qrDataUrl = qr.toDataURL();
 
             // 2. Load into Image to draw on Canvas
             const img = new Image();
@@ -349,7 +350,7 @@ const ComposeSection = ({ subscribers, onSent }) => {
                     )}
                 </div>
 
-                {result && <div style={{ marginTop: '1rem', padding: '0.5rem', borderRadius: '4px', background: result.success ? '#dcfce7' : '#fee2e2' }}>{result.message}</div>}
+                {result && <div style={{ marginTop: '1rem', padding: '0.5rem', borderRadius: '4px', background: result.success ? '#dcfce7' : '#fee2e2', color: result.success ? '#166534' : '#991b1b' }}>{result.message}</div>}
 
                 <button onClick={handleSend} disabled={sending} className="btn btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
                     {sending ? 'Sending...' : 'Send Notification'}
