@@ -629,7 +629,8 @@ textarea.form-input {
 /* DEBUG: Outer panel (bottom-sheet) debug border - BLUE */
 .bottom-sheet.debug-outer {
   border: 4px solid #3b82f6 !important;
-  background: rgba(59, 130, 246, 0.3) !important;
+  /* Darker: rgba(30, 41, 59, 0.9) is close to #1e293b but slightly transparent */
+  background: rgba(30, 41, 59, 0.9) !important;
 }
 
 
