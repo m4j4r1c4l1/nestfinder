@@ -251,6 +251,39 @@ router.get('/admin/notifications/batch/:batchId', requireAdmin, (req, res) => {
     }
 });
 
+// Clean up invalid logs (admin only)
+router.post('/admin/notifications/cleanup', requireAdmin, (req, res) => {
+    try {
+        // 1. Delete logs with null/empty target_id
+        const res1 = run(`DELETE FROM logs WHERE action = 'notification_sent' AND (target_id IS NULL OR target_id = '')`);
+
+        // 2. Delete orphaned logs (valid ID but no corresponding notification records)
+        // This handles cases where notifications were deleted but logs remain
+        const res2 = run(`
+            DELETE FROM logs 
+            WHERE action = 'notification_sent' 
+            AND target_id NOT IN (SELECT DISTINCT batch_id FROM notifications WHERE batch_id IS NOT NULL)
+        `);
+
+        log('admin', 'logs_cleanup', null, {
+            deletedInvalid: res1?.changes || 0,
+            deletedOrphaned: res2?.changes || 0
+        });
+
+        res.json({
+            success: true,
+            message: `Cleanup complete. Removed ${res1?.changes || 0} invalid and ${res2?.changes || 0} orphaned entries.`,
+            stats: {
+                invalid: res1?.changes || 0,
+                orphaned: res2?.changes || 0
+            }
+        });
+    } catch (error) {
+        console.error('Cleanup error:', error);
+        res.status(500).json({ error: 'Failed to cleanup logs' });
+    }
+});
+
 // Get notification history (logs)
 router.get('/admin/notifications/history', requireAdmin, (req, res) => {
     try {

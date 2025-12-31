@@ -385,7 +385,30 @@ const HistorySection = () => {
         <div className="card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>📜 Sent History</h3>
-                <button onClick={loadHistory} className="btn btn-sm btn-secondary">🔄 Refresh</button>
+                <div>
+                    <button
+                        onClick={async () => {
+                            if (!window.confirm('Are you sure you want to delete invalid log entries?')) return;
+                            try {
+                                const token = localStorage.getItem('nestfinder_admin_token');
+                                const res = await fetch(`${API_URL}/api/push/admin/notifications/cleanup`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    alert(data.message);
+                                    loadHistory();
+                                }
+                            } catch (err) { alert('Cleanup failed: ' + err.message); }
+                        }}
+                        className="btn btn-sm btn-danger"
+                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white' }}
+                    >
+                        🗑️ Cleanup
+                    </button>
+                    <button onClick={loadHistory} className="btn btn-sm btn-secondary">🔄 Refresh</button>
+                </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
