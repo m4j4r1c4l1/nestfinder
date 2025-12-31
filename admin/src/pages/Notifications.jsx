@@ -390,11 +390,11 @@ const HistorySection = () => {
             <div className="card-body" style={{ padding: 0 }}>
                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-                            <tr style={{ textAlign: 'left' }}>
-                                <th style={{ padding: '1rem', borderBottom: '3px solid #f59e0b', fontWeight: 600, background: '#fef3c7', color: '#92400e' }}>Timestamp (YELLOW)</th>
-                                <th style={{ padding: '1rem', borderBottom: '3px solid #3b82f6', fontWeight: 600, background: '#dbeafe', color: '#1e40af' }}>Message (BLUE)</th>
-                                <th style={{ padding: '1rem', borderBottom: '3px solid #10b981', fontWeight: 600, background: '#d1fae5', color: '#065f46' }}>Target (GREEN)</th>
+                        <thead style={{ position: 'sticky', top: 0, background: '#f1f5f9', zIndex: 1 }}>
+                            <tr style={{ textAlign: 'left', color: '#475569' }}>
+                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Timestamp</th>
+                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Message</th>
+                                <th style={{ padding: '1rem', borderBottom: '2px solid #e2e8f0', fontWeight: 600 }}>Target</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -420,19 +420,19 @@ const HistorySection = () => {
                                             e.currentTarget.style.borderLeft = 'none';
                                         }}
                                     >
-                                        <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem', color: '#64748b' }}>
-                                            {new Date(log.created_at).toLocaleString()}
+                                        <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem', background: '#fef3c7', borderLeft: '3px solid #f59e0b', color: '#92400e' }}>
+                                            {new Date(log.created_at).toLocaleString()} (YELLOW)
                                         </td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <div style={{ fontWeight: 600, color: '#1e293b' }}>{meta.title}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
+                                        <td style={{ padding: '1rem', background: '#dbeafe', borderLeft: '3px solid #3b82f6' }}>
+                                            <div style={{ fontWeight: 600, color: '#1e40af' }}>{meta.title} (BLUE)</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#3b82f6' }}>{meta.body ? meta.body.substring(0, 50) + '...' : meta.template}</div>
                                         </td>
-                                        <td style={{ padding: '1rem' }}>
+                                        <td style={{ padding: '1rem', background: '#d1fae5', borderLeft: '3px solid #10b981' }}>
                                             <span style={{
-                                                background: '#e0f2fe', color: '#0369a1',
+                                                background: '#065f46', color: 'white',
                                                 padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem'
                                             }}>
-                                                {meta.count} users
+                                                {meta.count} users (GREEN)
                                             </span>
                                         </td>
                                     </tr>
