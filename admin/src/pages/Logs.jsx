@@ -156,43 +156,45 @@ const Logs = () => {
                 </div>
             </div>
 
-            <div className="card" style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                        <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
-                            <th style={{ padding: '1rem' }}>Time</th>
-                            <th style={{ padding: '1rem' }}>Action</th>
-                            <th style={{ padding: '1rem' }}>User</th>
-                            <th style={{ padding: '1rem' }}>Details</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {logs.map(log => (
-                            <tr key={log.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--color-text-muted)' }}>
-                                    {new Date(log.created_at).toLocaleString()}
-                                </td>
-                                <td style={{ padding: '1rem' }}>
-                                    <span className="badge" style={{
-                                        padding: '0.25rem 0.5rem',
-                                        borderRadius: '4px',
-                                        fontWeight: 500,
-                                        fontSize: '0.85rem',
-                                        ...getActionStyle(log.action)
-                                    }}>
-                                        {log.action}
-                                    </span>
-                                </td>
-                                <td style={{ padding: '1rem' }}>
-                                    {log.user_nickname || <span className="text-muted">{log.user_id?.substring(0, 8)}...</span>}
-                                </td>
-                                <td style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                    {log.metadata ? JSON.stringify(log.metadata) : '-'}
-                                </td>
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ overflowX: 'auto', flex: 1, maxHeight: 'calc(100vh - 250px)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead style={{ position: 'sticky', top: 0, background: 'var(--color-bg-secondary)', zIndex: 1 }}>
+                            <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                                <th style={{ padding: '1rem' }}>Time</th>
+                                <th style={{ padding: '1rem' }}>Action</th>
+                                <th style={{ padding: '1rem' }}>User</th>
+                                <th style={{ padding: '1rem' }}>Details</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {logs.map(log => (
+                                <tr key={log.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                    <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--color-text-muted)' }}>
+                                        {new Date(log.created_at).toLocaleString()}
+                                    </td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <span className="badge" style={{
+                                            padding: '0.25rem 0.5rem',
+                                            borderRadius: '4px',
+                                            fontWeight: 500,
+                                            fontSize: '0.85rem',
+                                            ...getActionStyle(log.action)
+                                        }}>
+                                            {log.action}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '1rem' }}>
+                                        {log.user_nickname || <span className="text-muted">{log.user_id?.substring(0, 8)}...</span>}
+                                    </td>
+                                    <td style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                        {log.metadata ? JSON.stringify(log.metadata) : '-'}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div className="flex-center gap-4 mt-auto" style={{ padding: '1rem' }}>
