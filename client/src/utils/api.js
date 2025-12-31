@@ -3,12 +3,18 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 class ApiClient {
   constructor() {
     this.userId = localStorage.getItem('nestfinder_user_id');
+    this.userToken = localStorage.getItem('nestfinder_user_token');
     this.adminToken = localStorage.getItem('nestfinder_admin_token');
   }
 
   setUserId(id) {
     this.userId = id;
     localStorage.setItem('nestfinder_user_id', id);
+  }
+
+  setUserToken(token) {
+    this.userToken = token;
+    localStorage.setItem('nestfinder_user_token', token);
   }
 
   setAdminToken(token) {
@@ -18,8 +24,10 @@ class ApiClient {
 
   logout() {
     this.userId = null;
+    this.userToken = null;
     this.adminToken = null;
     localStorage.removeItem('nestfinder_user_id');
+    localStorage.removeItem('nestfinder_user_token');
     localStorage.removeItem('nestfinder_admin_token');
   }
 
@@ -29,11 +37,16 @@ class ApiClient {
       ...options.headers,
     };
 
-    if (this.userId) {
+    // Use user token for authentication (preferred)
+    if (this.userToken) {
+      headers['Authorization'] = `Bearer ${this.userToken}`;
+    } else if (this.userId) {
+      // Fallback to x-user-id if no token (backward compatibility)
       headers['x-user-id'] = this.userId;
     }
 
-    if (this.adminToken) {
+    // Admin token overrides for admin endpoints
+    if (this.adminToken && (endpoint.includes('/admin') || endpoint.includes('/push/admin'))) {
       headers['Authorization'] = `Bearer ${this.adminToken}`;
     }
 
@@ -74,11 +87,18 @@ class ApiClient {
   }
 
   // Auth
-  register(deviceId, nickname) {
-    return this.fetch('/auth/register', {
+  async register(deviceId, nickname) {
+    const data = await this.fetch('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ deviceId, nickname }),
     });
+
+    // Store the token if returned
+    if (data.token) {
+      this.setUserToken(data.token);
+    }
+
+    return data;
   }
 
   updateNickname(nickname) {
