@@ -157,8 +157,8 @@ const ComposeSection = ({ subscribers, onSent }) => {
     // Generate Custom QR Code with Emoji Center
     const generateQRCode = async () => {
         try {
-            // 1. Generate QR Data URL using QRious
-            const qr = new QRious({
+            // 1. Generate QR Data URL using window.QRious
+            const qr = new window.QRious({
                 value: APP_URL,
                 size: 500,
                 level: 'H',
