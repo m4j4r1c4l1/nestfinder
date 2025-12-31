@@ -93,13 +93,20 @@ router.get('/stats', (req, res) => {
             totalMemory: os.totalmem(),
             freeMemory: os.freemem(),
             loadAvg: os.loadavg(),
+            cpuUsage: process.cpuUsage(),
             uptime: process.uptime(),
             platform: `${os.type()} ${os.release()} (${os.arch()})`,
             distro: osDistro,
             hostname: os.hostname(),
             ips: networkIps,
             nodeVersion: process.version,
-            disk
+            disk,
+            // Render-specific info (null if not on Render)
+            render: process.env.RENDER ? {
+                service: process.env.RENDER_SERVICE_NAME || 'unknown',
+                instance: process.env.RENDER_INSTANCE_ID || 'unknown',
+                region: process.env.RENDER_REGION || 'unknown'
+            } : null
         }
     };
 

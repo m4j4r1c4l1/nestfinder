@@ -241,7 +241,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 1. Activity Metrics */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                        <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📈 Activity Metrics</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -254,7 +254,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 2. Status Summary */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
                                 <button
@@ -275,7 +275,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 3. Database Totals */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                        <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>💾 Database Totals</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -304,7 +304,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
 
                     {/* 4. System Status */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-header" style={{ padding: '0.35rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
+                        <div className="card-header" style={{ padding: '0.2rem 0.6rem', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>🖥️ System Status</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.75rem' }}>
@@ -379,6 +379,48 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                                                     height: '100%',
                                                     background: 'linear-gradient(90deg, #8b5cf6, #d946ef)'
                                                 }}></div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Heap Memory */}
+                                    <div style={{ marginTop: '0.2rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', marginBottom: '0.1rem' }}>
+                                            <span style={{ color: 'var(--color-text-secondary)' }}>Heap</span>
+                                            <span style={{ fontWeight: 500 }}>
+                                                {Math.round(stats.system.memoryUsage.heapUsed / 1024 / 1024)}MB /
+                                                {Math.round(stats.system.memoryUsage.heapTotal / 1024 / 1024)}MB
+                                            </span>
+                                        </div>
+                                        <div style={{ height: 4, background: 'var(--color-bg-tertiary)', borderRadius: 2, overflow: 'hidden', display: 'flex' }}>
+                                            <div style={{
+                                                width: `${(stats.system.memoryUsage.heapUsed / stats.system.memoryUsage.heapTotal) * 100}%`,
+                                                height: '100%',
+                                                background: 'linear-gradient(90deg, #f59e0b, #ef4444)'
+                                            }}></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Load Average */}
+                                    {stats.system.loadAvg && (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.15rem' }}>
+                                            <span style={{ color: 'var(--color-text-secondary)' }}>Load Avg</span>
+                                            <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>
+                                                {stats.system.loadAvg.map(l => l.toFixed(2)).join(' / ')}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Render Instance Info */}
+                                    {stats.system.render && (
+                                        <div style={{ marginTop: '0.15rem', padding: '0.2rem', background: 'var(--color-bg-tertiary)', borderRadius: 4, fontSize: '0.65rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <span style={{ color: 'var(--color-text-secondary)' }}>Render</span>
+                                                <span style={{ fontWeight: 500 }}>{stats.system.render.service}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <span style={{ color: 'var(--color-text-secondary)' }}>Region</span>
+                                                <span style={{ fontWeight: 500 }}>{stats.system.render.region}</span>
                                             </div>
                                         </div>
                                     )}
