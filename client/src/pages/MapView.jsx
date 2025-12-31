@@ -335,7 +335,7 @@ const MapView = () => {
             )}
 
             {/* Bottom Sheet Container */}
-            <div className={`bottom-sheet debug-outer ${activeSheet ? 'open' : ''}`}>
+            <div className={`bottom-sheet ${activeSheet ? 'open' : ''}`}>
                 <div className="bottom-sheet-handle" onClick={handleSheetClose} />
 
                 {activeSheet === 'notifications' && (
