@@ -143,6 +143,9 @@ const Notifications = () => {
             {/* Compose Section */}
             <ComposeSection subscribers={subscribers} totalSubscribers={stats.totalSubscribers} onSent={loadStats} />
 
+            {/* Metrics Chart Section */}
+            <MetricsChart />
+
             {/* History Section */}
             <HistorySection />
         </div>
@@ -345,29 +348,27 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                 <div className="form-group" style={{ marginTop: '1rem' }}>
                     <label className="form-label">Target</label>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
-                            <button
-                                onClick={() => setTarget('all')}
-                                className={`btn ${target === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-                                style={{ flex: 1 }}
-                            >
-                                All Users ({totalSubscribers || subscribers.length})
-                            </button>
-                            <button
-                                onClick={() => setTarget(target === 'selected' ? 'all' : 'selected')}
-                                className={`btn ${target === 'selected' ? 'btn-primary' : 'btn-secondary'}`}
-                                style={{ flex: 1 }}
-                            >
-                                {target === 'selected' ? 'Hide Users' : 'Select Users'}
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => setTarget('all')}
+                            className={`btn ${target === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ flex: 1 }}
+                        >
+                            All Users ({totalSubscribers || subscribers.length})
+                        </button>
+                        <button
+                            onClick={() => setTarget(target === 'selected' ? 'all' : 'selected')}
+                            className={`btn ${target === 'selected' ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ flex: 1 }}
+                        >
+                            {target === 'selected' ? 'Hide Users' : 'Select Users'}
+                        </button>
                         <button
                             onClick={onSent}
                             className="btn btn-secondary"
-                            style={{ padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                             title="Refresh User List"
                         >
-                            🔄
+                            🔄 Refresh
                         </button>
                     </div>
                     {target === 'selected' && (
@@ -390,6 +391,154 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                 <button onClick={handleSend} disabled={sending} className="btn btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
                     {sending ? 'Sending...' : 'Send Notification'}
                 </button>
+            </div>
+        </div>
+    );
+};
+
+// Grafana-style Metrics Chart Component
+const MetricsChart = () => {
+    const [metrics, setMetrics] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMetrics = async () => {
+            try {
+                const token = localStorage.getItem('nestfinder_admin_token');
+                const res = await fetch(`${API_URL}/api/admin/metrics/history?days=7`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setMetrics(data.metrics || []);
+                }
+            } catch (err) {
+                console.error('Failed to load metrics:', err);
+            }
+            setLoading(false);
+        };
+        fetchMetrics();
+    }, []);
+
+    if (loading || metrics.length === 0) {
+        return (
+            <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
+                <div className="card-header" style={{ background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
+                    <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>📈 Metrics Trend</h3>
+                </div>
+                <div className="card-body" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                    {loading ? 'Loading...' : 'No data available'}
+                </div>
+            </div>
+        );
+    }
+
+    // Chart configuration
+    const chartWidth = 800;
+    const chartHeight = 200;
+    const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+    const graphWidth = chartWidth - padding.left - padding.right;
+    const graphHeight = chartHeight - padding.top - padding.bottom;
+
+    // Define series with vivid colors
+    const series = [
+        { key: 'users', label: 'Users', color: '#3b82f6' },      // Blue
+        { key: 'notifications', label: 'Messages', color: '#8b5cf6' },  // Purple
+        { key: 'delivered', label: 'Delivered', color: '#22c55e' },    // Green
+        { key: 'read', label: 'Read', color: '#f59e0b' }          // Amber
+    ];
+
+    // Calculate scales
+    const allValues = series.flatMap(s => metrics.map(m => m[s.key] || 0));
+    const maxY = Math.max(...allValues, 1);
+    const minY = 0;
+    const yScale = (val) => graphHeight - ((val - minY) / (maxY - minY)) * graphHeight;
+    const xScale = (i) => (i / (metrics.length - 1)) * graphWidth;
+
+    // Generate grid lines
+    const gridLinesY = 5;
+    const gridStep = maxY / gridLinesY;
+
+    return (
+        <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
+            <div className="card-header" style={{ background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>📈 7-Day Metrics Trend</h3>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        {series.map(s => (
+                            <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+                                <div style={{ width: 12, height: 3, background: s.color, borderRadius: 2 }} />
+                                <span style={{ color: '#94a3b8' }}>{s.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto' }}>
+                <svg width="100%" viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ minWidth: 600 }}>
+                    <defs>
+                        {series.map(s => (
+                            <linearGradient key={s.key} id={`gradient-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={s.color} stopOpacity="0.3" />
+                                <stop offset="100%" stopColor={s.color} stopOpacity="0" />
+                            </linearGradient>
+                        ))}
+                    </defs>
+
+                    <g transform={`translate(${padding.left}, ${padding.top})`}>
+                        {/* Grid lines */}
+                        {Array.from({ length: gridLinesY + 1 }, (_, i) => {
+                            const y = (i / gridLinesY) * graphHeight;
+                            const val = Math.round(maxY - (i / gridLinesY) * maxY);
+                            return (
+                                <g key={i}>
+                                    <line x1={0} y1={y} x2={graphWidth} y2={y} stroke="#334155" strokeWidth="1" strokeDasharray="4,4" />
+                                    <text x={-8} y={y + 4} textAnchor="end" fill="#64748b" fontSize="10">{val}</text>
+                                </g>
+                            );
+                        })}
+
+                        {/* X-axis labels */}
+                        {metrics.map((m, i) => (
+                            <text key={i} x={xScale(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
+                                {new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </text>
+                        ))}
+
+                        {/* Lines and areas for each series */}
+                        {series.map(s => {
+                            const points = metrics.map((m, i) => `${xScale(i)},${yScale(m[s.key] || 0)}`).join(' ');
+                            const areaPoints = `0,${graphHeight} ${points} ${graphWidth},${graphHeight}`;
+                            return (
+                                <g key={s.key}>
+                                    {/* Area fill */}
+                                    <polygon points={areaPoints} fill={`url(#gradient-${s.key})`} />
+                                    {/* Line */}
+                                    <polyline
+                                        points={points}
+                                        fill="none"
+                                        stroke={s.color}
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                    {/* Data points */}
+                                    {metrics.map((m, i) => (
+                                        <circle
+                                            key={i}
+                                            cx={xScale(i)}
+                                            cy={yScale(m[s.key] || 0)}
+                                            r="4"
+                                            fill="#1e293b"
+                                            stroke={s.color}
+                                            strokeWidth="2"
+                                        />
+                                    ))}
+                                </g>
+                            );
+                        })}
+                    </g>
+                </svg>
             </div>
         </div>
     );
@@ -462,7 +611,8 @@ const HistorySection = () => {
                         </thead>
                         <tbody>
                             {logs.map(log => {
-                                const meta = JSON.parse(log.metadata || '{}');
+                                // metadata is already parsed by the API, no need to JSON.parse again
+                                const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
                                 // Use DateTimeCell logic here manually or reuse if refactored. 
                                 // Since DateTimeCell is inside Modal, let's duplicate the fix logic here or assume local fix.
                                 // NOTE: DateTimeCell is now inside DetailModal in my previous step, I should have moved it out.

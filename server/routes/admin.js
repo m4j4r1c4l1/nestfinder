@@ -122,6 +122,49 @@ router.get('/stats', (req, res) => {
     res.json({ stats });
 });
 
+// Get historical metrics for charting
+router.get('/metrics/history', (req, res) => {
+    const { days = 7 } = req.query;
+
+    // Get daily metrics for the past N days
+    const metrics = [];
+
+    for (let i = parseInt(days) - 1; i >= 0; i--) {
+        const dateOffset = `-${i} days`;
+        const dateLabel = i === 0 ? 'today' : dateOffset;
+
+        // Get date string for the day
+        const dateRow = get(`SELECT date('now', '${dateOffset}') as date_val`);
+        const dateStr = dateRow.date_val;
+
+        // Users created up to this date
+        const usersCount = get(`SELECT COUNT(*) as count FROM users WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
+
+        // Total notifications sent up to this date  
+        const notificationsCount = get(`SELECT COUNT(*) as count FROM notifications WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
+
+        // Delivered notifications up to this date
+        const deliveredCount = get(`SELECT COUNT(*) as count FROM notifications WHERE delivered = 1 AND date(created_at) <= date('now', '${dateOffset}')`).count;
+
+        // Read notifications up to this date
+        const readCount = get(`SELECT COUNT(*) as count FROM notifications WHERE read = 1 AND date(created_at) <= date('now', '${dateOffset}')`).count;
+
+        // Pending (sent but not delivered)
+        const pendingCount = notificationsCount - deliveredCount;
+
+        metrics.push({
+            date: dateStr,
+            users: usersCount,
+            notifications: notificationsCount,
+            delivered: deliveredCount,
+            read: readCount,
+            pending: pendingCount
+        });
+    }
+
+    res.json({ metrics });
+});
+
 // Get distinct log actions for filters
 router.get('/logs/actions', (req, res) => {
     // Select distinct actions for autocomplete
@@ -129,7 +172,7 @@ router.get('/logs/actions', (req, res) => {
     res.json({ actions: actions.map(a => a.action) });
 });
 
-// Get logs with pagination and filters
+// Get logs with pagination, filters, and sorting
 router.get('/logs', (req, res) => {
     const {
         page = 1,
@@ -137,10 +180,17 @@ router.get('/logs', (req, res) => {
         action,
         userId,
         startDate,
-        endDate
+        endDate,
+        sortBy = 'created_at',
+        sortDir = 'desc'
     } = req.query;
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    // Validate sort column to prevent SQL injection
+    const validSortColumns = ['created_at', 'action', 'user_nickname', 'user_id'];
+    const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'created_at';
+    const sortDirection = sortDir === 'asc' ? 'ASC' : 'DESC';
 
     let sql = `
     SELECT l.*, u.nickname as user_nickname
@@ -180,7 +230,9 @@ router.get('/logs', (req, res) => {
         countParams.push(endDate);
     }
 
-    sql += ` ORDER BY l.created_at DESC LIMIT ${parseInt(limit)} OFFSET ${offset}`;
+    // Apply sorting - handle user_nickname specially since it's from JOIN
+    const orderColumn = sortColumn === 'user_nickname' ? 'u.nickname' : `l.${sortColumn}`;
+    sql += ` ORDER BY ${orderColumn} ${sortDirection} LIMIT ${parseInt(limit)} OFFSET ${offset}`;
 
     const logs = all(sql, params);
     const total = get(countSql, countParams).count;

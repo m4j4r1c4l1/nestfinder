@@ -57,7 +57,7 @@ const Logs = () => {
     const fetchLogs = async () => {
         setLoading(true);
         try {
-            const data = await adminApi.getLogs({ ...filters, page });
+            const data = await adminApi.getLogs({ ...filters, page, sortBy: sortColumn, sortDir: sortDirection });
             setLogs(data.logs);
             setTotalPages(data.pagination.pages);
         } catch (err) {
@@ -85,7 +85,7 @@ const Logs = () => {
 
     useEffect(() => {
         fetchLogs();
-    }, [page, filters]);
+    }, [page, filters, sortColumn, sortDirection]);
 
     const handleExportCSV = async () => {
         setExporting(true);
@@ -159,7 +159,7 @@ const Logs = () => {
             </div>
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
-                <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1, maxHeight: 'calc(100vh - 180px)' }}>
+                <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1, maxHeight: 'calc(100vh - 140px)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
@@ -185,20 +185,8 @@ const Logs = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {[...logs].sort((a, b) => {
-                                let aVal = a[sortColumn] || '';
-                                let bVal = b[sortColumn] || '';
-                                if (sortColumn === 'created_at') {
-                                    aVal = new Date(aVal).getTime();
-                                    bVal = new Date(bVal).getTime();
-                                } else {
-                                    aVal = String(aVal).toLowerCase();
-                                    bVal = String(bVal).toLowerCase();
-                                }
-                                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-                                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-                                return 0;
-                            }).map(log => {
+                            {/* Server-side sorting - logs already sorted */}
+                            {logs.map(log => {
                                 // Timezone fix for display
                                 let safeIso = log.created_at;
                                 if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
