@@ -16,7 +16,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            qrcode: path.resolve(__dirname, 'node_modules/qrcode')
+            qrcode: path.resolve(__dirname, 'node_modules/qrcode/lib/browser.js')
         }
     }
 });
