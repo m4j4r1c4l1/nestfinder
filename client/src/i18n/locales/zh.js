@@ -143,7 +143,11 @@ export default {
     settings: {
         notifications: '通知',
         popupMessages: '实时弹窗',
-        popupDescription: '收到消息时立即显示'
+        popupDescription: '收到消息时立即显示',
+        shareApp: '分享应用',
+        scanToShare: '扫码打开 NestFinder',
+        copyLink: '复制链接',
+        linkCopied: '链接已复制!'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

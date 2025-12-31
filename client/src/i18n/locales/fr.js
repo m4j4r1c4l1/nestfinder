@@ -143,7 +143,11 @@ export default {
     settings: {
         notifications: 'Notifications',
         popupMessages: 'Popups en temps réel',
-        popupDescription: 'Afficher les messages dès leur arrivée'
+        popupDescription: 'Afficher les messages dès leur arrivée',
+        shareApp: "Partager l'App",
+        scanToShare: 'Scanner pour ouvrir NestFinder',
+        copyLink: 'Copier le Lien',
+        linkCopied: 'Lien copié!'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

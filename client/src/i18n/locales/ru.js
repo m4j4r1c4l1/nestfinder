@@ -143,7 +143,11 @@ export default {
     settings: {
         notifications: 'Уведомления',
         popupMessages: 'Всплывающие сообщения',
-        popupDescription: 'Показывать сообщения сразу'
+        popupDescription: 'Показывать сообщения сразу',
+        shareApp: 'Поделиться',
+        scanToShare: 'Сканируйте для NestFinder',
+        copyLink: 'Копировать ссылку',
+        linkCopied: 'Ссылка скопирована!'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

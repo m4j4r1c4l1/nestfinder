@@ -40,6 +40,69 @@ const SettingsPanel = ({ onClose }) => {
                 </button>
             </div>
             <div className="card-body">
+                {/* Share App - First section */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">{t('settings.shareApp')}</label>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        padding: 'var(--space-4)',
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--color-border)',
+                        gap: 'var(--space-3)'
+                    }}>
+                        <div style={{
+                            padding: '0.75rem',
+                            background: 'white',
+                            borderRadius: 'var(--radius-md)',
+                            position: 'relative'
+                        }}>
+                            <QRCodeSVG
+                                value={APP_URL}
+                                size={150}
+                                level="M"
+                                includeMargin={false}
+                            />
+                            {/* Nest emoji overlay in center */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                background: 'white',
+                                borderRadius: '50%',
+                                padding: '4px',
+                                fontSize: '1.5rem',
+                                lineHeight: 1
+                            }}>
+                                🪹
+                            </div>
+                        </div>
+                        <div style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--color-text-secondary)',
+                            textAlign: 'center'
+                        }}>
+                            {t('settings.scanToShare')}
+                        </div>
+                        <button
+                            onClick={handleCopyLink}
+                            className="btn btn-secondary"
+                            style={{
+                                fontSize: '0.8rem',
+                                padding: '0.5rem 1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem'
+                            }}
+                        >
+                            📋 {t('settings.copyLink')}
+                        </button>
+                    </div>
+                </div>
+
                 {/* Notification Settings */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.notifications')}</label>
@@ -88,7 +151,7 @@ const SettingsPanel = ({ onClose }) => {
                 </div>
 
                 {/* Language Selection */}
-                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                <div className="form-group">
                     <label className="form-label">{t('profile.language')}</label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                         {availableLanguages.map(lang => (
@@ -126,54 +189,6 @@ const SettingsPanel = ({ onClose }) => {
                                 )}
                             </button>
                         ))}
-                    </div>
-                </div>
-
-                {/* Share App */}
-                <div className="form-group">
-                    <label className="form-label">{t('settings.shareApp') || 'Share App'}</label>
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        padding: 'var(--space-4)',
-                        background: 'var(--color-bg-secondary)',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--color-border)',
-                        gap: 'var(--space-3)'
-                    }}>
-                        <div style={{
-                            padding: '0.75rem',
-                            background: 'white',
-                            borderRadius: 'var(--radius-md)'
-                        }}>
-                            <QRCodeSVG
-                                value={APP_URL}
-                                size={120}
-                                level="M"
-                                includeMargin={false}
-                            />
-                        </div>
-                        <div style={{
-                            fontSize: '0.75rem',
-                            color: 'var(--color-text-secondary)',
-                            textAlign: 'center'
-                        }}>
-                            {t('settings.scanToShare') || 'Scan to open NestFinder'}
-                        </div>
-                        <button
-                            onClick={handleCopyLink}
-                            className="btn btn-secondary"
-                            style={{
-                                fontSize: '0.8rem',
-                                padding: '0.5rem 1rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.4rem'
-                            }}
-                        >
-                            📋 {t('settings.copyLink') || 'Copy Link'}
-                        </button>
                     </div>
                 </div>
             </div>
