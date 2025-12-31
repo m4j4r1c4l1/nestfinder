@@ -178,7 +178,7 @@ export default {
         notifications: 'Notificaciones',
         popupMessages: 'Popups en Tiempo Real',
         popupDescription: 'Mostrar mensajes inmediatamente al recibirlos',
-        shareApp: 'Compartir App',
+        shareApp: 'Compartir NestFinder',
         scanToShare: 'Escanea para abrir NestFinder',
         copyLink: 'Copiar Enlace',
         shareLink: 'Compartir Enlace',

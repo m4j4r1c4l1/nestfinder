@@ -24,7 +24,10 @@ const SettingsPanel = ({ onClose }) => {
         localStorage.setItem(NOTIFICATION_PREF_KEY, JSON.stringify({ realTime: newValue }));
     };
 
+    const [showCopied, setShowCopied] = useState(false);
+
     const handleShare = async () => {
+        let shared = false;
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -32,14 +35,22 @@ const SettingsPanel = ({ onClose }) => {
                     text: t('welcome.subtitle'),
                     url: APP_URL
                 });
+                shared = true;
             } catch (err) {
-                if (err.name !== 'AbortError') {
-                    console.error('Error sharing:', err);
-                    navigator.clipboard.writeText(APP_URL);
-                }
+                // If user aborted share dialog, don't fall back to copy
+                if (err.name === 'AbortError') return;
+                console.error('Error sharing:', err);
             }
-        } else {
-            navigator.clipboard.writeText(APP_URL);
+        }
+
+        if (!shared) {
+            try {
+                await navigator.clipboard.writeText(APP_URL);
+                setShowCopied(true);
+                setTimeout(() => setShowCopied(false), 2000);
+            } catch (clipboardErr) {
+                console.error('Clipboard failed:', clipboardErr);
+            }
         }
     };
 
@@ -77,7 +88,7 @@ const SettingsPanel = ({ onClose }) => {
                             <QRCodeSVG
                                 value={APP_URL}
                                 size={150}
-                                level="M"
+                                level="H"
                                 includeMargin={false}
                             />
                             {/* Nest emoji overlay in center */}
@@ -89,7 +100,7 @@ const SettingsPanel = ({ onClose }) => {
                                 background: 'white',
                                 borderRadius: '50%',
                                 padding: '5px',
-                                fontSize: '2.5rem',
+                                fontSize: '2rem',
                                 lineHeight: 1,
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                             }}>
@@ -101,7 +112,9 @@ const SettingsPanel = ({ onClose }) => {
                             color: 'var(--color-text-secondary)',
                             textAlign: 'center'
                         }}>
-                            {t('settings.scanToShare')}
+                            {t('settings.scanToShare').split('NestFinder')[0]}
+                            <strong>NestFinder</strong>
+                            {t('settings.scanToShare').split('NestFinder')[1] || ''}
                         </div>
                         <button
                             onClick={handleShare}
@@ -112,12 +125,13 @@ const SettingsPanel = ({ onClose }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                background: 'var(--color-primary)',
+                                background: showCopied ? 'var(--color-success)' : 'var(--color-primary)',
                                 color: 'white',
-                                border: 'none'
+                                border: 'none',
+                                transition: 'background 0.3s'
                             }}
                         >
-                            🔗 {t('settings.shareLink') || 'Share Link'}
+                            {showCopied ? '✓ ' + t('settings.linkCopied') : '🔗 ' + (t('settings.shareLink') || 'Share Link')}
                         </button>
                     </div>
                 </div>
