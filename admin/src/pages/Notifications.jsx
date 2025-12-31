@@ -91,7 +91,7 @@ const Notifications = () => {
     };
 
     return (
-        <div className="notifications-page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
+        <div className="notifications-page" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 1rem' }}>
             <div className="page-header" style={{ marginBottom: '1rem' }}>
                 <h1>🔔 In-App Notifications</h1>
                 <p className="text-muted">Manage and track app notifications</p>
