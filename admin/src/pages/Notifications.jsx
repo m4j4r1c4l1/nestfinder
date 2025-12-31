@@ -351,7 +351,7 @@ const ComposeSection = ({ subscribers, onSent }) => {
                                 className={`btn ${target === 'all' ? 'btn-primary' : 'btn-secondary'}`}
                                 style={{ flex: 1 }}
                             >
-                                All Users ({stats.totalSubscribers})
+                                All Users ({subscribers.length})
                             </button>
                             <button
                                 onClick={() => setTarget('selected')}
@@ -362,7 +362,7 @@ const ComposeSection = ({ subscribers, onSent }) => {
                             </button>
                         </div>
                         <button
-                            onClick={loadStats}
+                            onClick={onSent}
                             className="btn btn-secondary"
                             style={{ padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             title="Refresh User List"
