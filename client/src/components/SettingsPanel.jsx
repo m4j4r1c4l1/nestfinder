@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const NOTIFICATION_PREF_KEY = 'nestfinder_notify_settings';
 const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder';
@@ -51,9 +52,49 @@ const SettingsPanel = ({ onClose }) => {
                 </button>
             </div>
             <div className="card-body">
-                {/* Share App - Simple Copy Link */}
+                {/* Share App with QR Code */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.shareApp')}</label>
+
+                    {/* QR Code Display */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        padding: 'var(--space-4)',
+                        background: 'white',
+                        borderRadius: 'var(--radius-md)',
+                        marginBottom: 'var(--space-3)'
+                    }}>
+                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                            <QRCodeCanvas
+                                value={APP_URL}
+                                size={160}
+                                level="H"
+                                bgColor="white"
+                                fgColor="#1e293b"
+                                style={{ display: 'block' }}
+                            />
+                            {/* Center Emoji Overlay */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                background: 'white',
+                                borderRadius: '50%',
+                                width: '40px',
+                                height: '40px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '24px'
+                            }}>
+                                🪹
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Copy Link Button */}
                     <div
                         role="button"
                         className="btn btn-secondary"
