@@ -43,11 +43,11 @@ const SettingsPanel = ({ onClose }) => {
     // Animation constants
     const ITEM_HEIGHT = 68; // 15% reduction from 80px
     const VISIBLE_ITEMS = 3; // Show exactly 3 items
-    const SPIN_ITEMS = 8; // Roll past 8 items for more dramatic effect
+    const SPIN_ITEMS = 4; // Roll past 4 items (reduced for stability)
     const PADDING = 12; // Top/bottom padding
     const CONTAINER_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT + PADDING * 2;
 
-    // Virtual position tracks which item is CENTERED (0 = first item centered)
+    // Virtual position tracks which item is CENTERED (can be fractional during animation)
     const [virtualPosition, setVirtualPosition] = useState(() => {
         const idx = availableLanguages.findIndex(l => l.code === language);
         return idx >= 0 ? idx : 0;
@@ -58,18 +58,22 @@ const SettingsPanel = ({ onClose }) => {
     const itemCount = availableLanguages.length;
 
     // Calculate Y position for each item (centered layout with padding)
-    // virtualPosition = index of item that should be in CENTER
+    // virtualPosition = index of item that should be in CENTER (can be fractional)
     const getItemY = (index) => {
         if (itemCount === 0) return 0;
 
+        // Normalize virtualPosition to valid range [0, itemCount)
+        let normalizedVPos = virtualPosition % itemCount;
+        if (normalizedVPos < 0) normalizedVPos += itemCount;
+
         // Offset from center: how many positions away from current center
-        let offset = index - virtualPosition;
+        let offset = index - normalizedVPos;
 
-        // Wrap around for infinite barrel effect
-        while (offset < -itemCount / 2) offset += itemCount;
-        while (offset > itemCount / 2) offset -= itemCount;
+        // Wrap around for infinite barrel effect - find shortest distance
+        if (offset > itemCount / 2) offset -= itemCount;
+        if (offset < -itemCount / 2) offset += itemCount;
 
-        // Convert to pixels (0 = center of container, accounting for padding)
+        // Convert to pixels (center position accounting for padding)
         const centerY = PADDING + (VISIBLE_ITEMS * ITEM_HEIGHT - ITEM_HEIGHT) / 2;
         return centerY + (offset * ITEM_HEIGHT);
     };
@@ -157,6 +161,7 @@ const SettingsPanel = ({ onClose }) => {
     const handleWheel = (e) => {
         if (isAnimating) return;
         e.preventDefault();
+        e.stopPropagation(); // Prevent parent scroll from interfering
 
         // Calculate scroll direction and animate to next/prev item
         const direction = e.deltaY > 0 ? 1 : -1;
