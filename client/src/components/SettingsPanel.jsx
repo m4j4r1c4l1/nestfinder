@@ -38,52 +38,47 @@ const SettingsPanel = ({ onClose }) => {
     };
 
     const carouselRef = React.useRef(null);
+    // Triple the list for "infinite" illusion
+    const displayLanguages = [...availableLanguages, ...availableLanguages, ...availableLanguages];
 
     // Slot Machine Spin Animation on Mount
     useEffect(() => {
         if (!carouselRef.current) return;
 
         const container = carouselRef.current;
-        const totalItems = availableLanguages.length;
+        const realCount = availableLanguages.length;
         const selectedIndex = availableLanguages.findIndex(l => l.code === language);
+
         if (selectedIndex === -1) return;
 
-        // Estimate item height including gap (approx 80px + 0.5rem gap)
-        const scrollHeight = container.scrollHeight;
-        const itemHeight = scrollHeight / totalItems;
-        const targetScroll = selectedIndex * itemHeight;
+        // Target the middle set for stability
+        const targetIndex = selectedIndex + realCount;
 
-        // Animation Helpers
-        const durationSpin = 600; // Fast spin down
-        const durationLand = 1500; // Slow landing
+        // Animation Config
+        const itemHeight = 68; // 68px (approx 15% reduction from 80) + gap handling
+        // Start "virtually" 4 items above
+        const startScroll = (targetIndex - 4) * itemHeight;
+        const targetScroll = targetIndex * itemHeight;
+
+        // Immediately snap to start position to prevent "jump"
+        container.scrollTop = startScroll;
+
+        const duration = 900; // Under 1s
         const startTime = performance.now();
-
-        // Easing: easeOutCubic (1 - pow(1 - x, 3))
         const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
-        const linear = (x) => x;
 
         const animate = (time) => {
             const elapsed = time - startTime;
-
-            // Phase 1: Spin to bottom
-            if (elapsed < durationSpin) {
-                const progress = linear(elapsed / durationSpin);
-                container.scrollTop = progress * (scrollHeight - container.clientHeight);
-                requestAnimationFrame(animate);
-            }
-            // Phase 2: Land on target (Reset to 0, then scroll to target)
-            else if (elapsed < (durationSpin + durationLand)) {
-                // If just started phase 2, we "looped" visually (jump to top)
-                const landElapsed = elapsed - durationSpin;
-                const progress = easeOutCubic(landElapsed / durationLand);
-
-                // We simulate wrapping by resetting logic, but here we just scroll from 0 to target
-                container.scrollTop = progress * targetScroll;
-                requestAnimationFrame(animate);
-            } else {
-                // Final ensure
+            if (elapsed >= duration) {
                 container.scrollTop = targetScroll;
+                return;
             }
+
+            const progress = easeOutCubic(elapsed / duration);
+            const currentPos = startScroll + ((targetScroll - startScroll) * progress);
+
+            container.scrollTop = currentPos;
+            requestAnimationFrame(animate);
         };
 
         requestAnimationFrame(animate);
@@ -250,7 +245,7 @@ const SettingsPanel = ({ onClose }) => {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: 'var(--space-2)',
-                            maxHeight: '250px',
+                            maxHeight: '220px', // Reduced slightly to match tighter items
                             overflowY: 'auto',
                             scrollSnapType: 'y mandatory',
                             paddingRight: '0.5rem',
@@ -263,10 +258,10 @@ const SettingsPanel = ({ onClose }) => {
                             position: 'relative'
                         }}
                     >
-                        {availableLanguages.map(lang => (
+                        {displayLanguages.map((lang, index) => (
                             <button
                                 type="button"
-                                key={lang.code}
+                                key={`${lang.code}-${index}`} // Unique key for duplicates
                                 onClick={() => setLanguage(lang.code)}
                                 style={{
                                     display: 'flex',
@@ -285,7 +280,8 @@ const SettingsPanel = ({ onClose }) => {
                                     color: 'var(--color-text)',
                                     flexShrink: 0,
                                     scrollSnapAlign: 'start',
-                                    minHeight: '80px'
+                                    minHeight: '68px', // Reduced height as requested
+                                    height: '68px'     // Enforce rigid height for animation precision
                                 }}
                             >
                                 <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
