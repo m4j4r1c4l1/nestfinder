@@ -1,13 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { adminApi } from '../api';
 import AdminMap from '../components/AdminMap';
 
-const Dashboard = ({ onNavigate, showBackup }) => {
+const Dashboard = ({ onNavigate }) => {
     const [stats, setStats] = useState(null);
     const [points, setPoints] = useState([]);
-    const [filteredPoints, setFilteredPoints] = useState(null); // null = show all, array = filtered
+    const [filteredPoints, setFilteredPoints] = useState(null);
     const [loading, setLoading] = useState(true);
     const [modalData, setModalData] = useState(null);
+    const [showBackup, setShowBackup] = useState(false);
+    const clickCountRef = useRef(0);
+    const clickTimeoutRef = useRef(null);
+
+    // Triple-click handler for DB Size row
+    const handleDBSizeClick = () => {
+        clickCountRef.current += 1;
+
+        if (clickCountRef.current === 3) {
+            setShowBackup(prev => !prev);
+            clickCountRef.current = 0;
+        }
+
+        // Reset if too slow (1 second pause resets)
+        if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = setTimeout(() => {
+            clickCountRef.current = 0;
+        }, 1000);
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -283,7 +302,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                             <MetricRow label="Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
                             <MetricRow label="Unread" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
                             <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
-                            <MetricRow label="DB Size" value={stats.dbSizeBytes ? (stats.dbSizeBytes >= 1048576 ? (stats.dbSizeBytes / 1048576).toFixed(2) + ' MB' : (stats.dbSizeBytes / 1024).toFixed(1) + ' KB') : '-'} color="#94a3b8" />
+                            <MetricRow label="DB Size" value={stats.dbSizeBytes ? (stats.dbSizeBytes >= 1048576 ? (stats.dbSizeBytes / 1048576).toFixed(2) + ' MB' : (stats.dbSizeBytes / 1024).toFixed(1) + ' KB') : '-'} onClick={handleDBSizeClick} color="#94a3b8" />
 
                             {showBackup && (
                                 <button
