@@ -355,10 +355,11 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                         <button
                             onClick={() => setShowEmojiPicker(true)}
                             type="button"
+                            className="btn btn-secondary"
                             style={{
-                                background: 'white', border: '1px solid #cbd5e1', borderRadius: '50%', width: '2rem', height: '2rem',
+                                border: '1px solid #cbd5e1', borderRadius: '50%', width: '2rem', height: '2rem',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1.2rem',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s', padding: 0
                             }}
                             title="Insert Emoji"
                         >
@@ -945,6 +946,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
                         boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>🔔</span>
                             <span style={{ fontWeight: 'bold', color: '#f1f5f9', fontSize: '1rem' }}>{message.title}</span>
                             <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
                                 {message.timestamp ? message.timestamp.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Just now'}
