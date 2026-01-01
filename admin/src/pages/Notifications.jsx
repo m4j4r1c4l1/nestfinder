@@ -858,14 +858,14 @@ const MessagePreviewModal = ({ message, onClose }) => {
                                 {message.timestamp ? message.timestamp.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Just now'}
                             </span>
                         </div>
+                        {message.image && (
+                            <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', overflow: 'hidden' }}>
+                                <img src={message.image} alt="Notification attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                            </div>
+                        )}
                         <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5 }}>
                             {message.body}
                         </div>
-                        {message.image && (
-                           <div style={{ marginTop: '0.5rem', borderRadius: '4px', overflow: 'hidden' }}>
-                               <img src={message.image} alt="Notification attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                           </div> 
-                        )}
                     </div>
                     <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#64748b' }}>
                         Preview of how the user sees this message
