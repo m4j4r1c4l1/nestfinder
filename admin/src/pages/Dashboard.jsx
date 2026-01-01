@@ -292,9 +292,8 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* 3. Database Metrics - 5 rows (+1/6th for button?) */}
-                    {/* When showBackup is true, this needs more relative space. Normal: 5 rows. Backup: 6 rows (effectively). */}
-                    <div className="card" style={{ flex: showBackup ? 6 : 5, display: 'flex', flexDirection: 'column', transition: 'flex 0.3s ease' }}>
+                    {/* 3. Database Metrics - 5 rows + space for button. Base flex 6 to be safe. */}
+                    <div className="card" style={{ flex: showBackup ? 7 : 6, display: 'flex', flexDirection: 'column', transition: 'flex 0.3s ease' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Metrics</span>
                         </div>
@@ -323,14 +322,8 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* 4. System Status - 4 effective rows unit height? (OS/Host + IPs + Node + Uptime + Memory) -> 5? */}
-                    {/* Looking at code: OS(1), Host(1), IPs(1-n), Node(1), Uptime(1), Memory(2). Total ~7? */}
-                    {/* Wait, flex: 1.3 previously. Let's assume 4 units for now based on visual similarity or recalculate. */}
-                    {/* Previous step showed OS, Host, IPs, Node, Uptime, Memory. */}
-                    {/* Actually, let's stick to 4 for parity with Activity, or maybe 5. */}
-                    {/* User said "4 boxes of Activity... 9 boxes...". Implicitly relying on metric rows being standard unit. */}
-                    {/* System status has smaller font rows. Let's try 4.5. */}
-                    <div className="card" style={{ flex: 4.5, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {/* 4. System Status - Many lines (OS, Host, IPs, Node, Uptime, Memory x2, Load). Needs significant space. */}
+                    <div className="card" style={{ flex: 8, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🖥️ System Status</span>
                         </div>
