@@ -134,6 +134,8 @@ const SettingsPanel = ({ onClose }) => {
                     </div>
                 </div>
 
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+
                 {/* Notification Settings */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.notifications')}</label>
@@ -180,6 +182,8 @@ const SettingsPanel = ({ onClose }) => {
                         </div>
                     </div>
                 </div>
+
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
 
                 {/* Language Selection */}
                 <div className="form-group">
