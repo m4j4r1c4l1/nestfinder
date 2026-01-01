@@ -187,7 +187,15 @@ const SettingsPanel = ({ onClose }) => {
                 {/* Language Selection */}
                 <div className="form-group">
                     <label className="form-label">{t('profile.language')}</label>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 'var(--space-2)',
+                        maxHeight: '250px',
+                        overflowY: 'auto',
+                        paddingRight: '0.5rem',
+                        marginRight: '-0.25rem' // Offset padding
+                    }}>
                         {availableLanguages.map(lang => (
                             <button
                                 type="button"
