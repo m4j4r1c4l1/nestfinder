@@ -280,3 +280,5 @@ const App = () => {
 };
 
 export default App;
+
+// Admin dashboard entry point updated for 2026 structure
