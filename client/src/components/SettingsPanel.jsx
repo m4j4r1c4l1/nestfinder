@@ -187,14 +187,23 @@ const SettingsPanel = ({ onClose }) => {
                 {/* Language Selection */}
                 <div className="form-group">
                     <label className="form-label">{t('profile.language')}</label>
+                    {/* Carousel Guidance */}
+                    <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+                        ↕️ Scroll to view all languages
+                    </div>
+
                     <div style={{
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 'var(--space-2)',
                         maxHeight: '250px',
                         overflowY: 'auto',
+                        scrollSnapType: 'y mandatory',
                         paddingRight: '0.5rem',
-                        marginRight: '-0.25rem' // Offset padding
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: 'var(--space-2)',
+                        background: 'rgba(0,0,0,0.02)'
                     }}>
                         {availableLanguages.map(lang => (
                             <button
@@ -215,7 +224,9 @@ const SettingsPanel = ({ onClose }) => {
                                     borderRadius: 'var(--radius-md)',
                                     cursor: 'pointer',
                                     transition: 'all var(--transition-fast)',
-                                    color: 'var(--color-text)'
+                                    color: 'var(--color-text)',
+                                    flexShrink: 0,
+                                    scrollSnapAlign: 'start'
                                 }}
                             >
                                 <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
