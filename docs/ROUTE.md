@@ -46,7 +46,6 @@ Routes are calculated using [OSRM](https://router.project-osrm.org/) (Open Sourc
 - Walking mode directions
 - Real street paths (not straight lines)
 - Free, no API key required
-- 
 
 ### Map Bounds Tracking
 ```javascript

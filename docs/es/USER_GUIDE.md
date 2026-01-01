@@ -156,7 +156,7 @@ La pantalla principal es el mapa.
 #### Flujo de Estados de Puntos
 Los puntos pasan por diferentes estados según las acciones de la comunidad:
 
-<p align="center"><img src="../images/point_status_flow.png" width="400" alt="Diagrama de Flujo de Estados" /></p>
+<p align="center"><img src="../../images/point_status_flow_es.png" width="400" alt="Diagrama de Flujo de Estados" /></p>
 
 ### Planificar una Ruta
 Encuentra el mejor camino a pie para visitar múltiples lugares.
