@@ -349,9 +349,29 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                 </div>
 
                 <div className="form-group" style={{ marginTop: '1rem' }}>
-                    <label className="form-label">Message</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <label className="form-label" style={{ marginBottom: 0 }}>Message</label>
+                        <button
+                            onClick={() => setShowEmojiPicker(true)}
+                            type="button"
+                            style={{
+                                background: 'white', border: '1px solid #ddd', borderRadius: '50%', width: '2rem', height: '2rem',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1.2rem',
+                                transition: 'all 0.2s'
+                            }}
+                            title="Insert Emoji"
+                        >
+                            😊
+                        </button>
+                    </div>
                     <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={3} />
                 </div>
+                {showEmojiPicker && (
+                    <EmojiPickerModal
+                        onSelect={(emoji) => { setBody(prev => prev + emoji); setShowEmojiPicker(false); }}
+                        onClose={() => setShowEmojiPicker(false)}
+                    />
+                )}
 
                 <div className="form-group" style={{ marginTop: '1rem' }}>
                     <label className="form-label">Target</label>
@@ -401,6 +421,65 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                 </button>
             </div>
         </div>
+    );
+};
+
+const EmojiPickerModal = ({ onSelect, onClose }) => {
+    const emojis = [
+        '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘',
+        '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒',
+        '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡',
+        '👋', '🤚', '🖐', '✋', '🖖', '👌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇',
+        '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪',
+        '🏠', '🏡', '🏘️', '🏚️', '🏗️', '🧱', '🪵', '🛖', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨',
+        '🪹', '🪺', '🐦', '🐣', '🐤', '🐥', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🪱', '🐛',
+        '💐', '🌸', '💮', '🏵️', '🌹', '🥀', '🌺', '🌻', '🌼', '🌷', '🌱', '🪴', '🌲', '🌳', '🌴', '🌵',
+        '🔥', '💧', '✨', '🌟', '💫', '⭐', '☀️', '⛅', '☁️', '⚡', '❄️', '☃️', '⛄', '🌬️', '💨', '🌪️',
+        '❤️', '🧡', '💛', '💚', '💙', '💜', '🤎', '🖤', '🤍', '💔', '❣️', '💕', '💞', '💓', '💗', '💖',
+        '🎉', '🎊', '🎈', '🎂', '🎁', '🕯️', '🧶', '🧵', '🪢', '🐾', '💾', '📥', '🚶', '🏃', '🧍', '🧎'
+    ];
+
+    return ReactDOM.createPortal(
+        <div
+            style={{
+                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
+            }}
+            onClick={onClose}
+        >
+            <div
+                style={{
+                    background: 'white', borderRadius: '12px', padding: '1rem', width: '320px', maxHeight: '80vh',
+                    display: 'flex', flexDirection: 'column',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                    animation: 'popIn 0.2s ease'
+                }}
+                onClick={e => e.stopPropagation()}
+            >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem' }}>Pick an Emoji</h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#666' }}>&times;</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '0.5rem', overflowY: 'auto', padding: '0.2rem' }}>
+                    {emojis.map(emoji => (
+                        <button
+                            key={emoji}
+                            onClick={() => onSelect(emoji)}
+                            style={{
+                                background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '4px',
+                                borderRadius: '4px', transition: 'background 0.2s'
+                            }}
+                            onMouseOver={e => e.target.style.background = '#f1f5f9'}
+                            onMouseOut={e => e.target.style.background = 'transparent'}
+                        >
+                            {emoji}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>,
+        document.body
     );
 };
 
