@@ -69,12 +69,14 @@ const MapView = () => {
                 setToast({
                     message: 'Location blocked. Clear browser data and try again.',
                     type: 'error',
+                    icon: '🤌',
                     duration: 6000
                 });
             } else {
                 setToast({
                     message: geoError.message || 'Location request failed',
-                    type: 'error'
+                    type: 'error',
+                    icon: '🙈'
                 });
             }
         }
@@ -88,8 +90,14 @@ const MapView = () => {
         }
     }, [toast]);
 
-    const showToast = (message, type = 'success') => {
-        setToast({ message, type });
+    const showToast = (message, type = 'success', overrideIcon = null) => {
+        // Default icons based on type
+        let icon = overrideIcon;
+        if (!icon) {
+            if (type === 'success') icon = '✔';
+            if (type === 'error') icon = '🙈';
+        }
+        setToast({ message, type, icon });
     };
 
     const handlePointClick = (point) => {
@@ -101,7 +109,7 @@ const MapView = () => {
         // When user clicks map, open submit panel with that location
         setClickedLocation(coords);
         setActiveSheet('submit');
-        showToast(t('submit.selectOnMap'), 'success');
+        showToast(t('submit.selectOnMap'), 'success'); // Uses default ✔
     };
 
     const handleSheetClose = () => {
@@ -112,7 +120,7 @@ const MapView = () => {
     const handleSubmit = async (data) => {
         await submitPoint(data);
         setActiveSheet(null);
-        showToast(t('submit.success'), 'success');
+        showToast(t('submit.success'), 'success'); // Uses default ✔
     };
 
     const handleConfirm = async (pointId) => {
@@ -121,7 +129,7 @@ const MapView = () => {
             setActiveSheet(null);
             showToast(t('point.confirmedMessage'), 'success');
         } catch (err) {
-            showToast(err.message || t('common.error'), 'error');
+            showToast(err.message || t('common.error'), 'error'); // Uses default 🙈
         }
     };
 
@@ -149,7 +157,7 @@ const MapView = () => {
         setRoutePath(routeData);
         setActiveSheet(null);
         if (routeData.distance && routeData.time) {
-            showToast(`Route: ${routeData.distance}km, ~${routeData.time} min walking`, 'success');
+            showToast(`Route: ${routeData.distance}km, ~${routeData.time} min walking`, 'success', '🚶');
         }
     };
 
@@ -185,12 +193,14 @@ const MapView = () => {
                     fontWeight: 500,
                     boxShadow: 'var(--shadow-lg)',
                     display: 'flex',
+                    flexDirection: 'row',
                     alignItems: 'center',
-                    gap: '1rem'
+                    gap: '0.75rem',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '90%'
                 }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#3B82F6" style={{ display: 'block', marginBottom: '2px' }}>
-                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-                    </svg><span>{toast.message}</span>
+                    <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{toast.icon}</span>
+                    <span>{toast.message}</span>
                     {toast.action && (
                         <button
                             onClick={toast.action.onClick}
@@ -202,7 +212,8 @@ const MapView = () => {
                                 padding: '4px 8px',
                                 fontSize: '0.8rem',
                                 fontWeight: 'bold',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                marginLeft: '0.5rem'
                             }}
                         >
                             {toast.action.label}
@@ -258,16 +269,16 @@ const MapView = () => {
                                 setToast(null);
                                 getCurrentLocation()
                                     .then(() => {
-                                        showToast(t('geo.locationEnabled'), 'success');
+                                        showToast(t('geo.locationEnabled'), 'success', '🗺️');
                                     })
                                     .catch(err => {
                                         console.error('Location error:', err);
                                         if (err.code === 1) {
-                                            showToast(t('geo.locationDenied', { tip: platformTip }), 'error');
+                                            showToast(t('geo.locationDenied', { tip: platformTip }), 'error', '🤌');
                                         } else if (err.code === 2) {
-                                            showToast(t('geo.locationUnavailable'), 'error');
+                                            showToast(t('geo.locationUnavailable'), 'error', '🤌');
                                         } else if (err.code === 3 || err.message?.includes('timeout')) {
-                                            showToast(t('geo.locationTimeout'), 'error');
+                                            showToast(t('geo.locationTimeout'), 'error', '🤌');
                                         }
                                     });
                             }}
