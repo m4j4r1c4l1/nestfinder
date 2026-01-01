@@ -80,7 +80,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                     transition: 'all 0.2s ease'
                                 }}
                             >
-                                <div className="notification-item-header" style={{ display: 'flex', flexDirection: 'column', marginBottom: '6px' }}>
+                                <div className="notification-item-header" style={{ display: 'flex', flexDirection: 'column', marginBottom: '6px', alignItems: 'center', textAlign: 'center' }}>
                                     <span className="notification-title" style={{ fontWeight: !n.read ? 'bold' : 'normal', fontSize: '1rem', lineHeight: 1.3 }}>{n.title}</span>
                                     <span className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', marginTop: '2px' }}>
                                         {(() => {
