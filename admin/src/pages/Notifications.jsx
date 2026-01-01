@@ -451,7 +451,8 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
         >
             <div
                 style={{
-                    background: '#0f172a', borderRadius: '12px', padding: '1rem', width: '600px', maxHeight: '350px',
+                    background: '#0f172a', borderRadius: '12px', padding: '1rem',
+                    width: 'min(1000px, 95vw)', height: 'auto', maxHeight: '95vh',
                     display: 'flex', flexDirection: 'column',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.5)', border: '1px solid #334155',
                     animation: 'popIn 0.2s ease', color: 'white'
@@ -462,7 +463,7 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
                     <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Pick an Emoji</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#94a3b8' }}>&times;</button>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(15, 1fr)', gap: '0.5rem', overflowY: 'auto', padding: '0.5rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem', padding: '0.5rem' }}>
                     {emojis.map(emoji => (
                         <button
                             key={emoji}
