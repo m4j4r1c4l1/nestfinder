@@ -441,7 +441,9 @@ const MapView = () => {
                     className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
                     onClick={() => setActiveSheet(activeSheet === 'route' ? null : 'route')}
                 >
-                    <span>🐾</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#F59E0B" style={{ display: 'block', marginBottom: '2px' }}>
+                        <path d="M12 14c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4zm-4.5-2.5c1.2 0 2.2-1 2.2-2.2 0-1.2-1-2.2-2.2-2.2-1.2 0-2.2 1-2.2 2.2 0 1.2 1 2.2 2.2 2.2zm9 0c1.2 0 2.2-1 2.2-2.2 0-1.2-1-2.2-2.2-2.2-1.2 0-2.2 1-2.2 2.2 0 1.2 1 2.2 2.2 2.2zM9 9c1.2 0 2.2-1 2.2-2.2C11.2 5.6 10.2 4.6 9 4.6c-1.2 0-2.2 1-2.2 2.2C6.8 8 7.8 9 9 9zm6 0c1.2 0 2.2-1 2.2-2.2C17.2 5.6 16.2 4.6 15 4.6c-1.2 0-2.2 1-2.2 2.2C12.8 8 13.8 9 15 9z" />
+                    </svg>
                     {t('map.route')}
                 </button>
                 <button
