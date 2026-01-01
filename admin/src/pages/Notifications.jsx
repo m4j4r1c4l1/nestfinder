@@ -617,7 +617,8 @@ const MetricsChart = () => {
                 {hoveredPoint !== null && metrics[hoveredPoint.index] && (
                     <div style={{
                         position: 'absolute',
-                        left: `calc(${(hoveredPoint.x + padding.left) / chartWidth * 100}% + 10px)`,
+                        left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
+                        transform: hoveredPoint.index > metrics.length * 0.6 ? 'translateX(calc(-100% - 15px))' : 'translateX(15px)',
                         top: '20px',
                         background: '#0f172a',
                         border: '1px solid #334155',
@@ -625,7 +626,9 @@ const MetricsChart = () => {
                         padding: '0.75rem',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                         zIndex: 10,
-                        minWidth: '140px'
+                        minWidth: '140px',
+                        pointerEvents: 'none', // Prevent flickering if mouse crosses tooltip
+                        transition: 'transform 0.1s ease-out, left 0.1s ease-out'
                     }}>
                         <div style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: '0.5rem', borderBottom: '1px solid #334155', paddingBottom: '0.5rem' }}>
                             {new Date(metrics[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
