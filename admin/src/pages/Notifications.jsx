@@ -455,7 +455,7 @@ const MetricsChart = () => {
     // Define series with colors matching Message Details Modal
     const series = [
         { key: 'notifications', label: 'Total Messages', color: '#8b5cf6' },  // Purple
-        { key: 'pending', label: 'Sent', color: '#6b7280' },           // Gray
+        { key: 'sent', label: 'Sent', color: '#6b7280' },           // Gray
         { key: 'delivered', label: 'Delivered', color: '#22c55e' },    // Green
         { key: 'read', label: 'Read', color: '#3b82f6' }               // Blue (like tick)
     ];

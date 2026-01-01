@@ -149,8 +149,8 @@ router.get('/metrics/history', (req, res) => {
         // Read notifications up to this date
         const readCount = get(`SELECT COUNT(*) as count FROM notifications WHERE read = 1 AND date(created_at) <= date('now', '${dateOffset}')`).count;
 
-        // Pending (sent but not delivered)
-        const pendingCount = notificationsCount - deliveredCount;
+        // Sent (pending, not delivered or read)
+        const sentCount = notificationsCount - deliveredCount - readCount;
 
         metrics.push({
             date: dateStr,
@@ -158,7 +158,7 @@ router.get('/metrics/history', (req, res) => {
             notifications: notificationsCount,
             delivered: deliveredCount,
             read: readCount,
-            pending: pendingCount
+            sent: sentCount
         });
     }
 
