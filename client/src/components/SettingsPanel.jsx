@@ -39,149 +39,92 @@ const SettingsPanel = ({ onClose }) => {
 
     const carouselRef = React.useRef(null);
     const sectionRef = React.useRef(null);
+    const wrapperRef = React.useRef(null);
 
     // Animation constants
-    const ITEM_HEIGHT = 68; // 15% reduction from 80px
-    const VISIBLE_ITEMS = 3; // Show exactly 3 items
-    const SPIN_ITEMS = 4; // Roll past 4 items (reduced for stability)
-    const PADDING = 12; // Top/bottom padding
+    const ITEM_HEIGHT = 68;
+    const VISIBLE_ITEMS = 3;
+    const PADDING = 12;
     const CONTAINER_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT + PADDING * 2;
 
-    // Virtual position tracks which item is CENTERED (can be fractional during animation)
-    const [virtualPosition, setVirtualPosition] = useState(() => {
+    // Which item index should be centered
+    const [centeredIndex, setCenteredIndex] = useState(() => {
         const idx = availableLanguages.findIndex(l => l.code === language);
         return idx >= 0 ? idx : 0;
     });
     const [hasAnimated, setHasAnimated] = useState(false);
-    const [isAnimating, setIsAnimating] = useState(false);
+    const [animationDuration, setAnimationDuration] = useState(0);
 
     const itemCount = availableLanguages.length;
 
-    // Calculate Y position for each item (centered layout with padding)
-    // virtualPosition = index of item that should be in CENTER (can be fractional)
-    const getItemY = (index) => {
-        if (itemCount === 0) return 0;
+    // Calculate translateY to center the specified item
+    // centerY is where the middle of the centered item should be
+    const centerY = PADDING + (VISIBLE_ITEMS - 1) * ITEM_HEIGHT / 2;
+    const translateY = centerY - (centeredIndex * ITEM_HEIGHT);
 
-        // Normalize virtualPosition to valid range [0, itemCount)
-        let normalizedVPos = virtualPosition % itemCount;
-        if (normalizedVPos < 0) normalizedVPos += itemCount;
-
-        // Offset from center: how many positions away from current center
-        let offset = index - normalizedVPos;
-
-        // Wrap around for infinite barrel effect - find shortest distance
-        if (offset > itemCount / 2) offset -= itemCount;
-        if (offset < -itemCount / 2) offset += itemCount;
-
-        // Convert to pixels (center position accounting for padding)
-        const centerY = PADDING + (VISIBLE_ITEMS * ITEM_HEIGHT - ITEM_HEIGHT) / 2;
-        return centerY + (offset * ITEM_HEIGHT);
-    };
-
-    // Smooth animation helper for any position change
-    const animateToPosition = (targetPos, duration = 300) => {
-        if (isAnimating) return;
-        setIsAnimating(true);
-
-        const startPos = virtualPosition;
-        const startTime = performance.now();
-        const easeOutQuart = (x) => 1 - Math.pow(1 - x, 4);
-
-        const animate = (time) => {
-            const elapsed = time - startTime;
-            if (elapsed >= duration) {
-                // Normalize to valid range
-                let finalPos = targetPos % itemCount;
-                if (finalPos < 0) finalPos += itemCount;
-                setVirtualPosition(finalPos);
-                setIsAnimating(false);
-                return;
-            }
-
-            const progress = easeOutQuart(elapsed / duration);
-            setVirtualPosition(startPos + (targetPos - startPos) * progress);
-            requestAnimationFrame(animate);
-        };
-
-        requestAnimationFrame(animate);
-    };
-
-    // Watch for section visibility to trigger animation
+    // Watch for section visibility to trigger spin animation
     useEffect(() => {
         if (!sectionRef.current || hasAnimated || itemCount === 0) return;
 
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && !hasAnimated) {
-                    // Start animation when visible
                     setHasAnimated(true);
-                    setIsAnimating(true);
 
                     const selectedIndex = availableLanguages.findIndex(l => l.code === language);
-                    if (selectedIndex === -1) {
-                        setIsAnimating(false);
-                        return;
-                    }
+                    if (selectedIndex === -1) return;
 
-                    // Start 8 items before target for more dramatic roll
-                    const startPos = selectedIndex - SPIN_ITEMS;
-                    const targetPos = selectedIndex;
+                    // Start 4 items before target (visually: start from a different position)
+                    const startIndex = selectedIndex + 4; // Start 4 items "later" in the list
 
-                    setVirtualPosition(startPos);
+                    // Instantly jump to start position (no transition)
+                    setAnimationDuration(0);
+                    setCenteredIndex(startIndex);
 
-                    const duration = 1200; // Longer for smoother landing
-                    const startTime = performance.now();
-                    // easeOutQuart for smoother deceleration
-                    const easeOutQuart = (x) => 1 - Math.pow(1 - x, 4);
-
-                    const animate = (time) => {
-                        const elapsed = time - startTime;
-                        if (elapsed >= duration) {
-                            setVirtualPosition(targetPos);
-                            setIsAnimating(false);
-                            return;
-                        }
-
-                        const progress = easeOutQuart(elapsed / duration);
-                        setVirtualPosition(startPos + (targetPos - startPos) * progress);
-                        requestAnimationFrame(animate);
-                    };
-
-                    requestAnimationFrame(animate);
+                    // After a frame, animate to target
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            setAnimationDuration(1000); // 1 second animation
+                            setCenteredIndex(selectedIndex);
+                        });
+                    });
                 }
             },
             { threshold: 0.5 }
         );
 
-
         observer.observe(sectionRef.current);
         return () => observer.disconnect();
     }, [hasAnimated, itemCount, language, availableLanguages]);
 
-    // Handle user scrolling with native listener (passive: false to allow preventDefault)
+    // Handle wheel scroll
     useEffect(() => {
         const el = carouselRef.current;
         if (!el) return;
 
         const handleWheel = (e) => {
-            if (isAnimating) return;
             e.preventDefault();
             e.stopPropagation();
 
-            // Calculate scroll direction and animate to next/prev item
             const direction = e.deltaY > 0 ? 1 : -1;
-            const targetPos = virtualPosition + direction;
-            animateToPosition(targetPos, 250);
+            setAnimationDuration(200); // Quick scroll animation
+            setCenteredIndex(prev => {
+                let next = prev + direction;
+                // Wrap around
+                if (next < 0) next = itemCount - 1;
+                if (next >= itemCount) next = 0;
+                return next;
+            });
         };
 
         el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
-    }, [isAnimating, virtualPosition, itemCount]);
+    }, [itemCount]);
 
-    // Click on non-center item to select it
+    // Click to select and center an item
     const handleItemClick = (index) => {
-        if (isAnimating) return;
-        animateToPosition(index, 300);
+        setAnimationDuration(300);
+        setCenteredIndex(index);
         setLanguage(availableLanguages[index].code);
     };
 
@@ -353,69 +296,69 @@ const SettingsPanel = ({ onClose }) => {
                             cursor: 'ns-resize'
                         }}
                     >
-                        {/* Barrel items - always absolute positioned */}
-                        {availableLanguages.map((lang, index) => {
-                            const yPos = getItemY(index);
-                            // Only render if item is in or near visible area
-                            const isVisible = yPos > -ITEM_HEIGHT && yPos < CONTAINER_HEIGHT + ITEM_HEIGHT;
+                        {/* Wrapper moves via CSS transition */}
+                        <div
+                            ref={wrapperRef}
+                            style={{
+                                transform: `translateY(${translateY}px)`,
+                                transition: animationDuration > 0
+                                    ? `transform ${animationDuration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`
+                                    : 'none',
+                                paddingTop: `${PADDING}px`
+                            }}
+                        >
+                            {availableLanguages.map((lang, index) => {
+                                const isCenter = index === Math.round(centeredIndex) % itemCount;
 
-                            if (!isVisible) return null;
-
-                            // Center position (accounting for padding)
-                            const centerY = PADDING + (VISIBLE_ITEMS * ITEM_HEIGHT - ITEM_HEIGHT) / 2;
-                            const isCenter = Math.abs(yPos - centerY) < ITEM_HEIGHT / 2;
-
-                            return (
-                                <div
-                                    key={lang.code}
-                                    onClick={() => handleItemClick(index)}
-                                    style={{
-                                        position: 'absolute',
-                                        left: '8px',
-                                        right: '8px',
-                                        top: `${yPos}px`,
-                                        transition: 'top 0.25s ease-out, opacity 0.2s, transform 0.2s',
-                                        zIndex: isCenter ? 10 : 1,
-                                        opacity: isCenter ? 1 : 0.6,
-                                        transform: isCenter ? 'scale(1.02)' : 'scale(0.98)',
-                                        cursor: 'pointer'
-                                    }}
-                                >
+                                return (
                                     <div
+                                        key={lang.code}
+                                        onClick={() => handleItemClick(index)}
                                         style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 'var(--space-3)',
-                                            padding: 'var(--space-3)',
-                                            background: isCenter
-                                                ? 'var(--color-primary-light)'
-                                                : 'var(--color-bg-secondary)',
-                                            border: isCenter
-                                                ? '2px solid var(--color-primary)'
-                                                : '1px solid var(--color-border)',
-                                            borderRadius: 'var(--radius-md)',
-                                            color: 'var(--color-text)',
-                                            height: `${ITEM_HEIGHT}px`,
-                                            boxSizing: 'border-box',
-                                            transition: 'all 0.15s ease-out'
+                                            padding: '0 8px',
+                                            marginBottom: '0',
+                                            opacity: isCenter ? 1 : 0.6,
+                                            transform: isCenter ? 'scale(1.02)' : 'scale(0.98)',
+                                            transition: 'opacity 0.2s, transform 0.2s',
+                                            cursor: 'pointer'
                                         }}
                                     >
-                                        <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
-                                        <div style={{ textAlign: 'left', flex: 1 }}>
-                                            <div style={{ fontWeight: isCenter ? 600 : 400 }}>
-                                                {lang.nativeName}
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 'var(--space-3)',
+                                                padding: 'var(--space-3)',
+                                                background: isCenter
+                                                    ? 'var(--color-primary-light)'
+                                                    : 'var(--color-bg-secondary)',
+                                                border: isCenter
+                                                    ? '2px solid var(--color-primary)'
+                                                    : '1px solid var(--color-border)',
+                                                borderRadius: 'var(--radius-md)',
+                                                color: 'var(--color-text)',
+                                                height: `${ITEM_HEIGHT}px`,
+                                                boxSizing: 'border-box',
+                                                transition: 'all 0.15s ease-out'
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
+                                            <div style={{ textAlign: 'left', flex: 1 }}>
+                                                <div style={{ fontWeight: isCenter ? 600 : 400 }}>
+                                                    {lang.nativeName}
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                                    {lang.name}
+                                                </div>
                                             </div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                                {lang.name}
-                                            </div>
+                                            {isCenter && (
+                                                <span style={{ color: 'var(--color-primary)' }}>✓</span>
+                                            )}
                                         </div>
-                                        {isCenter && (
-                                            <span style={{ color: 'var(--color-primary)' }}>✓</span>
-                                        )}
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
