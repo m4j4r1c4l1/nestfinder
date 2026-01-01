@@ -626,9 +626,25 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         </g>
     );
 
+    // Helper for heat-map color generation (Cool -> Hot)
+    const getHeatColor = (value, min, max) => {
+        if (max === min) return '#3b82f6'; // Default blue if no variance
+        const ratio = (value - min) / (max - min);
+        // Gradient: Blue (0) -> Cyan (0.25) -> Lime (0.5) -> Yellow (0.75) -> Red (1.0)
+        if (ratio < 0.25) return '#3b82f6'; // Blue
+        if (ratio < 0.5) return '#06b6d4';  // Cyan
+        if (ratio < 0.75) return '#84cc16'; // Lime
+        if (ratio < 0.9) return '#facc15';  // Yellow
+        return '#ef4444';                   // Red
+    };
+
     const renderBarChart = () => {
-        const barWidth = (graphWidth / metrics.length) * 0.6;
-        const xOffset = (graphWidth / metrics.length) / 2;
+        const barWidth = (graphWidth / metrics.length) * 0.3; // Half width (was 0.6)
+
+        // Calculate min/max for heat coloring
+        const values = metrics.map(m => m[seriesConfig[0].key] || 0);
+        const minVal = Math.min(...values);
+        const maxVal = Math.max(...values);
 
         return (
             <g>
@@ -637,7 +653,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     const h = (val / maxY) * graphHeight;
                     const x = getX(i) - (barWidth / 2);
                     const y = graphHeight - h;
-                    const color = seriesConfig[0].color;
+
+                    // Use heat color for bar charts, otherwise series color
+                    const color = type === 'bar' ? getHeatColor(val, minVal, maxVal) : seriesConfig[0].color;
                     const isHovered = hoveredPoint?.index === i;
 
                     return (
@@ -660,17 +678,20 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
             {/* Header */}
             <div className="card-header" style={{ background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                         <span style={{ fontSize: '1.2rem' }}>{icon}</span>
                         <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem', fontWeight: 600 }}>{title}</h3>
                     </div>
-                    {renderControls()}
+                    {/* Right-aligned controls */}
+                    <div style={{ marginLeft: 'auto' }}>
+                        {renderControls()}
+                    </div>
                 </div>
             </div>
 
             {/* Legend */}
-            {showLegend && seriesConfig.length > 1 && (
+            {showLegend && (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: '#1e293b' }}>
                     {seriesConfig.map(s => (
                         <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
@@ -766,34 +787,37 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
 const MetricsSection = () => {
     return (
-        <div style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                📉 Metrics Trends Graphs
-            </h2>
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+            <div className="card-header">
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    📉 Metrics Trends Graphs
+                </h3>
+            </div>
+            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {/* Messages Graph */}
+                <ChartCard
+                    title="Notifications"
+                    icon="📨"
+                    type="line"
+                    seriesConfig={[
+                        { key: 'notifications', label: 'Total', color: '#8b5cf6' },
+                        { key: 'sent', label: 'Sent', color: '#facc15' },
+                        { key: 'delivered', label: 'Delivered', color: '#22c55e' },
+                        { key: 'read', label: 'Read', color: '#3b82f6' }
+                    ]}
+                />
 
-            {/* Messages Graph */}
-            <ChartCard
-                title="Messages Volume"
-                icon="📨"
-                type="line"
-                seriesConfig={[
-                    { key: 'notifications', label: 'Total', color: '#8b5cf6' },
-                    { key: 'sent', label: 'Sent', color: '#facc15' },
-                    { key: 'delivered', label: 'Delivered', color: '#22c55e' },
-                    { key: 'read', label: 'Read', color: '#3b82f6' }
-                ]}
-            />
-
-            {/* Clients Graph */}
-            <ChartCard
-                title="Connected Clients (Users)"
-                icon="👥"
-                type="bar"
-                seriesConfig={[
-                    { key: 'users', label: 'Total Users', color: '#06b6d4' } // Cyan-500
-                ]}
-                showLegend={false}
-            />
+                {/* Clients Graph */}
+                <ChartCard
+                    title="Connected Clients"
+                    icon="👥"
+                    type="bar"
+                    seriesConfig={[
+                        { key: 'users', label: 'Total Users', color: '#06b6d4' }
+                    ]}
+                    showLegend={true}
+                />
+            </div>
         </div>
     );
 };
