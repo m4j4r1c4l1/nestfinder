@@ -356,7 +356,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                             onClick={() => setShowEmojiPicker(true)}
                             type="button"
                             style={{
-                                background: 'white', border: '1px solid #ddd', borderRadius: '50%', width: '2rem', height: '2rem',
+                                background: 'white', border: '1px solid #cbd5e1', borderRadius: '50%', width: '2rem', height: '2rem',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1.2rem',
                                 transition: 'all 0.2s'
                             }}
@@ -451,18 +451,18 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
         >
             <div
                 style={{
-                    background: 'white', borderRadius: '12px', padding: '1rem', width: '320px', maxHeight: '80vh',
+                    background: '#0f172a', borderRadius: '12px', padding: '1rem', width: '600px', maxHeight: '350px',
                     display: 'flex', flexDirection: 'column',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-                    animation: 'popIn 0.2s ease'
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)', border: '1px solid #334155',
+                    animation: 'popIn 0.2s ease', color: 'white'
                 }}
                 onClick={e => e.stopPropagation()}
             >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem' }}>Pick an Emoji</h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#666' }}>&times;</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #334155', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Pick an Emoji</h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#94a3b8' }}>&times;</button>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '0.5rem', overflowY: 'auto', padding: '0.2rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(15, 1fr)', gap: '0.5rem', overflowY: 'auto', padding: '0.5rem' }}>
                     {emojis.map(emoji => (
                         <button
                             key={emoji}
@@ -471,7 +471,7 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
                                 background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '4px',
                                 borderRadius: '4px', transition: 'background 0.2s'
                             }}
-                            onMouseOver={e => e.target.style.background = '#f1f5f9'}
+                            onMouseOver={e => e.target.style.background = '#334155'}
                             onMouseOut={e => e.target.style.background = 'transparent'}
                         >
                             {emoji}
