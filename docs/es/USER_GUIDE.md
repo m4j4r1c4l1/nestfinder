@@ -73,7 +73,7 @@ Visita: [https://m4j4r1c4l1.github.io/nestfinder/](https://m4j4r1c4l1.github.io/
 Para encontrar recursos cerca de ti y usar la navegación de rutas, la app necesita tu ubicación.
 
 > [!IMPORTANT]
-> **Privacidad Primero**: Solo usamos tu ubicación para mostrar puntos cercanos y calcular rutas.
+> **Privacidad Primero**: Solo usamos tu ubicación para mostrar puntos cercanos y calcular rutas, pero NO guardamos ni compartimos de ninguna forma ninguna información relativa a tu ubicación.
 
 ### iOS (iPhone)
 
