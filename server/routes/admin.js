@@ -137,8 +137,8 @@ router.get('/metrics/history', (req, res) => {
         const dateRow = get(`SELECT date('now', '${dateOffset}') as date_val`);
         const dateStr = dateRow.date_val;
 
-        // Users created up to this date
-        const usersCount = get(`SELECT COUNT(*) as count FROM users WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
+        // Users active this day (Daily Active Users)
+        const usersCount = get(`SELECT COUNT(DISTINCT user_id) as count FROM logs WHERE date(created_at) = date('now', '${dateOffset}')`).count;
 
         // Total notifications sent up to this date  
         const notificationsCount = get(`SELECT COUNT(*) as count FROM notifications WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
