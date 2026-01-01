@@ -322,8 +322,8 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* 4. System Status - Matched to Activity for visual balance (5.6) */}
-                    <div className="card" style={{ flex: 5.6, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {/* 4. System Status - Needs more height for 6+ rows. Flex 7.6 ensures visibility. */}
+                    <div className="card" style={{ flex: 7.6, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🖥️ System Status</span>
                         </div>
@@ -332,7 +332,7 @@ const Dashboard = ({ onNavigate }) => {
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: 'var(--color-text-secondary)' }}>OS</span>
-                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>{stats.system.distro}</span>
+                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>{stats.system.distro || 'N/A'}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: 'var(--color-text-secondary)' }}>Host</span>
