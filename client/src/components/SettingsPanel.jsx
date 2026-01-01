@@ -38,30 +38,22 @@ const SettingsPanel = ({ onClose }) => {
     };
 
     const carouselRef = React.useRef(null);
-    // Triple the list for "infinite" illusion
-    const displayLanguages = [...availableLanguages, ...availableLanguages, ...availableLanguages];
+    const [animationOffset, setAnimationOffset] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(true);
+
+    // Animation constants
+    const ITEM_HEIGHT = 68; // 15% reduction from 80px
+    const SPIN_ITEMS = 4; // How many items to "roll" past
 
     // Slot Machine Spin Animation on Mount
     useEffect(() => {
-        if (!carouselRef.current) return;
+        if (!carouselRef.current || availableLanguages.length === 0) return;
 
-        const container = carouselRef.current;
-        const realCount = availableLanguages.length;
         const selectedIndex = availableLanguages.findIndex(l => l.code === language);
-
         if (selectedIndex === -1) return;
 
-        // Target the middle set for stability
-        const targetIndex = selectedIndex + realCount;
-
-        // Animation Config
-        const itemHeight = 68; // 68px (approx 15% reduction from 80) + gap handling
-        // Start "virtually" 4 items above
-        const startScroll = (targetIndex - 4) * itemHeight;
-        const targetScroll = targetIndex * itemHeight;
-
-        // Immediately snap to start position to prevent "jump"
-        container.scrollTop = startScroll;
+        // Calculate total distance to travel (4 items worth)
+        const totalDistance = SPIN_ITEMS * ITEM_HEIGHT;
 
         const duration = 900; // Under 1s
         const startTime = performance.now();
@@ -70,17 +62,26 @@ const SettingsPanel = ({ onClose }) => {
         const animate = (time) => {
             const elapsed = time - startTime;
             if (elapsed >= duration) {
-                container.scrollTop = targetScroll;
+                setAnimationOffset(0);
+                setIsAnimating(false);
+                // Scroll to show selected item
+                if (carouselRef.current) {
+                    carouselRef.current.scrollTop = selectedIndex * ITEM_HEIGHT;
+                }
                 return;
             }
 
+            // Progress from 0 to 1, with easing
             const progress = easeOutCubic(elapsed / duration);
-            const currentPos = startScroll + ((targetScroll - startScroll) * progress);
+            // Start with negative offset (items shifted up), animate to 0
+            const currentOffset = totalDistance * (1 - progress);
+            setAnimationOffset(-currentOffset);
 
-            container.scrollTop = currentPos;
             requestAnimationFrame(animate);
         };
 
+        // Start with items shifted
+        setAnimationOffset(-totalDistance);
         requestAnimationFrame(animate);
     }, []); // Run on mount
 
@@ -245,10 +246,9 @@ const SettingsPanel = ({ onClose }) => {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: 'var(--space-2)',
-                            maxHeight: '220px', // Reduced slightly to match tighter items
-                            overflowY: 'auto',
-                            scrollSnapType: 'y mandatory',
-                            paddingRight: '0.5rem',
+                            maxHeight: '220px',
+                            overflowY: isAnimating ? 'hidden' : 'auto', // Hide during animation
+                            scrollSnapType: isAnimating ? 'none' : 'y mandatory',
                             border: '1px solid var(--color-border)',
                             borderRadius: 'var(--radius-md)',
                             padding: 'var(--space-2)',
@@ -258,46 +258,55 @@ const SettingsPanel = ({ onClose }) => {
                             position: 'relative'
                         }}
                     >
-                        {displayLanguages.map((lang, index) => (
-                            <button
-                                type="button"
-                                key={`${lang.code}-${index}`} // Unique key for duplicates
-                                onClick={() => setLanguage(lang.code)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 'var(--space-3)',
-                                    padding: 'var(--space-3)',
-                                    background: language === lang.code
-                                        ? 'var(--color-primary-light)'
-                                        : 'var(--color-bg-secondary)',
-                                    border: language === lang.code
-                                        ? '2px solid var(--color-primary)'
-                                        : '1px solid var(--color-border)',
-                                    borderRadius: 'var(--radius-md)',
-                                    cursor: 'pointer',
-                                    transition: 'all var(--transition-fast)',
-                                    color: 'var(--color-text)',
-                                    flexShrink: 0,
-                                    scrollSnapAlign: 'start',
-                                    minHeight: '68px', // Reduced height as requested
-                                    height: '68px'     // Enforce rigid height for animation precision
-                                }}
-                            >
-                                <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
-                                <div style={{ textAlign: 'left', flex: 1 }}>
-                                    <div style={{ fontWeight: language === lang.code ? 600 : 400 }}>
-                                        {lang.nativeName}
+                        {/* Inner wrapper for transform animation */}
+                        <div style={{
+                            transform: `translateY(${animationOffset}px)`,
+                            transition: isAnimating ? 'none' : 'transform 0.1s',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 'var(--space-2)'
+                        }}>
+                            {availableLanguages.map((lang) => (
+                                <button
+                                    type="button"
+                                    key={lang.code}
+                                    onClick={() => setLanguage(lang.code)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 'var(--space-3)',
+                                        padding: 'var(--space-3)',
+                                        background: language === lang.code
+                                            ? 'var(--color-primary-light)'
+                                            : 'var(--color-bg-secondary)',
+                                        border: language === lang.code
+                                            ? '2px solid var(--color-primary)'
+                                            : '1px solid var(--color-border)',
+                                        borderRadius: 'var(--radius-md)',
+                                        cursor: 'pointer',
+                                        transition: 'all var(--transition-fast)',
+                                        color: 'var(--color-text)',
+                                        flexShrink: 0,
+                                        scrollSnapAlign: 'start',
+                                        minHeight: `${ITEM_HEIGHT}px`,
+                                        height: `${ITEM_HEIGHT}px`
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
+                                    <div style={{ textAlign: 'left', flex: 1 }}>
+                                        <div style={{ fontWeight: language === lang.code ? 600 : 400 }}>
+                                            {lang.nativeName}
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                            {lang.name}
+                                        </div>
                                     </div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                        {lang.name}
-                                    </div>
-                                </div>
-                                {language === lang.code && (
-                                    <span style={{ color: 'var(--color-primary)' }}>✓</span>
-                                )}
-                            </button>
-                        ))}
+                                    {language === lang.code && (
+                                        <span style={{ color: 'var(--color-primary)' }}>✓</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
