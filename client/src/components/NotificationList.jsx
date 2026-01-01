@@ -80,9 +80,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                     transition: 'all 0.2s ease'
                                 }}
                             >
-                                <div className="notification-item-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                    <span className="notification-title" style={{ fontWeight: !n.read ? 'bold' : 'normal' }}>{n.title}</span>
-                                    <span className="notification-time" style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>
+                                <div className="notification-item-header" style={{ display: 'flex', flexDirection: 'column', marginBottom: '6px' }}>
+                                    <span className="notification-title" style={{ fontWeight: !n.read ? 'bold' : 'normal', fontSize: '1rem', lineHeight: 1.3 }}>{n.title}</span>
+                                    <span className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', marginTop: '2px' }}>
                                         {(() => {
                                             try {
                                                 // Fix timezone: SQLite returns "YYYY-MM-DD HH:MM:SS" (UTC)
