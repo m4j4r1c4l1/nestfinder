@@ -187,40 +187,6 @@ const Settings = () => {
                         {/* Separator */}
                         <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1.5rem 0' }} />
 
-                        {/* Rate Limits Section */}
-                        <div style={{ marginBottom: '1rem' }}>
-                            <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>🛡️ API Rate Limits</span>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <div className="form-group">
-                                <label className="form-label">Global Limit</label>
-                                <input name="rate_limit_global" type="number" className="form-input" value={settings.rate_limit_global || '60'} onChange={handleChange} min="1" />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Requests per minute per IP</div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Admin Login</label>
-                                <input name="rate_limit_admin_login" type="number" className="form-input" value={settings.rate_limit_admin_login || '5'} onChange={handleChange} min="1" />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Attempts per 15 minutes</div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Registration</label>
-                                <input name="rate_limit_register" type="number" className="form-input" value={settings.rate_limit_register || '10'} onChange={handleChange} min="1" />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Requests per hour</div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Point Submission</label>
-                                <input name="rate_limit_submit" type="number" className="form-input" value={settings.rate_limit_submit || '20'} onChange={handleChange} min="1" />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Requests per hour</div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Voting</label>
-                                <input name="rate_limit_vote" type="number" className="form-input" value={settings.rate_limit_vote || '30'} onChange={handleChange} min="1" />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Requests per hour</div>
-                            </div>
-                        </div>
-
-                        {/* Separator */}
-                        <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1.5rem 0' }} />
 
                         {/* Testing Banner Section */}
                         <div style={{ marginBottom: '1rem' }}>
@@ -263,6 +229,50 @@ const Settings = () => {
                     <h3 style={{ margin: 0, fontSize: '1rem' }}>🔒 Security</h3>
                 </div>
                 <div className="card-body" style={{ padding: '1.5rem' }}>
+                    <form onSubmit={handleSave}>
+                        {/* Rate Limits Section */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <div style={{ fontWeight: 500, marginBottom: '0.5rem' }}>API Rate Limits</div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Configure protection against abuse</div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div className="form-group">
+                                <label className="form-label">Global Limit</label>
+                                <input name="rate_limit_global" type="number" className="form-input" value={settings.rate_limit_global || '60'} onChange={handleChange} min="1" />
+                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Requests per minute per IP</div>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Admin Login</label>
+                                <input name="rate_limit_admin_login" type="number" className="form-input" value={settings.rate_limit_admin_login || '5'} onChange={handleChange} min="1" />
+                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Attempts per 15 minutes</div>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Registration</label>
+                                <input name="rate_limit_register" type="number" className="form-input" value={settings.rate_limit_register || '10'} onChange={handleChange} min="1" />
+                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Requests per hour</div>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Point Submission</label>
+                                <input name="rate_limit_submit" type="number" className="form-input" value={settings.rate_limit_submit || '20'} onChange={handleChange} min="1" />
+                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Requests per hour</div>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Voting</label>
+                                <input name="rate_limit_vote" type="number" className="form-input" value={settings.rate_limit_vote || '30'} onChange={handleChange} min="1" />
+                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Requests per hour</div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                            <button type="submit" className="btn btn-primary" disabled={saving}>
+                                {saving ? 'Saving...' : 'Update Rate Limits'}
+                            </button>
+                        </div>
+                    </form>
+
+                    {/* Separator */}
+                    <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0 0 1.5rem 0' }} />
+
                     {!showPasswordChange ? (
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
