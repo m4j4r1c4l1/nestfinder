@@ -216,9 +216,11 @@ const Settings = () => {
                             />
                         </div>
 
-                        <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem 2rem' }}>
-                            {saving ? 'Saving...' : 'Save Settings'}
-                        </button>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem 2rem' }}>
+                                {saving ? 'Saving...' : 'Save Settings'}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

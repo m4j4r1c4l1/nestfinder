@@ -211,7 +211,9 @@ const Logs = () => {
                                             </span>
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0' }}>
-                                            {log.user_nickname || <span style={{ color: '#64748b' }}>{log.user_id?.substring(0, 13)}...</span>}
+                                            {log.user_nickname || <span style={{ color: '#64748b' }}>
+                                                {log.user_id?.length > 13 ? `${log.user_id.substring(0, 13)}...` : log.user_id}
+                                            </span>}
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#94a3b8', verticalAlign: 'middle' }}>
                                             {log.metadata ? JSON.stringify(log.metadata) : '-'}
