@@ -276,7 +276,7 @@ const Dashboard = ({ onNavigate, showBackup }) => {
                     {/* 3. Database Totals - compact */}
                     <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Totals</span>
+                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Metrics</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
                             <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
@@ -484,7 +484,7 @@ const MetricRow = ({ label, value, onClick, color }) => (
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '0.4rem 0.5rem',
+            padding: '0.25rem 0.5rem',
             background: 'var(--color-bg-tertiary)',
             borderRadius: 'var(--radius-md)',
             cursor: onClick ? 'pointer' : 'default',
