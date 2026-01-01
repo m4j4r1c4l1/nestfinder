@@ -38,68 +38,113 @@ const SettingsPanel = ({ onClose }) => {
     };
 
     const carouselRef = React.useRef(null);
+    const sectionRef = React.useRef(null);
 
     // Animation constants
     const ITEM_HEIGHT = 68; // 15% reduction from 80px
-    const VISIBLE_ITEMS = 3; // How many items visible in the viewport
-    const SPIN_ITEMS = 4; // How many items to "roll" past
+    const VISIBLE_ITEMS = 3; // Show exactly 3 items
+    const SPIN_ITEMS = 4; // Roll past 4 items
+    const CONTAINER_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT;
 
-    // Virtual position for infinite scroll (can be any value, wraps around)
-    const [virtualPosition, setVirtualPosition] = useState(0);
-    const [isAnimating, setIsAnimating] = useState(true);
+    // Virtual position tracks which item is CENTERED (0 = first item centered)
+    const [virtualPosition, setVirtualPosition] = useState(() => {
+        const idx = availableLanguages.findIndex(l => l.code === language);
+        return idx >= 0 ? idx : 0;
+    });
+    const [hasAnimated, setHasAnimated] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
 
     const itemCount = availableLanguages.length;
 
-    // Calculate the Y position for each item based on virtual scroll position
-    // This creates the barrel effect - items wrap around infinitely
-    const getItemTransform = (index) => {
+    // Calculate Y position for each item (centered layout)
+    // virtualPosition = index of item that should be in CENTER
+    const getItemY = (index) => {
         if (itemCount === 0) return 0;
 
-        // Calculate offset from current virtual position (with wrap-around)
+        // Offset from center: how many positions away from current center
         let offset = index - virtualPosition;
 
-        // Normalize to center the visible items
-        // This makes items wrap around when they go out of view
+        // Wrap around for infinite barrel effect
         while (offset < -itemCount / 2) offset += itemCount;
         while (offset > itemCount / 2) offset -= itemCount;
 
-        return offset * ITEM_HEIGHT;
+        // Convert to pixels (0 = center of container)
+        // Center position is at CONTAINER_HEIGHT/2 - ITEM_HEIGHT/2
+        const centerY = (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2;
+        return centerY + (offset * ITEM_HEIGHT);
     };
 
-    // Slot Machine Spin Animation on Mount
+    // Watch for section visibility to trigger animation
     useEffect(() => {
-        if (availableLanguages.length === 0) return;
+        if (!sectionRef.current || hasAnimated || itemCount === 0) return;
 
-        const selectedIndex = availableLanguages.findIndex(l => l.code === language);
-        if (selectedIndex === -1) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && !hasAnimated) {
+                    // Start animation when visible
+                    setHasAnimated(true);
+                    setIsAnimating(true);
 
-        // Start position: 4 items "before" the target (simulates rolling)
-        const startPosition = selectedIndex - SPIN_ITEMS;
-        const targetPosition = selectedIndex;
+                    const selectedIndex = availableLanguages.findIndex(l => l.code === language);
+                    if (selectedIndex === -1) {
+                        setIsAnimating(false);
+                        return;
+                    }
 
-        setVirtualPosition(startPosition);
+                    // Start 4 items before target
+                    const startPos = selectedIndex - SPIN_ITEMS;
+                    const targetPos = selectedIndex;
 
-        const duration = 900; // Under 1s
-        const startTime = performance.now();
-        const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
+                    setVirtualPosition(startPos);
 
-        const animate = (time) => {
-            const elapsed = time - startTime;
-            if (elapsed >= duration) {
-                setVirtualPosition(targetPosition);
-                setIsAnimating(false);
-                return;
-            }
+                    const duration = 900;
+                    const startTime = performance.now();
+                    const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
 
-            const progress = easeOutCubic(elapsed / duration);
-            const currentPos = startPosition + ((targetPosition - startPosition) * progress);
-            setVirtualPosition(currentPos);
+                    const animate = (time) => {
+                        const elapsed = time - startTime;
+                        if (elapsed >= duration) {
+                            setVirtualPosition(targetPos);
+                            setIsAnimating(false);
+                            return;
+                        }
 
-            requestAnimationFrame(animate);
-        };
+                        const progress = easeOutCubic(elapsed / duration);
+                        setVirtualPosition(startPos + (targetPos - startPos) * progress);
+                        requestAnimationFrame(animate);
+                    };
 
-        requestAnimationFrame(animate);
-    }, []); // Run on mount
+                    requestAnimationFrame(animate);
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        observer.observe(sectionRef.current);
+        return () => observer.disconnect();
+    }, [hasAnimated, itemCount, language, availableLanguages]);
+
+    // Handle user scrolling (infinite barrel after animation)
+    const handleWheel = (e) => {
+        if (isAnimating) return;
+        e.preventDefault();
+
+        const delta = e.deltaY > 0 ? 0.15 : -0.15; // Smooth scroll
+        setVirtualPosition(prev => {
+            let newPos = prev + delta;
+            // Wrap around
+            if (newPos < 0) newPos += itemCount;
+            if (newPos >= itemCount) newPos -= itemCount;
+            return newPos;
+        });
+    };
+
+    // Snap to nearest item on scroll end
+    const handleScrollEnd = () => {
+        if (isAnimating) return;
+        const nearest = Math.round(virtualPosition) % itemCount;
+        setVirtualPosition(nearest < 0 ? nearest + itemCount : nearest);
+    };
 
 
 
@@ -249,130 +294,95 @@ const SettingsPanel = ({ onClose }) => {
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
 
                 {/* Language Selection */}
-                <div className="form-group">
+                <div className="form-group" ref={sectionRef}>
                     <label className="form-label">{t('profile.language')}</label>
                     {/* Carousel Guidance */}
                     <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-                        ↕️ Scroll to view all languages
+                        ↕️ Scroll to select language
                     </div>
 
                     <div
                         ref={carouselRef}
+                        onWheel={handleWheel}
+                        onMouseUp={handleScrollEnd}
+                        onTouchEnd={handleScrollEnd}
                         style={{
-                            height: `${VISIBLE_ITEMS * ITEM_HEIGHT + 16}px`, // Fixed height for barrel window
-                            overflowY: isAnimating ? 'hidden' : 'auto',
-                            scrollSnapType: isAnimating ? 'none' : 'y mandatory',
+                            height: `${CONTAINER_HEIGHT}px`,
+                            overflow: 'hidden',
                             border: '1px solid var(--color-border)',
                             borderRadius: 'var(--radius-md)',
-                            padding: 'var(--space-2)',
                             background: 'rgba(0,0,0,0.02)',
                             boxShadow: 'inset 0 10px 20px -10px rgba(0,0,0,0.3), inset 0 -10px 20px -10px rgba(0,0,0,0.3)',
-                            position: 'relative'
+                            position: 'relative',
+                            cursor: 'ns-resize'
                         }}
                     >
-                        {/* During animation: absolute positioned barrel items */}
-                        {isAnimating ? (
-                            availableLanguages.map((lang, index) => {
-                                const yPos = getItemTransform(index);
-                                // Only render if item is in or near visible area
-                                const isVisible = Math.abs(yPos) < ITEM_HEIGHT * (VISIBLE_ITEMS + 1);
+                        {/* Barrel items - always absolute positioned */}
+                        {availableLanguages.map((lang, index) => {
+                            const yPos = getItemY(index);
+                            // Only render if item is in or near visible area
+                            const isVisible = yPos > -ITEM_HEIGHT && yPos < CONTAINER_HEIGHT + ITEM_HEIGHT;
 
-                                if (!isVisible) return null;
+                            if (!isVisible) return null;
 
-                                return (
+                            const isCenter = Math.abs(yPos - (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2) < ITEM_HEIGHT / 2;
+
+                            return (
+                                <div
+                                    key={lang.code}
+                                    onClick={() => {
+                                        if (!isAnimating) {
+                                            setVirtualPosition(index);
+                                            setLanguage(lang.code);
+                                        }
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        left: '8px',
+                                        right: '8px',
+                                        top: `${yPos}px`,
+                                        transition: isAnimating ? 'none' : 'top 0.15s ease-out',
+                                        zIndex: isCenter ? 10 : 1,
+                                        opacity: isCenter ? 1 : 0.6,
+                                        transform: isCenter ? 'scale(1.02)' : 'scale(0.98)',
+                                        cursor: 'pointer'
+                                    }}
+                                >
                                     <div
-                                        key={lang.code}
-                                        style={{
-                                            position: 'absolute',
-                                            left: '8px',
-                                            right: '8px',
-                                            transform: `translateY(${yPos}px)`,
-                                            transition: 'none',
-                                            zIndex: language === lang.code ? 10 : 1
-                                        }}
-                                    >
-                                        <button
-                                            type="button"
-                                            style={{
-                                                width: '100%',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 'var(--space-3)',
-                                                padding: 'var(--space-3)',
-                                                background: language === lang.code
-                                                    ? 'var(--color-primary-light)'
-                                                    : 'var(--color-bg-secondary)',
-                                                border: language === lang.code
-                                                    ? '2px solid var(--color-primary)'
-                                                    : '1px solid var(--color-border)',
-                                                borderRadius: 'var(--radius-md)',
-                                                cursor: 'pointer',
-                                                color: 'var(--color-text)',
-                                                height: `${ITEM_HEIGHT}px`,
-                                                boxSizing: 'border-box'
-                                            }}
-                                        >
-                                            <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
-                                            <div style={{ textAlign: 'left', flex: 1 }}>
-                                                <div style={{ fontWeight: language === lang.code ? 600 : 400 }}>
-                                                    {lang.nativeName}
-                                                </div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                                    {lang.name}
-                                                </div>
-                                            </div>
-                                            {language === lang.code && (
-                                                <span style={{ color: 'var(--color-primary)' }}>✓</span>
-                                            )}
-                                        </button>
-                                    </div>
-                                );
-                            })
-                        ) : (
-                            /* After animation: normal scrollable list */
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                                {availableLanguages.map((lang) => (
-                                    <button
-                                        type="button"
-                                        key={lang.code}
-                                        onClick={() => setLanguage(lang.code)}
                                         style={{
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: 'var(--space-3)',
                                             padding: 'var(--space-3)',
-                                            background: language === lang.code
+                                            background: isCenter
                                                 ? 'var(--color-primary-light)'
                                                 : 'var(--color-bg-secondary)',
-                                            border: language === lang.code
+                                            border: isCenter
                                                 ? '2px solid var(--color-primary)'
                                                 : '1px solid var(--color-border)',
                                             borderRadius: 'var(--radius-md)',
-                                            cursor: 'pointer',
-                                            transition: 'all var(--transition-fast)',
                                             color: 'var(--color-text)',
-                                            flexShrink: 0,
-                                            scrollSnapAlign: 'start',
-                                            minHeight: `${ITEM_HEIGHT}px`,
-                                            height: `${ITEM_HEIGHT}px`
+                                            height: `${ITEM_HEIGHT}px`,
+                                            boxSizing: 'border-box',
+                                            transition: 'all 0.15s ease-out'
                                         }}
                                     >
                                         <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
                                         <div style={{ textAlign: 'left', flex: 1 }}>
-                                            <div style={{ fontWeight: language === lang.code ? 600 : 400 }}>
+                                            <div style={{ fontWeight: isCenter ? 600 : 400 }}>
                                                 {lang.nativeName}
                                             </div>
                                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                                                 {lang.name}
                                             </div>
                                         </div>
-                                        {language === lang.code && (
+                                        {isCenter && (
                                             <span style={{ color: 'var(--color-primary)' }}>✓</span>
                                         )}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
