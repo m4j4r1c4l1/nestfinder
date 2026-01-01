@@ -5,6 +5,20 @@
 
 ---
 
+## 📑 Table of Contents
+
+| Section | Description |
+|:---|:---|
+| **[🔐 Authentication Routes](#-authentication-routes-api-auth)** | Login, Register, Admin Access |
+| **[📍 Points Routes](#-points-routes-api-points)** | Submit, List, Confirm, Deactivate Locations |
+| **[⚙️ Settings Routes](#-settings-routes-api-settings)** | App Configuration & Admin Settings |
+| **[🔔 Notification Routes](#-notification-routes-api-push)** | Push Notifications & Admin Messaging |
+| **[👨‍💼 Admin Routes](#-admin-routes-api-admin)** | Dashboard Stats, Logs, User Management |
+| **[🏥 Health Check](#-health-check)** | Server Status Monitor |
+| **[🔌 WebSocket](#-websocket)** | Real-time Updates |
+
+---
+
 ## 🔐 Authentication Routes (`/api/auth`)
 
 ### Register/Login User
