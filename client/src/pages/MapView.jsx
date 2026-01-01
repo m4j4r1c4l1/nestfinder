@@ -441,7 +441,7 @@ const MapView = () => {
                     className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
                     onClick={() => setActiveSheet(activeSheet === 'route' ? null : 'route')}
                 >
-                    <span>🪢</span>
+                    <span>🐍</span>
                     {t('map.route')}
                 </button>
                 <button

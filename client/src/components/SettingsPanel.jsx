@@ -95,7 +95,7 @@ const SettingsPanel = ({ onClose }) => {
                                 justifyContent: 'center',
                                 fontSize: '32px'
                             }}>
-                                🪹
+                                🐣
                             </div>
                         </div>
                     </div>
