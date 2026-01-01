@@ -57,6 +57,12 @@ const templates = {
         name: '✏️ Custom Message',
         title: '',
         body: ''
+    },
+    happy_new_year: {
+        id: 'happy_new_year',
+        name: '🎉 Happy New Year',
+        title: 'Happy New Year! 🎆🪹',
+        body: 'Wishing everyone a bright and safe 2026! 🌟 Let\'s keep supporting each other and finding new paths to our nests 🪹. Happy New Year from NestFinder! 🏠💙'
     }
 };
 
@@ -238,6 +244,8 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
         if (templateId === 'share_app') {
             const qrImage = await generateQRCode();
             setImageUrl(qrImage);
+        } else if (templateId === 'happy_new_year') {
+            setImageUrl(`${APP_URL}/images/new_year_2026.png`);
         }
     };
 
