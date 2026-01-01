@@ -19,11 +19,29 @@ const logRateLimitHit = (type, req) => {
     console.warn(`⚠️ Rate limit exceeded [${type}]: IP=${ip}, Path=${path}`);
 };
 
+// Dynamic configuration cache
+let limitConfig = {
+    api_global: 60,
+    registration: 10,
+    point_submission: 20,
+    voting: 30,
+    admin_login: 5
+};
+
+// Function to update limits from database settings
+export const updateLimitConfig = (settings) => {
+    if (settings.rate_limit_global) limitConfig.api_global = parseInt(settings.rate_limit_global, 10);
+    if (settings.rate_limit_register) limitConfig.registration = parseInt(settings.rate_limit_register, 10);
+    if (settings.rate_limit_submit) limitConfig.point_submission = parseInt(settings.rate_limit_submit, 10);
+    if (settings.rate_limit_vote) limitConfig.voting = parseInt(settings.rate_limit_vote, 10);
+    if (settings.rate_limit_admin_login) limitConfig.admin_login = parseInt(settings.rate_limit_admin_login, 10);
+    console.log('🛡️ Rate limits updated:', limitConfig);
+};
+
 // Rate limiter for admin login
-// Block after 5 failed attempts from same IP in 15 minutes
 export const adminLoginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5,
+    windowMs: 15 * 60 * 1000,
+    max: () => limitConfig.admin_login, // Dynamic limit
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many login attempts, please try again after 15 minutes' },
@@ -33,10 +51,10 @@ export const adminLoginLimiter = rateLimit({
     }
 });
 
-// Global API rate limiter - 60 requests per minute per IP
+// Global API rate limiter
 export const apiLimiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 60,
+    windowMs: 60 * 1000,
+    max: () => limitConfig.api_global, // Dynamic limit
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests, please slow down' },
@@ -46,10 +64,10 @@ export const apiLimiter = rateLimit({
     }
 });
 
-// Stricter limiter for registration - 10 per hour per IP
+// Stricter limiter for registration
 export const registerLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10,
+    windowMs: 60 * 60 * 1000,
+    max: () => limitConfig.registration, // Dynamic limit
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many registrations, please try again later' },
@@ -59,10 +77,10 @@ export const registerLimiter = rateLimit({
     }
 });
 
-// Stricter limiter for point submissions - 20 per hour per IP
+// Stricter limiter for point submissions
 export const submitPointLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 20,
+    windowMs: 60 * 60 * 1000,
+    max: () => limitConfig.point_submission, // Dynamic limit
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many point submissions, please try again later' },
@@ -72,10 +90,10 @@ export const submitPointLimiter = rateLimit({
     }
 });
 
-// Limiter for voting actions (confirm/deactivate) - 30 per hour per IP
+// Limiter for voting actions
 export const voteLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 30,
+    windowMs: 60 * 60 * 1000,
+    max: () => limitConfig.voting, // Dynamic limit
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many votes, please try again later' },
