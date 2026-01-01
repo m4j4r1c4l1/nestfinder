@@ -199,14 +199,19 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
             img.src = qrDataUrl;
             await new Promise(r => img.onload = r);
 
-            // 3. Create Canvas
+            // 3. Create Canvas with Border
+            const border = 25;
             const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
+            canvas.width = img.width + (border * 2);
+            canvas.height = img.height + (border * 2);
             const ctx = canvas.getContext('2d');
 
-            // 4. Draw QR
-            ctx.drawImage(img, 0, 0);
+            // Fill white background (border)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 4. Draw QR Centered
+            ctx.drawImage(img, border, border);
 
             // 5. Draw Center Emoji (🪹)
             // White circle background for emoji
