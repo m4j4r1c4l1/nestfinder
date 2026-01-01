@@ -153,21 +153,30 @@ const SettingsPanel = ({ onClose }) => {
             { threshold: 0.5 }
         );
 
+
         observer.observe(sectionRef.current);
         return () => observer.disconnect();
     }, [hasAnimated, itemCount, language, availableLanguages]);
 
-    // Handle user scrolling (infinite barrel after animation)
-    const handleWheel = (e) => {
-        if (isAnimating) return;
-        e.preventDefault();
-        e.stopPropagation(); // Prevent parent scroll from interfering
+    // Handle user scrolling with native listener (passive: false to allow preventDefault)
+    useEffect(() => {
+        const el = carouselRef.current;
+        if (!el) return;
 
-        // Calculate scroll direction and animate to next/prev item
-        const direction = e.deltaY > 0 ? 1 : -1;
-        const targetPos = virtualPosition + direction;
-        animateToPosition(targetPos, 250);
-    };
+        const handleWheel = (e) => {
+            if (isAnimating) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Calculate scroll direction and animate to next/prev item
+            const direction = e.deltaY > 0 ? 1 : -1;
+            const targetPos = virtualPosition + direction;
+            animateToPosition(targetPos, 250);
+        };
+
+        el.addEventListener('wheel', handleWheel, { passive: false });
+        return () => el.removeEventListener('wheel', handleWheel);
+    }, [isAnimating, virtualPosition, itemCount]);
 
     // Click on non-center item to select it
     const handleItemClick = (index) => {
@@ -333,7 +342,6 @@ const SettingsPanel = ({ onClose }) => {
 
                     <div
                         ref={carouselRef}
-                        onWheel={handleWheel}
                         style={{
                             height: `${CONTAINER_HEIGHT}px`,
                             overflow: 'hidden',
