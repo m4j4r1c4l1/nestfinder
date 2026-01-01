@@ -168,6 +168,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [target, setTarget] = useState('all');
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
 
