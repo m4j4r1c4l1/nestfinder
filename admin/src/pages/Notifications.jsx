@@ -713,13 +713,13 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         return '#ef4444';                   // Red
     };
 
+    // Calculate min/max for heat coloring (Available to both renderBarChart and Tooltip)
+    const heatValues = type === 'bar' ? metrics.map(m => m[seriesConfig[0].key] || 0) : [];
+    const heatMin = Math.min(...heatValues);
+    const heatMax = Math.max(...heatValues);
+
     const renderBarChart = () => {
         const barWidth = (graphWidth / metrics.length) * 0.3; // Half width (was 0.6)
-
-        // Calculate min/max for heat coloring
-        const values = metrics.map(m => m[seriesConfig[0].key] || 0);
-        const minVal = Math.min(...values);
-        const maxVal = Math.max(...values);
 
         return (
             <g>
@@ -730,7 +730,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     const y = graphHeight - h;
 
                     // Use heat color for bar charts, otherwise series color
-                    const color = type === 'bar' ? getHeatColor(val, minVal, maxVal) : seriesConfig[0].color;
+                    const color = type === 'bar' ? getHeatColor(val, heatMin, heatMax) : seriesConfig[0].color;
                     const isHovered = hoveredPoint?.index === i;
 
                     return (
