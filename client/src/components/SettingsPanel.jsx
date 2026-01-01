@@ -38,22 +38,46 @@ const SettingsPanel = ({ onClose }) => {
     };
 
     const carouselRef = React.useRef(null);
-    const [animationOffset, setAnimationOffset] = useState(0);
-    const [isAnimating, setIsAnimating] = useState(true);
 
     // Animation constants
     const ITEM_HEIGHT = 68; // 15% reduction from 80px
+    const VISIBLE_ITEMS = 3; // How many items visible in the viewport
     const SPIN_ITEMS = 4; // How many items to "roll" past
+
+    // Virtual position for infinite scroll (can be any value, wraps around)
+    const [virtualPosition, setVirtualPosition] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(true);
+
+    const itemCount = availableLanguages.length;
+
+    // Calculate the Y position for each item based on virtual scroll position
+    // This creates the barrel effect - items wrap around infinitely
+    const getItemTransform = (index) => {
+        if (itemCount === 0) return 0;
+
+        // Calculate offset from current virtual position (with wrap-around)
+        let offset = index - virtualPosition;
+
+        // Normalize to center the visible items
+        // This makes items wrap around when they go out of view
+        while (offset < -itemCount / 2) offset += itemCount;
+        while (offset > itemCount / 2) offset -= itemCount;
+
+        return offset * ITEM_HEIGHT;
+    };
 
     // Slot Machine Spin Animation on Mount
     useEffect(() => {
-        if (!carouselRef.current || availableLanguages.length === 0) return;
+        if (availableLanguages.length === 0) return;
 
         const selectedIndex = availableLanguages.findIndex(l => l.code === language);
         if (selectedIndex === -1) return;
 
-        // Calculate total distance to travel (4 items worth)
-        const totalDistance = SPIN_ITEMS * ITEM_HEIGHT;
+        // Start position: 4 items "before" the target (simulates rolling)
+        const startPosition = selectedIndex - SPIN_ITEMS;
+        const targetPosition = selectedIndex;
+
+        setVirtualPosition(startPosition);
 
         const duration = 900; // Under 1s
         const startTime = performance.now();
@@ -62,26 +86,18 @@ const SettingsPanel = ({ onClose }) => {
         const animate = (time) => {
             const elapsed = time - startTime;
             if (elapsed >= duration) {
-                setAnimationOffset(0);
+                setVirtualPosition(targetPosition);
                 setIsAnimating(false);
-                // Scroll to show selected item
-                if (carouselRef.current) {
-                    carouselRef.current.scrollTop = selectedIndex * ITEM_HEIGHT;
-                }
                 return;
             }
 
-            // Progress from 0 to 1, with easing
             const progress = easeOutCubic(elapsed / duration);
-            // Start with negative offset (items shifted up), animate to 0
-            const currentOffset = totalDistance * (1 - progress);
-            setAnimationOffset(-currentOffset);
+            const currentPos = startPosition + ((targetPosition - startPosition) * progress);
+            setVirtualPosition(currentPos);
 
             requestAnimationFrame(animate);
         };
 
-        // Start with items shifted
-        setAnimationOffset(-totalDistance);
         requestAnimationFrame(animate);
     }, []); // Run on mount
 
@@ -243,70 +259,120 @@ const SettingsPanel = ({ onClose }) => {
                     <div
                         ref={carouselRef}
                         style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 'var(--space-2)',
-                            maxHeight: '220px',
-                            overflowY: isAnimating ? 'hidden' : 'auto', // Hide during animation
+                            height: `${VISIBLE_ITEMS * ITEM_HEIGHT + 16}px`, // Fixed height for barrel window
+                            overflowY: isAnimating ? 'hidden' : 'auto',
                             scrollSnapType: isAnimating ? 'none' : 'y mandatory',
                             border: '1px solid var(--color-border)',
                             borderRadius: 'var(--radius-md)',
                             padding: 'var(--space-2)',
                             background: 'rgba(0,0,0,0.02)',
-                            // Slot Machine Depth
                             boxShadow: 'inset 0 10px 20px -10px rgba(0,0,0,0.3), inset 0 -10px 20px -10px rgba(0,0,0,0.3)',
                             position: 'relative'
                         }}
                     >
-                        {/* Inner wrapper for transform animation */}
-                        <div style={{
-                            transform: `translateY(${animationOffset}px)`,
-                            transition: isAnimating ? 'none' : 'transform 0.1s',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 'var(--space-2)'
-                        }}>
-                            {availableLanguages.map((lang) => (
-                                <button
-                                    type="button"
-                                    key={lang.code}
-                                    onClick={() => setLanguage(lang.code)}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 'var(--space-3)',
-                                        padding: 'var(--space-3)',
-                                        background: language === lang.code
-                                            ? 'var(--color-primary-light)'
-                                            : 'var(--color-bg-secondary)',
-                                        border: language === lang.code
-                                            ? '2px solid var(--color-primary)'
-                                            : '1px solid var(--color-border)',
-                                        borderRadius: 'var(--radius-md)',
-                                        cursor: 'pointer',
-                                        transition: 'all var(--transition-fast)',
-                                        color: 'var(--color-text)',
-                                        flexShrink: 0,
-                                        scrollSnapAlign: 'start',
-                                        minHeight: `${ITEM_HEIGHT}px`,
-                                        height: `${ITEM_HEIGHT}px`
-                                    }}
-                                >
-                                    <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
-                                    <div style={{ textAlign: 'left', flex: 1 }}>
-                                        <div style={{ fontWeight: language === lang.code ? 600 : 400 }}>
-                                            {lang.nativeName}
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                            {lang.name}
-                                        </div>
+                        {/* During animation: absolute positioned barrel items */}
+                        {isAnimating ? (
+                            availableLanguages.map((lang, index) => {
+                                const yPos = getItemTransform(index);
+                                // Only render if item is in or near visible area
+                                const isVisible = Math.abs(yPos) < ITEM_HEIGHT * (VISIBLE_ITEMS + 1);
+
+                                if (!isVisible) return null;
+
+                                return (
+                                    <div
+                                        key={lang.code}
+                                        style={{
+                                            position: 'absolute',
+                                            left: '8px',
+                                            right: '8px',
+                                            transform: `translateY(${yPos}px)`,
+                                            transition: 'none',
+                                            zIndex: language === lang.code ? 10 : 1
+                                        }}
+                                    >
+                                        <button
+                                            type="button"
+                                            style={{
+                                                width: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 'var(--space-3)',
+                                                padding: 'var(--space-3)',
+                                                background: language === lang.code
+                                                    ? 'var(--color-primary-light)'
+                                                    : 'var(--color-bg-secondary)',
+                                                border: language === lang.code
+                                                    ? '2px solid var(--color-primary)'
+                                                    : '1px solid var(--color-border)',
+                                                borderRadius: 'var(--radius-md)',
+                                                cursor: 'pointer',
+                                                color: 'var(--color-text)',
+                                                height: `${ITEM_HEIGHT}px`,
+                                                boxSizing: 'border-box'
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
+                                            <div style={{ textAlign: 'left', flex: 1 }}>
+                                                <div style={{ fontWeight: language === lang.code ? 600 : 400 }}>
+                                                    {lang.nativeName}
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                                    {lang.name}
+                                                </div>
+                                            </div>
+                                            {language === lang.code && (
+                                                <span style={{ color: 'var(--color-primary)' }}>✓</span>
+                                            )}
+                                        </button>
                                     </div>
-                                    {language === lang.code && (
-                                        <span style={{ color: 'var(--color-primary)' }}>✓</span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
+                                );
+                            })
+                        ) : (
+                            /* After animation: normal scrollable list */
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                                {availableLanguages.map((lang) => (
+                                    <button
+                                        type="button"
+                                        key={lang.code}
+                                        onClick={() => setLanguage(lang.code)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 'var(--space-3)',
+                                            padding: 'var(--space-3)',
+                                            background: language === lang.code
+                                                ? 'var(--color-primary-light)'
+                                                : 'var(--color-bg-secondary)',
+                                            border: language === lang.code
+                                                ? '2px solid var(--color-primary)'
+                                                : '1px solid var(--color-border)',
+                                            borderRadius: 'var(--radius-md)',
+                                            cursor: 'pointer',
+                                            transition: 'all var(--transition-fast)',
+                                            color: 'var(--color-text)',
+                                            flexShrink: 0,
+                                            scrollSnapAlign: 'start',
+                                            minHeight: `${ITEM_HEIGHT}px`,
+                                            height: `${ITEM_HEIGHT}px`
+                                        }}
+                                    >
+                                        <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
+                                        <div style={{ textAlign: 'left', flex: 1 }}>
+                                            <div style={{ fontWeight: language === lang.code ? 600 : 400 }}>
+                                                {lang.nativeName}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                                {lang.name}
+                                            </div>
+                                        </div>
+                                        {language === lang.code && (
+                                            <span style={{ color: 'var(--color-primary)' }}>✓</span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
