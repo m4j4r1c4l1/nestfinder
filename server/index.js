@@ -142,7 +142,15 @@ app.use((err, req, res, next) => {
 // Start server after database is ready
 const PORT = process.env.PORT || 3001;
 
+// Import helpers to load settings on startup
+import { getSettings } from './database.js';
+import { updateLimitConfig } from './middleware/rateLimiter.js';
+
 initDatabase().then(() => {
+    // Load initial rate limits
+    const settings = getSettings();
+    updateLimitConfig(settings);
+
     server.listen(PORT, () => {
         console.log(`
 ╔═══════════════════════════════════════════════════════╗

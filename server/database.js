@@ -172,7 +172,12 @@ export const initDatabase = async () => {
     { key: 'app_name', value: 'NestFinder' },
     { key: 'polling_interval_ms', value: '60000' },
     { key: 'testing_banner_enabled', value: 'true' },
-    { key: 'testing_banner_text', value: 'Beta Testing' }
+    { key: 'testing_banner_text', value: 'Beta Testing' },
+    { key: 'rate_limit_global', value: '60' },
+    { key: 'rate_limit_register', value: '10' },
+    { key: 'rate_limit_submit', value: '20' },
+    { key: 'rate_limit_vote', value: '30' },
+    { key: 'rate_limit_admin_login', value: '5' }
   ];
 
   defaultSettings.forEach(s => {

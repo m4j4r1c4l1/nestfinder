@@ -88,6 +88,11 @@ router.put('/', requireAdmin, (req, res) => {
     // Broadcast settings update to all clients
     broadcast({ type: 'settings_updated', settings: responseSettings });
 
+    // Update rate limits dynamically
+    import('../middleware/rateLimiter.js').then(({ updateLimitConfig }) => {
+        updateLimitConfig(responseSettings);
+    });
+
     res.json({ settings: responseSettings });
 });
 
