@@ -88,21 +88,20 @@ const SettingsPanel = ({ onClose }) => {
                                 transform: 'translate(-50%, -50%)',
                                 background: 'white',
                                 borderRadius: '50%',
-                                width: '48px',
-                                height: '48px',
+                                width: '80px',
+                                height: '80px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '32px'
+                                fontSize: '50px'
                             }}>
-                                🐣
+                                🪹
                             </div>
                         </div>
                     </div>
 
-                    {/* Engagement Text */}
                     <div style={{ textAlign: 'center', margin: '0 auto var(--space-3)', color: 'var(--color-text-secondary)', fontSize: '0.9rem', width: '250px' }}>
-                        Spread the warmth! 🤝
+                        Spread the warmth! 🐣
                     </div>
 
                     {/* Copy Link Button */}
