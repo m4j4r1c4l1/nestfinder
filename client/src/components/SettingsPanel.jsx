@@ -43,8 +43,9 @@ const SettingsPanel = ({ onClose }) => {
     // Animation constants
     const ITEM_HEIGHT = 68; // 15% reduction from 80px
     const VISIBLE_ITEMS = 3; // Show exactly 3 items
-    const SPIN_ITEMS = 4; // Roll past 4 items
-    const CONTAINER_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT;
+    const SPIN_ITEMS = 8; // Roll past 8 items for more dramatic effect
+    const PADDING = 12; // Top/bottom padding
+    const CONTAINER_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT + PADDING * 2;
 
     // Virtual position tracks which item is CENTERED (0 = first item centered)
     const [virtualPosition, setVirtualPosition] = useState(() => {
@@ -56,7 +57,7 @@ const SettingsPanel = ({ onClose }) => {
 
     const itemCount = availableLanguages.length;
 
-    // Calculate Y position for each item (centered layout)
+    // Calculate Y position for each item (centered layout with padding)
     // virtualPosition = index of item that should be in CENTER
     const getItemY = (index) => {
         if (itemCount === 0) return 0;
@@ -68,10 +69,37 @@ const SettingsPanel = ({ onClose }) => {
         while (offset < -itemCount / 2) offset += itemCount;
         while (offset > itemCount / 2) offset -= itemCount;
 
-        // Convert to pixels (0 = center of container)
-        // Center position is at CONTAINER_HEIGHT/2 - ITEM_HEIGHT/2
-        const centerY = (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2;
+        // Convert to pixels (0 = center of container, accounting for padding)
+        const centerY = PADDING + (VISIBLE_ITEMS * ITEM_HEIGHT - ITEM_HEIGHT) / 2;
         return centerY + (offset * ITEM_HEIGHT);
+    };
+
+    // Smooth animation helper for any position change
+    const animateToPosition = (targetPos, duration = 300) => {
+        if (isAnimating) return;
+        setIsAnimating(true);
+
+        const startPos = virtualPosition;
+        const startTime = performance.now();
+        const easeOutQuart = (x) => 1 - Math.pow(1 - x, 4);
+
+        const animate = (time) => {
+            const elapsed = time - startTime;
+            if (elapsed >= duration) {
+                // Normalize to valid range
+                let finalPos = targetPos % itemCount;
+                if (finalPos < 0) finalPos += itemCount;
+                setVirtualPosition(finalPos);
+                setIsAnimating(false);
+                return;
+            }
+
+            const progress = easeOutQuart(elapsed / duration);
+            setVirtualPosition(startPos + (targetPos - startPos) * progress);
+            requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
     };
 
     // Watch for section visibility to trigger animation
@@ -91,15 +119,16 @@ const SettingsPanel = ({ onClose }) => {
                         return;
                     }
 
-                    // Start 4 items before target
+                    // Start 8 items before target for more dramatic roll
                     const startPos = selectedIndex - SPIN_ITEMS;
                     const targetPos = selectedIndex;
 
                     setVirtualPosition(startPos);
 
-                    const duration = 900;
+                    const duration = 1200; // Longer for smoother landing
                     const startTime = performance.now();
-                    const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
+                    // easeOutQuart for smoother deceleration
+                    const easeOutQuart = (x) => 1 - Math.pow(1 - x, 4);
 
                     const animate = (time) => {
                         const elapsed = time - startTime;
@@ -109,7 +138,7 @@ const SettingsPanel = ({ onClose }) => {
                             return;
                         }
 
-                        const progress = easeOutCubic(elapsed / duration);
+                        const progress = easeOutQuart(elapsed / duration);
                         setVirtualPosition(startPos + (targetPos - startPos) * progress);
                         requestAnimationFrame(animate);
                     };
@@ -129,21 +158,17 @@ const SettingsPanel = ({ onClose }) => {
         if (isAnimating) return;
         e.preventDefault();
 
-        const delta = e.deltaY > 0 ? 0.15 : -0.15; // Smooth scroll
-        setVirtualPosition(prev => {
-            let newPos = prev + delta;
-            // Wrap around
-            if (newPos < 0) newPos += itemCount;
-            if (newPos >= itemCount) newPos -= itemCount;
-            return newPos;
-        });
+        // Calculate scroll direction and animate to next/prev item
+        const direction = e.deltaY > 0 ? 1 : -1;
+        const targetPos = virtualPosition + direction;
+        animateToPosition(targetPos, 250);
     };
 
-    // Snap to nearest item on scroll end
-    const handleScrollEnd = () => {
+    // Click on non-center item to select it
+    const handleItemClick = (index) => {
         if (isAnimating) return;
-        const nearest = Math.round(virtualPosition) % itemCount;
-        setVirtualPosition(nearest < 0 ? nearest + itemCount : nearest);
+        animateToPosition(index, 300);
+        setLanguage(availableLanguages[index].code);
     };
 
 
@@ -304,8 +329,6 @@ const SettingsPanel = ({ onClose }) => {
                     <div
                         ref={carouselRef}
                         onWheel={handleWheel}
-                        onMouseUp={handleScrollEnd}
-                        onTouchEnd={handleScrollEnd}
                         style={{
                             height: `${CONTAINER_HEIGHT}px`,
                             overflow: 'hidden',
@@ -325,23 +348,20 @@ const SettingsPanel = ({ onClose }) => {
 
                             if (!isVisible) return null;
 
-                            const isCenter = Math.abs(yPos - (CONTAINER_HEIGHT - ITEM_HEIGHT) / 2) < ITEM_HEIGHT / 2;
+                            // Center position (accounting for padding)
+                            const centerY = PADDING + (VISIBLE_ITEMS * ITEM_HEIGHT - ITEM_HEIGHT) / 2;
+                            const isCenter = Math.abs(yPos - centerY) < ITEM_HEIGHT / 2;
 
                             return (
                                 <div
                                     key={lang.code}
-                                    onClick={() => {
-                                        if (!isAnimating) {
-                                            setVirtualPosition(index);
-                                            setLanguage(lang.code);
-                                        }
-                                    }}
+                                    onClick={() => handleItemClick(index)}
                                     style={{
                                         position: 'absolute',
                                         left: '8px',
                                         right: '8px',
                                         top: `${yPos}px`,
-                                        transition: isAnimating ? 'none' : 'top 0.15s ease-out',
+                                        transition: 'top 0.25s ease-out, opacity 0.2s, transform 0.2s',
                                         zIndex: isCenter ? 10 : 1,
                                         opacity: isCenter ? 1 : 0.6,
                                         transform: isCenter ? 'scale(1.02)' : 'scale(0.98)',
