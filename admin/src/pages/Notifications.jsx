@@ -492,8 +492,82 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
     );
 };
 
+// Modal for Daily Breakdown
+const DailyBreakdownModal = ({ date, data, onClose }) => {
+    if (!data) return null;
+
+    // Calculate max value for percentages
+    const maxVal = Math.max(...data.map(d => d.count), 1);
+
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.6)',
+            backdropFilter: 'blur(12px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2rem'
+        }} onClick={onClose}>
+            <div
+                className="card"
+                onClick={e => e.stopPropagation()}
+                style={{
+                    width: '100%',
+                    maxWidth: '500px',
+                    background: 'rgba(30, 41, 59, 0.9)',
+                    border: '1px solid #334155',
+                    animation: 'scaleIn 0.2s ease-out'
+                }}
+            >
+                <div className="card-header flex-between items-center" style={{ borderBottom: '1px solid #334155' }}>
+                    <h3 className="card-title">
+                        📊 Activity Breakdown
+                        <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                            {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </span>
+                    </h3>
+                    <button onClick={onClose} className="btn btn-secondary btn-icon" style={{ width: 32, height: 32, fontSize: '1.2rem' }}>×</button>
+                </div>
+
+                <div className="card-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                    {data.length === 0 ? (
+                        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>No detailed activity recorded for this day.</div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {data.map((item, i) => (
+                                <div key={i}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+                                        <span style={{ color: '#e2e8f0', textTransform: 'capitalize' }}>
+                                            {item.action.replace(/_/g, ' ')}
+                                        </span>
+                                        <span style={{ color: '#fff', fontWeight: 600 }}>{item.count}</span>
+                                    </div>
+                                    <div style={{ height: '8px', background: '#334155', borderRadius: '4px', overflow: 'hidden' }}>
+                                        <div style={{
+                                            height: '100%',
+                                            width: `${(item.count / maxVal) * 100}%`,
+                                            background: i === 0 ? '#3b82f6' : '#64748b',
+                                            borderRadius: '4px'
+                                        }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Reusable Chart Card Component with independent state
-const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true }) => {
+const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true, onPointClick }) => {
     const [metrics, setMetrics] = useState([]);
     const [loading, setLoading] = useState(true);
     const [days, setDays] = useState(7);
@@ -660,7 +734,10 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     const isHovered = hoveredPoint?.index === i;
 
                     return (
-                        <g key={i}>
+                        <g key={i} onClick={(e) => {
+                            e.stopPropagation();
+                            if (onPointClick) onPointClick(m);
+                        }} style={{ cursor: onPointClick ? 'pointer' : 'default' }}>
                             <rect
                                 x={x} y={y} width={barWidth} height={h}
                                 fill={color}
@@ -781,17 +858,26 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                         <div style={{ color: '#e2e8f0', fontWeight: 600, borderBottom: '1px solid #334155', marginBottom: '0.5rem', paddingBottom: '0.2rem', fontSize: '0.9rem' }}>
                             {new Date(metrics[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </div>
-                        {seriesConfig.map(s => (
-                            <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
-                                    <span style={{ width: 8, height: 8, background: s.color, borderRadius: '50%' }} />
-                                    {s.label}
-                                </span>
-                                <span style={{ color: '#fff', fontWeight: 500 }}>
-                                    {(metrics[hoveredPoint.index][s.key] || 0).toLocaleString()}
-                                </span>
-                            </div>
-                        ))}
+                        {seriesConfig.map(s => {
+                            // Calculate color dynamically for Heat Bar tooltip
+                            let tipColor = s.color;
+                            if (type === 'bar' && seriesConfig.length === 1) {
+                                const val = metrics[hoveredPoint.index][s.key] || 0;
+                                tipColor = getHeatColor(val, heatMin, heatMax);
+                            }
+
+                            return (
+                                <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
+                                        <span style={{ width: 8, height: 8, background: tipColor, borderRadius: '50%' }} />
+                                        {s.label}
+                                    </span>
+                                    <span style={{ color: '#fff', fontWeight: 500 }}>
+                                        {(metrics[hoveredPoint.index][s.key] || 0).toLocaleString()}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
             </div>
@@ -800,6 +886,20 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 };
 
 const MetricsSection = () => {
+    const [breakdownDate, setBreakdownDate] = useState(null);
+    const [breakdownData, setBreakdownData] = useState(null);
+
+    const handleClientBarClick = async (point) => {
+        setBreakdownDate(point.date);
+        try {
+            // New API endpoint for daily breakdown
+            const res = await adminApi.get('/metrics/daily-breakdown', { params: { date: point.date } });
+            setBreakdownData(res.data.breakdown);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     return (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
             <div className="card-header">
@@ -830,8 +930,18 @@ const MetricsSection = () => {
                         { key: 'users', label: 'Total Users', color: '#06b6d4' }
                     ]}
                     showLegend={true}
+                    onPointClick={handleClientBarClick}
                 />
             </div>
+
+            {/* Render Popup */}
+            {breakdownDate && (
+                <DailyBreakdownModal
+                    date={breakdownDate}
+                    data={breakdownData}
+                    onClose={() => { setBreakdownDate(null); setBreakdownData(null); }}
+                />
+            )}
         </div>
     );
 };
