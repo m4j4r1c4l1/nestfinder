@@ -455,7 +455,7 @@ const MetricsChart = () => {
     // Define series with colors matching Message Details Modal
     const series = [
         { key: 'notifications', label: 'Total Messages', color: '#8b5cf6' },  // Purple
-        { key: 'sent', label: 'Sent', color: '#f59e0b' },           // Amber
+        { key: 'sent', label: 'Sent', color: '#fbbf24' },           // Amber-400 (Lighter than #f59e0b)
         { key: 'delivered', label: 'Delivered', color: '#22c55e' },    // Green
         { key: 'read', label: 'Read', color: '#3b82f6' }               // Blue (like tick)
     ];
@@ -809,13 +809,16 @@ const MessagePreviewModal = ({ message, onClose }) => {
         <div
             style={{
                 position: 'fixed',
-                inset: 0,
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
                 background: 'rgba(0,0,0,0.6)',
                 backdropFilter: 'blur(5px)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                zIndex: 2000,
+                zIndex: 9999,
                 animation: 'fadeIn 0.2s ease'
             }}
             onClick={onClose}

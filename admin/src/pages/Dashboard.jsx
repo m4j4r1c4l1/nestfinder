@@ -259,7 +259,7 @@ const Dashboard = ({ onNavigate }) => {
                 <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
 
                     {/* 1. Activity Metrics */}
-                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div className="card" style={{ flex: 1.3, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📈 Activity Metrics</span>
                         </div>
@@ -272,7 +272,7 @@ const Dashboard = ({ onNavigate }) => {
                     </div>
 
                     {/* 2. Status Summary - compact */}
-                    <div className="card" style={{ flex: 0.7, display: 'flex', flexDirection: 'column' }}>
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
@@ -293,7 +293,7 @@ const Dashboard = ({ onNavigate }) => {
                     </div>
 
                     {/* 3. Database Totals - compact */}
-                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div className="card" style={{ flex: 1.4, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Metrics</span>
                         </div>
@@ -509,8 +509,8 @@ const MetricRow = ({ label, value, onClick, color }) => (
             cursor: onClick ? 'pointer' : 'default',
             transition: 'all 0.2s ease',
             borderLeft: `3px solid ${color}`,
-            flex: '0 0 auto', // Don't grow/shrink, fixed height
-            height: '36px', // Fixed height for consistency
+            flex: '1 1 auto', // Allow growing and shrinking
+            minHeight: '32px', // Minimum height to prevent total collapse
             userSelect: 'none'
         }}
         onMouseEnter={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-secondary)') : undefined}
