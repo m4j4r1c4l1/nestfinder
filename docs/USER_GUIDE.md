@@ -132,6 +132,11 @@ The main screen is the map.
 ### Adding a Point
 Help others by reporting resources!
 
+#### Point Status Flow
+Points move through different states based on community actions:
+
+<p align="center"><img src="images/point_status_flow.png" width="400" alt="Point Status Flow Diagram" /></p>
+
 1. Tap **Report** in the bottom menu.
 2. Choose a location:
    - **Current Location**: Use where you are now.
@@ -153,10 +158,7 @@ Tap any marker on the map to see details. You help the community by verifying re
 
 <p align="center"><img src="images/point_details.jpg" width="240" alt="Point Details" /></p>
 
-#### Point Status Flow
-Points move through different states based on community actions:
 
-<p align="center"><img src="images/point_status_flow.png" width="400" alt="Point Status Flow Diagram" /></p>
 
 ### Planning a Route
 Find the best walking path to visit multiple places.
