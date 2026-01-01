@@ -26,11 +26,11 @@
 
 ## ✨ Key Features
 
-- **🗺️ Interactive Map** — View resources with status markers (Verified/Pending).
+- **🗺️ Interactive Map** — View resources with status markers (Confirmed/Pending/Deactivated).
 - **📍 Easy Reporting** — Submit locations via GPS, Map Tap, or Address.
 - **🚶 Smart Routing** — [Calculate optimal walking paths](docs/ROUTE.md) to visible points.
 - **🌍 11 Languages** — Native support for EN, ES, FR, PT, IT, DE, NL, RU, AR, ZH, VAL.
-- **🔔 Real-time Alerts** — Push notifications for updates and verifications.
+- **🔔 Real-time Alerts** — In-App Push notifications for updates and news.
 - **📱 Installable App** — Add to home screen on iOS/Android (no store needed).
 - **📥 Data Export** — Download points in JSON, CSV, GPX, or KML formats.
 
@@ -75,7 +75,7 @@ No installation required! Just visit the web app.
 ### 📚 Documentation & Architecture
 
 *   **[API Reference](docs/API.md)** — Complete endpoints and usage.
-*   **[Layout Architecture](docs/LAYOUT_ARCHITECTURE.md)** — File structure and system design.
+*   **[Layout Architecture](docs/LAYOUT_ARCHITECTURE.md)** — Layout workaround.
 
 ---
 
