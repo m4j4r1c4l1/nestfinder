@@ -258,8 +258,8 @@ const Dashboard = ({ onNavigate }) => {
                 {/* Right Sidebar - Metrics + Status */}
                 <div style={{ flex: 1, minWidth: '280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
 
-                    {/* 1. Activity Metrics - 4 rows */}
-                    <div className="card" style={{ flex: 4, display: 'flex', flexDirection: 'column' }}>
+                    {/* 1. Activity Metrics - 4 rows + 1.6 header overhead = 5.6 */}
+                    <div className="card" style={{ flex: 5.6, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📈 Activity Metrics</span>
                         </div>
@@ -271,8 +271,8 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* 2. Status Summary - 3 rows */}
-                    <div className="card" style={{ flex: 3, display: 'flex', flexDirection: 'column' }}>
+                    {/* 2. Status Summary - 3 rows + 1.6 overhead = 4.6 */}
+                    <div className="card" style={{ flex: 4.6, display: 'flex', flexDirection: 'column' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📊 Status Summary</span>
                             {filteredPoints && (
@@ -292,8 +292,8 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* 3. Database Metrics - 5 rows + space for button. */}
-                    <div className="card" style={{ flex: showBackup ? 7 : 6, display: 'flex', flexDirection: 'column', transition: 'flex 0.3s ease' }}>
+                    {/* 3. Database Metrics - 5 rows + 1.6 overhead = 6.6. Backup adds ~1 row -> 7.6 */}
+                    <div className="card" style={{ flex: showBackup ? 7.6 : 6.6, display: 'flex', flexDirection: 'column', transition: 'flex 0.3s ease' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Metrics</span>
                         </div>
@@ -322,8 +322,8 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* 4. System Status - Dense info but small font. Flex 5 should be sufficient. */}
-                    <div className="card" style={{ flex: 5, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {/* 4. System Status - Matched to Activity for visual balance (5.6) */}
+                    <div className="card" style={{ flex: 5.6, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🖥️ System Status</span>
                         </div>
