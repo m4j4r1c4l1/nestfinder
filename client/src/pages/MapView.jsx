@@ -398,7 +398,7 @@ const MapView = () => {
                                 &times;
                             </button>
                         </div>
-                        <div className="card-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div className="card-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '2rem 1rem' }}>
                             <button className="btn btn-primary" onClick={() => handleDownload('json')} style={{ padding: '12px 8px' }}>
                                 📄 JSON
                             </button>
