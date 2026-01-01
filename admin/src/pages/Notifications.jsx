@@ -348,8 +348,9 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     <label className="form-label">Image</label>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <input type="text" className="form-input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL..." style={{ flex: 1 }} />
-                        <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
-                            📂 <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                        <label className="btn btn-secondary" style={{ cursor: 'pointer', padding: '0.4rem 1.5rem' }}>
+                            <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📂</span>
+                            <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
                         </label>
                     </div>
                 </div>
@@ -675,9 +676,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     };
 
     return (
-        <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
+        <div className="card" style={{ marginBottom: '1.5rem', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155', borderRadius: '8px', backdropFilter: 'blur(8px)' }}>
             {/* Header */}
-            <div className="card-header" style={{ background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
+            <div className="card-header" style={{ background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                         <span style={{ fontSize: '1.2rem' }}>{icon}</span>
@@ -692,7 +693,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
             {/* Legend */}
             {showLegend && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: '#1e293b' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: 'transparent' }}>
                     {seriesConfig.map(s => (
                         <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
                             <div style={{ width: 12, height: 12, borderRadius: '2px', background: s.color }} />
