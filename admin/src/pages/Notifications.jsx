@@ -810,7 +810,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
             style={{
                 position: 'fixed',
                 inset: 0,
-                background: 'rgba(0,0,0,0.4)',
+                background: 'rgba(0,0,0,0.6)',
                 backdropFilter: 'blur(5px)',
                 display: 'flex',
                 alignItems: 'center',
@@ -825,49 +825,46 @@ const MessagePreviewModal = ({ message, onClose }) => {
                 style={{
                     width: '90%',
                     maxWidth: '400px',
-                    background: '#ffffff', // Using light (client is light mode primarily) or #1e293b if implementing dark. 
-                    // To match "client look and feel", client notification list has background: !n.read ? 'var(--color-bg-secondary)' : 'transparent'. 
-                    // Assuming dark/light theme context, let's use a standard mobile-like card style.
-                    // The request says "reproduce the message with the same look and feel". 
-                    // Since I don't import client CSS here, I'll approximate the notification-item style.
+                    background: '#1e293b', // Dark background
                     borderRadius: '12px',
                     padding: '0',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    border: '1px solid #334155'
                 }}
             >
                 {/* Header */}
-                <div style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#334155' }}>Message Preview</h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
+                <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Message Preview</h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
                 </div>
 
                 {/* Body / Notification Item Replica */}
-                <div style={{ padding: '1.5rem', background: '#ffffff' }}>
+                <div style={{ padding: '1.5rem', background: '#1e293b' }}>
                     <div style={{
                         padding: '12px',
-                        borderBottom: '1px solid #e2e8f0',
-                        background: '#f1f5f9', // Unread bg color approximation
+                        borderBottom: '1px solid #334155',
+                        background: '#334155', // Unread bg color approximation
                         borderRadius: '8px',
                         borderLeft: '4px solid #3b82f6', // Primary color
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <span style={{ fontWeight: 'bold', color: '#1e293b', fontSize: '1rem' }}>{message.title}</span>
-                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                            <span style={{ fontWeight: 'bold', color: '#f1f5f9', fontSize: '1rem' }}>{message.title}</span>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
                                 {message.timestamp ? message.timestamp.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Just now'}
                             </span>
                         </div>
-                        <div style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.5 }}>
+                        <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5 }}>
                             {message.body}
                         </div>
                         {message.image && (
-                            <div style={{ marginTop: '0.5rem', borderRadius: '4px', overflow: 'hidden' }}>
-                                <img src={message.image} alt="Notification attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                            </div>
+                           <div style={{ marginTop: '0.5rem', borderRadius: '4px', overflow: 'hidden' }}>
+                               <img src={message.image} alt="Notification attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                           </div> 
                         )}
                     </div>
-                    <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#94a3b8' }}>
+                    <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#64748b' }}>
                         Preview of how the user sees this message
                     </div>
                 </div>
