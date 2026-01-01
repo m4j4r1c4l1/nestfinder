@@ -28,7 +28,7 @@
 
 - **🗺️ Interactive Map** — View resources with status markers (Verified/Pending).
 - **📍 Easy Reporting** — Submit locations via GPS, Map Tap, or Address.
-- **🚶 Smart Routing** — Calculate optimal walking paths to visible points.
+- **🚶 Smart Routing** — [Calculate optimal walking paths](docs/ROUTE.md) to visible points.
 - **🌍 11 Languages** — Native support for EN, ES, FR, PT, IT, DE, NL, RU, AR, ZH, VAL.
 - **🔔 Real-time Alerts** — Push notifications for updates and verifications.
 - **📱 Installable App** — Add to home screen on iOS/Android (no store needed).
@@ -71,6 +71,11 @@ No installation required! Just visit the web app.
    # Terminal 2: Client App
    cd client && npm run dev
    ```
+
+### 📚 Documentation & Architecture
+
+*   **[API Reference](docs/API.md)** — Complete endpoints and usage.
+*   **[Layout Architecture](docs/LAYOUT_ARCHITECTURE.md)** — File structure and system design.
 
 ---
 
