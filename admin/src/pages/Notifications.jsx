@@ -455,7 +455,7 @@ const MetricsChart = () => {
     // Define series with colors matching Message Details Modal
     const series = [
         { key: 'notifications', label: 'Total Messages', color: '#8b5cf6' },  // Purple
-        { key: 'sent', label: 'Sent', color: '#fbbf24' },           // Amber-400 (Lighter than #f59e0b)
+        { key: 'sent', label: 'Sent', color: '#facc15' },           // Yellow-400 (More yellowish)
         { key: 'delivered', label: 'Delivered', color: '#22c55e' },    // Green
         { key: 'read', label: 'Read', color: '#3b82f6' }               // Blue (like tick)
     ];
@@ -474,8 +474,8 @@ const MetricsChart = () => {
         <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
             {/* Header with title */}
             <div className="card-header" style={{ background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>📈 Messages Metrics Trend</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem', marginRight: 'auto' }}>📈 Messages Metrics Trend Graph</h3>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         {/* Time scope selector */}
                         <select
@@ -805,7 +805,7 @@ const HistorySection = () => {
 };
 
 const MessagePreviewModal = ({ message, onClose }) => {
-    return (
+    return ReactDOM.createPortal(
         <div
             style={{
                 position: 'fixed',
@@ -872,7 +872,8 @@ const MessagePreviewModal = ({ message, onClose }) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
