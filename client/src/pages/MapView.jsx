@@ -438,8 +438,9 @@ const MapView = () => {
                     className={`bottom-nav-item ${activeSheet === 'submit' ? 'active' : ''}`}
                     onClick={() => setActiveSheet(activeSheet === 'submit' ? null : 'submit')}
                 >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#F59E0B" style={{ display: 'block', marginBottom: '2px' }}>
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#8B4513" style={{ display: 'block', marginBottom: '2px' }}>
+                        <path d="M22 10h-6.7c-2.8 0-4.7 1.2-5.7 2.1C8.3 11.2 5.6 10 3 10c-1.1 0-2 .9-2 2v2c0 4.4 3.6 8 8 8s8-3.6 8-8v-2c0-1.1-.9-2-2-2h-3c-1.1 0-2 .9-2 2H5c.5-1.9 3.2-4 7-4 2.8 0 4.8 1.2 5.8 2.1.4-.8 1.5-1.9 2.2-2.1H22c1.1 0 2-.9 2-2s-.9-2-2-2zM4 14c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z" />
+                        <circle cx="12" cy="14" r="3" />
                     </svg>
                     {t('nav.report')}
                 </button>
