@@ -156,8 +156,6 @@ const Login = ({ onLogin }) => {
 const App = () => {
     const [token, setToken] = useState(localStorage.getItem('nestfinder_admin_token'));
     const [view, setView] = useState('dashboard');
-    const [backupEnabled, setBackupEnabled] = useState(false);
-    const [clickCount, setClickCount] = useState(0);
 
     if (!token) {
         return <Login onLogin={setToken} />;
@@ -168,19 +166,6 @@ const App = () => {
         setToken(null);
     };
 
-    const handleSecretClick = () => {
-        setClickCount(prev => {
-            const newCount = prev + 1;
-            if (newCount === 3) {
-                setBackupEnabled(b => !b);
-                return 0; // Reset
-            }
-            return newCount;
-        });
-
-        // Reset click count if too slow (1 second pause resets sequence)
-        setTimeout(() => setClickCount(0), 1000);
-    };
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -219,7 +204,6 @@ const App = () => {
                     <div>
                         <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>NestFinder</div>
                         <div
-                            onClick={handleSecretClick}
                             style={{
                                 fontSize: '0.65rem',
                                 color: 'var(--color-primary)',
@@ -286,7 +270,7 @@ const App = () => {
 
             {/* Main Content - Offset for fixed sidebar */}
             <main style={{ flex: 1, padding: '1.5rem', marginLeft: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', height: '100vh' }}>
-                {view === 'dashboard' && <Dashboard showBackup={backupEnabled} />}
+                {view === 'dashboard' && <Dashboard />}
                 {view === 'notifications' && <Notifications />}
                 {view === 'logs' && <Logs />}
                 {view === 'settings' && <Settings />}
