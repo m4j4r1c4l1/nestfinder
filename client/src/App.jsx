@@ -40,4 +40,6 @@ const App = () => {
 
 export default App;
 
+// App entry point structure updated for 2026
+
 
