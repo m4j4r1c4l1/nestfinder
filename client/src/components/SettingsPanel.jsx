@@ -64,13 +64,15 @@ const SettingsPanel = ({ onClose }) => {
                         background: 'white',
                         borderRadius: 'var(--radius-md)',
                         marginBottom: 'var(--space-3)',
-                        width: 'fit-content',
-                        margin: '0 auto var(--space-3) auto'
+                        width: '250px',
+                        margin: '0 auto var(--space-3) auto',
+                        display: 'flex',
+                        justifyContent: 'center'
                     }}>
                         <div style={{ position: 'relative', display: 'inline-block' }}>
                             <QRCodeCanvas
                                 value={APP_URL}
-                                size={160}
+                                size={200}
                                 level="H"
                                 bgColor="white"
                                 fgColor="#1e293b"
@@ -96,6 +98,11 @@ const SettingsPanel = ({ onClose }) => {
                         </div>
                     </div>
 
+                    {/* Engagement Text */}
+                    <div style={{ textAlign: 'center', margin: '0 auto var(--space-3)', color: 'var(--color-text-secondary)', fontSize: '0.9rem', width: '250px' }}>
+                        Spread the warmth! 🤝
+                    </div>
+
                     {/* Copy Link Button */}
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <div
@@ -108,7 +115,7 @@ const SettingsPanel = ({ onClose }) => {
                                 justifyContent: 'center',
                                 gap: '0.5rem',
                                 padding: '0.75rem 1.5rem',
-                                minWidth: '220px',
+                                minWidth: '250px',
                                 background: showCopied ? 'var(--color-confirmed)' : 'var(--color-primary)',
                                 color: 'white',
                                 border: 'none',
