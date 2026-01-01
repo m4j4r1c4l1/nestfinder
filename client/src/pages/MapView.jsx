@@ -90,14 +90,14 @@ const MapView = () => {
         }
     }, [toast]);
 
-    const showToast = (message, type = 'success', overrideIcon = null) => {
+    const showToast = (message, type = 'success', overrideIcon = null, forceSingleLine = false) => {
         // Default icons based on type
         let icon = overrideIcon;
         if (!icon) {
             if (type === 'success') icon = '✔';
             if (type === 'error') icon = '🙈';
         }
-        setToast({ message, type, icon });
+        setToast({ message, type, icon, forceSingleLine });
     };
 
     const handlePointClick = (point) => {
@@ -196,7 +196,8 @@ const MapView = () => {
                     flexDirection: 'row',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    maxWidth: '90%'
+                    maxWidth: '90%',
+                    whiteSpace: toast.forceSingleLine ? 'nowrap' : 'normal'
                 }}>
                     <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{toast.icon}</span>
                     <span>{toast.message}</span>
@@ -268,7 +269,7 @@ const MapView = () => {
                                 setToast(null);
                                 getCurrentLocation()
                                     .then(() => {
-                                        showToast(t('geo.locationEnabled'), 'success', '🗺️');
+                                        showToast(t('geo.locationEnabled'), 'success', '🗺️', true);
                                     })
                                     .catch(err => {
                                         console.error('Location error:', err);
