@@ -455,7 +455,7 @@ const MetricsChart = () => {
     // Define series with colors matching Message Details Modal
     const series = [
         { key: 'notifications', label: 'Total Messages', color: '#8b5cf6' },  // Purple
-        { key: 'sent', label: 'Sent', color: '#f97316' },           // Orange
+        { key: 'sent', label: 'Sent', color: '#f59e0b' },           // Amber
         { key: 'delivered', label: 'Delivered', color: '#22c55e' },    // Green
         { key: 'read', label: 'Read', color: '#3b82f6' }               // Blue (like tick)
     ];
@@ -650,6 +650,7 @@ const HistorySection = () => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedBatchId, setSelectedBatchId] = useState(null);
+    const [previewMessage, setPreviewMessage] = useState(null);
 
     useEffect(() => {
         loadHistory();
@@ -697,6 +698,7 @@ const HistorySection = () => {
                     >
                         🗑️ Clear History
                     </button>
+                    <button onClick={loadHistory} className="btn btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
@@ -717,7 +719,6 @@ const HistorySection = () => {
                                 const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
                                 // Use DateTimeCell logic here manually or reuse if refactored. 
                                 // Since DateTimeCell is inside Modal, let's duplicate the fix logic here or assume local fix.
-                                // NOTE: DateTimeCell is now inside DetailModal in my previous step, I should have moved it out.
                                 // I will implement inline fix here.
                                 let safeIso = log.created_at;
                                 if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
@@ -727,33 +728,31 @@ const HistorySection = () => {
                                 return (
                                     <tr
                                         key={log.id}
-                                        onClick={() => {
-                                            if (log.target_id) setSelectedBatchId(log.target_id);
-                                        }}
                                         style={{
                                             borderBottom: '1px solid #334155',
-                                            cursor: log.target_id ? 'pointer' : 'default',
                                             transition: 'all 0.2s ease',
                                             background: 'transparent'
                                         }}
                                         className="history-row"
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.1)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'transparent';
-                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                     >
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
-                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                        <td
+                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date })}
+                                        >
                                             <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
                                         </td>
-                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                        <td
+                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date })}
+                                        >
                                             <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                                                 {meta.body ? (meta.body.length > 55 ? meta.body.substring(0, 55) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
                                             </div>
@@ -769,10 +768,17 @@ const HistorySection = () => {
                                             </span>
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
-                                            <span style={{
-                                                background: 'rgba(74, 222, 128, 0.15)', color: '#4ade80', // Light Green as requested
-                                                padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 500, border: '1px solid rgba(74, 222, 128, 0.2)'
-                                            }}>
+                                            <span
+                                                onClick={() => {
+                                                    if (log.target_id) setSelectedBatchId(log.target_id);
+                                                }}
+                                                style={{
+                                                    background: 'rgba(74, 222, 128, 0.15)', color: '#4ade80', // Light Green as requested
+                                                    padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 500,
+                                                    border: '1px solid rgba(74, 222, 128, 0.2)',
+                                                    cursor: log.target_id ? 'pointer' : 'default'
+                                                }}
+                                            >
                                                 {meta.count} users
                                             </span>
                                         </td>
@@ -789,6 +795,83 @@ const HistorySection = () => {
             {selectedBatchId && (
                 <DetailModal batchId={selectedBatchId} onClose={() => setSelectedBatchId(null)} />
             )}
+
+            {/* Message Preview Modal */}
+            {previewMessage && (
+                <MessagePreviewModal message={previewMessage} onClose={() => setPreviewMessage(null)} />
+            )}
+        </div>
+    );
+};
+
+const MessagePreviewModal = ({ message, onClose }) => {
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.4)',
+                backdropFilter: 'blur(5px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 2000,
+                animation: 'fadeIn 0.2s ease'
+            }}
+            onClick={onClose}
+        >
+            <div
+                onClick={e => e.stopPropagation()}
+                style={{
+                    width: '90%',
+                    maxWidth: '400px',
+                    background: '#ffffff', // Using light (client is light mode primarily) or #1e293b if implementing dark. 
+                    // To match "client look and feel", client notification list has background: !n.read ? 'var(--color-bg-secondary)' : 'transparent'. 
+                    // Assuming dark/light theme context, let's use a standard mobile-like card style.
+                    // The request says "reproduce the message with the same look and feel". 
+                    // Since I don't import client CSS here, I'll approximate the notification-item style.
+                    borderRadius: '12px',
+                    padding: '0',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    overflow: 'hidden'
+                }}
+            >
+                {/* Header */}
+                <div style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#334155' }}>Message Preview</h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
+                </div>
+
+                {/* Body / Notification Item Replica */}
+                <div style={{ padding: '1.5rem', background: '#ffffff' }}>
+                    <div style={{
+                        padding: '12px',
+                        borderBottom: '1px solid #e2e8f0',
+                        background: '#f1f5f9', // Unread bg color approximation
+                        borderRadius: '8px',
+                        borderLeft: '4px solid #3b82f6', // Primary color
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span style={{ fontWeight: 'bold', color: '#1e293b', fontSize: '1rem' }}>{message.title}</span>
+                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                                {message.timestamp ? message.timestamp.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                            </span>
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.5 }}>
+                            {message.body}
+                        </div>
+                        {message.image && (
+                            <div style={{ marginTop: '0.5rem', borderRadius: '4px', overflow: 'hidden' }}>
+                                <img src={message.image} alt="Notification attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                            </div>
+                        )}
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#94a3b8' }}>
+                        Preview of how the user sees this message
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
