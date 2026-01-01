@@ -165,6 +165,27 @@ router.get('/metrics/history', (req, res) => {
     res.json({ metrics });
 });
 
+// Get daily breakdown of actions (for specific date)
+router.get('/metrics/daily-breakdown', (req, res) => {
+    const { date } = req.query; // YYYY-MM-DD
+
+    if (!date) {
+        return res.status(400).json({ error: 'Date required' });
+    }
+
+    // Breakdown: Count distinct users per action for this date
+    // This answers: "Of the users active today, how many did X?"
+    const breakdown = all(`
+        SELECT action, COUNT(DISTINCT user_id) as count 
+        FROM logs 
+        WHERE date(created_at) = ? 
+        GROUP BY action
+        ORDER BY count DESC
+    `, [date]);
+
+    res.json({ breakdown });
+});
+
 // Get distinct log actions for filters
 router.get('/logs/actions', (req, res) => {
     // Select distinct actions for autocomplete
