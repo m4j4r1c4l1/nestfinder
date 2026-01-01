@@ -150,7 +150,7 @@ const Notifications = () => {
             <ComposeSection subscribers={subscribers} totalSubscribers={stats.totalSubscribers} onSent={loadStats} />
 
             {/* Metrics Chart Section */}
-            <MetricsChart />
+            <MetricsSection />
 
             {/* History Section */}
             <HistorySection />
@@ -491,13 +491,13 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
     );
 };
 
-// Grafana-style Metrics Chart Component with interactive tooltips and controls
-const MetricsChart = () => {
+// Reusable Chart Card Component with independent state
+const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true }) => {
     const [metrics, setMetrics] = useState([]);
     const [loading, setLoading] = useState(true);
     const [days, setDays] = useState(7);
-    const [refreshInterval, setRefreshInterval] = useState(0); // 0 = off
-    const [hoveredPoint, setHoveredPoint] = useState(null); // { index, x, y }
+    const [refreshInterval, setRefreshInterval] = useState(0);
+    const [hoveredPoint, setHoveredPoint] = useState(null);
 
     const fetchMetrics = async () => {
         try {
@@ -527,92 +527,161 @@ const MetricsChart = () => {
         }
     }, [refreshInterval, days]);
 
-    if (loading || metrics.length === 0) {
-        return (
-            <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
-                <div className="card-header" style={{ background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
-                    <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>📈 Messages Metrics Trend</h3>
-                </div>
-                <div className="card-body" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-                    {loading ? 'Loading...' : 'No data available'}
-                </div>
-            </div>
-        );
-    }
-
-    // Chart configuration
+    // Chart Dimensions
     const chartWidth = 800;
     const chartHeight = 220;
     const padding = { top: 20, right: 20, bottom: 40, left: 50 };
     const graphWidth = chartWidth - padding.left - padding.right;
     const graphHeight = chartHeight - padding.top - padding.bottom;
 
-    // Define series with colors matching Message Details Modal
-    const series = [
-        { key: 'notifications', label: 'Total Messages', color: '#8b5cf6' },  // Purple
-        { key: 'sent', label: 'Sent', color: '#facc15' },           // Yellow-400 (More yellowish)
-        { key: 'delivered', label: 'Delivered', color: '#22c55e' },    // Green
-        { key: 'read', label: 'Read', color: '#3b82f6' }               // Blue (like tick)
-    ];
+    // Helper functions
+    const getX = (i) => (i / (metrics.length - 1 || 1)) * graphWidth;
+    const getY = (val, max) => graphHeight - ((val / max) * graphHeight);
+
+    if (loading || metrics.length === 0) {
+        return (
+            <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>{icon}</span>
+                        <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>{title}</h3>
+                    </div>
+                    {renderControls()}
+                </div>
+                <div className="card-body" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                    {loading ? 'Loading...' : 'No metrics data available'}
+                </div>
+            </div>
+        );
+    }
 
     // Calculate scales
-    const allValues = series.flatMap(s => metrics.map(m => m[s.key] || 0));
-    const maxY = Math.max(...allValues, 1);
-    const minY = 0;
-    const yScale = (val) => graphHeight - ((val - minY) / (maxY - minY)) * graphHeight;
-    const xScale = (i) => (i / (metrics.length - 1 || 1)) * graphWidth;
+    const allValues = seriesConfig.flatMap(s => metrics.map(m => m[s.key] || 0));
+    const maxY = Math.max(...allValues, 5); // Minimum non-zero scale
 
-    // Generate grid lines
+    // Grid lines
     const gridLinesY = 5;
+
+    function renderControls() {
+        return (
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <select
+                    value={days}
+                    onChange={(e) => setDays(parseInt(e.target.value))}
+                    style={{
+                        background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
+                        borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
+                    }}
+                >
+                    <option value={7}>7 Days</option>
+                    <option value={14}>14 Days</option>
+                    <option value={30}>30 Days</option>
+                </select>
+                <select
+                    value={refreshInterval}
+                    onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
+                    style={{
+                        background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
+                        borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
+                    }}
+                >
+                    <option value={0}>Refresh: Off</option>
+                    <option value={30}>30s</option>
+                    <option value={60}>1m</option>
+                </select>
+            </div>
+        );
+    }
+
+    const renderLineChart = () => (
+        <g>
+            {seriesConfig.map(s => {
+                const points = metrics.map((m, i) => `${getX(i)},${getY(m[s.key] || 0, maxY)}`).join(' ');
+                const areaPoints = `0,${graphHeight} ${points} ${graphWidth},${graphHeight}`;
+                return (
+                    <g key={s.key}>
+                        <defs>
+                            <linearGradient id={`gradient-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={s.color} stopOpacity="0.3" />
+                                <stop offset="100%" stopColor={s.color} stopOpacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <polygon points={areaPoints} fill={`url(#gradient-${s.key})`} />
+                        <polyline points={points} fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        {metrics.map((m, i) => (
+                            <circle
+                                key={i}
+                                cx={getX(i)}
+                                cy={getY(m[s.key] || 0, maxY)}
+                                r={hoveredPoint?.index === i ? 5 : 3}
+                                fill={hoveredPoint?.index === i ? s.color : '#1e293b'}
+                                stroke={s.color}
+                                strokeWidth="2"
+                                style={{ transition: 'r 0.1s ease', opacity: hoveredPoint && hoveredPoint.index !== i ? 0.5 : 1 }}
+                            />
+                        ))}
+                    </g>
+                );
+            })}
+        </g>
+    );
+
+    const renderBarChart = () => {
+        const barWidth = (graphWidth / metrics.length) * 0.6;
+        const xOffset = (graphWidth / metrics.length) / 2;
+
+        return (
+            <g>
+                {metrics.map((m, i) => {
+                    const val = m[seriesConfig[0].key] || 0;
+                    const h = (val / maxY) * graphHeight;
+                    const x = getX(i) - (barWidth / 2);
+                    const y = graphHeight - h;
+                    const color = seriesConfig[0].color;
+                    const isHovered = hoveredPoint?.index === i;
+
+                    return (
+                        <g key={i}>
+                            <rect
+                                x={x} y={y} width={barWidth} height={h}
+                                fill={color}
+                                rx="2" ry="2"
+                                opacity={isHovered ? 1 : 0.8}
+                                style={{ transition: 'opacity 0.2s' }}
+                            />
+                        </g>
+                    );
+                })}
+            </g>
+        );
+    };
 
     return (
         <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
-            {/* Header with title */}
+            {/* Header */}
             <div className="card-header" style={{ background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem', marginRight: 'auto' }}>📈 Messages Metrics Trend Graph</h3>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        {/* Time scope selector */}
-                        <select
-                            value={days}
-                            onChange={(e) => setDays(parseInt(e.target.value))}
-                            style={{
-                                background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
-                                borderRadius: '4px', padding: '0.25rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
-                            }}
-                        >
-                            <option value={7}>7 Days</option>
-                            <option value={14}>14 Days</option>
-                            <option value={30}>30 Days</option>
-                        </select>
-                        {/* Refresh interval selector */}
-                        <select
-                            value={refreshInterval}
-                            onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
-                            style={{
-                                background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
-                                borderRadius: '4px', padding: '0.25rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
-                            }}
-                        >
-                            <option value={0}>Auto-refresh: Off</option>
-                            <option value={30}>Every 30s</option>
-                            <option value={60}>Every 1m</option>
-                            <option value={300}>Every 5m</option>
-                        </select>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>{icon}</span>
+                        <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem', fontWeight: 600 }}>{title}</h3>
                     </div>
+                    {renderControls()}
                 </div>
             </div>
 
-            {/* Legend - separated from title */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: '#1e293b' }}>
-                {series.map(s => (
-                    <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-                        <div style={{ width: 14, height: 3, background: s.color, borderRadius: 2 }} />
-                        <span style={{ color: '#94a3b8' }}>{s.label}</span>
-                    </div>
-                ))}
-            </div>
+            {/* Legend */}
+            {showLegend && seriesConfig.length > 1 && (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: '#1e293b' }}>
+                    {seriesConfig.map(s => (
+                        <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+                            <div style={{ width: 12, height: 12, borderRadius: '2px', background: s.color }} />
+                            <span style={{ color: '#94a3b8' }}>{s.label}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
 
+            {/* Graph Body */}
             <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative' }}>
                 <svg
                     width="100%"
@@ -620,91 +689,41 @@ const MetricsChart = () => {
                     style={{ minWidth: 600 }}
                     onMouseLeave={() => setHoveredPoint(null)}
                 >
-                    <defs>
-                        {series.map(s => (
-                            <linearGradient key={s.key} id={`gradient-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor={s.color} stopOpacity="0.3" />
-                                <stop offset="100%" stopColor={s.color} stopOpacity="0" />
-                            </linearGradient>
-                        ))}
-                    </defs>
-
                     <g transform={`translate(${padding.left}, ${padding.top})`}>
-                        {/* Grid lines */}
+                        {/* Y-Axis Grid & Labels */}
                         {Array.from({ length: gridLinesY + 1 }, (_, i) => {
                             const y = (i / gridLinesY) * graphHeight;
                             const val = Math.round(maxY - (i / gridLinesY) * maxY);
                             return (
                                 <g key={i}>
                                     <line x1={0} y1={y} x2={graphWidth} y2={y} stroke="#334155" strokeWidth="1" strokeDasharray="4,4" />
-                                    <text x={-8} y={y + 4} textAnchor="end" fill="#64748b" fontSize="10">{val}</text>
+                                    <text x={-10} y={y + 4} textAnchor="end" fill="#64748b" fontSize="10">{val.toLocaleString()}</text>
                                 </g>
                             );
                         })}
 
-                        {/* X-axis labels */}
+                        {/* X-Axis Labels */}
                         {metrics.map((m, i) => (
-                            <text key={i} x={xScale(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
+                            <text key={i} x={getX(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
                                 {new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </text>
                         ))}
 
-                        {/* Hover detection areas */}
+                        {/* Render Chart Type */}
+                        {type === 'bar' ? renderBarChart() : renderLineChart()}
+
+                        {/* Hover Overlay Columns */}
                         {metrics.map((m, i) => (
                             <rect
-                                key={`hover-${i}`}
-                                x={xScale(i) - graphWidth / metrics.length / 2}
+                                key={`hover-col-${i}`}
+                                x={getX(i) - (graphWidth / metrics.length) / 2}
                                 y={0}
                                 width={graphWidth / metrics.length}
                                 height={graphHeight}
                                 fill="transparent"
-                                onMouseEnter={() => setHoveredPoint({ index: i, x: xScale(i) })}
+                                onMouseEnter={() => setHoveredPoint({ index: i, x: getX(i) })}
                             />
                         ))}
-
-                        {/* Vertical hover line */}
-                        {hoveredPoint !== null && (
-                            <line
-                                x1={hoveredPoint.x}
-                                y1={0}
-                                x2={hoveredPoint.x}
-                                y2={graphHeight}
-                                stroke="#64748b"
-                                strokeWidth="1"
-                                strokeDasharray="4,4"
-                            />
-                        )}
-
-                        {/* Lines and areas for each series */}
-                        {series.map(s => {
-                            const points = metrics.map((m, i) => `${xScale(i)},${yScale(m[s.key] || 0)}`).join(' ');
-                            const areaPoints = `0,${graphHeight} ${points} ${graphWidth},${graphHeight}`;
-                            return (
-                                <g key={s.key}>
-                                    <polygon points={areaPoints} fill={`url(#gradient-${s.key})`} />
-                                    <polyline
-                                        points={points}
-                                        fill="none"
-                                        stroke={s.color}
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                    {metrics.map((m, i) => (
-                                        <circle
-                                            key={i}
-                                            cx={xScale(i)}
-                                            cy={yScale(m[s.key] || 0)}
-                                            r={hoveredPoint?.index === i ? 6 : 4}
-                                            fill={hoveredPoint?.index === i ? s.color : '#1e293b'}
-                                            stroke={s.color}
-                                            strokeWidth="2"
-                                            style={{ transition: 'r 0.1s ease' }}
-                                        />
-                                    ))}
-                                </g>
-                            );
-                        })}
                     </g>
                 </svg>
 
@@ -713,33 +732,68 @@ const MetricsChart = () => {
                     <div style={{
                         position: 'absolute',
                         left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
+                        top: '10px',
                         transform: hoveredPoint.index > metrics.length * 0.6 ? 'translateX(calc(-100% - 15px))' : 'translateX(15px)',
-                        top: '20px',
                         background: '#0f172a',
                         border: '1px solid #334155',
                         borderRadius: '8px',
                         padding: '0.75rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                        zIndex: 10,
-                        minWidth: '140px',
-                        pointerEvents: 'none', // Prevent flickering if mouse crosses tooltip
-                        transition: 'transform 0.1s ease-out, left 0.1s ease-out'
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                        zIndex: 20,
+                        pointerEvents: 'none',
+                        minWidth: '120px'
                     }}>
-                        <div style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: '0.5rem', borderBottom: '1px solid #334155', paddingBottom: '0.5rem' }}>
+                        <div style={{ color: '#e2e8f0', fontWeight: 600, borderBottom: '1px solid #334155', marginBottom: '0.5rem', paddingBottom: '0.2rem', fontSize: '0.9rem' }}>
                             {new Date(metrics[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </div>
-                        {series.map(s => (
-                            <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color }} />
-                                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{s.label}</span>
+                        {seriesConfig.map(s => (
+                            <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
+                                    <span style={{ width: 8, height: 8, background: s.color, borderRadius: '50%' }} />
+                                    {s.label}
                                 </span>
-                                <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{metrics[hoveredPoint.index][s.key] || 0}</span>
+                                <span style={{ color: '#fff', fontWeight: 500 }}>
+                                    {(metrics[hoveredPoint.index][s.key] || 0).toLocaleString()}
+                                </span>
                             </div>
                         ))}
                     </div>
                 )}
             </div>
+        </div>
+    );
+};
+
+const MetricsSection = () => {
+    return (
+        <div style={{ marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                📉 Metrics Trends Graphs
+            </h2>
+
+            {/* Messages Graph */}
+            <ChartCard
+                title="Messages Volume"
+                icon="📨"
+                type="line"
+                seriesConfig={[
+                    { key: 'notifications', label: 'Total', color: '#8b5cf6' },
+                    { key: 'sent', label: 'Sent', color: '#facc15' },
+                    { key: 'delivered', label: 'Delivered', color: '#22c55e' },
+                    { key: 'read', label: 'Read', color: '#3b82f6' }
+                ]}
+            />
+
+            {/* Clients Graph */}
+            <ChartCard
+                title="Connected Clients (Users)"
+                icon="👥"
+                type="bar"
+                seriesConfig={[
+                    { key: 'users', label: 'Total Users', color: '#06b6d4' } // Cyan-500
+                ]}
+                showLegend={false}
+            />
         </div>
     );
 };
