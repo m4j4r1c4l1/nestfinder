@@ -292,7 +292,7 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* 3. Database Metrics - 5 rows + space for button. Base flex 6 to be safe. */}
+                    {/* 3. Database Metrics - 5 rows + space for button. */}
                     <div className="card" style={{ flex: showBackup ? 7 : 6, display: 'flex', flexDirection: 'column', transition: 'flex 0.3s ease' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Metrics</span>
@@ -322,8 +322,8 @@ const Dashboard = ({ onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* 4. System Status - Many lines (OS, Host, IPs, Node, Uptime, Memory x2, Load). Needs significant space. */}
-                    <div className="card" style={{ flex: 8, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {/* 4. System Status - Dense info but small font. Flex 5 should be sufficient. */}
+                    <div className="card" style={{ flex: 5, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🖥️ System Status</span>
                         </div>
