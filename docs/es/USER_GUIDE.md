@@ -132,6 +132,11 @@ La pantalla principal es el mapa.
 ### Añadir un Punto
 ¡Ayuda a otros reportando recursos!
 
+#### Flujo de Estados de Puntos
+Los puntos pasan por diferentes estados según las acciones de la comunidad:
+
+<p align="center"><img src="../images/point_status_flow_es.png" width="400" alt="Diagrama de Flujo de Estados" /></p>
+
 1. Toca **Reportar** en el menú inferior.
 2. Elige una ubicación:
    - **Ubicación Actual**: Usa donde estás ahora.
@@ -153,10 +158,7 @@ La pantalla principal es el mapa.
 
 <p align="center"><img src="../images/point_details.jpg" width="240" alt="Detalles del Punto" /></p>
 
-#### Flujo de Estados de Puntos
-Los puntos pasan por diferentes estados según las acciones de la comunidad:
 
-<p align="center"><img src="../images/point_status_flow_es.png" width="400" alt="Diagrama de Flujo de Estados" /></p>
 
 ### Planificar una Ruta
 Encuentra el mejor camino a pie para visitar múltiples lugares.
