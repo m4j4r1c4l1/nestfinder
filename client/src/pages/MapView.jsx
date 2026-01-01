@@ -196,7 +196,6 @@ const MapView = () => {
                     flexDirection: 'row',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    whiteSpace: 'nowrap',
                     maxWidth: '90%'
                 }}>
                     <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{toast.icon}</span>
