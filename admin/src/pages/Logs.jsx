@@ -195,7 +195,7 @@ const Logs = () => {
                                 return (
                                     <tr key={log.id} style={{ borderBottom: '1px solid #334155' }}>
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
                                                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                                             </div>
@@ -205,7 +205,6 @@ const Logs = () => {
                                                 padding: '0.25rem 0.5rem',
                                                 borderRadius: '4px',
                                                 fontWeight: 500,
-                                                fontSize: '0.85rem',
                                                 ...getActionStyle(log.action)
                                             }}>
                                                 {log.action}
