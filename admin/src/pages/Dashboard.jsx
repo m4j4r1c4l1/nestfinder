@@ -263,7 +263,7 @@ const Dashboard = ({ onNavigate }) => {
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📈 Activity Metrics</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <div className="card-body" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, justifyContent: 'space-between' }}>
                             <MetricRow label="Total Points" value={stats.totalPoints} onClick={() => handleStatClick('totalPoints')} color="var(--color-primary)" />
                             <MetricRow label="Active Users (7d)" value={stats.activeUsers} onClick={() => handleStatClick('activeUsers')} color="var(--color-confirmed)" />
                             <MetricRow label="New Reports Today" value={stats.todaySubmissions} onClick={() => handleStatClick('todayReports')} color="var(--color-pending)" />
@@ -297,7 +297,7 @@ const Dashboard = ({ onNavigate }) => {
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Metrics</span>
                         </div>
-                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                        <div className="card-body" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1, justifyContent: 'space-between' }}>
                             <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
                             <MetricRow label="Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
                             <MetricRow label="Unread" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
@@ -508,7 +508,9 @@ const MetricRow = ({ label, value, onClick, color }) => (
             borderRadius: 'var(--radius-md)',
             cursor: onClick ? 'pointer' : 'default',
             transition: 'all 0.2s ease',
-            borderLeft: `3px solid ${color}`
+            borderLeft: `3px solid ${color}`,
+            flex: 1,
+            userSelect: 'none'
         }}
         onMouseEnter={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-secondary)') : undefined}
         onMouseLeave={onClick ? (e => e.currentTarget.style.background = 'var(--color-bg-tertiary)') : undefined}
