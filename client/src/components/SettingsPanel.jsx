@@ -37,6 +37,58 @@ const SettingsPanel = ({ onClose }) => {
         }
     };
 
+    const carouselRef = React.useRef(null);
+
+    // Slot Machine Spin Animation on Mount
+    useEffect(() => {
+        if (!carouselRef.current) return;
+
+        const container = carouselRef.current;
+        const totalItems = availableLanguages.length;
+        const selectedIndex = availableLanguages.findIndex(l => l.code === language);
+        if (selectedIndex === -1) return;
+
+        // Estimate item height including gap (approx 80px + 0.5rem gap)
+        const scrollHeight = container.scrollHeight;
+        const itemHeight = scrollHeight / totalItems;
+        const targetScroll = selectedIndex * itemHeight;
+
+        // Animation Helpers
+        const durationSpin = 600; // Fast spin down
+        const durationLand = 1500; // Slow landing
+        const startTime = performance.now();
+
+        // Easing: easeOutCubic (1 - pow(1 - x, 3))
+        const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
+        const linear = (x) => x;
+
+        const animate = (time) => {
+            const elapsed = time - startTime;
+
+            // Phase 1: Spin to bottom
+            if (elapsed < durationSpin) {
+                const progress = linear(elapsed / durationSpin);
+                container.scrollTop = progress * (scrollHeight - container.clientHeight);
+                requestAnimationFrame(animate);
+            }
+            // Phase 2: Land on target (Reset to 0, then scroll to target)
+            else if (elapsed < (durationSpin + durationLand)) {
+                // If just started phase 2, we "looped" visually (jump to top)
+                const landElapsed = elapsed - durationSpin;
+                const progress = easeOutCubic(landElapsed / durationLand);
+
+                // We simulate wrapping by resetting logic, but here we just scroll from 0 to target
+                container.scrollTop = progress * targetScroll;
+                requestAnimationFrame(animate);
+            } else {
+                // Final ensure
+                container.scrollTop = targetScroll;
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }, []); // Run on mount
+
 
 
     return (
@@ -192,19 +244,25 @@ const SettingsPanel = ({ onClose }) => {
                         ↕️ Scroll to view all languages
                     </div>
 
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 'var(--space-2)',
-                        maxHeight: '250px',
-                        overflowY: 'auto',
-                        scrollSnapType: 'y mandatory',
-                        paddingRight: '0.5rem',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-md)',
-                        padding: 'var(--space-2)',
-                        background: 'rgba(0,0,0,0.02)'
-                    }}>
+                    <div
+                        ref={carouselRef}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 'var(--space-2)',
+                            maxHeight: '250px',
+                            overflowY: 'auto',
+                            scrollSnapType: 'y mandatory',
+                            paddingRight: '0.5rem',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: 'var(--radius-md)',
+                            padding: 'var(--space-2)',
+                            background: 'rgba(0,0,0,0.02)',
+                            // Slot Machine Depth
+                            boxShadow: 'inset 0 10px 20px -10px rgba(0,0,0,0.3), inset 0 -10px 20px -10px rgba(0,0,0,0.3)',
+                            position: 'relative'
+                        }}
+                    >
                         {availableLanguages.map(lang => (
                             <button
                                 type="button"
@@ -226,7 +284,8 @@ const SettingsPanel = ({ onClose }) => {
                                     transition: 'all var(--transition-fast)',
                                     color: 'var(--color-text)',
                                     flexShrink: 0,
-                                    scrollSnapAlign: 'start'
+                                    scrollSnapAlign: 'start',
+                                    minHeight: '80px'
                                 }}
                             >
                                 <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>

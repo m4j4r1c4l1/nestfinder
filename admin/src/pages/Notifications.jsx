@@ -694,12 +694,25 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             {/* Legend */}
             {showLegend && (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: 'transparent' }}>
-                    {seriesConfig.map(s => (
-                        <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-                            <div style={{ width: 12, height: 12, borderRadius: '2px', background: s.color }} />
-                            <span style={{ color: '#94a3b8' }}>{s.label}</span>
-                        </div>
-                    ))}
+                    {seriesConfig.map(s => {
+                        // Check if this is our Heat Bar chart (Connected Clients)
+                        const isHeatBar = type === 'bar' && seriesConfig.length === 1; // Simplest detection for now based on config
+
+                        return (
+                            <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+                                {/* Legend Icon: Gradient for HeatMap, Solid for Lines */}
+                                <div style={{
+                                    width: isHeatBar ? 24 : 12, // Wider for gradient
+                                    height: 12,
+                                    borderRadius: '2px',
+                                    background: isHeatBar
+                                        ? 'linear-gradient(to right, #3b82f6, #06b6d4, #84cc16, #facc15, #ef4444)' // Heat gradient
+                                        : s.color
+                                }} />
+                                <span style={{ color: '#94a3b8' }}>{s.label}</span>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
 
