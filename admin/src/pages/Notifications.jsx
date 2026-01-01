@@ -975,11 +975,11 @@ const DetailModal = ({ batchId, onClose }) => {
                 </div>
 
                 {/* Scrollable Table Area */}
-                <div style={{ padding: '0 1.5rem 1.5rem', overflowY: 'auto', flex: 1 }}>
+                <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Loading details...</div>
                     ) : details ? (
-                        <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'hidden' }}>
+                        <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'auto', flex: 1 }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                 <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
                                     <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
