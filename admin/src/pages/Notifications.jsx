@@ -493,7 +493,7 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
 };
 
 // Modal for Daily Breakdown
-const DailyBreakdownModal = ({ date, data, onClose }) => {
+const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
     // Handle loading state
     if (!data) {
         return ReactDOM.createPortal(
@@ -552,6 +552,11 @@ const DailyBreakdownModal = ({ date, data, onClose }) => {
                         <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                             {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </span>
+                        {totalUsers !== undefined && (
+                            <div style={{ fontSize: '0.85rem', color: '#60a5fa', marginTop: '0.25rem', fontWeight: 500 }}>
+                                Total Active Users: {totalUsers}
+                            </div>
+                        )}
                     </div>
                     <button onClick={onClose} style={{
                         background: 'transparent', border: 'none', color: '#cbd5e1', fontSize: '1.5rem', cursor: 'pointer',
@@ -906,9 +911,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                             }
 
                             return (
-                                <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
-                                        <span style={{ width: 8, height: 8, background: tipColor, borderRadius: '50%' }} />
+                                <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem', gap: '1rem' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                                        <span style={{ width: 8, height: 8, background: tipColor, borderRadius: '50%', flexShrink: 0 }} />
                                         {s.label}
                                     </span>
                                     <span style={{ color: '#fff', fontWeight: 500 }}>
@@ -927,9 +932,11 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 const MetricsSection = () => {
     const [breakdownDate, setBreakdownDate] = useState(null);
     const [breakdownData, setBreakdownData] = useState(null);
+    const [breakdownTotal, setBreakdownTotal] = useState(0);
 
     const handleClientBarClick = async (point) => {
         setBreakdownDate(point.date);
+        setBreakdownTotal(point.users || 0); // Capture the Users metric from the bar point
         try {
             // Fix: Use adminApi.fetch instead of .get, and correct path if needed
             // Assuming /admin/metrics/daily-breakdown based on history endpoint
@@ -982,6 +989,7 @@ const MetricsSection = () => {
                 <DailyBreakdownModal
                     date={breakdownDate}
                     data={breakdownData}
+                    totalUsers={breakdownTotal}
                     onClose={() => { setBreakdownDate(null); setBreakdownData(null); }}
                 />
             )}
