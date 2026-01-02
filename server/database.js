@@ -42,6 +42,13 @@ export const initDatabase = async () => {
     // Column likely already exists
   }
 
+  // Migration: Add recovery_key if missing
+  try {
+    db.run("ALTER TABLE users ADD COLUMN recovery_key TEXT");
+  } catch (error) {
+    // Column likely already exists
+  }
+
   db.run(`
     -- Points table (locations submitted by users)
     CREATE TABLE IF NOT EXISTS points (

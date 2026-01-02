@@ -133,6 +133,90 @@ router.post('/admin/login', adminLoginLimiter, (req, res) => {
     });
 });
 
+// ================== RECOVERY KEY SYSTEM ==================
+
+// Word list for 3-word recovery keys (110 words = ~130k combinations)
+const RECOVERY_WORDS = [
+    'nest', 'bird', 'wing', 'feather', 'sky', 'tree', 'branch', 'leaf', 'forest', 'meadow',
+    'river', 'stream', 'lake', 'ocean', 'wave', 'cloud', 'rain', 'storm', 'sun', 'moon',
+    'star', 'dawn', 'dusk', 'night', 'day', 'spring', 'summer', 'autumn', 'winter', 'frost',
+    'snow', 'wind', 'breeze', 'thunder', 'lightning', 'rainbow', 'mountain', 'valley', 'hill', 'cliff',
+    'cave', 'rock', 'stone', 'sand', 'grass', 'flower', 'bloom', 'seed', 'root', 'bark',
+    'eagle', 'hawk', 'owl', 'sparrow', 'robin', 'crow', 'dove', 'swan', 'heron', 'finch',
+    'fox', 'wolf', 'bear', 'deer', 'rabbit', 'squirrel', 'beaver', 'otter', 'badger', 'owl',
+    'heart', 'hope', 'trust', 'faith', 'love', 'care', 'help', 'home', 'haven', 'shelter',
+    'warm', 'safe', 'calm', 'peace', 'kind', 'bold', 'brave', 'wise', 'free', 'true',
+    'bright', 'soft', 'gentle', 'strong', 'swift', 'quiet', 'still', 'clear', 'fresh', 'new',
+    'gold', 'silver', 'copper', 'iron', 'amber', 'jade', 'ruby', 'pearl', 'crystal', 'diamond'
+];
+
+// Generate a 3-word recovery key
+const generateRecoveryKey = () => {
+    const words = [];
+    for (let i = 0; i < 3; i++) {
+        const index = Math.floor(Math.random() * RECOVERY_WORDS.length);
+        words.push(RECOVERY_WORDS[index]);
+    }
+    return words.join('-');
+};
+
+// Generate recovery key for user
+router.post('/recovery-key', (req, res) => {
+    const userId = req.headers['x-user-id'];
+
+    if (!userId) {
+        return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    // If already has key, return it
+    if (user.recovery_key) {
+        return res.json({ recoveryKey: user.recovery_key });
+    }
+
+    // Generate new key
+    const recoveryKey = generateRecoveryKey();
+    run('UPDATE users SET recovery_key = ? WHERE id = ?', [recoveryKey, userId]);
+
+    log(userId, 'recovery_key_generated');
+
+    res.json({ recoveryKey });
+});
+
+// Recover identity using key
+router.post('/recover', (req, res) => {
+    const { recoveryKey, deviceId } = req.body;
+
+    if (!recoveryKey || !deviceId) {
+        return res.status(400).json({ error: 'Recovery key and device ID required' });
+    }
+
+    const normalizedKey = recoveryKey.toLowerCase().trim().replace(/\s+/g, '-');
+    const user = get('SELECT * FROM users WHERE recovery_key = ?', [normalizedKey]);
+
+    if (!user) {
+        return res.status(404).json({ error: 'Invalid recovery key' });
+    }
+
+    // Update device_id to new device
+    run('UPDATE users SET device_id = ? WHERE id = ?', [deviceId, user.id]);
+
+    const updatedUser = get('SELECT * FROM users WHERE id = ?', [user.id]);
+    const token = generateUserToken(updatedUser.id);
+
+    log(updatedUser.id, 'identity_recovered', null, { newDeviceId: deviceId });
+
+    res.json({
+        user: updatedUser,
+        token,
+        message: 'Identity recovered successfully'
+    });
+});
+
 // Export JWT_SECRET for middleware
 export { NEST_INTEGRITY };
 export default router;

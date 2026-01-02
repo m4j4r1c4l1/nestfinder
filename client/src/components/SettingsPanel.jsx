@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
+import { api } from '../utils/api';
 import { QRCodeCanvas } from 'qrcode.react';
 
 const NOTIFICATION_PREF_KEY = 'nestfinder_notify_settings';
@@ -12,6 +13,99 @@ const getStatus = (score = 0) => {
     if (score >= 30) return { name: 'Owl', icon: '🦉', color: '#8b5cf6' };   // Violet
     if (score >= 10) return { name: 'Sparrow', icon: '🐦', color: '#3b82f6' }; // Blue
     return { name: 'Hatchling', icon: '🥚', color: '#94a3b8' }; // Slate
+};
+
+// Recovery Key Section Component
+const RecoveryKeySection = () => {
+    const [recoveryKey, setRecoveryKey] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const generateKey = async () => {
+        setLoading(true);
+        try {
+            const result = await api.generateRecoveryKey();
+            setRecoveryKey(result.recoveryKey);
+        } catch (err) {
+            console.error('Failed to generate recovery key:', err);
+        }
+        setLoading(false);
+    };
+
+    const copyKey = () => {
+        if (recoveryKey) {
+            navigator.clipboard.writeText(recoveryKey);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
+
+    return (
+        <div style={{
+            marginBottom: 'var(--space-4)',
+            padding: 'var(--space-3)',
+            background: 'var(--color-bg-secondary)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border)'
+        }}>
+            <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>
+                🔑 Recovery Key
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
+                Save this key to restore your identity on a new device.
+            </div>
+
+            {recoveryKey ? (
+                <div>
+                    <div style={{
+                        padding: 'var(--space-3)',
+                        background: 'var(--color-bg-tertiary)',
+                        borderRadius: 'var(--radius-md)',
+                        fontFamily: 'monospace',
+                        fontSize: 'var(--font-size-lg)',
+                        fontWeight: 600,
+                        textAlign: 'center',
+                        letterSpacing: '0.05em',
+                        color: 'var(--color-primary)',
+                        marginBottom: 'var(--space-2)'
+                    }}>
+                        {recoveryKey}
+                    </div>
+                    <button
+                        onClick={copyKey}
+                        style={{
+                            width: '100%',
+                            padding: 'var(--space-2)',
+                            background: copied ? 'var(--color-confirmed)' : 'var(--color-primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: 'var(--radius-md)',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {copied ? '✓ Copied!' : '📋 Copy Key'}
+                    </button>
+                </div>
+            ) : (
+                <button
+                    onClick={generateKey}
+                    disabled={loading}
+                    style={{
+                        width: '100%',
+                        padding: 'var(--space-2)',
+                        background: 'var(--color-primary)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        opacity: loading ? 0.7 : 1
+                    }}
+                >
+                    {loading ? 'Generating...' : 'Generate Recovery Key'}
+                </button>
+            )}
+        </div>
+    );
 };
 
 const SettingsPanel = ({ onClose }) => {
@@ -365,6 +459,9 @@ const SettingsPanel = ({ onClose }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* Recovery Key Section */}
+                <RecoveryKeySection />
 
                 {/* Share App with QR Code */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
