@@ -511,7 +511,13 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
         try {
             // 1. Generate QR Data URL using 'qrcode' package
             const qrDataUrl = await QRCode.toDataURL(APP_URL, {
-                width: 500, margin: 0, color: { dark: '#1e293b', light: '#ffffff' }, errorCorrectionLevel: 'H'
+                width: 500,
+                margin: 0,
+                color: {
+                    dark: '#1e293b',
+                    light: '#ffffff'
+                },
+                errorCorrectionLevel: 'H'
             });
 
             // 2. Load into Image to draw on Canvas
@@ -534,6 +540,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
             ctx.drawImage(img, border, border);
 
             // 5. Draw Center Emoji (🪹)
+            // White circle background for emoji
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = canvas.width / 6;
@@ -543,9 +550,11 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
             ctx.fillStyle = 'white';
             ctx.fill();
 
+            // Draw Emoji
             ctx.font = `${radius * 1.5}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            // Offset y slightly because emojis usually sit a bit high
             ctx.fillText('🪹', centerX, centerY + (radius * 0.1));
 
             return canvas.toDataURL('image/png');
@@ -558,9 +567,11 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const handleTemplateChange = async (templateId) => {
         setSelectedTemplate(templateId);
         const tmpl = templates[templateId];
+
+        // Clear fields and set new values
         setTitle(tmpl.title);
         setBody(tmpl.body || '');
-        setImageUrl('');
+        setImageUrl(''); // Reset image
 
         if (templateId === 'share_app') {
             const qrImage = await generateQRCode();
@@ -622,28 +633,28 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
         reader.readAsDataURL(file);
     };
 
-    const filteredSubscribers = (subscribers || []).filter(sub =>
+    const filteredSubscribers = subscribers.filter(sub =>
         (sub.nickname || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         sub.user_id.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
-        <div className="card">
-            {/* Keeping the card but removing main header since it's in a tab */}
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+            <div className="card-header"><h3>✉️ Compose Notification</h3></div>
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, auto)', gap: '0.5rem', justifyContent: 'center', paddingBottom: '0.5rem', overflowX: 'auto' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, auto)', gap: '0.5rem', justifyContent: 'center', paddingBottom: '0.5rem' }}>
                         {Object.values(templates).map(tmpl => (
                             <button
                                 key={tmpl.id}
                                 onClick={() => handleTemplateChange(tmpl.id)}
                                 style={{
                                     padding: '0.5rem 1rem',
-                                    border: selectedTemplate === tmpl.id ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                                    border: selectedTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #ddd',
                                     borderRadius: '20px',
-                                    background: selectedTemplate === tmpl.id ? 'var(--color-primary-light)' : 'var(--color-bg-secondary)',
-                                    color: selectedTemplate === tmpl.id ? 'var(--color-primary)' : 'var(--color-text)',
+                                    background: selectedTemplate === tmpl.id ? '#dbeafe' : 'white',
+                                    color: '#1e293b',
                                     cursor: 'pointer', whiteSpace: 'nowrap',
                                     fontWeight: selectedTemplate === tmpl.id ? 600 : 400
                                 }}
@@ -654,23 +665,23 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                <div className="form-group" style={{ marginTop: '1rem' }}>
                     <label className="form-label">Title</label>
                     <input type="text" className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} />
                 </div>
 
-                <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                <div className="form-group" style={{ marginTop: '1rem' }}>
                     <label className="form-label">Image</label>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <input type="text" className="form-input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL..." style={{ flex: 1 }} />
-                        <label className="btn btn-secondary" style={{ cursor: 'pointer', padding: '0.4rem 1.5rem', display: 'flex', alignItems: 'center' }}>
-                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📂</span>
+                        <label className="btn btn-secondary" style={{ cursor: 'pointer', padding: '0.4rem 1.5rem' }}>
+                            <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📂</span>
                             <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
                         </label>
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                <div className="form-group" style={{ marginTop: '1rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                         <label className="form-label" style={{ marginBottom: 0 }}>Message</label>
                         <button
@@ -678,16 +689,16 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                             type="button"
                             className="btn btn-secondary"
                             style={{
-                                border: '1px solid var(--color-border)', borderRadius: '50%', width: '2rem', height: '2rem',
+                                border: '1px solid #cbd5e1', borderRadius: '50%', width: '2rem', height: '2rem',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1.2rem',
-                                padding: 0
+                                transition: 'all 0.2s', padding: 0
                             }}
                             title="Insert Emoji"
                         >
                             😊
                         </button>
                     </div>
-                    <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={5} />
+                    <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={3} />
                 </div>
                 {showEmojiPicker && (
                     <EmojiPickerModal
@@ -696,8 +707,8 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     />
                 )}
 
-                <div className="form-group" style={{ marginTop: '1.5rem' }}>
-                    <label className="form-label">Target Audience</label>
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                    <label className="form-label">Target</label>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         <button
                             onClick={() => setTarget('all')}
@@ -719,29 +730,27 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                             style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                             title="Refresh User List"
                         >
-                            🔄 Refresh List
+                            🔄 Refresh
                         </button>
                     </div>
                     {target === 'selected' && (
-                        <div style={{ marginTop: '0.5rem', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '0.5rem', background: 'var(--color-bg-secondary)' }}>
-                            <input type="text" className="form-input" placeholder="Search users by nickname or ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ marginBottom: '0.5rem' }} />
-                            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        <div style={{ marginTop: '0.5rem', border: '1px solid #ddd', borderRadius: '8px', padding: '0.5rem' }}>
+                            <input type="text" className="form-input" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ marginBottom: '0.5rem' }} />
+                            <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
                                 {filteredSubscribers.map(sub => (
-                                    <label key={sub.user_id} style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem', alignItems: 'center', cursor: 'pointer', borderBottom: '1px solid var(--color-border)' }}>
+                                    <label key={sub.user_id} style={{ display: 'flex', gap: '0.5rem', padding: '0.25rem' }}>
                                         <input type="checkbox" checked={selectedUsers.includes(sub.user_id)} onChange={() => toggleUser(sub.user_id)} />
-                                        <span>{sub.nickname || 'Unknown User'}</span>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>({sub.user_id.substring(0, 8)}...)</span>
+                                        <span>{sub.nickname || sub.user_id}</span>
                                     </label>
                                 ))}
-                                {filteredSubscribers.length === 0 && <div style={{ padding: '0.5rem', color: 'var(--color-text-secondary)', textAlign: 'center' }}>No matching users</div>}
                             </div>
                         </div>
                     )}
                 </div>
 
-                {result && <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '4px', background: result.success ? '#dcfce7' : '#fee2e2', color: result.success ? '#166534' : '#991b1b', textAlign: 'center', fontWeight: 500 }}>{result.message}</div>}
+                {result && <div style={{ marginTop: '1rem', padding: '0.5rem', borderRadius: '4px', background: result.success ? '#dcfce7' : '#fee2e2', color: result.success ? '#166534' : '#991b1b', textAlign: 'center' }}>{result.message}</div>}
 
-                <button onClick={handleSend} disabled={sending} className="btn btn-primary" style={{ marginTop: '1.5rem', width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
+                <button onClick={handleSend} disabled={sending} className="btn btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
                     {sending ? 'Sending...' : 'Send Notification'}
                 </button>
             </div>
@@ -757,7 +766,7 @@ const HistorySection = () => {
 
     useEffect(() => {
         loadHistory();
-        const interval = setInterval(loadHistory, 30000);
+        const interval = setInterval(loadHistory, 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -776,12 +785,12 @@ const HistorySection = () => {
 
     return (
         <div className="card">
-            {/* Header modified as requested: No Title, Just Buttons */}
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.75rem 1rem', background: 'var(--color-bg-secondary)' }}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>📜 Sent History</h3>
                 <div>
                     <button
                         onClick={async () => {
-                            if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?')) return;
+                            if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?\nThis will remove all records of sent notifications from this list.')) return;
                             try {
                                 const token = localStorage.getItem('nestfinder_admin_token');
                                 const res = await fetch(`${API_URL}/api/push/admin/notifications/cleanup`, {
@@ -796,7 +805,7 @@ const HistorySection = () => {
                             } catch (err) { alert('Cleanup failed: ' + err.message); }
                         }}
                         className="btn btn-sm btn-danger"
-                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', border: 'none' }}
+                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white' }}
                         title="Delete all sent history logs"
                     >
                         🗑️ Clear History
@@ -804,15 +813,15 @@ const HistorySection = () => {
                     <button onClick={loadHistory} className="btn btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
-
             <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ maxHeight: '600px', overflowY: 'auto', borderRadius: '0 0 8px 8px' }}>
+                <div style={{ maxHeight: '400px', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: 'var(--color-bg-tertiary)', zIndex: 1 }}>
-                            <tr style={{ color: 'var(--color-text-secondary)', borderBottom: '1px solid var(--color-border)' }}>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Time</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Content</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Img</th>
+                        <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
+                            <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Timestamp</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Title</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Body</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Image</th>
                                 <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Target</th>
                             </tr>
                         </thead>
@@ -827,34 +836,54 @@ const HistorySection = () => {
                                 return (
                                     <tr
                                         key={log.id}
-                                        style={{ borderBottom: '1px solid var(--color-border)' }}
+                                        style={{
+                                            borderBottom: '1px solid #334155',
+                                            transition: 'all 0.2s ease',
+                                            background: 'transparent'
+                                        }}
                                         className="history-row"
+                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                     >
-                                        <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                                                <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{date.toLocaleDateString()}</span>
-                                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                                             </div>
                                         </td>
                                         <td
-                                            style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', cursor: 'pointer', maxWidth: '300px' }}
+                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
                                             onClick={() => setPreviewMessage({ ...meta, timestamp: date })}
                                         >
-                                            <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{meta.title}</div>
-                                            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                {meta.body}
+                                            <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
+                                        </td>
+                                        <td
+                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date })}
+                                        >
+                                            <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                                                {meta.body ? (meta.body.length > 55 ? meta.body.substring(0, 55) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
                                             </div>
                                         </td>
-                                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
-                                            {meta.image || (meta.template && meta.template.includes('img')) ? '🖼️' : '-'}
+                                        <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                                            <span style={{
+                                                fontSize: '0.8rem',
+                                                color: meta.image || (meta.template && meta.template.includes('img')) ? '#4ade80' : '#64748b',
+                                                background: meta.image ? 'rgba(74, 222, 128, 0.1)' : 'transparent',
+                                                padding: '2px 8px', borderRadius: '4px'
+                                            }}>
+                                                {meta.image ? 'Yes' : 'No'}
+                                            </span>
                                         </td>
-                                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                                        <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
                                             <span
-                                                onClick={() => { if (log.target_id) setSelectedBatchId(log.target_id); }}
+                                                onClick={() => {
+                                                    if (log.target_id) setSelectedBatchId(log.target_id);
+                                                }}
                                                 style={{
-                                                    background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6',
+                                                    background: 'rgba(74, 222, 128, 0.15)', color: '#4ade80',
                                                     padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 500,
-                                                    border: '1px solid rgba(59, 130, 246, 0.2)',
+                                                    border: '1px solid rgba(74, 222, 128, 0.2)',
                                                     cursor: log.target_id ? 'pointer' : 'default'
                                                 }}
                                             >
@@ -866,12 +895,17 @@ const HistorySection = () => {
                             })}
                         </tbody>
                     </table>
-                    {logs.length === 0 && !loading && <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>No history found</div>}
+                    {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
                 </div>
             </div>
 
-            {selectedBatchId && <DetailModal batchId={selectedBatchId} onClose={() => setSelectedBatchId(null)} />}
-            {previewMessage && <MessagePreviewModal message={previewMessage} onClose={() => setPreviewMessage(null)} />}
+            {selectedBatchId && (
+                <DetailModal batchId={selectedBatchId} onClose={() => setSelectedBatchId(null)} />
+            )}
+
+            {previewMessage && (
+                <MessagePreviewModal message={previewMessage} onClose={() => setPreviewMessage(null)} />
+            )}
         </div>
     );
 };
@@ -892,14 +926,42 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
     ];
 
     return ReactDOM.createPortal(
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }} onClick={onClose}>
-            <div style={{ background: '#1e293b', borderRadius: '12px', padding: '1rem', width: 'min(500px, 95vw)', maxHeight: '60vh', display: 'flex', flexDirection: 'column', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', border: '1px solid #334155' }} onClick={e => e.stopPropagation()}>
+        <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 10000
+        }} onClick={onClose}>
+            <div style={{
+                background: '#1e293b',
+                borderRadius: '12px',
+                padding: '1rem',
+                width: 'min(500px, 95vw)',
+                maxHeight: '60vh',
+                display: 'flex', flexDirection: 'column',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                border: '1px solid #334155'
+            }} onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '0.5rem' }}>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#94a3b8' }}>&times;</button>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem', padding: '0.5rem', overflowY: 'auto' }}>
+                <div style={{
+                    display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem',
+                    padding: '0.5rem', overflowY: 'auto',
+                    scrollbarWidth: 'thin', scrollbarColor: '#475569 #1e293b'
+                }}>
                     {emojis.map(emoji => (
-                        <button key={emoji} onClick={() => onSelect(emoji)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '4px' }}>
+                        <button
+                            key={emoji}
+                            onClick={() => onSelect(emoji)}
+                            style={{
+                                background: 'none', border: 'none',
+                                fontSize: '1.5rem', cursor: 'pointer', padding: '4px',
+                                transition: 'transform 0.1s'
+                            }}
+                            onMouseEnter={e => e.target.style.transform = 'scale(1.2)'}
+                            onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                        >
                             {emoji}
                         </button>
                     ))}
@@ -918,7 +980,9 @@ const DetailModal = ({ batchId, onClose }) => {
         const fetchDetails = async () => {
             try {
                 const token = localStorage.getItem('nestfinder_admin_token');
-                const res = await fetch(`${API_URL}/api/push/admin/notifications/batch/${batchId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch(`${API_URL}/api/push/admin/notifications/batch/${batchId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 if (res.ok) {
                     const data = await res.json();
                     setDetails(data);
@@ -929,59 +993,210 @@ const DetailModal = ({ batchId, onClose }) => {
         fetchDetails();
     }, [batchId]);
 
+    // Format helper for 2-line date/time (Fixing SQLite UTC assumption)
+    const DateTimeCell = ({ isoString, color = '#e2e8f0' }) => {
+        if (!isoString) return <span style={{ color: '#64748b' }}>-</span>;
+
+        // SQLite CURRENT_TIMESTAMP returns "YYYY-MM-DD HH:MM:SS" which JS parses as Local. 
+        // We must treat it as UTC by appending 'Z' if missing.
+        let safeIso = isoString;
+        if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) {
+            safeIso += 'Z';
+        }
+        // Also handle "T" separator if standard ISO
+        if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) {
+            safeIso += 'Z';
+        }
+
+        const date = new Date(safeIso);
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString()}</span>
+                {/* Restored seconds */}
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+            </div>
+        );
+    };
+
+    // Modal Content
+    const pendingCount = details ? details.stats.total - details.stats.delivered - details.stats.read : 0;
+
     const modalContent = (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem' }} onClick={(e) => e.target === e.currentTarget && onClose()}>
-            <div style={{ background: '#1e293b', color: '#f8fafc', borderRadius: '16px', width: '100%', maxWidth: '900px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px rgba(0,0,0,0.5)', border: '1px solid #334155' }}>
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(4px)', zIndex: 9999,
+            display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem'
+        }} onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div style={{
+                background: '#1e293b',
+                color: '#f8fafc',
+                borderRadius: '16px',
+                width: '100%', maxWidth: '900px',
+                maxHeight: '85vh',
+                display: 'flex', flexDirection: 'column',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                border: '1px solid #334155'
+            }}>
+                {/* Header */}
                 <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ margin: 0 }}>Message Details</h3>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>Message Details</h3>
                     <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                 </div>
-                <div style={{ padding: '1.5rem', overflow: 'auto' }}>
-                    {loading ? <div style={{ textAlign: 'center' }}>Loading...</div> : details ? (
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                            <thead style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                <tr>
-                                    <th style={{ padding: '0.75rem', textAlign: 'left' }}>User</th>
-                                    <th style={{ padding: '0.75rem', textAlign: 'center' }}>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {details.messages.map(msg => (
-                                    <tr key={msg.id} style={{ borderBottom: '1px solid #334155' }}>
-                                        <td style={{ padding: '0.75rem' }}>
-                                            <div style={{ fontWeight: 500 }}>{msg.nickname || 'Anonymous'}</div>
-                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
-                                        </td>
-                                        <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                                            {msg.read ? '🔵 Read' : msg.delivered ? '🟢 Delivered' : '⚪ Sent'}
-                                        </td>
+
+                {/* Fixed Stats Section */}
+                <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{details?.stats?.total || 0}</div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</div>
+                        </div>
+                        {/* New SENT (Pending) Box */}
+                        <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{pendingCount}</div>
+                            <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sent</div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{details?.stats?.delivered || 0}</div>
+                            <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Delivered</div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{details?.stats?.read || 0}</div>
+                            <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Read</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Scrollable Table Area */}
+                <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {loading ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Loading details...</div>
+                    ) : details ? (
+                        <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'auto', flex: 1 }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
+                                    <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Sent</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Received</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Read</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : <div>Error loading details</div>}
+                                </thead>
+                                <tbody>
+                                    {details.messages.map(msg => (
+                                        <tr key={msg.id} style={{ borderBottom: '1px solid #334155' }}>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                                <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Anonymous'}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                <DateTimeCell isoString={msg.created_at} />
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                <DateTimeCell isoString={msg.delivered_at} />
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                <DateTimeCell isoString={msg.read_at} />
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <div style={{ width: '40px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center', marginRight: '8px' }}>
+                                                        {msg.read ? (
+                                                            <span style={{ color: '#3b82f6', transform: 'translateX(-2px)' }}>✓✓</span>
+                                                        ) : msg.delivered ? (
+                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓✓</span>
+                                                        ) : (
+                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓</span>
+                                                        )}
+                                                    </div>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8' }}>
+                                                        {msg.read ? 'Read' : msg.delivered ? 'Delivered' : 'Sent'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            {details.messages.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No recipients found</div>}
+                        </div>
+                    ) : (
+                        <div style={{ color: '#ef4444', textAlign: 'center', padding: '2rem' }}>Error loading details</div>
+                    )}
                 </div>
             </div>
         </div>
     );
+
     return ReactDOM.createPortal(modalContent, document.body);
 };
 
 const MessagePreviewModal = ({ message, onClose }) => {
     return ReactDOM.createPortal(
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={onClose}>
-            <div onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '400px', background: '#1e293b', borderRadius: '12px', overflow: 'hidden', border: '1px solid #334155' }}>
+        <div
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(5px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 9999,
+                animation: 'fadeIn 0.2s ease'
+            }}
+            onClick={onClose}
+        >
+            <div
+                onClick={e => e.stopPropagation()}
+                style={{
+                    width: '90%',
+                    maxWidth: '400px',
+                    background: '#1e293b', // Dark background
+                    borderRadius: '12px',
+                    padding: '0',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    overflow: 'hidden',
+                    border: '1px solid #334155'
+                }}
+            >
+                {/* Header */}
                 <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Preview</h3>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Message Preview</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
                 </div>
-                <div style={{ padding: '1.5rem' }}>
-                    <div style={{ padding: '12px', background: '#334155', borderRadius: '8px', borderLeft: '4px solid #3b82f6' }}>
+
+                {/* Body / Notification Item Replica */}
+                <div style={{ padding: '1.5rem', background: '#1e293b' }}>
+                    <div style={{
+                        padding: '12px',
+                        borderBottom: '1px solid #334155',
+                        background: '#334155', // Unread bg color approximation
+                        borderRadius: '8px',
+                        borderLeft: '4px solid #3b82f6', // Primary color
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <span style={{ fontWeight: 'bold', color: '#f1f5f9' }}>{message.title}</span>
+                            <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>🔔</span>
+                            <span style={{ fontWeight: 'bold', color: '#f1f5f9', fontSize: '1rem' }}>{message.title}</span>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                {message.timestamp ? message.timestamp.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                            </span>
                         </div>
-                        {message.image && <img src={message.image} alt="Attachment" style={{ width: '100%', borderRadius: '4px', marginTop: '0.5rem', marginBottom: '0.5rem' }} />}
-                        <div style={{ color: '#cbd5e1', fontSize: '0.9rem' }}>{message.body}</div>
+                        {message.image && (
+                            <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', overflow: 'hidden' }}>
+                                <img src={message.image} alt="Notification attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                            </div>
+                        )}
+                        <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                            {message.body}
+                        </div>
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#64748b' }}>
+                        Preview of how the user sees this message
                     </div>
                 </div>
             </div>
