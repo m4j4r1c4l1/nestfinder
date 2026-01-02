@@ -5,6 +5,7 @@ import PointDetails from '../components/PointDetails';
 import FilterPanel from '../components/FilterPanel';
 import RoutePanel from '../components/RoutePanel';
 import SettingsPanel from '../components/SettingsPanel';
+import BroadcastModal from '../components/BroadcastModal';
 import { usePoints } from '../hooks/usePoints';
 import { useAuth } from '../hooks/useAuth';
 import { useGeolocation } from '../hooks/useGeolocation';
@@ -477,6 +478,9 @@ const MapView = () => {
                     {t('nav.settings')}
                 </button>
             </nav>
+
+            {/* Global Broadcast Modal - shows 1s after user settles (has location) */}
+            <BroadcastModal isSettled={!!userLocation} />
         </div>
     );
 };

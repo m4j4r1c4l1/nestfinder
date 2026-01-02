@@ -20,6 +20,20 @@ const escapeXml = (str) => {
 let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
 
+// Get currently active broadcast (public endpoint)
+router.get('/broadcast/active', (req, res) => {
+  const now = new Date().toISOString();
+  const activeBroadcast = get(`
+    SELECT * FROM broadcasts 
+    WHERE datetime(start_time) <= datetime(?)
+    AND datetime(end_time) >= datetime(?)
+    ORDER BY created_at DESC
+    LIMIT 1
+  `, [now, now]);
+
+  res.json({ broadcast: activeBroadcast || null });
+});
+
 // Get all points (with optional filters)
 router.get('/', (req, res) => {
   const { status, minLat, maxLat, minLng, maxLng } = req.query;

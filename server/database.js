@@ -119,6 +119,17 @@ export const initDatabase = async () => {
   `);
 
   db.run(`
+    -- Broadcasts table (admin announcements)
+    CREATE TABLE IF NOT EXISTS broadcasts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      message TEXT NOT NULL,
+      start_time DATETIME NOT NULL,
+      end_time DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  db.run(`
     -- In-App Notifications table
     CREATE TABLE IF NOT EXISTS notifications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
