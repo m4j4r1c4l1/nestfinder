@@ -1,16 +1,41 @@
 import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
+import { useToast } from './ToastProvider';
 
 const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onClose }) => {
     const { t } = useLanguage();
     const { updateTrustScore } = useAuth();
+    const { addToast } = useToast();
+
+    // Check for badge unlock
+    const checkBadgeUnlock = (oldScore, newScore) => {
+        const thresholds = [
+            { score: 10, name: 'Sparrow', icon: '🐦' },
+            { score: 30, name: 'Owl', icon: '🦉' },
+            { score: 50, name: 'Eagle', icon: '🦅' }
+        ];
+        for (const badge of thresholds) {
+            if (oldScore < badge.score && newScore >= badge.score) {
+                addToast(`Badge Unlocked: ${badge.name}!`, {
+                    type: 'achievement',
+                    icon: badge.icon,
+                    duration: 6000
+                });
+                return;
+            }
+        }
+        // Regular points notification
+        addToast(`+1 Trust Point!`, { type: 'success', icon: '⭐', duration: 2000 });
+    };
 
     // Wrapper to handle confirm and update trust score
     const handleConfirm = async (id) => {
+        const oldScore = user?.trust_score || 0;
         const result = await onConfirm(id);
         if (result?.user_trust_score !== undefined) {
             updateTrustScore(result.user_trust_score);
+            checkBadgeUnlock(oldScore, result.user_trust_score);
         }
     };
 
