@@ -884,7 +884,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                             <button
                                 onClick={handleBulkMarkRead}
                                 className="btn btn-sm"
-                                style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
+                                style={{ background: '#22c55e', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
                             >
                                 <span style={{ color: '#60a5fa' }}>✓✓</span> Mark as Read
                             </button>

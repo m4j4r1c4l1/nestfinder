@@ -8,6 +8,15 @@ export default {
         flag: '🇬🇧'
     },
 
+    // Feedback
+    feedback: {
+        title: 'Feedback',
+        description: 'Report bugs, suggest features, or send feedback',
+        placeholder: 'Describe your feedback in detail...',
+        send: 'Send Feedback',
+        charLimit: 'characters'
+    },
+
     // Navigation
     nav: {
         map: 'Map',
@@ -148,6 +157,7 @@ export default {
         title: 'Inbox',
         received: 'Received',
         sent: 'Sent',
+        compose: 'Compose',
         sendMessage: 'Send a Message',
         sentPlaceholder: 'Sent messages will appear here',
         noMessages: 'No messages yet',
