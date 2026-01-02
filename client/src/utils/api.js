@@ -115,6 +115,30 @@ class ApiClient {
     });
   }
 
+  // Recovery Key
+  generateRecoveryKey() {
+    return this.fetch('/auth/recovery-key', {
+      method: 'POST',
+    });
+  }
+
+  async recoverIdentity(recoveryKey, deviceId) {
+    const data = await this.fetch('/auth/recover', {
+      method: 'POST',
+      body: JSON.stringify({ recoveryKey, deviceId }),
+    });
+
+    // Store the new token and user ID
+    if (data.token) {
+      this.setUserToken(data.token);
+    }
+    if (data.user) {
+      this.setUserId(data.user.id);
+    }
+
+    return data;
+  }
+
   // Points
   getPoints(filters = {}) {
     const params = new URLSearchParams(filters);
