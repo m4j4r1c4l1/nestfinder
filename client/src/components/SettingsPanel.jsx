@@ -44,6 +44,7 @@ const SettingsPanel = ({ onClose }) => {
     const velocityRef = React.useRef(0);
     const lastWheelTime = React.useRef(0);
     const autoSelectTimer = React.useRef(null);
+    const wheelTimeoutRef = React.useRef(null); // Separate ref for wheel timeout
 
     // Animation constants
     const ITEM_HEIGHT = 68;
@@ -196,6 +197,7 @@ const SettingsPanel = ({ onClose }) => {
         return () => {
             if (animationRef.current) cancelAnimationFrame(animationRef.current);
             if (autoSelectTimer.current) clearTimeout(autoSelectTimer.current);
+            if (wheelTimeoutRef.current) clearTimeout(wheelTimeoutRef.current);
         };
     }, []);
 
@@ -236,12 +238,12 @@ const SettingsPanel = ({ onClose }) => {
             setIsAnimating(true);
 
             // Start deceleration after a pause in scrolling
-            if (animationRef.current) cancelAnimationFrame(animationRef.current);
-            animationRef.current = setTimeout(() => {
+            if (wheelTimeoutRef.current) clearTimeout(wheelTimeoutRef.current);
+            wheelTimeoutRef.current = setTimeout(() => {
                 if (Math.abs(velocityRef.current) > 0.1) {
                     animateWithMomentum(velocityRef.current * 0.5);
                 } else {
-                    // Snap to nearest
+                    // Snap to nearest integer
                     const nearestIndex = Math.round(scrollOffsetRef.current);
                     animateTo(nearestIndex, 200, () => {
                         startAutoSelectTimer();
@@ -531,7 +533,7 @@ const SettingsPanel = ({ onClose }) => {
                                             gap: 'var(--space-3)',
                                             padding: 'var(--space-3)',
                                             background: 'rgba(15, 23, 42, 0.95)',
-                                            border: '1px solid rgba(148, 163, 184, 0.15)',
+                                            border: '1px solid var(--color-border)',
                                             borderRadius: 'var(--radius-md)',
                                             color: 'var(--color-text)',
                                             height: `${ITEM_HEIGHT - 8}px`,
