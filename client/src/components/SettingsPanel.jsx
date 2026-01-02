@@ -146,7 +146,8 @@ const SettingsPanel = ({ onClose }) => {
             const elapsed = currentTime - startTime;
 
             if (elapsed >= duration) {
-                scrollOffsetRef.current = normalizeOffset(targetOffset);
+                // Always snap to exact integer for clean centering
+                scrollOffsetRef.current = Math.round(normalizeOffset(targetOffset));
                 forceRender(n => n + 1);
                 setIsAnimating(false);
                 if (onComplete) onComplete();
@@ -174,9 +175,9 @@ const SettingsPanel = ({ onClose }) => {
                     const selectedIndex = availableLanguages.findIndex(l => l.code === language);
                     if (selectedIndex === -1) return;
 
-                    // Roll through entire list TWICE before landing
+                    // Roll UPWARDS through entire list TWICE before landing
                     const spinDistance = itemCount * 2;
-                    scrollOffsetRef.current = selectedIndex + spinDistance;
+                    scrollOffsetRef.current = selectedIndex - spinDistance; // Negative = roll up
                     forceRender(n => n + 1);
 
                     // Animate to selected index (longer duration for dramatic effect)
@@ -524,7 +525,8 @@ const SettingsPanel = ({ onClose }) => {
                                             alignItems: 'center',
                                             gap: 'var(--space-3)',
                                             padding: 'var(--space-3)',
-                                            background: 'transparent',
+                                            background: 'rgba(255, 255, 255, 0.03)',
+                                            border: '1px solid rgba(255, 255, 255, 0.06)',
                                             borderRadius: 'var(--radius-md)',
                                             color: 'var(--color-text)',
                                             height: `${ITEM_HEIGHT}px`,
