@@ -55,8 +55,9 @@ const FeedbackSection = () => {
 
             <textarea
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => setMessage(e.target.value.slice(0, 500))}
                 placeholder={t('feedback.placeholder') || 'Describe your feedback...'}
+                maxLength={500}
                 style={{
                     width: '100%',
                     minHeight: '100px',
@@ -66,9 +67,12 @@ const FeedbackSection = () => {
                     borderRadius: 'var(--radius-md)',
                     color: 'var(--color-text)',
                     resize: 'vertical',
-                    marginBottom: 'var(--space-3)'
+                    marginBottom: 'var(--space-2)'
                 }}
             />
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textAlign: 'right', marginBottom: 'var(--space-3)' }}>
+                {message.length}/500 {t('feedback.charLimit') || 'characters'}
+            </div>
 
             <button
                 onClick={handleSubmit}
@@ -96,9 +100,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     const [activeTab, setActiveTab] = useState('received');
 
     const tabs = [
-        { id: 'received', label: `📬 ${t('inbox.received') || 'Received'}` },
-        { id: 'sent', label: `📤 ${t('inbox.sent') || 'Sent'}` },
-        { id: 'compose', label: `✉️ ${t('inbox.sendMessage') || 'Send a Message'}` }
+        { id: 'received', label: `📨 ${t('inbox.received') || 'Received'}` },
+        { id: 'sent', label: `📬 ${t('inbox.sent') || 'Sent'}` },
+        { id: 'compose', label: `✏️ ${t('inbox.compose') || 'Compose'}` }
     ];
 
     return (
