@@ -220,15 +220,15 @@ const SettingsPanel = ({ onClose }) => {
             // Calculate velocity based on wheel delta and time
             const scrollDelta = e.deltaY / ITEM_HEIGHT; // Normalize to items
 
-            // Accumulate velocity (faster scrolling = more momentum)
+            // Accumulate velocity (smoother momentum)
             if (timeDelta < 100) {
-                velocityRef.current += scrollDelta * 0.3; // Accumulate if scrolling fast
+                velocityRef.current += scrollDelta * 0.4; // Accumulate smoothly
             } else {
-                velocityRef.current = scrollDelta * 0.5; // Reset if scrolling slow
+                velocityRef.current = scrollDelta * 0.6; // Faster initial response
             }
 
-            // Clamp velocity
-            velocityRef.current = Math.max(-3, Math.min(3, velocityRef.current));
+            // Higher velocity clamp for more fluid movement
+            velocityRef.current = Math.max(-5, Math.min(5, velocityRef.current));
 
             // Apply immediate movement
             scrollOffsetRef.current += velocityRef.current;
@@ -494,7 +494,7 @@ const SettingsPanel = ({ onClose }) => {
                                 borderRadius: 'var(--radius-md)',
                                 background: 'var(--color-primary-light)',
                                 pointerEvents: 'none',
-                                zIndex: 5
+                                zIndex: 15
                             }}
                         />
 
