@@ -173,17 +173,76 @@ router.get('/metrics/daily-breakdown', (req, res) => {
         return res.status(400).json({ error: 'Date required' });
     }
 
-    // Breakdown: Count distinct users per action for this date
-    // This answers: "Of the users active today, how many did X?"
-    const breakdown = all(`
-        SELECT action, COUNT(DISTINCT user_id) as count 
+    // 1. Fetch all raw logs for the date to process in memory
+    const logs = all(`
+        SELECT user_id, action 
         FROM logs 
-        WHERE date(created_at) = ? 
-        GROUP BY action
-        ORDER BY count DESC
+        WHERE date(created_at) = ?
     `, [date]);
 
-    res.json({ breakdown });
+    // 2. Identify Cohorts
+    const newUsers = new Set();       // Set of user_ids who registered today
+    const returningUsers = new Set(); // Set of user_ids active today but didn't register today
+
+    // First pass: Identify new registered users
+    logs.forEach(l => {
+        if (l.action === 'register') {
+            newUsers.add(l.user_id);
+        }
+    });
+
+    // Second pass: Populate returning users
+    logs.forEach(l => {
+        if (!newUsers.has(l.user_id)) {
+            returningUsers.add(l.user_id);
+        }
+    });
+
+    // 3. Group Actions by Cohort
+    const actionsByNewUsers = {};      // { action: Set(user_ids) }
+    const actionsByReturningUsers = {}; // { action: Set(user_ids) }
+
+    logs.forEach(l => {
+        if (newUsers.has(l.user_id)) {
+            // Action by New User
+            if (l.action !== 'register') {
+                if (!actionsByNewUsers[l.action]) actionsByNewUsers[l.action] = new Set();
+                actionsByNewUsers[l.action].add(l.user_id);
+            }
+        } else {
+            // Action by Returning User
+            if (!actionsByReturningUsers[l.action]) actionsByReturningUsers[l.action] = new Set();
+            actionsByReturningUsers[l.action].add(l.user_id);
+        }
+    });
+
+    // 4. Build Hierarchical Tree
+    const breakdown = [];
+
+    // 4a. Register Cohort (Root)
+    if (newUsers.size > 0) {
+        const children = Object.entries(actionsByNewUsers)
+            .map(([act, set]) => ({ action: act, count: set.size }))
+            .sort((a, b) => b.count - a.count); // Sort children by count
+
+        breakdown.push({
+            action: 'register',
+            count: newUsers.size,
+            children
+        });
+    }
+
+    // 4b. Returning User Cohorts (Other Roots)
+    const otherRoots = Object.entries(actionsByReturningUsers)
+        .map(([act, set]) => ({ action: act, count: set.size, children: [] }))
+        .sort((a, b) => b.count - a.count);
+
+    breakdown.push(...otherRoots);
+
+    // Calculate total unique active users
+    const totalUsers = newUsers.size + returningUsers.size;
+
+    res.json({ breakdown, totalUsers });
 });
 
 // Get distinct log actions for filters
