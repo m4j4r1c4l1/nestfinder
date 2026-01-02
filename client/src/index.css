@@ -708,6 +708,18 @@ textarea.form-input {
   z-index: -1;
 }
 
+.bottom-nav-item:first-child::before {
+  border-top-left-radius: 24px;
+  border-bottom-left-radius: 24px;
+  left: 2px;
+}
+
+.bottom-nav-item:last-child::before {
+  border-top-right-radius: 24px;
+  border-bottom-right-radius: 24px;
+  right: 2px;
+}
+
 .bottom-nav-item.active::before {
   transform: scale(1);
 }

@@ -473,7 +473,7 @@ const SettingsPanel = ({ onClose }) => {
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                         style={{
-                            height: `${CONTAINER_HEIGHT}px`,
+                            height: `${CONTAINER_HEIGHT - 8}px`, // Tighter fit (crops top/bottom margins)
                             overflow: 'hidden',
                             border: '1px solid var(--color-border)',
                             borderRadius: 'var(--radius-md)',
@@ -520,7 +520,7 @@ const SettingsPanel = ({ onClose }) => {
                                         position: 'absolute',
                                         left: '8px',
                                         right: '8px',
-                                        top: `${yPos}px`,
+                                        top: `${yPos - 4}px`, // Shift up to align with tighter container
                                         zIndex: isInCenter ? 10 : 1,
                                         opacity: isInCenter ? 1 : 0.5,
                                         cursor: 'pointer'
@@ -533,7 +533,7 @@ const SettingsPanel = ({ onClose }) => {
                                             gap: 'var(--space-3)',
                                             padding: 'var(--space-3)',
                                             background: 'rgba(15, 23, 42, 0.95)',
-                                            border: '1px solid rgba(148, 163, 184, 0.2)',
+                                            border: `2px solid ${['#06b6d4', '#d946ef', '#84cc16'][index % 3]}`, // DEBUG COLORS
                                             borderRadius: 'var(--radius-md)',
                                             color: 'var(--color-text)',
                                             height: `${ITEM_HEIGHT - 8}px`,
