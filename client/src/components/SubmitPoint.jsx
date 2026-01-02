@@ -153,36 +153,39 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
             </div>
 
             <div className="card-body">
-                {/* Mode Toggle */}
                 <div className="mb-4">
-                    <div className="toggle-group">
+                    <div className="toggle-group" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-2)' }}>
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'gps' ? 'active' : ''}`}
                             onClick={() => setInputMode('gps')}
+                            style={{ justifyContent: 'center', textAlign: 'center' }}
                         >
-                            📍 {t('submit.gpsMode')}
+                            📍<br /><span style={{ fontSize: '0.75rem' }}>{t('submit.gpsMode')}</span>
                         </button>
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'map' ? 'active' : ''}`}
                             onClick={() => setInputMode('map')}
+                            style={{ justifyContent: 'center', textAlign: 'center' }}
                         >
-                            🗺️ {t('submit.mapMode')}
+                            🗺️<br /><span style={{ fontSize: '0.75rem' }}>{t('submit.mapMode')}</span>
                         </button>
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'address' ? 'active' : ''}`}
                             onClick={() => setInputMode('address')}
+                            style={{ justifyContent: 'center', textAlign: 'center' }}
                         >
-                            🏠 {t('submit.addressMode')}
+                            🏠<br /><span style={{ fontSize: '0.75rem' }}>{t('submit.addressMode')}</span>
                         </button>
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'voice' ? 'active' : ''}`}
                             onClick={() => setInputMode('voice')}
+                            style={{ justifyContent: 'center', textAlign: 'center' }}
                         >
-                            🎤 {t('submit.voiceMode') || 'Voice'}
+                            🎤<br /><span style={{ fontSize: '0.75rem' }}>{t('submit.voiceMode')}</span>
                         </button>
                     </div>
                 </div>
@@ -431,21 +434,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         </div>
                     </div>
 
-                    {/* Voice Notes */}
-                    <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
-                        <label className="form-label">{t('submit.additionalNotes') || 'Additional Notes'}</label>
-                        <textarea
-                            className="form-input"
-                            style={{
-                                width: '100%',
-                                minHeight: '80px',
-                                resize: 'vertical'
-                            }}
-                            value={voiceNotes}
-                            onChange={(e) => setVoiceNotes(e.target.value)}
-                            placeholder={t('submit.voicePlaceholder') || 'Any additional details...'}
-                        />
-                    </div>
+
 
 
                     <div className="flex gap-2" style={{ marginTop: 'var(--space-4)' }}>

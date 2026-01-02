@@ -130,6 +130,7 @@ export const initDatabase = async () => {
     CREATE TABLE IF NOT EXISTS broadcasts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       message TEXT NOT NULL,
+      image_url TEXT,
       start_time DATETIME NOT NULL,
       end_time DATETIME NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -201,6 +202,11 @@ export const initDatabase = async () => {
   db.run(`CREATE INDEX IF NOT EXISTS idx_confirmations_point ON confirmations(point_id);`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_logs_user ON logs(user_id);`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_logs_action ON logs(action);`);
+
+  // Migration: Add image_url to broadcasts
+  try {
+    db.run("ALTER TABLE broadcasts ADD COLUMN image_url TEXT");
+  } catch (e) { /* Column exists */ }
 
   // Insert default settings if not exists
   const defaultSettings = [
