@@ -498,6 +498,59 @@ const SettingsPanel = ({ onClose }) => {
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
 
+                {/* Lite Mode Toggle */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">Performance</label>
+                    <div
+                        onClick={() => {
+                            const current = localStorage.getItem('nestfinder_lite_mode') === 'true';
+                            localStorage.setItem('nestfinder_lite_mode', (!current).toString());
+                            window.location.reload(); // Reload to apply changes
+                        }}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: 'var(--space-3)',
+                            background: 'var(--color-bg-secondary)',
+                            borderRadius: 'var(--radius-md)',
+                            cursor: 'pointer',
+                            border: '1px solid var(--color-border)'
+                        }}
+                    >
+                        <div>
+                            <div style={{ fontWeight: 500 }}>🪶 Lite Mode</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                Reduce animations for slower devices
+                            </div>
+                        </div>
+                        <div
+                            style={{
+                                width: '44px',
+                                height: '24px',
+                                borderRadius: '12px',
+                                background: localStorage.getItem('nestfinder_lite_mode') === 'true' ? 'var(--color-primary)' : 'var(--color-border)',
+                                position: 'relative',
+                                transition: 'background 0.2s'
+                            }}
+                        >
+                            <div style={{
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: 'white',
+                                position: 'absolute',
+                                top: '2px',
+                                left: localStorage.getItem('nestfinder_lite_mode') === 'true' ? '22px' : '2px',
+                                transition: 'left 0.2s',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                            }} />
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+
                 {/* Language Selection */}
                 <div className="form-group" ref={sectionRef}>
                     <label className="form-label">{t('profile.language')}</label>
