@@ -40,18 +40,23 @@ const SettingsPanel = ({ onClose }) => {
     const carouselRef = React.useRef(null);
     const sectionRef = React.useRef(null);
     const animationRef = React.useRef(null);
-    const scrollOffsetRef = React.useRef(0); // Use ref for smooth animation
+    const scrollOffsetRef = React.useRef(0);
+    const velocityRef = React.useRef(0);
+    const lastWheelTime = React.useRef(0);
+    const autoSelectTimer = React.useRef(null);
 
     // Animation constants
     const ITEM_HEIGHT = 68;
     const VISIBLE_ITEMS = 3;
     const PADDING = 12;
     const CONTAINER_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT + PADDING * 2;
+    const AUTO_SELECT_DELAY = 2000; // 2 seconds to auto-confirm
 
     // Force re-render trigger
     const [, forceRender] = useState(0);
     const [hasAnimated, setHasAnimated] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isConfirmed, setIsConfirmed] = useState(true); // Current language is confirmed
 
     const itemCount = availableLanguages.length;
 
@@ -70,11 +75,8 @@ const SettingsPanel = ({ onClose }) => {
         if (itemCount === 0) return 0;
 
         const scrollOffset = scrollOffsetRef.current;
-
-        // Calculate visual offset from center
         let offset = index - scrollOffset;
 
-        // Wrap around for infinite barrel effect
         while (offset > itemCount / 2) offset -= itemCount;
         while (offset < -itemCount / 2) offset += itemCount;
 
@@ -87,6 +89,47 @@ const SettingsPanel = ({ onClose }) => {
         let normalized = offset % itemCount;
         if (normalized < 0) normalized += itemCount;
         return normalized;
+    };
+
+    // Start auto-select timer
+    const startAutoSelectTimer = () => {
+        if (autoSelectTimer.current) clearTimeout(autoSelectTimer.current);
+        setIsConfirmed(false);
+
+        autoSelectTimer.current = setTimeout(() => {
+            const currentIndex = Math.round(normalizeOffset(scrollOffsetRef.current)) % itemCount;
+            setLanguage(availableLanguages[currentIndex].code);
+            setIsConfirmed(true);
+        }, AUTO_SELECT_DELAY);
+    };
+
+    // Animate scrollOffset with momentum physics
+    const animateWithMomentum = (initialVelocity) => {
+        if (animationRef.current) cancelAnimationFrame(animationRef.current);
+
+        let velocity = initialVelocity;
+        const friction = 0.95; // Deceleration factor
+        const minVelocity = 0.01;
+
+        setIsAnimating(true);
+
+        const animate = () => {
+            velocity *= friction;
+            scrollOffsetRef.current += velocity;
+            forceRender(n => n + 1);
+
+            if (Math.abs(velocity) > minVelocity) {
+                animationRef.current = requestAnimationFrame(animate);
+            } else {
+                // Snap to nearest item
+                const nearestIndex = Math.round(scrollOffsetRef.current);
+                animateTo(nearestIndex, 300, () => {
+                    startAutoSelectTimer();
+                });
+            }
+        };
+
+        animationRef.current = requestAnimationFrame(animate);
     };
 
     // Animate scrollOffset from current to target using rAF
@@ -131,12 +174,13 @@ const SettingsPanel = ({ onClose }) => {
                     const selectedIndex = availableLanguages.findIndex(l => l.code === language);
                     if (selectedIndex === -1) return;
 
-                    // Start 4 items "later" and roll backward to selected
-                    scrollOffsetRef.current = selectedIndex + 4;
+                    // Roll through entire list TWICE before landing
+                    const spinDistance = itemCount * 2;
+                    scrollOffsetRef.current = selectedIndex + spinDistance;
                     forceRender(n => n + 1);
 
-                    // Animate down to selected index
-                    setTimeout(() => animateTo(selectedIndex, 1000), 50);
+                    // Animate to selected index (longer duration for dramatic effect)
+                    setTimeout(() => animateTo(selectedIndex, 2000), 50);
                 }
             },
             { threshold: 0.5 }
@@ -146,56 +190,118 @@ const SettingsPanel = ({ onClose }) => {
         return () => observer.disconnect();
     }, [hasAnimated, itemCount, language, availableLanguages]);
 
-    // Cleanup animation on unmount
+    // Cleanup on unmount
     useEffect(() => {
         return () => {
             if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            if (autoSelectTimer.current) clearTimeout(autoSelectTimer.current);
         };
     }, []);
 
-    // Handle wheel scroll  
+    // Handle wheel scroll with momentum
     useEffect(() => {
         const el = carouselRef.current;
         if (!el) return;
 
         const handleWheel = (e) => {
-            if (isAnimating) return;
             e.preventDefault();
             e.stopPropagation();
 
-            const direction = e.deltaY > 0 ? 1 : -1;
-            animateTo(scrollOffsetRef.current + direction, 200);
+            // Cancel any existing animation
+            if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            if (autoSelectTimer.current) clearTimeout(autoSelectTimer.current);
+            setIsConfirmed(false);
+
+            const now = performance.now();
+            const timeDelta = now - lastWheelTime.current;
+            lastWheelTime.current = now;
+
+            // Calculate velocity based on wheel delta and time
+            const scrollDelta = e.deltaY / ITEM_HEIGHT; // Normalize to items
+
+            // Accumulate velocity (faster scrolling = more momentum)
+            if (timeDelta < 100) {
+                velocityRef.current += scrollDelta * 0.3; // Accumulate if scrolling fast
+            } else {
+                velocityRef.current = scrollDelta * 0.5; // Reset if scrolling slow
+            }
+
+            // Clamp velocity
+            velocityRef.current = Math.max(-3, Math.min(3, velocityRef.current));
+
+            // Apply immediate movement
+            scrollOffsetRef.current += velocityRef.current;
+            forceRender(n => n + 1);
+            setIsAnimating(true);
+
+            // Start deceleration after a pause in scrolling
+            if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            animationRef.current = setTimeout(() => {
+                if (Math.abs(velocityRef.current) > 0.1) {
+                    animateWithMomentum(velocityRef.current * 0.5);
+                } else {
+                    // Snap to nearest
+                    const nearestIndex = Math.round(scrollOffsetRef.current);
+                    animateTo(nearestIndex, 200, () => {
+                        startAutoSelectTimer();
+                    });
+                }
+                velocityRef.current = 0;
+            }, 150);
         };
 
         el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
-    }, [isAnimating]);
+    }, [itemCount]);
 
-    // Touch scroll support
+    // Touch scroll with momentum
     const touchStartY = React.useRef(0);
+    const touchStartTime = React.useRef(0);
+
     const handleTouchStart = (e) => {
         touchStartY.current = e.touches[0].clientY;
+        touchStartTime.current = performance.now();
+        velocityRef.current = 0;
+        if (animationRef.current) cancelAnimationFrame(animationRef.current);
+        if (autoSelectTimer.current) clearTimeout(autoSelectTimer.current);
+        setIsConfirmed(false);
     };
+
     const handleTouchMove = (e) => {
-        if (isAnimating) return;
         e.preventDefault();
-        const deltaY = touchStartY.current - e.touches[0].clientY;
-        if (Math.abs(deltaY) > 30) {
-            const direction = deltaY > 0 ? 1 : -1;
-            animateTo(scrollOffsetRef.current + direction, 200);
-            touchStartY.current = e.touches[0].clientY;
+        const currentY = e.touches[0].clientY;
+        const deltaY = touchStartY.current - currentY;
+        const deltaItems = deltaY / ITEM_HEIGHT;
+
+        scrollOffsetRef.current += deltaItems;
+        velocityRef.current = deltaItems;
+        touchStartY.current = currentY;
+        forceRender(n => n + 1);
+    };
+
+    const handleTouchEnd = () => {
+        if (Math.abs(velocityRef.current) > 0.1) {
+            animateWithMomentum(velocityRef.current * 2);
+        } else {
+            const nearestIndex = Math.round(scrollOffsetRef.current);
+            animateTo(nearestIndex, 200, () => {
+                startAutoSelectTimer();
+            });
         }
     };
 
-    // Click to select an item
+    // Click to select an item (immediate confirmation)
     const handleItemClick = (index) => {
-        if (isAnimating) return;
+        if (animationRef.current) cancelAnimationFrame(animationRef.current);
+        if (autoSelectTimer.current) clearTimeout(autoSelectTimer.current);
+
         animateTo(index, 300, () => {
             setLanguage(availableLanguages[index].code);
+            setIsConfirmed(true);
         });
     };
 
-    // Get the currently centered item index (for checkmark)
+    // Get the currently centered item index
     const centeredItemIndex = Math.round(normalizeOffset(scrollOffsetRef.current)) % itemCount;
 
 
@@ -357,6 +463,7 @@ const SettingsPanel = ({ onClose }) => {
                         ref={carouselRef}
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                         style={{
                             height: `${CONTAINER_HEIGHT}px`,
                             overflow: 'hidden',
@@ -394,8 +501,8 @@ const SettingsPanel = ({ onClose }) => {
 
                             // Visual check: is this item in the center slot
                             const isInCenter = Math.abs(yPos - centerSlotY) < 5;
-                            // Checkmark only shows when animation is complete and this is the selected item
-                            const showCheckmark = !isAnimating && index === centeredItemIndex;
+                            // Checkmark shows when confirmed (after 2s or tap)
+                            const showCheckmark = isConfirmed && index === centeredItemIndex;
 
                             return (
                                 <div
