@@ -985,19 +985,74 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
             {previewItem && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.5)', zIndex: 10000,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    background: 'rgba(0,0,0,0.7)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    zIndex: 10000,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '1rem'
                 }} onClick={() => setPreviewItem(null)}>
-                    <div style={{ background: '#1e293b', padding: '2rem', borderRadius: '12px', width: 'min(600px, 90vw)', border: '1px solid #334155' }} onClick={e => e.stopPropagation()}>
-                        <h3 style={{ marginTop: 0, color: '#f8fafc' }}>Message from {previewItem.user_nickname || 'Anonymous'}</h3>
-                        <div style={{ marginBottom: '1rem', color: '#94a3b8', fontSize: '0.9rem' }}>
-                            {formatTimestamp24h(previewItem.created_at)} • {previewItem.type.toUpperCase()}
+                    <div style={{
+                        background: '#1e293b',
+                        padding: '2rem',
+                        borderRadius: '16px',
+                        width: 'min(600px, 90vw)',
+                        border: '1px solid #334155',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
+                        maxHeight: '90vh',
+                        overflowY: 'auto'
+                    }} onClick={e => e.stopPropagation()}>
+                        {/* Header with Type Icon */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div style={{
+                                fontSize: '2.5rem',
+                                flexShrink: 0,
+                                width: '60px',
+                                height: '60px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: previewItem.type === 'bug' ? 'rgba(239, 68, 68, 0.1)' : previewItem.type === 'suggestion' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                                borderRadius: '12px',
+                                border: `2px solid ${previewItem.type === 'bug' ? '#ef4444' : previewItem.type === 'suggestion' ? '#3b82f6' : '#9ca3af'}`
+                            }}>
+                                {previewItem.type === 'bug' ? '🐛' : previewItem.type === 'suggestion' ? '💡' : '📝'}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <h3 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#f8fafc', fontSize: '1.5rem' }}>
+                                    {previewItem.type === 'bug' ? 'Bug Report' : previewItem.type === 'suggestion' ? 'Feature Suggestion' : 'Feedback'}
+                                </h3>
+                                <div style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
+                                    <span>👤 {previewItem.user_nickname || 'Anonymous'}</span>
+                                    <span>•</span>
+                                    <span>📅 {formatTimestamp24h(previewItem.created_at)}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', color: '#e2e8f0', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+
+                        {/* Message Content */}
+                        <div style={{
+                            background: '#0f172a',
+                            padding: '1.5rem',
+                            borderRadius: '12px',
+                            color: '#e2e8f0',
+                            lineHeight: 1.7,
+                            marginBottom: '1.5rem',
+                            fontSize: '1rem',
+                            boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.2)'
+                        }}>
                             {previewItem.message}
                         </div>
+
+                        {/* Actions */}
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                            <button onClick={() => setPreviewItem(null)} className="btn btn-secondary">Close</button>
+                            <button
+                                onClick={() => setPreviewItem(null)}
+                                className="btn btn-secondary"
+                                style={{ padding: '0.75rem 1.5rem', borderRadius: '8px' }}
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>
