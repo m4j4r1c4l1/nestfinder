@@ -494,12 +494,28 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
 
 // Modal for Daily Breakdown
 const DailyBreakdownModal = ({ date, data, onClose }) => {
-    if (!data) return null;
+    // Handle loading state
+    if (!data) {
+        return ReactDOM.createPortal(
+            <div style={{
+                position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
+                zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }} onClick={onClose}>
+                <div style={{ color: '#cbd5e1' }}>Loading...</div>
+            </div>,
+            document.body
+        );
+    }
+
+    // Normalize data to array (handle both Array and Object formats)
+    const items = Array.isArray(data)
+        ? data
+        : Object.entries(data).map(([k, v]) => ({ action: k, count: v }));
 
     // Calculate max value for percentages
-    const maxVal = Math.max(...data.map(d => d.count), 1);
+    const maxVal = Math.max(...items.map(d => d.count), 1);
 
-    return (
+    const content = (
         <div style={{
             position: 'fixed',
             top: 0,
@@ -520,31 +536,40 @@ const DailyBreakdownModal = ({ date, data, onClose }) => {
                 style={{
                     width: '100%',
                     maxWidth: '500px',
-                    background: 'rgba(30, 41, 59, 0.9)',
+                    background: '#1e293b',
                     border: '1px solid #334155',
-                    animation: 'scaleIn 0.2s ease-out'
+                    borderRadius: '16px',
+                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                    animation: 'scaleIn 0.2s ease-out',
+                    display: 'flex',
+                    flexDirection: 'column'
                 }}
             >
-                <div className="card-header flex-between items-center" style={{ borderBottom: '1px solid #334155' }}>
-                    <h3 className="card-title">
-                        📊 Activity Breakdown
-                        <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                {/* Header */}
+                <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>Daily Breakdown</h3>
+                        <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                             {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </span>
-                    </h3>
-                    <button onClick={onClose} className="btn btn-secondary btn-icon" style={{ width: 32, height: 32, fontSize: '1.2rem' }}>×</button>
+                    </div>
+                    <button onClick={onClose} style={{
+                        background: 'transparent', border: 'none', color: '#cbd5e1', fontSize: '1.5rem', cursor: 'pointer',
+                        width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>×</button>
                 </div>
 
-                <div className="card-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-                    {data.length === 0 ? (
+                {/* Body */}
+                <div style={{ padding: '1.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                    {items.length === 0 ? (
                         <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>No detailed activity recorded for this day.</div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {data.map((item, i) => (
+                            {items.map((item, i) => (
                                 <div key={i}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
                                         <span style={{ color: '#e2e8f0', textTransform: 'capitalize' }}>
-                                            {item.action.replace(/_/g, ' ')}
+                                            {(item.action || item.label || 'Unknown').replace(/_/g, ' ')}
                                         </span>
                                         <span style={{ color: '#fff', fontWeight: 600 }}>{item.count}</span>
                                     </div>
@@ -564,6 +589,8 @@ const DailyBreakdownModal = ({ date, data, onClose }) => {
             </div>
         </div>
     );
+
+    return ReactDOM.createPortal(content, document.body);
 };
 
 // Reusable Chart Card Component with independent state
@@ -833,7 +860,19 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                                 width={graphWidth / metrics.length}
                                 height={graphHeight}
                                 fill="transparent"
-                                onMouseEnter={() => setHoveredPoint({ index: i, x: getX(i) })}
+                                style={{ cursor: onPointClick ? 'pointer' : 'default' }}
+                                onMouseMove={(e) => {
+                                    const y = e.nativeEvent.offsetY;
+                                    setHoveredPoint({ index: i, x: getX(i), y });
+                                }}
+                                onMouseEnter={(e) => {
+                                    const y = e.nativeEvent.offsetY;
+                                    setHoveredPoint({ index: i, x: getX(i), y });
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onPointClick) onPointClick(metrics[i]);
+                                }}
                             />
                         ))}
                     </g>
@@ -844,8 +883,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     <div style={{
                         position: 'absolute',
                         left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
-                        top: '10px',
-                        transform: hoveredPoint.index > metrics.length * 0.6 ? 'translateX(calc(-100% - 15px))' : 'translateX(15px)',
+                        top: `${hoveredPoint.y ? hoveredPoint.y + padding.top : 20}px`, // Follow cursor Y
+                        transform: `translate(${hoveredPoint.index > metrics.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50%)`, // Center vertically relative to cursor
                         background: '#0f172a',
                         border: '1px solid #334155',
                         borderRadius: '8px',
@@ -892,11 +931,15 @@ const MetricsSection = () => {
     const handleClientBarClick = async (point) => {
         setBreakdownDate(point.date);
         try {
-            // New API endpoint for daily breakdown
-            const res = await adminApi.get('/metrics/daily-breakdown', { params: { date: point.date } });
-            setBreakdownData(res.data.breakdown);
+            // Fix: Use adminApi.fetch instead of .get, and correct path if needed
+            // Assuming /admin/metrics/daily-breakdown based on history endpoint
+            const params = new URLSearchParams({ date: point.date });
+            const data = await adminApi.fetch(`/admin/metrics/daily-breakdown?${params}`);
+            setBreakdownData(data.breakdown);
         } catch (err) {
             console.error(err);
+            // Optional: set empty data or error state
+            setBreakdownData({});
         }
     };
 
