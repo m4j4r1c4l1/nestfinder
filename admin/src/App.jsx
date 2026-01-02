@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Logs from './pages/Logs';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
+import Messages from './pages/Messages';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -170,6 +171,7 @@ const App = () => {
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '📊' },
         { id: 'notifications', label: 'Notifications', icon: '📢' },
+        { id: 'messages', label: 'Messages', icon: '💌' },
         { id: 'logs', label: 'Activity Logs', icon: '📜' },
         { id: 'settings', label: 'Settings', icon: '⚙️' }
     ];
@@ -272,6 +274,7 @@ const App = () => {
             <main style={{ flex: 1, padding: '1.5rem', marginLeft: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', height: '100vh' }}>
                 {view === 'dashboard' && <Dashboard />}
                 {view === 'notifications' && <Notifications />}
+                {view === 'messages' && <Messages />}
                 {view === 'logs' && <Logs />}
                 {view === 'settings' && <Settings />}
             </main>
