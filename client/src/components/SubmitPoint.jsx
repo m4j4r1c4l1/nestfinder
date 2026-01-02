@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useLanguage } from '../i18n/LanguageContext';
+import VoiceButton from './VoiceButton';
 
 const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     const { t } = useLanguage();
@@ -10,6 +11,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     const [manualAddress, setManualAddress] = useState({ city: '', street: '', number: '' });
     const [tags, setTags] = useState([]); // 'Who' tags
     const [needs, setNeeds] = useState([]); // 'What' tags
+    const [voiceNotes, setVoiceNotes] = useState(''); // Voice input notes
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
     const [error, setError] = useState('');
@@ -116,11 +118,15 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
 
         try {
             setIsSubmitting(true);
+            // Combine tags and voice notes
+            const allNotes = [...tags, ...needs];
+            if (voiceNotes.trim()) allNotes.push(voiceNotes.trim());
+
             await onSubmit({
                 latitude: location.latitude,
                 longitude: location.longitude,
                 address,
-                notes: [...tags, ...needs].join(',') // Send all tags as comma-separated string
+                notes: allNotes.join(',')
             });
         } catch (err) {
             console.error('Submit point error:', err);
@@ -364,6 +370,34 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                     </span>
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* Voice Notes */}
+                    <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
+                        <label className="form-label">{t('submit.additionalNotes') || 'Additional Notes'}</label>
+                        <div style={{
+                            display: 'flex',
+                            gap: 'var(--space-2)',
+                            alignItems: 'flex-start'
+                        }}>
+                            <textarea
+                                className="form-input"
+                                style={{
+                                    flex: 1,
+                                    minHeight: '60px',
+                                    resize: 'vertical'
+                                }}
+                                value={voiceNotes}
+                                onChange={(e) => setVoiceNotes(e.target.value)}
+                                placeholder={t('submit.voicePlaceholder') || 'Type or speak...'}
+                            />
+                            <VoiceButton
+                                onTranscript={(text) => {
+                                    setVoiceNotes(prev => prev ? `${prev} ${text}` : text);
+                                }}
+                                disabled={isSubmitting}
+                            />
                         </div>
                     </div>
 
