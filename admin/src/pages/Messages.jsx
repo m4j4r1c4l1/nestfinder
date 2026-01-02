@@ -99,6 +99,7 @@ const Messages = () => {
         startTime: '',
         endTime: ''
     });
+    const [showBroadcastEmojiPicker, setShowBroadcastEmojiPicker] = useState(false);
     const [creatingBroadcast, setCreatingBroadcast] = useState(false);
 
     useEffect(() => {
@@ -382,6 +383,7 @@ const Messages = () => {
                                             )}
                                         </div>
                                         <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                                            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Message</label>
                                             <textarea
                                                 value={newBroadcast.message}
                                                 onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
@@ -392,7 +394,7 @@ const Messages = () => {
                                             <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setShowEmojiPicker(true)}
+                                                    onClick={() => setShowBroadcastEmojiPicker(true)}
                                                     style={{
                                                         background: 'none',
                                                         border: 'none',
@@ -438,6 +440,12 @@ const Messages = () => {
                                             {creatingBroadcast ? 'Creating...' : '📢 Publish Broadcast'}
                                         </button>
                                     </form>
+                                    {showBroadcastEmojiPicker && (
+                                        <EmojiPickerModal
+                                            onSelect={(emoji) => { setNewBroadcast(prev => ({ ...prev, message: prev.message + emoji })); setShowBroadcastEmojiPicker(false); }}
+                                            onClose={() => setShowBroadcastEmojiPicker(false)}
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -735,7 +743,16 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     <label className="form-label">Image</label>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <input type="text" className="form-input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL..." style={{ flex: 1 }} />
-                        <label className="btn btn-secondary" style={{ cursor: 'pointer', padding: '0.4rem 1.5rem' }}>
+                        <label className="btn btn-secondary" style={{
+                            cursor: 'pointer',
+                            padding: 0,
+                            width: '42px',
+                            height: '42px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '8px'
+                        }}>
                             <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📂</span>
                             <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
                         </label>
@@ -915,9 +932,9 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                             <button
                                 onClick={handleBulkMarkRead}
                                 className="btn btn-sm"
-                                style={{ background: '#22c55e', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
+                                style={{ background: '#14532d', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
                             >
-                                <span style={{ color: 'white', fontWeight: 'bold' }}>✓✓</span> Mark as Read
+                                <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>✓✓</span> Mark as Read
                             </button>
                             <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}>🗑️ Delete ({selectedIds.length})</button>
                         </>
@@ -990,12 +1007,14 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
                                         {item.status === 'new' ? (
-                                            <span style={{ color: '#22c55e', fontWeight: 500 }}>
-                                                <span style={{ fontSize: '0.9rem' }}>✓✓</span> Pending
+                                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                                <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
+                                                <span style={{ color: '#94a3b8', fontWeight: 500 }}>Pending</span>
                                             </span>
                                         ) : item.status === 'reviewed' ? (
-                                            <span style={{ color: '#3b82f6', fontWeight: 500 }}>
-                                                <span style={{ fontSize: '0.9rem' }}>✓✓</span> Read
+                                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                                <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
+                                                <span style={{ color: '#94a3b8', fontWeight: 500 }}>Read</span>
                                             </span>
                                         ) : (
                                             <span style={{ color: '#8b5cf6', fontWeight: 500 }}>Resolved</span>
