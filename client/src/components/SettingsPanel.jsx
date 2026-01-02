@@ -475,7 +475,7 @@ const SettingsPanel = ({ onClose }) => {
                             overflow: 'hidden',
                             border: '1px solid var(--color-border)',
                             borderRadius: 'var(--radius-md)',
-                            background: 'rgba(0,0,0,0.02)',
+                            background: 'rgba(51, 65, 85, 0.5)',
                             boxShadow: 'inset 0 10px 20px -10px rgba(0,0,0,0.3), inset 0 -10px 20px -10px rgba(0,0,0,0.3)',
                             position: 'relative',
                             cursor: 'ns-resize',
@@ -530,13 +530,13 @@ const SettingsPanel = ({ onClose }) => {
                                             alignItems: 'center',
                                             gap: 'var(--space-3)',
                                             padding: 'var(--space-3)',
-                                            background: 'rgba(30, 41, 59, 0.8)',
-                                            border: '1px solid rgba(148, 163, 184, 0.2)',
+                                            background: 'rgba(15, 23, 42, 0.95)',
+                                            border: '1px solid rgba(148, 163, 184, 0.15)',
                                             borderRadius: 'var(--radius-md)',
                                             color: 'var(--color-text)',
-                                            height: `${ITEM_HEIGHT - 6}px`,
-                                            marginBottom: '3px',
-                                            marginTop: '3px',
+                                            height: `${ITEM_HEIGHT - 8}px`,
+                                            marginBottom: '4px',
+                                            marginTop: '4px',
                                             boxSizing: 'border-box'
                                         }}
                                     >
