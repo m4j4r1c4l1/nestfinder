@@ -464,7 +464,7 @@ const SettingsPanel = ({ onClose }) => {
                     <label className="form-label">{t('profile.language')}</label>
                     {/* Carousel Guidance */}
                     <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', lineHeight: '1.4' }}>
-                        🌍 Scroll • Tap or wait 2s to confirm
+                        🌍 Scroll + Tap or wait 2s to confirm
                     </div>
 
                     <div
@@ -533,7 +533,7 @@ const SettingsPanel = ({ onClose }) => {
                                             gap: 'var(--space-3)',
                                             padding: 'var(--space-3)',
                                             background: 'rgba(15, 23, 42, 0.95)',
-                                            border: '1px solid var(--color-border)',
+                                            border: '1px solid rgba(148, 163, 184, 0.2)',
                                             borderRadius: 'var(--radius-md)',
                                             color: 'var(--color-text)',
                                             height: `${ITEM_HEIGHT - 8}px`,
