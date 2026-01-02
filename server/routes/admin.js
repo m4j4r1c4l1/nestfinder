@@ -137,8 +137,13 @@ router.get('/metrics/history', (req, res) => {
         const dateRow = get(`SELECT date('now', '${dateOffset}') as date_val`);
         const dateStr = dateRow.date_val;
 
-        // Users active this day (Daily Active Users)
-        const usersCount = get(`SELECT COUNT(DISTINCT user_id) as count FROM logs WHERE date(created_at) = date('now', '${dateOffset}')`).count;
+        // Users active this day (Daily Active Users) - EXCLUDE ADMINS
+        const usersCount = get(`
+            SELECT COUNT(DISTINCT user_id) as count 
+            FROM logs 
+            WHERE date(created_at) = date('now', '${dateOffset}')
+            AND user_id != 'admin' AND action NOT LIKE 'admin_%'
+        `).count;
 
         // Total notifications sent up to this date  
         const notificationsCount = get(`SELECT COUNT(*) as count FROM notifications WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
@@ -173,11 +178,12 @@ router.get('/metrics/daily-breakdown', (req, res) => {
         return res.status(400).json({ error: 'Date required' });
     }
 
-    // 1. Fetch all raw logs for the date to process in memory
+    // 1. Fetch all raw logs for the date to process in memory - EXCLUDE ADMINS
     const logs = all(`
         SELECT user_id, action 
         FROM logs 
         WHERE date(created_at) = ?
+        AND user_id != 'admin' AND action NOT LIKE 'admin_%'
     `, [date]);
 
     // 2. Identify Cohorts
