@@ -281,14 +281,19 @@ const SettingsPanel = ({ onClose }) => {
     };
 
     const handleTouchEnd = () => {
-        if (Math.abs(velocityRef.current) > 0.1) {
+        // Always snap to nearest item, but use momentum if velocity is high enough
+        const nearestIndex = Math.round(scrollOffsetRef.current);
+
+        if (Math.abs(velocityRef.current) > 0.3) {
+            // High velocity: apply momentum then snap
             animateWithMomentum(velocityRef.current * 2);
         } else {
-            const nearestIndex = Math.round(scrollOffsetRef.current);
+            // Low/no velocity: immediately snap to nearest
             animateTo(nearestIndex, 200, () => {
                 startAutoSelectTimer();
             });
         }
+        velocityRef.current = 0;
     };
 
     // Click to select an item (immediate confirmation)
