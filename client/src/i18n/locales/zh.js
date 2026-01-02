@@ -141,6 +141,7 @@ export default {
         continue: '继续'
     },
     settings: {
+        yourProfile: 'Your Profile',
         notifications: '通知',
         popupMessages: '实时弹窗',
         popupDescription: '收到消息时立即显示',

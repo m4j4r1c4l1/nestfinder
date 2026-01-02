@@ -142,6 +142,7 @@ export default {
         continue: 'متابع'
     },
     settings: {
+        yourProfile: 'Your Profile',
         notifications: 'إشعارات',
         popupMessages: 'نوافذ فورية',
         popupDescription: 'عرض الرسائل فوراً',

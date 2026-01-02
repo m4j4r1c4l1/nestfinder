@@ -141,6 +141,7 @@ export default {
         continue: 'Weiter'
     },
     settings: {
+        yourProfile: 'Your Profile',
         notifications: 'Benachrichtigungen',
         popupMessages: 'Echtzeit-Popups',
         popupDescription: 'Nachrichten sofort anzeigen',

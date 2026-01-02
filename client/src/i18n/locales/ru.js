@@ -141,6 +141,7 @@ export default {
         continue: 'Продолжить'
     },
     settings: {
+        yourProfile: 'Your Profile',
         notifications: 'Уведомления',
         popupMessages: 'Всплывающие сообщения',
         popupDescription: 'Показывать сообщения сразу',
