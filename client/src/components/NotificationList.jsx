@@ -29,8 +29,8 @@ const FeedbackSection = () => {
     };
 
     return (
-        <div style={{ padding: '0.5rem' }}>
-            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', textAlign: 'center' }}>
+        <div style={{ padding: '0.25rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', textAlign: 'center' }}>
                 {t('feedback.description') || 'Report bugs or suggest improvements.'}
             </div>
 
@@ -41,7 +41,7 @@ const FeedbackSection = () => {
                         onClick={() => setType(typeOption)}
                         style={{
                             flex: 1,
-                            padding: '0.5rem',
+                            padding: '0.4rem',
                             background: type === typeOption ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
                             color: type === typeOption ? 'white' : 'var(--color-text-secondary)',
                             border: 'none',
@@ -63,7 +63,8 @@ const FeedbackSection = () => {
                 maxLength={500}
                 style={{
                     width: '100%',
-                    minHeight: '80px',
+                    flex: 1,
+                    minHeight: '60px',
                     padding: '0.5rem',
                     background: 'var(--color-bg-tertiary)',
                     border: '1px solid var(--color-border)',
@@ -73,13 +74,13 @@ const FeedbackSection = () => {
                     marginBottom: '0.25rem'
                 }}
             />
-            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textAlign: 'right', marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textAlign: 'right', marginBottom: '0.25rem' }}>
                 {message.length}/500 {t('feedback.charLimit') || 'characters'}
             </div>
 
             {/* Application Rating */}
-            <div style={{ marginBottom: '0.5rem', padding: '0.5rem', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text)', marginBottom: '0.25rem', textAlign: 'center', fontWeight: 500 }}>
+            <div style={{ marginBottom: '0.5rem', padding: '0.25rem', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--color-text)', marginBottom: '0.1rem', textAlign: 'center', fontWeight: 500 }}>
                     {t('feedback.rateApp') || 'Rate the App'}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
@@ -90,9 +91,9 @@ const FeedbackSection = () => {
                             style={{
                                 background: 'none',
                                 border: 'none',
-                                fontSize: '1.4rem',
+                                fontSize: '1.25rem',
                                 cursor: 'pointer',
-                                padding: '0 4px',
+                                padding: '0 2px',
                                 transition: 'transform 0.1s',
                                 transform: rating >= star ? 'scale(1.1)' : 'scale(1)',
                                 filter: rating >= star ? 'grayscale(0%)' : 'grayscale(100%) opacity(0.3)'
@@ -109,7 +110,7 @@ const FeedbackSection = () => {
                 disabled={loading || !message.trim()}
                 style={{
                     width: '100%',
-                    padding: '0.75rem',
+                    padding: '0.6rem',
                     background: success ? 'var(--color-confirmed)' : 'var(--color-primary)',
                     color: 'white',
                     border: 'none',
