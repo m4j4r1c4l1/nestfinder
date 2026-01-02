@@ -68,3 +68,26 @@ If you see an error saying location was denied or blocked, this is most commonly
 You can still use the app!
 
 - **Manual Mode**: When reporting a point, choose "**Select on Map**" to manually drop a pin without needing GPS.
+
+---
+
+## 🗺️ NestFinder Anywhere (Offline Mode)
+
+NestFinder now includes enhanced offline capabilities:
+
+### What Works Offline
+- **Map Tiles**: Up to 2000 tiles are cached for offline viewing.
+- **Point Data**: Recently viewed points are cached for 24 hours.
+- **Cached Actions**: Submissions and confirmations are queued when offline.
+
+### Lite Mode
+In Settings, toggle **"Lite Mode"** to improve performance on slower devices:
+- Disables animations
+- Reduces visual effects
+- Optimizes battery usage
+
+### Reconnecting
+When you regain connectivity:
+- Queued actions are automatically synced.
+- You'll see a notification confirming the sync.
+

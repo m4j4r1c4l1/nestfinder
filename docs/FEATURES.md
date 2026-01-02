@@ -89,3 +89,46 @@ Designed for low-connectivity environments.
 - **CSV**: Spreadsheet-compatible export for analysis.
 - **GPX/KML**: GIS-compatible formats for use with other mapping tools.
 - **Pretty Printing**: Formatted JSON for human readability.
+
+---
+
+## 🆕 New Features (v2.0)
+
+### 8. Guardian Trust System 🏆
+A gamification system that rewards active contributors.
+- **Trust Score**: Earn points (+5 for approved submissions, +1 for confirmations).
+- **Weighted Voting**: High-trust users ("Guardians" with 50+ score) have 3x voting power.
+- **Badge Tiers**: Progress through Hatchling 🥚 → Sparrow 🐦 → Owl 🦉 → Eagle 🦅.
+- **Profile Display**: View your status and score in Settings.
+
+### 9. Voice-First Interface 🎙️
+Hands-free reporting for accessibility and convenience.
+- **Web Speech API**: Convert speech to text for notes.
+- **Microphone Button**: Integrated in the submission form.
+- **Multi-language**: Respects device language settings.
+
+### 10. Anonymous Identity Recovery 🔑
+Restore your account on a new device without personal data.
+- **3-Word Recovery Keys**: Easy-to-remember phrases (e.g., "eagle-forest-dawn").
+- **Generate in Settings**: Create and save your key.
+- **Cross-Device**: Use the key to recover your full history and score.
+
+### 11. Global Broadcast System 📢
+Admin announcements to all users.
+- **Delayed Display**: Broadcasts appear 1 second after settling on the map.
+- **See Once Logic**: Users only see each broadcast once (stored in localStorage).
+- **Admin Controls**: Create, schedule, and delete broadcasts from Admin Panel.
+
+### 12. User Feedback Channel 💌
+Direct communication with developers.
+- **Type Selection**: Report bugs 🐛, suggest ideas 💡, or send other feedback.
+- **In-App Form**: Accessible from Settings.
+- **Admin Inbox**: All feedback viewable in Admin Panel.
+
+### 13. Enhanced Offline Mode 🗺️
+Improved "NestFinder Anywhere" capabilities.
+- **Expanded Tile Cache**: 2000 map tiles stored for offline viewing.
+- **API Caching**: Point data cached for 24 hours.
+- **Lite Mode**: Toggle in Settings to disable animations for better performance.
+- **Offline Queue**: Actions queued when offline and synced when reconnected.
+
