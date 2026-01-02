@@ -108,6 +108,102 @@ const RecoveryKeySection = () => {
     );
 };
 
+// Feedback Section Component
+const FeedbackSection = () => {
+    const [type, setType] = useState('suggestion');
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async () => {
+        if (!message.trim()) return;
+
+        setLoading(true);
+        try {
+            await api.submitFeedback(type, message.trim());
+            setSuccess(true);
+            setMessage('');
+            setTimeout(() => setSuccess(false), 3000);
+        } catch (err) {
+            console.error('Failed to submit feedback:', err);
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div style={{
+            marginBottom: 'var(--space-4)',
+            padding: 'var(--space-3)',
+            background: 'var(--color-bg-secondary)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border)'
+        }}>
+            <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>
+                💌 Send Feedback
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
+                Report bugs or suggest improvements.
+            </div>
+
+            <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+                {['bug', 'suggestion', 'other'].map(t => (
+                    <button
+                        key={t}
+                        onClick={() => setType(t)}
+                        style={{
+                            flex: 1,
+                            padding: 'var(--space-2)',
+                            background: type === t ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
+                            color: type === t ? 'white' : 'var(--color-text-secondary)',
+                            border: 'none',
+                            borderRadius: 'var(--radius-md)',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            textTransform: 'capitalize'
+                        }}
+                    >
+                        {t === 'bug' ? '🐛 Bug' : t === 'suggestion' ? '💡 Idea' : '📝 Other'}
+                    </button>
+                ))}
+            </div>
+
+            <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Describe your feedback..."
+                style={{
+                    width: '100%',
+                    minHeight: '80px',
+                    padding: 'var(--space-2)',
+                    background: 'var(--color-bg-tertiary)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--color-text)',
+                    resize: 'vertical',
+                    marginBottom: 'var(--space-2)'
+                }}
+            />
+
+            <button
+                onClick={handleSubmit}
+                disabled={loading || !message.trim()}
+                style={{
+                    width: '100%',
+                    padding: 'var(--space-2)',
+                    background: success ? 'var(--color-confirmed)' : 'var(--color-primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 'var(--radius-md)',
+                    cursor: message.trim() ? 'pointer' : 'not-allowed',
+                    opacity: message.trim() ? 1 : 0.6
+                }}
+            >
+                {success ? '✓ Sent!' : loading ? 'Sending...' : 'Send Feedback'}
+            </button>
+        </div>
+    );
+};
+
 const SettingsPanel = ({ onClose }) => {
     const { t, language, setLanguage, availableLanguages } = useLanguage();
     const { user } = useAuth();
@@ -462,6 +558,9 @@ const SettingsPanel = ({ onClose }) => {
 
                 {/* Recovery Key Section */}
                 <RecoveryKeySection />
+
+                {/* Feedback Section */}
+                <FeedbackSection />
 
                 {/* Share App with QR Code */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>

@@ -627,4 +627,33 @@ router.delete('/broadcasts/:id', (req, res) => {
     res.json({ success: true });
 });
 
+// ================== FEEDBACK ==================
+
+// List all feedback
+router.get('/feedback', (req, res) => {
+    const feedback = all(`
+        SELECT f.*, u.nickname as user_nickname
+        FROM feedback f
+        LEFT JOIN users u ON f.user_id = u.id
+        ORDER BY f.created_at DESC
+    `);
+    res.json({ feedback });
+});
+
+// Update feedback status
+router.put('/feedback/:id/status', (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    run('UPDATE feedback SET status = ? WHERE id = ?', [status, id]);
+    res.json({ success: true });
+});
+
+// Delete feedback
+router.delete('/feedback/:id', (req, res) => {
+    const { id } = req.params;
+    run('DELETE FROM feedback WHERE id = ?', [id]);
+    res.json({ success: true });
+});
+
 export default router;

@@ -137,6 +137,19 @@ export const initDatabase = async () => {
   `);
 
   db.run(`
+    -- User Feedback table
+    CREATE TABLE IF NOT EXISTS feedback (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT,
+      type TEXT DEFAULT 'general',
+      message TEXT NOT NULL,
+      status TEXT DEFAULT 'new',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+  `);
+
+  db.run(`
     -- In-App Notifications table
     CREATE TABLE IF NOT EXISTS notifications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
