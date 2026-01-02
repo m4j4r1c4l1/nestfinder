@@ -72,9 +72,10 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         }
     };
 
-    const handleGeocodeAddress = async () => {
-        const fullAddress = `${manualAddress.street} ${manualAddress.number}, ${manualAddress.city}`;
-        if (!manualAddress.city || !manualAddress.street) {
+    const handleGeocodeAddress = async (addrToGeocode = null) => {
+        const addressQuery = addrToGeocode || `${manualAddress.street} ${manualAddress.number}, ${manualAddress.city}`;
+
+        if (!addrToGeocode && (!manualAddress.city || !manualAddress.street)) {
             setError(t('submit.addressRequired'));
             return;
         }
@@ -84,7 +85,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
 
         try {
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressQuery)}&limit=1`
             );
             const data = await response.json();
 
@@ -101,7 +102,10 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                     longitude: parseFloat(result.lon)
                 });
             }
-            setAddress(result.display_name);
+            // Update displayed address if in voice mode or generic address mode
+            if (inputMode === 'voice') {
+                setAddress(result.display_name);
+            }
         } catch (err) {
             setError(t('submit.geocodeError'));
         } finally {
@@ -172,6 +176,13 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                             onClick={() => setInputMode('address')}
                         >
                             🏠 {t('submit.addressMode')}
+                        </button>
+                        <button
+                            type="button"
+                            className={`toggle-btn ${inputMode === 'voice' ? 'active' : ''}`}
+                            onClick={() => setInputMode('voice')}
+                        >
+                            🎤 {t('submit.voiceMode') || 'Voice'}
                         </button>
                     </div>
                 </div>
@@ -282,6 +293,53 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         </div>
                     )}
 
+                    {inputMode === 'voice' && (
+                        <div className="form-group" style={{ textAlign: 'center', padding: 'var(--space-4) 0' }}>
+                            <div style={{ marginBottom: 'var(--space-3)' }}>
+                                <label className="form-label">{t('submit.voiceInstructions') || 'Tap microphone and speak the address'}</label>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-3)' }}>
+                                <VoiceButton
+                                    onTranscript={(text) => {
+                                        setAddress(text);
+                                        handleGeocodeAddress(text);
+                                    }}
+                                    disabled={isGeocoding || isSubmitting}
+                                />
+                            </div>
+
+                            {isGeocoding && (
+                                <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', marginBottom: 'var(--space-2)' }}>
+                                    <span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', marginRight: 6 }} />
+                                    {t('common.searching') || 'Searching location...'}
+                                </div>
+                            )}
+
+                            {address && (
+                                <div style={{
+                                    padding: 'var(--space-3)',
+                                    background: location ? 'var(--color-confirmed-light)' : 'var(--color-bg-tertiary)',
+                                    borderRadius: 'var(--radius-md)',
+                                    marginTop: 'var(--space-2)',
+                                    border: location ? '1px solid var(--color-confirmed)' : '1px solid var(--color-border)'
+                                }}>
+                                    <div style={{ fontSize: '1.2rem', marginBottom: 'var(--space-1)' }}>
+                                        {location ? '✅' : '📝'}
+                                    </div>
+                                    <div style={{ fontWeight: 500, color: 'var(--color-text)' }}>
+                                        "{address}"
+                                    </div>
+                                    {location && (
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-confirmed)', marginTop: 'var(--space-1)' }}>
+                                            Location found!
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {error && <div style={{ color: 'var(--color-deactivated)', fontSize: '12px', marginTop: 'var(--space-2)' }}>{error}</div>}
 
                     <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
@@ -376,30 +434,19 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                     {/* Voice Notes */}
                     <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
                         <label className="form-label">{t('submit.additionalNotes') || 'Additional Notes'}</label>
-                        <div style={{
-                            display: 'flex',
-                            gap: 'var(--space-2)',
-                            alignItems: 'flex-start'
-                        }}>
-                            <textarea
-                                className="form-input"
-                                style={{
-                                    flex: 1,
-                                    minHeight: '60px',
-                                    resize: 'vertical'
-                                }}
-                                value={voiceNotes}
-                                onChange={(e) => setVoiceNotes(e.target.value)}
-                                placeholder={t('submit.voicePlaceholder') || 'Type or speak...'}
-                            />
-                            <VoiceButton
-                                onTranscript={(text) => {
-                                    setVoiceNotes(prev => prev ? `${prev} ${text}` : text);
-                                }}
-                                disabled={isSubmitting}
-                            />
-                        </div>
+                        <textarea
+                            className="form-input"
+                            style={{
+                                width: '100%',
+                                minHeight: '80px',
+                                resize: 'vertical'
+                            }}
+                            value={voiceNotes}
+                            onChange={(e) => setVoiceNotes(e.target.value)}
+                            placeholder={t('submit.voicePlaceholder') || 'Any additional details...'}
+                        />
                     </div>
+
 
                     <div className="flex gap-2" style={{ marginTop: 'var(--space-4)' }}>
                         <button
@@ -415,8 +462,8 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         {t('submit.subtitle')}
                     </p>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

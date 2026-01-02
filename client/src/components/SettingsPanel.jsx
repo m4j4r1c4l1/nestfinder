@@ -20,12 +20,17 @@ const RecoveryKeySection = () => {
     const [recoveryKey, setRecoveryKey] = useState(null);
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [showKey, setShowKey] = useState(true);
 
     const generateKey = async () => {
         setLoading(true);
         try {
             const result = await api.generateRecoveryKey();
             setRecoveryKey(result.recoveryKey);
+            // Auto-copy and show feedback
+            navigator.clipboard.writeText(result.recoveryKey);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 3000);
         } catch (err) {
             console.error('Failed to generate recovery key:', err);
         }
@@ -42,14 +47,29 @@ const RecoveryKeySection = () => {
 
     return (
         <div style={{
-            marginBottom: 'var(--space-4)',
             padding: 'var(--space-3)',
-            background: 'var(--color-bg-secondary)',
+            background: 'var(--color-bg-tertiary)',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--color-border)'
         }}>
-            <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>
-                🔑 Recovery Key
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
+                <div style={{ fontWeight: 500 }}>
+                    🔑 Recovery Key
+                </div>
+                {recoveryKey && (
+                    <button
+                        onClick={() => setShowKey(!showKey)}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--color-text-secondary)',
+                            cursor: 'pointer',
+                            fontSize: '1rem'
+                        }}
+                    >
+                        {showKey ? '🙈' : '👁️'}
+                    </button>
+                )}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
                 Save this key to restore your identity on a new device.
@@ -59,7 +79,7 @@ const RecoveryKeySection = () => {
                 <div>
                     <div style={{
                         padding: 'var(--space-3)',
-                        background: 'var(--color-bg-tertiary)',
+                        background: 'var(--color-bg-secondary)',
                         borderRadius: 'var(--radius-md)',
                         fontFamily: 'monospace',
                         fontSize: 'var(--font-size-lg)',
@@ -69,7 +89,7 @@ const RecoveryKeySection = () => {
                         color: 'var(--color-primary)',
                         marginBottom: 'var(--space-2)'
                     }}>
-                        {recoveryKey}
+                        {showKey ? recoveryKey : '•••-•••-•••'}
                     </div>
                     <button
                         onClick={copyKey}
@@ -80,7 +100,8 @@ const RecoveryKeySection = () => {
                             color: 'white',
                             border: 'none',
                             borderRadius: 'var(--radius-md)',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            transition: 'background 0.3s'
                         }}
                     >
                         {copied ? '✓ Copied!' : '📋 Copy Key'}
@@ -93,116 +114,23 @@ const RecoveryKeySection = () => {
                     style={{
                         width: '100%',
                         padding: 'var(--space-2)',
-                        background: 'var(--color-primary)',
+                        background: copied ? 'var(--color-confirmed)' : 'var(--color-primary)',
                         color: 'white',
                         border: 'none',
                         borderRadius: 'var(--radius-md)',
                         cursor: 'pointer',
-                        opacity: loading ? 0.7 : 1
+                        opacity: loading ? 0.7 : 1,
+                        transition: 'background 0.3s'
                     }}
                 >
-                    {loading ? 'Generating...' : 'Generate Recovery Key'}
+                    {copied ? '✓ Key Generated & Copied!' : loading ? 'Generating...' : '🔑 Generate Recovery Key'}
                 </button>
             )}
         </div>
     );
 };
 
-// Feedback Section Component
-const FeedbackSection = () => {
-    const [type, setType] = useState('suggestion');
-    const [message, setMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
 
-    const handleSubmit = async () => {
-        if (!message.trim()) return;
-
-        setLoading(true);
-        try {
-            await api.submitFeedback(type, message.trim());
-            setSuccess(true);
-            setMessage('');
-            setTimeout(() => setSuccess(false), 3000);
-        } catch (err) {
-            console.error('Failed to submit feedback:', err);
-        }
-        setLoading(false);
-    };
-
-    return (
-        <div style={{
-            marginBottom: 'var(--space-4)',
-            padding: 'var(--space-3)',
-            background: 'var(--color-bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-border)'
-        }}>
-            <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>
-                💌 Send Feedback
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
-                Report bugs or suggest improvements.
-            </div>
-
-            <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
-                {['bug', 'suggestion', 'other'].map(t => (
-                    <button
-                        key={t}
-                        onClick={() => setType(t)}
-                        style={{
-                            flex: 1,
-                            padding: 'var(--space-2)',
-                            background: type === t ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
-                            color: type === t ? 'white' : 'var(--color-text-secondary)',
-                            border: 'none',
-                            borderRadius: 'var(--radius-md)',
-                            cursor: 'pointer',
-                            fontSize: '0.75rem',
-                            textTransform: 'capitalize'
-                        }}
-                    >
-                        {t === 'bug' ? '🐛 Bug' : t === 'suggestion' ? '💡 Idea' : '📝 Other'}
-                    </button>
-                ))}
-            </div>
-
-            <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Describe your feedback..."
-                style={{
-                    width: '100%',
-                    minHeight: '80px',
-                    padding: 'var(--space-2)',
-                    background: 'var(--color-bg-tertiary)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--color-text)',
-                    resize: 'vertical',
-                    marginBottom: 'var(--space-2)'
-                }}
-            />
-
-            <button
-                onClick={handleSubmit}
-                disabled={loading || !message.trim()}
-                style={{
-                    width: '100%',
-                    padding: 'var(--space-2)',
-                    background: success ? 'var(--color-confirmed)' : 'var(--color-primary)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 'var(--radius-md)',
-                    cursor: message.trim() ? 'pointer' : 'not-allowed',
-                    opacity: message.trim() ? 1 : 0.6
-                }}
-            >
-                {success ? '✓ Sent!' : loading ? 'Sending...' : 'Send Feedback'}
-            </button>
-        </div>
-    );
-};
 
 const SettingsPanel = ({ onClose }) => {
     const { t, language, setLanguage, availableLanguages } = useLanguage();
@@ -531,40 +459,10 @@ const SettingsPanel = ({ onClose }) => {
                 </button>
             </div>
             <div className="card-body">
-                {/* User Profile & Status */}
-                <div style={{
-                    background: `linear-gradient(135deg, ${status.color}20, transparent)`,
-                    borderRadius: 'var(--radius-lg)',
-                    padding: 'var(--space-4)',
-                    marginBottom: 'var(--space-4)',
-                    border: `1px solid ${status.color}40`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--space-3)'
-                }}>
-                    <div style={{ fontSize: '2.5rem' }}>{status.icon}</div>
-                    <div>
-                        <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
-                            {user?.nickname || 'User'}
-                        </div>
-                        <div style={{ color: status.color, fontWeight: 500 }}>
-                            {status.name}
-                        </div>
-                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                            Trust Score: {user?.trust_score || 0}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Recovery Key Section */}
-                <RecoveryKeySection />
-
-                {/* Feedback Section */}
-                <FeedbackSection />
-
-                {/* Share App with QR Code */}
+                {/* Share App with QR Code - FIRST SECTION */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.shareApp')}</label>
+
 
                     {/* QR Code Display */}
                     <div style={{
@@ -645,7 +543,43 @@ const SettingsPanel = ({ onClose }) => {
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
 
+                {/* Your Profile Section - Combined User + Recovery */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">{t('settings.yourProfile') || 'Your Profile'}</label>
+
+                    {/* User Status Card */}
+                    <div style={{
+                        background: `linear-gradient(135deg, ${status.color}20, transparent)`,
+                        borderRadius: 'var(--radius-lg)',
+                        padding: 'var(--space-4)',
+                        marginBottom: 'var(--space-3)',
+                        border: `1px solid ${status.color}40`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 'var(--space-3)'
+                    }}>
+                        <div style={{ fontSize: '2.5rem' }}>{status.icon}</div>
+                        <div>
+                            <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                                {user?.nickname || 'User'}
+                            </div>
+                            <div style={{ color: status.color, fontWeight: 500 }}>
+                                {status.name}
+                            </div>
+                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
+                                Trust Score: {user?.trust_score || 0}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Recovery Key */}
+                    <RecoveryKeySection />
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+
                 {/* Notification Settings */}
+
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.notifications')}</label>
                     <div
@@ -717,7 +651,7 @@ const SettingsPanel = ({ onClose }) => {
                         <div>
                             <div style={{ fontWeight: 500 }}>🪶 Lite Mode</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                Reduce animations for slower devices
+                                Reduce animations for smoother performance
                             </div>
                         </div>
                         <div
