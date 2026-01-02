@@ -540,7 +540,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [target, setTarget] = useState('all');
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showComposeEmojiPicker, setShowComposeEmojiPicker] = useState(false);
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
     const userListRef = React.useRef(null);
@@ -734,13 +734,13 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginTop: '1rem' }}>
-                    <label className="form-label">Title</label>
+                <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                    <label className="form-label" style={{ marginBottom: '0.25rem' }}>Title</label>
                     <input type="text" className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} />
                 </div>
 
-                <div className="form-group" style={{ marginTop: '1rem' }}>
-                    <label className="form-label">Image</label>
+                <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                    <label className="form-label" style={{ marginBottom: '0.25rem' }}>Image</label>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <input type="text" className="form-input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL..." style={{ flex: 1 }} />
                         <label className="btn btn-secondary" style={{
@@ -759,34 +759,40 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginTop: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                        <label className="form-label" style={{ marginBottom: 0 }}>Message</label>
+                <div className="form-group" style={{ marginTop: '0.5rem', position: 'relative' }}>
+                    <label className="form-label" style={{ marginBottom: '0.25rem', display: 'block' }}>Message</label>
+                    <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
+                    <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
                         <button
-                            onClick={() => setShowEmojiPicker(true)}
                             type="button"
-                            className="btn btn-secondary"
+                            onClick={() => setShowComposeEmojiPicker(true)}
                             style={{
-                                border: '1px solid #cbd5e1', borderRadius: '50%', width: '2rem', height: '2rem',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1.2rem',
-                                transition: 'all 0.2s', padding: 0
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '1.2rem',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                opacity: 0.7,
+                                transition: 'opacity 0.2s'
                             }}
+                            onMouseEnter={e => e.target.style.opacity = 1}
+                            onMouseLeave={e => e.target.style.opacity = 0.7}
                             title="Insert Emoji"
                         >
-                            😊
+                            😀
                         </button>
                     </div>
-                    <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={3} />
                 </div>
-                {showEmojiPicker && (
+                {showComposeEmojiPicker && (
                     <EmojiPickerModal
-                        onSelect={(emoji) => { setBody(prev => prev + emoji); setShowEmojiPicker(false); }}
-                        onClose={() => setShowEmojiPicker(false)}
+                        onSelect={(emoji) => { setBody(prev => prev + emoji); setShowComposeEmojiPicker(false); }}
+                        onClose={() => setShowComposeEmojiPicker(false)}
                     />
                 )}
 
-                <div className="form-group" style={{ marginTop: '1rem' }}>
-                    <label className="form-label">Target</label>
+
+                <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                    <label className="form-label" style={{ marginBottom: '0.25rem' }}>Target</label>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         <button
                             onClick={() => setTarget('all')}
@@ -1503,12 +1509,18 @@ const MessagePreviewModal = ({ message, onClose }) => {
             >
                 {/* Header */}
                 <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Message Preview</h3>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{(message.user_nickname || 'Anonymous')}</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
                 </div>
 
                 {/* Body / Notification Item Replica */}
                 <div style={{ padding: '1.5rem', background: '#1e293b' }}>
+                    {/* Timestamps above message */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                        <span>{message.timestamp ? message.timestamp.toLocaleDateString() : ''}</span>
+                        <span>{message.timestamp ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                    </div>
+
                     <div style={{
                         padding: '12px',
                         borderBottom: '1px solid #334155',
@@ -1520,9 +1532,6 @@ const MessagePreviewModal = ({ message, onClose }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>🔔</span>
                             <span style={{ fontWeight: 'bold', color: '#f1f5f9', fontSize: '1rem' }}>{message.title}</span>
-                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                                {message.timestamp ? message.timestamp.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Just now'}
-                            </span>
                         </div>
                         {message.image && (
                             <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', overflow: 'hidden' }}>
@@ -1532,9 +1541,6 @@ const MessagePreviewModal = ({ message, onClose }) => {
                         <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5 }}>
                             {message.body}
                         </div>
-                    </div>
-                    <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#64748b' }}>
-                        Preview of how the user sees this message
                     </div>
                 </div>
             </div>
