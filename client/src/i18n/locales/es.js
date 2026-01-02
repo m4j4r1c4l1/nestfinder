@@ -175,6 +175,7 @@ export default {
 
     // Settings
     settings: {
+        yourProfile: 'Your Profile',
         notifications: 'Notificaciones',
         popupMessages: 'Popups en Tiempo Real',
         popupDescription: 'Mostrar mensajes inmediatamente al recibirlos',

@@ -141,6 +141,7 @@ export default {
         continue: 'Doorgaan'
     },
     settings: {
+        yourProfile: 'Your Profile',
         notifications: 'Meldingen',
         popupMessages: 'Real-time Popups',
         popupDescription: 'Toon berichten direct bij ontvangst',

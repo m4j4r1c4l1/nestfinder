@@ -176,6 +176,7 @@ export default {
 
     // Settings
     settings: {
+        yourProfile: 'Your Profile',
         notifications: 'Notifications',
         popupMessages: 'Real-time Popups',
         popupDescription: 'Show messages immediately as they arrive',
@@ -183,7 +184,13 @@ export default {
         scanToShare: 'Scan to open NestFinder',
         copyLink: 'Copy Link',
         shareLink: 'Share Link',
-        linkCopied: 'Link copied!'
+        linkCopied: 'Link copied!',
+        recoveryKey: 'Recovery Key',
+        recoveryKeyDescription: 'Save this key to restore your identity on a new device.',
+        generateKey: 'Generate Recovery Key',
+        copyKey: 'Copy Key',
+        copied: 'Copied!',
+        keyGenerated: 'Key Generated & Copied!'
     },
 
     // Welcome Message

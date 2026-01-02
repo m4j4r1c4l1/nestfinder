@@ -784,13 +784,15 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const [selectedIds, setSelectedIds] = useState([]);
     const [previewItem, setPreviewItem] = useState(null);
+    const [sortColumn, setSortColumn] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState('desc');
 
     const toggleSelect = (id) => {
         setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     };
 
     const handleBulkMarkRead = async () => {
-        if (!confirm(`Mark ${selectedIds.length} items as reviewed?`)) return;
+        if (!confirm(`Mark ${selectedIds.length} items as read?`)) return;
         for (const id of selectedIds) {
             await onUpdateStatus(id, 'reviewed');
         }
@@ -807,6 +809,64 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
         onUpdate && onUpdate();
     };
 
+    // Handle row click: open preview AND mark as read if new
+    const handleRowClick = async (item) => {
+        setPreviewItem(item);
+        if (item.status === 'new') {
+            await onUpdateStatus(item.id, 'reviewed');
+            onUpdate && onUpdate();
+        }
+    };
+
+    // Utility function to format timestamp in 24h format with CET/CEST
+    const formatTimestamp24h = (isoString) => {
+        const date = new Date(isoString);
+        const formatter = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Europe/Paris', // CET/CEST timezone
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+        const parts = formatter.formatToParts(date);
+        const get = (type) => parts.find(p => p.type === type)?.value || '';
+
+        // Determine if CET or CEST based on date
+        const jan = new Date(date.getFullYear(), 0, 1);
+        const jul = new Date(date.getFullYear(), 6, 1);
+        const janOffset = jan.getTimezoneOffset();
+        const julOffset = jul.getTimezoneOffset();
+        const isDST = date.getTimezoneOffset() < Math.max(janOffset, julOffset);
+        const tz = isDST ? 'CEST' : 'CET';
+
+        return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}:${get('second')} ${tz}`;
+    };
+
+    // Sort feedback based on current column and direction
+    const sortedFeedback = [...feedback].sort((a, b) => {
+        let aVal, bVal;
+        if (sortColumn === 'created_at') {
+            aVal = new Date(a.created_at).getTime();
+            bVal = new Date(b.created_at).getTime();
+        } else if (sortColumn === 'user_nickname') {
+            aVal = (a.user_nickname || 'Anonymous').toLowerCase();
+            bVal = (b.user_nickname || 'Anonymous').toLowerCase();
+        } else if (sortColumn === 'type') {
+            aVal = a.type.toLowerCase();
+            bVal = b.type.toLowerCase();
+        } else {
+            return 0;
+        }
+        if (sortDirection === 'asc') {
+            return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+        } else {
+            return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+        }
+    });
+
     return (
         <div className="card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -814,7 +874,13 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                     {selectedIds.length > 0 && (
                         <>
-                            <button onClick={handleBulkMarkRead} className="btn btn-secondary btn-sm">👀 Mark Reviewed</button>
+                            <button
+                                onClick={handleBulkMarkRead}
+                                className="btn btn-sm"
+                                style={{ background: '#22c55e', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
+                            >
+                                ✓✓ Mark as Read
+                            </button>
                             <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}>🗑️ Delete ({selectedIds.length})</button>
                         </>
                     )}
@@ -833,16 +899,31 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         onChange={() => setSelectedIds(selectedIds.length === feedback.length ? [] : feedback.map(f => f.id))}
                                     />
                                 </th>
-                                <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Timestamp</th>
-                                <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Type</th>
-                                <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>From</th>
+                                <th
+                                    onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'desc'); }}
+                                    style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none', minWidth: '200px' }}
+                                >
+                                    Timestamp {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th
+                                    onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                    style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    From {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th
+                                    onClick={() => { setSortColumn('type'); setSortDirection(d => sortColumn === 'type' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                    style={{ padding: '0.75rem 1rem', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    Type {sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
                                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Message</th>
                                 <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Status</th>
                                 <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {feedback.map(item => (
+                            {sortedFeedback.map(item => (
                                 <tr
                                     key={item.id}
                                     style={{
@@ -852,19 +933,19 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     }}
                                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)'}
                                     onMouseLeave={e => e.currentTarget.style.background = item.status === 'new' ? 'rgba(59, 130, 246, 0.05)' : 'transparent'}
-                                    onClick={() => setPreviewItem(item)}
+                                    onClick={() => handleRowClick(item)}
                                 >
                                     <td style={{ padding: '0.5rem 1rem' }} onClick={e => e.stopPropagation()}>
                                         <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
                                     </td>
-                                    <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', fontSize: '0.85rem' }}>
-                                        {new Date(item.created_at).toLocaleString()}
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
-                                        <span style={{ fontSize: '1.2rem' }}>{item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}</span>
+                                    <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                                        {formatTimestamp24h(item.created_at)}
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', fontWeight: 500, color: '#e2e8f0' }}>
                                         {item.user_nickname || 'Anonymous'}
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
+                                        <span style={{ fontSize: '1.2rem' }}>{item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}</span>
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', color: '#cbd5e1' }}>
                                         {item.message.length > 50 ? item.message.substring(0, 50) + '...' : item.message}
@@ -901,17 +982,12 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     <div style={{ background: '#1e293b', padding: '2rem', borderRadius: '12px', width: 'min(600px, 90vw)', border: '1px solid #334155' }} onClick={e => e.stopPropagation()}>
                         <h3 style={{ marginTop: 0, color: '#f8fafc' }}>Message from {previewItem.user_nickname || 'Anonymous'}</h3>
                         <div style={{ marginBottom: '1rem', color: '#94a3b8', fontSize: '0.9rem' }}>
-                            {new Date(previewItem.created_at).toLocaleString()} • {previewItem.type.toUpperCase()}
+                            {formatTimestamp24h(previewItem.created_at)} • {previewItem.type.toUpperCase()}
                         </div>
                         <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', color: '#e2e8f0', lineHeight: 1.6, marginBottom: '1.5rem' }}>
                             {previewItem.message}
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                            {previewItem.status === 'new' && (
-                                <button onClick={() => { onUpdateStatus(previewItem.id, 'reviewed'); setPreviewItem(prev => ({ ...prev, status: 'reviewed' })); onUpdate(); }} className="btn btn-primary">
-                                    Mark as Reviewed
-                                </button>
-                            )}
                             <button onClick={() => setPreviewItem(null)} className="btn btn-secondary">Close</button>
                         </div>
                     </div>

@@ -16,23 +16,34 @@ const getStatus = (score = 0) => {
 };
 
 // Recovery Key Section Component
-const RecoveryKeySection = () => {
+const RecoveryKeySection = ({ t }) => {
     const [recoveryKey, setRecoveryKey] = useState(null);
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showKey, setShowKey] = useState(true);
+
+    // Load recovery key from session storage on mount (persists during current session only)
+    useEffect(() => {
+        const sessionKey = sessionStorage.getItem('nestfinder_recovery_key_temp');
+        if (sessionKey) {
+            setRecoveryKey(sessionKey);
+        }
+    }, []);
 
     const generateKey = async () => {
         setLoading(true);
         try {
             const result = await api.generateRecoveryKey();
             setRecoveryKey(result.recoveryKey);
+            // Store in session storage (cleared when browser closes)
+            sessionStorage.setItem('nestfinder_recovery_key_temp', result.recoveryKey);
             // Auto-copy and show feedback
             navigator.clipboard.writeText(result.recoveryKey);
             setCopied(true);
             setTimeout(() => setCopied(false), 3000);
         } catch (err) {
             console.error('Failed to generate recovery key:', err);
+            alert(t?.('common.error') || 'Failed to generate recovery key');
         }
         setLoading(false);
     };
@@ -54,7 +65,7 @@ const RecoveryKeySection = () => {
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
                 <div style={{ fontWeight: 500 }}>
-                    🔑 Recovery Key
+                    🔑 {t?.('settings.recoveryKey') || 'Recovery Key'}
                 </div>
                 {recoveryKey && (
                     <button
@@ -72,7 +83,7 @@ const RecoveryKeySection = () => {
                 )}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
-                Save this key to restore your identity on a new device.
+                {t?.('settings.recoveryKeyDescription') || 'Save this key to restore your identity on a new device.'}
             </div>
 
             {recoveryKey ? (
@@ -104,7 +115,7 @@ const RecoveryKeySection = () => {
                             transition: 'background 0.3s'
                         }}
                     >
-                        {copied ? '✓ Copied!' : '📋 Copy Key'}
+                        {copied ? `✓ ${t?.('settings.copied') || 'Copied!'}` : `📋 ${t?.('settings.copyKey') || 'Copy Key'}`}
                     </button>
                 </div>
             ) : (
@@ -123,7 +134,7 @@ const RecoveryKeySection = () => {
                         transition: 'background 0.3s'
                     }}
                 >
-                    {copied ? '✓ Key Generated & Copied!' : loading ? 'Generating...' : '🔑 Generate Recovery Key'}
+                    {copied ? `✓ ${t?.('settings.keyGenerated') || 'Key Generated & Copied!'}` : loading ? (t?.('common.loading') || 'Generating...') : `🔑 ${t?.('settings.generateKey') || 'Generate Recovery Key'}`}
                 </button>
             )}
         </div>
@@ -573,7 +584,7 @@ const SettingsPanel = ({ onClose }) => {
                     </div>
 
                     {/* Recovery Key */}
-                    <RecoveryKeySection />
+                    <RecoveryKeySection t={t} />
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />

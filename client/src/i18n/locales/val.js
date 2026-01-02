@@ -141,6 +141,7 @@ export default {
         continue: 'Continuar'
     },
     settings: {
+        yourProfile: 'Your Profile',
         notifications: 'Notificacions',
         popupMessages: 'Popups en Temps Reals',
         popupDescription: 'Mostrar missatges immediatament',
