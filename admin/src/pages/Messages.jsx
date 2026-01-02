@@ -245,7 +245,7 @@ const Messages = () => {
 
                     {/* COMPOSER TAB */}
                     {activeTab === 'composer' && (
-                        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                        <div style={{ width: '100%' }}>
                             <ComposeSection
                                 subscribers={subscribers}
                                 totalSubscribers={stats.totalSubscribers}
@@ -264,7 +264,7 @@ const Messages = () => {
 
                     {/* RECEIVED (FEEDBACK) TAB */}
                     {activeTab === 'feedback' && (
-                        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                        <div style={{ width: '100%' }}>
                             {feedback.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
                                     No feedback received yet
@@ -330,7 +330,7 @@ const Messages = () => {
 
                     {/* BROADCASTS TAB */}
                     {activeTab === 'broadcasts' && (
-                        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                        <div style={{ width: '100%' }}>
                             {/* Create New Broadcast */}
                             <div className="card" style={{ marginBottom: '2rem' }}>
                                 <div className="card-header">
@@ -936,8 +936,7 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
                 background: '#1e293b',
                 borderRadius: '12px',
                 padding: '1rem',
-                width: 'min(500px, 95vw)',
-                maxHeight: '60vh',
+                width: 'min(900px, 95vw)',
                 display: 'flex', flexDirection: 'column',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
                 border: '1px solid #334155'
@@ -947,8 +946,7 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
                 </div>
                 <div style={{
                     display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem',
-                    padding: '0.5rem', overflowY: 'auto',
-                    scrollbarWidth: 'thin', scrollbarColor: '#475569 #1e293b'
+                    padding: '0.5rem'
                 }}>
                     {emojis.map(emoji => (
                         <button
