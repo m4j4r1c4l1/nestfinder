@@ -664,7 +664,7 @@ textarea.form-input {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 8px 2px;
+  padding: 8px 4px;
   /* Reduced padding for 6 items */
   font-size: 0.65rem;
   /* Slightly smaller font */
@@ -697,13 +697,13 @@ textarea.form-input {
   content: '';
   position: absolute;
   top: 4px;
-  left: 4px;
-  right: 4px;
+  left: 2px;
+  right: 2px;
   bottom: 4px;
   transform: scale(0);
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 12px;
+  border-radius: 8px;
   transition: transform 0.3s ease;
   z-index: -1;
 }
