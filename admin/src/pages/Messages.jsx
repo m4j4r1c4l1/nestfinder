@@ -61,6 +61,24 @@ const templates = {
         name: '🎉 Happy New Year',
         title: 'Happy New Year! 🎆🪹',
         body: 'Wishing everyone a bright and safe 2026! 🌟 Let\'s keep supporting each other and finding new paths to our nests 🪹. Happy New Year from NestFinder! 🏠💙'
+    },
+    weather_alert: {
+        id: 'weather_alert',
+        name: '⛈️ Weather Alert',
+        title: '⛈️ Weather Alert',
+        body: 'Severe weather conditions reported. Please stay safe and seek shelter if necessary.'
+    },
+    community_event: {
+        id: 'community_event',
+        name: '🎉 Community Event',
+        title: '🎉 You\'re Invited!',
+        body: 'Join us for a community gathering! Check the events board for more details.'
+    },
+    maintenance: {
+        id: 'maintenance',
+        name: '🔧 Maintenance',
+        title: '🔧 App Maintenance',
+        body: 'NestFinder will be undergoing scheduled maintenance. Expect brief interruptions.'
     }
 };
 
@@ -86,7 +104,8 @@ const Messages = () => {
     useEffect(() => {
         fetchData();
         // Set up interval for refreshing data
-        const interval = setInterval(fetchData, 30000);
+        // Set up interval for refreshing data (10s to match Notifications)
+        const interval = setInterval(fetchData, 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -189,7 +208,7 @@ const Messages = () => {
                 display: 'flex',
                 gap: '0.5rem',
                 marginBottom: '2rem',
-                borderBottom: '1px solid var(--color-border)',
+                borderBottom: '1px solid #334155',
                 paddingBottom: '1rem',
                 overflowX: 'auto'
             }}>
@@ -199,29 +218,33 @@ const Messages = () => {
                         onClick={() => setActiveTab(tab.id)}
                         style={{
                             padding: '0.75rem 1.25rem',
-                            background: activeTab === tab.id ? 'var(--color-primary)' : 'transparent',
-                            color: activeTab === tab.id ? 'white' : 'var(--color-text-secondary)',
-                            border: activeTab === tab.id ? 'none' : '1px solid transparent',
-                            borderRadius: 'var(--radius-full)',
+                            background: activeTab === tab.id ? '#1e293b' : 'transparent',
+                            color: activeTab === tab.id ? '#f8fafc' : '#94a3b8',
+                            border: activeTab === tab.id ? '1px solid #334155' : '1px solid transparent',
+                            borderBottom: activeTab === tab.id ? 'none' : '1px solid transparent',
+                            borderRadius: '8px',
                             cursor: 'pointer',
                             fontWeight: 500,
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
                             transition: 'all 0.2s',
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            outline: 'none',
+                            position: 'relative',
+                            top: activeTab === tab.id ? '1px' : '0'
                         }}
                         onMouseEnter={e => {
-                            if (activeTab !== tab.id) e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+                            if (activeTab !== tab.id) e.currentTarget.style.color = '#e2e8f0';
                         }}
                         onMouseLeave={e => {
-                            if (activeTab !== tab.id) e.currentTarget.style.background = 'transparent';
+                            if (activeTab !== tab.id) e.currentTarget.style.color = '#94a3b8';
                         }}
                     >
                         {tab.label}
                         {tab.count > 0 && (
                             <span style={{
-                                background: activeTab === tab.id ? 'rgba(255,255,255,0.2)' : 'var(--color-primary)',
+                                background: activeTab === tab.id ? '#3b82f6' : '#475569',
                                 color: 'white',
                                 padding: '0.1rem 0.5rem',
                                 borderRadius: '10px',
@@ -265,66 +288,12 @@ const Messages = () => {
                     {/* RECEIVED (FEEDBACK) TAB */}
                     {activeTab === 'feedback' && (
                         <div style={{ width: '100%' }}>
-                            {feedback.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-                                    No feedback received yet
-                                </div>
-                            ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {feedback.map(f => (
-                                        <div
-                                            key={f.id}
-                                            className="card"
-                                            style={{
-                                                borderLeft: f.status === 'new' ? '4px solid var(--color-primary)' : '1px solid var(--color-border)'
-                                            }}
-                                        >
-                                            <div className="card-body">
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                        <span style={{ fontSize: '1.25rem' }}>
-                                                            {f.type === 'bug' ? '🐛' : f.type === 'suggestion' ? '💡' : '📝'}
-                                                        </span>
-                                                        <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{f.type}</span>
-                                                        {f.user_nickname && (
-                                                            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginLeft: '0.5rem' }}>
-                                                                from <strong>{f.user_nickname}</strong>
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                                                        {new Date(f.created_at).toLocaleString()}
-                                                    </span>
-                                                </div>
-
-                                                <div style={{ marginBottom: '1.5rem', lineHeight: '1.6', fontSize: '1.05rem' }}>
-                                                    {f.message}
-                                                </div>
-
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)' }}>
-                                                    <select
-                                                        value={f.status}
-                                                        onChange={(e) => handleUpdateFeedbackStatus(f.id, e.target.value)}
-                                                        className="form-input"
-                                                        style={{ width: 'auto', padding: '0.4rem 2rem 0.4rem 0.8rem' }}
-                                                    >
-                                                        <option value="new">🆕 New</option>
-                                                        <option value="reviewed">👀 Reviewed</option>
-                                                        <option value="resolved">✅ Resolved</option>
-                                                    </select>
-                                                    <button
-                                                        onClick={() => handleDeleteFeedback(f.id)}
-                                                        className="btn btn-secondary btn-sm"
-                                                        title="Delete Feedback"
-                                                    >
-                                                        🗑️
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                            <FeedbackSection
+                                feedback={feedback}
+                                onUpdate={fetchData}
+                                onUpdateStatus={handleUpdateFeedbackStatus}
+                                onDelete={handleDeleteFeedback}
+                            />
                         </div>
                     )}
 
@@ -338,6 +307,37 @@ const Messages = () => {
                                 </div>
                                 <div className="card-body">
                                     <form onSubmit={handleCreateBroadcast}>
+                                        <div className="form-group">
+                                            <label className="form-label">Template</label>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', paddingBottom: '0.5rem' }}>
+                                                {Object.values(templates).map(tmpl => (
+                                                    <button
+                                                        key={tmpl.id}
+                                                        type="button"
+                                                        onClick={() => handleBroadcastTemplateChange(tmpl.id)}
+                                                        style={{
+                                                            padding: '0.5rem 0.2rem',
+                                                            border: '1px solid #334155',
+                                                            borderRadius: '8px',
+                                                            background: '#0f172a',
+                                                            color: '#94a3b8',
+                                                            cursor: 'pointer',
+                                                            fontWeight: 400,
+                                                            fontSize: '0.85rem',
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            textAlign: 'center'
+                                                        }}
+                                                        title={tmpl.name}
+                                                        onMouseEnter={e => { e.currentTarget.style.color = '#e2e8f0'; e.currentTarget.style.background = '#1e293b'; }}
+                                                        onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = '#0f172a'; }}
+                                                    >
+                                                        {tmpl.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
                                         <textarea
                                             value={newBroadcast.message}
                                             onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
@@ -497,6 +497,14 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
+    const userListRef = React.useRef(null);
+
+    // Auto-scroll to users when target is set to 'selected'
+    useEffect(() => {
+        if (target === 'selected' && userListRef.current) {
+            userListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [target]);
 
     // Auto-dismiss result message
     useEffect(() => {
@@ -562,6 +570,15 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
             console.error('QR Generation failed:', err);
             return '';
         }
+    };
+
+    const handleBroadcastTemplateChange = (templateId) => {
+        const tmpl = templates[templateId];
+        setNewBroadcast(prev => ({
+            ...prev,
+            message: tmpl.body || '',
+            imageUrl: tmpl.id === 'happy_new_year' ? `${APP_URL}/images/new_year_2026.png` : ''
+        }));
     };
 
     const handleTemplateChange = async (templateId) => {
@@ -644,20 +661,26 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, auto)', gap: '0.5rem', justifyContent: 'center', paddingBottom: '0.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', paddingBottom: '0.5rem' }}>
                         {Object.values(templates).map(tmpl => (
                             <button
                                 key={tmpl.id}
                                 onClick={() => handleTemplateChange(tmpl.id)}
                                 style={{
-                                    padding: '0.5rem 1rem',
-                                    border: selectedTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #ddd',
-                                    borderRadius: '20px',
-                                    background: selectedTemplate === tmpl.id ? '#dbeafe' : 'white',
-                                    color: '#1e293b',
-                                    cursor: 'pointer', whiteSpace: 'nowrap',
-                                    fontWeight: selectedTemplate === tmpl.id ? 600 : 400
+                                    padding: '0.5rem 0.2rem',
+                                    border: selectedTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #334155',
+                                    borderRadius: '8px',
+                                    background: selectedTemplate === tmpl.id ? '#1e293b' : '#0f172a',
+                                    color: selectedTemplate === tmpl.id ? '#60a5fa' : '#94a3b8',
+                                    cursor: 'pointer',
+                                    fontWeight: selectedTemplate === tmpl.id ? 600 : 400,
+                                    fontSize: '0.85rem',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    textAlign: 'center'
                                 }}
+                                title={tmpl.name}
                             >
                                 {tmpl.name}
                             </button>
@@ -734,11 +757,11 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                         </button>
                     </div>
                     {target === 'selected' && (
-                        <div style={{ marginTop: '0.5rem', border: '1px solid #ddd', borderRadius: '8px', padding: '0.5rem' }}>
+                        <div style={{ marginTop: '0.5rem', border: '1px solid #ddd', borderRadius: '8px', padding: '0.5rem' }} ref={userListRef}>
                             <input type="text" className="form-input" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ marginBottom: '0.5rem' }} />
-                            <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                            <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
                                 {filteredSubscribers.map(sub => (
-                                    <label key={sub.user_id} style={{ display: 'flex', gap: '0.5rem', padding: '0.25rem' }}>
+                                    <label key={sub.user_id} style={{ display: 'flex', gap: '0.5rem', padding: '0.25rem', cursor: 'pointer' }}>
                                         <input type="checkbox" checked={selectedUsers.includes(sub.user_id)} onChange={() => toggleUser(sub.user_id)} />
                                         <span>{sub.nickname || sub.user_id}</span>
                                     </label>
@@ -754,6 +777,146 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     {sending ? 'Sending...' : 'Send Notification'}
                 </button>
             </div>
+        </div>
+    );
+};
+
+const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [previewItem, setPreviewItem] = useState(null);
+
+    const toggleSelect = (id) => {
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+
+    const handleBulkMarkRead = async () => {
+        if (!confirm(`Mark ${selectedIds.length} items as reviewed?`)) return;
+        for (const id of selectedIds) {
+            await onUpdateStatus(id, 'reviewed');
+        }
+        setSelectedIds([]);
+        onUpdate && onUpdate();
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`Delete ${selectedIds.length} items? This cannot be undone.`)) return;
+        for (const id of selectedIds) {
+            await onDelete(id);
+        }
+        setSelectedIds([]);
+        onUpdate && onUpdate();
+    };
+
+    return (
+        <div className="card">
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>📥 Received Messages</h3>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {selectedIds.length > 0 && (
+                        <>
+                            <button onClick={handleBulkMarkRead} className="btn btn-secondary btn-sm">👀 Mark Reviewed</button>
+                            <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}>🗑️ Delete ({selectedIds.length})</button>
+                        </>
+                    )}
+                    <button onClick={onUpdate} className="btn btn-secondary">🔄 Refresh</button>
+                </div>
+            </div>
+            <div className="card-body" style={{ padding: 0 }}>
+                <div style={{ height: '65vh', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                        <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
+                            <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                <th style={{ padding: '0.75rem 1rem', width: '40px' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={feedback.length > 0 && selectedIds.length === feedback.length}
+                                        onChange={() => setSelectedIds(selectedIds.length === feedback.length ? [] : feedback.map(f => f.id))}
+                                    />
+                                </th>
+                                <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Timestamp</th>
+                                <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Type</th>
+                                <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>From</th>
+                                <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Message</th>
+                                <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Status</th>
+                                <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {feedback.map(item => (
+                                <tr
+                                    key={item.id}
+                                    style={{
+                                        borderBottom: '1px solid #334155',
+                                        background: item.status === 'new' ? 'rgba(59, 130, 246, 0.05)' : 'transparent',
+                                        cursor: 'pointer'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = item.status === 'new' ? 'rgba(59, 130, 246, 0.05)' : 'transparent'}
+                                    onClick={() => setPreviewItem(item)}
+                                >
+                                    <td style={{ padding: '0.5rem 1rem' }} onClick={e => e.stopPropagation()}>
+                                        <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', color: '#94a3b8', fontSize: '0.85rem' }}>
+                                        {new Date(item.created_at).toLocaleString()}
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
+                                        <span style={{ fontSize: '1.2rem' }}>{item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}</span>
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', fontWeight: 500, color: '#e2e8f0' }}>
+                                        {item.user_nickname || 'Anonymous'}
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', color: '#cbd5e1' }}>
+                                        {item.message.length > 50 ? item.message.substring(0, 50) + '...' : item.message}
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
+                                        <span style={{
+                                            padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem',
+                                            background: item.status === 'new' ? 'var(--color-primary)' : item.status === 'resolved' ? 'var(--color-confirmed)' : '#475569',
+                                            color: 'white'
+                                        }}>
+                                            {item.status.toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', textAlign: 'right' }} onClick={e => e.stopPropagation()}>
+                                        <button onClick={() => onDelete(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {feedback.length === 0 && (
+                                <tr>
+                                    <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No messages found</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {previewItem && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.5)', zIndex: 10000,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }} onClick={() => setPreviewItem(null)}>
+                    <div style={{ background: '#1e293b', padding: '2rem', borderRadius: '12px', width: 'min(600px, 90vw)', border: '1px solid #334155' }} onClick={e => e.stopPropagation()}>
+                        <h3 style={{ marginTop: 0, color: '#f8fafc' }}>Message from {previewItem.user_nickname || 'Anonymous'}</h3>
+                        <div style={{ marginBottom: '1rem', color: '#94a3b8', fontSize: '0.9rem' }}>
+                            {new Date(previewItem.created_at).toLocaleString()} • {previewItem.type.toUpperCase()}
+                        </div>
+                        <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', color: '#e2e8f0', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                            {previewItem.message}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                            {previewItem.status === 'new' && (
+                                <button onClick={() => { onUpdateStatus(previewItem.id, 'reviewed'); setPreviewItem(prev => ({ ...prev, status: 'reviewed' })); onUpdate(); }} className="btn btn-primary">
+                                    Mark as Reviewed
+                                </button>
+                            )}
+                            <button onClick={() => setPreviewItem(null)} className="btn btn-secondary">Close</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -814,7 +977,7 @@ const HistorySection = () => {
                 </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ maxHeight: '400px', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                <div style={{ height: '65vh', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
@@ -941,7 +1104,8 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
                 boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
                 border: '1px solid #334155'
             }} onClick={e => e.stopPropagation()}>
-                <div style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #334155', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Pick an Emoji</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#94a3b8' }}>&times;</button>
                 </div>
                 <div style={{

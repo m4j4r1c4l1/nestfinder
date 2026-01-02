@@ -97,7 +97,7 @@ const Settings = () => {
     ];
 
     return (
-        <div style={{ maxWidth: '700px', margin: '0 auto', width: '100%' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Settings</h2>
 
             {message.text && (
@@ -281,7 +281,7 @@ const Settings = () => {
                                 <div style={{ fontWeight: 500 }}>Admin Password</div>
                                 <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Change your admin login password</div>
                             </div>
-                            <button className="btn btn-secondary" onClick={() => setShowPasswordChange(true)}>Change Password</button>
+                            <button className="btn" style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px' }} onClick={() => setShowPasswordChange(true)}>Change Password</button>
                         </div>
                     ) : (
                         <form onSubmit={handlePasswordChange}>

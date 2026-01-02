@@ -48,3 +48,4 @@ temp/
 # Local-only documentation
 docs/DEPLOY.md
 .agent/
+!.agent/workflows/
