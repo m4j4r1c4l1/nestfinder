@@ -70,8 +70,15 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateTrustScore = (score) => {
+        if (!user) return;
+        const updated = { ...user, trust_score: score };
+        setUser(updated);
+        localStorage.setItem('nestfinder_user_data', JSON.stringify(updated));
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, updateNickname }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, updateNickname, updateTrustScore }}>
             {children}
         </AuthContext.Provider>
     );

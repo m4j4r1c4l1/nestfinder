@@ -1,8 +1,18 @@
 import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { useAuth } from '../hooks/useAuth';
 
 const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onClose }) => {
     const { t } = useLanguage();
+    const { updateTrustScore } = useAuth();
+
+    // Wrapper to handle confirm and update trust score
+    const handleConfirm = async (id) => {
+        const result = await onConfirm(id);
+        if (result?.user_trust_score !== undefined) {
+            updateTrustScore(result.user_trust_score);
+        }
+    };
 
     if (!point) return null;
 
@@ -78,7 +88,7 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
                         <>
                             <button
                                 className="btn btn-success btn-block"
-                                onClick={() => onConfirm(point.id)}
+                                onClick={() => handleConfirm(point.id)}
                             >
                                 {t('point.confirmBtn')}
                             </button>

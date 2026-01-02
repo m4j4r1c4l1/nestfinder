@@ -129,19 +129,30 @@ router.post('/:id/confirm', voteLimiter, requireUser, (req, res) => {
     [pointId, userId]
   );
 
-  // Check if threshold reached
-  const confirmCount = get(
-    `SELECT COUNT(*) as count FROM confirmations WHERE point_id = ? AND type = 'confirm'`,
-    [pointId]
-  ).count;
+  // REWARD: Instant gratification for voting (+1)
+  run('UPDATE users SET trust_score = trust_score + 1 WHERE id = ?', [userId]);
 
-  const threshold = parseInt(getSetting('confirmations_required')) || 1;
+  // Check if threshold reached (Weighted Voting)
+  // Guardians (Trust >= 50) have 3x voting power
+  const confirmWeight = get(`
+    SELECT SUM(
+      CASE WHEN u.trust_score >= 50 THEN 3 ELSE 1 END
+    ) as weight
+    FROM confirmations c
+    JOIN users u ON c.user_id = u.id
+    WHERE c.point_id = ? AND c.type = 'confirm'
+  `, [pointId]).weight || 0;
 
-  if (point.status === 'pending' && confirmCount >= threshold) {
+  const threshold = parseInt(getSetting('confirmations_required')) || 1; // Usually 3 in prod
+
+  if (point.status === 'pending' && confirmWeight >= threshold) {
     run(
       `UPDATE points SET status = 'confirmed', updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
       [pointId]
     );
+
+    // REWARD: Submitter gets +5 points when confirmed
+    run('UPDATE users SET trust_score = trust_score + 5 WHERE id = ?', [point.user_id]);
   }
 
   const updatedPoint = get(`
@@ -154,10 +165,11 @@ router.post('/:id/confirm', voteLimiter, requireUser, (req, res) => {
   `, [pointId]);
 
   log(userId, 'confirm_point', pointId.toString(), { new_status: updatedPoint.status });
-
   broadcast({ type: 'point_updated', point: updatedPoint });
 
-  res.json({ point: updatedPoint });
+  // Fetch updated score for client-side gamification
+  const newScore = get('SELECT trust_score FROM users WHERE id = ?', [userId]).trust_score;
+  res.json({ point: updatedPoint, user_trust_score: newScore });
 });
 
 // Deactivate a point (rate limited: 30/hour)

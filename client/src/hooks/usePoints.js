@@ -96,7 +96,8 @@ export const usePoints = () => {
     };
 
     const confirmPoint = async (id) => {
-        await api.confirmPoint(id);
+        const result = await api.confirmPoint(id);
+        return result;
     };
 
     const deactivatePoint = async (id) => {
