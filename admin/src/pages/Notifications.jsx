@@ -507,13 +507,48 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
         );
     }
 
-    // Normalize data to array (handle both Array and Object formats)
-    const items = Array.isArray(data)
-        ? data
-        : Object.entries(data).map(([k, v]) => ({ action: k, count: v }));
+    // Data is now a hierarchical tree: [{ action, count, children: [] }]
+    const items = Array.isArray(data) ? data : [];
 
-    // Calculate max value for percentages
-    const maxVal = Math.max(...items.map(d => d.count), 1);
+    // Calculate global max for consistent bar scaling across all levels
+    let maxVal = 1;
+    items.forEach(root => {
+        maxVal = Math.max(maxVal, root.count);
+        if (root.children) {
+            root.children.forEach(child => maxVal = Math.max(maxVal, child.count));
+        }
+    });
+
+    // Helper to render a bar row
+    const renderRow = (item, index, isChild = false) => {
+        const percent = (item.count / maxVal) * 100;
+        const color = isChild ? '#94a3b8' : (index === 0 ? '#3b82f6' : '#64748b'); // Highlight first root (usually Register), others grey/slate
+        // Or keep cycling colors? Stick to clean hierarchy. User said "indentation matching breakdown". 
+        // Let's use Blue for Root, Slate for Children? 
+        // Actually, if 'Register' is blue, children can be cyan/purple?
+        // Let's stick to the previous color logic for Roots, and a distinct look for children.
+
+        return (
+            <div key={`${item.action}-${index}`} style={{ marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: isChild ? '0.85rem' : '0.9rem' }}>
+                    <span style={{ color: isChild ? '#cbd5e1' : '#e2e8f0', textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {isChild && <span style={{ opacity: 0.5 }}>↳</span>}
+                        {(item.action || 'Unknown').replace(/_/g, ' ')}
+                    </span>
+                    <span style={{ color: '#fff', fontWeight: 600 }}>{item.count}</span>
+                </div>
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{
+                        height: '100%',
+                        width: `${percent}%`,
+                        background: item.action === 'register' ? '#3b82f6' : (isChild ? '#64748b' : '#0ea5e9'),
+                        borderRadius: '4px',
+                        opacity: isChild ? 0.8 : 1
+                    }} />
+                </div>
+            </div>
+        );
+    };
 
     const content = (
         <div style={{
@@ -569,23 +604,25 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                     {items.length === 0 ? (
                         <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>No detailed activity recorded for this day.</div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {items.map((item, i) => (
-                                <div key={i}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                                        <span style={{ color: '#e2e8f0', textTransform: 'capitalize' }}>
-                                            {(item.action || item.label || 'Unknown').replace(/_/g, ' ')}
-                                        </span>
-                                        <span style={{ color: '#fff', fontWeight: 600 }}>{item.count}</span>
-                                    </div>
-                                    <div style={{ height: '8px', background: '#334155', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {items.map((root, i) => (
+                                <div key={i} style={{ marginBottom: root.children?.length ? '1rem' : '0' }}>
+                                    {/* Render Root */}
+                                    {renderRow(root, i, false)}
+
+                                    {/* Render Children (Indented) */}
+                                    {root.children && root.children.length > 0 && (
                                         <div style={{
-                                            height: '100%',
-                                            width: `${(item.count / maxVal) * 100}%`,
-                                            background: i === 0 ? '#3b82f6' : '#64748b',
-                                            borderRadius: '4px'
-                                        }} />
-                                    </div>
+                                            paddingLeft: '1.5rem',
+                                            borderLeft: '2px solid #334155',
+                                            marginLeft: '0.5rem',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '0.5rem'
+                                        }}>
+                                            {root.children.map((child, j) => renderRow(child, j, true))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
