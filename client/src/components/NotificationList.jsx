@@ -7,6 +7,7 @@ const FeedbackSection = () => {
     const { t } = useLanguage();
     const [type, setType] = useState('suggestion');
     const [message, setMessage] = useState('');
+    const [rating, setRating] = useState(5);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
@@ -15,9 +16,11 @@ const FeedbackSection = () => {
 
         setLoading(true);
         try {
-            await api.submitFeedback(type, message.trim());
+            const feedbackMsg = `${message.trim()}\n\n[Rating: ${rating}/5 ⭐]`;
+            await api.submitFeedback(type, feedbackMsg);
             setSuccess(true);
             setMessage('');
+            setRating(5);
             setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
             console.error('Failed to submit feedback:', err);
@@ -72,6 +75,33 @@ const FeedbackSection = () => {
             />
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textAlign: 'right', marginBottom: 'var(--space-3)' }}>
                 {message.length}/500 {t('feedback.charLimit') || 'characters'}
+            </div>
+
+            {/* Application Rating */}
+            <div style={{ marginBottom: 'var(--space-3)', padding: 'var(--space-2)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--color-text)', marginBottom: 'var(--space-2)', textAlign: 'center', fontWeight: 500 }}>
+                    {t('feedback.rateApp') || 'Rate the App'}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                            key={star}
+                            onClick={() => setRating(star)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '1.5rem',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                transition: 'transform 0.1s',
+                                transform: rating >= star ? 'scale(1.1)' : 'scale(1)',
+                                filter: rating >= star ? 'grayscale(0%)' : 'grayscale(100%) opacity(0.3)'
+                            }}
+                        >
+                            ⭐
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <button
