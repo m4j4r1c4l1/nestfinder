@@ -410,70 +410,77 @@ const Messages = () => {
                                 </div>
                             </div>
 
-                            {/* Existing Broadcasts List */}
-                            <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Active & Scheduled</h3>
-                            {broadcasts.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-                                    No broadcasts found
-                                </div>
-                            ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {broadcasts.map(b => {
-                                        const now = new Date();
-                                        const start = new Date(b.start_time);
-                                        const end = new Date(b.end_time);
-                                        const isActive = now >= start && now <= end;
-                                        const isPast = now > end;
 
-                                        return (
-                                            <div
-                                                key={b.id}
-                                                className="card"
-                                                style={{
-                                                    borderLeft: isActive ? '4px solid var(--color-confirmed)' : '1px solid var(--color-border)',
-                                                    opacity: isPast ? 0.7 : 1
-                                                }}
-                                            >
-                                                <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ marginBottom: '0.75rem', fontSize: '1.05rem' }}>{b.message}</div>
-                                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                                            <span>📅 {new Date(b.start_time).toLocaleString()}</span>
-                                                            <span>→</span>
-                                                            <span>→</span>
-                                                            <span>{new Date(b.end_time).toLocaleString()}</span>
-                                                        </div>
-                                                        {b.image_url && (
-                                                            <div style={{ marginTop: '0.75rem' }}>
-                                                                <img src={b.image_url} alt="Broadcast" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                            {/* Existing Broadcasts List */}
+                            <div className="card">
+                                <div className="card-header">
+                                    <h3>Manage Broadcasts</h3>
+                                </div>
+                                <div className="card-body">
+                                    {broadcasts.length === 0 ? (
+                                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
+                                            No broadcasts found
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            {broadcasts.map(b => {
+                                                const now = new Date();
+                                                const start = new Date(b.start_time);
+                                                const end = new Date(b.end_time);
+                                                const isActive = now >= start && now <= end;
+                                                const isPast = now > end;
+
+                                                return (
+                                                    <div
+                                                        key={b.id}
+                                                        className="card"
+                                                        style={{
+                                                            borderLeft: isActive ? '4px solid var(--color-confirmed)' : '1px solid var(--color-border)',
+                                                            opacity: isPast ? 0.7 : 1
+                                                        }}
+                                                    >
+                                                        <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                            <div style={{ flex: 1 }}>
+                                                                <div style={{ marginBottom: '0.75rem', fontSize: '1.05rem' }}>{b.message}</div>
+                                                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                                                    <span>📅 {new Date(b.start_time).toLocaleString()}</span>
+                                                                    <span>→</span>
+                                                                    <span>→</span>
+                                                                    <span>{new Date(b.end_time).toLocaleString()}</span>
+                                                                </div>
+                                                                {b.image_url && (
+                                                                    <div style={{ marginTop: '0.75rem' }}>
+                                                                        <img src={b.image_url} alt="Broadcast" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                                                                    </div>
+                                                                )}
+                                                                <div style={{ marginTop: '0.75rem' }}>
+                                                                    <span style={{
+                                                                        padding: '0.25rem 0.75rem',
+                                                                        borderRadius: '20px',
+                                                                        fontSize: '0.75rem',
+                                                                        fontWeight: 600,
+                                                                        background: isActive ? 'var(--color-confirmed)' : isPast ? 'var(--color-text-muted)' : 'var(--color-pending)',
+                                                                        color: 'white'
+                                                                    }}>
+                                                                        {isActive ? '🟢 ACTIVE' : isPast ? '⚫ ENDED' : '🟡 SCHEDULED'}
+                                                                    </span>
+                                                                </div>
                                                             </div>
-                                                        )}
-                                                        <div style={{ marginTop: '0.75rem' }}>
-                                                            <span style={{
-                                                                padding: '0.25rem 0.75rem',
-                                                                borderRadius: '20px',
-                                                                fontSize: '0.75rem',
-                                                                fontWeight: 600,
-                                                                background: isActive ? 'var(--color-confirmed)' : isPast ? 'var(--color-text-muted)' : 'var(--color-pending)',
-                                                                color: 'white'
-                                                            }}>
-                                                                {isActive ? '🟢 ACTIVE' : isPast ? '⚫ ENDED' : '🟡 SCHEDULED'}
-                                                            </span>
+                                                            <button
+                                                                onClick={() => handleDeleteBroadcast(b.id)}
+                                                                className="btn btn-secondary btn-sm"
+                                                                style={{ color: 'var(--color-deactivated)', borderColor: 'var(--color-deactivated)' }}
+                                                            >
+                                                                🗑️ Delete
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleDeleteBroadcast(b.id)}
-                                                        className="btn btn-secondary btn-sm"
-                                                        style={{ color: 'var(--color-deactivated)', borderColor: 'var(--color-deactivated)' }}
-                                                    >
-                                                        🗑️ Delete
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     )}
 
@@ -877,9 +884,9 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                             <button
                                 onClick={handleBulkMarkRead}
                                 className="btn btn-sm"
-                                style={{ background: '#22c55e', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
+                                style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
                             >
-                                ✓✓ Mark as Read
+                                <span style={{ color: '#60a5fa' }}>✓✓</span> Mark as Read
                             </button>
                             <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}>🗑️ Delete ({selectedIds.length})</button>
                         </>
@@ -952,11 +959,13 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
                                         <span style={{
-                                            padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem',
-                                            background: item.status === 'new' ? 'var(--color-primary)' : item.status === 'resolved' ? 'var(--color-confirmed)' : '#475569',
-                                            color: 'white'
+                                            padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem',
+                                            background: item.status === 'new' ? 'rgba(34, 197, 94, 0.15)' : item.status === 'reviewed' ? 'rgba(59, 130, 246, 0.15)' : item.status === 'resolved' ? 'var(--color-confirmed)' : '#475569',
+                                            color: item.status === 'new' ? '#22c55e' : item.status === 'reviewed' ? '#3b82f6' : 'white',
+                                            border: `1px solid ${item.status === 'new' ? '#22c55e' : item.status === 'reviewed' ? '#3b82f6' : 'transparent'}`,
+                                            fontWeight: 500
                                         }}>
-                                            {item.status.toUpperCase()}
+                                            {item.status === 'new' ? <><span style={{ color: '#22c55e' }}>✓✓</span> PENDING</> : item.status === 'reviewed' ? <><span style={{ color: '#60a5fa' }}>✓✓</span> READ</> : item.status.toUpperCase()}
                                         </span>
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', textAlign: 'right' }} onClick={e => e.stopPropagation()}>
