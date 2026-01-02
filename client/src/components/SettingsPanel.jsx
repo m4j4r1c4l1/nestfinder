@@ -39,6 +39,8 @@ const SettingsPanel = ({ onClose }) => {
 
     const carouselRef = React.useRef(null);
     const sectionRef = React.useRef(null);
+    const animationRef = React.useRef(null);
+    const scrollOffsetRef = React.useRef(0); // Use ref for smooth animation
 
     // Animation constants
     const ITEM_HEIGHT = 68;
@@ -46,35 +48,75 @@ const SettingsPanel = ({ onClose }) => {
     const PADDING = 12;
     const CONTAINER_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT + PADDING * 2;
 
-    // Which item index should be centered (can be any number, we mod it)
-    const [centeredIndex, setCenteredIndex] = useState(() => {
-        const idx = availableLanguages.findIndex(l => l.code === language);
-        return idx >= 0 ? idx : 0;
-    });
+    // Force re-render trigger
+    const [, forceRender] = useState(0);
     const [hasAnimated, setHasAnimated] = useState(false);
-    const [animationDuration, setAnimationDuration] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
 
     const itemCount = availableLanguages.length;
 
-    // Center slot Y position (middle of the 3 visible slots)
-    const centerSlotY = PADDING + ITEM_HEIGHT; // Second slot (index 1 of 0,1,2)
+    // Initialize scrollOffset to current language
+    useEffect(() => {
+        const idx = availableLanguages.findIndex(l => l.code === language);
+        scrollOffsetRef.current = idx >= 0 ? idx : 0;
+        forceRender(n => n + 1);
+    }, []);
 
-    // Calculate Y position for each item with infinite wrap-around
+    // Center slot Y position
+    const centerSlotY = PADDING + ITEM_HEIGHT;
+
+    // Calculate Y position for each item based on scrollOffset
     const getItemY = (index) => {
         if (itemCount === 0) return 0;
 
-        // Normalize centeredIndex to [0, itemCount)
-        let normalizedCenter = centeredIndex % itemCount;
-        if (normalizedCenter < 0) normalizedCenter += itemCount;
+        const scrollOffset = scrollOffsetRef.current;
 
-        // Calculate offset from center
-        let offset = index - normalizedCenter;
+        // Calculate visual offset from center
+        let offset = index - scrollOffset;
 
-        // Wrap around to find shortest visual path
+        // Wrap around for infinite barrel effect
         while (offset > itemCount / 2) offset -= itemCount;
         while (offset < -itemCount / 2) offset += itemCount;
 
         return centerSlotY + (offset * ITEM_HEIGHT);
+    };
+
+    // Normalize offset to valid range [0, itemCount)
+    const normalizeOffset = (offset) => {
+        if (itemCount === 0) return 0;
+        let normalized = offset % itemCount;
+        if (normalized < 0) normalized += itemCount;
+        return normalized;
+    };
+
+    // Animate scrollOffset from current to target using rAF
+    const animateTo = (targetOffset, duration, onComplete) => {
+        if (animationRef.current) cancelAnimationFrame(animationRef.current);
+
+        const startOffset = scrollOffsetRef.current;
+        const startTime = performance.now();
+        const easeOutQuart = (x) => 1 - Math.pow(1 - x, 4);
+
+        setIsAnimating(true);
+
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+
+            if (elapsed >= duration) {
+                scrollOffsetRef.current = normalizeOffset(targetOffset);
+                forceRender(n => n + 1);
+                setIsAnimating(false);
+                if (onComplete) onComplete();
+                return;
+            }
+
+            const progress = easeOutQuart(elapsed / duration);
+            scrollOffsetRef.current = startOffset + (targetOffset - startOffset) * progress;
+            forceRender(n => n + 1);
+            animationRef.current = requestAnimationFrame(animate);
+        };
+
+        animationRef.current = requestAnimationFrame(animate);
     };
 
     // Watch for section visibility to trigger spin animation
@@ -89,18 +131,12 @@ const SettingsPanel = ({ onClose }) => {
                     const selectedIndex = availableLanguages.findIndex(l => l.code === language);
                     if (selectedIndex === -1) return;
 
-                    // Start 4 items "later" (will roll backward to selected)
-                    const startIndex = selectedIndex + 4;
+                    // Start 4 items "later" and roll backward to selected
+                    scrollOffsetRef.current = selectedIndex + 4;
+                    forceRender(n => n + 1);
 
-                    setAnimationDuration(0);
-                    setCenteredIndex(startIndex);
-
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            setAnimationDuration(1000);
-                            setCenteredIndex(selectedIndex);
-                        });
-                    });
+                    // Animate down to selected index
+                    setTimeout(() => animateTo(selectedIndex, 1000), 50);
                 }
             },
             { threshold: 0.5 }
@@ -110,23 +146,30 @@ const SettingsPanel = ({ onClose }) => {
         return () => observer.disconnect();
     }, [hasAnimated, itemCount, language, availableLanguages]);
 
+    // Cleanup animation on unmount
+    useEffect(() => {
+        return () => {
+            if (animationRef.current) cancelAnimationFrame(animationRef.current);
+        };
+    }, []);
+
     // Handle wheel scroll  
     useEffect(() => {
         const el = carouselRef.current;
         if (!el) return;
 
         const handleWheel = (e) => {
+            if (isAnimating) return;
             e.preventDefault();
             e.stopPropagation();
 
             const direction = e.deltaY > 0 ? 1 : -1;
-            setAnimationDuration(200);
-            setCenteredIndex(prev => prev + direction); // No wrap needed, getItemY handles it
+            animateTo(scrollOffsetRef.current + direction, 200);
         };
 
         el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
-    }, []);
+    }, [isAnimating]);
 
     // Touch scroll support
     const touchStartY = React.useRef(0);
@@ -134,22 +177,26 @@ const SettingsPanel = ({ onClose }) => {
         touchStartY.current = e.touches[0].clientY;
     };
     const handleTouchMove = (e) => {
+        if (isAnimating) return;
         e.preventDefault();
         const deltaY = touchStartY.current - e.touches[0].clientY;
         if (Math.abs(deltaY) > 30) {
             const direction = deltaY > 0 ? 1 : -1;
-            setAnimationDuration(200);
-            setCenteredIndex(prev => prev + direction);
+            animateTo(scrollOffsetRef.current + direction, 200);
             touchStartY.current = e.touches[0].clientY;
         }
     };
 
     // Click to select an item
     const handleItemClick = (index) => {
-        setAnimationDuration(300);
-        setCenteredIndex(index);
-        setLanguage(availableLanguages[index].code);
+        if (isAnimating) return;
+        animateTo(index, 300, () => {
+            setLanguage(availableLanguages[index].code);
+        });
     };
+
+    // Get the currently centered item index (for checkmark)
+    const centeredItemIndex = Math.round(normalizeOffset(scrollOffsetRef.current)) % itemCount;
 
 
 
@@ -345,8 +392,10 @@ const SettingsPanel = ({ onClose }) => {
                             const isVisible = yPos > -ITEM_HEIGHT && yPos < CONTAINER_HEIGHT + ITEM_HEIGHT;
                             if (!isVisible) return null;
 
-                            // Check if this item is in the center slot
+                            // Visual check: is this item in the center slot
                             const isInCenter = Math.abs(yPos - centerSlotY) < 5;
+                            // Checkmark only shows when animation is complete and this is the selected item
+                            const showCheckmark = !isAnimating && index === centeredItemIndex;
 
                             return (
                                 <div
@@ -357,9 +406,6 @@ const SettingsPanel = ({ onClose }) => {
                                         left: '8px',
                                         right: '8px',
                                         top: `${yPos}px`,
-                                        transition: animationDuration > 0
-                                            ? `top ${animationDuration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`
-                                            : 'none',
                                         zIndex: isInCenter ? 10 : 1,
                                         opacity: isInCenter ? 1 : 0.5,
                                         cursor: 'pointer'
@@ -387,7 +433,7 @@ const SettingsPanel = ({ onClose }) => {
                                                 {lang.name}
                                             </div>
                                         </div>
-                                        {isInCenter && (
+                                        {showCheckmark && (
                                             <span style={{ color: 'var(--color-primary)' }}>✓</span>
                                         )}
                                     </div>
