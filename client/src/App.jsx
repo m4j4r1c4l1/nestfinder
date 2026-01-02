@@ -4,6 +4,7 @@ import { LanguageProvider } from './i18n/LanguageContext';
 import LanguagePicker from './components/LanguagePicker';
 import WelcomeMessage from './components/WelcomeMessage';
 import OfflineIndicator from './components/OfflineIndicator';
+import { ToastProvider } from './components/ToastProvider';
 import Home from './pages/Home';
 import MapView from './pages/MapView';
 
@@ -32,10 +33,12 @@ const AppContent = () => {
 const App = () => {
     return (
         <LanguageProvider>
-            <OfflineIndicator />
-            <WelcomeMessage />
-            <LanguagePicker />
-            <AppContent />
+            <ToastProvider>
+                <OfflineIndicator />
+                <WelcomeMessage />
+                <LanguagePicker />
+                <AppContent />
+            </ToastProvider>
         </LanguageProvider>
     );
 };

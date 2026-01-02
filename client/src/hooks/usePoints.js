@@ -71,6 +71,10 @@ export const usePoints = () => {
                     }
                     return [message.point, ...prev];
                 });
+                // Trigger proximity callback if provided
+                if (onNewPointCallback.current && message.point) {
+                    onNewPointCallback.current(message.point);
+                }
                 break;
             case 'point_updated':
                 setPoints(prev => prev.map(p => p.id === message.point.id ? message.point : p));
@@ -81,6 +85,12 @@ export const usePoints = () => {
             default:
                 break;
         }
+    };
+
+    // Callback for new point notifications
+    const onNewPointCallback = useRef(null);
+    const setNewPointCallback = (callback) => {
+        onNewPointCallback.current = callback;
     };
 
     const submitPoint = async (data) => {
@@ -121,6 +131,7 @@ export const usePoints = () => {
         confirmPoint,
         deactivatePoint,
         reactivatePoint,
-        refresh: fetchPoints
+        refresh: fetchPoints,
+        setNewPointCallback
     };
 };
