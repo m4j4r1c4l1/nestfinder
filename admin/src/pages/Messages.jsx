@@ -338,13 +338,6 @@ const Messages = () => {
                                                 ))}
                                             </div>
                                         </div>
-                                        <textarea
-                                            value={newBroadcast.message}
-                                            onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
-                                            placeholder="Enter broadcast message (visible to all users active in the app)..."
-                                            className="form-input"
-                                            style={{ minHeight: '100px', marginBottom: '1rem', resize: 'vertical' }}
-                                        />
                                         <div style={{ marginBottom: '1rem' }}>
                                             <label className="form-label">Image URL (Optional)</label>
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -356,7 +349,16 @@ const Messages = () => {
                                                     placeholder="https://..."
                                                     style={{ flex: 1 }}
                                                 />
-                                                <label className="btn btn-secondary" style={{ cursor: 'pointer', padding: '0.4rem 1.0rem' }}>
+                                                <label className="btn btn-secondary" style={{
+                                                    cursor: 'pointer',
+                                                    padding: 0,
+                                                    width: '42px',
+                                                    height: '42px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    borderRadius: '8px'
+                                                }}>
                                                     📂
                                                     <input
                                                         type="file"
@@ -378,6 +380,35 @@ const Messages = () => {
                                                     <img src={newBroadcast.imageUrl} alt="Preview" style={{ maxHeight: '100px', borderRadius: '4px', border: '1px solid var(--color-border)' }} />
                                                 </div>
                                             )}
+                                        </div>
+                                        <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                                            <textarea
+                                                value={newBroadcast.message}
+                                                onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
+                                                placeholder="Enter broadcast message (visible to all users active in the app)..."
+                                                className="form-input"
+                                                style={{ minHeight: '100px', width: '100%', resize: 'vertical' }}
+                                            />
+                                            <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowEmojiPicker(true)}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        fontSize: '1.2rem',
+                                                        cursor: 'pointer',
+                                                        padding: '4px',
+                                                        opacity: 0.7,
+                                                        transition: 'opacity 0.2s'
+                                                    }}
+                                                    onMouseEnter={e => e.target.style.opacity = 1}
+                                                    onMouseLeave={e => e.target.style.opacity = 0.7}
+                                                    title="Add Emoji"
+                                                >
+                                                    😀
+                                                </button>
+                                            </div>
                                         </div>
                                         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                                             <div style={{ flex: 1 }}>
@@ -984,7 +1015,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     </table>
                 </div>
             </div>
-            {previewItem && (
+            {previewItem && ReactDOM.createPortal(
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
                     background: 'rgba(0,0,0,0.6)',
@@ -1010,7 +1041,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     {previewItem.type === 'bug' ? '🐛' : previewItem.type === 'suggestion' ? '💡' : '📝'}
                                 </span>
                                 <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0', textTransform: 'capitalize' }}>
-                                    {previewItem.type} Report
+                                    {formatTimestamp24h(previewItem.created_at)}
                                 </h3>
                             </div>
                             <button onClick={() => setPreviewItem(null)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
@@ -1030,20 +1061,18 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     <span style={{ fontWeight: 'bold', color: '#f1f5f9', fontSize: '1rem' }}>
                                         {previewItem.user_nickname || 'Anonymous User'}
                                     </span>
-                                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                                        {formatTimestamp24h(previewItem.created_at)}
-                                    </span>
                                 </div>
                                 <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
                                     {previewItem.message}
                                 </div>
                             </div>
                             <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#64748b' }}>
-                                Feedback ID: {previewItem.id}
+                                Preview of how the user sees this message
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
