@@ -489,4 +489,25 @@ router.post('/:id/validate', requireUser, (req, res) => {
   res.json({ success: true });
 });
 
+// ================== FEEDBACK ==================
+
+// Submit feedback (bugs, suggestions)
+router.post('/feedback', (req, res) => {
+  const userId = req.headers['x-user-id'];
+  const { type, message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: 'Message required' });
+  }
+
+  run(`
+    INSERT INTO feedback (user_id, type, message)
+    VALUES (?, ?, ?)
+  `, [userId || null, type || 'general', message]);
+
+  log(userId || 'anonymous', 'feedback_submitted', null, { type });
+
+  res.json({ success: true, message: 'Thank you for your feedback!' });
+});
+
 export default router;

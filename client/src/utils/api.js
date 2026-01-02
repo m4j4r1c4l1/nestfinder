@@ -139,6 +139,14 @@ class ApiClient {
     return data;
   }
 
+  // Feedback
+  submitFeedback(type, message) {
+    return this.fetch('/points/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ type, message }),
+    });
+  }
+
   // Points
   getPoints(filters = {}) {
     const params = new URLSearchParams(filters);
