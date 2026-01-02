@@ -68,3 +68,26 @@ Si ves un error diciendo que la ubicación fue denegada o bloqueada, lo más com
 ¡Aún puedes usar la app!
 
 - **Modo Manual**: Al reportar un punto, elige "**Seleccionar en Mapa**" para colocar un marcador manualmente sin necesidad de GPS.
+
+---
+
+## 🗺️ NestFinder en Cualquier Lugar (Modo Offline)
+
+NestFinder ahora incluye capacidades offline mejoradas:
+
+### Qué Funciona Offline
+- **Tiles del Mapa**: Hasta 2000 tiles almacenados para visualización offline.
+- **Datos de Puntos**: Los puntos vistos recientemente se almacenan durante 24 horas.
+- **Acciones en Cola**: Envíos y confirmaciones se ponen en cola cuando estás offline.
+
+### Modo Lite
+En Ajustes, activa **"Modo Lite"** para mejorar el rendimiento en dispositivos lentos:
+- Desactiva animaciones
+- Reduce efectos visuales
+- Optimiza uso de batería
+
+### Reconexión
+Cuando recuperes conectividad:
+- Las acciones en cola se sincronizan automáticamente.
+- Verás una notificación confirmando la sincronización.
+

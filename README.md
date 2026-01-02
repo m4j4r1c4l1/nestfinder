@@ -27,12 +27,16 @@
 ## ✨ Key Features
 
 - **🗺️ Interactive Map** — View resources with status markers (Confirmed/Pending/Deactivated).
-- **📍 Easy Reporting** — Submit locations via GPS, Map Tap, or Address.
+- **📍 Easy Reporting** — Submit locations via GPS, Map Tap, Address, or **Voice Input** 🎤.
 - **🚶 Smart Routing** — [Calculate optimal walking paths](docs/ROUTE.md) to visible points.
 - **🌍 11 Languages** — Native support for EN, ES, FR, PT, IT, DE, NL, RU, AR, ZH, VAL.
-- **🔔 Real-time Alerts** — In-App Push notifications for updates and news.
+- **🔔 Real-time Alerts** — Toast notifications for achievements, plus In-App Push notifications.
 - **📱 Installable App** — Add to home screen on iOS/Android (no store needed).
 - **📥 Data Export** — Download points in JSON, CSV, GPX, or KML formats.
+- **🏆 Guardian Trust System** — Earn badges (Hatchling → Eagle) through contributions.
+- **🔑 Identity Recovery** — 3-word recovery keys to restore your account on new devices.
+- **📢 Global Broadcasts** — Admin announcements displayed to all users.
+- **💌 Feedback Channel** — Report bugs or suggest improvements directly in-app.
 
 👉 **[See Detailed Features List](docs/FEATURES.md)**
 

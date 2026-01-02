@@ -89,3 +89,46 @@ Diseñada para entornos de baja conectividad.
 - **CSV**: Exportación compatible con hojas de cálculo para análisis.
 - **GPX/KML**: Formatos compatibles con GIS para uso con otras herramientas de mapeo.
 - **Formato Legible**: JSON formateado para legibilidad humana.
+
+---
+
+## 🆕 Nuevas Características (v2.0)
+
+### 8. Sistema de Confianza Guardian 🏆
+Un sistema de gamificación que recompensa a los contribuidores activos.
+- **Puntuación de Confianza**: Gana puntos (+5 por envíos aprobados, +1 por confirmaciones).
+- **Voto Ponderado**: Los usuarios de alta confianza ("Guardianes" con 50+ puntos) tienen 3x poder de voto.
+- **Niveles de Insignia**: Progresa desde Polluelo 🥚 → Gorrión 🐦 → Búho 🦉 → Águila 🦅.
+- **Visualización de Perfil**: Ve tu estado y puntuación en Ajustes.
+
+### 9. Interfaz de Voz 🎙️
+Reportes manos libres para accesibilidad y conveniencia.
+- **API Web Speech**: Convierte voz a texto para notas.
+- **Botón de Micrófono**: Integrado en el formulario de envío.
+- **Multi-idioma**: Respeta la configuración de idioma del dispositivo.
+
+### 10. Recuperación de Identidad Anónima 🔑
+Restaura tu cuenta en un nuevo dispositivo sin datos personales.
+- **Claves de 3 Palabras**: Frases fáciles de recordar (ej: "águila-bosque-amanecer").
+- **Genera en Ajustes**: Crea y guarda tu clave.
+- **Multi-dispositivo**: Usa la clave para recuperar tu historial completo y puntuación.
+
+### 11. Sistema de Difusión Global 📢
+Anuncios del administrador para todos los usuarios.
+- **Visualización Retrasada**: Las difusiones aparecen 1 segundo después de establecerse en el mapa.
+- **Lógica de Ver Una Vez**: Los usuarios solo ven cada difusión una vez (almacenada en localStorage).
+- **Controles de Admin**: Crear, programar y eliminar difusiones desde el Panel de Admin.
+
+### 12. Canal de Retroalimentación 💌
+Comunicación directa con los desarrolladores.
+- **Selección de Tipo**: Reporta errores 🐛, sugiere ideas 💡, u otra retroalimentación.
+- **Formulario en la App**: Accesible desde Ajustes.
+- **Buzón de Admin**: Toda la retroalimentación visible en el Panel de Admin.
+
+### 13. Modo Offline Mejorado 🗺️
+Capacidades "NestFinder en Cualquier Lugar" mejoradas.
+- **Caché de Mapas Expandida**: 2000 tiles de mapa almacenadas para visualización offline.
+- **Caché de API**: Datos de puntos almacenados durante 24 horas.
+- **Modo Lite**: Actívalo en Ajustes para desactivar animaciones y mejor rendimiento.
+- **Cola Offline**: Acciones en cola cuando está offline y sincronizadas al reconectar.
+

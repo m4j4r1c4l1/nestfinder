@@ -153,3 +153,81 @@ If you need to add a new panel:
   - `c0ded91`: Initial flex attempts (superseded)
 
 - **Related Issues**: Panel alignment, vertical centering, scroll behavior
+
+---
+
+## 📢 Broadcast System Architecture
+
+### Overview
+The Broadcast System enables admin announcements to all users without interrupting their flow.
+
+### Database Schema
+```sql
+CREATE TABLE broadcasts (
+  id INTEGER PRIMARY KEY,
+  message TEXT NOT NULL,
+  start_time DATETIME NOT NULL,
+  end_time DATETIME NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### API Endpoints
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/points/broadcast/active` | GET | Public | Get current active broadcast |
+| `/admin/broadcasts` | GET | Admin | List all broadcasts |
+| `/admin/broadcasts` | POST | Admin | Create new broadcast |
+| `/admin/broadcasts/:id` | DELETE | Admin | Delete broadcast |
+
+### Client Flow
+```
+┌──────────────────────────────────────────────────────┐
+│ 1. User lands on MapView                             │
+│ 2. userLocation becomes available (settled)          │
+│ 3. Wait 1 second (delayed display)                   │
+│ 4. Fetch /points/broadcast/active                    │
+│ 5. Check localStorage for seen broadcasts            │
+│ 6. If unseen → Show BroadcastModal                   │
+│ 7. On dismiss → Mark as seen in localStorage         │
+└──────────────────────────────────────────────────────┘
+```
+
+### Files
+- **Modal Component**: `client/src/components/BroadcastModal.jsx`
+- **API Endpoint**: `server/routes/points.js` (lines 23-35)
+- **Admin Endpoints**: `server/routes/admin.js` (lines 592-629)
+- **Database Table**: `server/database.js` (lines 127-137)
+
+---
+
+## 💌 Feedback System Architecture
+
+### Overview
+Users can submit feedback (bugs, suggestions) directly from Settings.
+
+### Database Schema
+```sql
+CREATE TABLE feedback (
+  id INTEGER PRIMARY KEY,
+  user_id TEXT,
+  type TEXT DEFAULT 'general',
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'new',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### API Endpoints
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/points/feedback` | POST | Optional | Submit user feedback |
+| `/admin/feedback` | GET | Admin | List all feedback |
+| `/admin/feedback/:id/status` | PUT | Admin | Update status |
+| `/admin/feedback/:id` | DELETE | Admin | Delete feedback |
+
+### Files
+- **UI Component**: `client/src/components/SettingsPanel.jsx` (FeedbackSection)
+- **API Endpoint**: `server/routes/points.js` (lines 492-512)
+- **Admin Endpoints**: `server/routes/admin.js` (lines 631-660)
+
