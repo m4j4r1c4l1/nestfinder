@@ -29,19 +29,19 @@ const FeedbackSection = () => {
     };
 
     return (
-        <div style={{ padding: 'var(--space-2)' }}>
-            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)', textAlign: 'center' }}>
+        <div style={{ padding: '0.5rem' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', textAlign: 'center' }}>
                 {t('feedback.description') || 'Report bugs or suggest improvements.'}
             </div>
 
-            <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 {['bug', 'suggestion', 'other'].map(typeOption => (
                     <button
                         key={typeOption}
                         onClick={() => setType(typeOption)}
                         style={{
                             flex: 1,
-                            padding: 'var(--space-2)',
+                            padding: '0.5rem',
                             background: type === typeOption ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
                             color: type === typeOption ? 'white' : 'var(--color-text-secondary)',
                             border: 'none',
@@ -63,26 +63,26 @@ const FeedbackSection = () => {
                 maxLength={500}
                 style={{
                     width: '100%',
-                    minHeight: '100px',
-                    padding: 'var(--space-2)',
+                    minHeight: '80px',
+                    padding: '0.5rem',
                     background: 'var(--color-bg-tertiary)',
                     border: '1px solid var(--color-border)',
                     borderRadius: 'var(--radius-md)',
                     color: 'var(--color-text)',
-                    resize: 'vertical',
-                    marginBottom: 'var(--space-2)'
+                    resize: 'none',
+                    marginBottom: '0.25rem'
                 }}
             />
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textAlign: 'right', marginBottom: 'var(--space-3)' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textAlign: 'right', marginBottom: '0.5rem' }}>
                 {message.length}/500 {t('feedback.charLimit') || 'characters'}
             </div>
 
             {/* Application Rating */}
-            <div style={{ marginBottom: 'var(--space-3)', padding: 'var(--space-2)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--color-text)', marginBottom: 'var(--space-2)', textAlign: 'center', fontWeight: 500 }}>
+            <div style={{ marginBottom: '0.5rem', padding: '0.5rem', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-text)', marginBottom: '0.25rem', textAlign: 'center', fontWeight: 500 }}>
                     {t('feedback.rateApp') || 'Rate the App'}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
                     {[1, 2, 3, 4, 5].map((star) => (
                         <button
                             key={star}
@@ -90,9 +90,9 @@ const FeedbackSection = () => {
                             style={{
                                 background: 'none',
                                 border: 'none',
-                                fontSize: '1.5rem',
+                                fontSize: '1.4rem',
                                 cursor: 'pointer',
-                                padding: '4px',
+                                padding: '0 4px',
                                 transition: 'transform 0.1s',
                                 transform: rating >= star ? 'scale(1.1)' : 'scale(1)',
                                 filter: rating >= star ? 'grayscale(0%)' : 'grayscale(100%) opacity(0.3)'
@@ -109,7 +109,7 @@ const FeedbackSection = () => {
                 disabled={loading || !message.trim()}
                 style={{
                     width: '100%',
-                    padding: 'var(--space-3)',
+                    padding: '0.75rem',
                     background: success ? 'var(--color-confirmed)' : 'var(--color-primary)',
                     color: 'white',
                     border: 'none',
