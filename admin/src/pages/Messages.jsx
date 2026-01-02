@@ -77,6 +77,7 @@ const Messages = () => {
     // Broadcast form
     const [newBroadcast, setNewBroadcast] = useState({
         message: '',
+        imageUrl: '',
         startTime: '',
         endTime: ''
     });
@@ -125,7 +126,7 @@ const Messages = () => {
                 method: 'POST',
                 body: JSON.stringify(newBroadcast)
             });
-            setNewBroadcast({ message: '', startTime: '', endTime: '' });
+            setNewBroadcast({ message: '', imageUrl: '', startTime: '', endTime: '' });
             fetchData();
         } catch (err) {
             console.error('Failed to create broadcast:', err);
@@ -167,9 +168,9 @@ const Messages = () => {
 
     const tabs = [
         { id: 'composer', label: '🖊️ Composer', count: 0 },
-        { id: 'outbox', label: '📤 Outbox', count: 0 },
-        { id: 'broadcasts', label: '📢 Broadcasts', count: broadcasts.length },
-        { id: 'feedback', label: '💌 Feedback', count: feedback.filter(f => f.status === 'new').length }
+        { id: 'outbox', label: '📤 Sent', count: 0 },
+        { id: 'feedback', label: '📥 Received', count: feedback.filter(f => f.status === 'new').length },
+        { id: 'broadcasts', label: '📢 Broadcasts', count: broadcasts.length }
     ];
 
     return (
@@ -254,122 +255,14 @@ const Messages = () => {
                     )}
 
                     {/* OUTBOX TAB */}
+                    {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
                         <div>
                             <HistorySection />
                         </div>
                     )}
 
-                    {/* BROADCASTS TAB */}
-                    {activeTab === 'broadcasts' && (
-                        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                            {/* Create New Broadcast */}
-                            <div className="card" style={{ marginBottom: '2rem' }}>
-                                <div className="card-header">
-                                    <h3>Create Broadcast</h3>
-                                </div>
-                                <div className="card-body">
-                                    <form onSubmit={handleCreateBroadcast}>
-                                        <textarea
-                                            value={newBroadcast.message}
-                                            onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
-                                            placeholder="Enter broadcast message (visible to all users active in the app)..."
-                                            className="form-input"
-                                            style={{ minHeight: '100px', marginBottom: '1rem', resize: 'vertical' }}
-                                        />
-                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                                            <div style={{ flex: 1 }}>
-                                                <label className="form-label">Start Time</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    value={newBroadcast.startTime}
-                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, startTime: e.target.value })}
-                                                    className="form-input"
-                                                />
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <label className="form-label">End Time</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    value={newBroadcast.endTime}
-                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, endTime: e.target.value })}
-                                                    className="form-input"
-                                                />
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={creatingBroadcast || !newBroadcast.message}
-                                            className="btn btn-primary btn-block"
-                                        >
-                                            {creatingBroadcast ? 'Creating...' : '📢 Publish Broadcast'}
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-
-                            {/* Existing Broadcasts List */}
-                            <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Active & Scheduled</h3>
-                            {broadcasts.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-                                    No broadcasts found
-                                </div>
-                            ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {broadcasts.map(b => {
-                                        const now = new Date();
-                                        const start = new Date(b.start_time);
-                                        const end = new Date(b.end_time);
-                                        const isActive = now >= start && now <= end;
-                                        const isPast = now > end;
-
-                                        return (
-                                            <div
-                                                key={b.id}
-                                                className="card"
-                                                style={{
-                                                    borderLeft: isActive ? '4px solid var(--color-confirmed)' : '1px solid var(--color-border)',
-                                                    opacity: isPast ? 0.7 : 1
-                                                }}
-                                            >
-                                                <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ marginBottom: '0.75rem', fontSize: '1.05rem' }}>{b.message}</div>
-                                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                                            <span>📅 {new Date(b.start_time).toLocaleString()}</span>
-                                                            <span>→</span>
-                                                            <span>{new Date(b.end_time).toLocaleString()}</span>
-                                                        </div>
-                                                        <div style={{ marginTop: '0.75rem' }}>
-                                                            <span style={{
-                                                                padding: '0.25rem 0.75rem',
-                                                                borderRadius: '20px',
-                                                                fontSize: '0.75rem',
-                                                                fontWeight: 600,
-                                                                background: isActive ? 'var(--color-confirmed)' : isPast ? 'var(--color-text-muted)' : 'var(--color-pending)',
-                                                                color: 'white'
-                                                            }}>
-                                                                {isActive ? '🟢 ACTIVE' : isPast ? '⚫ ENDED' : '🟡 SCHEDULED'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleDeleteBroadcast(b.id)}
-                                                        className="btn btn-secondary btn-sm"
-                                                        style={{ color: 'var(--color-deactivated)', borderColor: 'var(--color-deactivated)' }}
-                                                    >
-                                                        🗑️ Delete
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* FEEDBACK TAB */}
+                    {/* RECEIVED (FEEDBACK) TAB */}
                     {activeTab === 'feedback' && (
                         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                             {feedback.length === 0 ? (
@@ -435,8 +328,158 @@ const Messages = () => {
                         </div>
                     )}
 
+                    {/* BROADCASTS TAB */}
+                    {activeTab === 'broadcasts' && (
+                        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                            {/* Create New Broadcast */}
+                            <div className="card" style={{ marginBottom: '2rem' }}>
+                                <div className="card-header">
+                                    <h3>Create Broadcast</h3>
+                                </div>
+                                <div className="card-body">
+                                    <form onSubmit={handleCreateBroadcast}>
+                                        <textarea
+                                            value={newBroadcast.message}
+                                            onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
+                                            placeholder="Enter broadcast message (visible to all users active in the app)..."
+                                            className="form-input"
+                                            style={{ minHeight: '100px', marginBottom: '1rem', resize: 'vertical' }}
+                                        />
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <label className="form-label">Image URL (Optional)</label>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <input
+                                                    type="text"
+                                                    className="form-input"
+                                                    value={newBroadcast.imageUrl}
+                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, imageUrl: e.target.value })}
+                                                    placeholder="https://..."
+                                                    style={{ flex: 1 }}
+                                                />
+                                                <label className="btn btn-secondary" style={{ cursor: 'pointer', padding: '0.4rem 1.0rem' }}>
+                                                    📂
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        style={{ display: 'none' }}
+                                                        onChange={(e) => {
+                                                            const file = e.target.files[0];
+                                                            if (file) {
+                                                                const reader = new FileReader();
+                                                                reader.onloadend = () => setNewBroadcast({ ...newBroadcast, imageUrl: reader.result });
+                                                                reader.readAsDataURL(file);
+                                                            }
+                                                        }}
+                                                    />
+                                                </label>
+                                            </div>
+                                            {newBroadcast.imageUrl && (
+                                                <div style={{ marginTop: '0.5rem' }}>
+                                                    <img src={newBroadcast.imageUrl} alt="Preview" style={{ maxHeight: '100px', borderRadius: '4px', border: '1px solid var(--color-border)' }} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                            <div style={{ flex: 1 }}>
+                                                <label className="form-label">Start Time</label>
+                                                <input
+                                                    type="datetime-local"
+                                                    value={newBroadcast.startTime}
+                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, startTime: e.target.value })}
+                                                    className="form-input"
+                                                />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <label className="form-label">End Time</label>
+                                                <input
+                                                    type="datetime-local"
+                                                    value={newBroadcast.endTime}
+                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, endTime: e.target.value })}
+                                                    className="form-input"
+                                                />
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={creatingBroadcast || !newBroadcast.message}
+                                            className="btn btn-primary btn-block"
+                                        >
+                                            {creatingBroadcast ? 'Creating...' : '📢 Publish Broadcast'}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            {/* Existing Broadcasts List */}
+                            <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Active & Scheduled</h3>
+                            {broadcasts.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
+                                    No broadcasts found
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {broadcasts.map(b => {
+                                        const now = new Date();
+                                        const start = new Date(b.start_time);
+                                        const end = new Date(b.end_time);
+                                        const isActive = now >= start && now <= end;
+                                        const isPast = now > end;
+
+                                        return (
+                                            <div
+                                                key={b.id}
+                                                className="card"
+                                                style={{
+                                                    borderLeft: isActive ? '4px solid var(--color-confirmed)' : '1px solid var(--color-border)',
+                                                    opacity: isPast ? 0.7 : 1
+                                                }}
+                                            >
+                                                <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ marginBottom: '0.75rem', fontSize: '1.05rem' }}>{b.message}</div>
+                                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                                            <span>📅 {new Date(b.start_time).toLocaleString()}</span>
+                                                            <span>→</span>
+                                                            <span>→</span>
+                                                            <span>{new Date(b.end_time).toLocaleString()}</span>
+                                                        </div>
+                                                        {b.image_url && (
+                                                            <div style={{ marginTop: '0.75rem' }}>
+                                                                <img src={b.image_url} alt="Broadcast" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                                                            </div>
+                                                        )}
+                                                        <div style={{ marginTop: '0.75rem' }}>
+                                                            <span style={{
+                                                                padding: '0.25rem 0.75rem',
+                                                                borderRadius: '20px',
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: 600,
+                                                                background: isActive ? 'var(--color-confirmed)' : isPast ? 'var(--color-text-muted)' : 'var(--color-pending)',
+                                                                color: 'white'
+                                                            }}>
+                                                                {isActive ? '🟢 ACTIVE' : isPast ? '⚫ ENDED' : '🟡 SCHEDULED'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeleteBroadcast(b.id)}
+                                                        className="btn btn-secondary btn-sm"
+                                                        style={{ color: 'var(--color-deactivated)', borderColor: 'var(--color-deactivated)' }}
+                                                    >
+                                                        🗑️ Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                 </div>
             )}
+
         </div>
     );
 };

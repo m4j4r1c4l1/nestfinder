@@ -602,16 +602,16 @@ router.get('/broadcasts', (req, res) => {
 
 // Create a new broadcast
 router.post('/broadcasts', (req, res) => {
-    const { message, startTime, endTime } = req.body;
+    const { message, imageUrl, startTime, endTime } = req.body;
 
     if (!message || !startTime || !endTime) {
         return res.status(400).json({ error: 'Message, start time, and end time are required' });
     }
 
     run(`
-        INSERT INTO broadcasts (message, start_time, end_time)
-        VALUES (?, ?, ?)
-    `, [message, startTime, endTime]);
+        INSERT INTO broadcasts (message, image_url, start_time, end_time)
+        VALUES (?, ?, ?, ?)
+    `, [message, imageUrl, startTime, endTime]);
 
     const broadcast = get('SELECT * FROM broadcasts ORDER BY id DESC LIMIT 1');
     log('admin', 'broadcast_created', broadcast.id.toString(), { message: message.substring(0, 50) });

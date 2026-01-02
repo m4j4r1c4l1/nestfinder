@@ -90,6 +90,7 @@ export default {
         gpsMode: 'GPS',
         mapMode: 'Map',
         addressMode: 'Address',
+        voiceMode: 'Voice',
         // GPS mode
         currentLocationLabel: 'Current Location',
         tapToLocate: 'Tap button to find location',
