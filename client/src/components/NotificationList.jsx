@@ -93,25 +93,20 @@ const FeedbackSection = () => {
 
 const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, toggleSettings, onClose }) => {
     const { t } = useLanguage();
-    const [activeTab, setActiveTab] = useState('inbox');
+    const [activeTab, setActiveTab] = useState('received');
 
     const tabs = [
-        { id: 'inbox', label: `📬 ${t('inbox.title') || 'Inbox'}` },
-        { id: 'feedback', label: `💌 ${t('feedback.title') || 'Feedback'}` }
+        { id: 'received', label: `📬 ${t('inbox.received') || 'Received'}` },
+        { id: 'sent', label: `📤 ${t('inbox.sent') || 'Sent'}` },
+        { id: 'compose', label: `✉️ ${t('inbox.sendMessage') || 'Send a Message'}` }
     ];
 
     return (
         <div className="card">
             {/* Header */}
             <div className="card-header flex-between items-center">
-                <h3 className="card-title">{activeTab === 'inbox' ? t('inbox.title') : t('feedback.title') || 'Feedback'}</h3>
+                <h3 className="card-title">{t('inbox.title') || 'Inbox'}</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {activeTab === 'inbox' && (
-                        <div className="notification-settings-toggle" onClick={toggleSettings} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                            <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{t('settings.popupMessages')}</span>
-                            <div className={`toggle-switch ${settings.realTime ? 'active' : ''}`}></div>
-                        </div>
-                    )}
                     {onClose && (
                         <button
                             onClick={onClose}
@@ -158,7 +153,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
             {/* Body */}
             <div className="card-body">
-                {activeTab === 'inbox' ? (
+                {activeTab === 'received' ? (
                     <>
                         {/* Actions */}
                         {notifications.some(n => !n.read) && (
@@ -240,6 +235,11 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             )}
                         </div>
                     </>
+                ) : activeTab === 'sent' ? (
+                    <div style={{ textAlign: 'center', padding: 'var(--space-4) 0', color: 'var(--color-text-secondary)' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📤</div>
+                        <div>{t('inbox.sentPlaceholder') || 'Sent messages will appear here'}</div>
+                    </div>
                 ) : (
                     <FeedbackSection />
                 )}

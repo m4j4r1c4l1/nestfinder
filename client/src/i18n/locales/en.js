@@ -146,6 +146,10 @@ export default {
     // Notifications/Inbox
     inbox: {
         title: 'Inbox',
+        received: 'Received',
+        sent: 'Sent',
+        sendMessage: 'Send a Message',
+        sentPlaceholder: 'Sent messages will appear here',
         noMessages: 'No messages yet',
         markAllRead: 'Mark all as read',
         unread: 'unread'
@@ -190,7 +194,11 @@ export default {
         generateKey: 'Generate Recovery Key',
         copyKey: 'Copy Key',
         copied: 'Copied!',
-        keyGenerated: 'Key Generated & Copied!'
+        keyGenerated: 'Key Generated & Copied!',
+        performance: 'Performance',
+        liteMode: 'Lite Mode',
+        liteModeDescription: 'Reduce animations for smoother performance',
+        scrollInstruction: '🌍 Scroll + Tap or wait 2s to confirm'
     },
 
     // Welcome Message

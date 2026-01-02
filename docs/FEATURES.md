@@ -92,8 +92,6 @@ Designed for low-connectivity environments.
 
 ---
 
-## 🆕 New Features (v2.0)
-
 ### 8. Guardian Trust System 🏆
 A gamification system that rewards active contributors.
 - **Trust Score**: Earn points (+5 for approved submissions, +1 for confirmations).
@@ -125,7 +123,7 @@ Direct communication with developers.
 - **In-App Form**: Accessible from Settings.
 - **Admin Inbox**: All feedback viewable in Admin Panel.
 
-### 13. Enhanced Offline Mode 🗺️
+### 13. Enhanced Offline Mode🗺️
 Improved "NestFinder Anywhere" capabilities.
 - **Expanded Tile Cache**: 2000 map tiles stored for offline viewing.
 - **API Caching**: Point data cached for 24 hours.
