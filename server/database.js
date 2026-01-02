@@ -29,10 +29,18 @@ export const initDatabase = async () => {
       id TEXT PRIMARY KEY,
       nickname TEXT,
       device_id TEXT UNIQUE NOT NULL,
+      trust_score INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       last_active DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Migration: Add trust_score if missing
+  try {
+    db.run("ALTER TABLE users ADD COLUMN trust_score INTEGER DEFAULT 0");
+  } catch (error) {
+    // Column likely already exists
+  }
 
   db.run(`
     -- Points table (locations submitted by users)

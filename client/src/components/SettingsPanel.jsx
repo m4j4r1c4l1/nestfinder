@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { useAuth } from '../hooks/useAuth';
 import { QRCodeCanvas } from 'qrcode.react';
 
 const NOTIFICATION_PREF_KEY = 'nestfinder_notify_settings';
 const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder';
 
+// Status Logic
+const getStatus = (score = 0) => {
+    if (score >= 50) return { name: 'Eagle', icon: '🦅', color: '#f59e0b' }; // Amber
+    if (score >= 30) return { name: 'Owl', icon: '🦉', color: '#8b5cf6' };   // Violet
+    if (score >= 10) return { name: 'Sparrow', icon: '🐦', color: '#3b82f6' }; // Blue
+    return { name: 'Hatchling', icon: '🥚', color: '#94a3b8' }; // Slate
+};
+
 const SettingsPanel = ({ onClose }) => {
     const { t, language, setLanguage, availableLanguages } = useLanguage();
+    const { user } = useAuth();
+
+    // Status
+    const status = getStatus(user?.trust_score);
+
     const [popupEnabled, setPopupEnabled] = useState(() => {
         try {
             const stored = localStorage.getItem(NOTIFICATION_PREF_KEY);
@@ -327,6 +341,31 @@ const SettingsPanel = ({ onClose }) => {
                 </button>
             </div>
             <div className="card-body">
+                {/* User Profile & Status */}
+                <div style={{
+                    background: `linear-gradient(135deg, ${status.color}20, transparent)`,
+                    borderRadius: 'var(--radius-lg)',
+                    padding: 'var(--space-4)',
+                    marginBottom: 'var(--space-4)',
+                    border: `1px solid ${status.color}40`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-3)'
+                }}>
+                    <div style={{ fontSize: '2.5rem' }}>{status.icon}</div>
+                    <div>
+                        <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                            {user?.nickname || 'User'}
+                        </div>
+                        <div style={{ color: status.color, fontWeight: 500 }}>
+                            {status.name}
+                        </div>
+                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
+                            Trust Score: {user?.trust_score || 0}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Share App with QR Code */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.shareApp')}</label>
