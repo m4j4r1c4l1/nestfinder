@@ -91,8 +91,8 @@ const Messages = () => {
     }, []);
 
     const fetchData = async () => {
-        // Only show loading on initial load or if explicitly requested and no data
-        if (loading && broadcasts.length === 0) setLoading(true);
+        // No explicit setLoading(true) here to prevent flickering on intervals
+        // Initial load is handled by default state = true
 
         try {
             const token = localStorage.getItem('nestfinder_admin_token');
