@@ -589,4 +589,42 @@ router.get('/backup', (req, res) => {
     }
 });
 
+// ================== BROADCASTS ==================
+
+// List all broadcasts
+router.get('/broadcasts', (req, res) => {
+    const broadcasts = all(`
+        SELECT * FROM broadcasts 
+        ORDER BY created_at DESC
+    `);
+    res.json({ broadcasts });
+});
+
+// Create a new broadcast
+router.post('/broadcasts', (req, res) => {
+    const { message, startTime, endTime } = req.body;
+
+    if (!message || !startTime || !endTime) {
+        return res.status(400).json({ error: 'Message, start time, and end time are required' });
+    }
+
+    run(`
+        INSERT INTO broadcasts (message, start_time, end_time)
+        VALUES (?, ?, ?)
+    `, [message, startTime, endTime]);
+
+    const broadcast = get('SELECT * FROM broadcasts ORDER BY id DESC LIMIT 1');
+    log('admin', 'broadcast_created', broadcast.id.toString(), { message: message.substring(0, 50) });
+
+    res.json({ broadcast });
+});
+
+// Delete a broadcast
+router.delete('/broadcasts/:id', (req, res) => {
+    const { id } = req.params;
+    run('DELETE FROM broadcasts WHERE id = ?', [id]);
+    log('admin', 'broadcast_deleted', id);
+    res.json({ success: true });
+});
+
 export default router;
