@@ -657,14 +657,17 @@ textarea.form-input {
 
 .bottom-nav-item {
   flex: 1;
+  min-width: 0;
+  /* Allow flex item to shrink below content size */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 8px 4px;
+  padding: 8px 2px;
   /* Reduced padding for 6 items */
-  font-size: 0.7rem;
+  font-size: 0.65rem;
+  /* Slightly smaller font */
   font-weight: 600;
   background: none;
   border: none;
@@ -673,7 +676,12 @@ textarea.form-input {
   position: relative;
   border-radius: 16px;
   color: #94a3b8;
-  /* Default text color */
+  /* Text overflow handling */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: calc(100% / 6);
+  /* 6 nav items */
 }
 
 /* Enforce consistent icon size for alignment */
