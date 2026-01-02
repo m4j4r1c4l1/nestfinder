@@ -527,7 +527,7 @@ const SettingsPanel = ({ onClose }) => {
                     </div>
 
                     <div style={{ textAlign: 'center', margin: '0 auto var(--space-3)', color: 'var(--color-text-secondary)', fontSize: '0.9rem', width: '250px' }}>
-                        Spread the warmth! 🐣
+                        {t('settings.spreadWarmth') || 'Spread the warmth! 🐣'}
                     </div>
 
                     {/* Copy Link Button */}

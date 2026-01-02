@@ -40,8 +40,10 @@ class ApiClient {
     // Use user token for authentication (preferred)
     if (this.userToken) {
       headers['Authorization'] = `Bearer ${this.userToken}`;
-    } else if (this.userId) {
-      // Fallback to x-user-id if no token (backward compatibility)
+    }
+
+    // Always include user ID if available (some endpoints require it explicitly)
+    if (this.userId) {
       headers['x-user-id'] = this.userId;
     }
 

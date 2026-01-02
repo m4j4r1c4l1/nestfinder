@@ -14,7 +14,8 @@ export default {
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
         send: 'Send Feedback',
-        charLimit: 'characters'
+        charLimit: 'characters',
+        rateApp: 'Rate the App'
     },
 
     // Navigation
@@ -208,7 +209,10 @@ export default {
         performance: 'Performance',
         liteMode: 'Lite Mode',
         liteModeDescription: 'Reduce animations for smoother performance',
-        scrollInstruction: '🌍 Scroll + Tap or wait 2s to confirm'
+        scrollInstruction: '🌍 Scroll + Tap or wait 2s to confirm',
+        spreadWarmth: 'Spread the warmth! 🐣',
+        yourProfile: 'Your Profile',
+        performance: 'Performance',
     },
 
     // Welcome Message

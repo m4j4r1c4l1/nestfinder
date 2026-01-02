@@ -886,7 +886,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                 className="btn btn-sm"
                                 style={{ background: '#22c55e', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
                             >
-                                <span style={{ color: '#60a5fa' }}>✓✓</span> Mark as Read
+                                <span style={{ color: 'white', fontWeight: 'bold' }}>✓✓</span> Mark as Read
                             </button>
                             <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}>🗑️ Delete ({selectedIds.length})</button>
                         </>
@@ -958,15 +958,17 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         {item.message.length > 50 ? item.message.substring(0, 50) + '...' : item.message}
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
-                                        <span style={{
-                                            padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem',
-                                            background: item.status === 'new' ? 'rgba(34, 197, 94, 0.15)' : item.status === 'reviewed' ? 'rgba(59, 130, 246, 0.15)' : item.status === 'resolved' ? 'var(--color-confirmed)' : '#475569',
-                                            color: item.status === 'new' ? '#22c55e' : item.status === 'reviewed' ? '#3b82f6' : 'white',
-                                            border: `1px solid ${item.status === 'new' ? '#22c55e' : item.status === 'reviewed' ? '#3b82f6' : 'transparent'}`,
-                                            fontWeight: 500
-                                        }}>
-                                            {item.status === 'new' ? <><span style={{ color: '#22c55e' }}>✓✓</span> PENDING</> : item.status === 'reviewed' ? <><span style={{ color: '#60a5fa' }}>✓✓</span> READ</> : item.status.toUpperCase()}
-                                        </span>
+                                        {item.status === 'new' ? (
+                                            <span style={{ color: '#22c55e', fontWeight: 500 }}>
+                                                <span style={{ fontSize: '0.9rem' }}>✓✓</span> Pending
+                                            </span>
+                                        ) : item.status === 'reviewed' ? (
+                                            <span style={{ color: '#3b82f6', fontWeight: 500 }}>
+                                                <span style={{ fontSize: '0.9rem' }}>✓✓</span> Read
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: '#8b5cf6', fontWeight: 500 }}>Resolved</span>
+                                        )}
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', textAlign: 'right' }} onClick={e => e.stopPropagation()}>
                                         <button onClick={() => onDelete(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
@@ -984,75 +986,61 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
             </div>
             {previewItem && (
                 <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.7)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    zIndex: 10000,
+                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(0,0,0,0.6)',
+                    backdropFilter: 'blur(5px)',
+                    zIndex: 9999,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: '1rem'
+                    animation: 'fadeIn 0.2s ease'
                 }} onClick={() => setPreviewItem(null)}>
                     <div style={{
+                        width: '90%', maxWidth: '400px',
                         background: '#1e293b',
-                        padding: '2rem',
-                        borderRadius: '16px',
-                        width: 'min(600px, 90vw)',
-                        border: '1px solid #334155',
-                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
-                        maxHeight: '90vh',
-                        overflowY: 'auto'
+                        borderRadius: '12px',
+                        padding: '0',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                        overflow: 'hidden',
+                        border: '1px solid #334155'
                     }} onClick={e => e.stopPropagation()}>
-                        {/* Header with Type Icon */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
-                            <div style={{
-                                fontSize: '2.5rem',
-                                flexShrink: 0,
-                                width: '60px',
-                                height: '60px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: previewItem.type === 'bug' ? 'rgba(239, 68, 68, 0.1)' : previewItem.type === 'suggestion' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(156, 163, 175, 0.1)',
-                                borderRadius: '12px',
-                                border: `2px solid ${previewItem.type === 'bug' ? '#ef4444' : previewItem.type === 'suggestion' ? '#3b82f6' : '#9ca3af'}`
-                            }}>
-                                {previewItem.type === 'bug' ? '🐛' : previewItem.type === 'suggestion' ? '💡' : '📝'}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                                <h3 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#f8fafc', fontSize: '1.5rem' }}>
-                                    {previewItem.type === 'bug' ? 'Bug Report' : previewItem.type === 'suggestion' ? 'Feature Suggestion' : 'Feedback'}
+
+                        {/* Header */}
+                        <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '1.2rem' }}>
+                                    {previewItem.type === 'bug' ? '🐛' : previewItem.type === 'suggestion' ? '💡' : '📝'}
+                                </span>
+                                <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0', textTransform: 'capitalize' }}>
+                                    {previewItem.type} Report
                                 </h3>
-                                <div style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
-                                    <span>👤 {previewItem.user_nickname || 'Anonymous'}</span>
-                                    <span>•</span>
-                                    <span>📅 {formatTimestamp24h(previewItem.created_at)}</span>
+                            </div>
+                            <button onClick={() => setPreviewItem(null)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+                        </div>
+
+                        {/* Body - styled like Notification Preview */}
+                        <div style={{ padding: '1.5rem', background: '#1e293b' }}>
+                            <div style={{
+                                padding: '12px',
+                                borderBottom: '1px solid #334155',
+                                background: '#334155',
+                                borderRadius: '8px',
+                                borderLeft: `4px solid ${previewItem.type === 'bug' ? '#ef4444' : previewItem.type === 'suggestion' ? '#3b82f6' : '#94a3b8'}`,
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                    <span style={{ fontWeight: 'bold', color: '#f1f5f9', fontSize: '1rem' }}>
+                                        {previewItem.user_nickname || 'Anonymous User'}
+                                    </span>
+                                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                        {formatTimestamp24h(previewItem.created_at)}
+                                    </span>
+                                </div>
+                                <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+                                    {previewItem.message}
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Message Content */}
-                        <div style={{
-                            background: '#0f172a',
-                            padding: '1.5rem',
-                            borderRadius: '12px',
-                            color: '#e2e8f0',
-                            lineHeight: 1.7,
-                            marginBottom: '1.5rem',
-                            fontSize: '1rem',
-                            boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.2)'
-                        }}>
-                            {previewItem.message}
-                        </div>
-
-                        {/* Actions */}
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                            <button
-                                onClick={() => setPreviewItem(null)}
-                                className="btn btn-secondary"
-                                style={{ padding: '0.75rem 1.5rem', borderRadius: '8px' }}
-                            >
-                                Close
-                            </button>
+                            <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#64748b' }}>
+                                Feedback ID: {previewItem.id}
+                            </div>
                         </div>
                     </div>
                 </div>
