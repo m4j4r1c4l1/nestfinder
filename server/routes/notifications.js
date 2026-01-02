@@ -294,3 +294,4 @@ router.get('/admin/notifications/history', requireAdmin, (req, res) => {
 });
 
 export default router;
+

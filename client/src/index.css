@@ -696,21 +696,20 @@ textarea.form-input {
 .bottom-nav-item::before {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  width: 50px;
-  /* Circle/Oval */
-  height: 50px;
-  background: rgba(255, 255, 255, 0.15);
-  /* White glow */
-  border-radius: 50%;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  transform: scale(0);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
   transition: transform 0.3s ease;
   z-index: -1;
 }
 
 .bottom-nav-item.active::before {
-  transform: translate(-50%, -50%) scale(1);
+  transform: scale(1);
 }
 
 .bottom-nav-item span {
