@@ -42,14 +42,28 @@ export default defineConfig({
                 navigateFallbackDenylist: [/^\/admin-panel/], // Don't intercept admin panel requests
                 runtimeCaching: [
                     {
+                        // OSM Tile caching - increased for offline areas
                         urlPattern: /^https:\/\/.*\.tile\.openstreetmap\.org\/.*/i,
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'osm-tiles',
                             expiration: {
-                                maxEntries: 500,
+                                maxEntries: 2000, // Increased for offline areas
                                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
                             }
+                        }
+                    },
+                    {
+                        // API Points caching - stale while revalidate for offline access
+                        urlPattern: /\/api\/points/i,
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'api-points',
+                            expiration: {
+                                maxEntries: 50,
+                                maxAgeSeconds: 60 * 60 * 24 // 24 hours
+                            },
+                            networkTimeoutSeconds: 3 // Fallback to cache if slow
                         }
                     }
                 ]
