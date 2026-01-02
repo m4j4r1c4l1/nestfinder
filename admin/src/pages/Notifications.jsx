@@ -6,7 +6,7 @@ import QRCode from 'qrcode';
 
 
 const API_URL = import.meta.env.VITE_API_URL || '';
-const APP_URL = 'https://nestfinder-sa1g.onrender.com';
+const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder/';
 
 // Notification templates
 const templates = {
