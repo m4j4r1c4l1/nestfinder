@@ -111,6 +111,10 @@ const Messages = () => {
     const [subscribers, setSubscribers] = useState([]);
     const [stats, setStats] = useState({ totalSubscribers: 0 });
 
+    // Pagination for Broadcasts
+    const [broadcastPage, setBroadcastPage] = useState(1);
+    const broadcastPageSize = 10;
+
     // Broadcast form
     const [newBroadcast, setNewBroadcast] = useState({
         message: '',
@@ -479,7 +483,7 @@ const Messages = () => {
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            {broadcasts.map(b => {
+                                            {broadcasts.slice((broadcastPage - 1) * broadcastPageSize, broadcastPage * broadcastPageSize).map(b => {
                                                 const now = new Date();
                                                 const start = new Date(b.start_time);
                                                 const end = new Date(b.end_time);
@@ -536,6 +540,13 @@ const Messages = () => {
                                         </div>
                                     )}
                                 </div>
+                                {Math.ceil(broadcasts.length / broadcastPageSize) > 1 && (
+                                    <PaginationControls
+                                        page={broadcastPage}
+                                        totalPages={Math.ceil(broadcasts.length / broadcastPageSize)}
+                                        setPage={setBroadcastPage}
+                                    />
+                                )}
                             </div>
                         </div>
                     )}
@@ -876,6 +887,10 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
 
+    // Pagination
+    const [page, setPage] = useState(1);
+    const pageSize = 20;
+
     // Resizable columns state
     // Resizable columns state
     const [columnWidths, setColumnWidths] = useState(() => {
@@ -1041,6 +1056,9 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
         }
     });
 
+    const totalPages = Math.ceil(sortedFeedback.length / pageSize);
+    const paginatedFeedback = sortedFeedback.slice((page - 1) * pageSize, page * pageSize);
+
     return (
         <div className="card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1132,7 +1150,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedFeedback.map(item => (
+
+                            {paginatedFeedback.map(item => (
                                 <tr
                                     key={item.id}
                                     style={{
@@ -1399,12 +1418,13 @@ const HistorySection = ({ users = [] }) => {
         return 0;
     });
 
+    const totalPages = Math.ceil(sortedLogs.length / pageSize);
+    const paginatedLogs = sortedLogs.slice((page - 1) * pageSize, page * pageSize);
+
     const handleSort = (column) => {
         setSortDirection(current => sortColumn === column && current === 'asc' ? 'desc' : 'asc');
         setSortColumn(column);
     };
-
-
 
     return (
         <div className="card">
@@ -1437,7 +1457,7 @@ const HistorySection = ({ users = [] }) => {
                 </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ height: 'auto', maxHeight: '65vh', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                <div style={{ height: 'auto', maxHeight: '65vh', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
@@ -1468,7 +1488,7 @@ const HistorySection = ({ users = [] }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedLogs.map(log => {
+                            {paginatedLogs.map(log => {
                                 const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
                                 let safeIso = log.created_at;
                                 if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
@@ -1556,6 +1576,7 @@ const HistorySection = ({ users = [] }) => {
                     </table>
                     {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
                 </div>
+                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
             </div>
 
             {selectedBatchId && (
@@ -1570,6 +1591,45 @@ const HistorySection = ({ users = [] }) => {
 };
 
 
+
+// --- REUSABLE PAGINATION COMPONENT ---
+const PaginationControls = ({ page, totalPages, setPage }) => (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+        <button
+            onClick={() => setPage(1)}
+            disabled={page <= 1}
+            style={{ background: 'none', border: 'none', color: page <= 1 ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page <= 1 ? 'default' : 'pointer', padding: '0.25rem' }}
+            title="First Page"
+        >
+            ◀◀
+        </button>
+        <button
+            onClick={() => setPage(p => p - 1)}
+            disabled={page <= 1}
+            style={{ background: 'none', border: 'none', color: page <= 1 ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page <= 1 ? 'default' : 'pointer', padding: '0.25rem' }}
+            title="Previous Page"
+        >
+            ◀
+        </button>
+        <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{page} / {totalPages}</span>
+        <button
+            onClick={() => setPage(p => p + 1)}
+            disabled={page >= totalPages}
+            style={{ background: 'none', border: 'none', color: page >= totalPages ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page >= totalPages ? 'default' : 'pointer', padding: '0.25rem' }}
+            title="Next Page"
+        >
+            ▶
+        </button>
+        <button
+            onClick={() => setPage(totalPages)}
+            disabled={page >= totalPages}
+            style={{ background: 'none', border: 'none', color: page >= totalPages ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page >= totalPages ? 'default' : 'pointer', padding: '0.25rem' }}
+            title="Last Page"
+        >
+            ▶▶
+        </button>
+    </div>
+);
 
 const ConfirmationModal = ({ title, message, onConfirm, onCancel }) => {
     return ReactDOM.createPortal(
