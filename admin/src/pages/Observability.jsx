@@ -66,7 +66,7 @@ const Observability = () => {
                 </div>
                 <div className="card-body">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        {/* Row 1: Users, Points, Rating, Dev */}
+                        {/* Row 1: Users, Points, Rating */}
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                             {/* Users Section */}
                             <div style={{ textAlign: 'center', padding: '0 1rem' }}>
@@ -74,7 +74,7 @@ const Observability = () => {
                                     {stats.totalSubscribers}
                                 </div>
                                 <div>
-                                    <div style={{ fontWeight: 600 }}>Total Users</div>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total Users</div>
                                     <div className="text-muted text-sm">Registered</div>
                                 </div>
                             </div>
@@ -90,7 +90,7 @@ const Observability = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
                                         <span style={{ fontSize: '0.9rem' }}>🟢</span>
                                         <div>
-                                            <div style={{ fontWeight: 600, lineHeight: 1 }}>Confirmed</div>
+                                            <div style={{ fontWeight: 600, lineHeight: 1, color: '#e2e8f0' }}>Confirmed</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
                                         </div>
                                     </div>
@@ -102,7 +102,19 @@ const Observability = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
                                         <span style={{ fontSize: '0.9rem' }}>🟠</span>
                                         <div>
-                                            <div style={{ fontWeight: 600, lineHeight: 1 }}>Pending</div>
+                                            <div style={{ fontWeight: 600, lineHeight: 1, color: '#e2e8f0' }}>Pending</div>
+                                            <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
+                                        {stats.mapPoints?.deactivated || 0}
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                                        <span style={{ fontSize: '0.9rem' }}>🔴</span>
+                                        <div>
+                                            <div style={{ fontWeight: 600, lineHeight: 1, color: '#e2e8f0' }}>Deactivated</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
                                         </div>
                                     </div>
@@ -118,7 +130,7 @@ const Observability = () => {
                                         {stats.avgRating ? stats.avgRating.toFixed(1) : '-'} ⭐
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: 600 }}>Avg Rating</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Avg Rating</div>
                                         <div className="text-muted text-sm">All time</div>
                                     </div>
                                 </div>
@@ -127,28 +139,8 @@ const Observability = () => {
                                         {stats.totalRatings || 0}
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: 600 }}>Votes</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Votes</div>
                                         <div className="text-muted text-sm">Total</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style={{ width: '1px', height: '50px', background: '#334155' }} />
-
-                            {/* Dev Metrics (Kept but compacted) */}
-                            <div style={{ textAlign: 'center', padding: '0 1rem', opacity: 0.8 }}>
-                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#64748b' }}>{(stats.devMetrics?.loc || 0).toLocaleString()}</div>
-                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>LOC</div>
-                                    </div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#0ea5e9' }}>{(stats.devMetrics?.components || 0).toLocaleString()}</div>
-                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Comps</div>
-                                    </div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#8b5cf6' }}>{(stats.devMetrics?.commits || 0).toLocaleString()}</div>
-                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Commits</div>
                                     </div>
                                 </div>
                             </div>
@@ -157,57 +149,90 @@ const Observability = () => {
                         {/* Separator Line */}
                         <div style={{ height: '1px', background: '#334155', width: '100%' }} />
 
-                        {/* Row 2: Messages Section */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-                            {/* Row 2a: Sent */}
-                            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                                <div style={{ textAlign: 'center', minWidth: '80px' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
-                                        {stats.notificationMetrics?.total || 0}
+                        {/* Row 2: Messages (left) | Devel (right) */}
+                        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
+                            {/* Messages Block (Left) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem', marginBottom: '0.25rem' }}>📨 Messages</div>
+                                {/* Sent Row */}
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                            {stats.notificationMetrics?.total || 0}
+                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Sent</div>
                                     </div>
-                                    <div className="text-muted text-sm">Total Sent</div>
+                                    <div style={{ width: '1px', height: '30px', background: '#334155' }} />
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#22c55e' }}>
+                                            {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
+                                        </div>
+                                        <div className="text-muted text-sm">Delivered</div>
+                                    </div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                                            {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
+                                        </div>
+                                        <div className="text-muted text-sm">Read</div>
+                                    </div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                            {stats.notificationMetrics?.unread || 0}
+                                        </div>
+                                        <div className="text-muted text-sm">Unread</div>
+                                    </div>
                                 </div>
-                                <div style={{ width: '1px', height: '30px', background: '#334155' }} />
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#22c55e' }}>
-                                        {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
+                                {/* Received Row */}
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', borderTop: '1px solid #334155', paddingTop: '0.75rem' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                            {stats.feedbackMetrics?.total || stats.totalReceived || 0}
+                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Received</div>
                                     </div>
-                                    <div className="text-muted text-sm">Delivered</div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#3b82f6' }}>
-                                        {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
+                                    <div style={{ width: '1px', height: '30px', background: '#334155' }} />
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#22c55e' }}>
+                                            {stats.feedbackMetrics?.pending || 0}
+                                        </div>
+                                        <div className="text-muted text-sm">Pending</div>
                                     </div>
-                                    <div className="text-muted text-sm">Read</div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#f59e0b' }}>
-                                        {stats.notificationMetrics?.unread || 0}
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                                            {stats.feedbackMetrics?.read || 0}
+                                        </div>
+                                        <div className="text-muted text-sm">Read</div>
                                     </div>
-                                    <div className="text-muted text-sm">Unread</div>
                                 </div>
                             </div>
 
-                            {/* Row 2b: Received */}
-                            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', borderTop: '1px solid #334155', paddingTop: '1rem', width: '100%', justifyContent: 'center' }}>
-                                <div style={{ textAlign: 'center', minWidth: '80px' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
-                                        {stats.feedbackMetrics?.total || stats.totalReceived || 0}
+                            <div style={{ width: '1px', height: '80px', background: '#334155', alignSelf: 'center' }} />
+
+                            {/* Devel Block (Right) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem', marginBottom: '0.25rem' }}>🛠️ Development</div>
+                                <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#64748b' }}>
+                                            {(stats.devMetrics?.loc || 0).toLocaleString()}
+                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>LOC</div>
+                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Lines of Code</div>
                                     </div>
-                                    <div className="text-muted text-sm">Total Received</div>
-                                </div>
-                                <div style={{ width: '1px', height: '30px', background: '#334155' }} />
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#22c55e' }}>
-                                        {stats.feedbackMetrics?.pending || 0}
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0ea5e9' }}>
+                                            {(stats.devMetrics?.components || 0).toLocaleString()}
+                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
+                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>React/JSX</div>
                                     </div>
-                                    <div className="text-muted text-sm">Pending</div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#3b82f6' }}>
-                                        {stats.feedbackMetrics?.read || 0}
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                            {(stats.devMetrics?.commits || 0).toLocaleString()}
+                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
+                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Git History</div>
                                     </div>
-                                    <div className="text-muted text-sm">Read</div>
                                 </div>
                             </div>
                         </div>
