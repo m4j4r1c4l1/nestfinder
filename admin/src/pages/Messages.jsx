@@ -331,7 +331,7 @@ const Messages = () => {
                     {/* OUTBOX TAB */}
                     {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: '2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
                             <HistorySection users={subscribers} />
                         </div>
                     )}
@@ -1128,8 +1128,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     onCancel={() => setShowConfirmModal(false)}
                 />
             )}
-            <div className="card-body" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 0 }}>
-                <div style={{ flex: 1, overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
+                <div style={{ maxHeight: 'calc(100vh - 350px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
@@ -1459,7 +1459,7 @@ const HistorySection = ({ users = [] }) => {
     };
 
     return (
-        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>📜 Sent History</h3>
                 <div>
@@ -1488,8 +1488,8 @@ const HistorySection = ({ users = [] }) => {
                     <button onClick={loadHistory} className="btn btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
-            <div className="card-body" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 0 }}>
-                <div style={{ flex: 1, overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
+            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
+                <div style={{ maxHeight: 'calc(100vh - 350px)', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
