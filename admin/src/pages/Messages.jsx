@@ -747,15 +747,11 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                         <input type="text" className="form-input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL..." style={{ flex: 1 }} />
                         <label className="btn btn-secondary" style={{
                             cursor: 'pointer',
-                            padding: 0,
-                            width: '42px',
-                            minWidth: '42px',
-                            height: 'auto',
-                            display: 'flex',
+                            padding: '0.4rem 1.5rem',
+                            display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            borderRadius: '8px',
-                            alignSelf: 'stretch'
+                            borderRadius: '8px'
                         }}>
                             <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📂</span>
                             <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
@@ -942,7 +938,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     return (
         <div className="card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3>📥 Received Messages</h3>
+                <h3>📥 Received History</h3>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                     {selectedIds.length > 0 && (
                         <>
@@ -1634,7 +1630,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
     if (isFeedback) {
         // Feedback Header: [Icon] [Nickname]
         const typeIcon = message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝';
-        headerTitle = message.user_nickname || 'Anonymous';
+        headerTitle = message.user_nickname ? `@${message.user_nickname}` : 'Anonymous';
         headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIcon}</span>;
     } else {
         // Notification Header: Recipient or Bulk
@@ -1642,7 +1638,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
         // Logic fix: Only show "Bulk" if count > 1 or target is clearly 'all'.
         // Do NOT assume target_id format defines bulk/single status (e.g. 'Ioscompose' is a valid single user ID).
         const isBulk = (message.count > 1) || message.target === 'all';
-        headerTitle = isBulk ? 'Bulk Message' : (message.nickname || message.target_id || message.device_id?.substr(0, 8) || 'User');
+        headerTitle = isBulk ? 'Bulk Message' : ((message.nickname ? `@${message.nickname}` : null) || message.target_id || message.device_id?.substr(0, 8) || 'User');
     }
 
     // Border Color
