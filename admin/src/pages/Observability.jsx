@@ -13,14 +13,17 @@ const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder/';
 const Observability = () => {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
-        total: 0,
-        delivered: 0,
-        read: 0,
-        avgDeliveryTime: 0,
-        avgDeliveryTime: 0,
-        avgOpenTime: 0,
-        platformDistribution: { android: 0, ios: 0, web: 0 },
-        devMetrics: { commits: 0, components: 0, loc: 0, files: 0 }
+        totalUsers: 0,
+        activeUsers: 0,
+        totalReceived: 0,
+        avgDeliveryTime: '0ms',
+        systemHealth: 100,
+        uptime: '99.9%',
+        errorRate: '0.0%',
+        mapPoints: { total: 0, confirmed: 0, pending: 0, rejected: 0 },
+        notificationMetrics: { total: 0, sent: 0, delivered: 0, read: 0, unread: 0 },
+        feedbackMetrics: { total: 0, pending: 0, read: 0 },
+        devMetrics: { loc: 0, components: 0, commits: 0 }
     });
 
     const [activeTab, setActiveTab] = useState('notifications');
@@ -40,12 +43,16 @@ const Observability = () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                setStats(prev => ({ ...prev, ...data }));
+            if (!res.ok) {
+                throw new Error(`Server returned ${res.status} ${res.statusText}`);
             }
+
+            const data = await res.json();
+            // Merge with default structure to ensure no undefined access
+            setStats(prev => ({ ...prev, ...data }));
         } catch (err) {
-            console.error('Failed to load observability data:', err);
+            console.error('Failed to load observability stats:', err);
+            // We keep the default stats so the UI doesn't crash
         }
         setLoading(false);
     };
