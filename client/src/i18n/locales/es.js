@@ -185,6 +185,7 @@ export default {
         recoveryKey: 'Clave de Recuperación',
         recoveryKeyDescription: 'Guarda esta clave para restaurar tu identidad en otro dispositivo.',
         generateKey: 'Generar Clave de Recuperación',
+        showKey: 'Mostrar Clave de Recuperación',
         copyKey: 'Copiar Clave',
         copied: '¡Copiado!',
         keyGenerated: '¡Clave Generada y Copiada!',
@@ -192,7 +193,13 @@ export default {
         liteMode: 'Modo Ligero',
         liteModeDescription: 'Reduce animaciones para un rendimiento más fluido',
         scrollInstruction: '🌍 Desplaza + Toca o espera 2s para confirmar',
-        spreadWarmth: '¡Comparte el calor! 🐣'
+        spreadWarmth: '¡Comparte el calor! 🐣',
+        trustScore: 'Puntuación de Confianza',
+        anonymousUser: 'Usuario',
+        statusHatchling: 'Polluelo',
+        statusSparrow: 'Gorrión',
+        statusOwl: 'Búho',
+        statusEagle: 'Águila'
     },
 
     // Welcome Message

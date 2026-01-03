@@ -151,6 +151,7 @@ export default {
         recoveryKey: '恢复密钥',
         recoveryKeyDescription: '保存此密钥以在新设备上恢复您的身份。',
         generateKey: '生成恢复密钥',
+        showKey: '显示恢复密钥',
         copyKey: '复制密钥',
         copied: '已复制!',
         keyGenerated: '密钥已生成并复制!',
@@ -158,7 +159,13 @@ export default {
         liteMode: '精简模式',
         liteModeDescription: '减少动画以获得更流畅的性能',
         scrollInstruction: '🌍 滚动 + 点击或等待2秒确认',
-        spreadWarmth: '传递温暖! 🐣'
+        spreadWarmth: '传递温暖! 🐣',
+        trustScore: '信任评分',
+        anonymousUser: '用户',
+        statusHatchling: '雏鸟',
+        statusSparrow: '麻雀',
+        statusOwl: '猫头鹰',
+        statusEagle: '老鹰'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

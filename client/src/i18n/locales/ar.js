@@ -152,6 +152,7 @@ export default {
         recoveryKey: 'مفتاح الاسترداد',
         recoveryKeyDescription: 'احفظ هذا المفتاح لاستعادة هويتك على جهاز جديد.',
         generateKey: 'إنشاء مفتاح الاسترداد',
+        showKey: 'عرض مفتاح الاسترداد',
         copyKey: 'نسخ المفتاح',
         copied: 'تم النسخ!',
         keyGenerated: 'تم إنشاء المفتاح ونسخه!',
@@ -159,7 +160,13 @@ export default {
         liteMode: 'الوضع الخفيف',
         liteModeDescription: 'تقليل الرسوم المتحركة لأداء أكثر سلاسة',
         scrollInstruction: '🌍 مرر + انقر أو انتظر 2 ثانية للتأكيد',
-        spreadWarmth: 'انشر الدفء! 🐣'
+        spreadWarmth: 'انشر الدفء! 🐣',
+        trustScore: 'نقاط الثقة',
+        anonymousUser: 'مستخدم',
+        statusHatchling: 'فرخ',
+        statusSparrow: 'عصفور',
+        statusOwl: 'بومة',
+        statusEagle: 'نسر'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

@@ -151,6 +151,7 @@ export default {
         recoveryKey: 'Clau de Recuperació',
         recoveryKeyDescription: 'Guarda esta clau per a restaurar la teua identitat en un nou dispositiu.',
         generateKey: 'Generar Clau de Recuperació',
+        showKey: 'Mostrar Clau de Recuperació',
         copyKey: 'Copiar Clau',
         copied: 'Copiat!',
         keyGenerated: 'Clau Generada i Copiada!',
@@ -158,7 +159,13 @@ export default {
         liteMode: 'Mode Lleuger',
         liteModeDescription: 'Redueix animacions per a un rendiment més fluid',
         scrollInstruction: '🌍 Desplaça + Toca o espera 2s per confirmar',
-        spreadWarmth: 'Comparteix la calor! 🐣'
+        spreadWarmth: 'Comparteix la calor! 🐣',
+        trustScore: 'Puntuació de Confiança',
+        anonymousUser: 'Usuari',
+        statusHatchling: 'Pollet',
+        statusSparrow: 'Pardal',
+        statusOwl: 'Mussol',
+        statusEagle: 'Àguila'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
