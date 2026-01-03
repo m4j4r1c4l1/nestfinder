@@ -1128,10 +1128,14 @@ const HistorySection = ({ users = [] }) => {
         const date = new Date(safeIso);
 
         const rawId = log.target_id;
-        let foundUser = users.find(u => u.id === rawId);
+
+        // Fix: Check both 'id' and 'user_id' properties since subscribers list uses user_id
+        let foundUser = users.find(u => (u.id === rawId || u.user_id === rawId));
+
         if (!foundUser && rawId && !rawId.startsWith('user_')) {
-            foundUser = users.find(u => u.id === `user_${rawId}`);
+            foundUser = users.find(u => (u.id === `user_${rawId}` || u.user_id === `user_${rawId}`));
         }
+
         const resolvedNickname = foundUser ? foundUser.nickname : (log.target_id || 'User');
 
         setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
