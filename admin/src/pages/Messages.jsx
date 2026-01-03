@@ -1761,7 +1761,7 @@ const DetailModal = ({ batchId, onClose }) => {
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Sent</th>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Received</th>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Read</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Status</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1780,8 +1780,8 @@ const DetailModal = ({ batchId, onClose }) => {
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                 <DateTimeCell isoString={msg.read_at} />
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <div style={{ width: '40px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center', marginRight: '8px' }}>
                                                         {msg.read ? (
                                                             <span style={{ color: '#3b82f6', transform: 'translateX(-2px)' }}>✓✓</span>
