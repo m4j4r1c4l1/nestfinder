@@ -1127,7 +1127,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                 />
             )}
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
-                <div style={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                <div style={{ maxHeight: 'calc(100vh - 330px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
@@ -1248,8 +1248,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
 
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', background: 'rgba(30, 41, 59, 0.5)' }} onClick={e => e.stopPropagation()}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', paddingRight: '1rem' }}>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
                                                 style={{
@@ -1461,17 +1461,18 @@ const HistorySection = ({ users = [] }) => {
 
     return (
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
                 <h3>📜 Sent History</h3>
+                <span style={{
+                    position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
+                    background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
+                    borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
+                    userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '170px'
+                }}>
+                    Total: {logs.length}
+                </span>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{
-                        background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
-                        borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.5rem',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '170px'
-                    }}>
-                        Total: {logs.length}
-                    </span>
                     <button
                         onClick={async () => {
                             if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?\nThis will remove all records of sent notifications from this list.')) return;
@@ -1498,7 +1499,7 @@ const HistorySection = ({ users = [] }) => {
                 </div>
             </div>
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
-                <div style={{ maxHeight: 'calc(100vh - 280px)', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
+                <div style={{ maxHeight: 'calc(100vh - 330px)', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
