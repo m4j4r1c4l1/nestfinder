@@ -1020,19 +1020,26 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
                                         <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
                                     </td>
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', color: '#94a3b8', fontSize: '0.85rem' }}>
-                                        {formatTimestamp24h(item.created_at)}
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2 }}>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>
+                                                {new Date(item.created_at).toLocaleDateString()}
+                                            </span>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                                {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500 }}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500 }}>
                                         {item.user_nickname || 'Anonymous'}
                                         <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id ? item.user_id.substr(0, 8) + '...' : ''}</div>
                                     </td>
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                         <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>
                                             {item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}
                                         </span>
                                     </td>
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                         <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                             {item.message}
                                         </div>
@@ -1230,13 +1237,13 @@ const HistorySection = () => {
                                         </td>
                                         <td
                                             style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date })}
+                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id })}
                                         >
                                             <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
                                         </td>
                                         <td
                                             style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date })}
+                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id })}
                                         >
                                             <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                                                 {meta.body ? (meta.body.length > 55 ? meta.body.substring(0, 55) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
