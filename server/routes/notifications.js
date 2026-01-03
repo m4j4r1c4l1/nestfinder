@@ -4,6 +4,10 @@ import { requireAdmin } from '../middleware/auth.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -165,20 +169,31 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         const rootDir = path.resolve(__dirname, '../../'); // Project root
 
         try {
-            // 1. Commits - Fetch from GitHub API using contributors endpoint
+            // 1. Commits - Hybrid Approach (Local Git -> GitHub API)
             try {
-                const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/contributors?per_page=100', {
-                    headers: { 'User-Agent': 'nestfinder-admin' }
-                });
-                if (response.ok) {
-                    const contributors = await response.json();
-                    if (Array.isArray(contributors)) {
-                        // Sum up all contributor commits
-                        devMetrics.commits = contributors.reduce((sum, c) => sum + (c.contributions || 0), 0);
+                // Try local git first (fastest, most accurate for dev)
+                const { stdout } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
+                devMetrics.commits = parseInt(stdout.trim(), 10);
+            } catch (gitErr) {
+                // Fallback to GitHub API (standard Link header method for Render/Remote)
+                try {
+                    const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', {
+                        headers: { 'User-Agent': 'nestfinder-admin' }
+                    });
+                    if (response.ok) {
+                        const linkHeader = response.headers.get('Link');
+                        if (linkHeader) {
+                            const match = linkHeader.match(/page=(\d+)>; rel="last"/);
+                            if (match) devMetrics.commits = parseInt(match[1], 10);
+                        }
+                        if (!devMetrics.commits) {
+                            const data = await response.json();
+                            devMetrics.commits = Array.isArray(data) ? data.length : 0;
+                        }
                     }
+                } catch (apiErr) {
+                    console.error('Commit count failed:', apiErr.message);
                 }
-            } catch (e) {
-                console.error('GitHub API commit count failed:', e.message);
             }
 
             // 2. Code Stats

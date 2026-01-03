@@ -1460,7 +1460,7 @@ const HistorySection = ({ users = [] }) => {
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>📜 Sent History</h3>
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                     <button
                         onClick={async () => {
                             if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?\nThis will remove all records of sent notifications from this list.')) return;
