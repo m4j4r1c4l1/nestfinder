@@ -1265,23 +1265,6 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                             </button>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '0.5rem 0', verticalAlign: 'middle', textAlign: 'center', background: '#334155', width: '120px' }} onClick={e => e.stopPropagation()}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
-                                                style={{
-                                                    background: 'none', border: 'none', cursor: 'pointer',
-                                                    fontSize: '1.2rem', opacity: 0.8, transition: 'opacity 0.2s', padding: '4px',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }}
-                                                onMouseEnter={e => e.target.style.opacity = 1}
-                                                onMouseLeave={e => e.target.style.opacity = 0.8}
-                                                title="Delete"
-                                            >
-                                                🗑️
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>
