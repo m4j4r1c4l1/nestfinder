@@ -67,78 +67,72 @@ const Observability = () => {
                 <div className="card-body">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         {/* Row 1: Users, Points, Rating */}
-                        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                            {/* Users Section */}
-                            <div style={{ textAlign: 'center', padding: '0 1rem' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
-                                    {stats.totalSubscribers}
-                                </div>
-                                <div>
-                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total Users</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
+                            {/* Users Block */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>👥 Users</div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
+                                        {stats.totalSubscribers}
+                                    </div>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                     <div className="text-muted text-sm">Registered</div>
                                 </div>
                             </div>
 
-                            <div style={{ width: '1px', height: '50px', background: '#334155' }} />
+                            <div style={{ width: '1px', height: '70px', background: '#334155', alignSelf: 'center' }} />
 
-                            {/* Map Points Section */}
-                            <div style={{ display: 'flex', gap: '1.5rem' }}>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>
-                                        {stats.mapPoints?.confirmed || 0}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
-                                        <span style={{ fontSize: '0.9rem' }}>🟢</span>
-                                        <div>
-                                            <div style={{ fontWeight: 600, lineHeight: 1, color: '#e2e8f0' }}>Confirmed</div>
-                                            <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
+                            {/* Points Block */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>📍 Points</div>
+                                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>
+                                            {stats.mapPoints?.confirmed || 0}
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                                            <span style={{ fontSize: '0.9rem' }}>🟢</span>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Confirmed</div>
                                         </div>
                                     </div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
-                                        {stats.mapPoints?.pending || 0}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
-                                        <span style={{ fontSize: '0.9rem' }}>🟠</span>
-                                        <div>
-                                            <div style={{ fontWeight: 600, lineHeight: 1, color: '#e2e8f0' }}>Pending</div>
-                                            <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                            {stats.mapPoints?.pending || 0}
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                                            <span style={{ fontSize: '0.9rem' }}>🟠</span>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Pending</div>
                                         </div>
                                     </div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
-                                        {stats.mapPoints?.deactivated || 0}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
-                                        <span style={{ fontSize: '0.9rem' }}>🔴</span>
-                                        <div>
-                                            <div style={{ fontWeight: 600, lineHeight: 1, color: '#e2e8f0' }}>Deactivated</div>
-                                            <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
+                                            {stats.mapPoints?.deactivated || 0}
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                                            <span style={{ fontSize: '0.9rem' }}>🔴</span>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Deactivated</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style={{ width: '1px', height: '50px', background: '#334155' }} />
+                            <div style={{ width: '1px', height: '70px', background: '#334155', alignSelf: 'center' }} />
 
-                            {/* Ratings Section */}
-                            <div style={{ display: 'flex', gap: '1.5rem' }}>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
-                                        {stats.avgRating ? stats.avgRating.toFixed(1) : '-'} ⭐
-                                    </div>
-                                    <div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Avg Rating</div>
+                            {/* Rating Block */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>⭐ Rating</div>
+                                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
+                                            {stats.avgRating ? stats.avgRating.toFixed(1) : '-'}
+                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Average</div>
                                         <div className="text-muted text-sm">All time</div>
                                     </div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-                                        {stats.totalRatings || 0}
-                                    </div>
-                                    <div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+                                            {stats.totalRatings || 0}
+                                        </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Votes</div>
                                         <div className="text-muted text-sm">Total</div>
                                     </div>
@@ -153,7 +147,7 @@ const Observability = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
                             {/* Messages Block (Left) */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem', marginBottom: '0.25rem' }}>📨 Messages</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>📨 Messages</div>
                                 {/* Sent Row */}
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
@@ -210,7 +204,7 @@ const Observability = () => {
 
                             {/* Devel Block (Right) */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem', marginBottom: '0.25rem' }}>🛠️ Development</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>🛠️ Development</div>
                                 <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#64748b' }}>

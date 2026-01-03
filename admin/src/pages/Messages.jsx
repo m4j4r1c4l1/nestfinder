@@ -249,6 +249,7 @@ const Messages = () => {
                             borderRadius: '8px',
                             cursor: 'pointer',
                             fontWeight: 500,
+                            fontSize: '1.1rem',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
@@ -310,14 +311,14 @@ const Messages = () => {
                     {/* OUTBOX TAB */}
                     {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
                             <HistorySection users={subscribers} />
                         </div>
                     )}
 
                     {/* RECEIVED (FEEDBACK) TAB */}
                     {activeTab === 'feedback' && (
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
                             <FeedbackSection
                                 feedback={feedback}
                                 onUpdate={fetchData}
@@ -1067,7 +1068,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const paginatedFeedback = sortedFeedback.slice((page - 1) * pageSize, page * pageSize);
 
     return (
-        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>💬 Received History</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -1438,7 +1439,7 @@ const HistorySection = ({ users = [] }) => {
     };
 
     return (
-        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>📜 Sent History</h3>
                 <div>
