@@ -229,6 +229,44 @@ export const initDatabase = async () => {
     db.run("ALTER TABLE feedback ADD COLUMN rating INTEGER");
   } catch (e) { /* Column exists */ }
 
+  // Migration: Extract ratings from existing feedback messages and populate daily_ratings
+  // This runs safely multiple times (only processes messages without rating set)
+  const feedbackWithRatings = db.exec(`
+    SELECT id, message, created_at FROM feedback 
+    WHERE rating IS NULL AND message LIKE '%[Rating:%'
+  `);
+
+  if (feedbackWithRatings.length > 0 && feedbackWithRatings[0].values) {
+    feedbackWithRatings[0].values.forEach(row => {
+      const [id, message, createdAt] = row;
+      // Extract rating from message like "[Rating: 5/5 ⭐]"
+      const match = message.match(/\[Rating:\s*(\d)\/5/);
+      if (match) {
+        const rating = parseInt(match[1]);
+        if (rating >= 1 && rating <= 5) {
+          // Update the feedback record
+          db.run("UPDATE feedback SET rating = ? WHERE id = ?", [rating, id]);
+
+          // Extract date from created_at (YYYY-MM-DD)
+          const dateStr = createdAt.split(' ')[0].split('T')[0];
+          const ratingCol = `rating_${rating}`;
+
+          // Upsert into daily_ratings
+          db.run(`
+            INSERT INTO daily_ratings (date, total_ratings, rating_sum, ${ratingCol})
+            VALUES (?, 1, ?, 1)
+            ON CONFLICT(date) DO UPDATE SET
+              total_ratings = total_ratings + 1,
+              rating_sum = rating_sum + ?,
+              ${ratingCol} = ${ratingCol} + 1
+          `, [dateStr, rating, rating]);
+        }
+      }
+    });
+    saveDatabase();
+    console.log('Migrated existing ratings from feedback messages');
+  }
+
   // Insert default settings if not exists
   const defaultSettings = [
     { key: 'confirmations_required', value: '1' },

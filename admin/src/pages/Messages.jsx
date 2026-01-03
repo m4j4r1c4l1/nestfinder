@@ -921,6 +921,9 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
         } else if (sortColumn === 'type') {
             aVal = a.type.toLowerCase();
             bVal = b.type.toLowerCase();
+        } else if (sortColumn === 'rating') {
+            aVal = a.rating || 0;
+            bVal = b.rating || 0;
         } else {
             return 0;
         }
@@ -1003,8 +1006,14 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                 >
                                     Type {sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                 </th>
+                                <th
+                                    onClick={() => { setSortColumn('rating'); setSortDirection(d => sortColumn === 'rating' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                    style={{ padding: '0.75rem 1rem', width: '100px', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    Rating {sortColumn === 'rating' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
 
-                                <th style={{ padding: '0.75rem 1rem', width: '45%', textAlign: 'left' }}>Message</th>
+                                <th style={{ padding: '0.75rem 1rem', width: '40%', textAlign: 'left' }}>Message</th>
                                 <th style={{ padding: '0.75rem 1rem', width: '40px' }}></th>
                             </tr>
                         </thead>
@@ -1057,6 +1066,22 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>
                                             {item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}
                                         </span>
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                                <span
+                                                    key={star}
+                                                    style={{
+                                                        fontSize: '0.9rem',
+                                                        filter: item.rating && star <= item.rating ? 'none' : 'grayscale(100%) opacity(0.3)',
+                                                        transition: 'filter 0.2s'
+                                                    }}
+                                                >
+                                                    ⭐
+                                                </span>
+                                            ))}
+                                        </div>
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                         <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
