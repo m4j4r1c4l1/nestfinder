@@ -1134,7 +1134,7 @@ const HistorySection = ({ users = [] }) => {
                     const data = await res.json();
                     if (data.messages && data.messages.length > 0) {
                         // We found the user!
-                        resolvedNickname = data.messages[0].nickname || 'User';
+                        resolvedNickname = data.messages[0].nickname || 'Anonymous';
                     }
                 }
             } catch (err) {
