@@ -171,7 +171,7 @@ const App = () => {
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '🐥' },
         { id: 'observability', label: 'Observability', icon: '🐦' },
-        { id: 'messages', label: 'Messages', icon: '🪶' },
+        { id: 'messages', label: 'Messages', icon: '🔔' },
         { id: 'logs', label: 'Activity Logs', icon: '🥚' },
         { id: 'settings', label: 'Settings', icon: '🦉' }
     ];
@@ -242,7 +242,7 @@ const App = () => {
                                 textAlign: 'left'
                             }}
                         >
-                            <span>{item.icon}</span>
+                            <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{item.icon}</span>
                             {item.label}
                         </button>
                     ))}
@@ -265,7 +265,7 @@ const App = () => {
                         fontSize: '0.9rem'
                     }}
                 >
-                    <span>🚪</span>
+                    <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🚪</span>
                     Logout
                 </button>
             </aside>

@@ -1127,7 +1127,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                 />
             )}
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
-                <div style={{ maxHeight: 'calc(100vh - 350px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                <div style={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
@@ -1249,18 +1249,21 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     </td>
 
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
-                                            style={{
-                                                background: 'none', border: 'none', cursor: 'pointer',
-                                                fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.2s', padding: '4px'
-                                            }}
-                                            onMouseEnter={e => e.target.style.opacity = 1}
-                                            onMouseLeave={e => e.target.style.opacity = 0.6}
-                                            title="Delete"
-                                        >
-                                            🗑️
-                                        </button>
+                                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
+                                                style={{
+                                                    background: 'none', border: 'none', cursor: 'pointer',
+                                                    fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.2s', padding: '4px',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }}
+                                                onMouseEnter={e => e.target.style.opacity = 1}
+                                                onMouseLeave={e => e.target.style.opacity = 0.6}
+                                                title="Delete"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -1464,7 +1467,7 @@ const HistorySection = ({ users = [] }) => {
                     <span style={{
                         background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
                         borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.5rem',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '34px', cursor: 'default',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
                         userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '170px'
                     }}>
                         Total: {logs.length}
@@ -1486,16 +1489,16 @@ const HistorySection = ({ users = [] }) => {
                             } catch (err) { alert('Cleanup failed: ' + err.message); }
                         }}
                         className="btn btn-sm btn-danger"
-                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}
+                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px' }}
                         title="Delete all sent history logs"
                     >
                         🗑️ Clear History
                     </button>
-                    <button onClick={loadHistory} className="btn btn-secondary" style={{ width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🔄 Refresh</button>
+                    <button onClick={loadHistory} className="btn btn-secondary btn-sm" style={{ width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px' }}>🔄 Refresh</button>
                 </div>
             </div>
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
-                <div style={{ maxHeight: 'calc(100vh - 350px)', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
+                <div style={{ maxHeight: 'calc(100vh - 280px)', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
