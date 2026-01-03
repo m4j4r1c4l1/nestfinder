@@ -312,7 +312,7 @@ const Messages = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
-                    padding: '0 1.5rem 1.5rem 1.5rem'
+                    padding: '1rem 1rem 1.5rem 1rem'
                 }}>
 
                     {/* COMPOSER TAB */}
@@ -1248,7 +1248,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
 
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', paddingRight: '2.5rem' }} onClick={e => e.stopPropagation()}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
                                             style={{
@@ -1464,7 +1464,7 @@ const HistorySection = ({ users = [] }) => {
                     <span style={{
                         background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
                         borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.5rem',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '34px', cursor: 'default',
                         userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '170px'
                     }}>
                         Total: {logs.length}
@@ -1565,7 +1565,7 @@ const HistorySection = ({ users = [] }) => {
                                             onClick={() => handlePreview(log)}
                                         >
                                             <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                                                {meta.body ? (meta.body.length > 55 ? meta.body.substring(0, 55) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
+                                                {meta.body ? (meta.body.length > 45 ? meta.body.substring(0, 45) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
                                             </div>
                                         </td>
                                         <td
