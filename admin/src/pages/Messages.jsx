@@ -282,7 +282,7 @@ const Messages = () => {
                     {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
                         <div>
-                            <HistorySection />
+                            <HistorySection users={subscribers} />
                         </div>
                     )}
 
@@ -1120,6 +1120,23 @@ const HistorySection = ({ users = [] }) => {
         setLoading(false);
     };
 
+    const handlePreview = (log) => {
+        const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
+        let safeIso = log.created_at;
+        if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
+        if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) { safeIso += 'Z'; }
+        const date = new Date(safeIso);
+
+        const rawId = log.target_id;
+        let foundUser = users.find(u => u.id === rawId);
+        if (!foundUser && rawId && !rawId.startsWith('user_')) {
+            foundUser = users.find(u => u.id === `user_${rawId}`);
+        }
+        const resolvedNickname = foundUser ? foundUser.nickname : (log.target_id || 'User');
+
+        setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
+    };
+
     const sortedLogs = [...logs].sort((a, b) => {
         const parseMeta = (item) => typeof item.metadata === 'string' ? JSON.parse(item.metadata || '{}') : (item.metadata || {});
 
@@ -1231,7 +1248,10 @@ const HistorySection = ({ users = [] }) => {
                                         onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)'}
                                         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                     >
-                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                        <td
+                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                            onClick={() => handlePreview(log)}
+                                        >
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
                                                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
@@ -1239,34 +1259,13 @@ const HistorySection = ({ users = [] }) => {
                                         </td>
                                         <td
                                             style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => {
-                                                const rawId = log.target_id;
-                                                // DEBUG LOOKUP FAILURE
-                                                console.log('Resolving Nickname for:', rawId, '| Users available:', users.length);
-                                                if (users.length > 0) console.log('Sample User ID:', users[0].id);
-
-                                                let foundUser = users.find(u => u.id === rawId);
-                                                if (!foundUser && rawId && !rawId.startsWith('user_')) {
-                                                    foundUser = users.find(u => u.id === `user_${rawId}`);
-                                                }
-                                                const resolvedNickname = foundUser ? foundUser.nickname : (log.target_id || 'User');
-
-                                                setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
-                                            }}
+                                            onClick={() => handlePreview(log)}
                                         >
                                             <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
                                         </td>
                                         <td
                                             style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => {
-                                                const rawId = log.target_id;
-                                                let foundUser = users.find(u => u.id === rawId);
-                                                if (!foundUser && rawId && !rawId.startsWith('user_')) {
-                                                    foundUser = users.find(u => u.id === `user_${rawId}`);
-                                                }
-                                                const resolvedNickname = foundUser ? foundUser.nickname : (log.target_id || 'User');
-                                                setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
-                                            }}
+                                            onClick={() => handlePreview(log)}
                                         >
                                             <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                                                 {meta.body ? (meta.body.length > 55 ? meta.body.substring(0, 55) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
