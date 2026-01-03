@@ -11,6 +11,53 @@ const Logs = () => {
     const [sortColumn, setSortColumn] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
 
+    // Resizable columns state
+    const [columnWidths, setColumnWidths] = useState({
+        time: 140,
+        action: 180,
+        user: 200,
+        details: null // flex
+    });
+    const [resizing, setResizing] = useState(null);
+    const [startX, setStartX] = useState(0);
+    const [startWidth, setStartWidth] = useState(0);
+
+    const handleResizeStart = (e, column) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setResizing(column);
+        setStartX(e.clientX);
+        setStartWidth(columnWidths[column] || 100);
+    };
+
+    useEffect(() => {
+        if (!resizing) return;
+        const handleMouseMove = (e) => {
+            const diff = e.clientX - startX;
+            const newWidth = Math.max(40, startWidth + diff);
+            setColumnWidths(prev => ({ ...prev, [resizing]: newWidth }));
+        };
+        const handleMouseUp = () => setResizing(null);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [resizing, startX, startWidth]);
+
+    const ResizeHandle = ({ column }) => (
+        <div
+            onMouseDown={(e) => handleResizeStart(e, column)}
+            style={{
+                position: 'absolute', right: 0, top: 0, bottom: 0, width: '5px',
+                cursor: 'col-resize', background: resizing === column ? '#3b82f6' : 'transparent', transition: 'background 0.1s'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#3b82f6'}
+            onMouseLeave={(e) => { if (resizing !== column) e.target.style.background = 'transparent'; }}
+        />
+    );
+
     // Helper to get matching colors for actions (Vibrant Warm Palette)
     // Returns solid RGB values for text/border
     const getActionBaseColor = (action) => {
@@ -160,28 +207,31 @@ const Logs = () => {
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
                 <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1, maxHeight: 'calc(100vh - 140px)' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
                                 <th
                                     onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'desc'); }}
-                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', minWidth: '170px' }}
+                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.time, position: 'relative' }}
                                 >
                                     Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="time" />
                                 </th>
                                 <th
                                     onClick={() => { setSortColumn('action'); setSortDirection(d => sortColumn === 'action' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.action, position: 'relative' }}
                                 >
                                     Action {sortColumn === 'action' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="action" />
                                 </th>
                                 <th
                                     onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, cursor: 'pointer', userSelect: 'none' }}
+                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, cursor: 'pointer', userSelect: 'none', width: columnWidths.user, position: 'relative' }}
                                 >
                                     User {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="user" />
                                 </th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Details</th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, position: 'relative' }}>Details</th>
                             </tr>
                         </thead>
                         <tbody>

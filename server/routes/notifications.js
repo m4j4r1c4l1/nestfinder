@@ -127,6 +127,11 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
         // Get feedback count
         const feedbackCount = get('SELECT COUNT(*) as count FROM feedback');
 
+        // Get map point counts by status
+        const confirmedPoints = get('SELECT COUNT(*) as count FROM points WHERE status = ?', ['confirmed']);
+        const pendingPoints = get('SELECT COUNT(*) as count FROM points WHERE status = ?', ['pending']);
+        const deactivatedPoints = get('SELECT COUNT(*) as count FROM points WHERE status = ?', ['deactivated']);
+
         // List recent active users
         const users = all(`
             SELECT id as user_id, nickname, created_at, last_active
@@ -144,7 +149,12 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
             },
             avgRating: avgRating,
             totalRatings: ratingStats?.totalRatings || 0,
-            totalReceived: feedbackCount?.count || 0
+            totalReceived: feedbackCount?.count || 0,
+            mapPoints: {
+                confirmed: confirmedPoints?.count || 0,
+                pending: pendingPoints?.count || 0,
+                deactivated: deactivatedPoints?.count || 0
+            }
         });
     } catch (error) {
         console.error('Stats error:', error);
