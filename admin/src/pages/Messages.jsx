@@ -1008,7 +1008,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         cursor: 'pointer',
                                         transition: 'background 0.2s'
                                     }}
-                                    onClick={() => setPreviewItem(item)}
+                                    onClick={() => handleRowClick(item)}
                                 >
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
                                         <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
@@ -1024,19 +1024,20 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        {item.status === 'new' ? (
-                                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                                <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
-                                                <span style={{ color: '#94a3b8', fontWeight: 500, fontSize: '0.8rem' }}>Pending</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <div style={{ width: '30px', fontSize: '1rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
+                                                {item.status === 'new' ? (
+                                                    <span style={{ color: '#22c55e' }}>✓✓</span>
+                                                ) : item.status === 'reviewed' ? (
+                                                    <span style={{ color: '#3b82f6' }}>✓✓</span>
+                                                ) : (
+                                                    <span style={{ color: '#8b5cf6' }}>✓✓</span>
+                                                )}
+                                            </div>
+                                            <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#94a3b8', width: '55px', textAlign: 'left' }}>
+                                                {item.status === 'new' ? 'Pending' : item.status === 'reviewed' ? 'Read' : 'Resolved'}
                                             </span>
-                                        ) : item.status === 'reviewed' ? (
-                                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                                <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
-                                                <span style={{ color: '#94a3b8', fontWeight: 500, fontSize: '0.8rem' }}>Read</span>
-                                            </span>
-                                        ) : (
-                                            <span style={{ color: '#8b5cf6', fontWeight: 500, fontSize: '0.8rem' }}>Resolved</span>
-                                        )}
+                                        </div>
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500, maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                         {item.user_nickname || 'Anonymous'}
