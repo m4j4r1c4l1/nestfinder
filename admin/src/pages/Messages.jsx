@@ -1172,7 +1172,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                 </th>
 
                                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left', position: 'relative' }}>Message</th>
-                                <th style={{ padding: '0.75rem 1rem', width: columnWidths.actions }}></th>
+                                <th style={{ padding: '0.75rem 1rem', width: '60px' }}></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1248,17 +1248,17 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
 
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', background: 'rgba(30, 41, 59, 0.5)' }} onClick={e => e.stopPropagation()}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', paddingRight: '1rem' }}>
+                                    <td style={{ padding: '0.5rem 0', verticalAlign: 'middle', textAlign: 'center', background: '#334155', width: '60px' }} onClick={e => e.stopPropagation()}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
                                                 style={{
                                                     background: 'none', border: 'none', cursor: 'pointer',
-                                                    fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.2s', padding: '4px',
+                                                    fontSize: '1.2rem', opacity: 0.8, transition: 'opacity 0.2s', padding: '4px',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                                                 }}
                                                 onMouseEnter={e => e.target.style.opacity = 1}
-                                                onMouseLeave={e => e.target.style.opacity = 0.6}
+                                                onMouseLeave={e => e.target.style.opacity = 0.8}
                                                 title="Delete"
                                             >
                                                 🗑️
