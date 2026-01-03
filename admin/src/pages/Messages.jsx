@@ -1004,11 +1004,11 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                 <h3>💬 Received History</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
-                        <span style={{ color: '#94a3b8', fontWeight: 500 }}>
-                            ✓✓ {feedback.filter(f => f.status === 'new').length} Pending
+                        <span style={{ fontWeight: 500 }}>
+                            <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => f.status === 'new').length} Pending</span>
                         </span>
-                        <span style={{ color: '#94a3b8', fontWeight: 500 }}>
-                            ✓✓ {feedback.filter(f => f.status === 'reviewed').length} Read
+                        <span style={{ fontWeight: 500 }}>
+                            <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => f.status === 'reviewed').length} Read</span>
                         </span>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -1200,6 +1200,54 @@ const HistorySection = ({ users = [] }) => {
     const [sortColumn, setSortColumn] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc');
 
+    // Resizable columns state
+    const [columnWidths, setColumnWidths] = useState({
+        timestamp: 130,
+        title: 200,
+        body: null, // flex
+        image: 80,
+        target: 120
+    });
+    const [resizing, setResizing] = useState(null);
+    const [startX, setStartX] = useState(0);
+    const [startWidth, setStartWidth] = useState(0);
+
+    const handleResizeStart = (e, column) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setResizing(column);
+        setStartX(e.clientX);
+        setStartWidth(columnWidths[column] || 100);
+    };
+
+    useEffect(() => {
+        if (!resizing) return;
+        const handleMouseMove = (e) => {
+            const diff = e.clientX - startX;
+            const newWidth = Math.max(40, startWidth + diff);
+            setColumnWidths(prev => ({ ...prev, [resizing]: newWidth }));
+        };
+        const handleMouseUp = () => setResizing(null);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [resizing, startX, startWidth]);
+
+    const ResizeHandle = ({ column }) => (
+        <div
+            onMouseDown={(e) => handleResizeStart(e, column)}
+            style={{
+                position: 'absolute', right: 0, top: 0, bottom: 0, width: '5px',
+                cursor: 'col-resize', background: resizing === column ? '#3b82f6' : 'transparent', transition: 'background 0.1s'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#3b82f6'}
+            onMouseLeave={(e) => { if (resizing !== column) e.target.style.background = 'transparent'; }}
+        />
+    );
+
     useEffect(() => {
         loadHistory();
         const interval = setInterval(loadHistory, 10000);
@@ -1325,23 +1373,27 @@ const HistorySection = ({ users = [] }) => {
             </div>
             <div className="card-body" style={{ padding: 0 }}>
                 <div style={{ height: '65vh', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                <th onClick={() => handleSort('created_at')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                <th onClick={() => handleSort('created_at')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.timestamp, position: 'relative' }}>
                                     Timestamp {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="timestamp" />
                                 </th>
-                                <th onClick={() => handleSort('title')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}>
+                                <th onClick={() => handleSort('title')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.title, position: 'relative' }}>
                                     Title {sortColumn === 'title' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="title" />
                                 </th>
-                                <th onClick={() => handleSort('body')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}>
+                                <th onClick={() => handleSort('body')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', position: 'relative' }}>
                                     Body {sortColumn === 'body' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                 </th>
-                                <th onClick={() => handleSort('image')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                <th onClick={() => handleSort('image')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.image, position: 'relative' }}>
                                     Image {sortColumn === 'image' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="image" />
                                 </th>
-                                <th onClick={() => handleSort('target')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                <th onClick={() => handleSort('target')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.target, position: 'relative' }}>
                                     Target {sortColumn === 'target' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="target" />
                                 </th>
                             </tr>
                         </thead>
