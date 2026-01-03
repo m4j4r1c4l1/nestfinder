@@ -1758,9 +1758,8 @@ const DetailModal = ({ batchId, onClose }) => {
                                 <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
                                     <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Message</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Template</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Delivered</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Sent</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Received</th>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Read</th>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Status</th>
                                     </tr>
@@ -1772,19 +1771,8 @@ const DetailModal = ({ batchId, onClose }) => {
                                                 <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Anonymous'}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#94a3b8' }}>
-                                                {msg.message && msg.message.length > 50 ? msg.message.substring(0, 50) + '...' : msg.message}
-                                            </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                                {(() => {
-                                                    const tInfo = getTemplateInfo(msg.template);
-                                                    return (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#e2e8f0', fontSize: '0.85rem' }}>
-                                                            <span>{tInfo.icon}</span>
-                                                            <span>{tInfo.name}</span>
-                                                        </div>
-                                                    );
-                                                })()}
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                <DateTimeCell isoString={msg.created_at || msg.timestamp} />
                                             </td>
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                 <DateTimeCell isoString={msg.delivered_at} />
