@@ -1248,13 +1248,12 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
 
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', paddingRight: '2.5rem' }} onClick={e => e.stopPropagation()}>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
                                             style={{
                                                 background: 'none', border: 'none', cursor: 'pointer',
-                                                fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.2s', padding: '4px',
-                                                display: 'inline-flex', justifyContent: 'center', alignItems: 'center'
+                                                fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.2s', padding: '4px'
                                             }}
                                             onMouseEnter={e => e.target.style.opacity = 1}
                                             onMouseLeave={e => e.target.style.opacity = 0.6}
@@ -1463,12 +1462,12 @@ const HistorySection = ({ users = [] }) => {
                 <h3>📜 Sent History</h3>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <span style={{
-                        background: '#22c55e', color: 'white', padding: '0 0.8rem',
-                        borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.5rem',
-                        display: 'flex', alignItems: 'center', height: '32px', cursor: 'default',
-                        userSelect: 'none'
+                        background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
+                        borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.5rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
+                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '130px'
                     }}>
-                        {logs.length} sent
+                        Total: {logs.length}
                     </span>
                     <button
                         onClick={async () => {
@@ -1487,12 +1486,12 @@ const HistorySection = ({ users = [] }) => {
                             } catch (err) { alert('Cleanup failed: ' + err.message); }
                         }}
                         className="btn btn-sm btn-danger"
-                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white' }}
+                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', width: '130px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         title="Delete all sent history logs"
                     >
                         🗑️ Clear History
                     </button>
-                    <button onClick={loadHistory} className="btn btn-secondary">🔄 Refresh</button>
+                    <button onClick={loadHistory} className="btn btn-secondary" style={{ width: '130px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🔄 Refresh</button>
                 </div>
             </div>
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
