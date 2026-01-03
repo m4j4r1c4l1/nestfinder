@@ -56,7 +56,7 @@ const Observability = () => {
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                     🐦 Metrics
                 </h1>
-                <p className="text-muted">Manage and track app notifications</p>
+                <p className="text-muted">Monitor system health, usage statistics, and developer insights</p>
             </div>
 
             {/* Totals Summary */}

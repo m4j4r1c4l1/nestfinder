@@ -217,7 +217,7 @@ const Settings = () => {
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem 2rem' }}>
+                            <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem 2rem', minWidth: '220px' }}>
                                 {saving ? 'Saving...' : 'Save Settings'}
                             </button>
                         </div>
@@ -266,7 +266,7 @@ const Settings = () => {
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-                            <button type="submit" className="btn btn-primary" disabled={saving}>
+                            <button type="submit" className="btn btn-primary" disabled={saving} style={{ minWidth: '220px' }}>
                                 {saving ? 'Saving...' : 'Update Rate Limits'}
                             </button>
                         </div>
@@ -281,7 +281,7 @@ const Settings = () => {
                                 <div style={{ fontWeight: 500 }}>Admin Password</div>
                                 <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Change your admin login password</div>
                             </div>
-                            <button className="btn" style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px' }} onClick={() => setShowPasswordChange(true)}>Change Password</button>
+                            <button className="btn" style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', minWidth: '220px' }} onClick={() => setShowPasswordChange(true)}>Change Password</button>
                         </div>
                     ) : (
                         <form onSubmit={handlePasswordChange}>
@@ -300,7 +300,7 @@ const Settings = () => {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button type="submit" className="btn btn-primary" disabled={changingPassword}>{changingPassword ? 'Changing...' : 'Update Password'}</button>
+                                <button type="submit" className="btn btn-primary" disabled={changingPassword} style={{ minWidth: '220px' }}>{changingPassword ? 'Changing...' : 'Update Password'}</button>
                                 <button type="button" className="btn btn-secondary" onClick={() => { setShowPasswordChange(false); setPasswords({ current: '', new: '', confirm: '' }); }}>Cancel</button>
                             </div>
                         </form>

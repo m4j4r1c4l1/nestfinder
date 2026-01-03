@@ -1248,7 +1248,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
 
-                                    <td style={{ padding: '0.5rem 0', verticalAlign: 'middle', textAlign: 'center', background: '#334155', width: '120px' }} onClick={e => e.stopPropagation()}>
+                                    <td style={{ padding: '0.5rem 0', verticalAlign: 'middle', textAlign: 'center', width: '120px' }} onClick={e => e.stopPropagation()}>
                                         <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
