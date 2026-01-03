@@ -472,7 +472,7 @@ const Messages = () => {
                                 <div className="card-header">
                                     <h3>🎬 Manage Broadcasts</h3>
                                 </div>
-                                <div className="card-body">
+                                <div className="card-body" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
                                     {broadcasts.length === 0 ? (
                                         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
                                             No broadcasts found
@@ -550,9 +550,9 @@ const Messages = () => {
 // --- Sub-components ---
 
 const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
-    const [selectedTemplate, setSelectedTemplate] = useState('announcement');
-    const [title, setTitle] = useState(templates.announcement.title);
-    const [body, setBody] = useState('');
+    const [selectedTemplate, setSelectedTemplate] = useState('share_app');
+    const [title, setTitle] = useState(templates.share_app.title);
+    const [body, setBody] = useState(templates.share_app.body);
     const [imageUrl, setImageUrl] = useState('');
     const [target, setTarget] = useState('all');
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -634,6 +634,17 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
             return '';
         }
     };
+
+    // Initial load for share_app template
+    useEffect(() => {
+        const init = async () => {
+            if (selectedTemplate === 'share_app') {
+                const qr = await generateQRCode();
+                setImageUrl(qr);
+            }
+        };
+        init();
+    }, []);
 
     const handleBroadcastTemplateChange = (templateId) => {
         const tmpl = templates[templateId];
@@ -1072,7 +1083,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                 />
             )}
             <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ height: '65vh', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                <div style={{ height: 'auto', maxHeight: '65vh', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
@@ -1426,7 +1437,7 @@ const HistorySection = ({ users = [] }) => {
                 </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ height: '65vh', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                <div style={{ height: 'auto', maxHeight: '65vh', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
