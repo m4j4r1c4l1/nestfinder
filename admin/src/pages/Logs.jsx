@@ -12,11 +12,15 @@ const Logs = () => {
     const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
 
     // Resizable columns state
-    const [columnWidths, setColumnWidths] = useState({
-        time: 140,
-        action: 180,
-        user: 200,
-        details: null // flex
+    // Resizable columns state
+    const [columnWidths, setColumnWidths] = useState(() => {
+        const saved = localStorage.getItem('admin_logs_columns');
+        return saved ? JSON.parse(saved) : {
+            time: 140,
+            action: 180,
+            user: 200,
+            details: null // flex
+        };
     });
     const [resizing, setResizing] = useState(null);
     const [startX, setStartX] = useState(0);
@@ -35,7 +39,11 @@ const Logs = () => {
         const handleMouseMove = (e) => {
             const diff = e.clientX - startX;
             const newWidth = Math.max(40, startWidth + diff);
-            setColumnWidths(prev => ({ ...prev, [resizing]: newWidth }));
+            setColumnWidths(prev => {
+                const updated = { ...prev, [resizing]: newWidth };
+                localStorage.setItem('admin_logs_columns', JSON.stringify(updated));
+                return updated;
+            });
         };
         const handleMouseUp = () => setResizing(null);
         document.addEventListener('mousemove', handleMouseMove);

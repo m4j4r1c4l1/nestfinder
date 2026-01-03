@@ -847,15 +847,19 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const [confirmAction, setConfirmAction] = useState(null);
 
     // Resizable columns state
-    const [columnWidths, setColumnWidths] = useState({
-        checkbox: 40,
-        timestamp: 130,
-        status: 100,
-        from: 150,
-        type: 60,
-        rating: 100,
-        message: null, // flex
-        actions: 50
+    // Resizable columns state
+    const [columnWidths, setColumnWidths] = useState(() => {
+        const saved = localStorage.getItem('admin_received_columns');
+        return saved ? JSON.parse(saved) : {
+            checkbox: 40,
+            timestamp: 130,
+            status: 100,
+            from: 150,
+            type: 60,
+            rating: 100,
+            message: null, // flex
+            actions: 50
+        };
     });
     const [resizing, setResizing] = useState(null);
     const [startX, setStartX] = useState(0);
@@ -876,7 +880,11 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
         const handleMouseMove = (e) => {
             const diff = e.clientX - startX;
             const newWidth = Math.max(40, startWidth + diff);
-            setColumnWidths(prev => ({ ...prev, [resizing]: newWidth }));
+            setColumnWidths(prev => {
+                const updated = { ...prev, [resizing]: newWidth };
+                localStorage.setItem('admin_received_columns', JSON.stringify(updated));
+                return updated;
+            });
         };
 
         const handleMouseUp = () => {
@@ -1201,12 +1209,17 @@ const HistorySection = ({ users = [] }) => {
     const [sortDirection, setSortDirection] = useState('desc');
 
     // Resizable columns state
-    const [columnWidths, setColumnWidths] = useState({
-        timestamp: 130,
-        title: 200,
-        body: null, // flex
-        image: 80,
-        target: 120
+    // Resizable columns state
+    const [columnWidths, setColumnWidths] = useState(() => {
+        const saved = localStorage.getItem('admin_sent_columns');
+        return saved ? JSON.parse(saved) : {
+            timestamp: 130,
+            title: 200,
+            body: null, // flex
+            template: 140, // [NEW]
+            image: 80,
+            target: 120
+        };
     });
     const [resizing, setResizing] = useState(null);
     const [startX, setStartX] = useState(0);
@@ -1225,7 +1238,11 @@ const HistorySection = ({ users = [] }) => {
         const handleMouseMove = (e) => {
             const diff = e.clientX - startX;
             const newWidth = Math.max(40, startWidth + diff);
-            setColumnWidths(prev => ({ ...prev, [resizing]: newWidth }));
+            setColumnWidths(prev => {
+                const updated = { ...prev, [resizing]: newWidth };
+                localStorage.setItem('admin_sent_columns', JSON.stringify(updated));
+                return updated;
+            });
         };
         const handleMouseUp = () => setResizing(null);
         document.addEventListener('mousemove', handleMouseMove);
@@ -1341,6 +1358,21 @@ const HistorySection = ({ users = [] }) => {
         setSortColumn(column);
     };
 
+    const getTemplateInfo = (key) => {
+        if (!key) return { icon: '❓', name: 'Unknown' };
+        const map = {
+            share_app: { icon: '🤝', name: 'Share App' },
+            new_points: { icon: '🪹', name: 'New Locations' },
+            status_update: { icon: '✅', name: 'Status Update' },
+            reminder: { icon: '📍', name: 'Weekly Reminder' },
+            announcement: { icon: '📢', name: 'Announcement' },
+            urgent: { icon: '🚨', name: 'Urgent Notice' },
+            new_feature: { icon: '✨', name: 'New Feature' },
+            custom: { icon: '✏️', name: 'Custom Message' }
+        };
+        return map[key] || { icon: '❓', name: key };
+    };
+
     return (
         <div className="card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1386,6 +1418,10 @@ const HistorySection = ({ users = [] }) => {
                                 </th>
                                 <th onClick={() => handleSort('body')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', position: 'relative' }}>
                                     Body {sortColumn === 'body' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', width: columnWidths.template, position: 'relative' }}>
+                                    Template
+                                    <ResizeHandle column="template" />
                                 </th>
                                 <th onClick={() => handleSort('image')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.image, position: 'relative' }}>
                                     Image {sortColumn === 'image' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
@@ -1439,6 +1475,20 @@ const HistorySection = ({ users = [] }) => {
                                             <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                                                 {meta.body ? (meta.body.length > 55 ? meta.body.substring(0, 55) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
                                             </div>
+                                        </td>
+                                        <td
+                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                            onClick={() => handlePreview(log)}
+                                        >
+                                            {(() => {
+                                                const tInfo = getTemplateInfo(meta.template);
+                                                return (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#e2e8f0', fontSize: '0.85rem' }}>
+                                                        <span>{tInfo.icon}</span>
+                                                        <span>{tInfo.name}</span>
+                                                    </div>
+                                                );
+                                            })()}
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
                                             <span style={{
@@ -1698,8 +1748,19 @@ const DetailModal = ({ batchId, onClose }) => {
                                                 <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Anonymous'}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
                                             </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                <DateTimeCell isoString={msg.created_at} />
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#94a3b8' }}>
+                                                {msg.message && msg.message.length > 50 ? msg.message.substring(0, 50) + '...' : msg.message}
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                                {(() => {
+                                                    const tInfo = getTemplateInfo(msg.template);
+                                                    return (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#e2e8f0', fontSize: '0.85rem' }}>
+                                                            <span>{tInfo.icon}</span>
+                                                            <span>{tInfo.name}</span>
+                                                        </div>
+                                                    );
+                                                })()}
                                             </td>
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                 <DateTimeCell isoString={msg.delivered_at} />
