@@ -1120,23 +1120,37 @@ const HistorySection = ({ users = [] }) => {
         setLoading(false);
     };
 
-    const handlePreview = (log) => {
+    const handlePreview = async (log) => {
         const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
         let safeIso = log.created_at;
         if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
         if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) { safeIso += 'Z'; }
         const date = new Date(safeIso);
 
-        const rawId = log.target_id;
+        let resolvedNickname = '🔔 Notification';
 
-        // Fix: Check both 'id' and 'user_id' properties since subscribers list uses user_id
-        let foundUser = users.find(u => (u.id === rawId || u.user_id === rawId));
-
-        if (!foundUser && rawId && !rawId.startsWith('user_')) {
-            foundUser = users.find(u => (u.id === `user_${rawId}` || u.user_id === `user_${rawId}`));
+        // Logic to untangle User Name from Batch ID
+        // The log.target_id is a Batch ID. To get the User Name, we must look up the batch details.
+        if (meta.count === 1 && log.target_id) {
+            try {
+                // We reuse the existing endpoint that the DetailModal uses
+                const token = localStorage.getItem('nestfinder_admin_token');
+                const res = await fetch(`${API_URL}/api/push/admin/notifications/batch/${log.target_id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.messages && data.messages.length > 0) {
+                        // We found the user!
+                        resolvedNickname = data.messages[0].nickname || 'User';
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to resolve nickname for preview:', err);
+            }
+        } else if (meta.count > 1 || meta.target === 'all') {
+            resolvedNickname = '📢 Broadcast';
         }
-
-        const resolvedNickname = foundUser ? foundUser.nickname : (log.target_id || 'User');
 
         setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
     };
