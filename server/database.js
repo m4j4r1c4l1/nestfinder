@@ -229,6 +229,11 @@ export const initDatabase = async () => {
     db.run("ALTER TABLE feedback ADD COLUMN rating INTEGER");
   } catch (e) { /* Column exists */ }
 
+  // Migration: Add status column to feedback (Fixes missing column issue)
+  try {
+    db.run("ALTER TABLE feedback ADD COLUMN status TEXT DEFAULT 'new'");
+  } catch (e) { /* Column exists */ }
+
   // Migration: Extract ratings from existing feedback messages and populate daily_ratings
   // This runs safely multiple times (only processes messages without rating set)
   const feedbackWithRatings = db.exec(`

@@ -145,13 +145,21 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
             FROM users 
             ORDER BY last_active DESC 
             LIMIT 100
-            LIMIT 100
         `);
 
         // Get feedback breakdown
-        const feedbackTotal = get('SELECT COUNT(*) as count FROM feedback');
-        const feedbackPending = get('SELECT COUNT(*) as count FROM feedback WHERE status = ?', ['new']);
-        const feedbackRead = get('SELECT COUNT(*) as count FROM feedback WHERE status != ?', ['new']);  // Assuming non-new is read/resolved
+        let feedbackTotal, feedbackPending, feedbackRead;
+        try {
+            feedbackTotal = get('SELECT COUNT(*) as count FROM feedback');
+            feedbackPending = get('SELECT COUNT(*) as count FROM feedback WHERE status = ?', ['new']);
+            feedbackRead = get('SELECT COUNT(*) as count FROM feedback WHERE status != ?', ['new']);
+        } catch (e) {
+            console.error('Feedback stats failed:', e.message);
+            // Fallback if column missing (should be fixed by migration, but just in case)
+            feedbackTotal = { count: 0 };
+            feedbackPending = { count: 0 };
+            feedbackRead = { count: 0 };
+        }
 
         // Calculate Dev Metrics
         let devMetrics = { commits: 0, components: 0, loc: 0, files: 0 };
