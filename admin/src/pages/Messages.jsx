@@ -846,6 +846,70 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
 
+    // Resizable columns state
+    const [columnWidths, setColumnWidths] = useState({
+        checkbox: 40,
+        timestamp: 130,
+        status: 100,
+        from: 150,
+        type: 60,
+        rating: 100,
+        message: null, // flex
+        actions: 50
+    });
+    const [resizing, setResizing] = useState(null);
+    const [startX, setStartX] = useState(0);
+    const [startWidth, setStartWidth] = useState(0);
+
+    // Resize handlers
+    const handleResizeStart = (e, column) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setResizing(column);
+        setStartX(e.clientX);
+        setStartWidth(columnWidths[column] || 100);
+    };
+
+    useEffect(() => {
+        if (!resizing) return;
+
+        const handleMouseMove = (e) => {
+            const diff = e.clientX - startX;
+            const newWidth = Math.max(40, startWidth + diff);
+            setColumnWidths(prev => ({ ...prev, [resizing]: newWidth }));
+        };
+
+        const handleMouseUp = () => {
+            setResizing(null);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [resizing, startX, startWidth]);
+
+    // Resize handle component
+    const ResizeHandle = ({ column }) => (
+        <div
+            onMouseDown={(e) => handleResizeStart(e, column)}
+            style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: '5px',
+                cursor: 'col-resize',
+                background: resizing === column ? '#3b82f6' : 'transparent',
+                transition: 'background 0.1s'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#3b82f6'}
+            onMouseLeave={(e) => { if (resizing !== column) e.target.style.background = 'transparent'; }}
+        />
+    );
+
     const toggleSelect = (id) => {
         setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     };
@@ -977,10 +1041,10 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
             )}
             <div className="card-body" style={{ padding: 0 }}>
                 <div style={{ height: '65vh', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                <th style={{ padding: '0.75rem 1rem', width: '40px' }}>
+                                <th style={{ padding: '0.75rem 1rem', width: columnWidths.checkbox, position: 'relative' }}>
                                     <input
                                         type="checkbox"
                                         checked={feedback.length > 0 && selectedIds.length === feedback.length}
@@ -989,32 +1053,39 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                 </th>
                                 <th
                                     onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: '130px' }}
+                                    style={{ padding: '0.75rem 1rem', textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.timestamp, position: 'relative' }}
                                 >
                                     Timestamp {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="timestamp" />
                                 </th>
-                                <th style={{ padding: '0.75rem 1rem', width: '100px', textAlign: 'center' }}>Status</th>
+                                <th style={{ padding: '0.75rem 1rem', width: columnWidths.status, textAlign: 'center', position: 'relative' }}>
+                                    Status
+                                    <ResizeHandle column="status" />
+                                </th>
                                 <th
                                     onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none', maxWidth: '150px' }}
+                                    style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.from, position: 'relative' }}
                                 >
                                     From {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="from" />
                                 </th>
                                 <th
                                     onClick={() => { setSortColumn('type'); setSortDirection(d => sortColumn === 'type' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', width: '50px', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                    style={{ padding: '0.75rem 1rem', width: columnWidths.type, textAlign: 'center', cursor: 'pointer', userSelect: 'none', position: 'relative' }}
                                 >
                                     Type {sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="type" />
                                 </th>
                                 <th
                                     onClick={() => { setSortColumn('rating'); setSortDirection(d => sortColumn === 'rating' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', width: '100px', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                    style={{ padding: '0.75rem 1rem', width: columnWidths.rating, textAlign: 'center', cursor: 'pointer', userSelect: 'none', position: 'relative' }}
                                 >
                                     Rating {sortColumn === 'rating' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="rating" />
                                 </th>
 
-                                <th style={{ padding: '0.75rem 1rem', width: '40%', textAlign: 'left' }}>Message</th>
-                                <th style={{ padding: '0.75rem 1rem', width: '40px' }}></th>
+                                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', position: 'relative' }}>Message</th>
+                                <th style={{ padding: '0.75rem 1rem', width: columnWidths.actions }}></th>
                             </tr>
                         </thead>
                         <tbody>
