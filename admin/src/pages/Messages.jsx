@@ -1262,6 +1262,10 @@ const HistorySection = ({ users = [] }) => {
     const [sortColumn, setSortColumn] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc');
 
+    // Pagination
+    const [page, setPage] = useState(1);
+    const pageSize = 20;
+
     // Resizable columns state
     // Resizable columns state
     const [columnWidths, setColumnWidths] = useState(() => {
