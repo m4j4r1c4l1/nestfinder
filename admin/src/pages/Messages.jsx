@@ -1598,8 +1598,10 @@ const MessagePreviewModal = ({ message, onClose }) => {
         headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIcon}</span>;
     } else {
         // Notification Header: Recipient or Bulk
-        // Fallback to target_id if nickname is missing (common in sent history)
-        const isBulk = message.count > 1 || message.target === 'all' || (message.target_id && !message.target_id.startsWith('user_'));
+        // Fallback to target_id if nickname is missing
+        // Logic fix: Only show "Bulk" if count > 1 or target is clearly 'all'.
+        // Do NOT assume target_id format defines bulk/single status (e.g. 'Ioscompose' is a valid single user ID).
+        const isBulk = (message.count > 1) || message.target === 'all';
         headerTitle = isBulk ? 'Bulk Message' : (message.nickname || message.target_id || message.device_id?.substr(0,8) || 'User');
     }
 
