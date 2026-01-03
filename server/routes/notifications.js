@@ -145,30 +145,39 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
             FROM users 
             ORDER BY last_active DESC 
             LIMIT 100
+            LIMIT 100
         `);
+
+        // Get feedback breakdown
+        const feedbackTotal = get('SELECT COUNT(*) as count FROM feedback');
+        const feedbackPending = get('SELECT COUNT(*) as count FROM feedback WHERE status = ?', ['new']);
+        const feedbackRead = get('SELECT COUNT(*) as count FROM feedback WHERE status != ?', ['new']);  // Assuming non-new is read/resolved
 
         // Calculate Dev Metrics
         let devMetrics = { commits: 0, components: 0, loc: 0, files: 0 };
-        try {
-            // 1. Commits
-            try {
-                const commitCount = execSync('git rev-list --count HEAD', { cwd: __dirname }).toString().trim();
-                devMetrics.commits = parseInt(commitCount, 10);
-            } catch (e) { console.error('Git commit count failed', e.message); }
+        const rootDir = path.resolve(__dirname, '../../'); // Project root
 
-            // 2. Code Stats (Client + Admin + Server)
-            // Go up from server/routes to root
-            const rootDir = path.resolve(__dirname, '../../');
+        try {
+            // 1. Commits - Run from project root to ensure .git access
+            try {
+                const commitCount = execSync('git rev-list --count HEAD', { cwd: rootDir }).toString().trim();
+                devMetrics.commits = parseInt(commitCount, 10);
+            } catch (e) {
+                // Fallback or ignore
+                console.error('Git commit count failed:', e.message);
+            }
+
+            // 2. Code Stats
             const clientStats = countCodeStats(path.join(rootDir, 'client/src'));
             const adminStats = countCodeStats(path.join(rootDir, 'admin/src'));
             const serverStats = countCodeStats(path.join(rootDir, 'server'));
 
-            devMetrics.components = clientStats.components + adminStats.components;
-            devMetrics.lines = clientStats.lines + adminStats.lines + serverStats.lines;
-            devMetrics.files = clientStats.files + adminStats.files + serverStats.files;
+            devMetrics.components = (clientStats.components || 0) + (adminStats.components || 0);
+            devMetrics.lines = (clientStats.lines || 0) + (adminStats.lines || 0) + (serverStats.lines || 0);
+            devMetrics.files = (clientStats.files || 0) + (adminStats.files || 0) + (serverStats.files || 0);
 
         } catch (err) {
-            console.error('Dev metrics calculation failed', err);
+            console.error('Dev metrics calculation failed:', err);
         }
 
         res.json({
@@ -179,9 +188,14 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
                 total: notificationCount?.count || 0,
                 unread: unreadCount?.count || 0
             },
+            feedbackMetrics: { // added breakdown
+                total: feedbackTotal?.count || 0,
+                pending: feedbackPending?.count || 0,
+                read: feedbackRead?.count || 0
+            },
             avgRating: avgRating,
             totalRatings: ratingStats?.totalRatings || 0,
-            totalReceived: feedbackCount?.count || 0,
+            totalReceived: feedbackTotal?.count || 0, // Keep for backward compat if needed, but UI uses feedbackMetrics now
             mapPoints: {
                 confirmed: confirmedPoints?.count || 0,
                 pending: pendingPoints?.count || 0,
