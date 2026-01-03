@@ -983,8 +983,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     />
                                 </th>
                                 <th
-                                    onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'desc'); }}
-                                    style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none', minWidth: '200px' }}
+                                    onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                    style={{ padding: '0.75rem 1rem', textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: '130px' }}
                                 >
                                     Timestamp {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                 </th>
@@ -1020,8 +1020,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
                                         <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
                                     </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2 }}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                                             <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>
                                                 {new Date(item.created_at).toLocaleDateString()}
                                             </span>
