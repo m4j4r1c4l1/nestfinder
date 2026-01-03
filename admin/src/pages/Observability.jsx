@@ -10,45 +10,50 @@ const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder/';
 
 
 
-const Notifications = () => {
-    // Shared State
-    const [subscribers, setSubscribers] = useState([]);
+const Observability = () => {
+    const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
-        totalSubscribers: 0,
-        notificationMetrics: { total: 0, unread: 0 }
+        total: 0,
+        delivered: 0,
+        read: 0,
+        avgDeliveryTime: 0,
+        avgOpenTime: 0,
+        platformDistribution: { android: 0, ios: 0, web: 0 }
     });
-    const [loading, setLoading] = useState(false);
+    const [dailyStats, setDailyStats] = useState([]);
+    const [activeTab, setActiveTab] = useState('notifications');
+    const [timeRange, setTimeRange] = useState('7d');
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedRating, setSelectedRating] = useState(null); // For rating breakdown modal
 
-    // Initial Load & Auto-Refresh
     useEffect(() => {
-        loadStats();
-        const interval = setInterval(loadStats, 10000);
-        return () => clearInterval(interval);
-    }, []);
+        loadData();
+    }, [timeRange]);
 
-    const loadStats = async () => {
+    const loadData = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
             const token = localStorage.getItem('nestfinder_admin_token');
-            const response = await fetch(`${API_URL}/api/push/admin/stats`, {
+            const res = await fetch(`${API_URL}/api/push/admin/analytics?range=${timeRange}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (response.ok) {
-                const data = await response.json();
-                setStats(data);
-                setSubscribers(data.subscribers || []);
+            if (res.ok) {
+                const data = await res.json();
+                setStats(data.stats);
+                setDailyStats(data.daily);
             }
         } catch (err) {
-            console.error('Failed to load stats:', err);
-        } finally {
-            setLoading(false);
+            console.error('Failed to load analytics:', err);
         }
+        setLoading(false);
     };
 
     return (
         <div className="notifications-page" style={{ width: '75%', maxWidth: '1500px', margin: '0 auto', padding: '0 1rem' }}>
-            <div className="page-header" style={{ marginBottom: '1rem' }}>
-                <h1>🔔 In-App Notifications</h1>
+            <div style={{ marginBottom: '2rem' }}>
+                <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    Metrics
+                </h1>
                 <p className="text-muted">Manage and track app notifications</p>
             </div>
 
@@ -1106,4 +1111,4 @@ const RatingsChartCard = ({ onPointClick }) => {
 
 
 
-export default Notifications;
+export default Observability;
