@@ -1219,14 +1219,20 @@ const HistorySection = ({ users = [] }) => {
         const defaults = {
             timestamp: 130,
             title: 200,
-            body: null, // flex
+            body: 300, // Changed from null (flex) to fixed default
             template: 140, // [NEW]
             image: 80,
             target: 120
         };
         try {
             const saved = localStorage.getItem('admin_sent_columns');
-            return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // Force body to have a value if it was previously null
+                if (!parsed.body) parsed.body = 300;
+                return { ...defaults, ...parsed };
+            }
+            return defaults;
         } catch (e) {
             return defaults;
         }
@@ -1416,7 +1422,7 @@ const HistorySection = ({ users = [] }) => {
                 </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ height: '65vh', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                <div style={{ height: '65vh', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
@@ -1428,8 +1434,9 @@ const HistorySection = ({ users = [] }) => {
                                     Title {sortColumn === 'title' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                     <ResizeHandle column="title" />
                                 </th>
-                                <th onClick={() => handleSort('body')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', position: 'relative' }}>
+                                <th onClick={() => handleSort('body')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.body, position: 'relative' }}>
                                     Body {sortColumn === 'body' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    <ResizeHandle column="body" />
                                 </th>
                                 <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', width: columnWidths.template, position: 'relative' }}>
                                     Template
