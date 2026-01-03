@@ -44,10 +44,15 @@ const RecoveryKeySection = ({ t }) => {
             // Save to session storage for current session persistence
             sessionStorage.setItem('nestfinder_recovery_key_temp', result.recoveryKey);
 
-            // Auto-copy to clipboard
-            await navigator.clipboard.writeText(result.recoveryKey);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 3000);
+            // Try to auto-copy to clipboard (may fail due to browser security after async)
+            try {
+                await navigator.clipboard.writeText(result.recoveryKey);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 3000);
+            } catch (clipboardErr) {
+                // Clipboard failed (expected in some browsers after async), user can manually copy
+                console.warn('Auto-copy to clipboard failed:', clipboardErr.message);
+            }
         } catch (err) {
             console.error('Failed to generate recovery key:', err);
             alert(`Failed to generate recovery key: ${err.message}\n\nTip: Try logging out and back in, or refresh the page.`);
