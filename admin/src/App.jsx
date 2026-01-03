@@ -271,7 +271,7 @@ const App = () => {
             </aside>
 
             {/* Main Content - Offset for fixed sidebar */}
-            <main style={{ flex: 1, padding: '1.5rem', marginLeft: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <main style={{ flex: 1, padding: 0, marginLeft: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', height: '100vh' }}>
                 {view === 'dashboard' && <Dashboard />}
                 {view === 'observability' && <Observability />}
                 {view === 'messages' && <Messages />}

@@ -216,7 +216,7 @@ const Dashboard = ({ onNavigate }) => {
     const deactivated = points.filter(p => p.status === 'deactivated').length;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.75rem', padding: '1.5rem' }}>
             <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Dashboard Overview</h2>
 
             {/* Main Content: Map + Right Sidebar */}
