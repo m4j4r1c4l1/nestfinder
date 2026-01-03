@@ -16,8 +16,7 @@ const FeedbackSection = () => {
 
         setLoading(true);
         try {
-            const feedbackMsg = `${message.trim()}\n\n[Rating: ${rating}/5 ⭐]`;
-            await api.submitFeedback(type, feedbackMsg);
+            await api.submitFeedback(type, message.trim(), rating);
             setSuccess(true);
             setMessage('');
             setRating(5);

@@ -656,4 +656,51 @@ router.delete('/feedback/:id', (req, res) => {
     res.json({ success: true });
 });
 
+// ================== RATINGS ==================
+
+// Get ratings statistics for charting
+router.get('/metrics/ratings', (req, res) => {
+    const { days = 30 } = req.query;
+
+    // Get daily ratings for the past N days
+    const ratings = [];
+
+    for (let i = parseInt(days) - 1; i >= 0; i--) {
+        const dateOffset = `-${i} days`;
+        const dateRow = get(`SELECT date('now', '${dateOffset}') as date_val`);
+        const dateStr = dateRow.date_val;
+
+        // Get rating data for this date
+        const data = get(`
+            SELECT total_ratings, rating_sum, rating_1, rating_2, rating_3, rating_4, rating_5
+            FROM daily_ratings
+            WHERE date = ?
+        `, [dateStr]);
+
+        if (data && data.total_ratings > 0) {
+            ratings.push({
+                date: dateStr,
+                average: parseFloat((data.rating_sum / data.total_ratings).toFixed(2)),
+                count: data.total_ratings,
+                breakdown: {
+                    1: data.rating_1,
+                    2: data.rating_2,
+                    3: data.rating_3,
+                    4: data.rating_4,
+                    5: data.rating_5
+                }
+            });
+        } else {
+            ratings.push({
+                date: dateStr,
+                average: 0,
+                count: 0,
+                breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+            });
+        }
+    }
+
+    res.json({ ratings });
+});
+
 export default router;
