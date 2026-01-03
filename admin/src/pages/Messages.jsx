@@ -1543,40 +1543,74 @@ const DetailModal = ({ batchId, onClose }) => {
 };
 
 const MessagePreviewModal = ({ message, onClose }) => {
-    // Standardize Data
-    // Feedback: user_nickname, message, type, created_at
-    // Notification (History): title, body, image, timestamp (Date obj)
+    // Helper for CET/CEST Time
+    const formatTimeCET = (dateObj) => {
+        if (!dateObj) return '';
+        // Check if Summer Time (Approximation for EU: Last Sun March to Last Sun Oct)
+        // Or simpler: use Intl.DateTimeFormat with timeZone: 'Europe/Paris' or 'CET' if supported
+        try {
+            const timePart = dateObj.toLocaleTimeString('en-GB', { 
+                hour: '2-digit', minute: '2-digit', second: '2-digit', 
+                timeZone: 'Europe/Paris' 
+            });
+            // Determine Standard vs Summer for suffix (simplified or explicit)
+            // 'Europe/Paris' handles the offset correctly. We just append the label.
+            // Getting the specific zone abbreviation is tricky cross-browser without libraries.
+            // We will stick to the generic CET/CEST convention based on offset or just hardcode based on date.
+            
+            // Reliable trick: check offset.
+            // Paris is UTC+1 (CET) or UTC+2 (CEST)
+            // We can infer from the date string representation in that timezone
+            const isSummer = dateObj.toLocaleString('en-US', { timeZone: 'Europe/Paris', timeZoneName: 'short' }).includes('GMT+2') 
+                          || dateObj.toLocaleString('en-US', { timeZone: 'Europe/Paris', timeZoneName: 'short' }).includes('CEST');
+            
+            return `${timePart} ${isSummer ? 'CEST' : 'CET'}`;
+        } catch (e) {
+            // Fallback for environments without ICU full data
+            return dateObj.toLocaleTimeString() + ' (Local)';
+        }
+    };
 
-    // Determine Title
-    const title = message.user_nickname 
-        ? (message.user_nickname || 'Anonymous') 
-        : (message.title || 'Notification');
+    // Determine Mode
+    const isFeedback = message.hasOwnProperty('user_nickname') || message.hasOwnProperty('type');
+    const isNotification = !isFeedback;
 
-    // Determine Timestamp
+    // Data Parsing
     let dateObj = null;
     if (message.created_at) dateObj = new Date(message.created_at);
     else if (message.timestamp) dateObj = new Date(message.timestamp);
-    
-    // Determine Border Color based on Type
-    let borderColor = '#94a3b8'; // Default Linear/Gray
-    if (message.type === 'bug') borderColor = '#ef4444'; // Red
-    else if (message.type === 'suggestion') borderColor = '#3b82f6'; // Blue
-    else if (message.image || message.body) borderColor = '#3b82f6'; // Notification Default Blue
+
+    // Header Content
+    let headerTitle = '';
+    let headerIcon = null;
+
+    if (isFeedback) {
+        // Feedback Header: [Icon] [Nickname]
+        const typeIcon = message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝';
+        headerTitle = message.user_nickname || 'Anonymous';
+        headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIcon}</span>;
+    } else {
+        // Notification Header: Recipient or Bulk
+        // If it was a broadcast (target_id present usually implies bulk if not single device) 
+        // OR we can check 'count' if available from metadata
+        const isBulk = message.count > 1 || message.target === 'all' || (message.target_id && !message.target_id.startsWith('user_'));
+        headerTitle = isBulk ? 'Bulk Message' : (message.nickname || message.device_id?.substr(0,8) || 'User');
+    }
+
+    // Border Color
+    let borderColor = '#3b82f6'; // Default Blue
+    if (isFeedback) {
+        if (message.type === 'bug') borderColor = '#ef4444';
+        else if (message.type === 'suggestion') borderColor = '#3b82f6';
+        else borderColor = '#94a3b8';
+    }
 
     return ReactDOM.createPortal(
         <div
             style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                height: '100vh',
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(5px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 9999,
+                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999,
                 animation: 'fadeIn 0.2s ease'
             }}
             onClick={onClose}
@@ -1584,29 +1618,40 @@ const MessagePreviewModal = ({ message, onClose }) => {
             <div
                 onClick={e => e.stopPropagation()}
                 style={{
-                    width: '90%',
-                    maxWidth: '400px',
-                    background: '#1e293b', // Dark background
-                    borderRadius: '12px',
-                    padding: '0',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                    overflow: 'hidden',
-                    border: '1px solid #334155'
+                    width: '90%', maxWidth: '400px', background: '#1e293b',
+                    borderRadius: '12px', padding: '0', boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    overflow: 'hidden', border: '1px solid #334155'
                 }}
             >
                 {/* Header */}
-                <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{title}</h3>
+                <div style={{
+                    padding: '1rem', borderBottom: '1px solid #334155',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {headerIcon}
+                        <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{headerTitle}</h3>
+                    </div>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
                 </div>
 
-                {/* Body */}
+                {/* Body Content */}
                 <div style={{ padding: '1.5rem', background: '#1e293b' }}>
-                    {/* Split Timestamp Above Body */}
-                    {dateObj && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                    
+                    {/* FEEDBACK STYLE: [Date] [Bell] [Time] */}
+                    {isFeedback && dateObj && (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginBottom: '1rem', color: '#94a3b8', fontSize: '0.85rem' }}>
                             <span>{dateObj.toLocaleDateString()}</span>
-                            <span>{dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span style={{ fontSize: '1rem' }}>🔔</span>
+                            <span>{formatTimeCET(dateObj)}</span>
+                        </div>
+                    )}
+
+                    {/* NOTIFICATION STYLE: Date separate if needed, usually inside or just simpler */}
+                    {/* User asked for OLD style: Header is user. Time in HH:MM:SS format. Title IN box. */}
+                    {isNotification && dateObj && (
+                         <div style={{ textAlign: 'right', marginBottom: '4px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                            {dateObj.toLocaleDateString()} • {formatTimeCET(dateObj)}
                         </div>
                     )}
 
@@ -1618,14 +1663,22 @@ const MessagePreviewModal = ({ message, onClose }) => {
                         borderLeft: `4px solid ${borderColor}`,
                         boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}>
-                        {/* Notification Image */}
+                        {/* NOTIFICATION TITLE (Inside Box) */}
+                        {isNotification && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+                                <span style={{ fontSize: '1.2rem' }}>🔔</span>
+                                <span style={{ fontWeight: 'bold', color: '#f1f5f9', fontSize: '1rem' }}>{message.title}</span>
+                            </div>
+                        )}
+
+                        {/* Image */}
                         {message.image && (
                             <div style={{ marginBottom: '0.8rem', borderRadius: '4px', overflow: 'hidden' }}>
                                 <img src={message.image} alt="Attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
                             </div>
                         )}
                         
-                        {/* Body Text */}
+                        {/* Message/Body */}
                         <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
                              {message.message || message.body}
                         </div>
