@@ -1630,7 +1630,8 @@ const MessagePreviewModal = ({ message, onClose }) => {
     if (isFeedback) {
         // Feedback Header: [Icon] [Nickname]
         const typeIcon = message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝';
-        headerTitle = message.user_nickname ? `@${message.user_nickname}` : 'Anonymous';
+        const rawNickname = message.user_nickname || message.nickname;
+        headerTitle = rawNickname ? `@${rawNickname}` : 'Anonymous';
         headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIcon}</span>;
     } else {
         // Notification Header: Recipient or Bulk
