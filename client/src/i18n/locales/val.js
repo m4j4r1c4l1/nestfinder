@@ -141,7 +141,7 @@ export default {
         continue: 'Continuar'
     },
     settings: {
-        yourProfile: 'Your Profile',
+        yourProfile: 'El Teu Perfil',
         notifications: 'Notificacions',
         popupMessages: 'Popups en Temps Reals',
         popupDescription: 'Mostrar missatges immediatament',
@@ -149,7 +149,18 @@ export default {
         scanToShare: 'Escaneja per obrir NestFinder',
         copyLink: 'Copiar Enllaç',
         shareLink: 'Compartir Enllaç',
-        linkCopied: 'Enllaç copiat!'
+        linkCopied: 'Enllaç copiat!',
+        recoveryKey: 'Clau de Recuperació',
+        recoveryKeyDescription: 'Guarda esta clau per a restaurar la teua identitat en un nou dispositiu.',
+        generateKey: 'Generar Clau de Recuperació',
+        copyKey: 'Copiar Clau',
+        copied: 'Copiat!',
+        keyGenerated: 'Clau Generada i Copiada!',
+        performance: 'Rendiment',
+        liteMode: 'Mode Lleuger',
+        liteModeDescription: 'Redueix animacions per a un rendiment més fluid',
+        scrollInstruction: '🌍 Desplaça + Toca o espera 2s per confirmar',
+        spreadWarmth: 'Comparteix la calor! 🐣'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
