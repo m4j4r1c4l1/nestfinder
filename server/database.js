@@ -208,6 +208,27 @@ export const initDatabase = async () => {
     db.run("ALTER TABLE broadcasts ADD COLUMN image_url TEXT");
   } catch (e) { /* Column exists */ }
 
+  // Daily ratings aggregation table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS daily_ratings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT UNIQUE NOT NULL,
+      total_ratings INTEGER DEFAULT 0,
+      rating_sum INTEGER DEFAULT 0,
+      rating_1 INTEGER DEFAULT 0,
+      rating_2 INTEGER DEFAULT 0,
+      rating_3 INTEGER DEFAULT 0,
+      rating_4 INTEGER DEFAULT 0,
+      rating_5 INTEGER DEFAULT 0
+    );
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_daily_ratings_date ON daily_ratings(date);`);
+
+  // Migration: Add rating column to feedback
+  try {
+    db.run("ALTER TABLE feedback ADD COLUMN rating INTEGER");
+  } catch (e) { /* Column exists */ }
+
   // Insert default settings if not exists
   const defaultSettings = [
     { key: 'confirmations_required', value: '1' },

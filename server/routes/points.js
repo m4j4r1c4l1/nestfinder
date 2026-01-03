@@ -494,18 +494,35 @@ router.post('/:id/validate', requireUser, (req, res) => {
 // Submit feedback (bugs, suggestions)
 router.post('/feedback', (req, res) => {
   const userId = req.headers['x-user-id'];
-  const { type, message } = req.body;
+  const { type, message, rating } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: 'Message required' });
   }
 
+  // Store feedback with optional rating
   run(`
-    INSERT INTO feedback (user_id, type, message)
-    VALUES (?, ?, ?)
-  `, [userId || null, type || 'general', message]);
+    INSERT INTO feedback (user_id, type, message, rating)
+    VALUES (?, ?, ?, ?)
+  `, [userId || null, type || 'general', message, rating || null]);
 
-  log(userId || 'anonymous', 'feedback_submitted', null, { type });
+  // If rating provided, update daily_ratings aggregation
+  if (rating && rating >= 1 && rating <= 5) {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const ratingCol = `rating_${rating}`;
+
+    // Upsert into daily_ratings
+    run(`
+      INSERT INTO daily_ratings (date, total_ratings, rating_sum, ${ratingCol})
+      VALUES (?, 1, ?, 1)
+      ON CONFLICT(date) DO UPDATE SET
+        total_ratings = total_ratings + 1,
+        rating_sum = rating_sum + ?,
+        ${ratingCol} = ${ratingCol} + 1
+    `, [today, rating, rating]);
+  }
+
+  log(userId || 'anonymous', 'feedback_submitted', null, { type, rating });
 
   res.json({ success: true, message: 'Thank you for your feedback!' });
 });

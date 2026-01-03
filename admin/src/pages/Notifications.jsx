@@ -146,14 +146,8 @@ const Notifications = () => {
                 </div>
             </div>
 
-            {/* Compose Section */}
-            <ComposeSection subscribers={subscribers} totalSubscribers={stats.totalSubscribers} onSent={loadStats} />
-
             {/* Metrics Chart Section */}
             <MetricsSection />
-
-            {/* History Section */}
-            <HistorySection />
         </div>
     );
 };
@@ -971,6 +965,9 @@ const MetricsSection = () => {
     const [breakdownData, setBreakdownData] = useState(null);
     const [breakdownTotal, setBreakdownTotal] = useState(0);
 
+    // Ratings breakdown state
+    const [ratingsBreakdown, setRatingsBreakdown] = useState(null);
+
     const handleClientBarClick = async (point) => {
         setBreakdownDate(point.date);
         setBreakdownTotal(point.users || 0); // Capture the Users metric from the bar point
@@ -984,6 +981,17 @@ const MetricsSection = () => {
             console.error(err);
             // Optional: set empty data or error state
             setBreakdownData({});
+        }
+    };
+
+    const handleRatingsBarClick = (point) => {
+        if (point.count > 0) {
+            setRatingsBreakdown({
+                date: point.date,
+                count: point.count,
+                average: point.average,
+                breakdown: point.breakdown
+            });
         }
     };
 
@@ -1019,6 +1027,9 @@ const MetricsSection = () => {
                     showLegend={true}
                     onPointClick={handleClientBarClick}
                 />
+
+                {/* Ratings Graph */}
+                <RatingsChartCard onPointClick={handleRatingsBarClick} />
             </div>
 
             {/* Render Popup */}
@@ -1030,6 +1041,344 @@ const MetricsSection = () => {
                     onClose={() => { setBreakdownDate(null); setBreakdownData(null); }}
                 />
             )}
+
+            {/* Ratings Breakdown Modal */}
+            {ratingsBreakdown && (
+                <RatingsBreakdownModal
+                    data={ratingsBreakdown}
+                    onClose={() => setRatingsBreakdown(null)}
+                />
+            )}
+        </div>
+    );
+};
+
+// Ratings Breakdown Modal
+const RatingsBreakdownModal = ({ data, onClose }) => {
+    const { date, count, average, breakdown } = data;
+    const maxRating = Math.max(...Object.values(breakdown), 1);
+
+    const starColors = {
+        1: '#ef4444', // Red
+        2: '#f97316', // Orange
+        3: '#facc15', // Yellow
+        4: '#84cc16', // Lime
+        5: '#22c55e'  // Green
+    };
+
+    return ReactDOM.createPortal(
+        <div
+            onClick={(e) => e.target === e.currentTarget && onClose()}
+            style={{
+                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(6px)',
+                display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999, padding: '2rem'
+            }}
+        >
+            <div style={{
+                background: 'linear-gradient(145deg, #1e293b, #0f172a)', border: '1px solid #334155',
+                borderRadius: '16px', padding: '1.5rem', maxWidth: '400px', width: '100%',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)'
+            }}>
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #334155', paddingBottom: '0.75rem' }}>
+                    <div>
+                        <h3 style={{ margin: 0, color: '#e2e8f0', fontSize: '1.1rem' }}>
+                            ⭐ Rating Breakdown
+                        </h3>
+                        <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
+                            {new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                        </div>
+                    </div>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                </div>
+
+                {/* Summary */}
+                <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#facc15' }}>{average.toFixed(1)}</div>
+                        <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Avg Rating</div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#3b82f6' }}>{count}</div>
+                        <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Total Votes</div>
+                    </div>
+                </div>
+
+                {/* Rating Bars */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {[5, 4, 3, 2, 1].map(star => {
+                        const value = breakdown[star] || 0;
+                        const pct = maxRating > 0 ? (value / maxRating) * 100 : 0;
+                        return (
+                            <div key={star} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ width: '50px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ fontSize: '1rem' }}>{'⭐'.repeat(1)}</span>
+                                    <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{star}</span>
+                                </div>
+                                <div style={{ flex: 1, height: '24px', background: '#1e293b', borderRadius: '4px', overflow: 'hidden', border: '1px solid #334155' }}>
+                                    <div style={{
+                                        width: `${pct}%`,
+                                        height: '100%',
+                                        background: `linear-gradient(90deg, ${starColors[star]}99, ${starColors[star]})`,
+                                        borderRadius: '3px',
+                                        transition: 'width 0.3s ease'
+                                    }} />
+                                </div>
+                                <div style={{ width: '40px', textAlign: 'right', color: '#e2e8f0', fontWeight: 600 }}>{value}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+// Ratings Chart Card Component (Area Chart)
+const RatingsChartCard = ({ onPointClick }) => {
+    const [ratings, setRatings] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [days, setDays] = useState(30);
+    const [refreshInterval, setRefreshInterval] = useState(0);
+    const [hoveredPoint, setHoveredPoint] = useState(null);
+
+    const fetchRatings = async () => {
+        try {
+            const token = localStorage.getItem('nestfinder_admin_token');
+            const res = await fetch(`${API_URL}/api/admin/metrics/ratings?days=${days}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setRatings(data.ratings || []);
+            }
+        } catch (err) {
+            console.error('Failed to load ratings:', err);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        setLoading(true);
+        fetchRatings();
+    }, [days]);
+
+    useEffect(() => {
+        if (refreshInterval > 0) {
+            const interval = setInterval(fetchRatings, refreshInterval * 1000);
+            return () => clearInterval(interval);
+        }
+    }, [refreshInterval, days]);
+
+    // Chart Dimensions
+    const chartWidth = 800;
+    const chartHeight = 220;
+    const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+    const graphWidth = chartWidth - padding.left - padding.right;
+    const graphHeight = chartHeight - padding.top - padding.bottom;
+
+    const getX = (i) => (i / (ratings.length - 1 || 1)) * graphWidth;
+    const getY = (val) => graphHeight - ((val / 5) * graphHeight); // Scale 0-5
+
+    const renderControls = () => (
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <select
+                value={days}
+                onChange={(e) => setDays(parseInt(e.target.value))}
+                style={{
+                    background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
+                    borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
+                }}
+            >
+                <option value={7}>7 Days</option>
+                <option value={14}>14 Days</option>
+                <option value={30}>30 Days</option>
+                <option value={90}>90 Days</option>
+            </select>
+            <select
+                value={refreshInterval}
+                onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
+                style={{
+                    background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
+                    borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
+                }}
+            >
+                <option value={0}>Refresh: Off</option>
+                <option value={30}>30s</option>
+                <option value={60}>1m</option>
+            </select>
+        </div>
+    );
+
+    if (loading || ratings.length === 0) {
+        return (
+            <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>⭐</span>
+                        <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>App Ratings</h3>
+                    </div>
+                    {renderControls()}
+                </div>
+                <div className="card-body" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                    {loading ? 'Loading...' : 'No ratings data available yet'}
+                </div>
+            </div>
+        );
+    }
+
+    // Filter to only show days with data for the area chart
+    const hasData = ratings.some(r => r.count > 0);
+    const maxY = 5; // Ratings are 1-5
+
+    // Build area path
+    const points = ratings.map((r, i) => `${getX(i)},${getY(r.average || 0)}`).join(' ');
+    const areaPoints = `0,${graphHeight} ${points} ${graphWidth},${graphHeight}`;
+
+    return (
+        <div className="card" style={{ marginBottom: '1.5rem', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155', borderRadius: '8px', backdropFilter: 'blur(8px)' }}>
+            {/* Header */}
+            <div className="card-header" style={{ background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>⭐</span>
+                        <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem', fontWeight: 600 }}>App Ratings</h3>
+                    </div>
+                    <div style={{ marginLeft: 'auto' }}>
+                        {renderControls()}
+                    </div>
+                </div>
+            </div>
+
+            {/* Legend */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: 'transparent' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+                    <div style={{ width: 24, height: 12, borderRadius: '2px', background: 'linear-gradient(90deg, #facc1566, #facc15)' }} />
+                    <span style={{ color: '#94a3b8' }}>Average Rating (1-5)</span>
+                </div>
+            </div>
+
+            {/* Graph Body */}
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative' }}>
+                <svg
+                    width="100%"
+                    viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                    style={{ minWidth: 600 }}
+                    onMouseLeave={() => setHoveredPoint(null)}
+                >
+                    <defs>
+                        <linearGradient id="ratings-gradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#facc15" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#facc15" stopOpacity="0.05" />
+                        </linearGradient>
+                    </defs>
+                    <g transform={`translate(${padding.left}, ${padding.top})`}>
+                        {/* Y-Axis Grid & Labels (1-5 scale) */}
+                        {[0, 1, 2, 3, 4, 5].map((val) => {
+                            const y = getY(val);
+                            return (
+                                <g key={val}>
+                                    <line x1={0} y1={y} x2={graphWidth} y2={y} stroke="#334155" strokeWidth="1" strokeDasharray="4,4" />
+                                    <text x={-10} y={y + 4} textAnchor="end" fill="#64748b" fontSize="10">{val}</text>
+                                </g>
+                            );
+                        })}
+
+                        {/* X-Axis Labels */}
+                        {ratings.map((r, i) => (
+                            <text key={i} x={getX(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
+                                {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </text>
+                        ))}
+
+                        {/* Area Fill */}
+                        {hasData && <polygon points={areaPoints} fill="url(#ratings-gradient)" />}
+
+                        {/* Line */}
+                        {hasData && <polyline points={points} fill="none" stroke="#facc15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+
+                        {/* Data Points */}
+                        {ratings.map((r, i) => (
+                            <circle
+                                key={i}
+                                cx={getX(i)}
+                                cy={getY(r.average || 0)}
+                                r={hoveredPoint?.index === i ? 6 : (r.count > 0 ? 4 : 2)}
+                                fill={r.count > 0 ? (hoveredPoint?.index === i ? '#facc15' : '#1e293b') : '#334155'}
+                                stroke={r.count > 0 ? '#facc15' : '#475569'}
+                                strokeWidth="2"
+                                style={{ transition: 'r 0.1s ease', cursor: r.count > 0 ? 'pointer' : 'default' }}
+                            />
+                        ))}
+
+                        {/* Hover Overlay Columns */}
+                        {ratings.map((r, i) => (
+                            <rect
+                                key={`hover-col-${i}`}
+                                x={getX(i) - (graphWidth / ratings.length) / 2}
+                                y={0}
+                                width={graphWidth / ratings.length}
+                                height={graphHeight}
+                                fill="transparent"
+                                style={{ cursor: r.count > 0 ? 'pointer' : 'default' }}
+                                onMouseMove={(e) => setHoveredPoint({ index: i, x: getX(i), y: e.nativeEvent.offsetY })}
+                                onMouseEnter={(e) => setHoveredPoint({ index: i, x: getX(i), y: e.nativeEvent.offsetY })}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onPointClick && r.count > 0) onPointClick(r);
+                                }}
+                            />
+                        ))}
+                    </g>
+                </svg>
+
+                {/* Tooltip */}
+                {hoveredPoint !== null && ratings[hoveredPoint.index] && (
+                    <div style={{
+                        position: 'absolute',
+                        left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
+                        top: `${hoveredPoint.y ? hoveredPoint.y + padding.top : 20}px`,
+                        transform: `translate(${hoveredPoint.index > ratings.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
+                        background: '#0f172a',
+                        border: '1px solid #334155',
+                        borderRadius: '8px',
+                        padding: '0.75rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                        zIndex: 20,
+                        pointerEvents: 'none',
+                        minWidth: '140px'
+                    }}>
+                        <div style={{ color: '#e2e8f0', fontWeight: 600, borderBottom: '1px solid #334155', marginBottom: '0.5rem', paddingBottom: '0.2rem', fontSize: '0.9rem' }}>
+                            {new Date(ratings[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem', gap: '1rem' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
+                                <span style={{ width: 8, height: 8, background: '#facc15', borderRadius: '50%' }} />
+                                Avg Rating
+                            </span>
+                            <span style={{ color: '#fff', fontWeight: 500 }}>
+                                {ratings[hoveredPoint.index].average > 0 ? ratings[hoveredPoint.index].average.toFixed(1) : '-'} ⭐
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', gap: '1rem' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
+                                <span style={{ width: 8, height: 8, background: '#3b82f6', borderRadius: '50%' }} />
+                                Votes
+                            </span>
+                            <span style={{ color: '#fff', fontWeight: 500 }}>
+                                {ratings[hoveredPoint.index].count}
+                            </span>
+                        </div>
+                        {ratings[hoveredPoint.index].count > 0 && (
+                            <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #334155', fontSize: '0.75rem', color: '#64748b', textAlign: 'center' }}>
+                                Click for breakdown
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
