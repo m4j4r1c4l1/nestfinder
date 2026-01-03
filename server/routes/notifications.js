@@ -115,6 +115,15 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
         const notificationCount = get('SELECT COUNT(*) as count FROM notifications');
         const unreadCount = get('SELECT COUNT(*) as count FROM notifications WHERE read = 0');
 
+        // Get rating metrics
+        const ratingStats = get(`
+            SELECT SUM(total_ratings) as totalRatings, SUM(rating_sum) as ratingSum
+            FROM daily_ratings
+        `);
+        const avgRating = ratingStats?.totalRatings > 0
+            ? ratingStats.ratingSum / ratingStats.totalRatings
+            : null;
+
         // List recent active users
         const users = all(`
             SELECT id as user_id, nickname, created_at, last_active
@@ -129,7 +138,9 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
             notificationMetrics: {
                 total: notificationCount?.count || 0,
                 unread: unreadCount?.count || 0
-            }
+            },
+            avgRating: avgRating,
+            totalRatings: ratingStats?.totalRatings || 0
         });
     } catch (error) {
         console.error('Stats error:', error);

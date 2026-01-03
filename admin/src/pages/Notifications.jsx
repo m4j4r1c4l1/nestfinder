@@ -108,20 +108,20 @@ const Notifications = () => {
                 <p className="text-muted">Manage and track app notifications</p>
             </div>
 
-            {/* Stats Summary */}
+            {/* Totals Summary */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3>📊 Metrics</h3>
+                    <h3>📊 Totals</h3>
                 </div>
                 <div className="card-body">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.5rem' }}>
                         <div>
                             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
                                 {stats.totalSubscribers}
                             </div>
                             <div>
                                 <div style={{ fontWeight: 600 }}>Total Users</div>
-                                <div className="text-muted text-sm">Registered users</div>
+                                <div className="text-muted text-sm">Registered</div>
                             </div>
                         </div>
                         <div>
@@ -129,8 +129,17 @@ const Notifications = () => {
                                 {stats.notificationMetrics?.total || 0}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 600 }}>Total Messages</div>
-                                <div className="text-muted text-sm">In database</div>
+                                <div style={{ fontWeight: 600 }}>Total Sent</div>
+                                <div className="text-muted text-sm">Notifications</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>
+                                {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 600 }}>Delivered</div>
+                                <div className="text-muted text-sm">Messages</div>
                             </div>
                         </div>
                         <div>
@@ -138,8 +147,26 @@ const Notifications = () => {
                                 {stats.notificationMetrics?.unread || 0}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 600 }}>Unread Messages</div>
-                                <div className="text-muted text-sm">Pending delivery</div>
+                                <div style={{ fontWeight: 600 }}>Pending</div>
+                                <div className="text-muted text-sm">Unread</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
+                                {stats.avgRating ? stats.avgRating.toFixed(1) : '-'} ⭐
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 600 }}>Avg Rating</div>
+                                <div className="text-muted text-sm">All time</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+                                {stats.totalRatings || 0}
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 600 }}>Rating Votes</div>
+                                <div className="text-muted text-sm">Total</div>
                             </div>
                         </div>
                     </div>
@@ -672,8 +699,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const graphWidth = chartWidth - padding.left - padding.right;
     const graphHeight = chartHeight - padding.top - padding.bottom;
 
-    // Helper functions
-    const getX = (i) => (i / (metrics.length - 1 || 1)) * graphWidth;
+    // Helper functions - add inner padding so bars don't overlap Y-axis
+    const innerPadding = type === 'bar' ? graphWidth / (metrics.length * 2) : 0;
+    const getX = (i) => innerPadding + (i / (metrics.length - 1 || 1)) * (graphWidth - innerPadding * 2);
     const getY = (val, max) => graphHeight - ((val / max) * graphHeight);
 
     if (loading || metrics.length === 0) {
@@ -1136,11 +1164,11 @@ const RatingsBreakdownModal = ({ data, onClose }) => {
     );
 };
 
-// Ratings Chart Card Component (Area Chart)
+// Ratings Chart Card Component (Area Chart with Stars)
 const RatingsChartCard = ({ onPointClick }) => {
     const [ratings, setRatings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [days, setDays] = useState(30);
+    const [days, setDays] = useState(7);
     const [refreshInterval, setRefreshInterval] = useState(0);
     const [hoveredPoint, setHoveredPoint] = useState(null);
 
@@ -1179,8 +1207,19 @@ const RatingsChartCard = ({ onPointClick }) => {
     const graphWidth = chartWidth - padding.left - padding.right;
     const graphHeight = chartHeight - padding.top - padding.bottom;
 
-    const getX = (i) => (i / (ratings.length - 1 || 1)) * graphWidth;
+    // Add inner padding for the ratings chart too
+    const innerPadding = graphWidth / (ratings.length * 2);
+    const getX = (i) => innerPadding + (i / (ratings.length - 1 || 1)) * (graphWidth - innerPadding * 2);
     const getY = (val) => graphHeight - ((val / 5) * graphHeight); // Scale 0-5
+
+    // Get color based on rating value (1-5 scale)
+    const getRatingColor = (avg) => {
+        if (avg >= 4.5) return '#22c55e'; // Green
+        if (avg >= 3.5) return '#84cc16'; // Lime
+        if (avg >= 2.5) return '#facc15'; // Yellow
+        if (avg >= 1.5) return '#f97316'; // Orange
+        return '#ef4444'; // Red
+    };
 
     const renderControls = () => (
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -1255,7 +1294,9 @@ const RatingsChartCard = ({ onPointClick }) => {
             {/* Legend */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: 'transparent' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-                    <div style={{ width: 24, height: 12, borderRadius: '2px', background: 'linear-gradient(90deg, #facc1566, #facc15)' }} />
+                    <div style={{ width: 24, height: 14, borderRadius: '2px', background: 'linear-gradient(to right, #ef4444, #f97316, #facc15, #84cc16, #22c55e)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: '0.6rem' }}>⭐</span>
+                    </div>
                     <span style={{ color: '#94a3b8' }}>Average Rating (1-5)</span>
                 </div>
             </div>
@@ -1299,18 +1340,20 @@ const RatingsChartCard = ({ onPointClick }) => {
                         {/* Line */}
                         {hasData && <polyline points={points} fill="none" stroke="#facc15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
 
-                        {/* Data Points */}
+                        {/* Data Points - Stars instead of circles */}
                         {ratings.map((r, i) => (
-                            <circle
+                            <text
                                 key={i}
-                                cx={getX(i)}
-                                cy={getY(r.average || 0)}
-                                r={hoveredPoint?.index === i ? 6 : (r.count > 0 ? 4 : 2)}
-                                fill={r.count > 0 ? (hoveredPoint?.index === i ? '#facc15' : '#1e293b') : '#334155'}
-                                stroke={r.count > 0 ? '#facc15' : '#475569'}
-                                strokeWidth="2"
-                                style={{ transition: 'r 0.1s ease', cursor: r.count > 0 ? 'pointer' : 'default' }}
-                            />
+                                x={getX(i)}
+                                y={getY(r.average || 0)}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize={hoveredPoint?.index === i ? 16 : (r.count > 0 ? 12 : 8)}
+                                fill={r.count > 0 ? getRatingColor(r.average) : '#475569'}
+                                style={{ transition: 'font-size 0.1s ease, fill 0.2s', cursor: r.count > 0 ? 'pointer' : 'default' }}
+                            >
+                                ★
+                            </text>
                         ))}
 
                         {/* Hover Overlay Columns */}
@@ -1371,11 +1414,6 @@ const RatingsChartCard = ({ onPointClick }) => {
                                 {ratings[hoveredPoint.index].count}
                             </span>
                         </div>
-                        {ratings[hoveredPoint.index].count > 0 && (
-                            <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #334155', fontSize: '0.75rem', color: '#64748b', textAlign: 'center' }}>
-                                Click for breakdown
-                            </div>
-                        )}
                     </div>
                 )}
             </div>
