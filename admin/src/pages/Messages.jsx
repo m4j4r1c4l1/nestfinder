@@ -539,7 +539,7 @@ const Messages = () => {
                                     </div>
                                 )}
                             </div>
-                            {Math.ceil(broadcasts.length / broadcastPageSize) > 1 && (
+                            {Math.ceil(broadcasts.length / broadcastPageSize) >= 1 && (
                                 <PaginationControls
                                     page={broadcastPage}
                                     totalPages={Math.ceil(broadcasts.length / broadcastPageSize)}
@@ -889,7 +889,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
 
     // Pagination
     const [page, setPage] = useState(1);
-    const pageSize = 20;
+    const pageSize = 100; // Increased to 100 per request
 
     // Resizable columns state
     // Resizable columns state
@@ -1242,6 +1242,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     </table>
                     {feedback.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No messages found</div>}
                 </div>
+                {totalPages >= 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
             </div>
 
             {previewItem && (
@@ -1579,7 +1580,7 @@ const HistorySection = ({ users = [] }) => {
                     </table>
                     {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
                 </div>
-                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
+                {totalPages >= 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
             </div>
 
             {selectedBatchId && (
