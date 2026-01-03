@@ -1018,7 +1018,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     }}
                                     onClick={() => setPreviewItem(item)}
                                 >
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
                                         <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
@@ -1031,7 +1031,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                             </span>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                         {item.status === 'new' ? (
                                             <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                                 <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
@@ -1061,7 +1061,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
 
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
                                             style={{
