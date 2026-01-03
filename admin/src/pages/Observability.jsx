@@ -207,7 +207,7 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>🛠️ Development</div>
                                 <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#64748b' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#14b8a6' }}>
                                             {(stats.devMetrics?.loc || 0).toLocaleString()}
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>LOC</div>
