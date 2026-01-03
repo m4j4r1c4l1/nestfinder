@@ -177,9 +177,12 @@ const Logs = () => {
     };
 
     return (
-        <div style={{ padding: '1.5rem' }}>
+        <div style={{ padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h2 style={{ marginBottom: '0.5rem' }}>🥚 Logs</h2>
+                <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>View and filter system activity and audit trails</p>
+            </div>
             <div className="flex-between flex-center mb-4">
-                <h2>🥚 System Logs</h2>
                 <div className="flex gap-2">
                     <input
                         list="actionOptions"
@@ -219,7 +222,7 @@ const Logs = () => {
             </div>
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
-                <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1, maxHeight: 'calc(100vh - 140px)' }}>
+                <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1 }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>

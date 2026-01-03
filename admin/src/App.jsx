@@ -172,7 +172,7 @@ const App = () => {
         { id: 'dashboard', label: 'Dashboard', icon: '🐥' },
         { id: 'observability', label: 'Observability', icon: '🐦' },
         { id: 'messages', label: 'Messages', icon: '🔔' },
-        { id: 'logs', label: 'Activity Logs', icon: '🥚' },
+        { id: 'logs', label: 'Logs', icon: '🥚' },
         { id: 'settings', label: 'Settings', icon: '🦉' }
     ];
 
