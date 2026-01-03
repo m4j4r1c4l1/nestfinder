@@ -233,7 +233,6 @@ const Messages = () => {
                 top: 0,
                 background: 'var(--color-bg-primary, #0f172a)',
                 zIndex: 100,
-                margin: '-1.5rem -1.5rem 1rem -1.5rem',
                 padding: '1.5rem 1.5rem 0 1.5rem'
             }}>
                 <div style={{ marginBottom: '1.5rem' }}>
@@ -312,7 +311,8 @@ const Messages = () => {
                     flex: (activeTab === 'outbox' || activeTab === 'feedback') ? 1 : 'none',
                     display: 'flex',
                     flexDirection: 'column',
-                    overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden'
+                    overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
+                    padding: '0 1.5rem 1.5rem 1.5rem'
                 }}>
 
                     {/* COMPOSER TAB */}
@@ -1465,7 +1465,7 @@ const HistorySection = ({ users = [] }) => {
                         background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
                         borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.5rem',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '150px'
+                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '170px'
                     }}>
                         Total: {logs.length}
                     </span>
@@ -1486,12 +1486,12 @@ const HistorySection = ({ users = [] }) => {
                             } catch (err) { alert('Cleanup failed: ' + err.message); }
                         }}
                         className="btn btn-sm btn-danger"
-                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', width: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}
                         title="Delete all sent history logs"
                     >
                         🗑️ Clear History
                     </button>
-                    <button onClick={loadHistory} className="btn btn-secondary" style={{ width: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🔄 Refresh</button>
+                    <button onClick={loadHistory} className="btn btn-secondary" style={{ width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🔄 Refresh</button>
                 </div>
             </div>
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>

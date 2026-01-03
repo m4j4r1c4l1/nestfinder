@@ -177,7 +177,7 @@ const Logs = () => {
     };
 
     return (
-        <div>
+        <div style={{ padding: '1.5rem' }}>
             <div className="flex-between flex-center mb-4">
                 <h2>System Logs</h2>
                 <div className="flex gap-2">
