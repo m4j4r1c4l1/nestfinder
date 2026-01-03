@@ -940,10 +940,10 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                 <h3>💬 Received History</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
-                        <span style={{ color: '#22c55e', fontWeight: 500 }}>
+                        <span style={{ color: '#94a3b8', fontWeight: 500 }}>
                             ✓✓ {feedback.filter(f => f.status === 'new').length} Pending
                         </span>
-                        <span style={{ color: '#3b82f6', fontWeight: 500 }}>
+                        <span style={{ color: '#94a3b8', fontWeight: 500 }}>
                             ✓✓ {feedback.filter(f => f.status === 'reviewed').length} Read
                         </span>
                     </div>
@@ -1085,7 +1085,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                         <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {item.message}
+                                            {(item.message || '').replace(/\n*\[Rating:\s*\d\/5\s*⭐\]/g, '').trim()}
                                         </div>
                                     </td>
 
@@ -1762,7 +1762,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
 
                         {/* Message/Body */}
                         <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
-                            {message.message || message.body}
+                            {((message.message || message.body) || '').replace(/\n*\[Rating:\s*\d\/5\s*⭐\]/g, '').trim()}
                         </div>
                     </div>
                 </div>

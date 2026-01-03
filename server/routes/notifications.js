@@ -124,6 +124,9 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
             ? ratingStats.ratingSum / ratingStats.totalRatings
             : null;
 
+        // Get feedback count
+        const feedbackCount = get('SELECT COUNT(*) as count FROM feedback');
+
         // List recent active users
         const users = all(`
             SELECT id as user_id, nickname, created_at, last_active
@@ -140,7 +143,8 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
                 unread: unreadCount?.count || 0
             },
             avgRating: avgRating,
-            totalRatings: ratingStats?.totalRatings || 0
+            totalRatings: ratingStats?.totalRatings || 0,
+            totalReceived: feedbackCount?.count || 0
         });
     } catch (error) {
         console.error('Stats error:', error);

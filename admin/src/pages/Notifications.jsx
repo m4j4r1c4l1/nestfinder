@@ -114,8 +114,9 @@ const Notifications = () => {
                     <h3>📊 Totals</h3>
                 </div>
                 <div className="card-body">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.5rem' }}>
-                        <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                        {/* Users Section */}
+                        <div style={{ textAlign: 'center', padding: '0 1rem' }}>
                             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
                                 {stats.totalSubscribers}
                             </div>
@@ -124,49 +125,72 @@ const Notifications = () => {
                                 <div className="text-muted text-sm">Registered</div>
                             </div>
                         </div>
-                        <div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
-                                {stats.notificationMetrics?.total || 0}
+
+                        {/* Separator */}
+                        <div style={{ width: '1px', height: '60px', background: '#334155', alignSelf: 'center' }} />
+
+                        {/* Messages Section */}
+                        <div style={{ display: 'flex', gap: '1.5rem' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                    {stats.notificationMetrics?.total || 0}
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>Total Sent</div>
+                                    <div className="text-muted text-sm">Notifications</div>
+                                </div>
                             </div>
-                            <div>
-                                <div style={{ fontWeight: 600 }}>Total Sent</div>
-                                <div className="text-muted text-sm">Notifications</div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>
+                                    {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>Delivered</div>
+                                    <div className="text-muted text-sm">Messages</div>
+                                </div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                    {stats.notificationMetrics?.unread || 0}
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>Pending</div>
+                                    <div className="text-muted text-sm">Unread</div>
+                                </div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                                    {stats.totalReceived || 0}
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>Received</div>
+                                    <div className="text-muted text-sm">Feedback</div>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>
-                                {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
+
+                        {/* Separator */}
+                        <div style={{ width: '1px', height: '60px', background: '#334155', alignSelf: 'center' }} />
+
+                        {/* Ratings Section */}
+                        <div style={{ display: 'flex', gap: '1.5rem' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
+                                    {stats.avgRating ? stats.avgRating.toFixed(1) : '-'} ⭐
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>Avg Rating</div>
+                                    <div className="text-muted text-sm">All time</div>
+                                </div>
                             </div>
-                            <div>
-                                <div style={{ fontWeight: 600 }}>Delivered</div>
-                                <div className="text-muted text-sm">Messages</div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
-                                {stats.notificationMetrics?.unread || 0}
-                            </div>
-                            <div>
-                                <div style={{ fontWeight: 600 }}>Pending</div>
-                                <div className="text-muted text-sm">Unread</div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
-                                {stats.avgRating ? stats.avgRating.toFixed(1) : '-'} ⭐
-                            </div>
-                            <div>
-                                <div style={{ fontWeight: 600 }}>Avg Rating</div>
-                                <div className="text-muted text-sm">All time</div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-                                {stats.totalRatings || 0}
-                            </div>
-                            <div>
-                                <div style={{ fontWeight: 600 }}>Rating Votes</div>
-                                <div className="text-muted text-sm">Total</div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
+                                    {stats.totalRatings || 0}
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>Rating Votes</div>
+                                    <div className="text-muted text-sm">Total</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1294,9 +1318,13 @@ const RatingsChartCard = ({ onPointClick }) => {
             {/* Legend */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: 'transparent' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-                    <div style={{ width: 24, height: 14, borderRadius: '2px', background: 'linear-gradient(to right, #ef4444, #f97316, #facc15, #84cc16, #22c55e)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: '0.6rem' }}>⭐</span>
-                    </div>
+                    <span style={{
+                        fontSize: '1.2rem',
+                        background: 'linear-gradient(to right, #ef4444, #f97316, #facc15, #84cc16, #22c55e)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text'
+                    }}>★</span>
                     <span style={{ color: '#94a3b8' }}>Average Rating (1-5)</span>
                 </div>
             </div>
@@ -1348,7 +1376,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                                 y={getY(r.average || 0)}
                                 textAnchor="middle"
                                 dominantBaseline="central"
-                                fontSize={hoveredPoint?.index === i ? 16 : (r.count > 0 ? 12 : 8)}
+                                fontSize={hoveredPoint?.index === i ? 20 : (r.count > 0 ? 16 : 10)}
                                 fill={r.count > 0 ? getRatingColor(r.average) : '#475569'}
                                 style={{ transition: 'font-size 0.1s ease, fill 0.2s', cursor: r.count > 0 ? 'pointer' : 'default' }}
                             >
@@ -1391,12 +1419,12 @@ const RatingsChartCard = ({ onPointClick }) => {
                         boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
                         zIndex: 20,
                         pointerEvents: 'none',
-                        minWidth: '140px'
+                        whiteSpace: 'nowrap'
                     }}>
                         <div style={{ color: '#e2e8f0', fontWeight: 600, borderBottom: '1px solid #334155', marginBottom: '0.5rem', paddingBottom: '0.2rem', fontSize: '0.9rem' }}>
                             {new Date(ratings[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem', gap: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem', gap: '1.5rem' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
                                 <span style={{ width: 8, height: 8, background: '#facc15', borderRadius: '50%' }} />
                                 Avg Rating
@@ -1405,7 +1433,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                                 {ratings[hoveredPoint.index].average > 0 ? ratings[hoveredPoint.index].average.toFixed(1) : '-'} ⭐
                             </span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', gap: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', gap: '1.5rem' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
                                 <span style={{ width: 8, height: 8, background: '#3b82f6', borderRadius: '50%' }} />
                                 Votes
