@@ -1611,7 +1611,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
     };
 
     // Determine Mode
-    const isFeedback = message.hasOwnProperty('user_nickname') || message.hasOwnProperty('type');
+    const isFeedback = 'user_nickname' in message || 'type' in message;
     const isNotification = !isFeedback;
 
     // Data Parsing
