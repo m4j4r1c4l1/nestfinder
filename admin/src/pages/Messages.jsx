@@ -216,7 +216,7 @@ const Messages = () => {
         <div style={{ flex: 1, maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                    Messages
+                    🔔 In-App Notifications
                 </h1>
                 <p style={{ color: 'var(--color-text-secondary)' }}>
                     Manage communications, broadcasts, and user feedback
