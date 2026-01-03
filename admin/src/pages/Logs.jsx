@@ -273,7 +273,16 @@ const Logs = () => {
                                                 {log.user_id?.length > 13 ? `${log.user_id.substring(0, 13)}...` : log.user_id}
                                             </span>}
                                         </td>
-                                        <td style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#94a3b8', verticalAlign: 'middle' }}>
+                                        <td style={{
+                                            padding: '0.5rem 1rem',
+                                            fontSize: '0.85rem',
+                                            color: '#94a3b8',
+                                            verticalAlign: 'middle',
+                                            whiteSpace: (log.metadata ? JSON.stringify(log.metadata) : '-').length > 100 ? 'normal' : 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            wordBreak: (log.metadata ? JSON.stringify(log.metadata) : '-').length > 100 ? 'break-word' : 'normal'
+                                        }}>
                                             {log.metadata ? JSON.stringify(log.metadata) : '-'}
                                         </td>
                                     </tr>

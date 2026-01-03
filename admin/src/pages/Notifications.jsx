@@ -46,6 +46,12 @@ const templates = {
         title: '🚨 Urgent Notice',
         body: ''
     },
+    rate_app: {
+        id: 'rate_app',
+        name: '⭐ Rate this App',
+        title: 'Enjoying NestFinder? ⭐',
+        body: 'If you find our app helpful, please take a moment to rate us! Your feedback helps us grow and reach more people.'
+    },
     new_feature: {
         id: 'new_feature',
         name: '✨ New Feature',

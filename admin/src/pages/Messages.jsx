@@ -62,11 +62,11 @@ const templates = {
         title: 'Happy New Year! 🎆🪹',
         body: 'Wishing everyone a bright and safe 2026! 🌟 Let\'s keep supporting each other and finding new paths to our nests 🪹. Happy New Year from NestFinder! 🏠💙'
     },
-    weather_alert: {
-        id: 'weather_alert',
-        name: '⛈️ Weather Alert',
-        title: '⛈️ Weather Alert',
-        body: 'Severe weather conditions reported. Please stay safe and seek shelter if necessary.'
+    rate_app: {
+        id: 'rate_app',
+        name: '⭐ Rate this App',
+        title: 'Enjoying NestFinder? ⭐',
+        body: 'If you find our app helpful, please take a moment to rate us! Your feedback helps us grow and reach more people.'
     },
     community_event: {
         id: 'community_event',
@@ -1367,7 +1367,9 @@ const HistorySection = ({ users = [] }) => {
             reminder: { icon: '📍', name: 'Weekly Reminder' },
             announcement: { icon: '📢', name: 'Announcement' },
             urgent: { icon: '🚨', name: 'Urgent Notice' },
+            rate_app: { icon: '⭐', name: 'Rate this App' },
             new_feature: { icon: '✨', name: 'New Feature' },
+            happy_new_year: { icon: '🎉', name: 'Happy New Year' },
             custom: { icon: '✏️', name: 'Custom Message' }
         };
         return map[key] || { icon: '❓', name: key };
