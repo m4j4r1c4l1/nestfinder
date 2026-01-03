@@ -1,6 +1,13 @@
 import express from 'express';
 import { getDb, run, get, all, log } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
@@ -140,9 +147,34 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
             LIMIT 100
         `);
 
+        // Calculate Dev Metrics
+        let devMetrics = { commits: 0, components: 0, loc: 0, files: 0 };
+        try {
+            // 1. Commits
+            try {
+                const commitCount = execSync('git rev-list --count HEAD', { cwd: __dirname }).toString().trim();
+                devMetrics.commits = parseInt(commitCount, 10);
+            } catch (e) { console.error('Git commit count failed', e.message); }
+
+            // 2. Code Stats (Client + Admin + Server)
+            // Go up from server/routes to root
+            const rootDir = path.resolve(__dirname, '../../');
+            const clientStats = countCodeStats(path.join(rootDir, 'client/src'));
+            const adminStats = countCodeStats(path.join(rootDir, 'admin/src'));
+            const serverStats = countCodeStats(path.join(rootDir, 'server'));
+
+            devMetrics.components = clientStats.components + adminStats.components;
+            devMetrics.lines = clientStats.lines + adminStats.lines + serverStats.lines;
+            devMetrics.files = clientStats.files + adminStats.files + serverStats.files;
+
+        } catch (err) {
+            console.error('Dev metrics calculation failed', err);
+        }
+
         res.json({
             totalSubscribers: total?.count || 0,
             subscribers: users,
+            devMetrics,
             notificationMetrics: {
                 total: notificationCount?.count || 0,
                 unread: unreadCount?.count || 0
@@ -161,6 +193,44 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
         res.status(500).json({ error: 'Failed to get stats' });
     }
 });
+
+// Helper to count code stats recursively
+const countCodeStats = (dirPath) => {
+    let stats = { files: 0, lines: 0, components: 0 };
+
+    if (!fs.existsSync(dirPath)) return stats;
+
+    const files = fs.readdirSync(dirPath);
+
+    for (const file of files) {
+        // Skip node_modules, .git, dist, build, etc.
+        if (['node_modules', '.git', 'dist', 'build', '.vite', 'coverage'].includes(file)) continue;
+
+        const fullPath = path.join(dirPath, file);
+        const stat = fs.statSync(fullPath);
+
+        if (stat.isDirectory()) {
+            const subStats = countCodeStats(fullPath);
+            stats.files += subStats.files;
+            stats.lines += subStats.lines;
+            stats.components += subStats.components;
+        } else if (stat.isFile()) {
+            // Check extensions for LOC
+            if (/\.(js|jsx|ts|tsx|css|scss|html)$/.test(file)) {
+                stats.files++;
+                try {
+                    const content = fs.readFileSync(fullPath, 'utf8');
+                    stats.lines += content.split('\n').length;
+                } catch (e) { /* ignore read errors */ }
+            }
+            // Check for Components (.jsx/.tsx)
+            if (/\.(jsx|tsx)$/.test(file)) {
+                stats.components++;
+            }
+        }
+    }
+    return stats;
+};
 
 // Send notification (In-App only)
 router.post('/admin/send', requireAdmin, async (req, res) => {
