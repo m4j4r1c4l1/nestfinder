@@ -82,6 +82,25 @@ const templates = {
     }
 };
 
+const getTemplateInfo = (key) => {
+    if (!key) return { icon: '❓', name: 'Unknown' };
+    const map = {
+        share_app: { icon: '🤝', name: 'Share App' },
+        new_points: { icon: '🪹', name: 'New Locations' },
+        status_update: { icon: '✅', name: 'Status Update' },
+        reminder: { icon: '📍', name: 'Weekly Reminder' },
+        announcement: { icon: '📢', name: 'Announcement' },
+        urgent: { icon: '🚨', name: 'Urgent Notice' },
+        rate_app: { icon: '⭐', name: 'Rate this App' },
+        new_feature: { icon: '✨', name: 'New Feature' },
+        happy_new_year: { icon: '🎉', name: 'Happy New Year' },
+        custom: { icon: '✏️', name: 'Custom Message' },
+        community_event: { icon: '🎉', name: 'Community Event' },
+        maintenance: { icon: '🔧', name: 'Maintenance' }
+    };
+    return map[key] || { icon: '❓', name: key };
+};
+
 const Messages = () => {
     const [activeTab, setActiveTab] = useState('composer');
     const [loading, setLoading] = useState(true);
@@ -700,7 +719,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     );
 
     return (
-        <div className="card" style={{ marginBottom: '1.5rem', maxHeight: 'none', overflow: 'visible' }}>
+        <div className="card" style={{ marginBottom: '1rem', maxHeight: 'none', overflow: 'visible' }}>
             <div className="card-header"><h3>✉️ Create Notifications</h3></div>
             <div className="card-body">
                 <div className="form-group">
@@ -732,12 +751,12 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                <div className="form-group" style={{ marginTop: '0.25rem' }}>
                     <label className="form-label" style={{ marginBottom: '0.25rem' }}>Title</label>
                     <input type="text" className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} />
                 </div>
 
-                <div className="form-group" style={{ marginTop: '0.25rem', marginBottom: '0.5rem' }}>
+                <div className="form-group" style={{ marginTop: '0.25rem', marginBottom: '0.25rem' }}>
                     <label className="form-label" style={{ marginBottom: '0.25rem' }}>Image</label>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
                         <input type="text" className="form-input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL..." style={{ flex: 1 }} />
@@ -755,7 +774,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginTop: '0.5rem', position: 'relative' }}>
+                <div className="form-group" style={{ marginTop: '0.25rem', position: 'relative' }}>
                     <label className="form-label" style={{ marginBottom: '0.25rem', display: 'block' }}>Message</label>
                     <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
                     <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
@@ -787,7 +806,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                 )}
 
 
-                <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                <div className="form-group" style={{ marginTop: '0.25rem' }}>
                     <label className="form-label" style={{ marginBottom: '0.25rem' }}>Target</label>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         <button
@@ -1374,22 +1393,7 @@ const HistorySection = ({ users = [] }) => {
         setSortColumn(column);
     };
 
-    const getTemplateInfo = (key) => {
-        if (!key) return { icon: '❓', name: 'Unknown' };
-        const map = {
-            share_app: { icon: '🤝', name: 'Share App' },
-            new_points: { icon: '🪹', name: 'New Locations' },
-            status_update: { icon: '✅', name: 'Status Update' },
-            reminder: { icon: '📍', name: 'Weekly Reminder' },
-            announcement: { icon: '📢', name: 'Announcement' },
-            urgent: { icon: '🚨', name: 'Urgent Notice' },
-            rate_app: { icon: '⭐', name: 'Rate this App' },
-            new_feature: { icon: '✨', name: 'New Feature' },
-            happy_new_year: { icon: '🎉', name: 'Happy New Year' },
-            custom: { icon: '✏️', name: 'Custom Message' }
-        };
-        return map[key] || { icon: '❓', name: key };
-    };
+
 
     return (
         <div className="card">
@@ -1427,7 +1431,7 @@ const HistorySection = ({ users = [] }) => {
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
                                 <th onClick={() => handleSort('created_at')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.timestamp, position: 'relative' }}>
-                                    Timestamp {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                     <ResizeHandle column="timestamp" />
                                 </th>
                                 <th onClick={() => handleSort('title')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.title, position: 'relative' }}>
