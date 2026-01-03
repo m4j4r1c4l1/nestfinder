@@ -14,13 +14,18 @@ const Logs = () => {
     // Resizable columns state
     // Resizable columns state
     const [columnWidths, setColumnWidths] = useState(() => {
-        const saved = localStorage.getItem('admin_logs_columns');
-        return saved ? JSON.parse(saved) : {
+        const defaults = {
             time: 140,
             action: 180,
             user: 200,
             details: null // flex
         };
+        try {
+            const saved = localStorage.getItem('admin_logs_columns');
+            return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+        } catch (e) {
+            return defaults;
+        }
     });
     const [resizing, setResizing] = useState(null);
     const [startX, setStartX] = useState(0);
