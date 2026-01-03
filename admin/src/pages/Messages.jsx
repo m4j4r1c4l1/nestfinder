@@ -1091,7 +1091,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     );
 };
 
-const HistorySection = () => {
+const HistorySection = ({ users = [] }) => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedBatchId, setSelectedBatchId] = useState(null);
@@ -1237,13 +1237,34 @@ const HistorySection = () => {
                                         </td>
                                         <td
                                             style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id })}
+                                            onClick={() => {
+                                                // Resolve Nickname from Users List
+                                                // target_id might be 'user_UUID' or just 'UUID' or 'Ioscompose' (if legacy/custom)
+                                                // Users list usually has IDs like 'user_UUID' or 'UUID' depending on backend.
+                                                // We try exact match first, then try appending/stripping 'user_'
+                                                const rawId = log.target_id;
+                                                let foundUser = users.find(u => u.id === rawId);
+                                                if (!foundUser && rawId && !rawId.startsWith('user_')) {
+                                                    foundUser = users.find(u => u.id === `user_${rawId}`);
+                                                }
+                                                const resolvedNickname = foundUser ? foundUser.nickname : (log.target_id || 'User');
+                                                
+                                                setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
+                                            }}
                                         >
                                             <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
                                         </td>
                                         <td
                                             style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id })}
+                                            onClick={() => {
+                                                const rawId = log.target_id;
+                                                let foundUser = users.find(u => u.id === rawId);
+                                                if (!foundUser && rawId && !rawId.startsWith('user_')) {
+                                                    foundUser = users.find(u => u.id === `user_${rawId}`);
+                                                }
+                                                const resolvedNickname = foundUser ? foundUser.nickname : (log.target_id || 'User');
+                                                setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
+                                            }}
                                         >
                                             <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                                                 {meta.body ? (meta.body.length > 55 ? meta.body.substring(0, 55) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
