@@ -36,13 +36,13 @@ const templates = {
         id: 'announcement',
         name: '📢 Announcement',
         title: '📢 Announcement',
-        body: ''
+        body: 'We have an important update regarding the NestFinder community.'
     },
     urgent: {
         id: 'urgent',
         name: '🚨 Urgent Notice',
         title: '🚨 Urgent Notice',
-        body: ''
+        body: 'Emergency alert: Please check the app for critical information.'
     },
     new_feature: {
         id: 'new_feature',
@@ -304,7 +304,7 @@ const Messages = () => {
                             {/* Create New Broadcast */}
                             <div className="card" style={{ marginBottom: '2rem' }}>
                                 <div className="card-header">
-                                    <h3>Create Broadcast</h3>
+                                    <h3>🌈 Create Broadcasts</h3>
                                 </div>
                                 <div className="card-body">
                                     <form onSubmit={handleCreateBroadcast}>
@@ -352,15 +352,11 @@ const Messages = () => {
                                                 />
                                                 <label className="btn btn-secondary" style={{
                                                     cursor: 'pointer',
-                                                    padding: 0,
-                                                    width: '42px',
-                                                    minWidth: '42px',
-                                                    height: 'auto',
-                                                    display: 'flex',
+                                                    padding: '0.4rem 1.5rem',
+                                                    display: 'inline-flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    borderRadius: '8px',
-                                                    alignSelf: 'stretch'
+                                                    borderRadius: '8px'
                                                 }}>
                                                     📂
                                                     <input
@@ -455,7 +451,7 @@ const Messages = () => {
                             {/* Existing Broadcasts List */}
                             <div className="card">
                                 <div className="card-header">
-                                    <h3>Manage Broadcasts</h3>
+                                    <h3>🎬 Manage Broadcasts</h3>
                                 </div>
                                 <div className="card-body">
                                     {broadcasts.length === 0 ? (
@@ -705,7 +701,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 
     return (
         <div className="card" style={{ marginBottom: '1.5rem', maxHeight: 'none', overflow: 'visible' }}>
-            <div className="card-header"><h3>✉️ Create Broadcasts</h3></div>
+            <div className="card-header"><h3>✉️ Create Notifications</h3></div>
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>
@@ -1630,8 +1626,11 @@ const MessagePreviewModal = ({ message, onClose }) => {
     if (isFeedback) {
         // Feedback Header: [Icon] [Nickname]
         const typeIcon = message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝';
+        // Ensure we grab the first available nickname property
         const rawNickname = message.user_nickname || message.nickname;
-        headerTitle = rawNickname ? `@${rawNickname}` : 'Anonymous';
+        // Force strings to be strings and trim
+        const safeNickname = String(rawNickname || '').trim();
+        headerTitle = safeNickname ? `@${safeNickname}` : 'Anonymous';
         headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIcon}</span>;
     } else {
         // Notification Header: Recipient or Bulk
@@ -1639,7 +1638,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
         // Logic fix: Only show "Bulk" if count > 1 or target is clearly 'all'.
         // Do NOT assume target_id format defines bulk/single status (e.g. 'Ioscompose' is a valid single user ID).
         const isBulk = (message.count > 1) || message.target === 'all';
-        headerTitle = isBulk ? 'Bulk Message' : ((message.nickname ? `@${message.nickname}` : null) || message.target_id || message.device_id?.substr(0, 8) || 'User');
+        headerTitle = isBulk ? 'Bulk Message' : ((message.nickname ? `@${message.nickname}` : null) || message.target_id || message.device_id?.substr(0, 8) || 'Anonymous');
     }
 
     // Border Color
