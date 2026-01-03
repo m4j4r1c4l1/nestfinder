@@ -217,7 +217,16 @@ const Messages = () => {
     ];
 
     return (
-        <div style={{ flex: 1, maxWidth: '1200px', margin: '0 auto', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{
+            flex: 1,
+            maxWidth: '1200px',
+            margin: '0 auto',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
+            minHeight: (activeTab === 'outbox' || activeTab === 'feedback') ? '100%' : 'auto'
+        }}>
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                     🔔 In-App Notifications
@@ -291,10 +300,10 @@ const Messages = () => {
             ) : (
                 <div className="tab-content" style={{
                     animation: 'fadeIn 0.3s ease',
-                    flex: 1,
+                    flex: (activeTab === 'outbox' || activeTab === 'feedback') ? 1 : 'none',
                     display: 'flex',
                     flexDirection: 'column',
-                    overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'auto' : 'hidden'
+                    overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden'
                 }}>
 
                     {/* COMPOSER TAB */}
@@ -311,14 +320,14 @@ const Messages = () => {
                     {/* OUTBOX TAB */}
                     {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: '2rem' }}>
                             <HistorySection users={subscribers} />
                         </div>
                     )}
 
                     {/* RECEIVED (FEEDBACK) TAB */}
                     {activeTab === 'feedback' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: '2rem' }}>
                             <FeedbackSection
                                 feedback={feedback}
                                 onUpdate={fetchData}
@@ -1068,7 +1077,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const paginatedFeedback = sortedFeedback.slice((page - 1) * pageSize, page * pageSize);
 
     return (
-        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>💬 Received History</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -1439,7 +1448,7 @@ const HistorySection = ({ users = [] }) => {
     };
 
     return (
-        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>📜 Sent History</h3>
                 <div>
