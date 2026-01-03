@@ -90,19 +90,19 @@ const Observability = () => {
                                     <div className="text-muted text-sm" style={{ fontSize: '0.8rem' }}>LOC</div>
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#64748b' }}>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0ea5e9' }}>
                                         {(stats.devMetrics?.components || 0).toLocaleString()}
                                     </div>
                                     <div className="text-muted text-sm" style={{ fontSize: '0.8rem' }}>Components</div>
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#64748b' }}>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
                                         {(stats.devMetrics?.commits || 0).toLocaleString()}
                                     </div>
                                     <div className="text-muted text-sm" style={{ fontSize: '0.8rem' }}>Commits</div>
                                 </div>
                             </div>
-                            <div style={{ fontWeight: 600, marginTop: '0.5rem' }}>Development</div>
+                            <div style={{ fontWeight: 600, marginTop: '0.5rem', color: '#94a3b8' }}>Development</div>
                         </div>
 
                         {/* Separator */}
@@ -137,13 +137,25 @@ const Observability = () => {
                                     <div className="text-muted text-sm">Unread</div>
                                 </div>
                             </div>
-                            {/* Row 2: Received (Total) */}
-                            <div style={{ borderTop: '1px solid #334155', paddingTop: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                            {/* Row 2: Received (Total, Pending, Read) */}
+                            <div style={{ borderTop: '1px solid #334155', paddingTop: '0.5rem', display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#3b82f6' }}>
-                                        {stats.totalReceived || 0}
+                                        {stats.feedbackMetrics?.total || stats.totalReceived || 0}
                                     </div>
-                                    <div className="text-muted text-sm">Received Total</div>
+                                    <div className="text-muted text-sm">Received</div>
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                        {stats.feedbackMetrics?.pending || 0}
+                                    </div>
+                                    <div className="text-muted text-sm">Pending</div>
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#22c55e' }}>
+                                        {stats.feedbackMetrics?.read || 0}
+                                    </div>
+                                    <div className="text-muted text-sm">Read</div>
                                 </div>
                             </div>
                         </div>
@@ -151,37 +163,43 @@ const Observability = () => {
                         {/* Separator */}
                         <div style={{ width: '1px', height: '60px', background: '#334155', alignSelf: 'center' }} />
 
-                        {/* Map Points Section - Flat Circles */}
+                        {/* Map Points Section - Flat Text with Left Icons */}
                         <div style={{ display: 'flex', gap: '1.5rem' }}>
                             <div style={{ textAlign: 'center' }}>
-                                <div style={{
-                                    width: '48px', height: '48px', borderRadius: '50%', background: '#22c55e',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.5rem',
-                                    fontSize: '1.25rem', fontWeight: 'bold', color: '#fff'
-                                }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>
                                     {stats.mapPoints?.confirmed || 0}
                                 </div>
-                                <div style={{ fontWeight: 600 }}>Confirmed</div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                                    <span style={{ fontSize: '0.9rem' }}>🟢</span>
+                                    <div>
+                                        <div style={{ fontWeight: 600, lineHeight: 1 }}>Confirmed</div>
+                                        <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
+                                    </div>
+                                </div>
                             </div>
                             <div style={{ textAlign: 'center' }}>
-                                <div style={{
-                                    width: '48px', height: '48px', borderRadius: '50%', background: '#f59e0b',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.5rem',
-                                    fontSize: '1.25rem', fontWeight: 'bold', color: '#fff'
-                                }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
                                     {stats.mapPoints?.pending || 0}
                                 </div>
-                                <div style={{ fontWeight: 600 }}>Pending</div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                                    <span style={{ fontSize: '0.9rem' }}>🟠</span>
+                                    <div>
+                                        <div style={{ fontWeight: 600, lineHeight: 1 }}>Pending</div>
+                                        <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
+                                    </div>
+                                </div>
                             </div>
                             <div style={{ textAlign: 'center' }}>
-                                <div style={{
-                                    width: '48px', height: '48px', borderRadius: '50%', background: '#64748b',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.5rem',
-                                    fontSize: '1.25rem', fontWeight: 'bold', color: '#fff'
-                                }}>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
                                     {stats.mapPoints?.deactivated || 0}
                                 </div>
-                                <div style={{ fontWeight: 600 }}>Deactivated</div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                                    <span style={{ fontSize: '0.9rem' }}>🔴</span>
+                                    <div>
+                                        <div style={{ fontWeight: 600, lineHeight: 1 }}>Deactivated</div>
+                                        <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Points</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
