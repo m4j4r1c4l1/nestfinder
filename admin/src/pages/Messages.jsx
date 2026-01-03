@@ -340,8 +340,8 @@ const Messages = () => {
                                             </div>
                                         </div>
                                         <div style={{ marginBottom: '1rem' }}>
-                                            <label className="form-label">Image URL (Optional)</label>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <label className="form-label" style={{ marginBottom: '0.25rem' }}>Image URL (Optional)</label>
+                                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
                                                 <input
                                                     type="text"
                                                     className="form-input"
@@ -354,11 +354,13 @@ const Messages = () => {
                                                     cursor: 'pointer',
                                                     padding: 0,
                                                     width: '42px',
-                                                    height: '42px',
+                                                    minWidth: '42px',
+                                                    height: 'auto',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    borderRadius: '8px'
+                                                    borderRadius: '8px',
+                                                    alignSelf: 'stretch'
                                                 }}>
                                                     📂
                                                     <input
@@ -702,8 +704,8 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     );
 
     return (
-        <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <div className="card-header"><h3>✉️ Compose Notification</h3></div>
+        <div className="card" style={{ marginBottom: '1.5rem', maxHeight: 'none', overflow: 'visible' }}>
+            <div className="card-header"><h3>✉️ Create Broadcasts</h3></div>
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>
@@ -741,17 +743,19 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 
                 <div className="form-group" style={{ marginTop: '0.5rem' }}>
                     <label className="form-label" style={{ marginBottom: '0.25rem' }}>Image</label>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
                         <input type="text" className="form-input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL..." style={{ flex: 1 }} />
                         <label className="btn btn-secondary" style={{
                             cursor: 'pointer',
                             padding: 0,
                             width: '42px',
-                            height: '42px',
+                            minWidth: '42px',
+                            height: 'auto',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
+                            alignSelf: 'stretch'
                         }}>
                             <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📂</span>
                             <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
@@ -847,18 +851,25 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const [previewItem, setPreviewItem] = useState(null);
     const [sortColumn, setSortColumn] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc');
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [confirmAction, setConfirmAction] = useState(null);
 
     const toggleSelect = (id) => {
         setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     };
 
     const handleBulkMarkRead = async () => {
-        if (!confirm(`Mark ${selectedIds.length} items as read?`)) return;
         for (const id of selectedIds) {
             await onUpdateStatus(id, 'reviewed');
         }
         setSelectedIds([]);
         onUpdate && onUpdate();
+    };
+
+    const confirmMarkRead = () => {
+        if (selectedIds.length === 0) return;
+        setConfirmAction(() => handleBulkMarkRead);
+        setShowConfirmModal(true);
     };
 
     const handleBulkDelete = async () => {
@@ -936,18 +947,29 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     {selectedIds.length > 0 && (
                         <>
                             <button
-                                onClick={handleBulkMarkRead}
+                                onClick={confirmMarkRead}
                                 className="btn btn-sm"
-                                style={{ background: '#14532d', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 500 }}
+                                style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '32px', display: 'flex', alignItems: 'center' }}
                             >
-                                <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>✓✓</span> Mark as Read
+                                <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
                             </button>
-                            <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}>🗑️ Delete ({selectedIds.length})</button>
+                            <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🗑️ Delete ({selectedIds.length})</button>
                         </>
                     )}
-                    <button onClick={onUpdate} className="btn btn-secondary">🔄 Refresh</button>
+                    <button onClick={onUpdate} className="btn btn-secondary btn-sm" style={{ height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🔄 Refresh</button>
                 </div>
             </div>
+            {showConfirmModal && (
+                <ConfirmationModal
+                    title="Confirm Action"
+                    message={`Are you sure you want to mark ${selectedIds.length} items as read?`}
+                    onConfirm={() => {
+                        confirmAction && confirmAction();
+                        setShowConfirmModal(false);
+                    }}
+                    onCancel={() => setShowConfirmModal(false)}
+                />
+            )}
             <div className="card-body" style={{ padding: 0 }}>
                 <div style={{ height: '65vh', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
@@ -1255,25 +1277,50 @@ const HistorySection = () => {
     );
 };
 
+
+
+const ConfirmationModal = ({ title, message, onConfirm, onCancel }) => {
+    return ReactDOM.createPortal(
+        <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
+        }}>
+            <div style={{
+                background: '#1e293b', borderRadius: '12px', padding: '1.5rem',
+                width: 'min(400px, 90vw)', border: '1px solid #334155',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+            }}>
+                <h3 style={{ margin: '0 0 1rem 0', color: '#f1f5f9', fontSize: '1.2rem' }}>{title}</h3>
+                <p style={{ color: '#cbd5e1', marginBottom: '1.5rem', lineHeight: 1.5 }}>{message}</p>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                    <button onClick={onCancel} style={{
+                        padding: '0.5rem 1rem', background: 'transparent', color: '#cbd5e1',
+                        border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer'
+                    }}>Cancel</button>
+                    <button onClick={onConfirm} style={{
+                        padding: '0.5rem 1rem', background: '#3b82f6', color: 'white',
+                        border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 500
+                    }}>Confirm</button>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
 const EmojiPickerModal = ({ onSelect, onClose }) => {
-    const emojis = [
-        '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘',
-        '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒',
-        '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡',
-        '👋', '🤚', '🖐', '✋', '🖖', '👌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇',
-        '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪',
-        '🏠', '🏡', '🏘️', '🏚️', '🏗️', '🧱', '🪵', '🛖', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨',
-        '🪹', '🪺', '🐦', '🐣', '🐤', '🐥', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🪱', '🐛',
-        '💐', '🌸', '💮', '🏵️', '🌹', '🥀', '🌺', '🌻', '🌼', '🌷', '🌱', '🪴', '🌲', '🌳', '🌴', '🌵',
-        '🔥', '💧', '✨', '🌟', '💫', '⭐', '☀️', '⛅', '☁️', '⚡', '❄️', '☃️', '⛄', '🌬️', '💨', '🌪️',
-        '❤️', '🧡', '💛', '💚', '💙', '💜', '🤎', '🖤', '🤍', '💔', '❣️', '💕', '💞', '💓', '💗', '💖',
-        '🎉', '🎊', '🎈', '🎂', '🎁', '🕯️', '🧶', '🧵', '🪢', '🐾', '💾', '📥', '🚶', '🏃', '🧍', '🧎'
-    ];
+    const categories = {
+        'Faces': ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '🥲', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃'],
+        'Gestures': ['👋', '🤚', '🖐', '✋', '🖖', '👌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦵', '🦿', '🦶', '👣', '👂', '🦻', '👃', '🫀', '🫁', '🧠', '🦷', '🦴', '👀', '👁', '👅', '👄'],
+        'Nature': ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐻‍❄️', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🪱', '🐛', '🦋', '🐌', '🐞', '🐜', '🪰', '🪲', '🪳', '🦟', '🦗', '🕷', '🕸', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🦭', '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🦣', '🐘', '🦛', '🦏', '🐪', '🐫', '🦒', '🦘', '🦬', '🐃', '🐂', '🐄', '🐎', '🐖', 'RAM', '🐑', '🦙', '🐐', '🦌', '🐕', '🐩', '🦮', '🐕‍🦺', '🐈', '🐈‍⬛', '🪶', '🐓', '🦃', '🦤', '🦚', '🦜', '🦢', '🦩', '🕊', '🐇', '🦝', '🦨', '🦡', '🦫', '🦦', '🦥', '🐁', '🐀', '🐿', '🦔', '🌲', '🌳', '🌴', '🌵', '🌾', '🌿', '☘️', '🍀', '🍁', '🍂', '🍃', '🍄', '🐚', '🪨', '🪵', '🔥', '💧', '✨', '🌟', '💫', '⭐', '☀️', '⛅', '☁️', '⚡', '❄️', '☃️', '⛄', '🌬️', '💨', '🌪️', '🌫', '🌈', '☔', '☂️', '🌊'],
+        'Objects': ['👓', '🕶', '🥽', '🥼', '🦺', '👔', '👕', '👖', '🧣', '🧤', '🧥', '🧦', '👗', '👘', '🥻', '🩱', '🩲', '🩳', '👙', '👚', '👛', '👜', '👝', '🎒', '🩴', '👞', '👟', '🥾', '🥿', '👠', '👡', '🩰', '👢', '👑', '👒', '🎩', '🎓', '🧢', '⛑', '🪖', '💄', '💍', '💎', '📢', '📣', '📯', '🔔', '🔕', '🎼', '🎵', '🎶', '🎙', '🎚', '🎛', '🎤', '🎧', '📻', '🎷', '🪗', '🎸', '🎹', '🎺', '🎻', '🪕', '🥁', '🪘', '📱', '📲', '☎️', '📞', '📟', '📠', '🔋', '🔌', '💻', '🖥', '🖨', '⌨️', '🖱', '🖲', '💽', '💾', '💿', '📀', '🧮', '🎥', '🎞', '📽', '🎬', '📺', '📷', '📸', '📹', '📼', '🔍', '🔎', '🕯', '💡', '🔦', '🏮', '🪔', '📔', '📕', '📖', '📗', '📘', '📙', '📚', '📓', '📒', '📃', '📜', '📄', '📰', '🗞', '📑', '🔖', '🏷', '💰', '🪙', '💴', '💵', '💶', '💷', '💸', '💳', '🧾', '✉️', '📧', '📨', '📩', '📤', '📥', '📦', '📫', '📪', '📬', '📭', '📮', '🗳', '✏️', '✒️', '🖋', '🖊', '🖌', '🖍', '📝', '💼', '📁', '📂', '🗂', '📅', '📆', '🗒', '🗓', '📇', '📈', '📉', '📊', '📋', '📌', '📍', '📎', '🖇', '📏', '📐', '✂️', '🗃', '🗄', '🗑', '🔒', '🔓', '🔏', '🔐', '🔑', '🗝', '🔨', '🪓', '⛏', '⚒', '🛠', '🗡', '⚔️', '🔫', '🪃', '🏹', '🛡', '🪚', '🔧', '🪛', '🔩', '⚙️', '🗜', '⚖️', '🦯', '🔗', '⛓', '🪝', '🧰', '🧲', '🪜', '🪑', '🛋', '🛌', '🧸', '🪆', '🖼', '🪞', '🧹', '🪠', '🪣', '🧼', '🪥', '🧽', '🧯', '🛒', '🚬', '⚰️', '🪦', '⚱️', '🏺', '🏹']
+    };
 
     return ReactDOM.createPortal(
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+            background: 'rgba(0,0,0,0.1)', // Lighter backdrop
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 10000
         }} onClick={onClose}>
@@ -1282,32 +1329,42 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
                 borderRadius: '12px',
                 padding: '1rem',
                 width: 'min(900px, 95vw)',
+                maxHeight: '90vh',
                 display: 'flex', flexDirection: 'column',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.6)',
                 border: '1px solid #334155'
             }} onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #334155', paddingBottom: '0.5rem' }}>
                     <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Pick an Emoji</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#94a3b8' }}>&times;</button>
                 </div>
-                <div style={{
-                    display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem',
-                    padding: '0.5rem'
-                }}>
-                    {emojis.map(emoji => (
-                        <button
-                            key={emoji}
-                            onClick={() => onSelect(emoji)}
-                            style={{
-                                background: 'none', border: 'none',
-                                fontSize: '1.5rem', cursor: 'pointer', padding: '4px',
-                                transition: 'transform 0.1s'
-                            }}
-                            onMouseEnter={e => e.target.style.transform = 'scale(1.2)'}
-                            onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-                        >
-                            {emoji}
-                        </button>
+                <div style={{ overflowY: 'auto', flex: 1, paddingRight: '0.5rem' }}>
+                    {Object.entries(categories).map(([category, emojis]) => (
+                        <div key={category} style={{ marginBottom: '1rem' }}>
+                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase' }}>{category}</h4>
+                            <div style={{
+                                display: 'flex', flexWrap: 'wrap', gap: '0.3rem',
+                                // Reduce gap and padding to fit more
+                            }}>
+                                {emojis.map(emoji => (
+                                    <button
+                                        key={emoji}
+                                        onClick={() => onSelect(emoji)}
+                                        style={{
+                                            background: 'none', border: 'none',
+                                            fontSize: '1.4rem', cursor: 'pointer', padding: '2px', // Compact padding
+                                            transition: 'transform 0.1s',
+                                            width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                        }}
+                                        onMouseEnter={e => e.target.style.transform = 'scale(1.2)'}
+                                        onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                                        title={emoji}
+                                    >
+                                        {emoji}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     ))}
                 </div>
             </div>
