@@ -181,7 +181,7 @@ router.get('/admin/stats', requireAdmin, (req, res) => {
             const serverStats = countCodeStats(path.join(rootDir, 'server'));
 
             devMetrics.components = (clientStats.components || 0) + (adminStats.components || 0);
-            devMetrics.lines = (clientStats.lines || 0) + (adminStats.lines || 0) + (serverStats.lines || 0);
+            devMetrics.loc = (clientStats.lines || 0) + (adminStats.lines || 0) + (serverStats.lines || 0);
             devMetrics.files = (clientStats.files || 0) + (adminStats.files || 0) + (serverStats.files || 0);
 
         } catch (err) {
