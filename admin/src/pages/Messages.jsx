@@ -1024,7 +1024,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500 }}>
                                         {item.user_nickname || 'Anonymous'}
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id.substr(0, 8)}...</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id ? item.user_id.substr(0, 8) + '...' : ''}</div>
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                         <span style={{
