@@ -107,7 +107,10 @@ const Logs = () => {
             color: `rgb(${baseColor})`, // Solid vibrant text
             border: `1px solid rgba(${baseColor}, 0.3)`, // Subtle matching border
             boxShadow: isImportant ? `0 0 10px rgba(${baseColor}, 0.2)` : 'none',
-            textShadow: '0 0 1px rgba(0,0,0,0.5)' // Typos happen, legible text is key
+            textShadow: '0 0 1px rgba(0,0,0,0.5)', // Typos happen, legible text is key
+            width: '180px',
+            display: 'inline-block',
+            textAlign: 'center'
         };
     };
 
@@ -182,8 +185,9 @@ const Logs = () => {
                 <h2 style={{ marginBottom: '0.5rem' }}>🥚 Logs</h2>
                 <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>View and filter system activity and audit trails</p>
             </div>
-            <div className="flex-between flex-center mb-4">
-                <div className="flex gap-2">
+
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
+                <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', background: '#0f172a' }}>
                     <input
                         list="actionOptions"
                         type="text"
@@ -219,9 +223,6 @@ const Logs = () => {
                         {exporting ? 'Exporting...' : 'Export CSV'}
                     </button>
                 </div>
-            </div>
-
-            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
                 <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1 }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
