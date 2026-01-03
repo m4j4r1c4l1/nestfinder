@@ -20,7 +20,7 @@ const Observability = () => {
         avgOpenTime: 0,
         platformDistribution: { android: 0, ios: 0, web: 0 }
     });
-    const [dailyStats, setDailyStats] = useState([]);
+
     const [activeTab, setActiveTab] = useState('notifications');
     const [timeRange, setTimeRange] = useState('7d');
     const [selectedDate, setSelectedDate] = useState(null);
@@ -34,16 +34,16 @@ const Observability = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/push/admin/analytics?range=${timeRange}`, {
+            const res = await fetch(`${API_URL}/api/push/admin/stats`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+
             if (res.ok) {
                 const data = await res.json();
-                setStats(data.stats);
-                setDailyStats(data.daily);
+                setStats(prev => ({ ...prev, ...data }));
             }
         } catch (err) {
-            console.error('Failed to load analytics:', err);
+            console.error('Failed to load observability data:', err);
         }
         setLoading(false);
     };
