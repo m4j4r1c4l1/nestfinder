@@ -165,25 +165,16 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         const rootDir = path.resolve(__dirname, '../../'); // Project root
 
         try {
-            // 1. Commits - Fetch from GitHub API (works even with shallow clones on Render)
+            // 1. Commits - Fetch from GitHub API using contributors endpoint
             try {
-                const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', {
+                const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/contributors?per_page=100', {
                     headers: { 'User-Agent': 'nestfinder-admin' }
                 });
                 if (response.ok) {
-                    // GitHub returns the total count in the Link header pagination
-                    const linkHeader = response.headers.get('Link');
-                    if (linkHeader) {
-                        // Parse: <...?page=442>; rel="last"
-                        const match = linkHeader.match(/page=(\d+)>; rel="last"/);
-                        if (match) {
-                            devMetrics.commits = parseInt(match[1], 10);
-                        }
-                    }
-                    // Fallback: if no Link header (< 1 page of results), count the array
-                    if (devMetrics.commits === 0) {
-                        const commits = await response.json();
-                        devMetrics.commits = Array.isArray(commits) ? commits.length : 0;
+                    const contributors = await response.json();
+                    if (Array.isArray(contributors)) {
+                        // Sum up all contributor commits
+                        devMetrics.commits = contributors.reduce((sum, c) => sum + (c.contributions || 0), 0);
                     }
                 }
             } catch (e) {
