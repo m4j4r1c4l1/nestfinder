@@ -217,7 +217,7 @@ const Messages = () => {
     ];
 
     return (
-        <div style={{ flex: 1, maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+        <div style={{ flex: 1, maxWidth: '1200px', margin: '0 auto', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                     🔔 In-App Notifications
@@ -288,7 +288,7 @@ const Messages = () => {
                     Loading messaging data...
                 </div>
             ) : (
-                <div className="tab-content" style={{ animation: 'fadeIn 0.3s ease' }}>
+                <div className="tab-content" style={{ animation: 'fadeIn 0.3s ease', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
                     {/* COMPOSER TAB */}
                     {activeTab === 'composer' && (
@@ -322,10 +322,11 @@ const Messages = () => {
                     )}
 
                     {/* BROADCASTS TAB */}
+                    {/* BROADCASTS TAB */}
                     {activeTab === 'broadcasts' && (
-                        <div style={{ width: '100%' }}>
+                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1rem', overflow: 'hidden' }}>
                             {/* Create New Broadcast */}
-                            <div className="card" style={{ marginBottom: '2rem' }}>
+                            <div className="card" style={{ flexShrink: 0, marginBottom: 0 }}>
                                 <div className="card-header">
                                     <h3>🌈 Create Broadcasts</h3>
                                 </div>
@@ -470,91 +471,92 @@ const Messages = () => {
                                 </div>
                             </div>
 
+                            {/* Manage Broadcasts */}
+                            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: 0 }}>
+                                <div className="card-header">
+                                    <h3>🎬 Manage Broadcasts</h3>
+                                </div>
+                                <div className="card-body" style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
+                                    <div style={{ padding: '1.5rem' }}>
+                                        {broadcasts.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
+                                                No broadcasts found
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                {broadcasts.slice((broadcastPage - 1) * broadcastPageSize, broadcastPage * broadcastPageSize).map(b => {
+                                                    const now = new Date();
+                                                    const start = new Date(b.start_time);
+                                                    const end = new Date(b.end_time);
+                                                    const isActive = now >= start && now <= end;
+                                                    const isPast = now > end;
 
-                            {/* Existing Broadcasts List */}
-                            <div className="card-header">
-                                <h3>🎬 Manage Broadcasts</h3>
-                            </div>
-                            <div className="card-body" style={{ maxHeight: 'calc(100vh - 250px)', overflowY: 'auto' }}>
-                                {broadcasts.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-                                        No broadcasts found
-                                    </div>
-                                ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                        {broadcasts.slice((broadcastPage - 1) * broadcastPageSize, broadcastPage * broadcastPageSize).map(b => {
-                                            const now = new Date();
-                                            const start = new Date(b.start_time);
-                                            const end = new Date(b.end_time);
-                                            const isActive = now >= start && now <= end;
-                                            const isPast = now > end;
-
-                                            return (
-                                                <div
-                                                    key={b.id}
-                                                    className="card"
-                                                    style={{
-                                                        borderLeft: isActive ? '4px solid var(--color-confirmed)' : '1px solid var(--color-border)',
-                                                        opacity: isPast ? 0.7 : 1
-                                                    }}
-                                                >
-                                                    <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                        <div style={{ flex: 1 }}>
-                                                            <div style={{ marginBottom: '0.75rem', fontSize: '1.05rem' }}>{b.message}</div>
-                                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                                                <span>📅 {new Date(b.start_time).toLocaleString()}</span>
-                                                                <span>→</span>
-                                                                <span>→</span>
-                                                                <span>{new Date(b.end_time).toLocaleString()}</span>
-                                                            </div>
-                                                            {b.image_url && (
-                                                                <div style={{ marginTop: '0.75rem' }}>
-                                                                    <img src={b.image_url} alt="Broadcast" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                                                    return (
+                                                        <div
+                                                            key={b.id}
+                                                            className="card"
+                                                            style={{
+                                                                borderLeft: isActive ? '4px solid var(--color-confirmed)' : '1px solid var(--color-border)',
+                                                                opacity: isPast ? 0.7 : 1,
+                                                                marginBottom: 0
+                                                            }}
+                                                        >
+                                                            <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                                <div style={{ flex: 1 }}>
+                                                                    <div style={{ marginBottom: '0.75rem', fontSize: '1.05rem' }}>{b.message}</div>
+                                                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                                                        <span>📅 {new Date(b.start_time).toLocaleString()}</span>
+                                                                        <span>→</span>
+                                                                        <span>→</span>
+                                                                        <span>{new Date(b.end_time).toLocaleString()}</span>
+                                                                    </div>
+                                                                    {b.image_url && (
+                                                                        <div style={{ marginTop: '0.75rem' }}>
+                                                                            <img src={b.image_url} alt="Broadcast" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                                                                        </div>
+                                                                    )}
+                                                                    <div style={{ marginTop: '0.75rem' }}>
+                                                                        <span style={{
+                                                                            padding: '0.25rem 0.75rem',
+                                                                            borderRadius: '20px',
+                                                                            fontSize: '0.75rem',
+                                                                            fontWeight: 600,
+                                                                            background: isActive ? 'var(--color-confirmed)' : isPast ? 'var(--color-text-muted)' : 'var(--color-pending)',
+                                                                            color: 'white'
+                                                                        }}>
+                                                                            {isActive ? '🟢 ACTIVE' : isPast ? '⚫ ENDED' : '🟡 SCHEDULED'}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
-                                                            )}
-                                                            <div style={{ marginTop: '0.75rem' }}>
-                                                                <span style={{
-                                                                    padding: '0.25rem 0.75rem',
-                                                                    borderRadius: '20px',
-                                                                    fontSize: '0.75rem',
-                                                                    fontWeight: 600,
-                                                                    background: isActive ? 'var(--color-confirmed)' : isPast ? 'var(--color-text-muted)' : 'var(--color-pending)',
-                                                                    color: 'white'
-                                                                }}>
-                                                                    {isActive ? '🟢 ACTIVE' : isPast ? '⚫ ENDED' : '🟡 SCHEDULED'}
-                                                                </span>
+                                                                <button
+                                                                    onClick={() => handleDeleteBroadcast(b.id)}
+                                                                    className="btn btn-secondary btn-sm"
+                                                                    style={{ color: 'var(--color-deactivated)', borderColor: 'var(--color-deactivated)' }}
+                                                                >
+                                                                    🗑️ Delete
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                        <button
-                                                            onClick={() => handleDeleteBroadcast(b.id)}
-                                                            className="btn btn-secondary btn-sm"
-                                                            style={{ color: 'var(--color-deactivated)', borderColor: 'var(--color-deactivated)' }}
-                                                        >
-                                                            🗑️ Delete
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
+                                </div>
+                                {Math.ceil(broadcasts.length / broadcastPageSize) >= 1 && (
+                                    <PaginationControls
+                                        page={broadcastPage}
+                                        totalPages={Math.ceil(broadcasts.length / broadcastPageSize)}
+                                        setPage={setBroadcastPage}
+                                    />
                                 )}
                             </div>
-                            {Math.ceil(broadcasts.length / broadcastPageSize) >= 1 && (
-                                <PaginationControls
-                                    page={broadcastPage}
-                                    totalPages={Math.ceil(broadcasts.length / broadcastPageSize)}
-                                    setPage={setBroadcastPage}
-                                />
-                            )}
                         </div>
-
                     )}
 
                 </div>
-            )
-            }
-
-        </div >
+            )}
+        </div>
     );
 };
 
@@ -1100,8 +1102,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     onCancel={() => setShowConfirmModal(false)}
                 />
             )}
-            <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ height: 'auto', maxHeight: 'calc(100vh - 250px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+            <div className="card-body" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 0 }}>
+                <div style={{ flex: 1, overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
@@ -1354,7 +1356,7 @@ const HistorySection = ({ users = [] }) => {
     };
 
     const handlePreview = async (log) => {
-        const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
+        const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{ }') : (log.metadata || {});
         let safeIso = log.created_at;
         if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
         if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) { safeIso += 'Z'; }
@@ -1389,7 +1391,7 @@ const HistorySection = ({ users = [] }) => {
     };
 
     const sortedLogs = [...logs].sort((a, b) => {
-        const parseMeta = (item) => typeof item.metadata === 'string' ? JSON.parse(item.metadata || '{}') : (item.metadata || {});
+        const parseMeta = (item) => typeof item.metadata === 'string' ? JSON.parse(item.metadata || '{ }') : (item.metadata || {});
 
         let valA, valB;
         if (sortColumn === 'created_at') {
@@ -1460,8 +1462,8 @@ const HistorySection = ({ users = [] }) => {
                     <button onClick={loadHistory} className="btn btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
-            <div className="card-body" style={{ padding: 0 }}>
-                <div style={{ height: 'auto', maxHeight: 'calc(100vh - 250px)', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
+            <div className="card-body" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 0 }}>
+                <div style={{ flex: 1, overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
