@@ -1249,7 +1249,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     </table>
                     {feedback.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No messages found</div>}
                 </div>
-                {totalPages >= 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
+                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
             </div>
 
             {previewItem && (
@@ -1587,7 +1587,7 @@ const HistorySection = ({ users = [] }) => {
                     </table>
                     {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
                 </div>
-                {totalPages >= 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
+                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
             </div>
 
             {selectedBatchId && (
