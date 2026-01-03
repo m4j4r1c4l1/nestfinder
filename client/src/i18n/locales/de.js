@@ -151,6 +151,7 @@ export default {
         recoveryKey: 'Wiederherstellungsschlüssel',
         recoveryKeyDescription: 'Speichern Sie diesen Schlüssel, um Ihre Identität auf einem neuen Gerät wiederherzustellen.',
         generateKey: 'Wiederherstellungsschlüssel generieren',
+        showKey: 'Wiederherstellungsschlüssel anzeigen',
         copyKey: 'Schlüssel kopieren',
         copied: 'Kopiert!',
         keyGenerated: 'Schlüssel generiert und kopiert!',
@@ -158,7 +159,13 @@ export default {
         liteMode: 'Lite-Modus',
         liteModeDescription: 'Animationen reduzieren für flüssigere Leistung',
         scrollInstruction: '🌍 Scrollen + Tippen oder 2s warten zum Bestätigen',
-        spreadWarmth: 'Wärme verbreiten! 🐣'
+        spreadWarmth: 'Wärme verbreiten! 🐣',
+        trustScore: 'Vertrauenspunkte',
+        anonymousUser: 'Benutzer',
+        statusHatchling: 'Küken',
+        statusSparrow: 'Spatz',
+        statusOwl: 'Eule',
+        statusEagle: 'Adler'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

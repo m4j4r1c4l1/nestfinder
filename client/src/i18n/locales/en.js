@@ -201,6 +201,7 @@ export default {
         recoveryKey: 'Recovery Key',
         recoveryKeyDescription: 'Save this key to restore your identity on a new device.',
         generateKey: 'Generate Recovery Key',
+        showKey: 'Show Recovery Key',
         copyKey: 'Copy Key',
         copied: 'Copied!',
         keyGenerated: 'Key Generated & Copied!',
@@ -208,7 +209,13 @@ export default {
         liteMode: 'Lite Mode',
         liteModeDescription: 'Reduce animations for smoother performance',
         scrollInstruction: '🌍 Scroll + Tap or wait 2s to confirm',
-        spreadWarmth: 'Spread the warmth! 🐣'
+        spreadWarmth: 'Spread the warmth! 🐣',
+        trustScore: 'Trust Score',
+        anonymousUser: 'User',
+        statusHatchling: 'Hatchling',
+        statusSparrow: 'Sparrow',
+        statusOwl: 'Owl',
+        statusEagle: 'Eagle'
     },
 
     // Welcome Message

@@ -151,6 +151,7 @@ export default {
         recoveryKey: 'Chave de Recuperação',
         recoveryKeyDescription: 'Guarde esta chave para restaurar a sua identidade num novo dispositivo.',
         generateKey: 'Gerar Chave de Recuperação',
+        showKey: 'Mostrar Chave de Recuperação',
         copyKey: 'Copiar Chave',
         copied: 'Copiado!',
         keyGenerated: 'Chave Gerada e Copiada!',
@@ -158,7 +159,13 @@ export default {
         liteMode: 'Modo Leve',
         liteModeDescription: 'Reduzir animações para melhor desempenho',
         scrollInstruction: '🌍 Deslize + Toque ou aguarde 2s para confirmar',
-        spreadWarmth: 'Espalhe o calor! 🐣'
+        spreadWarmth: 'Espalhe o calor! 🐣',
+        trustScore: 'Pontuação de Confiança',
+        anonymousUser: 'Utilizador',
+        statusHatchling: 'Pintainho',
+        statusSparrow: 'Pardal',
+        statusOwl: 'Coruja',
+        statusEagle: 'Águia'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

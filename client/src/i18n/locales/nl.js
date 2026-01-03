@@ -151,6 +151,7 @@ export default {
         recoveryKey: 'Herstelsleutel',
         recoveryKeyDescription: 'Bewaar deze sleutel om je identiteit op een nieuw apparaat te herstellen.',
         generateKey: 'Herstelsleutel Genereren',
+        showKey: 'Herstelsleutel Tonen',
         copyKey: 'Sleutel Kopiëren',
         copied: 'Gekopieerd!',
         keyGenerated: 'Sleutel Gegenereerd en Gekopieerd!',
@@ -158,7 +159,13 @@ export default {
         liteMode: 'Lite Modus',
         liteModeDescription: 'Verminder animaties voor vloeiendere prestaties',
         scrollInstruction: '🌍 Scroll + Tik of wacht 2s om te bevestigen',
-        spreadWarmth: 'Verspreid warmte! 🐣'
+        spreadWarmth: 'Verspreid warmte! 🐣',
+        trustScore: 'Vertrouwensscore',
+        anonymousUser: 'Gebruiker',
+        statusHatchling: 'Kuiken',
+        statusSparrow: 'Mus',
+        statusOwl: 'Uil',
+        statusEagle: 'Arend'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

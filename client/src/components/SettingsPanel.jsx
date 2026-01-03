@@ -7,12 +7,12 @@ import { QRCodeCanvas } from 'qrcode.react';
 const NOTIFICATION_PREF_KEY = 'nestfinder_notify_settings';
 const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder';
 
-// Status Logic
-const getStatus = (score = 0) => {
-    if (score >= 50) return { name: 'Eagle', icon: '🦅', color: '#f59e0b' }; // Amber
-    if (score >= 30) return { name: 'Owl', icon: '🦉', color: '#8b5cf6' };   // Violet
-    if (score >= 10) return { name: 'Sparrow', icon: '🐦', color: '#3b82f6' }; // Blue
-    return { name: 'Hatchling', icon: '🥚', color: '#94a3b8' }; // Slate
+// Status Logic - accepts t function for translations
+const getStatus = (score = 0, t) => {
+    if (score >= 50) return { name: t?.('settings.statusEagle') || 'Eagle', icon: '🦅', color: '#f59e0b' }; // Amber
+    if (score >= 30) return { name: t?.('settings.statusOwl') || 'Owl', icon: '🦉', color: '#8b5cf6' };   // Violet
+    if (score >= 10) return { name: t?.('settings.statusSparrow') || 'Sparrow', icon: '🐦', color: '#3b82f6' }; // Blue
+    return { name: t?.('settings.statusHatchling') || 'Hatchling', icon: '🥚', color: '#94a3b8' }; // Slate
 };
 
 // Recovery Key Section Component
@@ -21,14 +21,46 @@ const RecoveryKeySection = ({ t }) => {
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showKey, setShowKey] = useState(true);
+    const [keyVisible, setKeyVisible] = useState(true);
+    const [fadeOpacity, setFadeOpacity] = useState(1);
 
     // Load recovery key from session storage on mount (persists during current session only)
     useEffect(() => {
         const sessionKey = sessionStorage.getItem('nestfinder_recovery_key_temp');
         if (sessionKey) {
             setRecoveryKey(sessionKey);
+            // If loading from session, start hidden
+            setKeyVisible(false);
+            setFadeOpacity(0);
         }
     }, []);
+
+    // Auto-fade effect after 5 seconds when key is generated or shown
+    useEffect(() => {
+        if (recoveryKey && keyVisible && fadeOpacity === 1) {
+            const fadeTimer = setTimeout(() => {
+                // Start fading
+                const fadeDuration = 1000; // 1 second fade
+                const steps = 20;
+                const stepDuration = fadeDuration / steps;
+                let currentStep = 0;
+
+                const fadeInterval = setInterval(() => {
+                    currentStep++;
+                    const newOpacity = 1 - (currentStep / steps);
+                    setFadeOpacity(newOpacity);
+
+                    if (currentStep >= steps) {
+                        clearInterval(fadeInterval);
+                        setKeyVisible(false);
+                        setShowKey(false);
+                    }
+                }, stepDuration);
+            }, 5000); // 5 second delay before fade starts
+
+            return () => clearTimeout(fadeTimer);
+        }
+    }, [recoveryKey, keyVisible, fadeOpacity]);
 
     const generateKey = async () => {
         setLoading(true);
@@ -40,6 +72,9 @@ const RecoveryKeySection = ({ t }) => {
 
             const result = await api.generateRecoveryKey();
             setRecoveryKey(result.recoveryKey);
+            setKeyVisible(true);
+            setFadeOpacity(1);
+            setShowKey(true);
 
             // Save to session storage for current session persistence
             sessionStorage.setItem('nestfinder_recovery_key_temp', result.recoveryKey);
@@ -58,6 +93,12 @@ const RecoveryKeySection = ({ t }) => {
             alert(`Failed to generate recovery key: ${err.message}\n\nTip: Try logging out and back in, or refresh the page.`);
         }
         setLoading(false);
+    };
+
+    const handleShowKey = () => {
+        setKeyVisible(true);
+        setFadeOpacity(1);
+        setShowKey(true);
     };
 
     const copyKey = () => {
@@ -79,7 +120,7 @@ const RecoveryKeySection = ({ t }) => {
                 <div style={{ fontWeight: 500 }}>
                     🔑 {t?.('settings.recoveryKey') || 'Recovery Key'}
                 </div>
-                {recoveryKey && (
+                {recoveryKey && keyVisible && (
                     <button
                         onClick={() => setShowKey(!showKey)}
                         style={{
@@ -90,7 +131,7 @@ const RecoveryKeySection = ({ t }) => {
                             fontSize: '1rem'
                         }}
                     >
-                        {showKey ? '🙈' : '👁️'}
+                        {showKey ? '🙈' : '🙉'}
                     </button>
                 )}
             </div>
@@ -100,35 +141,57 @@ const RecoveryKeySection = ({ t }) => {
 
             {recoveryKey ? (
                 <div>
-                    <div style={{
-                        padding: 'var(--space-3)',
-                        background: 'var(--color-bg-secondary)',
-                        borderRadius: 'var(--radius-md)',
-                        fontFamily: 'monospace',
-                        fontSize: 'var(--font-size-lg)',
-                        fontWeight: 600,
-                        textAlign: 'center',
-                        letterSpacing: '0.05em',
-                        color: 'var(--color-primary)',
-                        marginBottom: 'var(--space-2)'
-                    }}>
-                        {showKey ? recoveryKey : '•••-•••-•••'}
-                    </div>
-                    <button
-                        onClick={copyKey}
-                        style={{
-                            width: '100%',
-                            padding: 'var(--space-2)',
-                            background: copied ? 'var(--color-confirmed)' : 'var(--color-primary)',
-                            color: 'white',
-                            border: 'none',
+                    {keyVisible && (
+                        <div style={{
+                            padding: 'var(--space-3)',
+                            background: 'var(--color-bg-secondary)',
                             borderRadius: 'var(--radius-md)',
-                            cursor: 'pointer',
-                            transition: 'background 0.3s'
-                        }}
-                    >
-                        {copied ? `✓ ${t?.('settings.copied') || 'Copied!'}` : `📋 ${t?.('settings.copyKey') || 'Copy Key'}`}
-                    </button>
+                            fontFamily: 'monospace',
+                            fontSize: 'var(--font-size-lg)',
+                            fontWeight: 600,
+                            textAlign: 'center',
+                            letterSpacing: '0.05em',
+                            color: 'var(--color-primary)',
+                            marginBottom: 'var(--space-2)',
+                            opacity: fadeOpacity,
+                            transition: 'opacity 0.1s ease-out'
+                        }}>
+                            {showKey ? recoveryKey : '•••-•••-•••'}
+                        </div>
+                    )}
+                    {keyVisible ? (
+                        <button
+                            onClick={copyKey}
+                            style={{
+                                width: '100%',
+                                padding: 'var(--space-2)',
+                                background: copied ? 'var(--color-confirmed)' : 'var(--color-primary)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: 'var(--radius-md)',
+                                cursor: 'pointer',
+                                transition: 'background 0.3s'
+                            }}
+                        >
+                            {copied ? `✓ ${t?.('settings.copied') || 'Copied!'}` : `📋 ${t?.('settings.copyKey') || 'Copy Key'}`}
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleShowKey}
+                            style={{
+                                width: '100%',
+                                padding: 'var(--space-2)',
+                                background: 'var(--color-primary)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: 'var(--radius-md)',
+                                cursor: 'pointer',
+                                transition: 'background 0.3s'
+                            }}
+                        >
+                            🔑 {t?.('settings.showKey') || 'Show Recovery Key'}
+                        </button>
+                    )}
                 </div>
             ) : (
                 <button
@@ -155,12 +218,13 @@ const RecoveryKeySection = ({ t }) => {
 
 
 
+
 const SettingsPanel = ({ onClose }) => {
     const { t, language, setLanguage, availableLanguages } = useLanguage();
     const { user } = useAuth();
 
     // Status
-    const status = getStatus(user?.trust_score);
+    const status = getStatus(user?.trust_score, t);
 
     const [popupEnabled, setPopupEnabled] = useState(() => {
         try {
@@ -584,13 +648,13 @@ const SettingsPanel = ({ onClose }) => {
                         <div style={{ fontSize: '2.5rem' }}>{status.icon}</div>
                         <div>
                             <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
-                                {user?.nickname || 'User'}
+                                {user?.nickname || t('settings.anonymousUser') || 'User'}
                             </div>
                             <div style={{ color: status.color, fontWeight: 500 }}>
                                 {status.name}
                             </div>
                             <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                                Trust Score: {user?.trust_score || 0}
+                                {t('settings.trustScore') || 'Trust Score'}: {user?.trust_score || 0}
                             </div>
                         </div>
                     </div>
