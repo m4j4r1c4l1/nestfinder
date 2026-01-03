@@ -288,7 +288,13 @@ const Messages = () => {
                     Loading messaging data...
                 </div>
             ) : (
-                <div className="tab-content" style={{ animation: 'fadeIn 0.3s ease', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div className="tab-content" style={{
+                    animation: 'fadeIn 0.3s ease',
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'auto' : 'hidden'
+                }}>
 
                     {/* COMPOSER TAB */}
                     {activeTab === 'composer' && (
@@ -304,14 +310,14 @@ const Messages = () => {
                     {/* OUTBOX TAB */}
                     {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
-                        <div>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                             <HistorySection users={subscribers} />
                         </div>
                     )}
 
                     {/* RECEIVED (FEEDBACK) TAB */}
                     {activeTab === 'feedback' && (
-                        <div style={{ width: '100%' }}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                             <FeedbackSection
                                 feedback={feedback}
                                 onUpdate={fetchData}
@@ -322,9 +328,8 @@ const Messages = () => {
                     )}
 
                     {/* BROADCASTS TAB */}
-                    {/* BROADCASTS TAB */}
                     {activeTab === 'broadcasts' && (
-                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1rem', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {/* Create New Broadcast */}
                             <div className="card" style={{ flexShrink: 0, marginBottom: 0 }}>
                                 <div className="card-header">
@@ -1062,7 +1067,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const paginatedFeedback = sortedFeedback.slice((page - 1) * pageSize, page * pageSize);
 
     return (
-        <div className="card">
+        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>💬 Received History</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -1433,7 +1438,7 @@ const HistorySection = ({ users = [] }) => {
     };
 
     return (
-        <div className="card">
+        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>📜 Sent History</h3>
                 <div>
