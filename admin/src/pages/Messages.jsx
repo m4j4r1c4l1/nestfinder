@@ -227,7 +227,14 @@ const Messages = () => {
             overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
             minHeight: (activeTab === 'outbox' || activeTab === 'feedback') ? '100%' : 'auto'
         }}>
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{
+                marginBottom: '2rem',
+                position: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'sticky' : 'static',
+                top: 0,
+                background: 'var(--color-bg-primary, #0f172a)',
+                zIndex: 10,
+                paddingTop: (activeTab === 'composer' || activeTab === 'broadcasts') ? '1rem' : 0
+            }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                     🔔 In-App Notifications
                 </h1>
@@ -243,7 +250,11 @@ const Messages = () => {
                 marginBottom: '2rem',
                 borderBottom: '1px solid #334155',
                 paddingBottom: '1rem',
-                overflowX: 'auto'
+                overflowX: 'auto',
+                position: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'sticky' : 'static',
+                top: (activeTab === 'composer' || activeTab === 'broadcasts') ? '5.5rem' : 0,
+                background: 'var(--color-bg-primary, #0f172a)',
+                zIndex: 10
             }}>
                 {tabs.map(tab => (
                     <button
@@ -327,7 +338,7 @@ const Messages = () => {
 
                     {/* RECEIVED (FEEDBACK) TAB */}
                     {activeTab === 'feedback' && (
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: '2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
                             <FeedbackSection
                                 feedback={feedback}
                                 onUpdate={fetchData}
@@ -1077,7 +1088,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const paginatedFeedback = sortedFeedback.slice((page - 1) * pageSize, page * pageSize);
 
     return (
-        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>💬 Received History</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
