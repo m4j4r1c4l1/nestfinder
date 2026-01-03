@@ -314,7 +314,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 
     return (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <div className="card-header"><h3>✉️ Compose Notification</h3></div>
+            <div className="card-header"><h3>✉️ Create Notifications</h3></div>
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>
@@ -1226,7 +1226,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
             >
                 {/* Header */}
                 <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>Message Preview</h3>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{message.nickname ? `@${message.nickname}` : 'Message Preview'}</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
                 </div>
 
