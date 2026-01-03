@@ -934,21 +934,31 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     return (
         <div className="card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3>📥 Received History</h3>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {selectedIds.length > 0 && (
-                        <>
-                            <button
-                                onClick={confirmMarkRead}
-                                className="btn btn-sm"
-                                style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '32px', display: 'flex', alignItems: 'center' }}
-                            >
-                                <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
-                            </button>
-                            <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🗑️ Delete ({selectedIds.length})</button>
-                        </>
-                    )}
-                    <button onClick={onUpdate} className="btn btn-secondary btn-sm" style={{ height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🔄 Refresh</button>
+                <h3>💬 Received History</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
+                        <span style={{ color: '#22c55e', fontWeight: 500 }}>
+                            ✓✓ {feedback.filter(f => f.status === 'new').length} Pending
+                        </span>
+                        <span style={{ color: '#3b82f6', fontWeight: 500 }}>
+                            ✓✓ {feedback.filter(f => f.status === 'reviewed').length} Read
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {selectedIds.length > 0 && (
+                            <>
+                                <button
+                                    onClick={confirmMarkRead}
+                                    className="btn btn-sm"
+                                    style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '32px', display: 'flex', alignItems: 'center' }}
+                                >
+                                    <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
+                                </button>
+                                <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🗑️ Delete ({selectedIds.length})</button>
+                            </>
+                        )}
+                        <button onClick={onUpdate} className="btn btn-secondary btn-sm" style={{ height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🔄 Refresh</button>
+                    </div>
                 </div>
             </div>
             {showConfirmModal && (
@@ -1024,8 +1034,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <div style={{ width: '30px', fontSize: '1rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                            <div style={{ width: '24px', fontSize: '1rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
                                                 {item.status === 'new' ? (
                                                     <span style={{ color: '#22c55e' }}>✓✓</span>
                                                 ) : item.status === 'reviewed' ? (
