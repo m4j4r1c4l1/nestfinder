@@ -1781,17 +1781,18 @@ const DetailModal = ({ batchId, onClose }) => {
                                                 <DateTimeCell isoString={msg.read_at} />
                                             </td>
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <div style={{ width: '40px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center', marginRight: '8px' }}>
+                                                {/* Fixed width container to ensure vertical alignment of text across rows */}
+                                                <div style={{ display: 'inline-flex', alignItems: 'center', width: '110px' }}>
+                                                    <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
                                                         {msg.read ? (
-                                                            <span style={{ color: '#3b82f6', transform: 'translateX(-2px)' }}>✓✓</span>
+                                                            <span style={{ color: '#3b82f6' }}>✓✓</span>
                                                         ) : msg.delivered ? (
-                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓✓</span>
+                                                            <span style={{ color: '#22c55e' }}>✓✓</span>
                                                         ) : (
-                                                            <span style={{ color: '#22c55e', transform: 'translateX(-2px)' }}>✓</span>
+                                                            <span style={{ color: '#22c55e' }}>✓</span>
                                                         )}
                                                     </div>
-                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8' }}>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
                                                         {msg.read ? 'Read' : msg.delivered ? 'Delivered' : 'Sent'}
                                                     </span>
                                                 </div>
