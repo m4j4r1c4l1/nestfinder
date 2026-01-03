@@ -988,9 +988,10 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                 >
                                     Timestamp {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                 </th>
+                                <th style={{ padding: '0.75rem 1rem', width: '100px', textAlign: 'center' }}>Status</th>
                                 <th
                                     onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                                    style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none', maxWidth: '150px' }}
                                 >
                                     From {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                 </th>
@@ -1000,8 +1001,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                 >
                                     Type {sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                 </th>
+
                                 <th style={{ padding: '0.75rem 1rem', width: '45%', textAlign: 'left' }}>Message</th>
-                                <th style={{ padding: '0.75rem 1rem', width: '100px', textAlign: 'center' }}>Status</th>
                                 <th style={{ padding: '0.75rem 1rem', width: '40px' }}></th>
                             </tr>
                         </thead>
@@ -1030,20 +1031,6 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                             </span>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500 }}>
-                                        {item.user_nickname || 'Anonymous'}
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id ? item.user_id.substr(0, 8) + '...' : ''}</div>
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>
-                                            {item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                        <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {item.message}
-                                        </div>
-                                    </td>
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                         {item.status === 'new' ? (
                                             <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
@@ -1059,6 +1046,21 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                             <span style={{ color: '#8b5cf6', fontWeight: 500, fontSize: '0.8rem' }}>Resolved</span>
                                         )}
                                     </td>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500, maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {item.user_nickname || 'Anonymous'}
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id ? item.user_id.substr(0, 8) + '...' : ''}</div>
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                        <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>
+                                            {item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                        <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {item.message}
+                                        </div>
+                                    </td>
+
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
@@ -1082,10 +1084,10 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
             </div>
 
             {previewItem && (
-                 <MessagePreviewModal
+                <MessagePreviewModal
                     message={previewItem}
                     onClose={() => setPreviewItem(null)}
-                 />
+                />
             )}
         </div>
     );
@@ -1120,7 +1122,7 @@ const HistorySection = ({ users = [] }) => {
 
     const sortedLogs = [...logs].sort((a, b) => {
         const parseMeta = (item) => typeof item.metadata === 'string' ? JSON.parse(item.metadata || '{}') : (item.metadata || {});
-        
+
         let valA, valB;
         if (sortColumn === 'created_at') {
             valA = new Date(a.created_at).getTime();
@@ -1238,17 +1240,17 @@ const HistorySection = ({ users = [] }) => {
                                         <td
                                             style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
                                             onClick={() => {
-                                                // Resolve Nickname from Users List
-                                                // target_id might be 'user_UUID' or just 'UUID' or 'Ioscompose' (if legacy/custom)
-                                                // Users list usually has IDs like 'user_UUID' or 'UUID' depending on backend.
-                                                // We try exact match first, then try appending/stripping 'user_'
                                                 const rawId = log.target_id;
+                                                // DEBUG LOOKUP FAILURE
+                                                console.log('Resolving Nickname for:', rawId, '| Users available:', users.length);
+                                                if (users.length > 0) console.log('Sample User ID:', users[0].id);
+
                                                 let foundUser = users.find(u => u.id === rawId);
                                                 if (!foundUser && rawId && !rawId.startsWith('user_')) {
                                                     foundUser = users.find(u => u.id === `user_${rawId}`);
                                                 }
                                                 const resolvedNickname = foundUser ? foundUser.nickname : (log.target_id || 'User');
-                                                
+
                                                 setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
                                             }}
                                         >
@@ -1577,21 +1579,21 @@ const MessagePreviewModal = ({ message, onClose }) => {
         // Check if Summer Time (Approximation for EU: Last Sun March to Last Sun Oct)
         // Or simpler: use Intl.DateTimeFormat with timeZone: 'Europe/Paris' or 'CET' if supported
         try {
-            const timePart = dateObj.toLocaleTimeString('en-GB', { 
-                hour: '2-digit', minute: '2-digit', second: '2-digit', 
-                timeZone: 'Europe/Paris' 
+            const timePart = dateObj.toLocaleTimeString('en-GB', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                timeZone: 'Europe/Paris'
             });
             // Determine Standard vs Summer for suffix (simplified or explicit)
             // 'Europe/Paris' handles the offset correctly. We just append the label.
             // Getting the specific zone abbreviation is tricky cross-browser without libraries.
             // We will stick to the generic CET/CEST convention based on offset or just hardcode based on date.
-            
+
             // Reliable trick: check offset.
             // Paris is UTC+1 (CET) or UTC+2 (CEST)
             // We can infer from the date string representation in that timezone
-            const isSummer = dateObj.toLocaleString('en-US', { timeZone: 'Europe/Paris', timeZoneName: 'short' }).includes('GMT+2') 
-                          || dateObj.toLocaleString('en-US', { timeZone: 'Europe/Paris', timeZoneName: 'short' }).includes('CEST');
-            
+            const isSummer = dateObj.toLocaleString('en-US', { timeZone: 'Europe/Paris', timeZoneName: 'short' }).includes('GMT+2')
+                || dateObj.toLocaleString('en-US', { timeZone: 'Europe/Paris', timeZoneName: 'short' }).includes('CEST');
+
             return `${timePart} ${isSummer ? 'CEST' : 'CET'}`;
         } catch (e) {
             // Fallback for environments without ICU full data
@@ -1623,7 +1625,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
         // Logic fix: Only show "Bulk" if count > 1 or target is clearly 'all'.
         // Do NOT assume target_id format defines bulk/single status (e.g. 'Ioscompose' is a valid single user ID).
         const isBulk = (message.count > 1) || message.target === 'all';
-        headerTitle = isBulk ? 'Bulk Message' : (message.nickname || message.target_id || message.device_id?.substr(0,8) || 'User');
+        headerTitle = isBulk ? 'Bulk Message' : (message.nickname || message.target_id || message.device_id?.substr(0, 8) || 'User');
     }
 
     // Border Color
@@ -1666,12 +1668,12 @@ const MessagePreviewModal = ({ message, onClose }) => {
 
                 {/* Body Content */}
                 <div style={{ padding: '1.5rem', background: '#1e293b' }}>
-                    
+
                     {/* FEEDBACK STYLE: [Date] [Bell] [Time] - Split Layout */}
                     {isFeedback && dateObj && (
-                        <div style={{ 
-                            display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', 
-                            marginBottom: '1rem', color: '#94a3b8', fontSize: '0.85rem' 
+                        <div style={{
+                            display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center',
+                            marginBottom: '1rem', color: '#94a3b8', fontSize: '0.85rem'
                         }}>
                             <span style={{ textAlign: 'left' }}>{dateObj.toLocaleDateString()}</span>
                             <span style={{ fontSize: '1rem' }}>🔔</span>
@@ -1681,7 +1683,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
 
                     {/* NOTIFICATION STYLE: Split Date/Time */}
                     {isNotification && dateObj && (
-                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.8rem', color: '#94a3b8' }}>
                             <span>{dateObj.toLocaleDateString()}</span>
                             <span>{formatTimeCET(dateObj)}</span>
                         </div>
@@ -1709,10 +1711,10 @@ const MessagePreviewModal = ({ message, onClose }) => {
                                 <img src={message.image} alt="Attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
                             </div>
                         )}
-                        
+
                         {/* Message/Body */}
                         <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
-                             {message.message || message.body}
+                            {message.message || message.body}
                         </div>
                     </div>
                 </div>
