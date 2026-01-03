@@ -38,8 +38,6 @@ export default {
         downloadKML: 'Download KML',
         downloadJSON: 'Download JSON',
         downloadCSV: 'Download CSV',
-        downloadGPX: 'Download GPX',
-        downloadKML: 'Download KML',
         totalPoints: 'total points',
         noResults: 'No results found'
     },
@@ -210,9 +208,7 @@ export default {
         liteMode: 'Lite Mode',
         liteModeDescription: 'Reduce animations for smoother performance',
         scrollInstruction: '🌍 Scroll + Tap or wait 2s to confirm',
-        spreadWarmth: 'Spread the warmth! 🐣',
-        yourProfile: 'Your Profile',
-        performance: 'Performance',
+        spreadWarmth: 'Spread the warmth! 🐣'
     },
 
     // Welcome Message

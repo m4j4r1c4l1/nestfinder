@@ -23,8 +23,6 @@ export default {
         downloadKML: 'Скачать KML',
         downloadJSON: 'Скачать JSON',
         downloadCSV: 'Скачать CSV',
-        downloadGPX: 'Скачать GPX',
-        downloadKML: 'Скачать KML',
         totalPoints: 'всего точек',
         noResults: 'Результаты не найдены'
     },
