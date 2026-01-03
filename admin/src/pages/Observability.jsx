@@ -54,7 +54,7 @@ const Observability = () => {
         <div className="notifications-page" style={{ width: '75%', maxWidth: '1500px', margin: '0 auto', padding: '1.5rem 1rem' }}>
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                    Metrics
+                    🐦 Metrics
                 </h1>
                 <p className="text-muted">Manage and track app notifications</p>
             </div>
