@@ -1781,8 +1781,8 @@ const DetailModal = ({ batchId, onClose }) => {
                                                 <DateTimeCell isoString={msg.read_at} />
                                             </td>
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                {/* Fixed width container to ensure vertical alignment of text across rows */}
-                                                <div style={{ display: 'inline-flex', alignItems: 'center', width: '110px' }}>
+                                                {/* Fixed width container centered with margin: auto to ensure vertical alignment of text across rows */}
+                                                <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
                                                     <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
                                                         {msg.read ? (
                                                             <span style={{ color: '#3b82f6' }}>✓✓</span>
