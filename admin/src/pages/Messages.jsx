@@ -210,10 +210,10 @@ const Messages = () => {
     };
 
     const tabs = [
-        { id: 'composer', label: '🖊️ Composer', count: 0 },
-        { id: 'outbox', label: '📤 Sent', count: 0 },
-        { id: 'feedback', label: '📥 Received', count: feedback.filter(f => f.status === 'new').length },
-        { id: 'broadcasts', label: '📢 Broadcasts', count: broadcasts.length }
+        { id: 'composer', label: '🪶 Composer', count: 0 },
+        { id: 'outbox', label: '🐦 Sent', count: 0 },
+        { id: 'feedback', label: '🥚 Received', count: feedback.filter(f => f.status === 'new').length },
+        { id: 'broadcasts', label: '🦅 Broadcasts', count: broadcasts.length }
     ];
 
     return (
@@ -227,81 +227,79 @@ const Messages = () => {
             overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
             minHeight: (activeTab === 'outbox' || activeTab === 'feedback') ? '100%' : 'auto'
         }}>
+            {/* Sticky Header Container for page-scroll tabs */}
             <div style={{
-                marginBottom: '2rem',
                 position: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'sticky' : 'static',
                 top: 0,
                 background: 'var(--color-bg-primary, #0f172a)',
                 zIndex: 10,
-                paddingTop: (activeTab === 'composer' || activeTab === 'broadcasts') ? '1rem' : 0
+                paddingTop: (activeTab === 'composer' || activeTab === 'broadcasts') ? '1rem' : 0,
+                paddingBottom: '1rem'
             }}>
-                <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                    🔔 In-App Notifications
-                </h1>
-                <p style={{ color: 'var(--color-text-secondary)' }}>
-                    Manage communications, broadcasts, and user feedback
-                </p>
-            </div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                        🪹 In-App Notifications
+                    </h1>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>
+                        Manage communications, broadcasts, and user feedback
+                    </p>
+                </div>
 
-            {/* Tabs */}
-            <div style={{
-                display: 'flex',
-                gap: '0.5rem',
-                marginBottom: '2rem',
-                borderBottom: '1px solid #334155',
-                paddingBottom: '1rem',
-                overflowX: 'auto',
-                position: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'sticky' : 'static',
-                top: (activeTab === 'composer' || activeTab === 'broadcasts') ? '5.5rem' : 0,
-                background: 'var(--color-bg-primary, #0f172a)',
-                zIndex: 10
-            }}>
-                {tabs.map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        style={{
-                            padding: '0.75rem 1.25rem',
-                            background: activeTab === tab.id ? '#1e293b' : 'transparent',
-                            color: activeTab === tab.id ? '#f8fafc' : '#94a3b8',
-                            border: activeTab === tab.id ? '1px solid #334155' : '1px solid transparent',
-                            borderBottom: activeTab === tab.id ? 'none' : '1px solid transparent',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontWeight: 500,
-                            fontSize: '1.1rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            transition: 'all 0.2s',
-                            whiteSpace: 'nowrap',
-                            outline: 'none',
-                            position: 'relative',
-                            top: activeTab === tab.id ? '1px' : '0'
-                        }}
-                        onMouseEnter={e => {
-                            if (activeTab !== tab.id) e.currentTarget.style.color = '#e2e8f0';
-                        }}
-                        onMouseLeave={e => {
-                            if (activeTab !== tab.id) e.currentTarget.style.color = '#94a3b8';
-                        }}
-                    >
-                        {tab.label}
-                        {tab.count > 0 && (
-                            <span style={{
-                                background: activeTab === tab.id ? '#3b82f6' : '#475569',
-                                color: 'white',
-                                padding: '0.1rem 0.5rem',
-                                borderRadius: '10px',
-                                fontSize: '0.75rem',
-                                minWidth: '20px',
-                                textAlign: 'center'
-                            }}>
-                                {tab.count}
-                            </span>
-                        )}
-                    </button>
-                ))}
+                {/* Tabs */}
+                <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    borderBottom: '1px solid #334155',
+                    paddingBottom: '1rem',
+                    overflowX: 'auto'
+                }}>
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            style={{
+                                padding: '0.75rem 1.25rem',
+                                background: activeTab === tab.id ? '#1e293b' : 'transparent',
+                                color: activeTab === tab.id ? '#f8fafc' : '#94a3b8',
+                                border: activeTab === tab.id ? '1px solid #334155' : '1px solid transparent',
+                                borderBottom: activeTab === tab.id ? 'none' : '1px solid transparent',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontWeight: 500,
+                                fontSize: '1.1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                transition: 'all 0.2s',
+                                whiteSpace: 'nowrap',
+                                outline: 'none',
+                                position: 'relative',
+                                top: activeTab === tab.id ? '1px' : '0'
+                            }}
+                            onMouseEnter={e => {
+                                if (activeTab !== tab.id) e.currentTarget.style.color = '#e2e8f0';
+                            }}
+                            onMouseLeave={e => {
+                                if (activeTab !== tab.id) e.currentTarget.style.color = '#94a3b8';
+                            }}
+                        >
+                            {tab.label}
+                            {tab.count > 0 && (
+                                <span style={{
+                                    background: activeTab === tab.id ? '#3b82f6' : '#475569',
+                                    color: 'white',
+                                    padding: '0.1rem 0.5rem',
+                                    borderRadius: '10px',
+                                    fontSize: '0.75rem',
+                                    minWidth: '20px',
+                                    textAlign: 'center'
+                                }}>
+                                    {tab.count}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {loading ? (
@@ -1485,6 +1483,13 @@ const HistorySection = ({ users = [] }) => {
                     >
                         🗑️ Clear History
                     </button>
+                    <span style={{
+                        background: '#334155', color: '#94a3b8', padding: '0.2rem 0.6rem',
+                        borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, marginRight: '0.5rem',
+                        display: 'flex', alignItems: 'center', height: '32px'
+                    }}>
+                        {logs.length} sent
+                    </span>
                     <button onClick={loadHistory} className="btn btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
