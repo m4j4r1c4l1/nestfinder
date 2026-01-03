@@ -169,7 +169,7 @@ const App = () => {
 
 
     const navItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: '🪺' },
+        { id: 'dashboard', label: 'Dashboard', icon: '🐥' },
         { id: 'observability', label: 'Observability', icon: '🐦' },
         { id: 'messages', label: 'Messages', icon: '🪶' },
         { id: 'logs', label: 'Activity Logs', icon: '🥚' },
