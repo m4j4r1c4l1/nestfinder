@@ -141,7 +141,7 @@ export default {
         continue: '继续'
     },
     settings: {
-        yourProfile: 'Your Profile',
+        yourProfile: '您的资料',
         notifications: '通知',
         popupMessages: '实时弹窗',
         popupDescription: '收到消息时立即显示',
@@ -149,7 +149,18 @@ export default {
         scanToShare: '扫码打开 NestFinder',
         copyLink: '复制链接',
         shareLink: '分享链接',
-        linkCopied: '链接已复制!'
+        linkCopied: '链接已复制!',
+        recoveryKey: '恢复密钥',
+        recoveryKeyDescription: '保存此密钥以在新设备上恢复您的身份。',
+        generateKey: '生成恢复密钥',
+        copyKey: '复制密钥',
+        copied: '已复制!',
+        keyGenerated: '密钥已生成并复制!',
+        performance: '性能',
+        liteMode: '精简模式',
+        liteModeDescription: '减少动画以获得更流畅的性能',
+        scrollInstruction: '🌍 滚动 + 点击或等待2秒确认',
+        spreadWarmth: '传递温暖! 🐣'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

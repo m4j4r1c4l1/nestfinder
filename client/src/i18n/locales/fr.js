@@ -141,7 +141,7 @@ export default {
         continue: 'Continuer'
     },
     settings: {
-        yourProfile: 'Your Profile',
+        yourProfile: 'Votre Profil',
         notifications: 'Notifications',
         popupMessages: 'Popups en temps réel',
         popupDescription: 'Afficher les messages dès leur arrivée',
@@ -149,7 +149,18 @@ export default {
         scanToShare: 'Scanner pour ouvrir NestFinder',
         copyLink: 'Copier le Lien',
         shareLink: 'Partager le lien',
-        linkCopied: 'Lien copié!'
+        linkCopied: 'Lien copié!',
+        recoveryKey: 'Clé de Récupération',
+        recoveryKeyDescription: 'Sauvegardez cette clé pour restaurer votre identité sur un nouvel appareil.',
+        generateKey: 'Générer une Clé de Récupération',
+        copyKey: 'Copier la Clé',
+        copied: 'Copié!',
+        keyGenerated: 'Clé Générée et Copiée!',
+        performance: 'Performance',
+        liteMode: 'Mode Léger',
+        liteModeDescription: 'Réduire les animations pour de meilleures performances',
+        scrollInstruction: '🌍 Défiler + Toucher ou attendre 2s pour confirmer',
+        spreadWarmth: 'Répandez la chaleur! 🐣'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

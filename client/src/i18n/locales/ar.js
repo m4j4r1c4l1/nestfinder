@@ -142,7 +142,7 @@ export default {
         continue: 'متابع'
     },
     settings: {
-        yourProfile: 'Your Profile',
+        yourProfile: 'ملفك الشخصي',
         notifications: 'إشعارات',
         popupMessages: 'نوافذ فورية',
         popupDescription: 'عرض الرسائل فوراً',
@@ -150,7 +150,18 @@ export default {
         scanToShare: 'امسح لفتح NestFinder',
         copyLink: 'نسخ الرابط',
         shareLink: 'مشاركة الرابط',
-        linkCopied: 'تم نسخ الرابط!'
+        linkCopied: 'تم نسخ الرابط!',
+        recoveryKey: 'مفتاح الاسترداد',
+        recoveryKeyDescription: 'احفظ هذا المفتاح لاستعادة هويتك على جهاز جديد.',
+        generateKey: 'إنشاء مفتاح الاسترداد',
+        copyKey: 'نسخ المفتاح',
+        copied: 'تم النسخ!',
+        keyGenerated: 'تم إنشاء المفتاح ونسخه!',
+        performance: 'الأداء',
+        liteMode: 'الوضع الخفيف',
+        liteModeDescription: 'تقليل الرسوم المتحركة لأداء أكثر سلاسة',
+        scrollInstruction: '🌍 مرر + انقر أو انتظر 2 ثانية للتأكيد',
+        spreadWarmth: 'انشر الدفء! 🐣'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

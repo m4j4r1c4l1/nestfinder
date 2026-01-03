@@ -141,7 +141,7 @@ export default {
         continue: 'Doorgaan'
     },
     settings: {
-        yourProfile: 'Your Profile',
+        yourProfile: 'Jouw Profiel',
         notifications: 'Meldingen',
         popupMessages: 'Real-time Popups',
         popupDescription: 'Toon berichten direct bij ontvangst',
@@ -149,7 +149,18 @@ export default {
         scanToShare: 'Scan om NestFinder te openen',
         copyLink: 'Link Kopiëren',
         shareLink: 'Link delen',
-        linkCopied: 'Link gekopieerd!'
+        linkCopied: 'Link gekopieerd!',
+        recoveryKey: 'Herstelsleutel',
+        recoveryKeyDescription: 'Bewaar deze sleutel om je identiteit op een nieuw apparaat te herstellen.',
+        generateKey: 'Herstelsleutel Genereren',
+        copyKey: 'Sleutel Kopiëren',
+        copied: 'Gekopieerd!',
+        keyGenerated: 'Sleutel Gegenereerd en Gekopieerd!',
+        performance: 'Prestaties',
+        liteMode: 'Lite Modus',
+        liteModeDescription: 'Verminder animaties voor vloeiendere prestaties',
+        scrollInstruction: '🌍 Scroll + Tik of wacht 2s om te bevestigen',
+        spreadWarmth: 'Verspreid warmte! 🐣'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
