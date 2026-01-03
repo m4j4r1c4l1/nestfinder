@@ -1591,10 +1591,9 @@ const MessagePreviewModal = ({ message, onClose }) => {
         headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIcon}</span>;
     } else {
         // Notification Header: Recipient or Bulk
-        // If it was a broadcast (target_id present usually implies bulk if not single device) 
-        // OR we can check 'count' if available from metadata
+        // Fallback to target_id if nickname is missing (common in sent history)
         const isBulk = message.count > 1 || message.target === 'all' || (message.target_id && !message.target_id.startsWith('user_'));
-        headerTitle = isBulk ? 'Bulk Message' : (message.nickname || message.device_id?.substr(0,8) || 'User');
+        headerTitle = isBulk ? 'Bulk Message' : (message.nickname || message.target_id || message.device_id?.substr(0,8) || 'User');
     }
 
     // Border Color
@@ -1638,20 +1637,23 @@ const MessagePreviewModal = ({ message, onClose }) => {
                 {/* Body Content */}
                 <div style={{ padding: '1.5rem', background: '#1e293b' }}>
                     
-                    {/* FEEDBACK STYLE: [Date] [Bell] [Time] */}
+                    {/* FEEDBACK STYLE: [Date] [Bell] [Time] - Split Layout */}
                     {isFeedback && dateObj && (
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginBottom: '1rem', color: '#94a3b8', fontSize: '0.85rem' }}>
-                            <span>{dateObj.toLocaleDateString()}</span>
+                        <div style={{ 
+                            display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', 
+                            marginBottom: '1rem', color: '#94a3b8', fontSize: '0.85rem' 
+                        }}>
+                            <span style={{ textAlign: 'left' }}>{dateObj.toLocaleDateString()}</span>
                             <span style={{ fontSize: '1rem' }}>🔔</span>
-                            <span>{formatTimeCET(dateObj)}</span>
+                            <span style={{ textAlign: 'right' }}>{formatTimeCET(dateObj)}</span>
                         </div>
                     )}
 
-                    {/* NOTIFICATION STYLE: Date separate if needed, usually inside or just simpler */}
-                    {/* User asked for OLD style: Header is user. Time in HH:MM:SS format. Title IN box. */}
+                    {/* NOTIFICATION STYLE: Split Date/Time */}
                     {isNotification && dateObj && (
-                         <div style={{ textAlign: 'right', marginBottom: '4px', fontSize: '0.8rem', color: '#94a3b8' }}>
-                            {dateObj.toLocaleDateString()} • {formatTimeCET(dateObj)}
+                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                            <span>{dateObj.toLocaleDateString()}</span>
+                            <span>{formatTimeCET(dateObj)}</span>
                         </div>
                     )}
 
