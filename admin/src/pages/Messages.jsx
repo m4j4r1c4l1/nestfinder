@@ -238,7 +238,7 @@ const Messages = () => {
             }}>
                 <div style={{ marginBottom: '1.5rem' }}>
                     <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                        🪹 In-App Notifications
+                        🔔 In-App Notifications
                     </h1>
                     <p style={{ color: 'var(--color-text-secondary)' }}>
                         Manage communications, broadcasts, and user feedback
@@ -1248,12 +1248,13 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
 
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
+                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
                                             style={{
                                                 background: 'none', border: 'none', cursor: 'pointer',
-                                                fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.2s', padding: '4px'
+                                                fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.2s', padding: '4px',
+                                                display: 'inline-flex', justifyContent: 'center', alignItems: 'center'
                                             }}
                                             onMouseEnter={e => e.target.style.opacity = 1}
                                             onMouseLeave={e => e.target.style.opacity = 0.6}
@@ -1461,6 +1462,14 @@ const HistorySection = ({ users = [] }) => {
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>📜 Sent History</h3>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{
+                        background: '#22c55e', color: 'white', padding: '0 0.8rem',
+                        borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, marginRight: '0.5rem',
+                        display: 'flex', alignItems: 'center', height: '32px', cursor: 'default',
+                        userSelect: 'none'
+                    }}>
+                        {logs.length} sent
+                    </span>
                     <button
                         onClick={async () => {
                             if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?\nThis will remove all records of sent notifications from this list.')) return;
@@ -1483,13 +1492,6 @@ const HistorySection = ({ users = [] }) => {
                     >
                         🗑️ Clear History
                     </button>
-                    <span style={{
-                        background: '#334155', color: '#94a3b8', padding: '0.2rem 0.6rem',
-                        borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, marginRight: '0.5rem',
-                        display: 'flex', alignItems: 'center', height: '32px'
-                    }}>
-                        {logs.length} sent
-                    </span>
                     <button onClick={loadHistory} className="btn btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
