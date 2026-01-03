@@ -228,22 +228,23 @@ const App = () => {
                             onClick={() => setView(item.id)}
                             style={{
                                 display: 'flex',
+                                justifyContent: 'center', // Centers the inner block
                                 alignItems: 'center',
-                                gap: '0.75rem',
-                                padding: '0.75rem 1rem',
+                                padding: '0.75rem 0', // Removed horizontal padding, relying on inner block width
                                 background: view === item.id ? 'var(--color-primary-light)' : 'transparent',
                                 border: 'none',
                                 borderRadius: 'var(--radius-md)',
                                 color: view === item.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
-                                fontSize: '0.9rem',
-                                fontWeight: view === item.id ? 600 : 400,
+                                width: '100%',
                                 textAlign: 'left'
                             }}
                         >
-                            <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{item.icon}</span>
-                            {item.label}
+                            <div style={{ width: '150px', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <span style={{ fontSize: '1.4rem', lineHeight: 1, width: '30px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>{item.icon}</span>
+                                <span style={{ fontSize: '0.9rem', fontWeight: view === item.id ? 600 : 400 }}>{item.label}</span>
+                            </div>
                         </button>
                     ))}
                 </nav>
@@ -253,20 +254,22 @@ const App = () => {
                     onClick={handleLogout}
                     style={{
                         display: 'flex',
+                        justifyContent: 'center',
                         alignItems: 'center',
-                        gap: '0.75rem',
-                        padding: '0.75rem 1rem',
+                        padding: '0.75rem 0',
                         background: 'transparent',
                         border: '1px solid var(--color-border)',
                         borderRadius: 'var(--radius-md)',
                         color: 'var(--color-text-secondary)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        fontSize: '0.9rem'
+                        width: '100%'
                     }}
                 >
-                    <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🚪</span>
-                    Logout
+                    <div style={{ width: '150px', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '1.4rem', lineHeight: 1, width: '30px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>🚪</span>
+                        <span style={{ fontSize: '0.9rem' }}>Logout</span>
+                    </div>
                 </button>
             </aside>
 
