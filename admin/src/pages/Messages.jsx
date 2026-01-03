@@ -996,11 +996,12 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                 </th>
                                 <th
                                     onClick={() => { setSortColumn('type'); setSortDirection(d => sortColumn === 'type' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                    style={{ padding: '0.75rem 1rem', width: '50px', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
                                 >
                                     Type {sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                 </th>
-                                <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Message</th>
+                                <th style={{ padding: '0.75rem 1rem', width: '45%', textAlign: 'left' }}>Message</th>
+                                <th style={{ padding: '0.75rem 1rem', width: '100px', textAlign: 'center' }}>Status</th>
                                 <th style={{ padding: '0.75rem 1rem', width: '40px' }}></th>
                             </tr>
                         </thead>
@@ -1027,19 +1028,29 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id ? item.user_id.substr(0, 8) + '...' : ''}</div>
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <span style={{
-                                            padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-                                            background: item.type === 'bug' ? 'rgba(239, 68, 68, 0.2)' : item.type === 'suggestion' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(148, 163, 184, 0.2)',
-                                            color: item.type === 'bug' ? '#f87171' : item.type === 'suggestion' ? '#60a5fa' : '#94a3b8',
-                                            textTransform: 'uppercase'
-                                        }}>
-                                            {item.type}
+                                        <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>
+                                            {item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}
                                         </span>
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }}>
-                                        <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                             {item.message}
                                         </div>
+                                    </td>
+                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                        {item.status === 'new' ? (
+                                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                                <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
+                                                <span style={{ color: '#94a3b8', fontWeight: 500, fontSize: '0.8rem' }}>Pending</span>
+                                            </span>
+                                        ) : item.status === 'reviewed' ? (
+                                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                                <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
+                                                <span style={{ color: '#94a3b8', fontWeight: 500, fontSize: '0.8rem' }}>Read</span>
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: '#8b5cf6', fontWeight: 500, fontSize: '0.8rem' }}>Resolved</span>
+                                        )}
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
                                         <button
@@ -1064,11 +1075,10 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
             </div>
 
             {previewItem && (
-                <ReceivedMessagePreviewModal
-                    previewItem={previewItem}
+                 <MessagePreviewModal
+                    message={previewItem}
                     onClose={() => setPreviewItem(null)}
-                    formatTimestamp={formatTimestamp24h}
-                />
+                 />
             )}
         </div>
     );
@@ -1533,83 +1543,25 @@ const DetailModal = ({ batchId, onClose }) => {
 };
 
 const MessagePreviewModal = ({ message, onClose }) => {
-    return ReactDOM.createPortal(
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                height: '100vh',
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(5px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 9999,
-                animation: 'fadeIn 0.2s ease'
-            }}
-            onClick={onClose}
-        >
-            <div
-                onClick={e => e.stopPropagation()}
-                style={{
-                    width: '90%',
-                    maxWidth: '400px',
-                    background: '#1e293b', // Dark background
-                    borderRadius: '12px',
-                    padding: '0',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                    overflow: 'hidden',
-                    border: '1px solid #334155'
-                }}
-            >
-                {/* Header */}
-                <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{(message.user_nickname || 'Anonymous')}</h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
-                </div>
+    // Standardize Data
+    // Feedback: user_nickname, message, type, created_at
+    // Notification (History): title, body, image, timestamp (Date obj)
 
-                {/* Body / Notification Item Replica */}
-                <div style={{ padding: '1.5rem', background: '#1e293b' }}>
-                    {/* Timestamps above message */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.8rem', color: '#94a3b8' }}>
-                        <span>{message.timestamp ? message.timestamp.toLocaleDateString() : ''}</span>
-                        <span>{message.timestamp ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
-                    </div>
+    // Determine Title
+    const title = message.user_nickname 
+        ? (message.user_nickname || 'Anonymous') 
+        : (message.title || 'Notification');
 
-                    <div style={{
-                        padding: '12px',
-                        borderBottom: '1px solid #334155',
-                        background: '#334155', // Unread bg color approximation
-                        borderRadius: '8px',
-                        borderLeft: '4px solid #3b82f6', // Primary color
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>🔔</span>
-                            <span style={{ fontWeight: 'bold', color: '#f1f5f9', fontSize: '1rem' }}>{message.title}</span>
-                        </div>
-                        {message.image && (
-                            <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', overflow: 'hidden' }}>
-                                <img src={message.image} alt="Notification attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                            </div>
-                        )}
-                        <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-                            {message.body}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>,
-        document.body
-    );
-};
-
-
-const ReceivedMessagePreviewModal = ({ previewItem, onClose, formatTimestamp }) => {
-    // Parse timestamp to Date object if needed
-    const date = new Date(previewItem.created_at);
+    // Determine Timestamp
+    let dateObj = null;
+    if (message.created_at) dateObj = new Date(message.created_at);
+    else if (message.timestamp) dateObj = new Date(message.timestamp);
+    
+    // Determine Border Color based on Type
+    let borderColor = '#94a3b8'; // Default Linear/Gray
+    if (message.type === 'bug') borderColor = '#ef4444'; // Red
+    else if (message.type === 'suggestion') borderColor = '#3b82f6'; // Blue
+    else if (message.image || message.body) borderColor = '#3b82f6'; // Notification Default Blue
 
     return ReactDOM.createPortal(
         <div
@@ -1644,28 +1596,38 @@ const ReceivedMessagePreviewModal = ({ previewItem, onClose, formatTimestamp }) 
             >
                 {/* Header */}
                 <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{previewItem.user_nickname || 'Anonymous'}</h3>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{title}</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
                 </div>
 
                 {/* Body */}
                 <div style={{ padding: '1.5rem', background: '#1e293b' }}>
                     {/* Split Timestamp Above Body */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.8rem', color: '#94a3b8' }}>
-                        <span>{date.toLocaleDateString()}</span>
-                        <span>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
+                    {dateObj && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                            <span>{dateObj.toLocaleDateString()}</span>
+                            <span>{dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                    )}
 
                     <div style={{
                         padding: '12px',
                         borderBottom: '1px solid #334155',
                         background: '#334155',
                         borderRadius: '8px',
-                        borderLeft: `4px solid ${previewItem.type === 'bug' ? '#ef4444' : previewItem.type === 'suggestion' ? '#3b82f6' : '#94a3b8'}`,
+                        borderLeft: `4px solid ${borderColor}`,
                         boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}>
+                        {/* Notification Image */}
+                        {message.image && (
+                            <div style={{ marginBottom: '0.8rem', borderRadius: '4px', overflow: 'hidden' }}>
+                                <img src={message.image} alt="Attachment" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                            </div>
+                        )}
+                        
+                        {/* Body Text */}
                         <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
-                            {previewItem.message}
+                             {message.message || message.body}
                         </div>
                     </div>
                 </div>
