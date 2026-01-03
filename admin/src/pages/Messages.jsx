@@ -1627,10 +1627,9 @@ const MessagePreviewModal = ({ message, onClose }) => {
         // Feedback Header: [Icon] [Nickname]
         const typeIcon = message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝';
         // Ensure we grab the first available nickname property
-        const rawNickname = message.user_nickname || message.nickname;
-        // Force strings to be strings and trim
-        const safeNickname = String(rawNickname || '').trim();
-        headerTitle = safeNickname ? `@${safeNickname}` : 'Anonymous';
+        const rawNickname = message.user_nickname || message.nickname || 'Anonymous';
+        const cleanNickname = String(rawNickname).replace(/^@/, '').trim();
+        headerTitle = `@${cleanNickname}`;
         headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIcon}</span>;
     } else {
         // Notification Header: Recipient or Bulk
