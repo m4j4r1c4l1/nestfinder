@@ -849,8 +849,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     // Resizable columns state
     // Resizable columns state
     const [columnWidths, setColumnWidths] = useState(() => {
-        const saved = localStorage.getItem('admin_received_columns');
-        return saved ? JSON.parse(saved) : {
+        const defaults = {
             checkbox: 40,
             timestamp: 130,
             status: 100,
@@ -860,6 +859,12 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
             message: null, // flex
             actions: 50
         };
+        try {
+            const saved = localStorage.getItem('admin_received_columns');
+            return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+        } catch (e) {
+            return defaults;
+        }
     });
     const [resizing, setResizing] = useState(null);
     const [startX, setStartX] = useState(0);
@@ -1211,8 +1216,7 @@ const HistorySection = ({ users = [] }) => {
     // Resizable columns state
     // Resizable columns state
     const [columnWidths, setColumnWidths] = useState(() => {
-        const saved = localStorage.getItem('admin_sent_columns');
-        return saved ? JSON.parse(saved) : {
+        const defaults = {
             timestamp: 130,
             title: 200,
             body: null, // flex
@@ -1220,6 +1224,12 @@ const HistorySection = ({ users = [] }) => {
             image: 80,
             target: 120
         };
+        try {
+            const saved = localStorage.getItem('admin_sent_columns');
+            return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+        } catch (e) {
+            return defaults;
+        }
     });
     const [resizing, setResizing] = useState(null);
     const [startX, setStartX] = useState(0);
