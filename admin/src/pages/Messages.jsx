@@ -1079,6 +1079,8 @@ const HistorySection = () => {
     const [loading, setLoading] = useState(false);
     const [selectedBatchId, setSelectedBatchId] = useState(null);
     const [previewMessage, setPreviewMessage] = useState(null);
+    const [sortColumn, setSortColumn] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState('desc');
 
     useEffect(() => {
         loadHistory();
@@ -1097,6 +1099,45 @@ const HistorySection = () => {
             }
         } catch (err) { console.error(err); }
         setLoading(false);
+    };
+
+    const sortedLogs = [...logs].sort((a, b) => {
+        const parseMeta = (item) => typeof item.metadata === 'string' ? JSON.parse(item.metadata || '{}') : (item.metadata || {});
+        
+        let valA, valB;
+        if (sortColumn === 'created_at') {
+            valA = new Date(a.created_at).getTime();
+            valB = new Date(b.created_at).getTime();
+        } else if (sortColumn === 'title') {
+            const metaA = parseMeta(a);
+            const metaB = parseMeta(b);
+            valA = (metaA.title || '').toLowerCase();
+            valB = (metaB.title || '').toLowerCase();
+        } else if (sortColumn === 'body') {
+            const metaA = parseMeta(a);
+            const metaB = parseMeta(b);
+            valA = (metaA.body || '').toLowerCase();
+            valB = (metaB.body || '').toLowerCase();
+        } else if (sortColumn === 'image') {
+            const metaA = parseMeta(a);
+            const metaB = parseMeta(b);
+            valA = metaA.image ? 1 : 0;
+            valB = metaB.image ? 1 : 0;
+        } else if (sortColumn === 'target') {
+            const metaA = parseMeta(a);
+            const metaB = parseMeta(b);
+            valA = metaA.count || 0;
+            valB = metaB.count || 0;
+        }
+
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const handleSort = (column) => {
+        setSortDirection(current => sortColumn === column && current === 'asc' ? 'desc' : 'asc');
+        setSortColumn(column);
     };
 
     return (
@@ -1134,15 +1175,25 @@ const HistorySection = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
                             <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Timestamp</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Title</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>Body</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Image</th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Target</th>
+                                <th onClick={() => handleSort('created_at')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                    Timestamp {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th onClick={() => handleSort('title')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}>
+                                    Title {sortColumn === 'title' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th onClick={() => handleSort('body')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}>
+                                    Body {sortColumn === 'body' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th onClick={() => handleSort('image')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                    Image {sortColumn === 'image' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th onClick={() => handleSort('target')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                                    Target {sortColumn === 'target' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {logs.map(log => {
+                            {sortedLogs.map(log => {
                                 const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
                                 let safeIso = log.created_at;
                                 if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
