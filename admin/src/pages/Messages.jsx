@@ -422,15 +422,27 @@ const Messages = () => {
                                                 ))}
                                             </div>
                                         </div>
-                                        <div style={{ marginBottom: '1rem' }}>
-                                            <label className="form-label" style={{ marginBottom: '0.25rem' }}>Image URL (Optional)</label>
+
+                                        <div className="form-group" style={{ marginTop: '0.25rem' }}>
+                                            <label className="form-label" style={{ marginBottom: '0.25rem' }}>Title</label>
+                                            <input
+                                                type="text"
+                                                className="form-input"
+                                                value={newBroadcast.title || ''}
+                                                onChange={(e) => setNewBroadcast({ ...newBroadcast, title: e.target.value })}
+                                                placeholder="Broadcast title..."
+                                            />
+                                        </div>
+
+                                        <div className="form-group" style={{ marginTop: '0.25rem', marginBottom: '0.25rem' }}>
+                                            <label className="form-label" style={{ marginBottom: '0.25rem' }}>Image</label>
                                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
                                                 <input
                                                     type="text"
                                                     className="form-input"
                                                     value={newBroadcast.imageUrl}
                                                     onChange={(e) => setNewBroadcast({ ...newBroadcast, imageUrl: e.target.value })}
-                                                    placeholder="https://..."
+                                                    placeholder="Image URL..."
                                                     style={{ flex: 1 }}
                                                 />
                                                 <label className="btn btn-secondary" style={{
@@ -441,7 +453,7 @@ const Messages = () => {
                                                     justifyContent: 'center',
                                                     borderRadius: '8px'
                                                 }}>
-                                                    📂
+                                                    <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📂</span>
                                                     <input
                                                         type="file"
                                                         accept="image/*"
@@ -449,6 +461,10 @@ const Messages = () => {
                                                         onChange={(e) => {
                                                             const file = e.target.files[0];
                                                             if (file) {
+                                                                if (file.size > 8 * 1024 * 1024) {
+                                                                    alert('Image too large (>8MB)');
+                                                                    return;
+                                                                }
                                                                 const reader = new FileReader();
                                                                 reader.onloadend = () => setNewBroadcast({ ...newBroadcast, imageUrl: reader.result });
                                                                 reader.readAsDataURL(file);
@@ -463,14 +479,16 @@ const Messages = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        <div style={{ position: 'relative', marginBottom: '1rem' }}>
-                                            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Message</label>
+
+                                        <div className="form-group" style={{ marginTop: '0.25rem', position: 'relative' }}>
+                                            <label className="form-label" style={{ marginBottom: '0.25rem', display: 'block' }}>Message</label>
                                             <textarea
+                                                className="form-input"
                                                 value={newBroadcast.message}
                                                 onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
-                                                placeholder="Enter broadcast message (visible to all users active in the app)..."
-                                                className="form-input"
-                                                style={{ minHeight: '100px', width: '100%', resize: 'vertical' }}
+                                                rows={3}
+                                                style={{ width: '100%', resize: 'vertical' }}
+                                                placeholder="Enter broadcast message..."
                                             />
                                             <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
                                                 <button
@@ -487,7 +505,7 @@ const Messages = () => {
                                                     }}
                                                     onMouseEnter={e => e.target.style.opacity = 1}
                                                     onMouseLeave={e => e.target.style.opacity = 0.7}
-                                                    title="Add Emoji"
+                                                    title="Insert Emoji"
                                                 >
                                                     😀
                                                 </button>
@@ -1170,7 +1188,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                     onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
                                     style={{ padding: '0.75rem 1rem', textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.timestamp, position: 'relative' }}
                                 >
-                                    Timestamp {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                    Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                     <ResizeHandle column="timestamp" />
                                 </th>
                                 <th style={{ padding: '0.75rem 1rem', width: columnWidths.status, textAlign: 'center', position: 'relative' }}>
@@ -1225,14 +1243,15 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                                 {new Date(item.created_at).toLocaleDateString()}
                                             </span>
                                             <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                                                {new Date(item.created_at).toLocaleTimeString('en-US', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                    second: '2-digit',
-                                                    timeZone: 'Europe/Paris',
-                                                    timeZoneName: 'short',
-                                                    hour12: false
-                                                })}
+                                                {(() => {
+                                                    const d = new Date(item.created_at);
+                                                    const hours = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+                                                    const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
+                                                    const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
+                                                    const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+                                                    const isDST = Math.max(jan, jul) !== parisOffset;
+                                                    return `${hours} ${isDST ? 'CEST' : 'CET'}`;
+                                                })()}
                                             </span>
                                         </div>
                                     </td>
