@@ -107,6 +107,7 @@ const Logs = () => {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [totalLogsCount, setTotalLogsCount] = useState(0);
     const [filters, setFilters] = useState({ limit: 50 });
     const [exporting, setExporting] = useState(false);
     const [sortColumn, setSortColumn] = useState('created_at');
@@ -239,6 +240,7 @@ const Logs = () => {
             const data = await adminApi.getLogs({ ...filters, page, sortBy: sortColumn, sortDir: sortDirection });
             setLogs(data.logs);
             setTotalPages(data.pagination.pages);
+            setTotalLogsCount(data.pagination.total || 0);
         } catch (err) {
             console.error(err);
         } finally {
@@ -460,25 +462,33 @@ const Logs = () => {
             </div>
 
             {/* Pagination - Buttons */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
-                <button
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page <= 1}
-                    style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
-                >
-                    ◀ Prev
-                </button>
-                <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
-                    Page {page} of {totalPages || 1}
-                </span>
-                <button
-                    onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
-                    disabled={page >= totalPages}
-                    style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
-                >
-                    Next ▶
-                </button>
-            </div>
+            {totalPages > 1 && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                        Showing {logs.length} of {totalLogsCount} logs
+                    </span>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page <= 1}
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+                        >
+                            ◀ Prev
+                        </button>
+                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                            Page {page} of {totalPages || 1}
+                        </span>
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
+                            disabled={page >= totalPages}
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                        >
+                            Next ▶
+                        </button>
+                    </div>
+                    <div></div>
+                </div>
+            )}
         </div>
     );
 };

@@ -251,7 +251,15 @@ const Users = () => {
                     value={searchTerm}
                     onChange={(e) => { setSearchTerm(e.target.value); setPage(1); setShowSearchDropdown(true); }}
                     onFocus={() => setShowSearchDropdown(true)}
-                    style={{ width: '100%', maxWidth: '400px', padding: '0.75rem 1rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#e2e8f0', fontSize: '0.9rem' }}
+                    className="form-control-search"
+                    style={{
+                        width: '100%', maxWidth: '400px', padding: '0.75rem 1rem',
+                        background: '#1e293b', // Lighter than page bg
+                        border: '1px solid #475569', // More visible border
+                        borderRadius: '8px', color: '#e2e8f0', fontSize: '0.9rem',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        transition: 'all 0.2s ease'
+                    }}
                 />
                 {/* Search Suggestions Dropdown */}
                 {showSearchDropdown && searchTerm && (
@@ -365,7 +373,9 @@ const Users = () => {
                                                 <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={user.nickname || 'Anonymous'}>
                                                     {(user.nickname || '').length > 30 ? (user.nickname.substring(0, 30) + '...') : (user.nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>)}
                                                 </div>
-                                                <code style={{ fontSize: '0.65rem', color: '#64748b' }}>{user.id.substring(0, 10)}...</code>
+                                                <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={user.id}>
+                                                    {user.id.length > 30 ? (user.id.substring(0, 30) + '...') : user.id}
+                                                </code>
                                             </td>
                                             {/* Badge - Clickable */}
                                             <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center', position: 'relative' }}>
@@ -473,31 +483,37 @@ const Users = () => {
                 </div>
             </div>
 
-            {/* Pagination Footer */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155', gap: '1rem' }}>
-                <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                    Showing {paginatedUsers.length} of {filteredUsers.length} users
-                </span>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <button
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page === 1 ? '#1e293b' : '#334155', color: page === 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer' }}
-                    >
-                        ◀ Prev
-                    </button>
-                    <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
-                        Page {page} of {totalPages || 1}
+            {/* Pagination Footer - Grid for Left Text + Center Buttons */}
+            {totalPages > 1 && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                        Showing {paginatedUsers.length} of {filteredUsers.length} users
                     </span>
-                    <button
-                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page >= totalPages}
-                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
-                    >
-                        Next ▶
-                    </button>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page === 1 ? '#1e293b' : '#334155', color: page === 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer' }}
+                        >
+                            ◀ Prev
+                        </button>
+                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                            Page {page} of {totalPages || 1}
+                        </span>
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page >= totalPages}
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                        >
+                            Next ▶
+                        </button>
+                    </div>
+
+                    {/* Empty right column to balance grid */}
+                    <div></div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
