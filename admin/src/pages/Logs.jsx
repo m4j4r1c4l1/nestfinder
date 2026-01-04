@@ -1,5 +1,98 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { adminApi } from '../api';
+
+// --- Custom Searchable Dropdown Component ---
+const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem, style }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const wrapperRef = useRef(null);
+
+    // Filter options based on search. If no search, show all.
+    const filteredOptions = options.filter(opt => {
+        const str = typeof opt === 'string' ? opt : (opt.label || opt.id || '');
+        return str.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleSelect = (opt) => {
+        // Pass specialized value if object, else string directly
+        onChange(typeof opt === 'object' ? opt.id : opt);
+        setSearchTerm(typeof opt === 'object' ? (opt.nickname || opt.id) : opt);
+        setIsOpen(false);
+    };
+
+    return (
+        <div ref={wrapperRef} style={{ position: 'relative', ...style }}>
+            <input
+                type="text"
+                placeholder={placeholder}
+                value={searchTerm || value || ''}
+                onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setIsOpen(true);
+                    if (!e.target.value) onChange(undefined); // Clear filter on empty
+                }}
+                onFocus={() => setIsOpen(true)}
+                className="form-control"
+                style={{ width: '100%', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+            />
+            {isOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    width: '300px', // Wider dropdown to fit badges
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '4px',
+                    zIndex: 50,
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                }}>
+                    {filteredOptions.length > 0 ? (
+                        filteredOptions.map((opt, idx) => (
+                            <div
+                                key={idx}
+                                onClick={() => handleSelect(opt)}
+                                style={{
+                                    padding: '0.5rem',
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid #334155',
+                                    transition: 'background 0.1s',
+                                    color: '#e2e8f0',
+                                    display: 'flex',
+                                    justifyContent: renderItem ? 'center' : 'flex-start'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                                {renderItem ? renderItem(opt) : (
+                                    <span style={{ fontSize: '0.85rem' }}>
+                                        {typeof opt === 'object' ? `${opt.nickname || 'Anonymous'} (${opt.id.substring(0, 8)})` : opt}
+                                    </span>
+                                )}
+                            </div>
+                        ))
+                    ) : (
+                        <div style={{ padding: '0.5rem', color: '#94a3b8', fontSize: '0.8rem', textAlign: 'center' }}>
+                            No matches found
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
 
 const Logs = () => {
     const [logs, setLogs] = useState([]);
@@ -12,11 +105,10 @@ const Logs = () => {
     const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
 
     // Resizable columns state
-    // Resizable columns state
     const [columnWidths, setColumnWidths] = useState(() => {
         const defaults = {
             time: 140,
-            action: 180,
+            action: 260, // Increased to fit wider badges (220px + padding)
             user: 200,
             details: null // flex
         };
@@ -71,46 +163,62 @@ const Logs = () => {
         />
     );
 
-    // Helper to get matching colors for actions (Vibrant Warm Palette)
-    // Returns solid RGB values for text/border
+    // Optimized Color Palette for Specific Actions
+    // Using HSL-like variations for distinctiveness
     const getActionBaseColor = (action) => {
-        if (!action) return '148, 163, 184'; // Slate-400 (Grey)
-        const a = action.toLowerCase();
+        if (!action) return '148, 163, 184'; // Slate
 
-        // Admin actions -> RED (User request)
-        if (a.includes('admin') && !a.includes('notification')) return '239, 68, 68'; // Red-500
+        switch (action) {
+            // --- Content / Points ---
+            case 'submit_point': return '34, 197, 94'; // Is Spring Green
+            case 'confirm_point': return '21, 128, 61'; // Deep Green
+            case 'validate_point': return '16, 185, 129'; // Emerald
+            case 'deactivate_point': return '239, 68, 68'; // Red
+            case 'vote_deactivate_point': return '249, 115, 22'; // Orange
+            case 'reactivate_point': return '217, 70, 239'; // Fuchsia
+            case 'export_points': return '14, 165, 233'; // Sky Blue
+            case 'feedback_submitted': return '236, 72, 153'; // Pink
 
-        // Notifications -> YELLOW WARM (User request)
-        if (a.includes('notification')) return '234, 179, 8'; // Yellow-500 (Warm Amber)
+            // --- Auth / User ---
+            case 'login': return '59, 130, 246'; // Blue
+            case 'register': return '99, 102, 241'; // Indigo
+            case 'update_nickname': return '139, 92, 246'; // Violet
+            case 'admin_login': return '168, 85, 247'; // Purple
+            case 'admin_login_failed': return '153, 27, 27'; // Dark Red
+            case 'recovery_key_generated': return '20, 184, 166'; // Teal (Longest)
+            case 'identity_recovered': return '234, 179, 8'; // Yellow
 
-        // Auth/Registration -> BLUE (User request)
-        if (a.includes('login') || a.includes('register')) return '59, 130, 246'; // Blue-500
+            // --- Notifications / Broadcats ---
+            case 'notification_sent': return '250, 204, 21'; // Yellow-400
+            case 'notifications_cleared': return '253, 224, 71'; // Light Yellow
+            case 'broadcast_created': return '251, 146, 60'; // Orange-400
+            case 'broadcast_deleted': return '194, 65, 12'; // Deep Orange
+            case 'history_cleared': return '120, 113, 108'; // Stone
 
-        // Creation/Submission/Confirmation -> GREEN (User request)
-        if (a.includes('create') || a.includes('submit') || a.includes('confirm') || a.includes('validate')) return '34, 197, 94'; // Green-500
+            // --- System ---
+            case 'rate_limit_exceeded': return '87, 83, 78'; // Warm Grey
 
-        // Deletion/Rejection -> PURPLE (Distinct from Admin Red)
-        if (a.includes('delete') || a.includes('reject') || a.includes('deactivate')) return '168, 85, 247'; // Purple-500
-
-        // Updates -> ORANGE
-        if (a.includes('update') || a.includes('edit')) return '249, 115, 22'; // Orange-500
-
-        return '148, 163, 184'; // Default Grey
+            default: return '148, 163, 184'; // Default Grey
+        }
     };
 
     const getActionStyle = (action) => {
         const baseColor = getActionBaseColor(action);
-        const isImportant = action && action.toLowerCase().includes('admin');
+        const isImportant = action && (action.includes('admin') || action.includes('failed'));
 
         return {
-            background: `rgba(${baseColor}, 0.15)`, // Subtle tinted background
-            color: `rgb(${baseColor})`, // Solid vibrant text
-            border: `1px solid rgba(${baseColor}, 0.3)`, // Subtle matching border
+            background: `rgba(${baseColor}, 0.15)`,
+            color: `rgb(${baseColor})`,
+            border: `1px solid rgba(${baseColor}, 0.3)`,
             boxShadow: isImportant ? `0 0 10px rgba(${baseColor}, 0.2)` : 'none',
-            textShadow: '0 0 1px rgba(0,0,0,0.5)', // Typos happen, legible text is key
-            width: '180px',
+            textShadow: '0 0 1px rgba(0,0,0,0.5)',
+            width: '220px', // Wider fixed width for longest action
             display: 'inline-block',
-            textAlign: 'center'
+            textAlign: 'center',
+            fontSize: '0.8rem',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
         };
     };
 
@@ -216,21 +324,29 @@ const Logs = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <span>Details</span>
                                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
-                                            <input
-                                                list="actionOptions"
-                                                type="text"
+                                            <SearchableDropdown
+                                                options={availableActions}
+                                                value={filters.action}
+                                                onChange={(val) => setFilters(prev => ({ ...prev, action: val }))}
                                                 placeholder="Filter Action"
-                                                className="form-control"
-                                                onChange={(e) => setFilters(prev => ({ ...prev, action: e.target.value || undefined }))}
-                                                style={{ width: '140px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                                renderItem={(action) => (
+                                                    <span className="badge" style={{
+                                                        padding: '0.25rem 0.5rem',
+                                                        borderRadius: '4px',
+                                                        fontWeight: 500,
+                                                        ...getActionStyle(action)
+                                                    }}>
+                                                        {action}
+                                                    </span>
+                                                )}
+                                                style={{ width: '160px' }}
                                             />
-                                            <input
-                                                list="userOptions"
-                                                type="text"
+                                            <SearchableDropdown
+                                                options={availableUsers}
+                                                value={filters.userId}
+                                                onChange={(val) => setFilters(prev => ({ ...prev, userId: val }))}
                                                 placeholder="Filter User"
-                                                className="form-control"
-                                                onChange={(e) => setFilters(prev => ({ ...prev, userId: e.target.value || undefined }))}
-                                                style={{ width: '140px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                                style={{ width: '160px' }}
                                             />
                                             <button
                                                 className="btn btn-secondary"
