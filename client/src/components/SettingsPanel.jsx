@@ -118,7 +118,7 @@ const RecoveryKeySection = ({ t }) => {
                     {keyVisible && (
                         <div style={{
                             padding: 'var(--space-3)',
-                            background: '#000000',
+                            background: 'var(--color-bg-secondary)',
                             borderRadius: 'var(--radius-md)',
                             fontFamily: 'monospace',
                             fontSize: 'var(--font-size-lg)',
