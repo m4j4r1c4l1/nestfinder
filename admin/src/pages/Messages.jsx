@@ -1006,7 +1006,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
 
     // Pagination
     const [page, setPage] = useState(1);
-    const pageSize = 100; // Increased to 100 per request
+    const pageSize = 15;
 
     // Resizable columns state
     // Resizable columns state
@@ -1301,8 +1301,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         </div>
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                            <div style={{ width: '24px', fontSize: '1rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
+                                            <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
                                                 {item.status === 'new' ? (
                                                     <span style={{ color: '#22c55e' }}>✓✓</span>
                                                 ) : item.status === 'reviewed' ? (
@@ -1311,7 +1311,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                                     <span style={{ color: '#8b5cf6' }}>✓✓</span>
                                                 )}
                                             </div>
-                                            <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#94a3b8', width: '55px', textAlign: 'left' }}>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
                                                 {item.status === 'new' ? 'Pending' : item.status === 'reviewed' ? 'Read' : 'Resolved'}
                                             </span>
                                         </div>
@@ -1392,7 +1392,7 @@ const HistorySection = ({ users = [] }) => {
     const [sortDirection, setSortDirection] = useState('desc');
 
     const [page, setPage] = useState(1);
-    const pageSize = 100; // Increased to 100 per request
+    const pageSize = 15;
 
     // Resizable columns state
     // Resizable columns state
@@ -1748,7 +1748,7 @@ const PaginationControls = ({ page, totalPages, setPage, totalItems, currentCoun
         <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
             Showing {currentCount} of {totalItems} {itemLabel}
         </span>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>
             <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1}

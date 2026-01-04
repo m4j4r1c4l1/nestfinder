@@ -31,7 +31,7 @@ const Users = () => {
     const [sortColumn, setSortColumn] = useState('last_active');
     const [sortDirection, setSortDirection] = useState('desc');
     const [page, setPage] = useState(1);
-    const pageSize = 100;
+    const pageSize = 15;
     const [badgePickerUser, setBadgePickerUser] = useState(null); // User ID for badge picker dropdown
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
     const searchWrapperRef = useRef(null);
