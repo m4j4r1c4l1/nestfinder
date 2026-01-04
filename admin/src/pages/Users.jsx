@@ -435,8 +435,9 @@ const Users = () => {
                                     <div style={{ color: '#e2e8f0', fontWeight: 500, fontSize: '0.85rem' }}>
                                         {(user.nickname || 'Anonymous').substring(0, 30)}
                                     </div>
-                                    <div style={{ color: '#64748b', fontSize: '0.7rem' }}>
-                                        {user.id.substring(0, 12)}... • {getBadge(user.trust_score).name}
+                                    <div style={{ color: '#64748b', fontSize: '0.7rem', display: 'flex', alignItems: 'center' }}>
+                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={user.id}>{user.id}</span>
+                                        <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>&nbsp;• {getBadge(user.trust_score).name}</span>
                                     </div>
                                 </div>
                             </div>
