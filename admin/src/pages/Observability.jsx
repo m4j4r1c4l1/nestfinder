@@ -225,18 +225,18 @@ const Observability = () => {
                                             <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Lines of Code</div>
                                         </div>
                                         <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0ea5e9' }}>
-                                                {(stats.devMetrics?.components || 0).toLocaleString()}
-                                            </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
-                                            <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>React/JSX</div>
-                                        </div>
-                                        <div style={{ textAlign: 'center' }}>
                                             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
                                                 {(stats.devMetrics?.commits || 0).toLocaleString()}
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Git History</div>
+                                        </div>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0ea5e9' }}>
+                                                {(stats.devMetrics?.components || 0).toLocaleString()}
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
+                                            <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>React/JSX</div>
                                         </div>
                                     </div>
                                 </div>
