@@ -242,12 +242,18 @@ const Dashboard = ({ onNavigate }) => {
                                 </button>
                             )}
                             <span style={{
+                                background: 'rgba(56, 189, 248, 0.1)',
+                                color: '#38bdf8',
+                                padding: '0 0.75rem',
+                                borderRadius: '4px',
                                 fontSize: '0.85rem',
-                                color: 'white',
-                                background: '#3b82f6',
-                                padding: '0.25rem 0.75rem',
-                                borderRadius: '12px',
-                                fontWeight: 500
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '28px',
+                                border: '1px solid rgba(56, 189, 248, 0.2)',
+                                userSelect: 'none'
                             }}>
                                 {(filteredPoints || points).length} {filteredPoints ? 'filtered' : 'total'}
                             </span>
@@ -292,7 +298,7 @@ const Dashboard = ({ onNavigate }) => {
                                 </button>
                             )}
                         </div>
-                        <div className="card-body" style={{ padding: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                        <div className="card-body" style={{ padding: '0.35rem', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
                             <StatusRow label="Confirmed" count={confirmed} total={stats.totalPoints} color="var(--color-confirmed)" icon="✅" onClick={() => handleStatusFilter('confirmed')} />
                             <StatusRow label="Pending" count={pending} total={stats.totalPoints} color="var(--color-pending)" icon="⏳" onClick={() => handleStatusFilter('pending')} />
                             <StatusRow label="Deactivated" count={deactivated} total={stats.totalPoints} color="var(--color-deactivated)" icon="❌" onClick={() => handleStatusFilter('deactivated')} />
