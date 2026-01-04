@@ -1744,7 +1744,7 @@ const HistorySection = ({ users = [] }) => {
 
 // --- REUSABLE PAGINATION COMPONENT ---
 const PaginationControls = ({ page, totalPages, setPage, totalItems, currentCount, itemLabel = 'items' }) => (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
         <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
             Showing {currentCount} of {totalItems} {itemLabel}
         </span>
@@ -1767,6 +1767,7 @@ const PaginationControls = ({ page, totalPages, setPage, totalItems, currentCoun
                 Next ▶
             </button>
         </div>
+        <div></div>
     </div>
 );
 
