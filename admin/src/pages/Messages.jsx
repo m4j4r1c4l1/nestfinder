@@ -1370,7 +1370,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     </table>
                     {feedback.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No messages found</div>}
                 </div>
-                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} itemLabel="messages" />}
+                <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} itemLabel="messages" />
             </div>
 
             {previewItem && (
@@ -1729,7 +1729,7 @@ const HistorySection = ({ users = [] }) => {
                     </div>
                 </div>
             </div>
-            {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedLogs.length} currentCount={paginatedLogs.length} itemLabel="messages" />}
+            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedLogs.length} currentCount={paginatedLogs.length} itemLabel="messages" />
 
             {selectedBatchId && (
                 <DetailModal batchId={selectedBatchId} onClose={() => setSelectedBatchId(null)} />

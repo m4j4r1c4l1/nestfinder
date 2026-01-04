@@ -196,8 +196,8 @@ const LogDetailModal = ({ log, onClose }) => {
             backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.4)', padding: '1rem'
         }} onClick={onClose}>
             <div className="card" onClick={e => e.stopPropagation()} style={{
-                width: '100%', // Match Layout
-                maxWidth: '75%', // User requested "same width as thread graph card" -> Assuming 75% of page or container
+                width: '75%', // Match Main Container Width
+                maxWidth: '1500px', // Match Main Container MaxWidth
                 background: '#1e293b',
                 border: '1px solid #334155',
                 borderRadius: '12px',
@@ -217,8 +217,9 @@ const LogDetailModal = ({ log, onClose }) => {
                     <div style={{ display: 'grid', gap: '1.5rem' }}>
 
                         {/* 1. Header Info */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                            <div>
+                        {/* 1. Header Info: Time (Left), User (Center), Action (Right) */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ textAlign: 'left' }}>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</label>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2, marginTop: '0.25rem' }}>
                                     {(() => {
@@ -239,13 +240,13 @@ const LogDetailModal = ({ log, onClose }) => {
                                 </div>
                             </div>
 
-                            <div>
+                            <div style={{ textAlign: 'center', flex: 1 }}>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
                                 <div style={{ fontSize: '1rem', color: '#e2e8f0' }}>{log.user_nickname || 'Anonymous'}</div>
                                 <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>{log.user_id}</div>
                             </div>
 
-                            <div>
+                            <div style={{ textAlign: 'right' }}>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Action</label>
                                 <div style={{ marginTop: '0.25rem' }}>
                                     <span className="badge" style={getActionStyle(log.action)}>
@@ -598,33 +599,33 @@ const Logs = () => {
             </div>
 
             {/* Pagination - Buttons (Moved Outside Card) */}
-            {totalPages > 1 && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
-                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                        Showing {logs.length} of {totalLogsCount} logs
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+                <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                    Showing {logs.length} of {totalLogsCount} logs
+                </span>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>
+                    <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page <= 1}
+                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+                    >
+                        ◀ Prev
+                    </button>
+                    <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                        Page {page} of {totalPages || 1}
                     </span>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <button
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page <= 1}
-                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
-                        >
-                            ◀ Prev
-                        </button>
-                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
-                            Page {page} of {totalPages || 1}
-                        </span>
-                        <button
-                            onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
-                            disabled={page >= totalPages}
-                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
-                        >
-                            Next ▶
-                        </button>
-                    </div>
-                    <div></div>{/* Spacer for 1fr layout */}
+                    <button
+                        onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
+                        disabled={page >= totalPages}
+                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                    >
+                        Next ▶
+                    </button>
                 </div>
-            )}
+                {/* Empty right column to balance grid */}
+                <div></div>
+            </div>
 
             <LogDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
         </div>
