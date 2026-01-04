@@ -351,7 +351,7 @@ const Users = () => {
             </div>
 
             {/* Search Bar with Dropdown */}
-            <div style={{ marginBottom: '1rem', position: 'relative' }} ref={searchWrapperRef}>
+            <div style={{ marginBottom: '1rem', position: 'relative', width: '100%', maxWidth: '400px' }} ref={searchWrapperRef}>
                 <input
                     type="text"
                     placeholder="🔍 Search by nickname, ID, or badge..."
@@ -360,7 +360,7 @@ const Users = () => {
                     onFocus={() => setShowSearchDropdown(true)}
                     className="form-control-search"
                     style={{
-                        width: '100%', maxWidth: '400px', padding: '0.75rem 2.5rem 0.75rem 1rem', // Added padding-right
+                        width: '100%', padding: '0.75rem 2.5rem 0.75rem 1rem', // Added padding-right
                         background: '#1e293b',
                         border: '1px solid #475569',
                         borderRadius: '8px', color: '#e2e8f0', fontSize: '0.9rem',
