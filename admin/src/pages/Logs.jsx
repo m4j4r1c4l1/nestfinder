@@ -373,20 +373,22 @@ const Logs = () => {
                             {/* Server-side sorting - logs already sorted */}
                             {logs.map(log => (
                                 <tr key={log.id} style={{ borderBottom: '1px solid #334155', color: '#cbd5e1' }}>
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
                                                 {new Date(log.created_at).toLocaleDateString()}
                                             </span>
                                             <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                                                {new Date(log.created_at).toLocaleTimeString('en-US', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                    second: '2-digit',
-                                                    timeZone: 'Europe/Paris',
-                                                    timeZoneName: 'short',
-                                                    hour12: false
-                                                })}
+                                                {(() => {
+                                                    const d = new Date(log.created_at);
+                                                    const hours = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+                                                    // Determine CET vs CEST based on DST
+                                                    const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
+                                                    const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
+                                                    const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+                                                    const isDST = Math.max(jan, jul) !== parisOffset;
+                                                    return `${hours} ${isDST ? 'CEST' : 'CET'}`;
+                                                })()}
                                             </span>
                                         </div>
                                     </td>
@@ -410,47 +412,60 @@ const Logs = () => {
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem' }}>
                                         {(() => {
-                                            // Parse metadata if available
-                                            let meta = {};
-                                            try {
-                                                meta = log.metadata ? (typeof log.metadata === 'string' ? JSON.parse(log.metadata) : log.metadata) : {};
-                                            } catch (e) { meta = {}; }
-
-                                            // Build a readable summary
-                                            const parts = [];
-                                            if (meta.title) parts.push(meta.title);
-                                            if (meta.body) parts.push(meta.body.substring(0, 50) + (meta.body.length > 50 ? '...' : ''));
-                                            if (meta.count) parts.push(`${meta.count} users`);
-                                            if (meta.target) parts.push(`Target: ${meta.target}`);
-                                            if (meta.template) parts.push(`Template: ${meta.template}`);
-
-                                            // Fallback to legacy details field
-                                            if (parts.length === 0 && log.details) {
+                                            // First try log.details (used by admin_login, etc.)
+                                            if (log.details) {
                                                 try {
-                                                    const details = JSON.parse(log.details);
-                                                    const detailStr = Object.entries(details)
-                                                        .map(([k, v]) => `${k}: ${v}`)
-                                                        .join(', ');
-                                                    if (detailStr) parts.push(detailStr);
+                                                    const details = typeof log.details === 'string' ? JSON.parse(log.details) : log.details;
+                                                    if (Object.keys(details).length > 0) {
+                                                        const detailStr = Object.entries(details)
+                                                            .filter(([k]) => !['password', 'token'].includes(k.toLowerCase()))
+                                                            .map(([k, v]) => `${k}: ${typeof v === 'string' && v.length > 30 ? v.substring(0, 30) + '...' : v}`)
+                                                            .join(', ');
+                                                        if (detailStr) {
+                                                            return (
+                                                                <div style={{
+                                                                    fontSize: '0.85rem',
+                                                                    color: '#cbd5e1',
+                                                                    whiteSpace: 'nowrap',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    maxWidth: '400px'
+                                                                }} title={detailStr}>
+                                                                    {detailStr}
+                                                                </div>
+                                                            );
+                                                        }
+                                                    }
                                                 } catch (e) { }
                                             }
 
-                                            const summary = parts.join(' • ');
+                                            // Fallback to metadata
+                                            if (log.metadata) {
+                                                try {
+                                                    const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata) : log.metadata;
+                                                    const parts = [];
+                                                    if (meta.title) parts.push(meta.title);
+                                                    if (meta.body) parts.push(meta.body.substring(0, 50) + (meta.body.length > 50 ? '...' : ''));
+                                                    if (meta.count) parts.push(`${meta.count} users`);
+                                                    const summary = parts.join(' • ');
+                                                    if (summary) {
+                                                        return (
+                                                            <div style={{
+                                                                fontSize: '0.85rem',
+                                                                color: '#cbd5e1',
+                                                                whiteSpace: 'nowrap',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                maxWidth: '400px'
+                                                            }} title={summary}>
+                                                                {summary}
+                                                            </div>
+                                                        );
+                                                    }
+                                                } catch (e) { }
+                                            }
 
-                                            return summary ? (
-                                                <div style={{
-                                                    fontSize: '0.85rem',
-                                                    color: '#cbd5e1',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    maxWidth: '400px'
-                                                }} title={summary}>
-                                                    {summary}
-                                                </div>
-                                            ) : (
-                                                <span style={{ color: '#64748b', fontStyle: 'italic' }}>—</span>
-                                            );
+                                            return <span style={{ color: '#64748b', fontStyle: 'italic' }}>—</span>;
                                         })()}
                                     </td>
                                 </tr>
