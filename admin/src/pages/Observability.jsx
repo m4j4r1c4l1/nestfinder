@@ -215,7 +215,7 @@ const Observability = () => {
                             {/* Devel Block (Right) */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem', marginBottom: '0.5rem' }}>🛠️ Development</div>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '2rem' }}>
                                     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                                         <div style={{ textAlign: 'center' }}>
                                             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#14b8a6' }}>
