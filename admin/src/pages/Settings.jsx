@@ -98,7 +98,10 @@ const Settings = () => {
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '1.5rem' }}>
-            <h2 style={{ marginBottom: '1.5rem' }}>🦉 Settings</h2>
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🦉 Settings</h1>
+                <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Configure application settings and security options</p>
+            </div>
 
             {message.text && (
                 <div style={{

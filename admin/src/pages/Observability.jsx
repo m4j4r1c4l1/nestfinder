@@ -101,6 +101,7 @@ const Observability = () => {
                                             <span style={{ fontSize: '0.9rem' }}>🟢</span>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Confirmed</div>
                                         </div>
+                                        <div className="text-muted text-sm">Verified</div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
@@ -110,6 +111,7 @@ const Observability = () => {
                                             <span style={{ fontSize: '0.9rem' }}>🟠</span>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Pending</div>
                                         </div>
+                                        <div className="text-muted text-sm">Awaiting</div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
@@ -119,6 +121,7 @@ const Observability = () => {
                                             <span style={{ fontSize: '0.9rem' }}>🔴</span>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Deactivated</div>
                                         </div>
+                                        <div className="text-muted text-sm">Inactive</div>
                                     </div>
                                 </div>
                             </div>
@@ -210,29 +213,31 @@ const Observability = () => {
                             <div style={{ width: '1px', height: '80px', background: '#334155', alignSelf: 'center' }} />
 
                             {/* Devel Block (Right) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center', justifyContent: 'center' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>🛠️ Development</div>
-                                <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#14b8a6' }}>
-                                            {(stats.devMetrics?.loc || 0).toLocaleString()}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem', marginBottom: '0.5rem' }}>🛠️ Development</div>
+                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#14b8a6' }}>
+                                                {(stats.devMetrics?.loc || 0).toLocaleString()}
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>LOC</div>
+                                            <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Lines of Code</div>
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>LOC</div>
-                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Lines of Code</div>
-                                    </div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0ea5e9' }}>
-                                            {(stats.devMetrics?.components || 0).toLocaleString()}
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0ea5e9' }}>
+                                                {(stats.devMetrics?.components || 0).toLocaleString()}
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
+                                            <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>React/JSX</div>
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
-                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>React/JSX</div>
-                                    </div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
-                                            {(stats.devMetrics?.commits || 0).toLocaleString()}
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                                {(stats.devMetrics?.commits || 0).toLocaleString()}
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
+                                            <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Git History</div>
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
-                                        <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Git History</div>
                                     </div>
                                 </div>
                             </div>

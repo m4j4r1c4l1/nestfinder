@@ -298,7 +298,7 @@ const Logs = () => {
     return (
         <div style={{ padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div style={{ marginBottom: '1.5rem' }}>
-                <h2 style={{ marginBottom: '0.5rem' }}>🥚 Logs</h2>
+                <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🥚 Logs</h1>
                 <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>View and filter system activity and audit trails</p>
             </div>
 
