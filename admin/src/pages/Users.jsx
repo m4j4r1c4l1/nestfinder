@@ -360,14 +360,41 @@ const Users = () => {
                     onFocus={() => setShowSearchDropdown(true)}
                     className="form-control-search"
                     style={{
-                        width: '100%', maxWidth: '400px', padding: '0.75rem 1rem',
-                        background: '#1e293b', // Lighter than page bg
-                        border: '1px solid #475569', // More visible border
+                        width: '100%', maxWidth: '400px', padding: '0.75rem 2.5rem 0.75rem 1rem', // Added padding-right
+                        background: '#1e293b',
+                        border: '1px solid #475569',
                         borderRadius: '8px', color: '#e2e8f0', fontSize: '0.9rem',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                         transition: 'all 0.2s ease'
                     }}
                 />
+                {searchTerm && (
+                    <button
+                        onClick={() => { setSearchTerm(''); setPage(1); }}
+                        style={{
+                            position: 'absolute',
+                            right: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#94a3b8',
+                            fontSize: '1.2rem',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            lineHeight: 1,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            borderRadius: '50%',
+                            transition: 'color 0.2s, background 0.2s',
+                            zIndex: 10
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#cbd5e1'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
+                        title="Clear search"
+                    >
+                        ×
+                    </button>
+                )}
                 {/* Search Suggestions Dropdown */}
                 {showSearchDropdown && searchTerm && (
                     <div style={{

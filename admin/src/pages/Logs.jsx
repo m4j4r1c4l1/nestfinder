@@ -549,13 +549,13 @@ const Logs = () => {
                                                 {log.action}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '0.75rem 1rem', overflow: 'hidden' }}>
-                                            <div style={{ fontWeight: 500, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {log.user_nickname || 'Anonymous'}
+                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                            <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={log.user_nickname || 'Anonymous'}>
+                                                {(log.user_nickname || '').length > 30 ? (log.user_nickname.substring(0, 30) + '...') : (log.user_nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>)}
                                             </div>
-                                            <div style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {log.user_id || 'N/A'}
-                                            </div>
+                                            <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={log.user_id}>
+                                                {(log.user_id || '').length > 30 ? (log.user_id.substring(0, 30) + '...') : (log.user_id || 'N/A')}
+                                            </code>
                                         </td>
                                         <td style={{ padding: '0.75rem 1rem' }}>
                                             {(() => {
