@@ -124,6 +124,7 @@ const Messages = () => {
     });
     const [showBroadcastEmojiPicker, setShowBroadcastEmojiPicker] = useState(false);
     const [creatingBroadcast, setCreatingBroadcast] = useState(false);
+    const [selectedBroadcastTemplate, setSelectedBroadcastTemplate] = useState('custom');
 
     useEffect(() => {
         fetchData();
@@ -170,11 +171,35 @@ const Messages = () => {
                 body: JSON.stringify(newBroadcast)
             });
             setNewBroadcast({ message: '', imageUrl: '', startTime: '', endTime: '' });
+            setSelectedBroadcastTemplate('custom');
             fetchData();
         } catch (err) {
             console.error('Failed to create broadcast:', err);
         }
         setCreatingBroadcast(false);
+    };
+
+    const handleBroadcastTemplateChange = (templateId) => {
+        // Force update logic
+        const tmpl = templates[templateId];
+        if (!tmpl) return;
+
+        setSelectedBroadcastTemplate(templateId);
+        setNewBroadcast(prev => {
+            const updated = {
+                ...prev,
+                message: tmpl.body || '',
+                imageUrl: tmpl.id === 'happy_new_year' ? `${APP_URL}images/new_year_2026.png` : (tmpl.id === 'share_app' ? '' : '')
+            };
+            return updated;
+        });
+
+        // Special handling for templates that need dynamic generation
+        if (templateId === 'share_app') {
+            // Need to generate QR code here?
+            // The Composer uses logic to generate QR, but Broadcasts form is simpler.
+            // Let's just set the text for now as per requirement.
+        }
     };
 
     const handleDeleteBroadcast = async (id) => {
@@ -366,12 +391,12 @@ const Messages = () => {
                                                         onClick={() => handleBroadcastTemplateChange(tmpl.id)}
                                                         style={{
                                                             padding: '0.5rem 0.2rem',
-                                                            border: '1px solid #334155',
+                                                            border: selectedBroadcastTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #334155',
                                                             borderRadius: '8px',
-                                                            background: '#0f172a',
-                                                            color: '#94a3b8',
+                                                            background: selectedBroadcastTemplate === tmpl.id ? '#1e293b' : '#0f172a',
+                                                            color: selectedBroadcastTemplate === tmpl.id ? '#60a5fa' : '#94a3b8',
                                                             cursor: 'pointer',
-                                                            fontWeight: 400,
+                                                            fontWeight: selectedBroadcastTemplate === tmpl.id ? 600 : 400,
                                                             fontSize: '0.85rem',
                                                             whiteSpace: 'nowrap',
                                                             overflow: 'hidden',
@@ -379,8 +404,18 @@ const Messages = () => {
                                                             textAlign: 'center'
                                                         }}
                                                         title={tmpl.name}
-                                                        onMouseEnter={e => { e.currentTarget.style.color = '#e2e8f0'; e.currentTarget.style.background = '#1e293b'; }}
-                                                        onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = '#0f172a'; }}
+                                                        onMouseEnter={e => {
+                                                            if (selectedBroadcastTemplate !== tmpl.id) {
+                                                                e.currentTarget.style.color = '#e2e8f0';
+                                                                e.currentTarget.style.background = '#1e293b';
+                                                            }
+                                                        }}
+                                                        onMouseLeave={e => {
+                                                            if (selectedBroadcastTemplate !== tmpl.id) {
+                                                                e.currentTarget.style.color = '#94a3b8';
+                                                                e.currentTarget.style.background = '#0f172a';
+                                                            }
+                                                        }}
                                                     >
                                                         {tmpl.name}
                                                     </button>
@@ -683,14 +718,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
         init();
     }, []);
 
-    const handleBroadcastTemplateChange = (templateId) => {
-        const tmpl = templates[templateId];
-        setNewBroadcast(prev => ({
-            ...prev,
-            message: tmpl.body || '',
-            imageUrl: tmpl.id === 'happy_new_year' ? `${APP_URL}/images/new_year_2026.png` : ''
-        }));
-    };
+
 
     const handleTemplateChange = async (templateId) => {
         setSelectedTemplate(templateId);
@@ -1562,7 +1590,16 @@ const HistorySection = ({ users = [] }) => {
                                         >
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
-                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                                    {date.toLocaleTimeString('en-US', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        second: '2-digit',
+                                                        timeZone: 'Europe/Paris',
+                                                        timeZoneName: 'short',
+                                                        hour12: false
+                                                    })}
+                                                </span>
                                             </div>
                                         </td>
                                         <td
