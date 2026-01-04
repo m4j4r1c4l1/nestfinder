@@ -412,57 +412,33 @@ const Logs = () => {
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem' }}>
                                         {(() => {
-                                            // First try log.details (used by admin_login, etc.)
-                                            if (log.details) {
-                                                try {
-                                                    const details = typeof log.details === 'string' ? JSON.parse(log.details) : log.details;
-                                                    if (Object.keys(details).length > 0) {
-                                                        const detailStr = Object.entries(details)
-                                                            .filter(([k]) => !['password', 'token'].includes(k.toLowerCase()))
-                                                            .map(([k, v]) => `${k}: ${typeof v === 'string' && v.length > 30 ? v.substring(0, 30) + '...' : v}`)
-                                                            .join(', ');
-                                                        if (detailStr) {
-                                                            return (
-                                                                <div style={{
-                                                                    fontSize: '0.85rem',
-                                                                    color: '#cbd5e1',
-                                                                    whiteSpace: 'nowrap',
-                                                                    overflow: 'hidden',
-                                                                    textOverflow: 'ellipsis',
-                                                                    maxWidth: '400px'
-                                                                }} title={detailStr}>
-                                                                    {detailStr}
-                                                                </div>
-                                                            );
-                                                        }
-                                                    }
-                                                } catch (e) { }
-                                            }
+                                            // log.metadata is already parsed by the API
+                                            const meta = log.metadata;
 
-                                            // Fallback to metadata
-                                            if (log.metadata) {
-                                                try {
-                                                    const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata) : log.metadata;
-                                                    const parts = [];
-                                                    if (meta.title) parts.push(meta.title);
-                                                    if (meta.body) parts.push(meta.body.substring(0, 50) + (meta.body.length > 50 ? '...' : ''));
-                                                    if (meta.count) parts.push(`${meta.count} users`);
-                                                    const summary = parts.join(' • ');
-                                                    if (summary) {
-                                                        return (
-                                                            <div style={{
-                                                                fontSize: '0.85rem',
-                                                                color: '#cbd5e1',
-                                                                whiteSpace: 'nowrap',
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                maxWidth: '400px'
-                                                            }} title={summary}>
-                                                                {summary}
-                                                            </div>
-                                                        );
-                                                    }
-                                                } catch (e) { }
+                                            if (meta && typeof meta === 'object' && Object.keys(meta).length > 0) {
+                                                // Build readable string from all metadata fields
+                                                const detailStr = Object.entries(meta)
+                                                    .filter(([k]) => !['password', 'token'].includes(k.toLowerCase()))
+                                                    .map(([k, v]) => {
+                                                        const strVal = typeof v === 'string' ? v : JSON.stringify(v);
+                                                        return `${k}: ${strVal.length > 35 ? strVal.substring(0, 35) + '...' : strVal}`;
+                                                    })
+                                                    .join(', ');
+
+                                                if (detailStr) {
+                                                    return (
+                                                        <div style={{
+                                                            fontSize: '0.85rem',
+                                                            color: '#cbd5e1',
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            maxWidth: '400px'
+                                                        }} title={detailStr}>
+                                                            {detailStr}
+                                                        </div>
+                                                    );
+                                                }
                                             }
 
                                             return <span style={{ color: '#64748b', fontStyle: 'italic' }}>—</span>;

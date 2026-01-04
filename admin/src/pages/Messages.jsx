@@ -179,27 +179,77 @@ const Messages = () => {
         setCreatingBroadcast(false);
     };
 
-    const handleBroadcastTemplateChange = (templateId) => {
-        // Force update logic
+    const handleBroadcastTemplateChange = async (templateId) => {
         const tmpl = templates[templateId];
         if (!tmpl) return;
 
         setSelectedBroadcastTemplate(templateId);
-        setNewBroadcast(prev => {
-            const updated = {
-                ...prev,
-                message: tmpl.body || '',
-                imageUrl: tmpl.id === 'happy_new_year' ? `${APP_URL}images/new_year_2026.png` : (tmpl.id === 'share_app' ? '' : '')
-            };
-            return updated;
-        });
 
-        // Special handling for templates that need dynamic generation
-        if (templateId === 'share_app') {
-            // Need to generate QR code here?
-            // The Composer uses logic to generate QR, but Broadcasts form is simpler.
-            // Let's just set the text for now as per requirement.
+        // Build update object with title and message
+        const updates = {
+            title: tmpl.title || '',
+            message: tmpl.body || '',
+            imageUrl: ''
+        };
+
+        // Handle special templates
+        if (templateId === 'happy_new_year') {
+            updates.imageUrl = `${APP_URL}images/new_year_2026.png`;
+        } else if (templateId === 'share_app') {
+            // Generate QR code using the same logic as ComposeSection
+            try {
+                const qrDataUrl = await QRCode.toDataURL(APP_URL, {
+                    width: 500,
+                    margin: 0,
+                    color: { dark: '#1e293b', light: '#ffffff' },
+                    errorCorrectionLevel: 'H'
+                });
+
+                // Add border and emoji (simplified version)
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = qrDataUrl;
+                });
+
+                const border = 30;
+                canvas.width = img.width + border * 2;
+                canvas.height = img.height + border * 2;
+
+                // Gradient background
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, '#3b82f6');
+                gradient.addColorStop(1, '#8b5cf6');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw QR
+                ctx.drawImage(img, border, border);
+
+                // Center emoji
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = canvas.width / 6;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+                ctx.font = `${radius * 1.5}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🪹', centerX, centerY + radius * 0.1);
+
+                updates.imageUrl = canvas.toDataURL('image/png');
+            } catch (err) {
+                console.error('QR generation failed:', err);
+            }
         }
+
+        setNewBroadcast(prev => ({ ...prev, ...updates }));
     };
 
     const handleDeleteBroadcast = async (id) => {
