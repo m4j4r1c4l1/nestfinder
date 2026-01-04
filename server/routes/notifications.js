@@ -169,37 +169,26 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         const rootDir = path.resolve(__dirname, '../../'); // Project root
 
         try {
-            // 1. Commits - Hybrid Approach (Local Git -> GitHub API)
+            // 1. Commits - Use GitHub Contributors API (most reliable for total count)
             try {
-                // Try local git first (fastest, most accurate for dev)
-                const { stdout } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
-                devMetrics.commits = parseInt(stdout.trim(), 10);
-            } catch (gitErr) {
-                // Fallback to GitHub API (use pagination to get total count)
-                try {
-                    // First, try to get the Link header with per_page=1 to find total pages
-                    const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', {
-                        headers: { 'User-Agent': 'nestfinder-admin' }
-                    });
-                    if (response.ok) {
-                        const linkHeader = response.headers.get('Link');
-                        if (linkHeader) {
-                            const match = linkHeader.match(/page=(\d+)>; rel="last"/);
-                            if (match) devMetrics.commits = parseInt(match[1], 10);
-                        }
-                        // If no Link header (less than 2 pages), fetch more commits to count
-                        if (!devMetrics.commits) {
-                            const fullResponse = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=100', {
-                                headers: { 'User-Agent': 'nestfinder-admin' }
-                            });
-                            if (fullResponse.ok) {
-                                const data = await fullResponse.json();
-                                devMetrics.commits = Array.isArray(data) ? data.length : 0;
-                            }
-                        }
+                const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/contributors?per_page=100', {
+                    headers: { 'User-Agent': 'nestfinder-admin' }
+                });
+                if (response.ok) {
+                    const contributors = await response.json();
+                    if (Array.isArray(contributors)) {
+                        // Sum all contributor commits
+                        devMetrics.commits = contributors.reduce((sum, c) => sum + (c.contributions || 0), 0);
                     }
-                } catch (apiErr) {
-                    console.error('Commit count failed:', apiErr.message);
+                }
+            } catch (apiErr) {
+                // Fallback to local git if API fails
+                console.error('GitHub API failed, trying local git:', apiErr.message);
+                try {
+                    const { stdout } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
+                    devMetrics.commits = parseInt(stdout.trim(), 10);
+                } catch (gitErr) {
+                    console.error('Local git also failed:', gitErr.message);
                 }
             }
 
