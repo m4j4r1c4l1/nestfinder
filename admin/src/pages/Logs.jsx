@@ -240,10 +240,12 @@ const LogDetailModal = ({ log, onClose }) => {
                                 </div>
                             </div>
 
-                            <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
-                                <div style={{ fontSize: '1rem', color: '#e2e8f0' }}>{log.user_nickname || 'Anonymous'}</div>
-                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>{log.user_id}</div>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ textAlign: 'left' }}>
+                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
+                                    <div style={{ fontSize: '0.9rem', color: '#cbd5e1' }}>{log.user_nickname || 'Anonymous'}</div>
+                                    <div style={{ fontSize: '1.1rem', color: '#f8fafc', fontFamily: 'monospace', fontWeight: 600 }}>{log.user_id}</div>
+                                </div>
                             </div>
 
                             <div>
@@ -595,7 +597,7 @@ const Logs = () => {
 
                 {/* Pagination - Buttons */}
                 {/* Pagination - Matching Messages.jsx Style */}
-                <LogDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
+
             </div>
 
             {/* Pagination - Buttons (Moved Outside Card) */}
