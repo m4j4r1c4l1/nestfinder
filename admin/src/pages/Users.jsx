@@ -34,6 +34,7 @@ const Users = () => {
     const pageSize = 30;
     const [badgePickerUser, setBadgePickerUser] = useState(null); // User ID for badge picker dropdown
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+    const [selectedBadgeFilter, setSelectedBadgeFilter] = useState(null);
     const searchWrapperRef = useRef(null);
 
     // Click outside handler for search dropdown
@@ -141,9 +142,20 @@ const Users = () => {
     // Filter and paginate
     const filteredUsers = sortedUsers.filter(user => {
         const search = searchTerm.toLowerCase();
+        const badge = getBadge(user.trust_score);
+
+        // Badge Filter
+        if (selectedBadgeFilter) {
+            if (selectedBadgeFilter === 'blocked') {
+                if (!user.blocked) return false;
+            } else if (selectedBadgeFilter !== badge.name.toLowerCase()) {
+                return false;
+            }
+        }
+
         return (user.nickname || '').toLowerCase().includes(search) ||
             (user.id || '').toLowerCase().includes(search) ||
-            getBadge(user.trust_score).name.toLowerCase().includes(search);
+            badge.name.toLowerCase().includes(search);
     });
     const totalPages = Math.ceil(filteredUsers.length / pageSize);
     const paginatedUsers = filteredUsers.slice((page - 1) * pageSize, page * pageSize);
@@ -216,40 +228,123 @@ const Users = () => {
             </div>
 
             {/* Stats Cards */}
+            {/* Stats Cards - Clickable Filters */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '0.75rem' }}>
+                {/* Total - Clears Filter */}
+                <div
+                    className="card"
+                    onClick={() => setSelectedBadgeFilter(null)}
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))',
+                        border: selectedBadgeFilter === null ? '2px solid #3b82f6' : '1px solid rgba(59, 130, 246, 0.2)',
+                        padding: '0.75rem',
+                        cursor: 'pointer',
+                        opacity: selectedBadgeFilter !== null ? 0.6 : 1,
+                        transition: 'all 0.2s'
+                    }}
+                >
                     <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>Total</div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{users.length}</div>
                 </div>
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05))', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '0.75rem' }}>
+
+                {/* Eagle */}
+                <div
+                    className="card"
+                    onClick={() => setSelectedBadgeFilter(selectedBadgeFilter === 'eagle' ? null : 'eagle')}
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05))',
+                        border: selectedBadgeFilter === 'eagle' ? '2px solid #f59e0b' : '1px solid rgba(245, 158, 11, 0.2)',
+                        padding: '0.75rem',
+                        cursor: 'pointer',
+                        opacity: (selectedBadgeFilter && selectedBadgeFilter !== 'eagle') ? 0.6 : 1,
+                        transition: 'all 0.2s',
+                        transform: selectedBadgeFilter === 'eagle' ? 'scale(1.02)' : 'none'
+                    }}
+                >
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#f59e0b', marginBottom: '0.25rem', fontWeight: 600 }}>
                         <span>🦅 Eagle</span>
                         <span style={{ color: '#ffffff' }}>≥50</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f59e0b' }}>{badgeCounts.eagle}</div>
                 </div>
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '0.75rem' }}>
+
+                {/* Owl */}
+                <div
+                    className="card"
+                    onClick={() => setSelectedBadgeFilter(selectedBadgeFilter === 'owl' ? null : 'owl')}
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))',
+                        border: selectedBadgeFilter === 'owl' ? '2px solid #8b5cf6' : '1px solid rgba(139, 92, 246, 0.2)',
+                        padding: '0.75rem',
+                        cursor: 'pointer',
+                        opacity: (selectedBadgeFilter && selectedBadgeFilter !== 'owl') ? 0.6 : 1,
+                        transition: 'all 0.2s',
+                        transform: selectedBadgeFilter === 'owl' ? 'scale(1.02)' : 'none'
+                    }}
+                >
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.25rem', fontWeight: 600 }}>
                         <span>🦉 Owl</span>
                         <span style={{ color: '#ffffff' }}>≥30</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6' }}>{badgeCounts.owl}</div>
                 </div>
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '0.75rem' }}>
+
+                {/* Sparrow */}
+                <div
+                    className="card"
+                    onClick={() => setSelectedBadgeFilter(selectedBadgeFilter === 'sparrow' ? null : 'sparrow')}
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))',
+                        border: selectedBadgeFilter === 'sparrow' ? '2px solid #3b82f6' : '1px solid rgba(59, 130, 246, 0.2)',
+                        padding: '0.75rem',
+                        cursor: 'pointer',
+                        opacity: (selectedBadgeFilter && selectedBadgeFilter !== 'sparrow') ? 0.6 : 1,
+                        transition: 'all 0.2s',
+                        transform: selectedBadgeFilter === 'sparrow' ? 'scale(1.02)' : 'none'
+                    }}
+                >
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.25rem', fontWeight: 600 }}>
                         <span>🐦 Sparrow</span>
                         <span style={{ color: '#ffffff' }}>≥10</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{badgeCounts.sparrow}</div>
                 </div>
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05))', border: '1px solid rgba(148, 163, 184, 0.2)', padding: '0.75rem' }}>
+
+                {/* Hatchling */}
+                <div
+                    className="card"
+                    onClick={() => setSelectedBadgeFilter(selectedBadgeFilter === 'hatchling' ? null : 'hatchling')}
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05))',
+                        border: selectedBadgeFilter === 'hatchling' ? '2px solid #94a3b8' : '1px solid rgba(148, 163, 184, 0.2)',
+                        padding: '0.75rem',
+                        cursor: 'pointer',
+                        opacity: (selectedBadgeFilter && selectedBadgeFilter !== 'hatchling') ? 0.6 : 1,
+                        transition: 'all 0.2s',
+                        transform: selectedBadgeFilter === 'hatchling' ? 'scale(1.02)' : 'none'
+                    }}
+                >
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem', fontWeight: 600 }}>
                         <span>🥚 Hatchling</span>
                         <span style={{ color: '#ffffff' }}>&lt;10</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#94a3b8' }}>{badgeCounts.hatchling}</div>
                 </div>
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05))', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.75rem' }}>
+
+                {/* Blocked */}
+                <div
+                    className="card"
+                    onClick={() => setSelectedBadgeFilter(selectedBadgeFilter === 'blocked' ? null : 'blocked')}
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05))',
+                        border: selectedBadgeFilter === 'blocked' ? '2px solid #ef4444' : '1px solid rgba(239, 68, 68, 0.2)',
+                        padding: '0.75rem',
+                        cursor: 'pointer',
+                        opacity: (selectedBadgeFilter && selectedBadgeFilter !== 'blocked') ? 0.6 : 1,
+                        transition: 'all 0.2s',
+                        transform: selectedBadgeFilter === 'blocked' ? 'scale(1.02)' : 'none'
+                    }}
+                >
                     <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>🚫 Blocked</div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>{users.filter(u => u.blocked).length}</div>
                 </div>
