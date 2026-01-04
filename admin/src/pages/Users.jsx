@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { adminApi } from '../api';
 
 // Badge system - matching client-side thresholds
@@ -33,6 +33,19 @@ const Users = () => {
     const [page, setPage] = useState(1);
     const pageSize = 100;
     const [badgePickerUser, setBadgePickerUser] = useState(null); // User ID for badge picker dropdown
+    const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+    const searchWrapperRef = useRef(null);
+
+    // Click outside handler for search dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target)) {
+                setShowSearchDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Badge options with minimum trust scores
     const badgeOptions = [
@@ -230,15 +243,74 @@ const Users = () => {
                 </div>
             </div>
 
-            {/* Search Bar */}
-            <div style={{ marginBottom: '1rem' }}>
+            {/* Search Bar with Dropdown */}
+            <div style={{ marginBottom: '1rem', position: 'relative' }} ref={searchWrapperRef}>
                 <input
                     type="text"
                     placeholder="🔍 Search by nickname, ID, or badge..."
                     value={searchTerm}
-                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1); setShowSearchDropdown(true); }}
+                    onFocus={() => setShowSearchDropdown(true)}
                     style={{ width: '100%', maxWidth: '400px', padding: '0.75rem 1rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#e2e8f0', fontSize: '0.9rem' }}
                 />
+                {/* Search Suggestions Dropdown */}
+                {showSearchDropdown && searchTerm && (
+                    <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        width: '100%',
+                        maxWidth: '400px',
+                        maxHeight: '300px',
+                        overflowY: 'auto',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        borderRadius: '0 0 8px 8px',
+                        zIndex: 50,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                    }}>
+                        {filteredUsers.slice(0, 10).map(user => (
+                            <div
+                                key={user.id}
+                                onClick={() => {
+                                    setSearchTerm(user.nickname || user.id);
+                                    setShowSearchDropdown(false);
+                                }}
+                                style={{
+                                    padding: '0.6rem 1rem',
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid #334155',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    transition: 'background 0.1s'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                                <span style={{ fontSize: '1rem' }}>{getBadge(user.trust_score).icon}</span>
+                                <div>
+                                    <div style={{ color: '#e2e8f0', fontWeight: 500, fontSize: '0.85rem' }}>
+                                        {(user.nickname || 'Anonymous').substring(0, 30)}
+                                    </div>
+                                    <div style={{ color: '#64748b', fontSize: '0.7rem' }}>
+                                        {user.id.substring(0, 12)}... • {getBadge(user.trust_score).name}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {filteredUsers.length === 0 && (
+                            <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
+                                No users found
+                            </div>
+                        )}
+                        {filteredUsers.length > 10 && (
+                            <div style={{ padding: '0.5rem', textAlign: 'center', color: '#64748b', fontSize: '0.75rem', borderTop: '1px solid #334155' }}>
+                                + {filteredUsers.length - 10} more results
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Users Table */}
@@ -290,7 +362,9 @@ const Users = () => {
                                         <tr key={user.id} style={{ borderBottom: '1px solid #334155', color: '#cbd5e1', background: user.blocked ? 'rgba(239, 68, 68, 0.05)' : 'transparent', opacity: user.blocked ? 0.7 : 1 }}>
                                             {/* Nickname + ID */}
                                             <td style={{ padding: '0.6rem 0.75rem' }}>
-                                                <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{user.nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>}</div>
+                                                <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={user.nickname || 'Anonymous'}>
+                                                    {(user.nickname || '').length > 30 ? (user.nickname.substring(0, 30) + '...') : (user.nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>)}
+                                                </div>
                                                 <code style={{ fontSize: '0.65rem', color: '#64748b' }}>{user.id.substring(0, 10)}...</code>
                                             </td>
                                             {/* Badge - Clickable */}
@@ -400,7 +474,7 @@ const Users = () => {
             </div>
 
             {/* Pagination Footer */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155', gap: '1rem' }}>
                 <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
                     Showing {paginatedUsers.length} of {filteredUsers.length} users
                 </span>
