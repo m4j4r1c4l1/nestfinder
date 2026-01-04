@@ -224,28 +224,28 @@ const Users = () => {
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05))', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '0.75rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#f59e0b', marginBottom: '0.25rem', fontWeight: 600 }}>
                         <span>🦅 Eagle</span>
-                        <span>(≥50)</span>
+                        <span>≥50</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f59e0b' }}>{badgeCounts.eagle}</div>
                 </div>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '0.75rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.25rem', fontWeight: 600 }}>
                         <span>🦉 Owl</span>
-                        <span>(≥30)</span>
+                        <span>≥30</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6' }}>{badgeCounts.owl}</div>
                 </div>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '0.75rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.25rem', fontWeight: 600 }}>
                         <span>🐦 Sparrow</span>
-                        <span>(≥10)</span>
+                        <span>≥10</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{badgeCounts.sparrow}</div>
                 </div>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05))', border: '1px solid rgba(148, 163, 184, 0.2)', padding: '0.75rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem', fontWeight: 600 }}>
                         <span>🥚 Hatchling</span>
-                        <span>(&lt;10)</span>
+                        <span>&lt;10</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#94a3b8' }}>{badgeCounts.hatchling}</div>
                 </div>
