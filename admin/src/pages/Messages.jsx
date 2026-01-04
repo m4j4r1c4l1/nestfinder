@@ -1370,8 +1370,8 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     </table>
                     {feedback.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No messages found</div>}
                 </div>
-                <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} itemLabel="messages" />
             </div>
+            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} itemLabel="messages" />
 
             {previewItem && (
                 <MessagePreviewModal
