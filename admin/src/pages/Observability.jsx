@@ -295,11 +295,19 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
     // Helper to render a bar row
     const renderRow = (item, index, isChild = false) => {
         const percent = (item.count / maxVal) * 100;
-        const color = isChild ? '#94a3b8' : (index === 0 ? '#3b82f6' : '#64748b'); // Highlight first root (usually Register), others grey/slate
-        // Or keep cycling colors? Stick to clean hierarchy. User said "indentation matching breakdown". 
-        // Let's use Blue for Root, Slate for Children? 
-        // Actually, if 'Register' is blue, children can be cyan/purple?
-        // Let's stick to the previous color logic for Roots, and a distinct look for children.
+
+        // Vibrant Palette for events
+        const vibrantColors = [
+            '#f472b6', // Pink
+            '#a78bfa', // Purple
+            '#22d3ee', // Cyan
+            '#4ade80', // Green
+            '#fb923c', // Orange
+            '#facc15', // Yellow
+        ];
+
+        // Assign vibrant color to root items based on index, children get Slate/Grey
+        const barColor = isChild ? '#94a3b8' : vibrantColors[index % vibrantColors.length];
 
         return (
             <div key={`${item.action}-${index}`} style={{ marginBottom: '0.75rem' }}>
@@ -314,9 +322,10 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                     <div style={{
                         height: '100%',
                         width: `${percent}%`,
-                        background: item.action === 'register' ? '#3b82f6' : (isChild ? '#64748b' : '#0ea5e9'),
+                        background: barColor,
                         borderRadius: '4px',
-                        opacity: isChild ? 0.8 : 1
+                        opacity: isChild ? 0.5 : 0.75, // Semi-transparent for "glass" vibe
+                        boxShadow: isChild ? 'none' : `0 0 10px ${barColor}66` // Add subtle glow to vibrant bars
                     }} />
                 </div>
             </div>
