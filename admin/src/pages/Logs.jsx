@@ -218,7 +218,7 @@ const LogDetailModal = ({ log, onClose }) => {
 
                         {/* 1. Header Info */}
                         {/* 1. Header Info: Time (Left), User (Center), Action (Right) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', alignItems: 'center', gap: '1rem' }}>
                             <div style={{ textAlign: 'left' }}>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</label>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2, marginTop: '0.25rem' }}>
@@ -240,11 +240,11 @@ const LogDetailModal = ({ log, onClose }) => {
                                 </div>
                             </div>
 
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <div style={{ textAlign: 'left' }}>
                                     <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
                                     <div style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0' }}>{log.user_nickname || 'Anonymous'}</div>
-                                    <div style={{ fontSize: '1.1rem', color: '#94a3b8', fontFamily: 'monospace', fontStyle: 'italic' }}>{log.user_id}</div>
+                                    <div style={{ fontSize: '0.9rem', color: '#94a3b8', fontFamily: 'monospace', fontStyle: 'italic' }}>{log.user_id}</div>
                                 </div>
                             </div>
 
@@ -604,7 +604,7 @@ const Logs = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
                 <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                    Showing {logs.length} of {totalLogsCount} logs
+                    Showing {logs.length === 0 ? 0 : (page - 1) * (filters.limit || 30) + 1}-{Math.min((page - 1) * (filters.limit || 30) + 1 + logs.length - 1, totalLogsCount)} of {totalLogsCount} logs
                 </span>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>
                     <button
