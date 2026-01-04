@@ -76,7 +76,7 @@ const Observability = () => {
                         {/* Row 1: Users, Points, Rating */}
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
                             {/* Users Block */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>👥 Users</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
@@ -90,7 +90,7 @@ const Observability = () => {
                             <div style={{ width: '1px', height: '70px', background: '#334155', alignSelf: 'center' }} />
 
                             {/* Points Block */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>📍 Points</div>
                                 <div style={{ display: 'flex', gap: '1.5rem' }}>
                                     <div style={{ textAlign: 'center' }}>
@@ -126,7 +126,7 @@ const Observability = () => {
                             <div style={{ width: '1px', height: '70px', background: '#334155', alignSelf: 'center' }} />
 
                             {/* Rating Block */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>⭐ Rating</div>
                                 <div style={{ display: 'flex', gap: '1.5rem' }}>
                                     <div style={{ textAlign: 'center' }}>
@@ -153,7 +153,7 @@ const Observability = () => {
                         {/* Row 2: Messages (left) | Devel (right) */}
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
                             {/* Messages Block (Left) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', justifyContent: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>📨 Messages</div>
                                 {/* Sent Row */}
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
@@ -210,7 +210,7 @@ const Observability = () => {
                             <div style={{ width: '1px', height: '80px', background: '#334155', alignSelf: 'center' }} />
 
                             {/* Devel Block (Right) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center', justifyContent: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>🛠️ Development</div>
                                 <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
@@ -344,7 +344,7 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                 {/* Header */}
                 <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
                     <div>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>Daily Breakdown</h3>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>👥 Daily Breakdown</h3>
                         <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                             {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </span>

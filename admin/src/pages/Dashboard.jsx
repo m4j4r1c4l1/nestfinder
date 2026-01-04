@@ -311,10 +311,10 @@ const Dashboard = ({ onNavigate }) => {
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Metrics</span>
                         </div>
                         <div className="card-body" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1, overflow: 'visible' }}>
-                            <MetricRow label="Total Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
+                            <MetricRow label="Users" value={stats.totalUsers} onClick={() => handleStatClick('totalUsers')} color="#3b82f6" />
                             <MetricRow label="Notifications" value={stats.totalNotifications} onClick={() => handleStatClick('totalNotifications')} color="#8b5cf6" />
                             <MetricRow label="Unread" value={stats.unreadNotifications} onClick={() => handleStatClick('unreadNotifications')} color="#f59e0b" />
-                            <MetricRow label="Total Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
+                            <MetricRow label="Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
                             <MetricRow label="DB Size" value={stats.dbSizeBytes ? (stats.dbSizeBytes >= 1048576 ? (stats.dbSizeBytes / 1048576).toFixed(2) + ' MB' : (stats.dbSizeBytes / 1024).toFixed(1) + ' KB') : '-'} onClick={handleDBSizeClick} color="#94a3b8" />
 
                             {showBackup && (

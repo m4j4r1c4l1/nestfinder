@@ -353,7 +353,7 @@ const Settings = () => {
                                 ) : (
                                     <button
                                         className="btn"
-                                        style={{ background: 'transparent', border: `1px solid ${opt.color}`, color: opt.color, padding: '0.4rem 0.75rem', fontSize: '0.85rem', minWidth: '220px' }}
+                                        style={{ background: opt.color, border: `1px solid ${opt.color}`, color: 'white', padding: '0.4rem 0.75rem', fontSize: '0.85rem', minWidth: '220px' }}
                                         onClick={() => setConfirmReset(opt.target)}
                                     >
                                         {opt.label}
