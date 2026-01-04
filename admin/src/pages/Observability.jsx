@@ -388,16 +388,18 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {items.map((root, i) => {
-                                // Calculate parent color to pass to children
-                                const vibrantColors = ['#f472b6', '#a78bfa', '#22d3ee', '#4ade80', '#fb923c', '#facc15'];
-                                const parentColor = vibrantColors[i % vibrantColors.length];
+                                // Just pass null override so it cycles based on index.
+                                // But for children, we want them to cycle relative to the total list or just their own index?
+                                // "different colors no matter their root event".
+                                // Let's use a simple counter or hash if possible, but index is easiest.
+                                // To make children distinct from parent, we can offset the index.
 
                                 return (
                                     <div key={i} style={{ marginBottom: root.children?.length ? '1rem' : '0' }}>
-                                        {/* Render Root (No override, uses index) */}
+                                        {/* Render Root */}
                                         {renderRow(root, i, false)}
 
-                                        {/* Render Children (Indented, Inherit Parent Color) */}
+                                        {/* Render Children (Indented) */}
                                         {root.children && root.children.length > 0 && (
                                             <div style={{
                                                 paddingLeft: '1.5rem',
@@ -407,7 +409,8 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                                                 flexDirection: 'column',
                                                 gap: '0.5rem'
                                             }}>
-                                                {root.children.map((child, j) => renderRow(child, j, true, parentColor))}
+                                                {/* Use (i + j + 1) to offset colors so child doesn't match parent exactly */}
+                                                {root.children.map((child, j) => renderRow(child, i + j + 1, true))}
                                             </div>
                                         )}
                                     </div>
