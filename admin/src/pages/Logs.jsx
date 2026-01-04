@@ -373,15 +373,22 @@ const Logs = () => {
                             {/* Server-side sorting - logs already sorted */}
                             {logs.map(log => (
                                 <tr key={log.id} style={{ borderBottom: '1px solid #334155', color: '#cbd5e1' }}>
-                                    <td style={{ padding: '0.75rem 1rem', color: '#94a3b8', fontSize: '0.85rem' }}>
-                                        {new Date(log.created_at).toLocaleTimeString('en-US', {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            second: '2-digit',
-                                            timeZone: 'Europe/Paris',
-                                            timeZoneName: 'short',
-                                            hour12: false
-                                        })}
+                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
+                                                {new Date(log.created_at).toLocaleDateString()}
+                                            </span>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                                                {new Date(log.created_at).toLocaleTimeString('en-US', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    second: '2-digit',
+                                                    timeZone: 'Europe/Paris',
+                                                    timeZoneName: 'short',
+                                                    hour12: false
+                                                })}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
                                         <span className="badge" style={{
@@ -402,23 +409,49 @@ const Logs = () => {
                                         </div>
                                     </td>
                                     <td style={{ padding: '0.75rem 1rem' }}>
-                                        {log.target_id && (
-                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                                                Target: <span style={{ color: '#e2e8f0' }}>{log.target_id.substring(0, 8)}...</span>
-                                            </div>
-                                        )}
-                                        {log.details && Object.keys(JSON.parse(log.details || '{}')).length > 0 && (
-                                            <div style={{
-                                                fontSize: '0.8rem',
-                                                color: '#cbd5e1',
-                                                marginTop: '4px',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis'
-                                            }}>
-                                                {JSON.stringify(JSON.parse(log.details), null, 1).replace(/[\{\}"]/g, '')}
-                                            </div>
-                                        )}
+                                        {(() => {
+                                            // Parse metadata if available
+                                            let meta = {};
+                                            try {
+                                                meta = log.metadata ? (typeof log.metadata === 'string' ? JSON.parse(log.metadata) : log.metadata) : {};
+                                            } catch (e) { meta = {}; }
+
+                                            // Build a readable summary
+                                            const parts = [];
+                                            if (meta.title) parts.push(meta.title);
+                                            if (meta.body) parts.push(meta.body.substring(0, 50) + (meta.body.length > 50 ? '...' : ''));
+                                            if (meta.count) parts.push(`${meta.count} users`);
+                                            if (meta.target) parts.push(`Target: ${meta.target}`);
+                                            if (meta.template) parts.push(`Template: ${meta.template}`);
+
+                                            // Fallback to legacy details field
+                                            if (parts.length === 0 && log.details) {
+                                                try {
+                                                    const details = JSON.parse(log.details);
+                                                    const detailStr = Object.entries(details)
+                                                        .map(([k, v]) => `${k}: ${v}`)
+                                                        .join(', ');
+                                                    if (detailStr) parts.push(detailStr);
+                                                } catch (e) { }
+                                            }
+
+                                            const summary = parts.join(' • ');
+
+                                            return summary ? (
+                                                <div style={{
+                                                    fontSize: '0.85rem',
+                                                    color: '#cbd5e1',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    maxWidth: '400px'
+                                                }} title={summary}>
+                                                    {summary}
+                                                </div>
+                                            ) : (
+                                                <span style={{ color: '#64748b', fontStyle: 'italic' }}>—</span>
+                                            );
+                                        })()}
                                     </td>
                                 </tr>
                             ))
