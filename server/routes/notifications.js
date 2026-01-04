@@ -168,6 +168,13 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         let devMetrics = { commits: 0, components: 0, loc: 0, files: 0 };
         const rootDir = path.resolve(__dirname, '../../'); // Project root
 
+        // First, check if we have stored data from GitHub webhook
+        const storedMetrics = get('SELECT * FROM dev_metrics WHERE id = 1');
+        if (storedMetrics && storedMetrics.total_commits > 0) {
+            devMetrics.commits = storedMetrics.total_commits;
+            devMetrics.lastCommit = storedMetrics.last_commit_hash || '-';
+        }
+
         // Cache for commits to avoid API rate limits and flakiness on Render
         if (!global.cachedCommits) global.cachedCommits = 0;
 

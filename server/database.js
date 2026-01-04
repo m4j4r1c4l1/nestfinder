@@ -49,6 +49,26 @@ export const initDatabase = async () => {
     // Column likely already exists
   }
 
+  // Migration: Add blocked column if missing
+  try {
+    db.run("ALTER TABLE users ADD COLUMN blocked BOOLEAN DEFAULT 0");
+  } catch (error) {
+    // Column likely already exists
+  }
+
+  // Dev metrics table for GitHub webhook data
+  db.run(`
+    CREATE TABLE IF NOT EXISTS dev_metrics (
+      id INTEGER PRIMARY KEY,
+      last_commit_hash TEXT,
+      last_commit_message TEXT,
+      last_commit_author TEXT,
+      last_commit_time TEXT,
+      total_commits INTEGER DEFAULT 0,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   db.run(`
     -- Points table (locations submitted by users)
     CREATE TABLE IF NOT EXISTS points (

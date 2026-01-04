@@ -106,6 +106,25 @@ export const adminApi = {
         });
     },
 
+    blockUser(userId) {
+        return this.fetch(`/admin/users/${userId}/block`, {
+            method: 'PUT',
+        });
+    },
+
+    unblockUser(userId) {
+        return this.fetch(`/admin/users/${userId}/unblock`, {
+            method: 'PUT',
+        });
+    },
+
+    updateUserTrustScore(userId, score) {
+        return this.fetch(`/admin/users/${userId}/trust-score`, {
+            method: 'PUT',
+            body: JSON.stringify({ trust_score: score }),
+        });
+    },
+
     getNotifications() {
         return this.fetch('/admin/notifications');
     },
