@@ -187,42 +187,6 @@ const Logs = () => {
             </div>
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
-                <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', background: '#0f172a' }}>
-                    <input
-                        list="actionOptions"
-                        type="text"
-                        placeholder="Filter by Action..."
-                        className="form-control"
-                        onChange={(e) => setFilters(prev => ({ ...prev, action: e.target.value || undefined }))}
-                        style={{ width: '200px' }}
-                    />
-                    <datalist id="actionOptions">
-                        {availableActions.map(action => (
-                            <option key={action} value={action} />
-                        ))}
-                    </datalist>
-
-                    <input
-                        list="userOptions"
-                        type="text"
-                        placeholder="Filter by User ID..."
-                        className="form-control"
-                        onChange={(e) => setFilters(prev => ({ ...prev, userId: e.target.value || undefined }))}
-                        style={{ width: '200px' }}
-                    />
-                    <datalist id="userOptions">
-                        {availableUsers.map(user => (
-                            <option key={user.id} value={user.id}>{user.nickname || 'Anonymous'} ({user.id.substring(0, 8)})</option>
-                        ))}
-                    </datalist>
-                    <button
-                        className="btn btn-secondary"
-                        onClick={handleExportCSV}
-                        disabled={exporting}
-                    >
-                        {exporting ? 'Exporting...' : 'Export CSV'}
-                    </button>
-                </div>
                 <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1 }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
@@ -248,7 +212,37 @@ const Logs = () => {
                                     User {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                                     <ResizeHandle column="user" />
                                 </th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, position: 'relative' }}>Details</th>
+                                <th style={{ padding: '0.5rem 1rem', fontWeight: 600, position: 'relative' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <span>Details</span>
+                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
+                                            <input
+                                                list="actionOptions"
+                                                type="text"
+                                                placeholder="Filter Action"
+                                                className="form-control"
+                                                onChange={(e) => setFilters(prev => ({ ...prev, action: e.target.value || undefined }))}
+                                                style={{ width: '140px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                            />
+                                            <input
+                                                list="userOptions"
+                                                type="text"
+                                                placeholder="Filter User"
+                                                className="form-control"
+                                                onChange={(e) => setFilters(prev => ({ ...prev, userId: e.target.value || undefined }))}
+                                                style={{ width: '140px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                            />
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={handleExportCSV}
+                                                disabled={exporting}
+                                                style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}
+                                            >
+                                                {exporting ? '...' : 'Export'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
