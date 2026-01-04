@@ -35,32 +35,7 @@ const RecoveryKeySection = ({ t }) => {
         }
     }, []);
 
-    // Auto-fade effect after 5 seconds when key is generated or shown
-    useEffect(() => {
-        if (recoveryKey && keyVisible && fadeOpacity === 1) {
-            const fadeTimer = setTimeout(() => {
-                // Start fading
-                const fadeDuration = 1000; // 1 second fade
-                const steps = 20;
-                const stepDuration = fadeDuration / steps;
-                let currentStep = 0;
 
-                const fadeInterval = setInterval(() => {
-                    currentStep++;
-                    const newOpacity = 1 - (currentStep / steps);
-                    setFadeOpacity(newOpacity);
-
-                    if (currentStep >= steps) {
-                        clearInterval(fadeInterval);
-                        setKeyVisible(false);
-                        setShowKey(false);
-                    }
-                }, stepDuration);
-            }, 5000); // 5 second delay before fade starts
-
-            return () => clearTimeout(fadeTimer);
-        }
-    }, [recoveryKey, keyVisible, fadeOpacity]);
 
     const generateKey = async () => {
         setLoading(true);
@@ -78,16 +53,6 @@ const RecoveryKeySection = ({ t }) => {
 
             // Save to session storage for current session persistence
             sessionStorage.setItem('nestfinder_recovery_key_temp', result.recoveryKey);
-
-            // Try to auto-copy to clipboard (may fail due to browser security after async)
-            try {
-                await navigator.clipboard.writeText(result.recoveryKey);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 3000);
-            } catch (clipboardErr) {
-                // Clipboard failed (expected in some browsers after async), user can manually copy
-                console.warn('Auto-copy to clipboard failed:', clipboardErr.message);
-            }
         } catch (err) {
             console.error('Failed to generate recovery key:', err);
             alert(`Failed to generate recovery key: ${err.message}\n\nTip: Try logging out and back in, or refresh the page.`);
@@ -105,7 +70,16 @@ const RecoveryKeySection = ({ t }) => {
         if (recoveryKey) {
             navigator.clipboard.writeText(recoveryKey);
             setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+
+            // Hide key after "Copied" message duration (3 seconds)
+            setTimeout(() => {
+                setCopied(false);
+                setFadeOpacity(0);
+                setTimeout(() => {
+                    setKeyVisible(false);
+                    setShowKey(false);
+                }, 200); // Wait for fade
+            }, 3000);
         }
     };
 
@@ -144,18 +118,23 @@ const RecoveryKeySection = ({ t }) => {
                     {keyVisible && (
                         <div style={{
                             padding: 'var(--space-3)',
-                            background: 'var(--color-bg-secondary)',
+                            background: '#000000',
                             borderRadius: 'var(--radius-md)',
                             fontFamily: 'monospace',
                             fontSize: 'var(--font-size-lg)',
                             fontWeight: 600,
                             textAlign: 'center',
                             letterSpacing: '0.05em',
-                            color: 'var(--color-primary)',
+                            color: '#00ff00', // Unix terminal green
                             marginBottom: 'var(--space-2)',
                             opacity: fadeOpacity,
-                            transition: 'opacity 0.1s ease-out'
-                        }}>
+                            transition: 'opacity 0.2s ease-out',
+                            cursor: 'pointer',
+                            border: '1px solid #333'
+                        }}
+                            onClick={copyKey}
+                            title="Click to copy and hide"
+                        >
                             {showKey ? recoveryKey : '•••-•••-•••'}
                         </div>
                     )}
