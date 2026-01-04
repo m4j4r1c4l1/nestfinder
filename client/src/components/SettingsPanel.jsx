@@ -555,16 +555,13 @@ const SettingsPanel = ({ onClose }) => {
                     <div style={{
                         display: 'flex',
                         justifyContent: 'center',
+                        alignItems: 'center',
                         padding: '0.5rem',
                         background: 'white',
                         borderRadius: 'var(--radius-md)',
-                        marginBottom: 'var(--space-3)',
                         width: '250px',
                         height: '250px',
-                        margin: '0 auto var(--space-3) auto',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center'
+                        margin: '0 auto var(--space-3) auto'
                     }}>
                         <div style={{ position: 'relative', display: 'inline-block' }}>
                             <QRCodeCanvas
