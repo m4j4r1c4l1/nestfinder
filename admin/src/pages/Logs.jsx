@@ -357,10 +357,21 @@ const Logs = () => {
                                                 style={{ width: '300px' }}
                                             />
                                             <button
-                                                className="btn btn-secondary"
                                                 onClick={handleExportCSV}
                                                 disabled={exporting}
-                                                style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}
+                                                style={{
+                                                    padding: '0.35rem 1rem',
+                                                    fontSize: '0.8rem',
+                                                    background: '#334155',
+                                                    color: '#e2e8f0',
+                                                    border: '1px solid #475569',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 500,
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.background = '#475569'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.background = '#334155'; }}
                                             >
                                                 {exporting ? '...' : 'Export'}
                                             </button>
