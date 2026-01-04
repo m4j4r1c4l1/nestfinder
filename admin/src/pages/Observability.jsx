@@ -833,7 +833,7 @@ const MetricsSection = () => {
                     type="line"
                     seriesConfig={[
                         { key: 'totalReceived', label: 'Total', color: '#8b5cf6' },
-                        { key: 'receivedPending', label: 'Pending', color: '#f59e0b' },
+                        { key: 'receivedPending', label: 'Pending', color: '#22c55e' },
                         { key: 'receivedRead', label: 'Read', color: '#3b82f6' }
                     ]}
                 />

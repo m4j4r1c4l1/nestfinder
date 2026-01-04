@@ -160,7 +160,7 @@ router.get('/metrics/history', (req, res) => {
 
         // Daily counts for status breakdown (NON-CUMULATIVE)
         const dailyReceivedTotal = get(`SELECT COUNT(*) as count FROM feedback WHERE date(created_at) = date('now', '${dateOffset}')`).count;
-        const dailyReceivedPending = get(`SELECT COUNT(*) as count FROM feedback WHERE status = 'pending' AND date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyReceivedPending = get(`SELECT COUNT(*) as count FROM feedback WHERE status = 'new' AND date(created_at) = date('now', '${dateOffset}')`).count;
         const dailyReceivedRead = get(`SELECT COUNT(*) as count FROM feedback WHERE status = 'read' AND date(created_at) = date('now', '${dateOffset}')`).count;
 
         metrics.push({
