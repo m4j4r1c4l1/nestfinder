@@ -4,11 +4,12 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { api } from '../utils/api';
 
 const Home = () => {
-    const { login } = useAuth();
+    const { login, recoverFromKey } = useAuth();
     const { t } = useLanguage();
     const [nickname, setNickname] = useState('');
     const [loading, setLoading] = useState(false);
     const [appConfig, setAppConfig] = useState(null);
+    const [error, setError] = useState(null);
 
     // Fetch app config for testing banner settings
     useEffect(() => {
@@ -17,14 +18,31 @@ const Home = () => {
             .catch(err => console.error('Failed to fetch app config:', err));
     }, []);
 
+    // Detect 3-word recovery key pattern (word-word-word)
+    const isRecoveryKey = (input) => /^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z]+$/.test(input.trim());
+
     const handleStart = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError(null);
+
         try {
-            await login(nickname);
+            if (isRecoveryKey(nickname)) {
+                // Attempt recovery
+                await recoverFromKey(nickname.trim().toLowerCase());
+            } else {
+                // Normal registration
+                await login(nickname);
+            }
         } catch (err) {
             console.error(err);
+            if (isRecoveryKey(nickname)) {
+                setError(t?.('welcome.invalidRecoveryKey') || 'Invalid recovery key. Please check and try again.');
+            } else {
+                setError(err.message || 'An error occurred. Please try again.');
+            }
         }
+        setLoading(false);
     };
 
     return (
@@ -86,9 +104,23 @@ const Home = () => {
                         className="form-input"
                         placeholder={t('welcome.nicknamePlaceholder')}
                         value={nickname}
-                        onChange={(e) => setNickname(e.target.value)}
+                        onChange={(e) => { setNickname(e.target.value); setError(null); }}
                         style={{ textAlign: 'center', fontSize: '1.1rem', padding: '1rem' }}
                     />
+                    {error && (
+                        <div style={{
+                            marginTop: 'var(--space-2)',
+                            padding: 'var(--space-2)',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            color: '#ef4444',
+                            fontSize: '0.85rem',
+                            textAlign: 'center'
+                        }}>
+                            {error}
+                        </div>
+                    )}
                 </div>
 
                 <button
