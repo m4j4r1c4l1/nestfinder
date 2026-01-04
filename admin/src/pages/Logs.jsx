@@ -31,7 +31,7 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
     };
 
     return (
-        <div ref={wrapperRef} style={{ position: 'relative', ...style }}>
+        <div ref={wrapperRef} style={{ position: 'relative', width: '100%', ...style }}>
             <input
                 type="text"
                 placeholder={placeholder}
@@ -45,12 +45,13 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
                 className="form-control"
                 style={{
                     width: '100%',
-                    padding: '0.25rem 0.5rem', // Keep compact
-                    fontSize: '0.8rem',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.85rem',
                     backgroundColor: '#0f172a', // Dark theme bg
                     border: '1px solid #334155', // Dark theme border
                     color: '#e2e8f0', // Light text
-                    borderRadius: '4px'
+                    borderRadius: '6px',
+                    transition: 'border-color 0.2s'
                 }}
             />
             {isOpen && (
@@ -58,14 +59,15 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
                     position: 'absolute',
                     top: '100%',
                     right: 0,
-                    width: '100%', // Match parent width (which is 300px)
+                    width: '100%', // Match parent width
                     maxHeight: '300px',
                     overflowY: 'auto',
                     background: '#1e293b',
                     border: '1px solid #334155',
-                    borderRadius: '4px',
+                    borderRadius: '6px',
                     zIndex: 50,
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+                    marginTop: '4px'
                 }}>
                     {filteredOptions.length > 0 ? (
                         filteredOptions.map((opt, idx) => (
@@ -73,7 +75,7 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
                                 key={idx}
                                 onClick={() => handleSelect(opt)}
                                 style={{
-                                    padding: '0.5rem',
+                                    padding: '0.5rem 0.75rem',
                                     cursor: 'pointer',
                                     borderBottom: '1px solid #334155',
                                     transition: 'background 0.1s',
@@ -92,12 +94,93 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
                             </div>
                         ))
                     ) : (
-                        <div style={{ padding: '0.5rem', color: '#94a3b8', fontSize: '0.8rem', textAlign: 'center' }}>
+                        <div style={{ padding: '0.75rem', color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center' }}>
                             No matches found
                         </div>
                     )}
                 </div>
             )}
+        </div>
+    );
+};
+
+// --- Log Detail Modal ---
+const LogDetailModal = ({ log, onClose }) => {
+    if (!log) return null;
+
+    return (
+        <div style={{
+            position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.4)', padding: '1rem'
+        }} onClick={onClose}>
+            <div className="card" onClick={e => e.stopPropagation()} style={{
+                width: '100%', // Match Layout
+                maxWidth: '75%', // User requested "same width as thread graph card" -> Assuming 75% of page or container
+                background: '#1e293b',
+                border: '1px solid #334155',
+                borderRadius: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                maxHeight: '90vh',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.6)'
+            }}>
+                <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderRadius: '12px 12px 0 0' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        🥚 Log Details
+                    </h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                </div>
+
+                <div style={{ padding: '1.5rem', overflowY: 'auto' }}>
+                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+
+                        {/* 1. Header Info */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                            <div>
+                                <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</label>
+                                <div style={{ fontSize: '1rem', color: '#e2e8f0', fontWeight: 500 }}>
+                                    {new Date(log.created_at).toLocaleString('en-GB', { timeZone: 'Europe/Paris' })}
+                                </div>
+                            </div>
+                            <div>
+                                <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Action</label>
+                                <div style={{ marginTop: '0.25rem' }}>
+                                    <span className="badge" style={{
+                                        padding: '0.25rem 0.75rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem',
+                                        display: 'inline-block',
+                                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff'
+                                    }}>
+                                        {log.action}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
+                                <div style={{ fontSize: '1rem', color: '#e2e8f0' }}>{log.user_nickname || 'Anonymous'}</div>
+                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>{log.user_id}</div>
+                            </div>
+                        </div>
+
+                        <div style={{ height: '1px', background: '#334155' }} />
+
+                        {/* 2. Metadata / Details */}
+                        <div>
+                            <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem', display: 'block' }}>Payload Details</label>
+
+                            <div style={{
+                                background: '#0f172a', border: '1px solid #334155', borderRadius: '6px',
+                                padding: '1rem',
+                                fontFamily: 'monospace', fontSize: '0.85rem', color: '#cbd5e1',
+                                overflowX: 'auto',
+                                whiteSpace: 'pre-wrap' // formatted JSON
+                            }}>
+                                {log.metadata ? JSON.stringify(log.metadata, null, 2) : 'No additional details'}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
@@ -108,6 +191,7 @@ const Logs = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalLogsCount, setTotalLogsCount] = useState(0);
+    const [selectedLog, setSelectedLog] = useState(null); // For modal
     const [filters, setFilters] = useState({ limit: 15 });
     const [exporting, setExporting] = useState(false);
     const [sortColumn, setSortColumn] = useState('created_at');
@@ -198,10 +282,10 @@ const Logs = () => {
             case 'identity_recovered': return '234, 179, 8'; // Yellow
 
             // --- Notifications / Broadcats ---
-            case 'notification_sent': return '250, 204, 21'; // Yellow-400
+            case 'notification_sent': return '250, 204, 21'; // Yellow
             case 'notifications_cleared': return '253, 224, 71'; // Light Yellow
-            case 'broadcast_created': return '251, 146, 60'; // Orange-400
-            case 'broadcast_deleted': return '194, 65, 12'; // Deep Orange
+            case 'broadcast_created': return '234, 179, 8'; // Yellow-600
+            case 'broadcast_deleted': return '194, 65, 12'; // dark Orange
             case 'history_cleared': return '120, 113, 108'; // Stone
 
             // --- System ---
@@ -215,19 +299,25 @@ const Logs = () => {
         const baseColor = getActionBaseColor(action);
         const isImportant = action && (action.includes('admin') || action.includes('failed'));
 
+        // Admin events explicit override to RED if not handled by getActionBaseColor correctly, 
+        // but 'admin_login' returns Red. 'recovery' keys return Teal/Yellow.
+        // Ensuring Red for Admin Login
+
         return {
             background: `rgba(${baseColor}, 0.15)`,
             color: `rgb(${baseColor})`,
             border: `1px solid rgba(${baseColor}, 0.3)`,
-            boxShadow: isImportant ? `0 0 10px rgba(${baseColor}, 0.2)` : 'none',
-            textShadow: '0 0 1px rgba(0,0,0,0.5)',
-            width: '220px', // Wider fixed width for longest action
+            boxShadow: isImportant ? `0 0 10px rgba(${baseColor}, 0.1)` : 'none',
+            padding: '0.25rem 0.5rem',
+            borderRadius: '4px',
+            maxWidth: '100%', // Flexible width
             display: 'inline-block',
             textAlign: 'center',
-            fontSize: '0.8rem',
+            fontSize: '0.75rem',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
+            fontWeight: 600
         };
     };
 
@@ -305,190 +395,200 @@ const Logs = () => {
             </div>
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
-                <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1 }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem', tableLayout: 'fixed' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
-                            <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
-                                <th
-                                    onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'desc'); }}
-                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.time, position: 'relative' }}
-                                >
-                                    Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="time" />
-                                </th>
-                                <th
-                                    onClick={() => { setSortColumn('action'); setSortDirection(d => sortColumn === 'action' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.action, position: 'relative' }}
-                                >
-                                    Action {sortColumn === 'action' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="action" />
-                                </th>
-                                <th
-                                    onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', fontWeight: 600, cursor: 'pointer', userSelect: 'none', width: columnWidths.user, position: 'relative' }}
-                                >
-                                    User {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="user" />
-                                </th>
-                                <th style={{ padding: '0.5rem 1rem', fontWeight: 600, position: 'relative' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <span>Details</span>
-                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
-                                            <SearchableDropdown
-                                                options={availableActions}
-                                                value={filters.action}
-                                                onChange={(val) => setFilters(prev => ({ ...prev, action: val }))}
-                                                placeholder="Filter Action"
-                                                renderItem={(action) => (
-                                                    <span className="badge" style={{
-                                                        padding: '0.25rem 0.5rem',
-                                                        borderRadius: '4px',
-                                                        fontWeight: 500,
-                                                        ...getActionStyle(action)
-                                                    }}>
-                                                        {action}
-                                                    </span>
-                                                )}
-                                                style={{ width: '300px' }}
-                                            />
-                                            <SearchableDropdown
-                                                options={availableUsers}
-                                                value={filters.userId}
-                                                onChange={(val) => setFilters(prev => ({ ...prev, userId: val }))}
-                                                placeholder="Filter User"
-                                                style={{ width: '300px' }}
-                                            />
-                                            <button
-                                                onClick={handleExportCSV}
-                                                disabled={exporting}
-                                                style={{
-                                                    padding: '0.35rem 1rem',
-                                                    fontSize: '0.8rem',
-                                                    background: '#334155',
-                                                    color: '#e2e8f0',
-                                                    border: '1px solid #475569',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    fontWeight: 500,
-                                                    transition: 'all 0.2s ease'
-                                                }}
-                                                onMouseEnter={e => { e.currentTarget.style.background = '#475569'; }}
-                                                onMouseLeave={e => { e.currentTarget.style.background = '#334155'; }}
-                                            >
-                                                {exporting ? '...' : 'Export'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {/* Server-side sorting - logs already sorted */}
-                            {logs.map(log => (
-                                <tr key={log.id} style={{ borderBottom: '1px solid #334155', color: '#cbd5e1' }}>
-                                    <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
-                                                {new Date(log.created_at).toLocaleDateString()}
-                                            </span>
-                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                                                {(() => {
-                                                    const d = new Date(log.created_at);
-                                                    const hours = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
-                                                    // Determine CET vs CEST based on DST
-                                                    const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
-                                                    const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
-                                                    const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
-                                                    const isDST = Math.max(jan, jul) !== parisOffset;
-                                                    return `${hours} ${isDST ? 'CEST' : 'CET'}`;
-                                                })()}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                                        <span className="badge" style={{
-                                            padding: '0.25rem 0.5rem',
-                                            borderRadius: '4px',
-                                            fontWeight: 500,
-                                            ...getActionStyle(log.action)
-                                        }}>
-                                            {log.action}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '0.75rem 1rem' }}>
-                                        <div style={{ fontWeight: 500, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {log.user_nickname || 'Anonymous'}
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                            {log.user_id ? log.user_id.substring(0, 8) + '...' : 'N/A'}
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '0.75rem 1rem' }}>
-                                        {(() => {
-                                            // log.metadata is already parsed by the API
-                                            const meta = log.metadata;
-
-                                            if (meta && typeof meta === 'object' && Object.keys(meta).length > 0) {
-                                                // Filter out sensitive fields and show raw JSON format
-                                                const filtered = Object.fromEntries(
-                                                    Object.entries(meta).filter(([k]) => !['password', 'token'].includes(k.toLowerCase()))
-                                                );
-                                                const rawJson = JSON.stringify(filtered);
-
-                                                return (
-                                                    <div style={{
-                                                        fontSize: '0.8rem',
-                                                        color: '#94a3b8',
-                                                        fontFamily: 'monospace',
-                                                        whiteSpace: 'nowrap',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        width: '100%'
-                                                    }} title={rawJson}>
-                                                        {rawJson}
-                                                    </div>
-                                                );
-                                            }
-
-                                            return <span style={{ color: '#64748b', fontStyle: 'italic' }}>—</span>;
-                                        })()}
-                                    </td>
-                                </tr>
-                            ))
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Pagination - Buttons */}
-            {totalPages > 1 && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
-                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                        Showing {logs.length} of {totalLogsCount} logs
-                    </span>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    {/* Filters Toolbar - Moved above table */}
+                    <div style={{
+                        padding: '1rem', borderBottom: '1px solid #334155',
+                        display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+                        background: '#1e293b'
+                    }}>
+                        <div style={{ display: 'flex', gap: '1rem', flex: 1, minWidth: '300px' }}>
+                            <SearchableDropdown
+                                options={availableActions}
+                                value={filters.action}
+                                onChange={(val) => setFilters(prev => ({ ...prev, action: val }))}
+                                placeholder="Filter Action"
+                                renderItem={(action) => (
+                                    <span className="badge" style={{
+                                        ...getActionStyle(action),
+                                        maxWidth: '100%'
+                                    }}>
+                                        {action}
+                                    </span>
+                                )}
+                                style={{ flex: 1, minWidth: '150px' }}
+                            />
+                            <SearchableDropdown
+                                options={availableUsers}
+                                value={filters.userId}
+                                onChange={(val) => setFilters(prev => ({ ...prev, userId: val }))}
+                                placeholder="Filter User"
+                                style={{ flex: 1, minWidth: '150px' }}
+                            />
+                        </div>
                         <button
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page <= 1}
-                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+                            onClick={handleExportCSV}
+                            disabled={exporting}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                fontSize: '0.85rem',
+                                background: '#3b82f6',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontWeight: 500,
+                                transition: 'background 0.2s',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#3b82f6'; }}
                         >
-                            ◀ Prev
-                        </button>
-                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
-                            Page {page} of {totalPages || 1}
-                        </span>
-                        <button
-                            onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
-                            disabled={page >= totalPages}
-                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
-                        >
-                            Next ▶
+                            <span>📥</span> {exporting ? 'Exporting...' : 'Export CSV'}
                         </button>
                     </div>
-                    <div></div>
+
+                    <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem', tableLayout: 'fixed' }}>
+                            <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
+                                <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
+                                    <th
+                                        onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'desc'); }}
+                                        style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.time, position: 'relative' }}
+                                    >
+                                        Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="time" />
+                                    </th>
+                                    <th
+                                        onClick={() => { setSortColumn('action'); setSortDirection(d => sortColumn === 'action' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                        style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.action, position: 'relative' }}
+                                    >
+                                        Action {sortColumn === 'action' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="action" />
+                                    </th>
+                                    <th
+                                        onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                        style={{ padding: '0.75rem 1rem', fontWeight: 600, cursor: 'pointer', userSelect: 'none', width: columnWidths.user, position: 'relative' }}
+                                    >
+                                        User {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="user" />
+                                    </th>
+                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>
+                                        Details
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {/* Server-side sorting - logs already sorted */}
+                                {logs.map(log => (
+                                    <tr
+                                        key={log.id}
+                                        style={{ borderBottom: '1px solid #334155', color: '#cbd5e1', cursor: 'pointer', transition: 'background 0.1s' }}
+                                        onClick={() => setSelectedLog(log)}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(51, 65, 85, 0.4)'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                        <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
+                                                    {new Date(log.created_at).toLocaleDateString()}
+                                                </span>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                                                    {(() => {
+                                                        const d = new Date(log.created_at);
+                                                        const hours = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+                                                        // Determine CET vs CEST based on DST
+                                                        const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
+                                                        const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
+                                                        const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+                                                        const isDST = Math.max(jan, jul) !== parisOffset;
+                                                        return `${hours} ${isDST ? 'CEST' : 'CET'}`;
+                                                    })()}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                            <span className="badge" style={getActionStyle(log.action)}>
+                                                {log.action}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '0.75rem 1rem', overflow: 'hidden' }}>
+                                            <div style={{ fontWeight: 500, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {log.user_nickname || 'Anonymous'}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {log.user_id || 'N/A'}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                            {(() => {
+                                                // log.metadata is already parsed by the API
+                                                const meta = log.metadata;
+
+                                                if (meta && typeof meta === 'object' && Object.keys(meta).length > 0) {
+                                                    // Filter out sensitive fields and show raw JSON format
+                                                    const filtered = Object.fromEntries(
+                                                        Object.entries(meta).filter(([k]) => !['password', 'token'].includes(k.toLowerCase()))
+                                                    );
+                                                    const rawJson = JSON.stringify(filtered);
+
+                                                    return (
+                                                        <div style={{
+                                                            fontSize: '0.8rem',
+                                                            color: '#94a3b8',
+                                                            fontFamily: 'monospace',
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            width: '100%'
+                                                        }} title={rawJson}>
+                                                            {rawJson}
+                                                        </div>
+                                                    );
+                                                }
+
+                                                return <span style={{ color: '#64748b', fontStyle: 'italic' }}>—</span>;
+                                            })()}
+                                        </td>
+                                    </tr>
+                                ))
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            )}
+
+                {/* Pagination - Buttons */}
+                {totalPages > 1 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+                        <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                            Showing {logs.length} of {totalLogsCount} logs
+                        </span>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page <= 1}
+                                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+                            >
+                                ◀ Prev
+                            </button>
+                            <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                                Page {page} of {totalPages || 1}
+                            </span>
+                            <button
+                                onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
+                                disabled={page >= totalPages}
+                                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                            >
+                                Next ▶
+                            </button>
+                        </div>
+                        <div></div>
+                    </div>
+                )}
+
+                <LogDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
+            </div>
         </div>
     );
 };
