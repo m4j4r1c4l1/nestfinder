@@ -183,8 +183,11 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
 
             if (!isShallow) {
                 // 1. Local Dev / Full Clone: Use Git (Fastest & Most Accurate)
-                const { stdout } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
-                devMetrics.commits = parseInt(stdout.trim(), 10);
+                const { stdout: count } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
+                devMetrics.commits = parseInt(count.trim(), 10);
+
+                const { stdout: hash } = await execAsync('git rev-parse --short HEAD', { cwd: rootDir });
+                devMetrics.lastCommit = hash.trim();
             } else {
                 // 2. Render / Shallow Clone: Use GitHub API with Token & Caching
                 const headers = { 'User-Agent': 'nestfinder-admin' };
@@ -209,9 +212,11 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
                             }
                         }
                         // Fallback: If no link header (single page), count body
-                        if (!devMetrics.commits) {
-                            const data = await response.json();
-                            if (Array.isArray(data)) devMetrics.commits = data.length;
+                        // Get Latest Hash from Body (always fetch this now)
+                        const data = await response.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            if (!devMetrics.commits) devMetrics.commits = data.length;
+                            devMetrics.lastCommit = data[0].sha.substring(0, 7);
                         }
 
                         // Update cache on success
@@ -226,8 +231,9 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
                     devMetrics.commits = global.cachedCommits;
                 }
 
-                // Final fallback: Show 1 instead of 0 if everything fails
+                // Final fallback
                 if (!devMetrics.commits) devMetrics.commits = 1;
+                if (!devMetrics.lastCommit) devMetrics.lastCommit = '-';
             }
 
             // 2. Code Stats

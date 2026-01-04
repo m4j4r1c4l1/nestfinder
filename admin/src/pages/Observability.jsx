@@ -238,6 +238,13 @@ const Observability = () => {
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>React/JSX</div>
                                         </div>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                                {stats.devMetrics?.lastCommit || '-'}
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Latest</div>
+                                            <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Commit ID</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
