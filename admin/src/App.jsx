@@ -267,7 +267,7 @@ const App = () => {
                     }}
                 >
                     <div style={{ width: '150px', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{ fontSize: '1.4rem', lineHeight: 1, width: '30px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>🚪</span>
+                        <span style={{ fontSize: '1.4rem', lineHeight: 1, width: '30px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>🐣</span>
                         <span style={{ fontSize: '0.9rem' }}>Logout</span>
                     </div>
                 </button>

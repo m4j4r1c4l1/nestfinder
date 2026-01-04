@@ -255,7 +255,7 @@ const Dashboard = ({ onNavigate }) => {
                                 border: '1px solid rgba(56, 189, 248, 0.2)',
                                 userSelect: 'none'
                             }}>
-                                {(filteredPoints || points).length} {filteredPoints ? 'filtered' : 'total'}
+                                {filteredPoints ? `Filtered: ${filteredPoints.length}` : `Total: ${points.length}`}
                             </span>
                         </div>
                     </div>
