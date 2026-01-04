@@ -220,17 +220,21 @@ const LogDetailModal = ({ log, onClose }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                             <div>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</label>
-                                <div style={{ fontSize: '1rem', color: '#e2e8f0', fontWeight: 500 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2, marginTop: '0.25rem' }}>
                                     {(() => {
                                         const d = new Date(log.created_at);
-                                        const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Paris' });
-                                        const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
-                                        // Determine CET vs CEST
                                         const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
                                         const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
                                         const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
                                         const isDST = Math.max(jan, jul) !== parisOffset;
-                                        return `${dateStr} ${timeStr} ${isDST ? 'CEST' : 'CET'}`;
+                                        const hours = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+
+                                        return (
+                                            <>
+                                                <span style={{ fontSize: '1rem', fontWeight: 500, color: '#e2e8f0' }}>{d.toLocaleDateString()}</span>
+                                                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{hours} {isDST ? 'CEST' : 'CET'}</span>
+                                            </>
+                                        );
                                     })()}
                                 </div>
                             </div>
@@ -421,24 +425,7 @@ const Logs = () => {
                     <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🥚 Logs</h1>
                     <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>View and filter system activity and audit trails</p>
                 </div>
-                {/* Level Legend */}
-                <div style={{ display: 'flex', gap: '1rem', background: '#1e293b', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #334155', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#cbd5e1' }}>
-                        <span>🥚</span> <span>Hatchling (&lt;10)</span>
-                    </div>
-                    <div style={{ width: '1px', height: '15px', background: '#475569' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#3b82f6' }}>
-                        <span>🐦</span> <span>Sparrow (≥10)</span>
-                    </div>
-                    <div style={{ width: '1px', height: '15px', background: '#475569' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#8b5cf6' }}>
-                        <span>🦉</span> <span>Owl (≥30)</span>
-                    </div>
-                    <div style={{ width: '1px', height: '15px', background: '#475569' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#f59e0b' }}>
-                        <span>🦅</span> <span>Eagle (≥50)</span>
-                    </div>
-                </div>
+
             </div>
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
@@ -607,37 +594,41 @@ const Logs = () => {
 
                 {/* Pagination - Buttons */}
                 {/* Pagination - Matching Messages.jsx Style */}
-                {totalPages > 1 && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
-                        <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                            Showing {logs.length} of {totalLogsCount} logs
-                        </span>
-                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <button
-                                onClick={() => setPage(p => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
-                            >
-                                ◀ Prev
-                            </button>
-                            <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
-                                Page {page} of {totalPages || 1}
-                            </span>
-                            <button
-                                onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
-                                disabled={page >= totalPages}
-                                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
-                            >
-                                Next ▶
-                            </button>
-                        </div>
-                        <div></div>{/* Spacer for 1fr layout */}
-                    </div>
-                )}
-
                 <LogDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
             </div>
+
+            {/* Pagination - Buttons (Moved Outside Card) */}
+            {totalPages > 1 && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                        Showing {logs.length} of {totalLogsCount} logs
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page <= 1}
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+                        >
+                            ◀ Prev
+                        </button>
+                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                            Page {page} of {totalPages || 1}
+                        </span>
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
+                            disabled={page >= totalPages}
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                        >
+                            Next ▶
+                        </button>
+                    </div>
+                    <div></div>{/* Spacer for 1fr layout */}
+                </div>
+            )}
+
+            <LogDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
         </div>
+
     );
 };
 
