@@ -105,7 +105,7 @@ const RecoveryKeySection = ({ t }) => {
                             fontSize: '1rem'
                         }}
                     >
-                        {showKey ? '🙈' : '🙉'}
+                        {showKey ? '🙉' : '🙈'}
                     </button>
                 )}
             </div>
