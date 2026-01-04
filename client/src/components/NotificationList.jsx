@@ -70,7 +70,8 @@ const FeedbackSection = () => {
                     borderRadius: 'var(--radius-md)',
                     color: 'var(--color-text)',
                     resize: 'none',
-                    marginBottom: '0.25rem'
+                    marginBottom: '0.25rem',
+                    fontSize: '16px'
                 }}
             />
             <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textAlign: 'right', marginBottom: '0.25rem' }}>
