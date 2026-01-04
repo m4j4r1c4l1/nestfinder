@@ -499,7 +499,7 @@ const Users = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
                 <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                    Showing {paginatedUsers.length} of {filteredUsers.length} users
+                    Showing {paginatedUsers.length === 0 ? 0 : (page - 1) * pageSize + 1}-{Math.min((page - 1) * pageSize + 1 + paginatedUsers.length - 1, filteredUsers.length)} of {filteredUsers.length} users
                 </span>
 
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>

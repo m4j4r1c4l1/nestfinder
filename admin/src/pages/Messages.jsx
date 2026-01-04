@@ -670,6 +670,7 @@ const Messages = () => {
                                         page={broadcastPage}
                                         totalPages={Math.ceil(broadcasts.length / broadcastPageSize)}
                                         setPage={setBroadcastPage}
+                                        pageSize={broadcastPageSize}
                                     />
                                 )}
                             </div>
@@ -1381,7 +1382,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     />
                 )}
             </div>
-            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} itemLabel="messages" />
+            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} pageSize={pageSize} itemLabel="messages" />
         </>
     );
 };
@@ -1732,7 +1733,7 @@ const HistorySection = ({ users = [] }) => {
                     </div>
                 </div>
             </div>
-            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedLogs.length} currentCount={paginatedLogs.length} itemLabel="messages" />
+            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedLogs.length} currentCount={paginatedLogs.length} pageSize={pageSize} itemLabel="messages" />
 
             {selectedBatchId && (
                 <DetailModal batchId={selectedBatchId} onClose={() => setSelectedBatchId(null)} />
@@ -1748,33 +1749,38 @@ const HistorySection = ({ users = [] }) => {
 
 
 // --- REUSABLE PAGINATION COMPONENT ---
-const PaginationControls = ({ page, totalPages, setPage, totalItems, currentCount, itemLabel = 'items' }) => (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
-        <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-            Showing {currentCount} of {totalItems} {itemLabel}
-        </span>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>
-            <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
-            >
-                ◀ Prev
-            </button>
-            <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
-                Page {page} of {totalPages || 1}
+const PaginationControls = ({ page, totalPages, setPage, totalItems, currentCount, pageSize = 30, itemLabel = 'items' }) => {
+    const start = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+    const end = Math.min(start + currentCount - 1, totalItems);
+
+    return (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+            <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                Showing {start}-{end} of {totalItems} {itemLabel}
             </span>
-            <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
-            >
-                Next ▶
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>
+                <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+                >
+                    ◀ Prev
+                </button>
+                <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                    Page {page} of {totalPages || 1}
+                </span>
+                <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                >
+                    Next ▶
+                </button>
+            </div>
+            <div></div>
         </div>
-        <div></div>
-    </div>
-);
+    );
+};
 
 const ConfirmationModal = ({ title, message, onConfirm, onCancel }) => {
     return ReactDOM.createPortal(
