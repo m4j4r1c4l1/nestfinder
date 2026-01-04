@@ -104,6 +104,74 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
     );
 };
 
+// --- Helpers ---
+
+// Optimized Color Palette for Specific Actions
+// Using HSL-like variations for distinctiveness
+const getActionBaseColor = (action) => {
+    if (!action) return '148, 163, 184'; // Slate
+
+    switch (action) {
+        // --- Content / Points ---
+        case 'submit_point': return '34, 197, 94'; // Is Spring Green
+        case 'confirm_point': return '21, 128, 61'; // Deep Green
+        case 'validate_point': return '16, 185, 129'; // Emerald
+        case 'deactivate_point': return '168, 85, 247'; // Purple
+        case 'vote_deactivate_point': return '249, 115, 22'; // Orange
+        case 'reactivate_point': return '217, 70, 239'; // Fuchsia
+        case 'export_points': return '14, 165, 233'; // Sky Blue
+        case 'feedback_submitted': return '236, 72, 153'; // Pink
+
+        // --- Auth / User ---
+        case 'login': return '59, 130, 246'; // Blue
+        case 'register': return '99, 102, 241'; // Indigo
+        case 'update_nickname': return '139, 92, 246'; // Violet
+        case 'admin_login': return '239, 68, 68'; // Red
+        case 'admin_login_failed': return '153, 27, 27'; // Dark Red
+        case 'recovery_key_generated': return '20, 184, 166'; // Teal (Longest)
+        case 'identity_recovered': return '234, 179, 8'; // Yellow
+
+        // --- Notifications / Broadcats ---
+        case 'notification_sent': return '250, 204, 21'; // Yellow
+        case 'push_notification_sent': return '6, 182, 212'; // Cyan-500 (Distinct from Green)
+        case 'push_notifications_sent': return '6, 182, 212'; // Cyan-500
+        case 'notifications_cleared': return '253, 224, 71'; // Light Yellow
+        case 'push_subscribe': return '147, 51, 234'; // Purple-600
+        case 'broadcast_created': return '234, 179, 8'; // Yellow-600
+        case 'broadcast_deleted': return '194, 65, 12'; // dark Orange
+        case 'history_cleared': return '120, 113, 108'; // Stone
+        case 'trust_score_updated': return '202, 138, 4'; // Yellow-600
+        case 'Trust_score_updated': return '202, 138, 4'; // Case variant
+
+        // --- System ---
+        case 'rate_limit_exceeded': return '87, 83, 78'; // Warm Grey
+
+        default: return '148, 163, 184'; // Default Grey
+    }
+};
+
+const getActionStyle = (action) => {
+    const baseColor = getActionBaseColor(action);
+    const isImportant = action && (action.includes('admin') || action.includes('failed'));
+
+    return {
+        background: `rgba(${baseColor}, 0.15)`,
+        color: `rgb(${baseColor})`,
+        border: `1px solid rgba(${baseColor}, 0.3)`,
+        boxShadow: isImportant ? `0 0 10px rgba(${baseColor}, 0.1)` : 'none',
+        padding: '0.25rem 0.5rem',
+        borderRadius: '4px',
+        maxWidth: '100%', // Flexible width
+        display: 'inline-block',
+        textAlign: 'center',
+        fontSize: '0.75rem',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        fontWeight: 600
+    };
+};
+
 // --- Log Detail Modal ---
 const LogDetailModal = ({ log, onClose }) => {
     if (!log) return null;
@@ -264,75 +332,7 @@ const Logs = () => {
         />
     );
 
-    // Optimized Color Palette for Specific Actions
-    // Using HSL-like variations for distinctiveness
-    const getActionBaseColor = (action) => {
-        if (!action) return '148, 163, 184'; // Slate
 
-        switch (action) {
-            // --- Content / Points ---
-            case 'submit_point': return '34, 197, 94'; // Is Spring Green
-            case 'confirm_point': return '21, 128, 61'; // Deep Green
-            case 'validate_point': return '16, 185, 129'; // Emerald
-            case 'deactivate_point': return '168, 85, 247'; // Purple
-            case 'vote_deactivate_point': return '249, 115, 22'; // Orange
-            case 'reactivate_point': return '217, 70, 239'; // Fuchsia
-            case 'export_points': return '14, 165, 233'; // Sky Blue
-            case 'feedback_submitted': return '236, 72, 153'; // Pink
-
-            // --- Auth / User ---
-            case 'login': return '59, 130, 246'; // Blue
-            case 'register': return '99, 102, 241'; // Indigo
-            case 'update_nickname': return '139, 92, 246'; // Violet
-            case 'admin_login': return '239, 68, 68'; // Red
-            case 'admin_login_failed': return '153, 27, 27'; // Dark Red
-            case 'recovery_key_generated': return '20, 184, 166'; // Teal (Longest)
-            case 'identity_recovered': return '234, 179, 8'; // Yellow
-
-            // --- Notifications / Broadcats ---
-            case 'notification_sent': return '250, 204, 21'; // Yellow
-            case 'push_notification_sent': return '22, 163, 74'; // Green-600
-            case 'push_notifications_sent': return '22, 163, 74'; // Green-600 (Plural variant)
-            case 'notifications_cleared': return '253, 224, 71'; // Light Yellow
-            case 'push_subscribe': return '147, 51, 234'; // Purple-600
-            case 'broadcast_created': return '234, 179, 8'; // Yellow-600
-            case 'broadcast_deleted': return '194, 65, 12'; // dark Orange
-            case 'history_cleared': return '120, 113, 108'; // Stone
-            case 'trust_score_updated': return '202, 138, 4'; // Yellow-600
-            case 'Trust_score_updated': return '202, 138, 4'; // Case variant
-
-            // --- System ---
-            case 'rate_limit_exceeded': return '87, 83, 78'; // Warm Grey
-
-            default: return '148, 163, 184'; // Default Grey
-        }
-    };
-
-    const getActionStyle = (action) => {
-        const baseColor = getActionBaseColor(action);
-        const isImportant = action && (action.includes('admin') || action.includes('failed'));
-
-        // Admin events explicit override to RED if not handled by getActionBaseColor correctly, 
-        // but 'admin_login' returns Red. 'recovery' keys return Teal/Yellow.
-        // Ensuring Red for Admin Login
-
-        return {
-            background: `rgba(${baseColor}, 0.15)`,
-            color: `rgb(${baseColor})`,
-            border: `1px solid rgba(${baseColor}, 0.3)`,
-            boxShadow: isImportant ? `0 0 10px rgba(${baseColor}, 0.1)` : 'none',
-            padding: '0.25rem 0.5rem',
-            borderRadius: '4px',
-            maxWidth: '100%', // Flexible width
-            display: 'inline-block',
-            textAlign: 'center',
-            fontSize: '0.75rem',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            fontWeight: 600
-        };
-    };
 
     const [availableActions, setAvailableActions] = useState([]);
     const [availableUsers, setAvailableUsers] = useState([]);
