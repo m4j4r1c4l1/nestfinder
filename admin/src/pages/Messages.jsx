@@ -523,11 +523,6 @@ const Messages = () => {
                                                     />
                                                 </label>
                                             </div>
-                                            {newBroadcast.imageUrl && (
-                                                <div style={{ marginTop: '0.5rem' }}>
-                                                    <img src={newBroadcast.imageUrl} alt="Preview" style={{ maxHeight: '100px', borderRadius: '4px', border: '1px solid var(--color-border)' }} />
-                                                </div>
-                                            )}
                                         </div>
 
                                         <div className="form-group" style={{ marginTop: '0.25rem', position: 'relative' }}>
@@ -1660,14 +1655,14 @@ const HistorySection = ({ users = [] }) => {
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
                                                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                                    {date.toLocaleTimeString('en-US', {
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                        second: '2-digit',
-                                                        timeZone: 'Europe/Paris',
-                                                        timeZoneName: 'short',
-                                                        hour12: false
-                                                    })}
+                                                    {(() => {
+                                                        const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+                                                        const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
+                                                        const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
+                                                        const parisOffset = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+                                                        const isDST = Math.max(jan, jul) !== parisOffset;
+                                                        return `${hours} ${isDST ? 'CEST' : 'CET'}`;
+                                                    })()}
                                                 </span>
                                             </div>
                                         </td>

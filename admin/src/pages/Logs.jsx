@@ -416,29 +416,25 @@ const Logs = () => {
                                             const meta = log.metadata;
 
                                             if (meta && typeof meta === 'object' && Object.keys(meta).length > 0) {
-                                                // Build readable string from all metadata fields
-                                                const detailStr = Object.entries(meta)
-                                                    .filter(([k]) => !['password', 'token'].includes(k.toLowerCase()))
-                                                    .map(([k, v]) => {
-                                                        const strVal = typeof v === 'string' ? v : JSON.stringify(v);
-                                                        return `${k}: ${strVal.length > 35 ? strVal.substring(0, 35) + '...' : strVal}`;
-                                                    })
-                                                    .join(', ');
+                                                // Filter out sensitive fields and show raw JSON format
+                                                const filtered = Object.fromEntries(
+                                                    Object.entries(meta).filter(([k]) => !['password', 'token'].includes(k.toLowerCase()))
+                                                );
+                                                const rawJson = JSON.stringify(filtered);
 
-                                                if (detailStr) {
-                                                    return (
-                                                        <div style={{
-                                                            fontSize: '0.85rem',
-                                                            color: '#cbd5e1',
-                                                            whiteSpace: 'nowrap',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            maxWidth: '400px'
-                                                        }} title={detailStr}>
-                                                            {detailStr}
-                                                        </div>
-                                                    );
-                                                }
+                                                return (
+                                                    <div style={{
+                                                        fontSize: '0.8rem',
+                                                        color: '#94a3b8',
+                                                        fontFamily: 'monospace',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        width: '100%'
+                                                    }} title={rawJson}>
+                                                        {rawJson}
+                                                    </div>
+                                                );
                                             }
 
                                             return <span style={{ color: '#64748b', fontStyle: 'italic' }}>—</span>;
