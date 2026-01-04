@@ -479,7 +479,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1.2rem' }}>{icon}</span>
+                        {typeof icon === 'string' ? <span style={{ fontSize: '1.2rem' }}>{icon}</span> : icon}
                         <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>{title}</h3>
                     </div>
                     {renderControls()}
@@ -619,7 +619,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             <div className="card-header" style={{ background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <span style={{ fontSize: '1.2rem' }}>{icon}</span>
+                        {typeof icon === 'string' ? <span style={{ fontSize: '1.2rem' }}>{icon}</span> : icon}
                         <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem', fontWeight: 600 }}>{title}</h3>
                     </div>
                     {/* Right-aligned controls */}
@@ -816,7 +816,7 @@ const MetricsSection = () => {
                 {/* Notifications Sent Graph */}
                 <ChartCard
                     title="Notifications Sent"
-                    icon="📤"
+                    icon={<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', fontSize: '1rem' }}>↑</span>}
                     type="line"
                     seriesConfig={[
                         { key: 'notifications', label: 'Total', color: '#8b5cf6' },
@@ -829,7 +829,7 @@ const MetricsSection = () => {
                 {/* Notifications Received Graph */}
                 <ChartCard
                     title="Notifications Received"
-                    icon="📥"
+                    icon={<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', fontSize: '1rem' }}>↓</span>}
                     type="line"
                     seriesConfig={[
                         { key: 'totalReceived', label: 'Total', color: '#8b5cf6' },
@@ -1075,9 +1075,9 @@ const RatingsChartCard = ({ onPointClick }) => {
 
             {/* Legend */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid #334155', background: 'transparent' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
                     <span style={{
-                        fontSize: '1.2rem',
+                        fontSize: '1.8rem',
                         background: 'linear-gradient(to right, #ef4444, #f97316, #facc15, #84cc16, #22c55e)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
