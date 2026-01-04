@@ -797,24 +797,11 @@ const MetricsSection = () => {
         <div className="card" style={{ marginBottom: '1.5rem' }}>
             <div className="card-header">
                 <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                    📉 Trends Graphs
+                    📈 Trends Graphs
                 </h3>
             </div>
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                {/* Messages Graph */}
-                <ChartCard
-                    title="Notifications"
-                    icon="📨"
-                    type="line"
-                    seriesConfig={[
-                        { key: 'notifications', label: 'Total', color: '#8b5cf6' },
-                        { key: 'sent', label: 'Sent', color: '#facc15' },
-                        { key: 'delivered', label: 'Delivered', color: '#22c55e' },
-                        { key: 'read', label: 'Read', color: '#3b82f6' }
-                    ]}
-                />
-
-                {/* Clients Graph */}
+                {/* Clients Graph - FIRST */}
                 <ChartCard
                     title="Connected Clients"
                     icon="👥"
@@ -824,6 +811,31 @@ const MetricsSection = () => {
                     ]}
                     showLegend={true}
                     onPointClick={handleClientBarClick}
+                />
+
+                {/* Notifications Sent Graph */}
+                <ChartCard
+                    title="Notifications Sent"
+                    icon="📤"
+                    type="line"
+                    seriesConfig={[
+                        { key: 'notifications', label: 'Total', color: '#8b5cf6' },
+                        { key: 'sent', label: 'Sent', color: '#facc15' },
+                        { key: 'delivered', label: 'Delivered', color: '#22c55e' },
+                        { key: 'read', label: 'Read', color: '#3b82f6' }
+                    ]}
+                />
+
+                {/* Notifications Received Graph */}
+                <ChartCard
+                    title="Notifications Received"
+                    icon="📥"
+                    type="line"
+                    seriesConfig={[
+                        { key: 'totalReceived', label: 'Total', color: '#8b5cf6' },
+                        { key: 'receivedPending', label: 'Pending', color: '#f59e0b' },
+                        { key: 'receivedRead', label: 'Read', color: '#3b82f6' }
+                    ]}
                 />
 
                 {/* Ratings Graph */}

@@ -145,25 +145,37 @@ router.get('/metrics/history', (req, res) => {
             AND user_id != 'admin' AND action NOT LIKE 'admin_%'
         `).count;
 
-        // Total notifications sent up to this date  
+        // ===== NOTIFICATIONS SENT (to users) =====
+        // Total notifications sent up to this date (CUMULATIVE)
         const notificationsCount = get(`SELECT COUNT(*) as count FROM notifications WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
 
-        // Delivered notifications up to this date
-        const deliveredCount = get(`SELECT COUNT(*) as count FROM notifications WHERE delivered = 1 AND date(created_at) <= date('now', '${dateOffset}')`).count;
+        // Daily counts for status breakdown (NON-CUMULATIVE)
+        const dailySent = get(`SELECT COUNT(*) as count FROM notifications WHERE date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyDelivered = get(`SELECT COUNT(*) as count FROM notifications WHERE delivered = 1 AND date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyRead = get(`SELECT COUNT(*) as count FROM notifications WHERE read = 1 AND date(created_at) = date('now', '${dateOffset}')`).count;
 
-        // Read notifications up to this date
-        const readCount = get(`SELECT COUNT(*) as count FROM notifications WHERE read = 1 AND date(created_at) <= date('now', '${dateOffset}')`).count;
+        // ===== FEEDBACK RECEIVED (from users) =====
+        // Total feedback received up to this date (CUMULATIVE)
+        const totalReceived = get(`SELECT COUNT(*) as count FROM feedback WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
 
-        // Sent (pending, not delivered or read)
-        const sentCount = notificationsCount - deliveredCount - readCount;
+        // Daily counts for status breakdown (NON-CUMULATIVE)
+        const dailyReceivedTotal = get(`SELECT COUNT(*) as count FROM feedback WHERE date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyReceivedPending = get(`SELECT COUNT(*) as count FROM feedback WHERE status = 'pending' AND date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyReceivedRead = get(`SELECT COUNT(*) as count FROM feedback WHERE status = 'read' AND date(created_at) = date('now', '${dateOffset}')`).count;
 
         metrics.push({
             date: dateStr,
             users: usersCount,
-            notifications: notificationsCount,
-            delivered: deliveredCount,
-            read: readCount,
-            sent: sentCount
+            // Sent Notifications
+            notifications: notificationsCount,  // Cumulative total
+            sent: dailySent,                    // Daily
+            delivered: dailyDelivered,          // Daily
+            read: dailyRead,                    // Daily
+            // Received Feedback
+            totalReceived: totalReceived,       // Cumulative total
+            receivedDaily: dailyReceivedTotal,  // Daily total
+            receivedPending: dailyReceivedPending, // Daily pending
+            receivedRead: dailyReceivedRead     // Daily read
         });
     }
 
