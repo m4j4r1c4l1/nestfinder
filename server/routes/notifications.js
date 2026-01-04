@@ -178,10 +178,15 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
                 if (response.ok) {
                     const linkHeader = response.headers.get('Link');
                     if (linkHeader) {
-                        // Link header format: <url?page=X>; rel="last"
-                        const match = linkHeader.match(/[?&]page=(\d+)[^>]*>;\s*rel="last"/);
-                        if (match) {
-                            devMetrics.commits = parseInt(match[1], 10);
+                        // Link header format: <url?page=X>; rel="next", <url?page=Y>; rel="last"
+                        const links = linkHeader.split(',');
+                        const lastLink = links.find(link => link.includes('rel="last"'));
+
+                        if (lastLink) {
+                            const match = lastLink.match(/[?&]page=(\d+)/);
+                            if (match) {
+                                devMetrics.commits = parseInt(match[1], 10);
+                            }
                         }
                     }
                     // If no commits yet from Link header, try counting directly
