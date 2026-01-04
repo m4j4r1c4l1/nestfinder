@@ -796,8 +796,8 @@ const MetricsSection = () => {
     return (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
             <div className="card-header">
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    📉 Metrics Trends Graphs
+                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    📉 Trends Graphs
                 </h3>
             </div>
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
