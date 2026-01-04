@@ -31,7 +31,7 @@ const Users = () => {
     const [sortColumn, setSortColumn] = useState('last_active');
     const [sortDirection, setSortDirection] = useState('desc');
     const [page, setPage] = useState(1);
-    const pageSize = 15;
+    const pageSize = 30;
     const [badgePickerUser, setBadgePickerUser] = useState(null); // User ID for badge picker dropdown
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
     const searchWrapperRef = useRef(null);
@@ -158,7 +158,7 @@ const Users = () => {
     };
 
     const handleDeleteUser = async (userId) => {
-        if (!confirm('Delete this user and all their data?')) return;
+        // if (!confirm('Delete this user and all their data?')) return;
         setActionLoading(true);
         try {
             await adminApi.deleteUser(userId);
@@ -168,7 +168,7 @@ const Users = () => {
     };
 
     const handleBlockUser = async (userId) => {
-        if (!confirm('Block this user?')) return;
+        // if (!confirm('Block this user?')) return;
         setActionLoading(true);
         try {
             await adminApi.blockUser(userId);
