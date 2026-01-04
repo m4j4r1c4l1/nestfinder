@@ -293,7 +293,7 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
     });
 
     // Helper to render a bar row
-    const renderRow = (item, index, isChild = false) => {
+    const renderRow = (item, index, isChild = false, overrideColor = null) => {
         const percent = (item.count / maxVal) * 100;
 
         // Vibrant Palette for events
@@ -306,8 +306,8 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
             '#facc15', // Yellow
         ];
 
-        // Assign vibrant color to root items based on index, children get Slate/Grey
-        const barColor = isChild ? '#94a3b8' : vibrantColors[index % vibrantColors.length];
+        // Assign vibrant color: Use override (parent's color) if provided, otherwise cycle based on index
+        const barColor = overrideColor || vibrantColors[index % vibrantColors.length];
 
         return (
             <div key={`${item.action}-${index}`} style={{ marginBottom: '0.75rem' }}>
@@ -325,7 +325,7 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                         background: barColor,
                         borderRadius: '4px',
                         opacity: isChild ? 0.5 : 0.75, // Semi-transparent for "glass" vibe
-                        boxShadow: isChild ? 'none' : `0 0 10px ${barColor}66` // Add subtle glow to vibrant bars
+                        boxShadow: `0 0 10px ${barColor}66` // Glow for everyone
                     }} />
                 </div>
             </div>
@@ -387,26 +387,32 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                         <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>No detailed activity recorded for this day.</div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {items.map((root, i) => (
-                                <div key={i} style={{ marginBottom: root.children?.length ? '1rem' : '0' }}>
-                                    {/* Render Root */}
-                                    {renderRow(root, i, false)}
+                            {items.map((root, i) => {
+                                // Calculate parent color to pass to children
+                                const vibrantColors = ['#f472b6', '#a78bfa', '#22d3ee', '#4ade80', '#fb923c', '#facc15'];
+                                const parentColor = vibrantColors[i % vibrantColors.length];
 
-                                    {/* Render Children (Indented) */}
-                                    {root.children && root.children.length > 0 && (
-                                        <div style={{
-                                            paddingLeft: '1.5rem',
-                                            borderLeft: '2px solid #334155',
-                                            marginLeft: '0.5rem',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '0.5rem'
-                                        }}>
-                                            {root.children.map((child, j) => renderRow(child, j, true))}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                                return (
+                                    <div key={i} style={{ marginBottom: root.children?.length ? '1rem' : '0' }}>
+                                        {/* Render Root (No override, uses index) */}
+                                        {renderRow(root, i, false)}
+
+                                        {/* Render Children (Indented, Inherit Parent Color) */}
+                                        {root.children && root.children.length > 0 && (
+                                            <div style={{
+                                                paddingLeft: '1.5rem',
+                                                borderLeft: '2px solid #334155',
+                                                marginLeft: '0.5rem',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '0.5rem'
+                                            }}>
+                                                {root.children.map((child, j) => renderRow(child, j, true, parentColor))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
