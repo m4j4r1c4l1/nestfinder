@@ -52,6 +52,26 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const recoverFromKey = async (recoveryKey) => {
+        let deviceId = localStorage.getItem('nestfinder_device_id');
+        if (!deviceId) {
+            deviceId = uuidv4();
+            localStorage.setItem('nestfinder_device_id', deviceId);
+        }
+
+        try {
+            const { user } = await api.recoverIdentity(recoveryKey, deviceId);
+            api.setUserId(user.id);
+            setUser(user);
+            localStorage.setItem('nestfinder_user_id', user.id);
+            localStorage.setItem('nestfinder_user_data', JSON.stringify(user));
+            return user;
+        } catch (error) {
+            console.error('Recovery failed:', error);
+            throw error;
+        }
+    };
+
     const logout = () => {
         api.logout();
         setUser(null);
@@ -78,7 +98,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, updateNickname, updateTrustScore }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, updateNickname, updateTrustScore, recoverFromKey }}>
             {children}
         </AuthContext.Provider>
     );

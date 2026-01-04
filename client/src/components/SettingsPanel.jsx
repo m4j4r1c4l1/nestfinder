@@ -171,6 +171,20 @@ const RecoveryKeySection = ({ t }) => {
                             🔑 {t?.('settings.showKey') || 'Show Recovery Key'}
                         </button>
                     )}
+
+                    {/* Usage Instructions - Always visible when key exists */}
+                    <div style={{
+                        marginTop: 'var(--space-3)',
+                        padding: 'var(--space-2)',
+                        background: 'rgba(59, 130, 246, 0.1)',
+                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '0.75rem',
+                        color: 'var(--color-text-secondary)',
+                        lineHeight: 1.5
+                    }}>
+                        💡 {t?.('settings.recoveryKeyUsage') || 'To restore your account on a new device, type your 3-word key in the nickname field when you open the app.'}
+                    </div>
                 </div>
             ) : (
                 <button
@@ -191,6 +205,117 @@ const RecoveryKeySection = ({ t }) => {
                     {copied ? `✓ ${t?.('settings.keyGenerated') || 'Key Generated & Copied!'}` : loading ? (t?.('common.loading') || 'Generating...') : `🔑 ${t?.('settings.generateKey') || 'Generate Recovery Key'}`}
                 </button>
             )}
+        </div>
+    );
+};
+
+// Restore Account Section Component
+const RestoreAccountSection = ({ t }) => {
+    const { recoverFromKey } = useAuth();
+    const [inputKey, setInputKey] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
+
+    const handleRestore = async () => {
+        if (!inputKey.trim()) return;
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            await recoverFromKey(inputKey.trim().toLowerCase());
+            setSuccess(true);
+            // Reload page to refresh user state
+            setTimeout(() => window.location.reload(), 1500);
+        } catch (err) {
+            setError(t?.('settings.invalidRecoveryKey') || 'Invalid recovery key. Please check and try again.');
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div style={{
+            padding: 'var(--space-3)',
+            background: 'var(--color-bg-tertiary)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border)',
+            marginTop: 'var(--space-3)'
+        }}>
+            <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>
+                🔄 {t?.('settings.restoreAccount') || 'Restore Account from Key'}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
+                {t?.('settings.restoreAccountDescription') || 'Enter a recovery key to restore your previous identity.'}
+            </div>
+
+            <input
+                type="text"
+                value={inputKey}
+                onChange={(e) => { setInputKey(e.target.value); setError(null); }}
+                placeholder={t?.('settings.enterRecoveryKey') || 'word-word-word'}
+                style={{
+                    width: '100%',
+                    padding: 'var(--space-2)',
+                    background: 'var(--color-bg-secondary)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--color-text)',
+                    fontSize: '1rem',
+                    textAlign: 'center',
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.05em',
+                    marginBottom: 'var(--space-2)'
+                }}
+            />
+
+            {error && (
+                <div style={{
+                    padding: 'var(--space-2)',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: 'var(--radius-md)',
+                    color: '#ef4444',
+                    fontSize: '0.85rem',
+                    textAlign: 'center',
+                    marginBottom: 'var(--space-2)'
+                }}>
+                    {error}
+                </div>
+            )}
+
+            {success && (
+                <div style={{
+                    padding: 'var(--space-2)',
+                    background: 'rgba(34, 197, 94, 0.1)',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    borderRadius: 'var(--radius-md)',
+                    color: '#22c55e',
+                    fontSize: '0.85rem',
+                    textAlign: 'center',
+                    marginBottom: 'var(--space-2)'
+                }}>
+                    ✓ {t?.('settings.accountRestored') || 'Account restored! Reloading...'}
+                </div>
+            )}
+
+            <button
+                onClick={handleRestore}
+                disabled={loading || !inputKey.trim() || success}
+                style={{
+                    width: '100%',
+                    padding: 'var(--space-2)',
+                    background: success ? 'var(--color-confirmed)' : 'var(--color-primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 'var(--radius-md)',
+                    cursor: loading || !inputKey.trim() || success ? 'not-allowed' : 'pointer',
+                    opacity: loading || !inputKey.trim() ? 0.7 : 1,
+                    transition: 'background 0.3s'
+                }}
+            >
+                {loading ? (t?.('common.loading') || 'Restoring...') : `🔄 ${t?.('settings.restoreButton') || 'Restore Account'}`}
+            </button>
         </div>
     );
 };
@@ -637,6 +762,9 @@ const SettingsPanel = ({ onClose }) => {
 
                     {/* Recovery Key */}
                     <RecoveryKeySection t={t} />
+
+                    {/* Restore Account from Key */}
+                    <RestoreAccountSection t={t} />
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
