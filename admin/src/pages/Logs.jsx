@@ -108,7 +108,7 @@ const Logs = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalLogsCount, setTotalLogsCount] = useState(0);
-    const [filters, setFilters] = useState({ limit: 50 });
+    const [filters, setFilters] = useState({ limit: 15 });
     const [exporting, setExporting] = useState(false);
     const [sortColumn, setSortColumn] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
