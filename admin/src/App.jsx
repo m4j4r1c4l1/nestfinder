@@ -5,6 +5,7 @@ import Logs from './pages/Logs';
 import Settings from './pages/Settings';
 import Observability from './pages/Observability';
 import Messages from './pages/Messages';
+import Users from './pages/Users';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -172,6 +173,7 @@ const App = () => {
         { id: 'dashboard', label: 'Dashboard', icon: '🐥' },
         { id: 'observability', label: 'Observability', icon: '🐦' },
         { id: 'messages', label: 'Messages', icon: '🔔' },
+        { id: 'users', label: 'Users', icon: '👤' },
         { id: 'logs', label: 'Logs', icon: '🥚' },
         { id: 'settings', label: 'Settings', icon: '🦉' }
     ];
@@ -278,6 +280,7 @@ const App = () => {
                 {view === 'dashboard' && <Dashboard />}
                 {view === 'observability' && <Observability />}
                 {view === 'messages' && <Messages />}
+                {view === 'users' && <Users />}
                 {view === 'logs' && <Logs />}
                 {view === 'settings' && <Settings />}
             </main>

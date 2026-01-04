@@ -415,6 +415,68 @@ router.delete('/users/:id', (req, res) => {
     }
 });
 
+// Block user (admin only)
+router.put('/users/:id/block', (req, res) => {
+    const userId = req.params.id;
+
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
+
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    try {
+        run('UPDATE users SET blocked = 1 WHERE id = ?', [userId]);
+        log('admin', 'user_blocked', userId, { nickname: user.nickname });
+        res.json({ success: true, message: `User ${user.nickname || user.id} blocked` });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to block user' });
+    }
+});
+
+// Unblock user (admin only)
+router.put('/users/:id/unblock', (req, res) => {
+    const userId = req.params.id;
+
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
+
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    try {
+        run('UPDATE users SET blocked = 0 WHERE id = ?', [userId]);
+        log('admin', 'user_unblocked', userId, { nickname: user.nickname });
+        res.json({ success: true, message: `User ${user.nickname || user.id} unblocked` });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to unblock user' });
+    }
+});
+
+// Update user trust score (admin only)
+router.put('/users/:id/trust-score', (req, res) => {
+    const userId = req.params.id;
+    const { trust_score } = req.body;
+
+    if (trust_score === undefined || trust_score < 0) {
+        return res.status(400).json({ error: 'Valid trust_score required' });
+    }
+
+    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
+
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    try {
+        run('UPDATE users SET trust_score = ? WHERE id = ?', [trust_score, userId]);
+        log('admin', 'trust_score_updated', userId, { old_score: user.trust_score, new_score: trust_score });
+        res.json({ success: true, trust_score });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update trust score' });
+    }
+});
+
 // Get all notifications (admin only)
 router.get('/notifications', (req, res) => {
     const notifications = all(`
