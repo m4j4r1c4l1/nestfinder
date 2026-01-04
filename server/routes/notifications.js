@@ -188,7 +188,7 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
             } else {
                 // 2. Render / Shallow Clone: Use GitHub API with Token & Caching
                 const headers = { 'User-Agent': 'nestfinder-admin' };
-                const token = process.env.GITHUB_TOKEN || process.env.NEST_HASH;
+                const token = process.env.GITHUB_TOKEN || process.env.NEST_TRACKER;
                 if (token) {
                     headers['Authorization'] = `token ${token}`;
                 }
