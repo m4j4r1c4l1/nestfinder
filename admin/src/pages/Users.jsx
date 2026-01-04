@@ -222,19 +222,31 @@ const Users = () => {
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{users.length}</div>
                 </div>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05))', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '0.75rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>🦅 Eagle (≥50)</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#f59e0b', marginBottom: '0.25rem', fontWeight: 600 }}>
+                        <span>🦅 Eagle</span>
+                        <span>(≥50)</span>
+                    </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f59e0b' }}>{badgeCounts.eagle}</div>
                 </div>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '0.75rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>🦉 Owl (≥30)</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.25rem', fontWeight: 600 }}>
+                        <span>🦉 Owl</span>
+                        <span>(≥30)</span>
+                    </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6' }}>{badgeCounts.owl}</div>
                 </div>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '0.75rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>🐦 Sparrow (≥10)</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.25rem', fontWeight: 600 }}>
+                        <span>🐦 Sparrow</span>
+                        <span>(≥10)</span>
+                    </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{badgeCounts.sparrow}</div>
                 </div>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05))', border: '1px solid rgba(148, 163, 184, 0.2)', padding: '0.75rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>🥚 Hatchling (&lt;10)</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem', fontWeight: 600 }}>
+                        <span>🥚 Hatchling</span>
+                        <span>(&lt;10)</span>
+                    </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#94a3b8' }}>{badgeCounts.hatchling}</div>
                 </div>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05))', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.75rem' }}>
@@ -484,36 +496,35 @@ const Users = () => {
             </div>
 
             {/* Pagination Footer - Grid for Left Text + Center Buttons */}
-            {totalPages > 1 && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
-                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                        Showing {paginatedUsers.length} of {filteredUsers.length} users
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
+                <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                    Showing {paginatedUsers.length} of {filteredUsers.length} users
+                </span>
+
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>
+                    <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page === 1 ? '#1e293b' : '#334155', color: page === 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer' }}
+                    >
+                        ◀ Prev
+                    </button>
+                    <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                        Page {page} of {totalPages || 1}
                     </span>
-
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <button
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page === 1 ? '#1e293b' : '#334155', color: page === 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer' }}
-                        >
-                            ◀ Prev
-                        </button>
-                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
-                            Page {page} of {totalPages || 1}
-                        </span>
-                        <button
-                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                            disabled={page >= totalPages}
-                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
-                        >
-                            Next ▶
-                        </button>
-                    </div>
-
-                    {/* Empty right column to balance grid */}
-                    <div></div>
+                    <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page >= totalPages}
+                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                    >
+                        Next ▶
+                    </button>
                 </div>
-            )}
+
+                {/* Empty right column to balance grid */}
+                <div></div>
+            </div>
         </div>
     );
 };
