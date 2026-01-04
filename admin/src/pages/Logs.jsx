@@ -139,25 +139,33 @@ const LogDetailModal = ({ log, onClose }) => {
                             <div>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</label>
                                 <div style={{ fontSize: '1rem', color: '#e2e8f0', fontWeight: 500 }}>
-                                    {new Date(log.created_at).toLocaleString('en-GB', { timeZone: 'Europe/Paris' })}
+                                    {(() => {
+                                        const d = new Date(log.created_at);
+                                        const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Paris' });
+                                        const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+                                        // Determine CET vs CEST
+                                        const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
+                                        const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
+                                        const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+                                        const isDST = Math.max(jan, jul) !== parisOffset;
+                                        return `${dateStr} ${timeStr} ${isDST ? 'CEST' : 'CET'}`;
+                                    })()}
                                 </div>
                             </div>
-                            <div>
-                                <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Action</label>
-                                <div style={{ marginTop: '0.25rem' }}>
-                                    <span className="badge" style={{
-                                        padding: '0.25rem 0.75rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem',
-                                        display: 'inline-block',
-                                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff'
-                                    }}>
-                                        {log.action}
-                                    </span>
-                                </div>
-                            </div>
+
                             <div>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
                                 <div style={{ fontSize: '1rem', color: '#e2e8f0' }}>{log.user_nickname || 'Anonymous'}</div>
                                 <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>{log.user_id}</div>
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Action</label>
+                                <div style={{ marginTop: '0.25rem' }}>
+                                    <span className="badge" style={getActionStyle(log.action)}>
+                                        {log.action}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -283,10 +291,15 @@ const Logs = () => {
 
             // --- Notifications / Broadcats ---
             case 'notification_sent': return '250, 204, 21'; // Yellow
+            case 'push_notification_sent': return '22, 163, 74'; // Green-600
+            case 'push_notifications_sent': return '22, 163, 74'; // Green-600 (Plural variant)
             case 'notifications_cleared': return '253, 224, 71'; // Light Yellow
+            case 'push_subscribe': return '147, 51, 234'; // Purple-600
             case 'broadcast_created': return '234, 179, 8'; // Yellow-600
             case 'broadcast_deleted': return '194, 65, 12'; // dark Orange
             case 'history_cleared': return '120, 113, 108'; // Stone
+            case 'trust_score_updated': return '202, 138, 4'; // Yellow-600
+            case 'Trust_score_updated': return '202, 138, 4'; // Case variant
 
             // --- System ---
             case 'rate_limit_exceeded': return '87, 83, 78'; // Warm Grey

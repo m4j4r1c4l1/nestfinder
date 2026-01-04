@@ -77,7 +77,7 @@ const Observability = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
                             {/* Users Block */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>👥 Users</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>🦚 Users</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
                                         {stats.totalSubscribers}
@@ -161,26 +161,26 @@ const Observability = () => {
                                 {/* Sent Row */}
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#8b5cf6' }}>
                                             {stats.notificationMetrics?.total || 0}
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Sent</div>
                                     </div>
                                     <div style={{ width: '1px', height: '30px', background: '#334155' }} />
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#22c55e' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#22c55e' }}>
                                             {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
                                         </div>
                                         <div className="text-muted text-sm">Delivered</div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#3b82f6' }}>
                                             {(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}
                                         </div>
                                         <div className="text-muted text-sm">Read</div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#f59e0b' }}>
                                             {stats.notificationMetrics?.unread || 0}
                                         </div>
                                         <div className="text-muted text-sm">Unread</div>
@@ -189,7 +189,7 @@ const Observability = () => {
                                 {/* Received Row */}
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', borderTop: '1px solid #334155', paddingTop: '0.75rem' }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#8b5cf6' }}>
                                             {stats.feedbackMetrics?.total || stats.totalReceived || 0}
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Received</div>
@@ -218,28 +218,28 @@ const Observability = () => {
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '2rem' }}>
                                     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                                         <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#14b8a6' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#14b8a6' }}>
                                                 {(stats.devMetrics?.loc || 0).toLocaleString()}
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>LOC</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Lines of Code</div>
                                         </div>
                                         <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#8b5cf6' }}>
                                                 {(stats.devMetrics?.commits || 0).toLocaleString()}
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Git History</div>
                                         </div>
                                         <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0ea5e9' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#0ea5e9' }}>
                                                 {(stats.devMetrics?.components || 0).toLocaleString()}
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>React/JSX</div>
                                         </div>
                                         <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#f59e0b', fontFamily: '"JetBrains Mono", monospace', height: '2.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#f59e0b', fontFamily: '"JetBrains Mono", monospace', height: '2.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {stats.devMetrics?.lastCommit || '-'}
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
