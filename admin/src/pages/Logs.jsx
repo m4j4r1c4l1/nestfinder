@@ -43,14 +43,22 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
                 }}
                 onFocus={() => setIsOpen(true)}
                 className="form-control"
-                style={{ width: '100%', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                style={{
+                    width: '100%',
+                    padding: '0.25rem 0.5rem', // Keep compact
+                    fontSize: '0.8rem',
+                    backgroundColor: '#0f172a', // Dark theme bg
+                    border: '1px solid #334155', // Dark theme border
+                    color: '#e2e8f0', // Light text
+                    borderRadius: '4px'
+                }}
             />
             {isOpen && (
                 <div style={{
                     position: 'absolute',
                     top: '100%',
                     right: 0,
-                    width: '300px', // Wider dropdown to fit badges
+                    width: '100%', // Match parent width (which is 300px)
                     maxHeight: '300px',
                     overflowY: 'auto',
                     background: '#1e293b',
@@ -173,7 +181,7 @@ const Logs = () => {
             case 'submit_point': return '34, 197, 94'; // Is Spring Green
             case 'confirm_point': return '21, 128, 61'; // Deep Green
             case 'validate_point': return '16, 185, 129'; // Emerald
-            case 'deactivate_point': return '239, 68, 68'; // Red
+            case 'deactivate_point': return '168, 85, 247'; // Purple
             case 'vote_deactivate_point': return '249, 115, 22'; // Orange
             case 'reactivate_point': return '217, 70, 239'; // Fuchsia
             case 'export_points': return '14, 165, 233'; // Sky Blue
@@ -183,7 +191,7 @@ const Logs = () => {
             case 'login': return '59, 130, 246'; // Blue
             case 'register': return '99, 102, 241'; // Indigo
             case 'update_nickname': return '139, 92, 246'; // Violet
-            case 'admin_login': return '168, 85, 247'; // Purple
+            case 'admin_login': return '239, 68, 68'; // Red
             case 'admin_login_failed': return '153, 27, 27'; // Dark Red
             case 'recovery_key_generated': return '20, 184, 166'; // Teal (Longest)
             case 'identity_recovered': return '234, 179, 8'; // Yellow
@@ -339,14 +347,14 @@ const Logs = () => {
                                                         {action}
                                                     </span>
                                                 )}
-                                                style={{ width: '160px' }}
+                                                style={{ width: '300px' }}
                                             />
                                             <SearchableDropdown
                                                 options={availableUsers}
                                                 value={filters.userId}
                                                 onChange={(val) => setFilters(prev => ({ ...prev, userId: val }))}
                                                 placeholder="Filter User"
-                                                style={{ width: '160px' }}
+                                                style={{ width: '300px' }}
                                             />
                                             <button
                                                 className="btn btn-secondary"
@@ -363,50 +371,58 @@ const Logs = () => {
                         </thead>
                         <tbody>
                             {/* Server-side sorting - logs already sorted */}
-                            {logs.map(log => {
-                                // Timezone fix for display
-                                let safeIso = log.created_at;
-                                if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
-                                const date = new Date(safeIso);
-
-                                return (
-                                    <tr key={log.id} style={{ borderBottom: '1px solid #334155' }}>
-                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
-                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                            <span className="badge" style={{
-                                                padding: '0.25rem 0.5rem',
-                                                borderRadius: '4px',
-                                                fontWeight: 500,
-                                                ...getActionStyle(log.action)
-                                            }}>
-                                                {log.action}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0' }}>
-                                            {log.user_nickname || <span style={{ color: '#64748b' }}>
-                                                {log.user_id?.length > 13 ? `${log.user_id.substring(0, 13)}...` : log.user_id}
-                                            </span>}
-                                        </td>
-                                        <td style={{
-                                            padding: '0.5rem 1rem',
-                                            fontSize: '0.85rem',
-                                            color: '#94a3b8',
-                                            verticalAlign: 'middle',
-                                            whiteSpace: (log.metadata ? JSON.stringify(log.metadata) : '-').length > 100 ? 'normal' : 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            wordBreak: (log.metadata ? JSON.stringify(log.metadata) : '-').length > 100 ? 'break-word' : 'normal'
+                            {logs.map(log => (
+                                <tr key={log.id} style={{ borderBottom: '1px solid #334155', color: '#cbd5e1' }}>
+                                    <td style={{ padding: '0.75rem 1rem', color: '#94a3b8', fontSize: '0.85rem' }}>
+                                        {new Date(log.created_at).toLocaleTimeString('en-US', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                            timeZone: 'Europe/Paris',
+                                            timeZoneName: 'short',
+                                            hour12: false
+                                        })}
+                                    </td>
+                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                        <span className="badge" style={{
+                                            padding: '0.25rem 0.5rem',
+                                            borderRadius: '4px',
+                                            fontWeight: 500,
+                                            ...getActionStyle(log.action)
                                         }}>
-                                            {log.metadata ? JSON.stringify(log.metadata) : '-'}
-                                        </td>
-                                    </tr>
-                                )
-                            })}
+                                            {log.action}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '0.75rem 1rem' }}>
+                                        <div style={{ fontWeight: 500, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {log.user_nickname || 'Anonymous'}
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                            {log.user_id ? log.user_id.substring(0, 8) + '...' : 'N/A'}
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: '0.75rem 1rem' }}>
+                                        {log.target_id && (
+                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                Target: <span style={{ color: '#e2e8f0' }}>{log.target_id.substring(0, 8)}...</span>
+                                            </div>
+                                        )}
+                                        {log.details && Object.keys(JSON.parse(log.details || '{}')).length > 0 && (
+                                            <div style={{
+                                                fontSize: '0.8rem',
+                                                color: '#cbd5e1',
+                                                marginTop: '4px',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis'
+                                            }}>
+                                                {JSON.stringify(JSON.parse(log.details), null, 1).replace(/[\{\}"]/g, '')}
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))
+                            }
                         </tbody>
                     </table>
                 </div>

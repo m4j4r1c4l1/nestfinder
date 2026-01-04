@@ -1192,12 +1192,19 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
                                     </td>
                                     <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                                            <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
                                                 {new Date(item.created_at).toLocaleDateString()}
                                             </span>
-                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                                {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                                                {new Date(item.created_at).toLocaleTimeString('en-US', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    second: '2-digit',
+                                                    timeZone: 'Europe/Paris',
+                                                    timeZoneName: 'short',
+                                                    hour12: false
+                                                })}
                                             </span>
                                         </div>
                                     </td>
