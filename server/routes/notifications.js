@@ -175,6 +175,9 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
                 const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', {
                     headers: { 'User-Agent': 'nestfinder-admin' }
                 });
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                }
                 if (response.ok) {
                     const linkHeader = response.headers.get('Link');
                     if (linkHeader) {
