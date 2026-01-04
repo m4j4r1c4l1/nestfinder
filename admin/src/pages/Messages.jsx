@@ -1370,7 +1370,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     </table>
                     {feedback.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No messages found</div>}
                 </div>
-                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
+                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} itemLabel="messages" />}
             </div>
 
             {previewItem && (
@@ -1726,7 +1726,7 @@ const HistorySection = ({ users = [] }) => {
                     </table>
                     {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
                 </div>
-                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} />}
+                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedLogs.length} currentCount={paginatedLogs.length} itemLabel="messages" />}
             </div>
 
             {selectedBatchId && (
@@ -1743,41 +1743,30 @@ const HistorySection = ({ users = [] }) => {
 
 
 // --- REUSABLE PAGINATION COMPONENT ---
-const PaginationControls = ({ page, totalPages, setPage }) => (
+const PaginationControls = ({ page, totalPages, setPage, totalItems, currentCount, itemLabel = 'items' }) => (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
-        <button
-            onClick={() => setPage(1)}
-            disabled={page <= 1}
-            style={{ background: 'none', border: 'none', color: page <= 1 ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page <= 1 ? 'default' : 'pointer', padding: '0.25rem' }}
-            title="First Page"
-        >
-            ◀◀
-        </button>
-        <button
-            onClick={() => setPage(p => p - 1)}
-            disabled={page <= 1}
-            style={{ background: 'none', border: 'none', color: page <= 1 ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page <= 1 ? 'default' : 'pointer', padding: '0.25rem' }}
-            title="Previous Page"
-        >
-            ◀
-        </button>
-        <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{page} / {totalPages}</span>
-        <button
-            onClick={() => setPage(p => p + 1)}
-            disabled={page >= totalPages}
-            style={{ background: 'none', border: 'none', color: page >= totalPages ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page >= totalPages ? 'default' : 'pointer', padding: '0.25rem' }}
-            title="Next Page"
-        >
-            ▶
-        </button>
-        <button
-            onClick={() => setPage(totalPages)}
-            disabled={page >= totalPages}
-            style={{ background: 'none', border: 'none', color: page >= totalPages ? '#475569' : '#94a3b8', fontSize: '1.2rem', cursor: page >= totalPages ? 'default' : 'pointer', padding: '0.25rem' }}
-            title="Last Page"
-        >
-            ▶▶
-        </button>
+        <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+            Showing {currentCount} of {totalItems} {itemLabel}
+        </span>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page <= 1 ? '#1e293b' : '#334155', color: page <= 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+            >
+                ◀ Prev
+            </button>
+            <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                Page {page} of {totalPages || 1}
+            </span>
+            <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+            >
+                Next ▶
+            </button>
+        </div>
     </div>
 );
 
