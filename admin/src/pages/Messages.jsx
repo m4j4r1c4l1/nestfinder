@@ -1559,175 +1559,177 @@ const HistorySection = ({ users = [] }) => {
     };
 
     return (
-        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-                <h3>📜 Sent History</h3>
-                <span style={{
-                    position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
-                    background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
-                    borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                    userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '170px'
-                }}>
-                    Total: {logs.length}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <button
-                        onClick={async () => {
-                            if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?\nThis will remove all records of sent notifications from this list.')) return;
-                            try {
-                                const token = localStorage.getItem('nestfinder_admin_token');
-                                const res = await fetch(`${API_URL}/api/push/admin/notifications/cleanup`, {
-                                    method: 'POST',
-                                    headers: { 'Authorization': `Bearer ${token}` }
-                                });
-                                const data = await res.json();
-                                if (data.success) {
-                                    alert(data.message);
-                                    loadHistory();
-                                }
-                            } catch (err) { alert('Cleanup failed: ' + err.message); }
-                        }}
-                        className="btn btn-sm btn-danger"
-                        style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px' }}
-                        title="Delete all sent history logs"
-                    >
-                        🗑️ Clear History
-                    </button>
-                    <button onClick={loadHistory} className="btn btn-secondary btn-sm" style={{ width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px' }}>🔄 Refresh</button>
+        <>
+            <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
+                    <h3>📜 Sent History</h3>
+                    <span style={{
+                        position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
+                        background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
+                        borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
+                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '170px'
+                    }}>
+                        Total: {logs.length}
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <button
+                            onClick={async () => {
+                                if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?\nThis will remove all records of sent notifications from this list.')) return;
+                                try {
+                                    const token = localStorage.getItem('nestfinder_admin_token');
+                                    const res = await fetch(`${API_URL}/api/push/admin/notifications/cleanup`, {
+                                        method: 'POST',
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    });
+                                    const data = await res.json();
+                                    if (data.success) {
+                                        alert(data.message);
+                                        loadHistory();
+                                    }
+                                } catch (err) { alert('Cleanup failed: ' + err.message); }
+                            }}
+                            className="btn btn-sm btn-danger"
+                            style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px' }}
+                            title="Delete all sent history logs"
+                        >
+                            🗑️ Clear History
+                        </button>
+                        <button onClick={loadHistory} className="btn btn-secondary btn-sm" style={{ width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px' }}>🔄 Refresh</button>
+                    </div>
                 </div>
-            </div>
-            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
-                <div style={{ maxHeight: 'calc(100vh - 330px)', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
-                            <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                <th onClick={() => handleSort('created_at')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.timestamp, position: 'relative' }}>
-                                    Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="timestamp" />
-                                </th>
-                                <th onClick={() => handleSort('title')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.title, position: 'relative' }}>
-                                    Title {sortColumn === 'title' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="title" />
-                                </th>
-                                <th onClick={() => handleSort('body')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.body, position: 'relative' }}>
-                                    Body {sortColumn === 'body' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="body" />
-                                </th>
-                                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', width: columnWidths.template, position: 'relative' }}>
-                                    Template
-                                    <ResizeHandle column="template" />
-                                </th>
-                                <th onClick={() => handleSort('image')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.image, position: 'relative' }}>
-                                    Image {sortColumn === 'image' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="image" />
-                                </th>
-                                <th onClick={() => handleSort('target')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.target, position: 'relative' }}>
-                                    Target {sortColumn === 'target' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="target" />
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginatedLogs.map(log => {
-                                const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
-                                let safeIso = log.created_at;
-                                if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
-                                if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) { safeIso += 'Z'; }
-                                const date = new Date(safeIso);
+                <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
+                    <div style={{ maxHeight: 'calc(100vh - 330px)', overflow: 'auto', background: '#1e293b', borderRadius: '0 0 0 0' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
+                            <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
+                                <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                    <th onClick={() => handleSort('created_at')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.timestamp, position: 'relative' }}>
+                                        Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="timestamp" />
+                                    </th>
+                                    <th onClick={() => handleSort('title')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.title, position: 'relative' }}>
+                                        Title {sortColumn === 'title' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="title" />
+                                    </th>
+                                    <th onClick={() => handleSort('body')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.body, position: 'relative' }}>
+                                        Body {sortColumn === 'body' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="body" />
+                                    </th>
+                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left', width: columnWidths.template, position: 'relative' }}>
+                                        Template
+                                        <ResizeHandle column="template" />
+                                    </th>
+                                    <th onClick={() => handleSort('image')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.image, position: 'relative' }}>
+                                        Image {sortColumn === 'image' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="image" />
+                                    </th>
+                                    <th onClick={() => handleSort('target')} style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.target, position: 'relative' }}>
+                                        Target {sortColumn === 'target' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="target" />
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {paginatedLogs.map(log => {
+                                    const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{}') : (log.metadata || {});
+                                    let safeIso = log.created_at;
+                                    if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
+                                    if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) { safeIso += 'Z'; }
+                                    const date = new Date(safeIso);
 
-                                return (
-                                    <tr
-                                        key={log.id}
-                                        style={{
-                                            borderBottom: '1px solid #334155',
-                                            transition: 'all 0.2s ease',
-                                            background: 'transparent'
-                                        }}
-                                        className="history-row"
-                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                        <td
-                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => handlePreview(log)}
+                                    return (
+                                        <tr
+                                            key={log.id}
+                                            style={{
+                                                borderBottom: '1px solid #334155',
+                                                transition: 'all 0.2s ease',
+                                                background: 'transparent'
+                                            }}
+                                            className="history-row"
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                         >
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
-                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                                    {(() => {
-                                                        const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
-                                                        const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
-                                                        const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
-                                                        const parisOffset = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
-                                                        const isDST = Math.max(jan, jul) !== parisOffset;
-                                                        return `${hours} ${isDST ? 'CEST' : 'CET'}`;
-                                                    })()}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td
-                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => handlePreview(log)}
-                                        >
-                                            <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
-                                        </td>
-                                        <td
-                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => handlePreview(log)}
-                                        >
-                                            <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                                                {meta.body ? (meta.body.length > 45 ? meta.body.substring(0, 45) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
-                                            </div>
-                                        </td>
-                                        <td
-                                            style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
-                                            onClick={() => handlePreview(log)}
-                                        >
-                                            {(() => {
-                                                const tInfo = getTemplateInfo(meta.template);
-                                                return (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#e2e8f0', fontSize: '0.85rem' }}>
-                                                        <span>{tInfo.icon}</span>
-                                                        <span>{tInfo.name}</span>
-                                                    </div>
-                                                );
-                                            })()}
-                                        </td>
-                                        <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
-                                            <span style={{
-                                                fontSize: '0.8rem',
-                                                color: meta.image || (meta.template && meta.template.includes('img')) ? '#4ade80' : '#64748b',
-                                                background: meta.image ? 'rgba(74, 222, 128, 0.1)' : 'transparent',
-                                                padding: '2px 8px', borderRadius: '4px'
-                                            }}>
-                                                {meta.image ? 'Yes' : 'No'}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
-                                            <span
-                                                onClick={() => {
-                                                    if (log.target_id) setSelectedBatchId(log.target_id);
-                                                }}
-                                                style={{
-                                                    background: 'rgba(74, 222, 128, 0.15)', color: '#4ade80',
-                                                    padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 500,
-                                                    border: '1px solid rgba(74, 222, 128, 0.2)',
-                                                    cursor: log.target_id ? 'pointer' : 'default'
-                                                }}
+                                            <td
+                                                style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                                onClick={() => handlePreview(log)}
                                             >
-                                                {meta.count} users
-                                            </span>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                    {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                                        {(() => {
+                                                            const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+                                                            const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
+                                                            const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
+                                                            const parisOffset = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+                                                            const isDST = Math.max(jan, jul) !== parisOffset;
+                                                            return `${hours} ${isDST ? 'CEST' : 'CET'}`;
+                                                        })()}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td
+                                                style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                                onClick={() => handlePreview(log)}
+                                            >
+                                                <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{meta.title}</div>
+                                            </td>
+                                            <td
+                                                style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                                onClick={() => handlePreview(log)}
+                                            >
+                                                <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                                                    {meta.body ? (meta.body.length > 45 ? meta.body.substring(0, 45) + '...' : meta.body) : <span style={{ fontStyle: 'italic', opacity: 0.5 }}>-</span>}
+                                                </div>
+                                            </td>
+                                            <td
+                                                style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', cursor: 'pointer' }}
+                                                onClick={() => handlePreview(log)}
+                                            >
+                                                {(() => {
+                                                    const tInfo = getTemplateInfo(meta.template);
+                                                    return (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#e2e8f0', fontSize: '0.85rem' }}>
+                                                            <span>{tInfo.icon}</span>
+                                                            <span>{tInfo.name}</span>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                                                <span style={{
+                                                    fontSize: '0.8rem',
+                                                    color: meta.image || (meta.template && meta.template.includes('img')) ? '#4ade80' : '#64748b',
+                                                    background: meta.image ? 'rgba(74, 222, 128, 0.1)' : 'transparent',
+                                                    padding: '2px 8px', borderRadius: '4px'
+                                                }}>
+                                                    {meta.image ? 'Yes' : 'No'}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                                                <span
+                                                    onClick={() => {
+                                                        if (log.target_id) setSelectedBatchId(log.target_id);
+                                                    }}
+                                                    style={{
+                                                        background: 'rgba(74, 222, 128, 0.15)', color: '#4ade80',
+                                                        padding: '0.2rem 0.6rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 500,
+                                                        border: '1px solid rgba(74, 222, 128, 0.2)',
+                                                        cursor: log.target_id ? 'pointer' : 'default'
+                                                    }}
+                                                >
+                                                    {meta.count} users
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
+                    </div>
                 </div>
-                {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedLogs.length} currentCount={paginatedLogs.length} itemLabel="messages" />}
             </div>
+            {totalPages > 1 && <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedLogs.length} currentCount={paginatedLogs.length} itemLabel="messages" />}
 
             {selectedBatchId && (
                 <DetailModal batchId={selectedBatchId} onClose={() => setSelectedBatchId(null)} />
@@ -1736,7 +1738,7 @@ const HistorySection = ({ users = [] }) => {
             {previewMessage && (
                 <MessagePreviewModal message={previewMessage} onClose={() => setPreviewMessage(null)} />
             )}
-        </div>
+        </>
     );
 };
 

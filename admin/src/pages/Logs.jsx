@@ -117,8 +117,8 @@ const Logs = () => {
     const [columnWidths, setColumnWidths] = useState(() => {
         const defaults = {
             time: 140,
-            action: 260, // Increased to fit wider badges (220px + padding)
-            user: 200,
+            action: 200, // Reduced from 260
+            user: 180, // Reduced from 200
             details: null // flex
         };
         try {
@@ -298,7 +298,7 @@ const Logs = () => {
     };
 
     return (
-        <div style={{ padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ width: '75%', maxWidth: '1500px', margin: '0 auto', padding: '1.5rem 1rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div style={{ marginBottom: '1.5rem' }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🥚 Logs</h1>
                 <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>View and filter system activity and audit trails</p>
