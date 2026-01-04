@@ -196,7 +196,7 @@ const LogDetailModal = ({ log, onClose }) => {
             backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.4)', padding: '1rem'
         }} onClick={onClose}>
             <div className="card" onClick={e => e.stopPropagation()} style={{
-                width: '75%', // Match Main Container Width
+                width: '75vw', // Match Main Container Width
                 maxWidth: '1500px', // Match Main Container MaxWidth
                 background: '#1e293b',
                 border: '1px solid #334155',
@@ -240,13 +240,13 @@ const LogDetailModal = ({ log, onClose }) => {
                                 </div>
                             </div>
 
-                            <div style={{ textAlign: 'center', flex: 1 }}>
+                            <div style={{ flex: 1 }}>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
                                 <div style={{ fontSize: '1rem', color: '#e2e8f0' }}>{log.user_nickname || 'Anonymous'}</div>
                                 <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>{log.user_id}</div>
                             </div>
 
-                            <div style={{ textAlign: 'right' }}>
+                            <div>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Action</label>
                                 <div style={{ marginTop: '0.25rem' }}>
                                     <span className="badge" style={getActionStyle(log.action)}>
