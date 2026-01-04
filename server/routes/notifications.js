@@ -168,48 +168,65 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         let devMetrics = { commits: 0, components: 0, loc: 0, files: 0 };
         const rootDir = path.resolve(__dirname, '../../'); // Project root
 
-        try {
-            // 1. Commits - Use GitHub API with Link header pagination
-            try {
-                // Request with per_page=1 to get total from Link header
-                const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', {
-                    headers: { 'User-Agent': 'nestfinder-admin' }
-                });
-                if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
-                }
-                if (response.ok) {
-                    const linkHeader = response.headers.get('Link');
-                    if (linkHeader) {
-                        // Link header format: <url?page=X>; rel="next", <url?page=Y>; rel="last"
-                        const links = linkHeader.split(',');
-                        const lastLink = links.find(link => link.includes('rel="last"'));
+        // Cache for commits to avoid API rate limits and flakiness on Render
+        if (!global.cachedCommits) global.cachedCommits = 0;
 
-                        if (lastLink) {
-                            const match = lastLink.match(/[?&]page=(\d+)/);
-                            if (match) {
-                                devMetrics.commits = parseInt(match[1], 10);
+        try {
+            // Check if we are in a shallow clone (Render uses shallow clones)
+            let isShallow = false;
+            try {
+                const { stdout } = await execAsync('git rev-parse --is-shallow-repository', { cwd: rootDir });
+                isShallow = stdout.trim() === 'true';
+            } catch (e) {
+                isShallow = true; // Assume shallow/problematic if git checks fail
+            }
+
+            if (!isShallow) {
+                // 1. Local Dev / Full Clone: Use Git (Fastest & Most Accurate)
+                const { stdout } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
+                devMetrics.commits = parseInt(stdout.trim(), 10);
+            } else {
+                // 2. Render / Shallow Clone: Use GitHub API with Token & Caching
+                const headers = { 'User-Agent': 'nestfinder-admin' };
+                if (process.env.GITHUB_TOKEN) {
+                    headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+                }
+
+                try {
+                    const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', { headers });
+
+                    if (response.ok) {
+                        const linkHeader = response.headers.get('Link');
+                        if (linkHeader) {
+                            const links = linkHeader.split(',');
+                            const lastLink = links.find(link => link.includes('rel="last"'));
+                            if (lastLink) {
+                                const match = lastLink.match(/[?&]page=(\d+)/);
+                                if (match) {
+                                    devMetrics.commits = parseInt(match[1], 10);
+                                }
                             }
                         }
-                    }
-                    // If no commits yet from Link header, try counting directly
-                    if (!devMetrics.commits) {
-                        // Fallback: just mark as 1 if we got the single commit
-                        const data = await response.json();
-                        if (Array.isArray(data) && data.length > 0) {
-                            devMetrics.commits = 1; // At least 1
+                        // Fallback: If no link header (single page), count body
+                        if (!devMetrics.commits) {
+                            const data = await response.json();
+                            if (Array.isArray(data)) devMetrics.commits = data.length;
                         }
+
+                        // Update cache on success
+                        if (devMetrics.commits > 0) global.cachedCommits = devMetrics.commits;
                     }
+                } catch (apiErr) {
+                    console.error('GitHub API failed:', apiErr.message);
                 }
-            } catch (apiErr) {
-                // Fallback to local git if API fails
-                console.error('GitHub API failed, trying local git:', apiErr.message);
-                try {
-                    const { stdout } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
-                    devMetrics.commits = parseInt(stdout.trim(), 10);
-                } catch (gitErr) {
-                    console.error('Local git also failed:', gitErr.message);
+
+                // Fallback to cache if API failed or returned 0
+                if ((!devMetrics.commits || devMetrics.commits === 0) && global.cachedCommits > 0) {
+                    devMetrics.commits = global.cachedCommits;
                 }
+
+                // Final fallback: Show 1 instead of 0 if everything fails
+                if (!devMetrics.commits) devMetrics.commits = 1;
             }
 
             // 2. Code Stats
