@@ -1177,209 +1177,212 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     const paginatedFeedback = sortedFeedback.slice((page - 1) * pageSize, page * pageSize);
 
     return (
-        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3>💬 Received History</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
-                        <span style={{ fontWeight: 500 }}>
-                            <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => f.status === 'new').length} Pending</span>
-                        </span>
-                        <span style={{ fontWeight: 500 }}>
-                            <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => f.status === 'reviewed').length} Read</span>
-                        </span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {selectedIds.length > 0 && (
-                            <>
-                                <button
-                                    onClick={confirmMarkRead}
-                                    className="btn btn-sm"
-                                    style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '32px', display: 'flex', alignItems: 'center' }}
-                                >
-                                    <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
-                                </button>
-                                <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🗑️ Delete ({selectedIds.length})</button>
-                            </>
-                        )}
-                        <button onClick={onUpdate} className="btn btn-secondary btn-sm" style={{ height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🔄 Refresh</button>
+        <>
+            <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3>💬 Received History</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
+                            <span style={{ fontWeight: 500 }}>
+                                <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => f.status === 'new').length} Pending</span>
+                            </span>
+                            <span style={{ fontWeight: 500 }}>
+                                <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => f.status === 'reviewed').length} Read</span>
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            {selectedIds.length > 0 && (
+                                <>
+                                    <button
+                                        onClick={confirmMarkRead}
+                                        className="btn btn-sm"
+                                        style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '32px', display: 'flex', alignItems: 'center' }}
+                                    >
+                                        <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
+                                    </button>
+                                    <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🗑️ Delete ({selectedIds.length})</button>
+                                </>
+                            )}
+                            <button onClick={onUpdate} className="btn btn-secondary btn-sm" style={{ height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🔄 Refresh</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            {showConfirmModal && (
-                <ConfirmationModal
-                    title="Confirm Action"
-                    message={`Are you sure you want to mark ${selectedIds.length} items as read?`}
-                    onConfirm={() => {
-                        confirmAction && confirmAction();
-                        setShowConfirmModal(false);
-                    }}
-                    onCancel={() => setShowConfirmModal(false)}
-                />
-            )}
-            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
-                <div style={{ maxHeight: 'calc(100vh - 330px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
-                            <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                <th style={{ padding: '0.75rem 1rem', width: columnWidths.checkbox, position: 'relative' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={feedback.length > 0 && selectedIds.length === feedback.length}
-                                        onChange={() => setSelectedIds(selectedIds.length === feedback.length ? [] : feedback.map(f => f.id))}
-                                    />
-                                </th>
-                                <th
-                                    onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.timestamp, position: 'relative' }}
-                                >
-                                    Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="timestamp" />
-                                </th>
-                                <th style={{ padding: '0.75rem 1rem', width: columnWidths.status, textAlign: 'center', position: 'relative' }}>
-                                    Status
-                                    <ResizeHandle column="status" />
-                                </th>
-                                <th
-                                    onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.from, position: 'relative' }}
-                                >
-                                    From {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="from" />
-                                </th>
-                                <th
-                                    onClick={() => { setSortColumn('type'); setSortDirection(d => sortColumn === 'type' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', width: columnWidths.type, textAlign: 'center', cursor: 'pointer', userSelect: 'none', position: 'relative' }}
-                                >
-                                    Type {sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="type" />
-                                </th>
-                                <th
-                                    onClick={() => { setSortColumn('rating'); setSortDirection(d => sortColumn === 'rating' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                    style={{ padding: '0.75rem 1rem', width: columnWidths.rating, textAlign: 'center', cursor: 'pointer', userSelect: 'none', position: 'relative' }}
-                                >
-                                    Rating {sortColumn === 'rating' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                                    <ResizeHandle column="rating" />
-                                </th>
+                {showConfirmModal && (
+                    <ConfirmationModal
+                        title="Confirm Action"
+                        message={`Are you sure you want to mark ${selectedIds.length} items as read?`}
+                        onConfirm={() => {
+                            confirmAction && confirmAction();
+                            setShowConfirmModal(false);
+                        }}
+                        onCancel={() => setShowConfirmModal(false)}
+                    />
+                )}
+                <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
+                    <div style={{ maxHeight: 'calc(100vh - 330px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
+                            <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 1 }}>
+                                <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                    <th style={{ padding: '0.75rem 1rem', width: columnWidths.checkbox, position: 'relative' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={feedback.length > 0 && selectedIds.length === feedback.length}
+                                            onChange={() => setSelectedIds(selectedIds.length === feedback.length ? [] : feedback.map(f => f.id))}
+                                        />
+                                    </th>
+                                    <th
+                                        onClick={() => { setSortColumn('created_at'); setSortDirection(d => sortColumn === 'created_at' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                        style={{ padding: '0.75rem 1rem', textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: columnWidths.timestamp, position: 'relative' }}
+                                    >
+                                        Time {sortColumn === 'created_at' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="timestamp" />
+                                    </th>
+                                    <th style={{ padding: '0.75rem 1rem', width: columnWidths.status, textAlign: 'center', position: 'relative' }}>
+                                        Status
+                                        <ResizeHandle column="status" />
+                                    </th>
+                                    <th
+                                        onClick={() => { setSortColumn('user_nickname'); setSortDirection(d => sortColumn === 'user_nickname' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                        style={{ padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', userSelect: 'none', width: columnWidths.from, position: 'relative' }}
+                                    >
+                                        From {sortColumn === 'user_nickname' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="from" />
+                                    </th>
+                                    <th
+                                        onClick={() => { setSortColumn('type'); setSortDirection(d => sortColumn === 'type' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                        style={{ padding: '0.75rem 1rem', width: columnWidths.type, textAlign: 'center', cursor: 'pointer', userSelect: 'none', position: 'relative' }}
+                                    >
+                                        Type {sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="type" />
+                                    </th>
+                                    <th
+                                        onClick={() => { setSortColumn('rating'); setSortDirection(d => sortColumn === 'rating' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+                                        style={{ padding: '0.75rem 1rem', width: columnWidths.rating, textAlign: 'center', cursor: 'pointer', userSelect: 'none', position: 'relative' }}
+                                    >
+                                        Rating {sortColumn === 'rating' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                        <ResizeHandle column="rating" />
+                                    </th>
 
-                                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', position: 'relative' }}>Message</th>
-                                <th style={{ padding: '0.75rem 1rem', width: '120px' }}></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            {paginatedFeedback.map(item => (
-                                <tr
-                                    key={item.id}
-                                    style={{
-                                        borderBottom: '1px solid #334155',
-                                        background: selectedIds.includes(item.id) ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
-                                        cursor: 'pointer',
-                                        transition: 'background 0.2s'
-                                    }}
-                                    onClick={() => handleRowClick(item)}
-                                >
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
-                                        <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
-                                                {new Date(item.created_at).toLocaleDateString()}
-                                            </span>
-                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                                                {(() => {
-                                                    const d = new Date(item.created_at);
-                                                    const hours = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
-                                                    const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
-                                                    const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
-                                                    const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
-                                                    const isDST = Math.max(jan, jul) !== parisOffset;
-                                                    return `${hours} ${isDST ? 'CEST' : 'CET'}`;
-                                                })()}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
-                                            <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
-                                                {item.status === 'new' ? (
-                                                    <span style={{ color: '#22c55e' }}>✓✓</span>
-                                                ) : item.status === 'reviewed' ? (
-                                                    <span style={{ color: '#3b82f6' }}>✓✓</span>
-                                                ) : (
-                                                    <span style={{ color: '#8b5cf6' }}>✓✓</span>
-                                                )}
-                                            </div>
-                                            <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
-                                                {item.status === 'new' ? 'Pending' : item.status === 'reviewed' ? 'Read' : 'Resolved'}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500, maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {item.user_nickname || 'Anonymous'}
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id ? item.user_id.substr(0, 8) + '...' : ''}</div>
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>
-                                            {item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
-                                            {[1, 2, 3, 4, 5].map(star => (
-                                                <span
-                                                    key={star}
-                                                    style={{
-                                                        fontSize: '0.9rem',
-                                                        filter: item.rating && star <= item.rating ? 'none' : 'grayscale(100%) opacity(0.3)',
-                                                        transition: 'filter 0.2s'
-                                                    }}
-                                                >
-                                                    ⭐
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                        <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {(item.message || '').replace(/\n*\[Rating:\s*\d\/5\s*⭐\]/g, '').trim()}
-                                        </div>
-                                    </td>
-
-                                    <td style={{ padding: '0.5rem 0', verticalAlign: 'middle', textAlign: 'center', width: '120px' }} onClick={e => e.stopPropagation()}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
-                                                style={{
-                                                    background: 'none', border: 'none', cursor: 'pointer',
-                                                    fontSize: '1.2rem', opacity: 0.8, transition: 'opacity 0.2s', padding: '4px',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }}
-                                                onMouseEnter={e => e.target.style.opacity = 1}
-                                                onMouseLeave={e => e.target.style.opacity = 0.8}
-                                                title="Delete"
-                                            >
-                                                🗑️
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', position: 'relative' }}>Message</th>
+                                    <th style={{ padding: '0.75rem 1rem', width: '120px' }}></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    {feedback.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No messages found</div>}
+                            </thead>
+                            <tbody>
+
+                                {paginatedFeedback.map(item => (
+                                    <tr
+                                        key={item.id}
+                                        style={{
+                                            borderBottom: '1px solid #334155',
+                                            background: selectedIds.includes(item.id) ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
+                                            cursor: 'pointer',
+                                            transition: 'background 0.2s'
+                                        }}
+                                        onClick={() => handleRowClick(item)}
+                                    >
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
+                                            <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} />
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
+                                                    {new Date(item.created_at).toLocaleDateString()}
+                                                </span>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                                                    {(() => {
+                                                        const d = new Date(item.created_at);
+                                                        const hours = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+                                                        const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
+                                                        const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
+                                                        const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+                                                        const isDST = Math.max(jan, jul) !== parisOffset;
+                                                        return `${hours} ${isDST ? 'CEST' : 'CET'}`;
+                                                    })()}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
+                                                <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
+                                                    {item.status === 'new' ? (
+                                                        <span style={{ color: '#22c55e' }}>✓✓</span>
+                                                    ) : item.status === 'reviewed' ? (
+                                                        <span style={{ color: '#3b82f6' }}>✓✓</span>
+                                                    ) : (
+                                                        <span style={{ color: '#8b5cf6' }}>✓✓</span>
+                                                    )}
+                                                </div>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
+                                                    {item.status === 'new' ? 'Pending' : item.status === 'reviewed' ? 'Read' : 'Resolved'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500, maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {item.user_nickname || 'Anonymous'}
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id ? item.user_id.substr(0, 8) + '...' : ''}</div>
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>
+                                                {item.type === 'bug' ? '🐛' : item.type === 'suggestion' ? '💡' : '📝'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <span
+                                                        key={star}
+                                                        style={{
+                                                            fontSize: '0.9rem',
+                                                            filter: item.rating && star <= item.rating ? 'none' : 'grayscale(100%) opacity(0.3)',
+                                                            transition: 'filter 0.2s'
+                                                        }}
+                                                    >
+                                                        ⭐
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {(item.message || '').replace(/\n*\[Rating:\s*\d\/5\s*⭐\]/g, '').trim()}
+                                            </div>
+                                        </td>
+
+                                        <td style={{ padding: '0.5rem 0', verticalAlign: 'middle', textAlign: 'center', width: '120px' }} onClick={e => e.stopPropagation()}>
+                                            <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
+                                                    style={{
+                                                        background: 'none', border: 'none', cursor: 'pointer',
+                                                        fontSize: '1.2rem', opacity: 0.8, transition: 'opacity 0.2s', padding: '4px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }}
+                                                    onMouseEnter={e => e.target.style.opacity = 1}
+                                                    onMouseLeave={e => e.target.style.opacity = 0.8}
+                                                    title="Delete"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {feedback.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No messages found</div>}
+                    </div>
                 </div>
+
+
+                {previewItem && (
+                    <MessagePreviewModal
+                        message={previewItem}
+                        onClose={() => setPreviewItem(null)}
+                    />
+                )}
             </div>
             <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} itemLabel="messages" />
-
-            {previewItem && (
-                <MessagePreviewModal
-                    message={previewItem}
-                    onClose={() => setPreviewItem(null)}
-                />
-            )}
-        </div>
+        </>
     );
 };
 

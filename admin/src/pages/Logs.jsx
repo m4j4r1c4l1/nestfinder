@@ -196,7 +196,7 @@ const LogDetailModal = ({ log, onClose }) => {
             backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.4)', padding: '1rem'
         }} onClick={onClose}>
             <div className="card" onClick={e => e.stopPropagation()} style={{
-                width: '75vw', // Match Main Container Width
+                width: '37.5vw', // Reduced to half as requested
                 maxWidth: '1500px', // Match Main Container MaxWidth
                 background: '#1e293b',
                 border: '1px solid #334155',
