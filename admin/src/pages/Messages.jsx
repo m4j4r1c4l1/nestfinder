@@ -253,7 +253,7 @@ const Messages = () => {
     };
 
     const handleDeleteBroadcast = async (id) => {
-        if (!confirm('Delete this broadcast?')) return;
+        // if (!confirm('Delete this broadcast?')) return;
         try {
             await adminApi.fetch(`/admin/broadcasts/${id}`, { method: 'DELETE' });
             fetchData();
@@ -1006,7 +1006,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
 
     // Pagination
     const [page, setPage] = useState(1);
-    const pageSize = 15;
+    const pageSize = 30;
 
     // Resizable columns state
     // Resizable columns state
@@ -1392,7 +1392,7 @@ const HistorySection = ({ users = [] }) => {
     const [sortDirection, setSortDirection] = useState('desc');
 
     const [page, setPage] = useState(1);
-    const pageSize = 15;
+    const pageSize = 30;
 
     // Resizable columns state
     // Resizable columns state

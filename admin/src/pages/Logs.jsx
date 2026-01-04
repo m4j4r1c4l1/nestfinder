@@ -87,9 +87,23 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             >
                                 {renderItem ? renderItem(opt) : (
-                                    <span style={{ fontSize: '0.85rem' }}>
-                                        {typeof opt === 'object' ? `${opt.nickname || 'Anonymous'} (${opt.id.substring(0, 8)})` : opt}
-                                    </span>
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', overflow: 'hidden' }}>
+                                        {typeof opt === 'object' ? (
+                                            <>
+                                                <span style={{ fontWeight: 700, marginRight: '0.5rem', whiteSpace: 'nowrap' }}>
+                                                    {opt.nickname || 'Anonymous'}
+                                                </span>
+                                                <span style={{
+                                                    fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace',
+                                                    flex: 1, minWidth: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'
+                                                }}>
+                                                    {opt.id}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span>{opt}</span>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         ))
@@ -268,7 +282,7 @@ const Logs = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [totalLogsCount, setTotalLogsCount] = useState(0);
     const [selectedLog, setSelectedLog] = useState(null); // For modal
-    const [filters, setFilters] = useState({ limit: 15 });
+    const [filters, setFilters] = useState({ limit: 30 });
     const [exporting, setExporting] = useState(false);
     const [sortColumn, setSortColumn] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
@@ -402,9 +416,29 @@ const Logs = () => {
 
     return (
         <div style={{ width: '75%', maxWidth: '1500px', margin: '0 auto', padding: '1.5rem 1rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ marginBottom: '1.5rem' }}>
-                <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🥚 Logs</h1>
-                <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>View and filter system activity and audit trails</p>
+            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div>
+                    <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🥚 Logs</h1>
+                    <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>View and filter system activity and audit trails</p>
+                </div>
+                {/* Level Legend */}
+                <div style={{ display: 'flex', gap: '1rem', background: '#1e293b', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #334155', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                        <span>🥚</span> <span>Hatchling (&lt;10)</span>
+                    </div>
+                    <div style={{ width: '1px', height: '15px', background: '#475569' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#3b82f6' }}>
+                        <span>🐦</span> <span>Sparrow (≥10)</span>
+                    </div>
+                    <div style={{ width: '1px', height: '15px', background: '#475569' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#8b5cf6' }}>
+                        <span>🦉</span> <span>Owl (≥30)</span>
+                    </div>
+                    <div style={{ width: '1px', height: '15px', background: '#475569' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#f59e0b' }}>
+                        <span>🦅</span> <span>Eagle (≥50)</span>
+                    </div>
+                </div>
             </div>
 
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
@@ -572,12 +606,13 @@ const Logs = () => {
                 </div>
 
                 {/* Pagination - Buttons */}
+                {/* Pagination - Matching Messages.jsx Style */}
                 {totalPages > 1 && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
                         <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
                             Showing {logs.length} of {totalLogsCount} logs
                         </span>
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                             <button
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
                                 disabled={page <= 1}
@@ -596,7 +631,7 @@ const Logs = () => {
                                 Next ▶
                             </button>
                         </div>
-                        <div></div>
+                        <div></div>{/* Spacer for 1fr layout */}
                     </div>
                 )}
 
