@@ -431,12 +431,12 @@ const Users = () => {
                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             >
                                 <span style={{ fontSize: '1rem' }}>{getBadge(user.trust_score).icon}</span>
-                                <div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ color: '#e2e8f0', fontWeight: 500, fontSize: '0.85rem' }}>
                                         {(user.nickname || 'Anonymous').substring(0, 30)}
                                     </div>
                                     <div style={{ color: '#64748b', fontSize: '0.7rem', display: 'flex', alignItems: 'center' }}>
-                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={user.id}>{user.id}</span>
+                                        <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={user.id}>{user.id}</span>
                                         <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>&nbsp;• {getBadge(user.trust_score).name}</span>
                                     </div>
                                 </div>
