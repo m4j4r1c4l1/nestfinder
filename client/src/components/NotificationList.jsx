@@ -641,7 +641,18 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                                         setViewingImageOnly(true);
                                                                     }
                                                                 }}
-                                                                style={{ fontSize: '1.2rem', lineHeight: 1, cursor: notification.image_url ? 'pointer' : 'default' }}
+                                                                style={{
+                                                                    fontSize: '1.2rem',
+                                                                    lineHeight: 1,
+                                                                    cursor: notification.image_url ? 'pointer' : 'default',
+                                                                    padding: '8px',
+                                                                    margin: '-8px',
+                                                                    minWidth: '40px',
+                                                                    minHeight: '40px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center'
+                                                                }}
                                                             >
                                                                 {notification.image_url ? '🖼️' : ''}
                                                             </div>
