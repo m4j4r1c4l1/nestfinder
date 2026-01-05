@@ -111,10 +111,11 @@ const Observability = () => {
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)', lineHeight: 1 }}>
                                         {stats.totalSubscribers}
                                     </div>
-                                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.2rem' }}>Total Registered</div>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
+                                    <div className="text-muted text-sm">Registered</div>
                                 </div>
-                                {/* Stacked Badges */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', maxWidth: '140px' }}>
+                                {/* Horizontal Badges */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem', width: '100%' }}>
                                     {[
                                         { label: 'Eagle', count: stats.userLevels?.eagle, color: '#f59e0b', icon: '🦅' },
                                         { label: 'Owl', count: stats.userLevels?.owl, color: '#8b5cf6', icon: '🦉' },
@@ -122,21 +123,19 @@ const Observability = () => {
                                         { label: 'Hatchling', count: stats.userLevels?.hatchling, color: '#94a3b8', icon: '🥚' }
                                     ].map(badge => (
                                         <div key={badge.label} style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                            display: 'flex', alignItems: 'center', gap: '0.3rem',
                                             background: `${badge.color}15`, border: `1px solid ${badge.color}30`,
-                                            borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.8rem'
+                                            borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.75rem'
                                         }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: badge.color, fontWeight: 600 }}>
-                                                <span>{badge.icon}</span>
-                                                <span>{badge.label}</span>
-                                            </div>
-                                            <span style={{ fontWeight: 700, color: badge.color }}>{badge.count || 0}</span>
+                                            <span style={{ fontSize: '0.8rem' }}>{badge.icon}</span>
+                                            <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
+                                            <span style={{ fontWeight: 700, color: badge.color, marginLeft: '0.1rem' }}>{badge.count || 0}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            <div style={{ width: '1px', height: '180px', background: '#334155', alignSelf: 'center' }} />
+                            <div style={{ width: '1px', alignSelf: 'stretch', background: '#334155', margin: '0 1rem' }} />
 
                             {/* Points Block */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem' }}>
@@ -145,41 +144,35 @@ const Observability = () => {
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', lineHeight: 1 }}>
                                         {(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)}
                                     </div>
-                                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.2rem' }}>Total Locations</div>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
+                                    <div className="text-muted text-sm">Locations</div>
                                 </div>
-                                {/* Stacked Badges - Aligned with Users */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', maxWidth: '140px' }}>
+                                {/* Horizontal Badges - Aligned style with Users */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem', width: '100%' }}>
                                     {[
                                         { label: 'Confirmed', count: stats.mapPoints?.confirmed, color: '#22c55e', icon: '🟢' },
                                         { label: 'Pending', count: stats.mapPoints?.pending, color: '#f59e0b', icon: '🟠' },
                                         { label: 'Inactive', count: stats.mapPoints?.deactivated, color: '#ef4444', icon: '🔴' }
                                     ].map(badge => (
                                         <div key={badge.label} style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                            display: 'flex', alignItems: 'center', gap: '0.3rem',
                                             background: `${badge.color}15`, border: `1px solid ${badge.color}30`,
-                                            borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.8rem'
+                                            borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.75rem'
                                         }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: badge.color, fontWeight: 600 }}>
-                                                <span style={{ fontSize: '0.6rem' }}>{badge.icon}</span>
-                                                <span>{badge.label}</span>
-                                            </div>
-                                            <span style={{ fontWeight: 700, color: badge.color }}>{badge.count || 0}</span>
+                                            <span style={{ fontSize: '0.6rem' }}>{badge.icon}</span>
+                                            <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
+                                            <span style={{ fontWeight: 700, color: badge.color, marginLeft: '0.1rem' }}>{badge.count || 0}</span>
                                         </div>
                                     ))}
-                                    {/* Spacer to match user badges height if needed, or let naturally flow. 
-                                        User has 4 items, Points has 3. Let's add an empty invisible one to keep alignment perfect? 
-                                        Or just let it be short. User said "align... horizontally with the badges of the users block".
-                                        The first 3 will align. The 4th user badge will hang lower. That's likely fine.
-                                    */}
                                 </div>
                             </div>
 
-                            <div style={{ width: '1px', height: '70px', background: '#334155', alignSelf: 'center' }} />
+                            <div style={{ width: '1px', alignSelf: 'stretch', background: '#334155', margin: '0 1rem' }} />
 
                             {/* Rating Block */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', alignSelf: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>⭐ Rating</div>
-                                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
                                             {stats.avgRating ? stats.avgRating.toFixed(1) : '-'}
