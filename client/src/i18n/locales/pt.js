@@ -173,7 +173,12 @@ export default {
         enterRecoveryKey: 'palavra-palavra-palavra',
         invalidRecoveryKey: 'Chave de recuperação inválida. Verifique e tente novamente.',
         accountRestored: 'Conta restaurada! A recarregar...',
-        restoreButton: 'Restaurar Conta'
+        restoreButton: 'Restaurar Conta',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'Aviso',
+        restoreWarningMessage: 'Restaurar outra conta irá desconectá-lo da sua conta atual. Se não guardou a chave de recuperação desta conta, perderá o acesso permanentemente. Continuar?',
+        restoreConfirmButton: 'Sim, Restaurar',
+        sameKeyError: 'Esta é a chave de recuperação da sua conta atual. Já está conectado com esta conta.'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
