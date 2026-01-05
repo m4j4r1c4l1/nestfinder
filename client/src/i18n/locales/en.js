@@ -237,7 +237,7 @@ export default {
         // Home Screen
         title: 'NestFinder',
         subtitle: 'Finding Nests ❤️ Bringing Relief',
-        nicknameLabel: 'Enter a nickname to contribute (optional)',
+        nicknameLabel: 'Enter a Nickname or Recovery Key (optional)',
         nicknamePlaceholder: 'Anonymous Helper',
         buttonStart: 'Start Helping',
         buttonLoading: 'Starting...',
