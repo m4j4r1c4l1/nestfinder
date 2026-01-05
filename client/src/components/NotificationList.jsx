@@ -340,7 +340,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         return (
             <div style={{
                 background: 'var(--color-bg-secondary)',
-                padding: '0.75rem 0',
+                padding: '0.85rem 0',
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '0.35rem',
@@ -373,7 +373,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         return (
             <div style={{
                 background: 'var(--color-bg-secondary)',
-                padding: '0.75rem 0',
+                padding: '0.85rem 0',
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '0.35rem',
