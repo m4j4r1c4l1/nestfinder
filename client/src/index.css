@@ -1116,12 +1116,12 @@ textarea.form-input {
 }
 
 .notification-popup.image-only {
-  background: transparent;
-  border: none;
-  padding: 0;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  padding: 0.5rem;
   width: auto;
   max-width: 90vw;
-  box-shadow: none;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes popup-enter {
