@@ -142,6 +142,10 @@ class ApiClient {
   }
 
   // Feedback
+  getFeedback() {
+    return this.fetch('/points/feedback');
+  }
+
   submitFeedback(type, message, rating) {
     return this.fetch('/points/feedback', {
       method: 'POST',
