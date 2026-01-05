@@ -304,33 +304,34 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         minWidth: '100px'
     };
 
-    // Summary Badge Component (Dashboard style, clickable)
+    // Summary Badge Component (Dashboard style, clickable, compact)
     const SummaryBadge = ({ label, count, color, onClick, isActive }) => (
         <span
             onClick={onClick}
             style={{
                 background: isActive ? `${color}35` : `${color}15`,
                 color: color,
-                padding: '0 0.75rem',
+                padding: '0 0.5rem',
                 borderRadius: '4px',
-                fontSize: '0.75rem',
+                fontSize: '0.65rem',
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                height: '28px',
+                height: '24px',
                 border: `1px solid ${isActive ? color : `${color}30`}`,
-                gap: '0.4rem',
+                gap: '0.25rem',
                 userSelect: 'none',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap'
             }}>
             <span style={{ color: color }}>{label}</span>
             <span style={{ color: 'white', fontWeight: 700 }}>{count}</span>
         </span>
     );
 
-    // Render sticky summary badges row for Received tab
+    // Render sticky footer badges row for Received tab
     const renderReceivedSummaryBadges = () => {
         const totalCount = baseNotifications.length;
         if (totalCount === 0) return null;
@@ -339,15 +340,15 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         return (
             <div style={{
                 position: 'sticky',
-                top: 0,
+                bottom: 0,
                 zIndex: 10,
                 background: '#0f172a',
                 padding: '0.5rem 0',
                 display: 'flex',
                 justifyContent: 'center',
-                gap: '0.5rem',
-                borderBottom: '1px solid var(--color-border)',
-                marginBottom: '0.5rem'
+                gap: '0.35rem',
+                borderTop: '1px solid var(--color-border)',
+                marginTop: '0.5rem'
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
                 <SummaryBadge label="NEW" count={unreadCount} color="#94a3b8" onClick={() => setReceivedFilter('new')} isActive={receivedFilter === 'new'} />
@@ -356,7 +357,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         );
     };
 
-    // Render sticky summary badges row for Sent tab
+    // Render sticky footer badges row for Sent tab
     const renderSentSummaryBadges = () => {
         const totalCount = baseSent.length;
         if (totalCount === 0) return null;
@@ -375,15 +376,15 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         return (
             <div style={{
                 position: 'sticky',
-                top: 0,
+                bottom: 0,
                 zIndex: 10,
                 background: '#0f172a',
                 padding: '0.5rem 0',
                 display: 'flex',
                 justifyContent: 'center',
-                gap: '0.5rem',
-                borderBottom: '1px solid var(--color-border)',
-                marginBottom: '0.5rem'
+                gap: '0.35rem',
+                borderTop: '1px solid var(--color-border)',
+                marginTop: '0.5rem'
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
                 <SummaryBadge label="SENT" count={sentCount} color="#94a3b8" onClick={() => setSentFilter('sent')} isActive={sentFilter === 'sent'} />
@@ -567,7 +568,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             </div>
                         ) : (
                             <>
-                                {renderReceivedSummaryBadges()}
                                 {filteredNotifications.map(notification => {
                                     const isDeleting = messageToDelete?.id === notification.id;
                                     return (
@@ -590,7 +590,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 }}
                                             >
                                                 {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
                                                     {/* Left: Icon + Title */}
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                         <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
@@ -625,6 +625,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     marginTop: '0.4rem',
                                                     marginBottom: '0.4rem',
                                                     whiteSpace: 'pre-wrap',
+                                                    wordBreak: 'break-word',
                                                     lineHeight: '1.5'
                                                 }}>
                                                     {notification.body}
@@ -661,6 +662,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         {t('inbox.markAllRead') || 'Mark all as read'}
                                     </button>
                                 )}
+                                {renderReceivedSummaryBadges()}
                             </>
                         )}
                     </div>
@@ -681,7 +683,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             </div>
                         ) : (
                             <>
-                                {renderSentSummaryBadges()}
                                 {filteredSent.map(msg => {
                                     const isDeleting = messageToDelete?.id === msg.id;
                                     return (
@@ -700,7 +701,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 background: '#0f172a'
                                             }}>
                                                 {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
                                                     {/* Left: Icon + Title */}
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                         <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
@@ -735,6 +736,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     marginTop: '0.4rem',
                                                     marginBottom: '0.4rem',
                                                     whiteSpace: 'pre-wrap',
+                                                    wordBreak: 'break-word',
                                                     lineHeight: '1.5'
                                                 }}>
                                                     {msg.message}
@@ -772,6 +774,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         </SwipeableMessage>
                                     );
                                 })}
+                                {renderSentSummaryBadges()}
                             </>
                         )}
                     </div>
