@@ -137,9 +137,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     const [activeTab, setActiveTab] = useState('received');
 
     const tabs = [
-        { id: 'received', label: `🦜 ${t('inbox.received') || 'Received'}` },
-        { id: 'sent', label: `🦩 ${t('inbox.sent') || 'Sent'}` },
-        { id: 'compose', label: `🪶 ${t('inbox.compose') || 'Compose'}` }
+        { id: 'received', icon: '🦜', label: t('inbox.received') || 'Received' },
+        { id: 'sent', icon: '🦩', label: t('inbox.sent') || 'Sent' },
+        { id: 'compose', icon: '🪶', label: t('inbox.compose') || 'Compose' }
     ];
 
     return (
@@ -149,14 +149,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
-                background: 'rgba(15, 23, 42, 0.95)', // Deep dark opaque background to hide content behind
+                background: 'rgba(15, 23, 42, 0.95)', // Deep dark opaque background
                 backdropFilter: 'blur(10px)',
                 borderBottom: '1px solid var(--color-border)',
-                borderTopLeftRadius: 'var(--radius-xl)', // Match card radius
+                borderTopLeftRadius: 'var(--radius-xl)',
                 borderTopRightRadius: 'var(--radius-xl)'
             }}>
                 {/* Header */}
-                <div className="card-header flex-between items-center" style={{ borderBottom: 'none' }}>
+                <div className="card-header flex-between items-center" style={{ borderBottom: 'none', paddingBottom: '0.25rem' }}>
                     <h3 className="card-title">{t('inbox.title') || 'Inbox'}</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {onClose && (
@@ -181,29 +181,31 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 </div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex' }}>
+                <div style={{ display: 'flex', paddingBottom: '0.5rem' }}>
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             style={{
                                 flex: 1,
-                                padding: 'var(--space-3)',
+                                padding: 'var(--space-2)',
                                 background: 'transparent',
                                 border: 'none',
-                                borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+                                borderBottom: activeTab === tab.id ? '3px solid var(--color-primary)' : '3px solid transparent', // Thicker indicator
                                 color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                                 fontWeight: activeTab === tab.id ? 600 : 400,
-                                fontSize: '1rem', // Increased generic size (was inherited/small)
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
                                 display: 'flex',
+                                flexDirection: 'column', // Vertical stack
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '0.5rem'
+                                gap: '2px', // Tight gap
+                                height: 'auto'
                             }}
                         >
-                            {tab.label}
+                            <span style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '2px' }}>{tab.icon}</span>
+                            <span style={{ fontSize: '0.85rem' }}>{tab.label}</span>
                         </button>
                     ))}
                 </div>
