@@ -165,7 +165,15 @@ export default {
         statusHatchling: 'Pulcino',
         statusSparrow: 'Passero',
         statusOwl: 'Gufo',
-        statusEagle: 'Aquila'
+        statusEagle: 'Aquila',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'Per ripristinare il tuo account su un nuovo dispositivo, digita la tua chiave di 3 parole nel campo soprannome.',
+        restoreAccount: 'Ripristina Account',
+        restoreAccountDescription: 'Inserisci una chiave di recupero per ripristinare la tua identità.',
+        enterRecoveryKey: 'parola-parola-parola',
+        invalidRecoveryKey: 'Chiave di recupero non valida. Verifica e riprova.',
+        accountRestored: 'Account ripristinato! Ricaricamento...',
+        restoreButton: 'Ripristina Account'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
@@ -184,7 +192,9 @@ export default {
         message2: 'Ogni atto di gentilezza conta quando ci aiutiamo a vicenda.',
         message3: 'Insieme possiamo fare la differenza nella comunità.',
         callToAction: 'Aiuta a localizzare e assistere chi ne ha bisogno.',
-        button: 'Inizia'
+        button: 'Inizia',
+        // Recovery error
+        invalidRecoveryKey: 'Chiave di recupero non valida. Verifica e riprova.'
     },
     common: {
         loading: 'Caricamento...',

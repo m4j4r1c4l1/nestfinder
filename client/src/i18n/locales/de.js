@@ -165,7 +165,15 @@ export default {
         statusHatchling: 'Küken',
         statusSparrow: 'Spatz',
         statusOwl: 'Eule',
-        statusEagle: 'Adler'
+        statusEagle: 'Adler',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'Um Ihr Konto auf einem neuen Gerät wiederherzustellen, geben Sie Ihren 3-Wort-Schlüssel im Spitznamen-Feld ein.',
+        restoreAccount: 'Konto Wiederherstellen',
+        restoreAccountDescription: 'Geben Sie einen Wiederherstellungsschlüssel ein, um Ihre Identität wiederherzustellen.',
+        enterRecoveryKey: 'wort-wort-wort',
+        invalidRecoveryKey: 'Ungültiger Wiederherstellungsschlüssel. Bitte überprüfen.',
+        accountRestored: 'Konto wiederhergestellt! Wird neu geladen...',
+        restoreButton: 'Konto Wiederherstellen'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
@@ -184,7 +192,9 @@ export default {
         message2: 'Jeder Akt der Freundlichkeit zählt.',
         message3: 'Gemeinsam können wir einen Unterschied machen.',
         callToAction: 'Helfen Sie, Bedürftige zu finden und zu unterstützen.',
-        button: 'Los geht\'s'
+        button: 'Los geht\'s',
+        // Recovery error
+        invalidRecoveryKey: 'Ungültiger Wiederherstellungsschlüssel. Bitte überprüfen.'
     },
     common: {
         loading: 'Laden...',

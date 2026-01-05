@@ -165,7 +165,15 @@ export default {
         statusHatchling: 'Птенец',
         statusSparrow: 'Воробей',
         statusOwl: 'Сова',
-        statusEagle: 'Орёл'
+        statusEagle: 'Орёл',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'Чтобы восстановить аккаунт на новом устройстве, введите свой 3-словный ключ в поле никнейма.',
+        restoreAccount: 'Восстановить аккаунт',
+        restoreAccountDescription: 'Введите ключ восстановления для восстановления вашей личности.',
+        enterRecoveryKey: 'слово-слово-слово',
+        invalidRecoveryKey: 'Неверный ключ восстановления. Проверьте и попробуйте снова.',
+        accountRestored: 'Аккаунт восстановлен! Перезагрузка...',
+        restoreButton: 'Восстановить аккаунт'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
@@ -184,7 +192,9 @@ export default {
         message2: 'Каждый добрый поступок важен.',
         message3: 'Вместе мы можем изменить мир к лучшему.',
         callToAction: 'Помогайте находить и поддерживать тех, кто в этом нуждается.',
-        button: 'Начать'
+        button: 'Начать',
+        // Recovery error
+        invalidRecoveryKey: 'Неверный ключ восстановления. Проверьте и попробуйте снова.'
     },
     common: {
         loading: 'Загрузка...',

@@ -165,7 +165,15 @@ export default {
         statusHatchling: 'Pintainho',
         statusSparrow: 'Pardal',
         statusOwl: 'Coruja',
-        statusEagle: 'Águia'
+        statusEagle: 'Águia',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'Para restaurar a sua conta num novo dispositivo, digite a sua chave de 3 palavras no campo de alcunha.',
+        restoreAccount: 'Restaurar Conta',
+        restoreAccountDescription: 'Insira uma chave de recuperação para restaurar a sua identidade.',
+        enterRecoveryKey: 'palavra-palavra-palavra',
+        invalidRecoveryKey: 'Chave de recuperação inválida. Verifique e tente novamente.',
+        accountRestored: 'Conta restaurada! A recarregar...',
+        restoreButton: 'Restaurar Conta'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
@@ -184,7 +192,9 @@ export default {
         message2: 'Cada ato de bondade conta quando nos ajudamos.',
         message3: 'Juntos podemos fazer a diferença na comunidade.',
         callToAction: 'Ajude a localizar e assistir quem mais precisa.',
-        button: 'Começar'
+        button: 'Começar',
+        // Recovery error
+        invalidRecoveryKey: 'Chave de recuperação inválida. Verifique e tente novamente.'
     },
     common: {
         loading: 'A carregar...',
