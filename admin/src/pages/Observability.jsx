@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { adminApi } from '../api';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 
 
@@ -31,37 +32,19 @@ const Observability = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedRating, setSelectedRating] = useState(null); // For rating breakdown modal
 
+    // WebSocket for real-time updates (handled by custom hook)
+    const wsUrl = API_URL.replace(/^http/, 'ws') || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
+
+    useWebSocket(wsUrl, (message) => {
+        if (message.type === 'commit-update') {
+            console.log(`Real-time commit update: ${message.data.lastCommit} - refreshing stats`);
+            // Add small delay to allow server to finish startup/DB init
+            setTimeout(loadData, 1000);
+        }
+    });
+
     useEffect(() => {
         loadData();
-
-        // Polling disabled for testing WebSocket live updates
-        // const intervalId = setInterval(loadData, 60000);
-
-        // WebSocket for real-time updates
-        const wsUrl = API_URL.replace(/^http/, 'ws') || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
-        const ws = new WebSocket(wsUrl);
-
-        ws.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                if (message.type === 'commit-update') {
-                    // Refresh all stats (LOC, commits, components) when commit is received
-                    console.log(`Real-time commit update: ${message.data.lastCommit} - refreshing stats`);
-                    loadData();
-                }
-            } catch (err) {
-                console.error('WebSocket message parse error:', err);
-            }
-        };
-
-        ws.onopen = () => console.log('WebSocket connected for real-time updates');
-        ws.onerror = (err) => console.error('WebSocket error:', err);
-        ws.onclose = () => console.log('WebSocket disconnected');
-
-        return () => {
-            // clearInterval(intervalId);
-            ws.close();
-        };
     }, [timeRange]);
 
     const loadData = async () => {
