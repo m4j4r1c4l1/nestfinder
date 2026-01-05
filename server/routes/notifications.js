@@ -490,5 +490,21 @@ router.get('/admin/notifications/history', requireAdmin, (req, res) => {
     }
 });
 
+// Prune old notifications
+router.delete('/prune', (req, res) => {
+    const { cutoff } = req.body;
+    if (!cutoff) return res.status(400).json({ error: 'Cutoff date required' });
+
+    const userId = req.headers['x-user-id'];
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+    run(`
+    DELETE FROM notifications 
+    WHERE user_id = ? AND created_at < ?
+  `, [userId, cutoff]);
+
+    res.json({ success: true, message: 'Notifications pruned' });
+});
+
 export default router;
 

@@ -507,6 +507,22 @@ router.get('/feedback', (req, res) => {
   res.json({ feedback });
 });
 
+// Prune old feedback
+router.delete('/feedback/prune', (req, res) => {
+  const { cutoff } = req.body;
+  if (!cutoff) return res.status(400).json({ error: 'Cutoff date required' });
+
+  const userId = req.headers['x-user-id'];
+  if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+  run(`
+    DELETE FROM feedback
+    WHERE user_id = ? AND created_at < ?
+  `, [userId, cutoff]);
+
+  res.json({ success: true, message: 'Feedback pruned' });
+});
+
 // Submit feedback (bugs, suggestions)
 router.post('/feedback', (req, res) => {
   const userId = req.headers['x-user-id'];

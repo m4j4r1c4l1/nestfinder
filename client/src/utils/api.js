@@ -146,6 +146,20 @@ class ApiClient {
     return this.fetch('/points/feedback');
   }
 
+  pruneFeedback(cutoffDate) {
+    return this.fetch('/points/feedback/prune', {
+      method: 'DELETE',
+      body: JSON.stringify({ cutoff: cutoffDate }),
+    });
+  }
+
+  pruneNotifications(cutoffDate) {
+    return this.fetch('/push/notifications/prune', {
+      method: 'DELETE',
+      body: JSON.stringify({ cutoff: cutoffDate }),
+    });
+  }
+
   submitFeedback(type, message, rating) {
     return this.fetch('/points/feedback', {
       method: 'POST',
