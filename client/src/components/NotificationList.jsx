@@ -144,52 +144,64 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
     return (
         <div className="card">
-            {/* Header */}
-            <div className="card-header flex-between items-center">
-                <h3 className="card-title">{t('inbox.title') || 'Inbox'}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {onClose && (
+            {/* Sticky Header & Tabs Container */}
+            <div style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                background: 'rgba(15, 23, 42, 0.95)', // Deep dark opaque background to hide content behind
+                backdropFilter: 'blur(10px)',
+                borderBottom: '1px solid var(--color-border)',
+                borderTopLeftRadius: 'var(--radius-xl)', // Match card radius
+                borderTopRightRadius: 'var(--radius-xl)'
+            }}>
+                {/* Header */}
+                <div className="card-header flex-between items-center" style={{ borderBottom: 'none' }}>
+                    <h3 className="card-title">{t('inbox.title') || 'Inbox'}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {onClose && (
+                            <button
+                                onClick={onClose}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    fontSize: '1.5rem',
+                                    color: 'var(--color-text-secondary)',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    lineHeight: 1,
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}
+                            >
+                                &times;
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Tabs */}
+                <div style={{ display: 'flex' }}>
+                    {tabs.map(tab => (
                         <button
-                            onClick={onClose}
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
                             style={{
-                                background: 'none',
+                                flex: 1,
+                                padding: 'var(--space-3)',
+                                background: 'transparent',
                                 border: 'none',
-                                fontSize: '1.5rem',
-                                color: 'var(--color-text-secondary)',
+                                borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+                                color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                                fontWeight: activeTab === tab.id ? 600 : 400,
                                 cursor: 'pointer',
-                                padding: 0,
-                                lineHeight: 1,
-                                display: 'flex',
-                                alignItems: 'center'
+                                transition: 'all 0.2s ease'
                             }}
                         >
-                            &times;
+                            {tab.label}
                         </button>
-                    )}
+                    ))}
                 </div>
-            </div>
-
-            {/* Tabs */}
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)' }}>
-                {tabs.map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        style={{
-                            flex: 1,
-                            padding: 'var(--space-3)',
-                            background: 'transparent',
-                            border: 'none',
-                            borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-                            color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                            fontWeight: activeTab === tab.id ? 600 : 400,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                        }}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
             </div>
 
             {/* Body */}
