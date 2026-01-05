@@ -211,6 +211,22 @@ const Dashboard = ({ onNavigate }) => {
 
     if (loading) return <div className="flex-center" style={{ height: '100%' }}>Loading dashboard...</div>;
 
+    if (!stats) return (
+        <div style={{ padding: '2rem', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <h3 style={{ marginBottom: '1rem' }}>Unable to load dashboard</h3>
+            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem', maxWidth: '400px' }}>
+                There was a problem communicating with the server. It might be restarting, or your session may have expired.
+            </p>
+            <button
+                className="btn btn-primary"
+                onClick={() => window.location.reload()}
+                style={{ padding: '0.75rem 1.5rem' }}
+            >
+                Retry Connection
+            </button>
+        </div>
+    );
+
     const confirmed = points.filter(p => p.status === 'confirmed').length;
     const pending = points.filter(p => p.status === 'pending').length;
     const deactivated = points.filter(p => p.status === 'deactivated').length;
