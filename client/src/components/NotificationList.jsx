@@ -28,7 +28,7 @@ const FeedbackSection = () => {
     };
 
     return (
-        <div style={{ padding: '0.25rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '0.25rem', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', textAlign: 'center' }}>
                 {t('feedback.description') || 'Report bugs or suggest improvements.'}
             </div>
