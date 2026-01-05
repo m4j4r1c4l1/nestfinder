@@ -340,6 +340,82 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         </button>
     );
 
+    // Helper: Format Time (CET/CEST)
+    const formatTime = (dateString) => {
+        try {
+            return new Intl.DateTimeFormat('en-GB', {
+                day: 'numeric', month: 'short',
+                hour: '2-digit', minute: '2-digit',
+                timeZone: 'Europe/Paris',
+                timeZoneName: 'short'
+            }).format(new Date(dateString));
+        } catch (e) {
+            return '';
+        }
+    };
+
+    // Helper: Render Status Badge
+    const renderStatusBadge = (item, type) => {
+        let status = 'SENT';
+        let color = 'gray';
+
+        if (type === 'received') {
+            if (!item.read) {
+                status = 'NEW'; // Equiv to DELIVERED/Unread
+                color = 'green';
+            } else {
+                status = 'READ';
+                color = 'blue';
+            }
+        } else {
+            // Sent items
+            const s = (item.status || '').toLowerCase();
+            if (s === 'resolved' || s === 'read') {
+                status = 'READ';
+                color = 'blue';
+            } else if (s === 'new' || s === 'pending' || s === 'delivered') {
+                status = 'DELIVERED';
+                color = 'green';
+            } else {
+                status = 'SENT';
+                color = 'gray';
+            }
+        }
+
+        const bgColors = {
+            gray: 'rgba(148, 163, 184, 0.15)',
+            green: 'rgba(34, 197, 94, 0.15)',
+            blue: 'rgba(59, 130, 246, 0.15)'
+        };
+        const textColors = {
+            gray: '#64748b',
+            green: '#16a34a',
+            blue: '#2563eb'
+        };
+        const borderColors = {
+            gray: 'rgba(148, 163, 184, 0.2)',
+            green: 'rgba(34, 197, 94, 0.2)',
+            blue: 'rgba(59, 130, 246, 0.2)'
+        };
+
+        return (
+            <span style={{
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '12px',
+                background: bgColors[color],
+                color: textColors[color],
+                border: `1px solid ${borderColors[color]}`,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                whiteSpace: 'nowrap'
+            }}>
+                {status}
+            </span>
+        );
+    };
+
     return (
         <div className="card" style={{ height: '500px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
             {/* Sticky Header & Tabs */}
@@ -405,19 +481,36 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             <div
                                                 className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                                 onClick={() => markAsRead(notification.id)}
-                                                style={{ position: 'relative', overflow: 'hidden' }}
+                                                style={{ position: 'relative', overflow: 'hidden', padding: '1rem' }}
                                             >
-                                                <div className="notification-icon">
-                                                    {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
-                                                </div>
-                                                <div className="notification-content" style={{ paddingRight: '30px' }}>
-                                                    <div className="notification-header">
-                                                        <span className="notification-title">{notification.title}</span>
-                                                        <span className="notification-time">{new Date(notification.created_at).toLocaleDateString()}</span>
+                                                {/* Header: Icon+Title | Badge | Time */}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', position: 'relative', height: '24px' }}>
+                                                    {/* Left: Icon + Title */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '35%' }}>
+                                                        <span className="notification-icon" style={{ fontSize: '1.2rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
+                                                            {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
+                                                        </span>
+                                                        <span className="notification-title" style={{ fontSize: '0.9rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {notification.title}
+                                                        </span>
                                                     </div>
-                                                    <p className="notification-body">{notification.body}</p>
+
+                                                    {/* Center: Badge */}
+                                                    <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
+                                                        {renderStatusBadge(notification, 'received')}
+                                                    </div>
+
+                                                    {/* Right: Timestamp */}
+                                                    <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginLeft: 'auto' }}>
+                                                        {formatTime(notification.created_at)}
+                                                    </div>
                                                 </div>
-                                                {!notification.read && <div className="unread-dot"></div>}
+
+                                                {/* Body */}
+                                                <p className="notification-body" style={{ margin: 0, paddingRight: '0' }}>
+                                                    {notification.body}
+                                                </p>
+
                                                 {renderDeletionOverlay(notification.id)}
                                                 {renderBinIcon(notification.id, 'received', isDeleting)}
                                             </div>
@@ -456,23 +549,42 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         swipeDirection={swipeDirection}
                                         onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
                                     >
-                                        <div className="notification-item read" style={{ position: 'relative', overflow: 'hidden' }}>
-                                            <div className="notification-icon">
-                                                {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
-                                            </div>
-                                            <div className="notification-content" style={{ paddingRight: '30px' }}>
-                                                <div className="notification-header">
-                                                    <span className="notification-title" style={{ textTransform: 'capitalize' }}>{msg.type || 'Feedback'}</span>
-                                                    <span className="notification-time">{new Date(msg.created_at).toLocaleDateString()}</span>
+                                        <div className="notification-item read" style={{ position: 'relative', overflow: 'hidden', padding: '1rem' }}>
+                                            {/* Header: Icon+Title | Badge | Time */}
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', position: 'relative', height: '24px' }}>
+                                                {/* Left: Icon + Title */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '35%' }}>
+                                                    <span className="notification-icon" style={{ fontSize: '1.2rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
+                                                        {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
+                                                    </span>
+                                                    <span className="notification-title" style={{ fontSize: '0.9rem', fontWeight: 600, textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {msg.type || 'Feedback'}
+                                                    </span>
                                                 </div>
-                                                <p className="notification-body">{msg.message}</p>
-                                                {msg.rating && (
-                                                    <div style={{ fontSize: '0.8rem', marginTop: '0.25rem', color: '#f59e0b' }}>{'⭐'.repeat(msg.rating)}</div>
-                                                )}
-                                                <div style={{ fontSize: '0.7rem', marginTop: '0.5rem', display: 'inline-block', padding: '2px 6px', borderRadius: '4px', background: msg.status === 'resolved' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(148, 163, 184, 0.1)', color: msg.status === 'resolved' ? '#22c55e' : 'var(--color-text-secondary)' }}>
-                                                    {msg.status ? msg.status.toUpperCase() : 'SENT'}
+
+                                                {/* Center: Badge */}
+                                                <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
+                                                    {renderStatusBadge(msg, 'sent')}
+                                                </div>
+
+                                                {/* Right: Timestamp */}
+                                                <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginLeft: 'auto' }}>
+                                                    {formatTime(msg.created_at)}
                                                 </div>
                                             </div>
+
+                                            {/* Body */}
+                                            <p className="notification-body" style={{ margin: 0 }}>
+                                                {msg.message}
+                                            </p>
+
+                                            {/* Stars (Centered) */}
+                                            {msg.rating && (
+                                                <div style={{ textAlign: 'center', marginTop: '0.75rem', fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
+                                                    {'⭐'.repeat(msg.rating)}
+                                                </div>
+                                            )}
+
                                             {renderDeletionOverlay(msg.id)}
                                             {renderBinIcon(msg.id, 'sent', isDeleting)}
                                         </div>
