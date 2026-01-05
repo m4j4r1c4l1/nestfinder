@@ -294,7 +294,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                     position: 'absolute',
                     top: 0,
                     left: 0,
-                    width: 'calc(100% - 40px)', // Leave space for the real bin icon
+                    width: '100%', // Full width coverage
                     height: '100%',
                     background: 'rgba(15, 23, 42, 0.7)',
                     backdropFilter: 'blur(4px)',
@@ -302,14 +302,15 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    zIndex: 20
+                    zIndex: 20,
+                    borderRadius: 'var(--radius-md)' // Match container radius
                 }}
             >
                 <button
                     onClick={confirmDelete}
                     style={deleteButtonStyle}
                 >
-                    🗑️ {t('inbox.delete.yes') || 'Delete'}
+                    {t('inbox.delete.yes') || 'Delete'}
                 </button>
             </div>
         );
@@ -482,12 +483,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     position: 'relative',
                                                     overflow: 'hidden',
                                                     padding: '1.25rem',
-                                                    borderBottom: '1px solid var(--color-border)' // Separator
+                                                    borderRadius: 'var(--radius-md)',
+                                                    border: '1px solid var(--color-border)',
+                                                    marginBottom: '0.75rem'
                                                 }}
                                             >
-                                                {/* 1. Header Row: Icon/Title + Timestamp */}
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                {/* 1. Header Row: Icon/Title + Timestamp (Baseline Aligned) */}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.4rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
                                                         <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
                                                             {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
                                                         </span>
@@ -495,7 +498,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             {notification.title}
                                                         </span>
                                                     </div>
-                                                    <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 500, paddingTop: '4px' }}>
+                                                    <div className="notification-time" style={{ fontSize: '1rem', color: 'var(--color-text-secondary)', fontWeight: 400 }}>
                                                         {formatTime(notification.created_at)}
                                                     </div>
                                                 </div>
@@ -509,26 +512,26 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     fontFamily: 'monospace',
                                                     fontSize: '0.85rem',
                                                     color: '#cbd5e1',
-                                                    marginBottom: '0.5rem',
-                                                    marginTop: '0', // Removed to equalise spacing (Header has mb-0.5rem)
-                                                    whiteSpace: 'pre-wrap', // Preserve line breaks
+                                                    marginTop: '0.4rem',
+                                                    marginBottom: '0.4rem',
+                                                    whiteSpace: 'pre-wrap',
                                                     lineHeight: '1.5'
                                                 }}>
                                                     {notification.body}
                                                 </div>
 
                                                 {/* 3. Footer Row: Stars (Left) | Badge (Center) | Bin (Right) */}
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', height: '24px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
                                                     {/* Left: Placeholder for Stars */}
-                                                    <div style={{ justifySelf: 'start' }}></div>
+                                                    <div style={{ flex: '0 0 auto', minWidth: '60px' }}></div>
 
                                                     {/* Center: Status Badge */}
-                                                    <div style={{ justifySelf: 'center' }}>
+                                                    <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center' }}>
                                                         {renderStatusBadge(notification, 'received')}
                                                     </div>
 
                                                     {/* Right: Bin Icon */}
-                                                    <div style={{ justifySelf: 'end' }}>
+                                                    <div style={{ flex: '0 0 auto', minWidth: '60px', display: 'flex', justifyContent: 'flex-end' }}>
                                                         <button
                                                             onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
                                                             style={{
@@ -584,11 +587,13 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             position: 'relative',
                                             overflow: 'hidden',
                                             padding: '1.25rem',
-                                            borderBottom: '1px solid var(--color-border)' // Separator
+                                            borderRadius: 'var(--radius-md)',
+                                            border: '1px solid var(--color-border)',
+                                            marginBottom: '0.75rem'
                                         }}>
-                                            {/* 1. Header Row: Icon/Title + Timestamp */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            {/* 1. Header Row: Icon/Title + Timestamp (Baseline Aligned) */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.4rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
                                                     <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
                                                         {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
                                                     </span>
@@ -596,7 +601,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         {getFeedbackTitle(msg.type)}
                                                     </span>
                                                 </div>
-                                                <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 500, paddingTop: '4px' }}>
+                                                <div className="notification-time" style={{ fontSize: '1rem', color: 'var(--color-text-secondary)', fontWeight: 400 }}>
                                                     {formatTime(msg.created_at)}
                                                 </div>
                                             </div>
@@ -610,8 +615,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 fontFamily: 'monospace',
                                                 fontSize: '0.85rem',
                                                 color: '#cbd5e1',
-                                                marginBottom: '0.5rem',
-                                                marginTop: '0', // Removed to equalise spacing
+                                                marginTop: '0.4rem',
+                                                marginBottom: '0.4rem',
                                                 whiteSpace: 'pre-wrap',
                                                 lineHeight: '1.5'
                                             }}>
@@ -619,9 +624,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             </div>
 
                                             {/* 3. Footer Row: Stars (Left) | Badge (Center) | Bin (Right) */}
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', height: '24px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
                                                 {/* Left: Stars */}
-                                                <div style={{ justifySelf: 'start' }}>
+                                                <div style={{ flex: '0 0 auto', minWidth: '60px' }}>
                                                     {msg.rating && (
                                                         <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
                                                             {'⭐'.repeat(msg.rating)}
@@ -630,12 +635,12 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 </div>
 
                                                 {/* Center: Status Badge */}
-                                                <div style={{ justifySelf: 'center' }}>
+                                                <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center' }}>
                                                     {renderStatusBadge(msg, 'sent')}
                                                 </div>
 
                                                 {/* Right: Bin Icon */}
-                                                <div style={{ justifySelf: 'end' }}>
+                                                <div style={{ flex: '0 0 auto', minWidth: '60px', display: 'flex', justifyContent: 'flex-end' }}>
                                                     <button
                                                         onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
                                                         style={{
