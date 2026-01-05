@@ -221,7 +221,7 @@ const LogDetailModal = ({ log, onClose }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', alignItems: 'start', gap: '1rem' }}>
                             <div style={{ textAlign: 'left' }}>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', lineHeight: '1rem' }}>Time</label>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2, marginTop: '0.25rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2, marginTop: '0.5rem' }}>
                                     {(() => {
                                         const d = new Date(log.created_at);
                                         const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
@@ -243,14 +243,14 @@ const LogDetailModal = ({ log, onClose }) => {
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <div style={{ textAlign: 'left' }}>
                                     <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', lineHeight: '1rem' }}>User</label>
-                                    <div style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginTop: '0.25rem', lineHeight: 1.2 }}>{log.user_nickname || 'Anonymous'}</div>
+                                    <div style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginTop: '0.5rem', lineHeight: 1.2 }}>{log.user_nickname || 'Anonymous'}</div>
                                     <div style={{ fontSize: '0.9rem', color: '#94a3b8', fontFamily: 'monospace', fontStyle: 'italic' }}>{log.user_id}</div>
                                 </div>
                             </div>
 
                             <div style={{ textAlign: 'center' }}>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', lineHeight: '1rem' }}>Action</label>
-                                <div style={{ marginTop: '0.25rem' }}>
+                                <div style={{ marginTop: '0.5rem' }}>
                                     <span className="badge" style={getActionStyle(log.action)}>
                                         {log.action}
                                     </span>
