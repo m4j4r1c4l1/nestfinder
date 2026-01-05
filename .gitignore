@@ -1,0 +1,9 @@
+# Ignore everything except gh-pages specific files
+*
+
+# Allow these files
+!.gitignore
+!index.html
+!404.html
+!assets/
+!assets/**
