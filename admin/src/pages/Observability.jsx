@@ -33,6 +33,11 @@ const Observability = () => {
 
     useEffect(() => {
         loadData();
+
+        // Polling interval to refresh data (every 30 seconds)
+        const intervalId = setInterval(loadData, 30000);
+
+        return () => clearInterval(intervalId);
     }, [timeRange]);
 
     const loadData = async () => {
