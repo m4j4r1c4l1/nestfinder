@@ -531,7 +531,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             style={{
-                                flex: 1, padding: '0.65rem', background: activeTab === tab.id ? 'rgba(15, 23, 42, 0.95)' : 'transparent', border: 'none',
+                                flex: 1, padding: '1rem 0.25rem', background: activeTab === tab.id ? 'rgba(15, 23, 42, 0.95)' : 'transparent', border: 'none',
                                 borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
                                 borderTopLeftRadius: activeTab === tab.id ? 'var(--radius-md)' : '0',
                                 borderTopRightRadius: activeTab === tab.id ? 'var(--radius-md)' : '0',
