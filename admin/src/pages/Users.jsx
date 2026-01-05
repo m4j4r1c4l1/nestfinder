@@ -354,7 +354,7 @@ const Users = () => {
             <div style={{ marginBottom: '1rem', position: 'relative', width: '100%', maxWidth: '400px' }} ref={searchWrapperRef}>
                 <input
                     type="text"
-                    placeholder="🔍 Search by nickname, ID, or badge..."
+                    placeholder="Search by nickname, ID, or badge..."
                     value={searchTerm}
                     onChange={(e) => { setSearchTerm(e.target.value); setPage(1); setShowSearchDropdown(true); }}
                     onFocus={() => setShowSearchDropdown(true)}
