@@ -11,6 +11,8 @@ out/
 
 # Vite cache
 .vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
 
 # Environment files
 .env
