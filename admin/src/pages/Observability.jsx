@@ -106,7 +106,7 @@ const Observability = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
                             {/* Users Block */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>🦚 Users</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>🦚 Users</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)' }}>
                                         {stats.totalSubscribers}
@@ -120,7 +120,7 @@ const Observability = () => {
 
                             {/* Points Block */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>📍 Points</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>📍 Points</div>
                                 <div style={{ display: 'flex', gap: '1.5rem' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>
@@ -159,7 +159,7 @@ const Observability = () => {
 
                             {/* Rating Block */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>⭐ Rating</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>⭐ Rating</div>
                                 <div style={{ display: 'flex', gap: '1.5rem' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
@@ -186,7 +186,7 @@ const Observability = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
                             {/* Messages Block (Left) */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', justifyContent: 'center' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem' }}>📨 Messages</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>🔔 Messages</div>
                                 {/* Sent Row */}
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
@@ -243,25 +243,25 @@ const Observability = () => {
 
                             {/* Devel Block (Right) */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.1rem', marginBottom: '0.5rem' }}>🛠️ Development</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem', marginBottom: '0.5rem' }}>🛠️ Development</div>
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '2rem' }}>
-                                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
                                         <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#14b8a6' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#14b8a6', height: '2.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {(stats.devMetrics?.loc || 0).toLocaleString()}
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>LOC</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Lines of Code</div>
                                         </div>
                                         <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#8b5cf6', height: '2.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {(stats.devMetrics?.commits || 0).toLocaleString()}
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
                                             <div className="text-muted text-sm" style={{ fontSize: '0.7rem' }}>Git History</div>
                                         </div>
                                         <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#0ea5e9' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#0ea5e9', height: '2.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {(stats.devMetrics?.components || 0).toLocaleString()}
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
