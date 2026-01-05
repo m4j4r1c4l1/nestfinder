@@ -159,8 +159,11 @@ export default {
         compose: 'Compose',
         sendMessage: 'Send a Message',
         sentPlaceholder: 'Sent messages will appear here',
-        noMessages: 'No messages yet',
-        markAllRead: 'Mark all as read',
+        'empty': 'Your nest is empty',
+        'noSent': 'No contributions yet',
+        'delete.confirm': 'Delete this message permanently?',
+        'delete.cancel': 'Cancel',
+        'delete.yes': 'Delete',
         unread: 'unread'
     },
 
