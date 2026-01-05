@@ -105,6 +105,31 @@ router.post('/notifications/read-all', (req, res) => {
         res.status(500).json({ error: 'Failed to mark all as read' });
     }
 });
+// Delete a notification (user action)
+router.delete('/notifications/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({ error: 'User ID required' });
+        }
+
+        // Only delete if it belongs to this user
+        const notification = get('SELECT * FROM notifications WHERE id = ? AND user_id = ?', [id, userId]);
+        if (!notification) {
+            return res.status(404).json({ error: 'Notification not found' });
+        }
+
+        run('DELETE FROM notifications WHERE id = ? AND user_id = ?', [id, userId]);
+        log(userId, 'delete_notification', id.toString(), {});
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Delete notification error:', error);
+        res.status(500).json({ error: 'Failed to delete notification' });
+    }
+});
 
 // ========================================
 // ADMIN ROUTES
