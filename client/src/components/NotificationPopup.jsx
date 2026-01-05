@@ -1,10 +1,11 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 const NotificationPopup = ({ message, onDismiss, onMarkRead }) => {
     if (!message) return null;
 
-    return (
-        <div className="notification-popup-overlay" onClick={onDismiss}>
+    return ReactDOM.createPortal(
+        <div className="notification-popup-overlay" onClick={onDismiss} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
             <div className="notification-popup" onClick={e => e.stopPropagation()}>
                 <span className="notification-popup-icon" style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>🔔</span>
                 <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem' }}>{message.title}</h3>
@@ -42,7 +43,8 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead }) => {
                     Got it
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
