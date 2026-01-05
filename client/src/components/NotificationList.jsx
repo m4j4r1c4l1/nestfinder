@@ -134,22 +134,40 @@ const FeedbackSection = ({ onFeedbackSent }) => {
     );
 };
 
-// Swipeable Message Item Component
+// Swipeable Message Item Component with Progressive Blur
 const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right' }) => {
     const touchStartX = useRef(0);
     const touchCurrentX = useRef(0);
     const [swiping, setSwiping] = useState(false);
+    const [swipeProgress, setSwipeProgress] = useState(0); // 0 to 1
     const SWIPE_THRESHOLD = 80;
 
     const handleTouchStart = (e) => {
         touchStartX.current = e.touches[0].clientX;
         touchCurrentX.current = e.touches[0].clientX;
         setSwiping(true);
+        setSwipeProgress(0);
     };
 
     const handleTouchMove = (e) => {
         if (!swiping) return;
         touchCurrentX.current = e.touches[0].clientX;
+
+        const diff = touchCurrentX.current - touchStartX.current;
+        const absDiff = Math.abs(diff);
+
+        // Only track progress if swiping in the correct direction
+        const isCorrectDirection =
+            (swipeDirection === 'right' && diff > 0) ||
+            (swipeDirection === 'left' && diff < 0);
+
+        if (isCorrectDirection) {
+            // Calculate progress as percentage of threshold (capped at 1)
+            const progress = Math.min(absDiff / SWIPE_THRESHOLD, 1);
+            setSwipeProgress(progress);
+        } else {
+            setSwipeProgress(0);
+        }
     };
 
     const handleTouchEnd = () => {
@@ -163,13 +181,23 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right' })
         if ((swipeDirection === 'right' && isRightSwipe) || (swipeDirection === 'left' && isLeftSwipe)) {
             onSwipeDelete();
         }
+
+        // Reset progress after touch ends
+        setSwipeProgress(0);
     };
+
+    // Calculate blur based on progress (max 4px blur at full swipe)
+    const blurAmount = swipeProgress * 4;
 
     return (
         <div
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
+            style={{
+                filter: swipeProgress > 0 ? `blur(${blurAmount}px)` : 'none',
+                transition: swiping ? 'none' : 'filter 0.2s ease-out'
+            }}
         >
             {children}
         </div>
