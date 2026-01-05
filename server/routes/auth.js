@@ -209,9 +209,11 @@ router.post('/recover', (req, res) => {
         console.log('[DEBUG] Found user:', user.id, 'updating device_id');
 
         // Update device_id to new device
-        // First, clear device_id from any existing user to avoid UNIQUE constraint violation
+        // First, assign a new unique device_id to any existing user with this device
         // This effectively "logs out" the previous user from this device
-        run('UPDATE users SET device_id = NULL WHERE device_id = ?', [deviceId]);
+        // We use a 'displaced-' prefix to avoid conflicts and make it easy to identify
+        const displacedDeviceId = 'displaced-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8);
+        run('UPDATE users SET device_id = ? WHERE device_id = ?', [displacedDeviceId, deviceId]);
         run('UPDATE users SET device_id = ? WHERE id = ?', [deviceId, user.id]);
 
         const updatedUser = get('SELECT * FROM users WHERE id = ?', [user.id]);
