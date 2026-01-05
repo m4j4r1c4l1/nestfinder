@@ -455,7 +455,11 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     // Helper: Format Date/Time (split into two lines)
     const formatDateTime = (dateString) => {
         try {
-            const d = new Date(dateString);
+            // Database stores timestamps in UTC without timezone suffix
+            // Normalize to ISO format and append 'Z' to treat as UTC
+            const utcString = dateString.replace(' ', 'T') + 'Z';
+            const d = new Date(utcString);
+
             const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
             const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
             const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
