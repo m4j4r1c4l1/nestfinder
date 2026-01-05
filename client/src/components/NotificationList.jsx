@@ -573,6 +573,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                     ) : (
                                         filteredNotifications.map(notification => {
                                             const isDeleting = messageToDelete?.id === notification.id;
+                                            console.log('Rendering Notification:', { id: notification.id, title: notification.title, image_url: notification.image_url });
                                             return (
                                                 <SwipeableMessage
                                                     key={notification.id}
