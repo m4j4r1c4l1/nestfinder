@@ -508,6 +508,16 @@ const SettingsPanel = ({ onClose }) => {
     // Status
     const status = getStatus(user?.trust_score, t);
 
+    // Retention Policy
+    const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
+
+    const handleRetentionChange = (e) => {
+        const val = e.target.value;
+        setRetention(val);
+        localStorage.setItem('nestfinder_message_retention', val);
+        window.dispatchEvent(new Event('storage'));
+    };
+
     const [popupEnabled, setPopupEnabled] = useState(() => {
         try {
             const stored = localStorage.getItem(NOTIFICATION_PREF_KEY);
@@ -813,21 +823,57 @@ const SettingsPanel = ({ onClose }) => {
     // Get the currently centered item index
     const centeredItemIndex = Math.round(normalizeOffset(scrollOffsetRef.current)) % itemCount;
 
-
-
     return (
-        <div className="card">
+        <div className="card" style={{ height: '100%', maxHeight: '100%', overflowY: 'auto' }}>
             <div className="card-header flex-between items-center">
-                <h3 className="card-title">{t('nav.settings')}</h3>
+                <h3 className="card-title">{t('settings.title')}</h3>
                 <button
-                    type="button"
                     onClick={onClose}
-                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                 >
                     &times;
                 </button>
             </div>
+
             <div className="card-body">
+                {/* Language (Existing) */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                        {t('settings.language')}
+                    </label>
+                    <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="form-control"
+                    >
+                        <option value="en">English (UK)</option>
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                    </select>
+                </div>
+
+                {/* Message Retention (New) */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                        {t('settings.messageRetention') || 'Message Retention'}
+                    </label>
+                    <select
+                        value={retention}
+                        onChange={handleRetentionChange}
+                        className="form-control"
+                    >
+                        <option value="1m">{t('settings.retention.1m') || '1 Month'}</option>
+                        <option value="3m">{t('settings.retention.3m') || '3 Months'}</option>
+                        <option value="6m">{t('settings.retention.6m') || '6 Months'}</option>
+                        <option value="forever">{t('settings.retention.forever') || 'Forever'}</option>
+                    </select>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
+                        {t('settings.retention.desc') || 'Automatically hide generic messages older than this.'}
+                    </div>
+                </div>
                 {/* Share App with QR Code - FIRST SECTION */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.shareApp')}</label>
