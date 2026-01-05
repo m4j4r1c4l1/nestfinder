@@ -115,9 +115,17 @@ export default {
     },
     inbox: {
         title: 'Berichten',
+        received: 'Ontvangen',
+        sent: 'Verzonden',
+        compose: 'Schrijven',
         noMessages: 'Nog geen berichten',
         markAllRead: 'Markeer alles als gelezen',
-        unread: 'ongelezen'
+        unread: 'ongelezen',
+        empty: 'Je nest is leeg',
+        noSent: 'Nog geen bijdragen',
+        'delete.confirm': 'Dit bericht permanent verwijderen?',
+        'delete.cancel': 'Annuleren',
+        'delete.yes': 'Verwijderen'
     },
     profile: {
         title: 'Profiel',
@@ -178,7 +186,23 @@ export default {
         restoreWarningTitle: 'Waarschuwing',
         restoreWarningMessage: 'Het herstellen van een ander account zal je van je huidige account loskoppelen. Als je de herstelsleutel van dit account niet hebt opgeslagen, verlies je permanent de toegang. Doorgaan?',
         restoreConfirmButton: 'Ja, Herstellen',
-        sameKeyError: 'Dit is de herstelsleutel van je huidige account. Je bent al ingelogd met dit account.'
+        sameKeyError: 'Dit is de herstelsleutel van je huidige account. Je bent al ingelogd met dit account.',
+        // Swipe Direction
+        swipeDirection: 'Veeg om te Verwijderen',
+        swipe: {
+            right: '→ Veeg naar rechts',
+            left: '← Veeg naar links',
+            desc: 'Veeg een bericht in deze richting om te verwijderen.'
+        },
+        // Message Retention
+        messageRetention: 'Berichtenbehoud',
+        retention: {
+            '1m': '1 Maand',
+            '3m': '3 Maanden',
+            '6m': '6 Maanden',
+            forever: 'Altijd',
+            desc: '⚠️ Oudere berichten worden permanent verwijderd.'
+        }
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

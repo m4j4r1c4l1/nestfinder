@@ -115,9 +115,17 @@ export default {
     },
     inbox: {
         title: 'Nachrichten',
+        received: 'Empfangen',
+        sent: 'Gesendet',
+        compose: 'Verfassen',
         noMessages: 'Keine Nachrichten',
         markAllRead: 'Alle als gelesen markieren',
-        unread: 'ungelesen'
+        unread: 'ungelesen',
+        empty: 'Dein Nest ist leer',
+        noSent: 'Noch keine Beiträge',
+        'delete.confirm': 'Diese Nachricht dauerhaft löschen?',
+        'delete.cancel': 'Abbrechen',
+        'delete.yes': 'Löschen'
     },
     profile: {
         title: 'Profil',
@@ -178,7 +186,23 @@ export default {
         restoreWarningTitle: 'Warnung',
         restoreWarningMessage: 'Das Wiederherstellen eines anderen Kontos wird Sie von Ihrem aktuellen Konto trennen. Wenn Sie den Wiederherstellungsschlüssel dieses Kontos nicht gespeichert haben, verlieren Sie den Zugang dauerhaft. Fortfahren?',
         restoreConfirmButton: 'Ja, Wiederherstellen',
-        sameKeyError: 'Dies ist der Wiederherstellungsschlüssel Ihres aktuellen Kontos. Sie sind bereits mit diesem Konto angemeldet.'
+        sameKeyError: 'Dies ist der Wiederherstellungsschlüssel Ihres aktuellen Kontos. Sie sind bereits mit diesem Konto angemeldet.',
+        // Swipe Direction
+        swipeDirection: 'Wischen zum Löschen',
+        swipe: {
+            right: '→ Nach rechts wischen',
+            left: '← Nach links wischen',
+            desc: 'Wischen Sie eine Nachricht in diese Richtung, um sie zu löschen.'
+        },
+        // Message Retention
+        messageRetention: 'Nachrichtenspeicherung',
+        retention: {
+            '1m': '1 Monat',
+            '3m': '3 Monate',
+            '6m': '6 Monate',
+            forever: 'Für immer',
+            desc: '⚠️ Ältere Nachrichten werden dauerhaft gelöscht.'
+        }
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

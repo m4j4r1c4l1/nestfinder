@@ -115,9 +115,17 @@ export default {
     },
     inbox: {
         title: 'Messages',
+        received: 'Reçus',
+        sent: 'Envoyés',
+        compose: 'Rédiger',
         noMessages: 'Aucun message',
         markAllRead: 'Tout marquer comme lu',
-        unread: 'non lu'
+        unread: 'non lu',
+        empty: 'Votre nid est vide',
+        noSent: 'Aucune contribution encore',
+        'delete.confirm': 'Supprimer ce message définitivement?',
+        'delete.cancel': 'Annuler',
+        'delete.yes': 'Supprimer'
     },
     profile: {
         title: 'Profil',
@@ -178,7 +186,23 @@ export default {
         restoreWarningTitle: 'Avertissement',
         restoreWarningMessage: 'Restaurer un autre compte vous déconnectera de votre compte actuel. Si vous n\'avez pas sauvegardé la clé de récupération de ce compte, vous perdrez l\'accès de façon permanente. Continuer?',
         restoreConfirmButton: 'Oui, Restaurer',
-        sameKeyError: 'Ceci est la clé de récupération de votre compte actuel. Vous êtes déjà connecté avec ce compte.'
+        sameKeyError: 'Ceci est la clé de récupération de votre compte actuel. Vous êtes déjà connecté avec ce compte.',
+        // Swipe Direction
+        swipeDirection: 'Glisser pour Supprimer',
+        swipe: {
+            right: '→ Glisser vers la droite',
+            left: '← Glisser vers la gauche',
+            desc: 'Glissez un message dans cette direction pour le supprimer.'
+        },
+        // Message Retention
+        messageRetention: 'Conservation des Messages',
+        retention: {
+            '1m': '1 Mois',
+            '3m': '3 Mois',
+            '6m': '6 Mois',
+            forever: 'Toujours',
+            desc: '⚠️ Les messages plus anciens seront définitivement supprimés.'
+        }
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

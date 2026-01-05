@@ -115,9 +115,17 @@ export default {
     },
     inbox: {
         title: "Bústia d'entrada",
+        received: 'Rebuts',
+        sent: 'Enviats',
+        compose: 'Redactar',
         noMessages: 'No hi ha missatges encara',
         markAllRead: 'Marcar tot com llegit',
-        unread: 'sense llegir'
+        unread: 'sense llegir',
+        empty: 'El teu niu està buit',
+        noSent: 'Sense contribucions encara',
+        'delete.confirm': 'Eliminar este missatge permanentment?',
+        'delete.cancel': 'Cancel·lar',
+        'delete.yes': 'Eliminar'
     },
     profile: {
         title: 'Perfil',
@@ -178,7 +186,23 @@ export default {
         restoreWarningTitle: 'Advertència',
         restoreWarningMessage: 'Restaurar un altre compte et desconnectarà del teu compte actual. Si no has guardat la clau de recuperació d\'aquest compte, perdràs l\'accés de manera permanent. Continuar?',
         restoreConfirmButton: 'Sí, Restaurar',
-        sameKeyError: 'Aquesta és la clau de recuperació del teu compte actual. Ja estàs connectat amb aquest compte.'
+        sameKeyError: 'Aquesta és la clau de recuperació del teu compte actual. Ja estàs connectat amb aquest compte.',
+        // Swipe Direction
+        swipeDirection: 'Lliscar per Eliminar',
+        swipe: {
+            right: '→ Lliscar a la dreta',
+            left: '← Lliscar a l\'esquerra',
+            desc: 'Llisca un missatge en aquesta direcció per eliminar-lo.'
+        },
+        // Message Retention
+        messageRetention: 'Retenció de Missatges',
+        retention: {
+            '1m': '1 Mes',
+            '3m': '3 Mesos',
+            '6m': '6 Mesos',
+            forever: 'Per sempre',
+            desc: '⚠️ Els missatges més antics seran eliminats permanentment.'
+        }
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

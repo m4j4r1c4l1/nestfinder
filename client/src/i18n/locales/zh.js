@@ -115,9 +115,17 @@ export default {
     },
     inbox: {
         title: '消息',
+        received: '收到的',
+        sent: '已发送',
+        compose: '撰写',
         noMessages: '暂无消息',
         markAllRead: '全部标记为已读',
-        unread: '未读'
+        unread: '未读',
+        empty: '您的巢穴是空的',
+        noSent: '暂无贡献',
+        'delete.confirm': '永久删除此消息？',
+        'delete.cancel': '取消',
+        'delete.yes': '删除'
     },
     profile: {
         title: '个人资料',
@@ -178,7 +186,23 @@ export default {
         restoreWarningTitle: '警告',
         restoreWarningMessage: '恢复另一个帐户将使您与当前帐户断开连接。如果您没有保存此帐户的恢复密钥，您将永久失去访问权限。继续？',
         restoreConfirmButton: '是的，恢复',
-        sameKeyError: '这是您当前帐户的恢复密钥。您已经使用此帐户登录。'
+        sameKeyError: '这是您当前帐户的恢复密钥。您已经使用此帐户登录。',
+        // Swipe Direction
+        swipeDirection: '滑动删除',
+        swipe: {
+            right: '→ 向右滑动',
+            left: '← 向左滑动',
+            desc: '向这个方向滑动消息以删除。'
+        },
+        // Message Retention
+        messageRetention: '消息保留',
+        retention: {
+            '1m': '1 个月',
+            '3m': '3 个月',
+            '6m': '6 个月',
+            forever: '永久',
+            desc: '⚠️ 超出时间的消息将被永久删除。'
+        }
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
