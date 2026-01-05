@@ -342,13 +342,13 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 position: 'sticky',
                 bottom: 0,
                 zIndex: 10,
-                background: '#0f172a',
+                background: 'var(--color-bg-primary)',
                 padding: '0.5rem 0',
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '0.35rem',
                 borderTop: '1px solid var(--color-border)',
-                marginTop: '0.5rem'
+                marginTop: 'auto'
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
                 <SummaryBadge label="NEW" count={unreadCount} color="#94a3b8" onClick={() => setReceivedFilter('new')} isActive={receivedFilter === 'new'} />
@@ -378,13 +378,13 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 position: 'sticky',
                 bottom: 0,
                 zIndex: 10,
-                background: '#0f172a',
+                background: 'var(--color-bg-primary)',
                 padding: '0.5rem 0',
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '0.35rem',
                 borderTop: '1px solid var(--color-border)',
-                marginTop: '0.5rem'
+                marginTop: 'auto'
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
                 <SummaryBadge label="SENT" count={sentCount} color="#94a3b8" onClick={() => setSentFilter('sent')} isActive={sentFilter === 'sent'} />
@@ -560,7 +560,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                 {/* RECEIVED TAB */}
                 {activeTab === 'received' && (
-                    <div className="notification-list" style={{ marginTop: '0.5rem', height: '100%' }}>
+                    <div className="notification-list" style={{ marginTop: '0.5rem', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
                         {filteredNotifications.length === 0 ? (
                             <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                 <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪹</span>
@@ -670,7 +670,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                 {/* SENT TAB */}
                 {activeTab === 'sent' && (
-                    <div className="notification-list" style={{ marginTop: '0.5rem', height: '100%' }}>
+                    <div className="notification-list" style={{ marginTop: '0.5rem', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
                         {loadingSent ? (
                             <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                 <span style={{ fontSize: '2rem' }}>⌛</span>
