@@ -18,6 +18,7 @@ const getStatus = (score = 0, t) => {
 
 // Recovery Key Section Component
 const RecoveryKeySection = ({ t }) => {
+    const { user } = useAuth();
     const [recoveryKey, setRecoveryKey] = useState(null);
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -27,7 +28,6 @@ const RecoveryKeySection = ({ t }) => {
 
     // Load recovery key from session storage OR check user object on mount
     useEffect(() => {
-        const { user } = useAuth();
         const sessionKey = sessionStorage.getItem('nestfinder_recovery_key_temp');
 
         if (sessionKey) {
@@ -52,7 +52,7 @@ const RecoveryKeySection = ({ t }) => {
             // Ah, recovery flow uses a key provided by user. Maybe save THAT key to session?
             // YES. In `handleConfirmRestore`, we should save the inputKey to `nestfinder_recovery_key_temp`.
         }
-    }, []);
+    }, [user]);
 
 
 
