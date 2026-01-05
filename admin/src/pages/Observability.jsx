@@ -34,10 +34,42 @@ const Observability = () => {
     useEffect(() => {
         loadData();
 
-        // Polling interval to refresh data (every 30 seconds)
-        const intervalId = setInterval(loadData, 30000);
+        // Polling interval as fallback (every 60 seconds instead of 30)
+        const intervalId = setInterval(loadData, 60000);
 
-        return () => clearInterval(intervalId);
+        // WebSocket for real-time updates
+        const wsUrl = API_URL.replace(/^http/, 'ws') || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
+        const ws = new WebSocket(wsUrl);
+
+        ws.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                if (message.type === 'commit-update') {
+                    // Update commit info in real-time
+                    setStats(prev => ({
+                        ...prev,
+                        devMetrics: {
+                            ...prev.devMetrics,
+                            lastCommit: message.data.lastCommit,
+                            lastCommitMessage: message.data.lastCommitMessage,
+                            lastCommitAuthor: message.data.lastCommitAuthor
+                        }
+                    }));
+                    console.log(`Real-time commit update: ${message.data.lastCommit}`);
+                }
+            } catch (err) {
+                console.error('WebSocket message parse error:', err);
+            }
+        };
+
+        ws.onopen = () => console.log('WebSocket connected for real-time updates');
+        ws.onerror = (err) => console.error('WebSocket error:', err);
+        ws.onclose = () => console.log('WebSocket disconnected');
+
+        return () => {
+            clearInterval(intervalId);
+            ws.close();
+        };
     }, [timeRange]);
 
     const loadData = async () => {

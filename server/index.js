@@ -17,7 +17,7 @@ import pointsRoutes, { setBroadcast as setPointsBroadcast } from './routes/point
 import settingsRoutes, { setBroadcast as setSettingsBroadcast } from './routes/settings.js';
 import adminRoutes from './routes/admin.js';
 import notificationsRoutes from './routes/notifications.js';
-import webhookRoutes from './routes/webhook.js';
+import webhookRoutes, { setBroadcast as setWebhookBroadcast } from './routes/webhook.js';
 
 const app = express();
 // Enable trust proxy for Render/load balancers
@@ -56,6 +56,7 @@ const broadcast = (data) => {
 // Inject broadcast function into routes
 setPointsBroadcast(broadcast);
 setSettingsBroadcast(broadcast);
+setWebhookBroadcast(broadcast);
 
 // Import rate limiters
 import { apiLimiter } from './middleware/rateLimiter.js';

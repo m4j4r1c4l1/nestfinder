@@ -4,6 +4,10 @@ import { run, get } from '../database.js';
 
 const router = express.Router();
 
+// Broadcast function (injected from index.js for real-time updates)
+let broadcast = () => { };
+export const setBroadcast = (fn) => { broadcast = fn; };
+
 // Verify GitHub webhook signature
 const verifySignature = (req, secret) => {
     const signature = req.headers['x-hub-signature-256'];
@@ -64,6 +68,18 @@ router.post('/github', (req, res) => {
         `, [lastCommitHash, lastCommitMessage, lastCommitAuthor, lastCommitTime, commits]);
 
         console.log(`GitHub webhook: Received push with ${commits} commits. Latest: ${lastCommitHash}`);
+
+        // Broadcast real-time update to connected admin clients
+        broadcast({
+            type: 'commit-update',
+            data: {
+                lastCommit: lastCommitHash,
+                lastCommitMessage,
+                lastCommitAuthor,
+                lastCommitTime,
+                commits
+            }
+        });
 
         res.json({
             success: true,
