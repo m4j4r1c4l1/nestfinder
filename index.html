@@ -36,22 +36,14 @@
         allow="geolocation; web-share; clipboard-write"></iframe>
 
     <script>
-        // Generic routing support for iframe
-        // forwards subpaths (like /admin-panel) to the underlying service
-        // without hardcoding sensitive path names.
         try {
             const path = window.location.pathname;
             const iframe = document.querySelector('iframe');
-
-            // Check if we have a path to forward (ignoring the repo base path /nestfinder)
-            // This regex captures the path after the first segment (e.g. /nestfinder/foo -> /foo)
-            // or treats the path as root if it's just the base
             const match = path.match(/^\/[^/]+(.*)$/);
             const subPath = match ? match[1] : path;
 
             if (subPath && subPath.length > 1 && iframe) {
                 const targetUrl = new URL(iframe.src);
-                // Clean double slashes just in case
                 targetUrl.pathname = subPath.replace('//', '/');
                 iframe.src = targetUrl.href;
             }
