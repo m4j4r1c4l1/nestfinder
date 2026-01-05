@@ -35,7 +35,7 @@ router.post('/admin/login', (req, res) => {
 
     // Generate Admin Token (expires in 12h)
     const token = jwt.sign(
-        { id: admin.id, type: 'admin', username: admin.username },
+        { adminId: admin.id, type: 'admin', username: admin.username },
         NEST_INTEGRITY,
         { expiresIn: '12h' }
     );
