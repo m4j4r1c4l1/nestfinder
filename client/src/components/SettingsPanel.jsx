@@ -221,6 +221,7 @@ const RestoreAccountSection = ({ t }) => {
 
     // Tap-to-paste handler
     const handleInputClick = async () => {
+        // Only attempt paste if input is empty
         if (!inputKey.trim()) {
             try {
                 const clipboardText = await navigator.clipboard.readText();
@@ -233,6 +234,23 @@ const RestoreAccountSection = ({ t }) => {
                 console.log('Clipboard access not available');
             }
         }
+    };
+
+    const handleInputChange = (e) => {
+        // Smart formatting: lowercase, letters/dashes only, spaces -> dashes
+        let val = e.target.value.toLowerCase();
+
+        // Replace spaces/underscores with dashes
+        val = val.replace(/[\s_]+/g, '-');
+
+        // Remove invalid chars (keep only a-z and -)
+        val = val.replace(/[^a-z-]/g, '');
+
+        // Prevent multiple consecutive dashes
+        val = val.replace(/-+/g, '-');
+
+        setInputKey(val);
+        setError(null);
     };
 
     const handleRestoreClick = () => {
@@ -260,9 +278,7 @@ const RestoreAccountSection = ({ t }) => {
         setError(null);
 
         try {
-            const keyToRecover = inputKey.trim().toLowerCase();
-            console.log('[DEBUG] Attempting recovery with key:', JSON.stringify(keyToRecover), 'Length:', keyToRecover.length);
-            await recoverFromKey(keyToRecover);
+            await recoverFromKey(inputKey.trim().toLowerCase());
             setSuccess(true);
             // Reload page to refresh user state
             setTimeout(() => window.location.reload(), 1500);
@@ -290,7 +306,7 @@ const RestoreAccountSection = ({ t }) => {
             <input
                 type="text"
                 value={inputKey}
-                onChange={(e) => { setInputKey(e.target.value); setError(null); }}
+                onChange={handleInputChange}
                 onClick={handleInputClick}
                 placeholder={t?.('settings.enterRecoveryKey') || 'word-word-word'}
                 style={{
