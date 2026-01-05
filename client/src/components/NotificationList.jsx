@@ -62,16 +62,17 @@ const FeedbackSection = () => {
                 maxLength={500}
                 style={{
                     width: '100%',
-                    flex: 1,
-                    minHeight: '60px',
-                    padding: '0.5rem',
+                    height: '120px', // Fixed height to prevent collapse
+                    padding: '0.75rem', // More comfortable padding
                     background: 'var(--color-bg-tertiary)',
                     border: '1px solid var(--color-border)',
                     borderRadius: 'var(--radius-md)',
                     color: 'var(--color-text)',
                     resize: 'none',
-                    marginBottom: '0.25rem',
-                    fontSize: '16px'
+                    marginBottom: '0.5rem',
+                    fontSize: '16px',
+                    fontFamily: 'inherit',
+                    lineHeight: '1.5'
                 }}
             />
             <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', textAlign: 'right', marginBottom: '0.25rem' }}>

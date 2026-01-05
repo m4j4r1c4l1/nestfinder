@@ -3,8 +3,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
-import { run, get } from '../database.js';
-import { log } from '../utils/logger.js';
+import { run, get, log } from '../database.js';
 
 const router = express.Router();
 const NEST_INTEGRITY = process.env.NEST_INTEGRITY || 'default-secret-key';
