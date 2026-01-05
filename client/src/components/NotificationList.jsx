@@ -273,7 +273,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         ? baseSent
         : baseSent.filter(m => {
             const s = (m.status || '').toLowerCase();
-            if (sentFilter === 'read') return s === 'resolved' || s === 'read';
+            if (sentFilter === 'read') return s === 'resolved' || s === 'read' || s === 'reviewed';
             if (sentFilter === 'delivered') return s === 'new' || s === 'pending' || s === 'delivered';
             if (sentFilter === 'sent') return !s || s === 'sent';
             return true;
@@ -340,10 +340,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         return (
             <div style={{
                 background: 'var(--color-bg-secondary)',
-                padding: '0.85rem 0',
+                padding: '0.85rem 0.5rem',
                 display: 'flex',
-                justifyContent: 'center',
-                gap: '0.35rem',
+                justifyContent: 'space-between',
                 borderTop: 'none',
                 flexShrink: 0
             }}>
@@ -368,15 +367,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         }).length;
         const readCount = baseSent.filter(m => {
             const s = (m.status || '').toLowerCase();
-            return s === 'resolved' || s === 'read';
+            return s === 'resolved' || s === 'read' || s === 'reviewed';
         }).length;
         return (
             <div style={{
                 background: 'var(--color-bg-secondary)',
-                padding: '0.85rem 0',
+                padding: '0.85rem 0.5rem',
                 display: 'flex',
-                justifyContent: 'center',
-                gap: '0.35rem',
+                justifyContent: 'space-between',
                 borderTop: 'none',
                 flexShrink: 0
             }}>
@@ -474,7 +472,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         } else {
             // Sent items
             const s = (item.status || '').toLowerCase();
-            if (s === 'resolved' || s === 'read') {
+            if (s === 'resolved' || s === 'read' || s === 'reviewed') {
                 // READ = 2 blue ticks
                 ticks = '✓✓';
                 tickColor = '#2563eb';
