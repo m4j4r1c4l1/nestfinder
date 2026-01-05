@@ -45,17 +45,9 @@ const Observability = () => {
             try {
                 const message = JSON.parse(event.data);
                 if (message.type === 'commit-update') {
-                    // Update commit info in real-time
-                    setStats(prev => ({
-                        ...prev,
-                        devMetrics: {
-                            ...prev.devMetrics,
-                            lastCommit: message.data.lastCommit,
-                            lastCommitMessage: message.data.lastCommitMessage,
-                            lastCommitAuthor: message.data.lastCommitAuthor
-                        }
-                    }));
-                    console.log(`Real-time commit update: ${message.data.lastCommit}`);
+                    // Refresh all stats (LOC, commits, components) when commit is received
+                    console.log(`Real-time commit update: ${message.data.lastCommit} - refreshing stats`);
+                    loadData();
                 }
             } catch (err) {
                 console.error('WebSocket message parse error:', err);
