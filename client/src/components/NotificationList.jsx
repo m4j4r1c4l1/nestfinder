@@ -137,9 +137,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     const [activeTab, setActiveTab] = useState('received');
 
     const tabs = [
-        { id: 'received', label: `📨 ${t('inbox.received') || 'Received'}` },
-        { id: 'sent', label: `📬 ${t('inbox.sent') || 'Sent'}` },
-        { id: 'compose', label: `✏️ ${t('inbox.compose') || 'Compose'}` }
+        { id: 'received', label: `🦜 ${t('inbox.received') || 'Received'}` },
+        { id: 'sent', label: `🦩 ${t('inbox.sent') || 'Sent'}` },
+        { id: 'compose', label: `🪶 ${t('inbox.compose') || 'Compose'}` }
     ];
 
     return (
@@ -194,8 +194,13 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                 borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
                                 color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                                 fontWeight: activeTab === tab.id ? 600 : 400,
+                                fontSize: '1rem', // Increased generic size (was inherited/small)
                                 cursor: 'pointer',
-                                transition: 'all 0.2s ease'
+                                transition: 'all 0.2s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem'
                             }}
                         >
                             {tab.label}
