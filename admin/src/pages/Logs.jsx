@@ -45,7 +45,7 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
                 className="form-control"
                 style={{
                     width: '100%',
-                    padding: '0.5rem 0.75rem',
+                    padding: '0.5rem 2rem 0.5rem 0.75rem', // Added padding-right for clear button
                     fontSize: '0.85rem',
                     backgroundColor: '#0f172a', // Dark theme bg
                     border: '1px solid #334155', // Dark theme border
@@ -54,6 +54,36 @@ const SearchableDropdown = ({ options, value, onChange, placeholder, renderItem,
                     transition: 'border-color 0.2s'
                 }}
             />
+            {(searchTerm || value) && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onChange(undefined);
+                        setSearchTerm('');
+                        setIsOpen(false);
+                    }}
+                    style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#94a3b8',
+                        fontSize: '1.2rem',
+                        cursor: 'pointer',
+                        padding: '0',
+                        lineHeight: 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 10
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#cbd5e1'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
+                    title="Clear"
+                >
+                    ×
+                </button>
+            )}
             {isOpen && (
                 <div style={{
                     position: 'absolute',
