@@ -189,32 +189,42 @@ router.post('/recovery-key', (req, res) => {
 
 // Recover identity using key
 router.post('/recover', (req, res) => {
-    const { recoveryKey, deviceId } = req.body;
+    try {
+        const { recoveryKey, deviceId } = req.body;
 
-    if (!recoveryKey || !deviceId) {
-        return res.status(400).json({ error: 'Recovery key and device ID required' });
+        if (!recoveryKey || !deviceId) {
+            return res.status(400).json({ error: 'Recovery key and device ID required' });
+        }
+
+        const normalizedKey = recoveryKey.toLowerCase().trim().replace(/\s+/g, '-');
+        console.log('[DEBUG] Recover attempt - key:', normalizedKey, 'deviceId:', deviceId);
+
+        const user = get('SELECT * FROM users WHERE recovery_key = ?', [normalizedKey]);
+
+        if (!user) {
+            console.log('[DEBUG] No user found for key:', normalizedKey);
+            return res.status(404).json({ error: 'Invalid recovery key' });
+        }
+
+        console.log('[DEBUG] Found user:', user.id, 'updating device_id');
+
+        // Update device_id to new device
+        run('UPDATE users SET device_id = ? WHERE id = ?', [deviceId, user.id]);
+
+        const updatedUser = get('SELECT * FROM users WHERE id = ?', [user.id]);
+        const token = generateUserToken(updatedUser.id);
+
+        log(updatedUser.id, 'identity_recovered', null, { newDeviceId: deviceId });
+
+        res.json({
+            user: updatedUser,
+            token,
+            message: 'Identity recovered successfully'
+        });
+    } catch (err) {
+        console.error('[ERROR] /auth/recover failed:', err);
+        res.status(500).json({ error: 'Recovery failed: ' + err.message });
     }
-
-    const normalizedKey = recoveryKey.toLowerCase().trim().replace(/\s+/g, '-');
-    const user = get('SELECT * FROM users WHERE recovery_key = ?', [normalizedKey]);
-
-    if (!user) {
-        return res.status(404).json({ error: 'Invalid recovery key' });
-    }
-
-    // Update device_id to new device
-    run('UPDATE users SET device_id = ? WHERE id = ?', [deviceId, user.id]);
-
-    const updatedUser = get('SELECT * FROM users WHERE id = ?', [user.id]);
-    const token = generateUserToken(updatedUser.id);
-
-    log(updatedUser.id, 'identity_recovered', null, { newDeviceId: deviceId });
-
-    res.json({
-        user: updatedUser,
-        token,
-        message: 'Identity recovered successfully'
-    });
 });
 
 // Export JWT_SECRET for middleware
