@@ -29,14 +29,18 @@
         allow="geolocation *"></iframe>
 
     <script>
-        // Check current URL to see if we should load a specific page
-        const path = window.location.pathname;
-        const iframe = document.getElementById('app-frame');
+        try {
+            const path = window.location.pathname;
+            const iframe = document.getElementById('app-frame');
+            const match = path.match(/^\/[^/]+(.*)$/);
+            const subPath = match ? match[1] : path;
 
-        // If the URL contains 'admin-panel', update the iframe src
-        if (path.includes('/admin-panel')) {
-            iframe.src = "https://nestfinder-sa1g.onrender.com/admin-panel";
-        }
+            if (subPath && subPath.length > 1 && iframe) {
+                const targetUrl = new URL(iframe.src);
+                targetUrl.pathname = subPath.replace('//', '/');
+                iframe.src = targetUrl.href;
+            }
+        } catch (e) { }
     </script>
 </body>
 
