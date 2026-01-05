@@ -506,5 +506,13 @@ router.delete('/prune', (req, res) => {
     res.json({ success: true, message: 'Notifications pruned' });
 });
 
-export default router;
+// Delete individual notification
+router.delete('/:id', (req, res) => {
+    const userId = req.headers['x-user-id'];
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
 
+    run('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, userId]);
+    res.json({ success: true });
+});
+
+export default router;

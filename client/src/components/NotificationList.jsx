@@ -3,7 +3,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { api } from '../utils/api';
 
 // Feedback Section Component (moved from SettingsPanel)
-const FeedbackSection = () => {
+const FeedbackSection = ({ onFeedbackSent }) => {
     const { t } = useLanguage();
     const [type, setType] = useState('suggestion');
     const [message, setMessage] = useState('');
@@ -21,6 +21,7 @@ const FeedbackSection = () => {
             setMessage('');
             setRating(5);
             setTimeout(() => setSuccess(false), 3000);
+            if (onFeedbackSent) onFeedbackSent();
         } catch (err) {
             console.error('Failed to submit feedback:', err);
         }
@@ -136,6 +137,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('received');
     const [sentMessages, setSentMessages] = useState([]);
+    const [loadingSent, setLoadingSent] = useState(true);
     const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
 
     // Listen for retention setting changes
@@ -148,17 +150,21 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     }, []);
 
     // Fetch sent messages
-    useEffect(() => {
-        const fetchSent = async () => {
-            try {
-                const data = await api.getFeedback();
-                if (data && data.feedback) {
-                    setSentMessages(data.feedback);
-                }
-            } catch (err) {
-                console.error('Failed to fetch sent messages', err);
+    const fetchSent = async () => {
+        setLoadingSent(true);
+        try {
+            const data = await api.getFeedback();
+            if (data && data.feedback) {
+                setSentMessages(data.feedback);
             }
-        };
+        } catch (err) {
+            console.error('Failed to fetch sent messages', err);
+        } finally {
+            setLoadingSent(false);
+        }
+    };
+
+    useEffect(() => {
         fetchSent();
     }, []);
 
@@ -179,7 +185,31 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         });
     };
 
-    const filteredNotifications = filterByRetention(notifications);
+    const handleDelete = async (e, id, type) => {
+        e.stopPropagation(); // Prevent opening message
+        if (!window.confirm(t('common.confirmDelete') || 'Delete this message?')) return;
+
+        try {
+            if (type === 'received') {
+                await api.deleteNotification(id);
+                // Optimistic update handled by markDeleted logic for local state
+                setDeletedIds(prev => new Set(prev).add(id));
+            } else {
+                await api.deleteFeedback(id);
+                setSentMessages(prev => prev.filter(m => m.id !== id));
+            }
+        } catch (err) {
+            console.error('Failed to delete', err);
+        }
+    };
+
+    // Since we can't easily modify `notifications` prop, we use a local filter for deleted IDs
+    const [deletedIds, setDeletedIds] = useState(new Set());
+    const markDeleted = async (e, id) => {
+        handleDelete(e, id, 'received');
+    };
+
+    const filteredNotifications = filterByRetention(notifications).filter(n => !deletedIds.has(n.id));
     const filteredSent = filterByRetention(sentMessages);
 
     const tabs = [
@@ -203,41 +233,24 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 {/* Header - Compact */}
                 <div className="card-header flex-between items-center" style={{ borderBottom: 'none', padding: '0.75rem 1rem 0.25rem 1rem' }}>
                     <h3 className="card-title" style={{ fontSize: '1.1rem' }}>{t('inbox.title') || 'Inbox'}</h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        {/* Settings Gear */}
+                    {onClose && (
                         <button
-                            onClick={toggleSettings}
+                            onClick={onClose}
                             style={{
                                 background: 'none',
                                 border: 'none',
-                                fontSize: '1.25rem',
+                                fontSize: '1.5rem',
+                                color: 'var(--color-text-secondary)',
                                 cursor: 'pointer',
                                 padding: 0,
-                                opacity: settings ? 1 : 0.7
+                                lineHeight: 1,
+                                display: 'flex',
+                                alignItems: 'center'
                             }}
-                            title={t('nav.settings')}
                         >
-                            ⚙️
+                            &times;
                         </button>
-                        {onClose && (
-                            <button
-                                onClick={onClose}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    fontSize: '1.5rem',
-                                    color: 'var(--color-text-secondary)',
-                                    cursor: 'pointer',
-                                    padding: 0,
-                                    lineHeight: 1,
-                                    display: 'flex',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                &times;
-                            </button>
-                        )}
-                    </div>
+                    )}
                 </div>
 
                 {/* Tabs */}
@@ -281,11 +294,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             <div className="empty-state">
                                 <span style={{ fontSize: '2rem' }}>📭</span>
                                 <p>{t('inbox.empty') || 'No messages'}</p>
-                                {notifications.length > 0 && (
-                                    <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: 0.7 }}>
-                                        ({notifications.length - filteredNotifications.length} hidden by retention)
-                                    </div>
-                                )}
                             </div>
                         ) : (
                             <>
@@ -294,13 +302,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         key={notification.id}
                                         className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                         onClick={() => markAsRead(notification.id)}
+                                        style={{ position: 'relative' }}
                                     >
                                         <div className="notification-icon">
                                             {notification.type === 'alert' ? '🚨' :
                                                 notification.type === 'success' ? '✅' :
                                                     notification.type === 'reward' ? '🏆' : '📩'}
                                         </div>
-                                        <div className="notification-content">
+                                        <div className="notification-content" style={{ paddingRight: '20px' }}>
                                             <div className="notification-header">
                                                 <span className="notification-title">{notification.title}</span>
                                                 <span className="notification-time">
@@ -310,6 +319,28 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             <p className="notification-body">{notification.body}</p>
                                         </div>
                                         {!notification.read && <div className="unread-dot"></div>}
+
+                                        {/* Delete Button */}
+                                        <button
+                                            onClick={(e) => markDeleted(e, notification.id)}
+                                            style={{
+                                                position: 'absolute',
+                                                top: '50%',
+                                                right: '10px',
+                                                transform: 'translateY(-50%)',
+                                                background: 'none',
+                                                border: 'none',
+                                                opacity: 0.3,
+                                                cursor: 'pointer',
+                                                fontSize: '1rem',
+                                                padding: '4px'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.opacity = 1}
+                                            onMouseLeave={(e) => e.target.style.opacity = 0.3}
+                                            title="Delete"
+                                        >
+                                            🗑️
+                                        </button>
                                     </div>
                                 ))}
                                 {filteredNotifications.some(n => !n.read) && (
@@ -329,18 +360,23 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 {/* SENT TAB */}
                 {activeTab === 'sent' && (
                     <div className="notification-list" style={{ marginTop: '1rem' }}>
-                        {filteredSent.length === 0 ? (
+                        {loadingSent ? (
+                            <div className="empty-state">
+                                <span style={{ fontSize: '2rem' }}>⌛</span>
+                                <p>Loading...</p>
+                            </div>
+                        ) : filteredSent.length === 0 ? (
                             <div className="empty-state">
                                 <span style={{ fontSize: '2rem' }}>🪁</span>
                                 <p>{t('inbox.noSent') || 'No sent messages'}</p>
                             </div>
                         ) : (
                             filteredSent.map(msg => (
-                                <div key={msg.id} className="notification-item read">
+                                <div key={msg.id} className="notification-item read" style={{ position: 'relative' }}>
                                     <div className="notification-icon">
                                         {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
                                     </div>
-                                    <div className="notification-content">
+                                    <div className="notification-content" style={{ paddingRight: '20px' }}>
                                         <div className="notification-header">
                                             <span className="notification-title" style={{ textTransform: 'capitalize' }}>
                                                 {msg.type || 'Feedback'}
@@ -368,6 +404,27 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             {msg.status ? msg.status.toUpperCase() : 'SENT'}
                                         </div>
                                     </div>
+                                    {/* Delete Button */}
+                                    <button
+                                        onClick={(e) => handleDelete(e, msg.id, 'sent')}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            right: '10px',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            opacity: 0.3,
+                                            cursor: 'pointer',
+                                            fontSize: '1rem',
+                                            padding: '4px'
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.opacity = 1}
+                                        onMouseLeave={(e) => e.target.style.opacity = 0.3}
+                                        title="Delete"
+                                    >
+                                        🗑️
+                                    </button>
                                 </div>
                             ))
                         )}
@@ -376,7 +433,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                 {/* COMPOSE TAB */}
                 {activeTab === 'compose' && (
-                    <FeedbackSection t={t} />
+                    <FeedbackSection t={t} onFeedbackSent={fetchSent} />
                 )}
             </div>
         </div>
