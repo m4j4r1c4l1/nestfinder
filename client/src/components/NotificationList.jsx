@@ -341,11 +341,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         return (
             <div style={{
                 background: 'var(--color-bg-secondary)',
-                padding: '0.85rem 1.5rem',
+                padding: '0.85rem 1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
                 borderTop: 'none',
-                boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)', // Subtle top shadow for blending
                 flexShrink: 0
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
@@ -374,11 +373,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         return (
             <div style={{
                 background: 'var(--color-bg-secondary)',
-                padding: '0.85rem 1.5rem',
+                padding: '0.85rem 1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
                 borderTop: 'none',
-                boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)', // Subtle top shadow for blending
                 flexShrink: 0
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
@@ -677,7 +675,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             ) : (
                                 <>
                                     {filteredSent.length === 0 ? (
-                                        <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '200px', width: '100%', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
+                                        <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                             <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</span>
                                             <p style={{ fontSize: '1.1rem', margin: 0 }}>No messages match this filter</p>
                                         </div>
