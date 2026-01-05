@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../utils/api';
@@ -347,30 +348,33 @@ const RestoreAccountSection = ({ t }) => {
                 {loading ? (t?.('common.loading') || 'Restoring...') : `🔄 ${t?.('settings.restoreButton') || 'Restore Account'}`}
             </button>
 
-            {/* Confirmation Dialog */}
-            {showConfirmDialog && (
+            {/* Confirmation Dialog - Portal to body for full-screen blur */}
+            {showConfirmDialog && ReactDOM.createPortal(
                 <div style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.75)',
+                    background: 'rgba(0, 0, 0, 0.6)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    zIndex: 9999,
+                    zIndex: 10000,
                     padding: 'var(--space-4)',
-                    backdropFilter: 'blur(4px)'
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)'
                 }}>
                     <div style={{
-                        background: 'var(--color-bg-primary)',
-                        borderRadius: 'var(--radius-lg)',
+                        background: 'rgba(51, 65, 85, 0.95)',
+                        borderRadius: 'var(--radius-xl)',
                         border: '1px solid var(--color-border)',
-                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+                        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
                         maxWidth: '400px',
                         width: '100%',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)'
                     }}>
                         {/* Header */}
                         <div style={{
@@ -440,7 +444,8 @@ const RestoreAccountSection = ({ t }) => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
