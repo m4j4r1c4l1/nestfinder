@@ -7,7 +7,7 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.ico', 'icons/*.png'],
+            includeAssets: ['favicon.svg', 'favicon.ico', 'icons/*.png'],
             manifest: {
                 name: 'NestFinder',
                 short_name: 'NestFinder',
