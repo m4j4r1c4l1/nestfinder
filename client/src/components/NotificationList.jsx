@@ -556,7 +556,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
             </div>
 
             {/* Content Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
 
                 {/* RECEIVED TAB */}
                 {activeTab === 'received' && (
@@ -592,7 +592,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         padding: '0.75rem',
                                                         borderRadius: 'var(--radius-md)',
                                                         border: '1px solid var(--color-border)',
-                                                        marginBottom: '0.75rem',
+                                                        margin: '0 0.5rem 0.75rem 0.5rem',
                                                         background: '#0f172a'
                                                     }}
                                                 >
@@ -698,7 +698,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     padding: '0.75rem',
                                                     borderRadius: 'var(--radius-md)',
                                                     border: '1px solid var(--color-border)',
-                                                    marginBottom: '0.75rem',
+                                                    margin: '0 0.5rem 0.75rem 0.5rem',
                                                     background: '#0f172a'
                                                 }}>
                                                     {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
