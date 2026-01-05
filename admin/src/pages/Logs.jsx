@@ -218,7 +218,7 @@ const LogDetailModal = ({ log, onClose }) => {
 
                         {/* 1. Header Info */}
                         {/* 1. Header Info: Time (Left), User (Center), Action (Right) */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', alignItems: 'start', gap: '1rem' }}>
                             <div style={{ textAlign: 'left' }}>
                                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</label>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2, marginTop: '0.25rem' }}>
@@ -243,7 +243,7 @@ const LogDetailModal = ({ log, onClose }) => {
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <div style={{ textAlign: 'left' }}>
                                     <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</label>
-                                    <div style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0' }}>{log.user_nickname || 'Anonymous'}</div>
+                                    <div style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginTop: '0.25rem' }}>{log.user_nickname || 'Anonymous'}</div>
                                     <div style={{ fontSize: '0.9rem', color: '#94a3b8', fontFamily: 'monospace', fontStyle: 'italic' }}>{log.user_id}</div>
                                 </div>
                             </div>
