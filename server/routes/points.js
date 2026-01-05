@@ -491,6 +491,22 @@ router.post('/:id/validate', requireUser, (req, res) => {
 
 // ================== FEEDBACK ==================
 
+// Get feedback history for a user
+router.get('/feedback', (req, res) => {
+  const userId = req.headers['x-user-id'];
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID required' });
+  }
+
+  const feedback = all(`
+    SELECT * FROM feedback
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+  `, [userId]);
+
+  res.json({ feedback });
+});
+
 // Submit feedback (bugs, suggestions)
 router.post('/feedback', (req, res) => {
   const userId = req.headers['x-user-id'];
