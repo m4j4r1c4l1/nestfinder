@@ -517,7 +517,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 borderBottom: '1px solid var(--color-border)',
                 flexShrink: 0
             }}>
-                <div className="card-header flex-between items-center" style={{ borderBottom: 'none', padding: '0.5rem 1rem 0.1rem 1rem' }}>
+                <div className="card-header flex-between items-center" style={{ borderBottom: 'none', padding: '0.75rem 1rem 0.25rem 1rem' }}>
                     <h3 className="card-title" style={{ fontSize: '1.1rem' }}>{t('inbox.title') || 'Inbox'}</h3>
                     {onClose && (
                         <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}>
@@ -669,7 +669,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             ) : baseSent.length === 0 ? (
                                 <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                     <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪹</span>
-                                    <p style={{ fontSize: '1.1rem', margin: 0 }}>{t('inbox.noSent') || 'No contributions yet'}</p>
+                                    <p style={{ fontSize: '1.1rem', margin: 0 }}>{t('inbox.noSent') || 'No hatchlings in the nest'}</p>
                                 </div>
                             ) : (
                                 <>
