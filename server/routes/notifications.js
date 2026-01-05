@@ -150,6 +150,12 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
             LIMIT 100
         `);
 
+        // User Level Stats
+        const eagleCount = get('SELECT COUNT(*) as count FROM users WHERE trust_score >= 50');
+        const owlCount = get('SELECT COUNT(*) as count FROM users WHERE trust_score >= 30 AND trust_score < 50');
+        const sparrowCount = get('SELECT COUNT(*) as count FROM users WHERE trust_score >= 10 AND trust_score < 30');
+        const hatchlingCount = get('SELECT COUNT(*) as count FROM users WHERE (trust_score IS NULL OR trust_score < 10)');
+
         // Get feedback breakdown
         let feedbackTotal, feedbackPending, feedbackRead;
         try {
@@ -259,6 +265,12 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         res.json({
             totalSubscribers: total?.count || 0,
             subscribers: users,
+            userLevels: {
+                eagle: eagleCount?.count || 0,
+                owl: owlCount?.count || 0,
+                sparrow: sparrowCount?.count || 0,
+                hatchling: hatchlingCount?.count || 0
+            },
             devMetrics,
             notificationMetrics: {
                 total: notificationCount?.count || 0,
