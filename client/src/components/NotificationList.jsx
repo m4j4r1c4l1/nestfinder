@@ -268,8 +268,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     // Error-style delete button (matches SettingsPanel invalid key style)
     const deleteButtonStyle = {
         padding: 'var(--space-2)',
-        paddingLeft: '12px',
-        paddingRight: '12px',
+        paddingLeft: '24px',
+        paddingRight: '24px',
         background: 'rgba(239, 68, 68, 0.1)',
         border: '1px solid rgba(239, 68, 68, 0.3)',
         borderRadius: 'var(--radius-md)',
@@ -280,7 +280,79 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         display: 'flex',
         alignItems: 'center',
         gap: '6px',
-        fontWeight: 500
+        fontWeight: 500,
+        minWidth: '100px'
+    };
+
+    // Summary Badge Component (Dashboard style)
+    const SummaryBadge = ({ label, count, color }) => (
+        <span style={{
+            background: `${color}15`,
+            color: color,
+            padding: '0 0.75rem',
+            borderRadius: '4px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '28px',
+            border: `1px solid ${color}30`,
+            gap: '0.4rem',
+            userSelect: 'none'
+        }}>
+            <span style={{ color: color }}>{label}</span>
+            <span style={{ color: 'white', fontWeight: 700 }}>{count}</span>
+        </span>
+    );
+
+    // Render sticky summary badges row
+    const renderReceivedSummaryBadges = () => {
+        if (filteredNotifications.length === 0) return null;
+        const unreadCount = filteredNotifications.filter(n => !n.read).length;
+        const readCount = filteredNotifications.filter(n => n.read).length;
+        return (
+            <div style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                background: 'var(--color-bg-primary)',
+                padding: '0.5rem 0',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '0.75rem',
+                borderBottom: '1px solid var(--color-border)',
+                marginBottom: '0.5rem'
+            }}>
+                <SummaryBadge label="NEW" count={unreadCount} color="#94a3b8" />
+                <SummaryBadge label="READ" count={readCount} color="#3b82f6" />
+            </div>
+        );
+    };
+
+    const renderSentSummaryBadges = () => {
+        if (filteredSent.length === 0) return null;
+        const sentCount = filteredSent.filter(m => m.status === 'sent').length;
+        const deliveredCount = filteredSent.filter(m => m.status === 'delivered').length;
+        const readCount = filteredSent.filter(m => m.status === 'read').length;
+        return (
+            <div style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                background: 'var(--color-bg-primary)',
+                padding: '0.5rem 0',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '0.75rem',
+                borderBottom: '1px solid var(--color-border)',
+                marginBottom: '0.5rem'
+            }}>
+                <SummaryBadge label="SENT" count={sentCount} color="#94a3b8" />
+                <SummaryBadge label="DELIVERED" count={deliveredCount} color="#22c55e" />
+                <SummaryBadge label="READ" count={readCount} color="#3b82f6" />
+            </div>
+        );
     };
 
     // Render deletion overlay for a message
@@ -467,6 +539,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             </div>
                         ) : (
                             <>
+                                {renderReceivedSummaryBadges()}
                                 {filteredNotifications.map(notification => {
                                     const isDeleting = messageToDelete?.id === notification.id;
                                     return (
@@ -579,96 +652,99 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                 <p style={{ fontSize: '1.1rem', margin: 0 }}>{t('inbox.noSent') || 'No contributions yet'}</p>
                             </div>
                         ) : (
-                            filteredSent.map(msg => {
-                                const isDeleting = messageToDelete?.id === msg.id;
-                                return (
-                                    <SwipeableMessage
-                                        key={msg.id}
-                                        swipeDirection={swipeDirection}
-                                        onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
-                                    >
-                                        <div className="notification-item read" style={{
-                                            position: 'relative',
-                                            overflow: 'hidden',
-                                            padding: '0.75rem',
-                                            borderRadius: 'var(--radius-md)',
-                                            border: '1px solid var(--color-border)',
-                                            marginBottom: '0.75rem',
-                                            background: '#0f172a'
-                                        }}>
-                                            {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
-                                                {/* Left: Icon + Title */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                    <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
-                                                        {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
-                                                    </span>
-                                                    <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
-                                                        {getFeedbackTitle(msg.type)}
-                                                    </span>
-                                                </div>
-
-                                                {/* Center: Status Badge */}
-                                                <div style={{ justifySelf: 'center' }}>
-                                                    {renderStatusBadge(msg, 'sent')}
-                                                </div>
-
-                                                {/* Right: Stacked Date/Time */}
-                                                <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>
-                                                    <div>{formatDateTime(msg.created_at).date}</div>
-                                                    <div>{formatDateTime(msg.created_at).time}</div>
-                                                </div>
-                                            </div>
-
-                                            {/* 2. Body Row: Message Content */}
-                                            <div style={{
-                                                background: 'var(--color-bg-tertiary)',
-                                                border: '1px solid #334155',
-                                                borderRadius: '6px',
+                            <>
+                                {renderSentSummaryBadges()}
+                                {filteredSent.map(msg => {
+                                    const isDeleting = messageToDelete?.id === msg.id;
+                                    return (
+                                        <SwipeableMessage
+                                            key={msg.id}
+                                            swipeDirection={swipeDirection}
+                                            onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
+                                        >
+                                            <div className="notification-item read" style={{
+                                                position: 'relative',
+                                                overflow: 'hidden',
                                                 padding: '0.75rem',
-                                                fontFamily: 'monospace',
-                                                fontSize: '0.85rem',
-                                                color: '#cbd5e1',
-                                                marginTop: '0.4rem',
-                                                marginBottom: '0.4rem',
-                                                whiteSpace: 'pre-wrap',
-                                                lineHeight: '1.5'
+                                                borderRadius: 'var(--radius-md)',
+                                                border: '1px solid var(--color-border)',
+                                                marginBottom: '0.75rem',
+                                                background: '#0f172a'
                                             }}>
-                                                {msg.message}
-                                            </div>
+                                                {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                    {/* Left: Icon + Title */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
+                                                            {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
+                                                        </span>
+                                                        <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
+                                                            {getFeedbackTitle(msg.type)}
+                                                        </span>
+                                                    </div>
 
-                                            {/* 3. Footer Row: Stars (Left) | Bin (Right) */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
-                                                {/* Left: Stars */}
-                                                <div>
-                                                    {msg.rating && (
-                                                        <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
-                                                            {'⭐'.repeat(msg.rating)}
-                                                        </div>
-                                                    )}
+                                                    {/* Center: Status Badge */}
+                                                    <div style={{ justifySelf: 'center' }}>
+                                                        {renderStatusBadge(msg, 'sent')}
+                                                    </div>
+
+                                                    {/* Right: Stacked Date/Time */}
+                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>
+                                                        <div>{formatDateTime(msg.created_at).date}</div>
+                                                        <div>{formatDateTime(msg.created_at).time}</div>
+                                                    </div>
                                                 </div>
 
-                                                {/* Right: Bin Icon */}
-                                                <div>
-                                                    <button
-                                                        onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
-                                                        style={{
-                                                            background: 'none', border: 'none', cursor: 'pointer',
-                                                            fontSize: '1rem', padding: '4px', opacity: isDeleting ? 1 : 0.6,
-                                                            transition: 'opacity 0.2s', display: 'flex', alignItems: 'center'
-                                                        }}
-                                                        title={t('common.delete') || 'Delete'}
-                                                    >
-                                                        🗑️
-                                                    </button>
+                                                {/* 2. Body Row: Message Content */}
+                                                <div style={{
+                                                    background: 'var(--color-bg-tertiary)',
+                                                    border: '1px solid #334155',
+                                                    borderRadius: '6px',
+                                                    padding: '0.75rem',
+                                                    fontFamily: 'monospace',
+                                                    fontSize: '0.85rem',
+                                                    color: '#cbd5e1',
+                                                    marginTop: '0.4rem',
+                                                    marginBottom: '0.4rem',
+                                                    whiteSpace: 'pre-wrap',
+                                                    lineHeight: '1.5'
+                                                }}>
+                                                    {msg.message}
                                                 </div>
-                                            </div>
 
-                                            {renderDeletionOverlay(msg.id)}
-                                        </div>
-                                    </SwipeableMessage>
-                                );
-                            })
+                                                {/* 3. Footer Row: Stars (Left) | Bin (Right) */}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
+                                                    {/* Left: Stars */}
+                                                    <div>
+                                                        {msg.rating && (
+                                                            <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
+                                                                {'⭐'.repeat(msg.rating)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Right: Bin Icon */}
+                                                    <div>
+                                                        <button
+                                                            onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
+                                                            style={{
+                                                                background: 'none', border: 'none', cursor: 'pointer',
+                                                                fontSize: '1rem', padding: '4px', opacity: isDeleting ? 1 : 0.6,
+                                                                transition: 'opacity 0.2s', display: 'flex', alignItems: 'center'
+                                                            }}
+                                                            title={t('common.delete') || 'Delete'}
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {renderDeletionOverlay(msg.id)}
+                                            </div>
+                                        </SwipeableMessage>
+                                    );
+                                })
+                            </>
                         )}
                     </div>
                 )}
