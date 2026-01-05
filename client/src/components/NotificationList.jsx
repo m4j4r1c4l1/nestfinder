@@ -28,7 +28,7 @@ const FeedbackSection = () => {
     };
 
     return (
-        <div style={{ padding: '0.25rem', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '0.25rem', height: '100%', width: '100%', display: 'block' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', textAlign: 'center' }}>
                 {t('feedback.description') || 'Report bugs or suggest improvements.'}
             </div>
@@ -56,6 +56,7 @@ const FeedbackSection = () => {
             </div>
 
             <textarea
+                key={success ? 'submitted' : 'editing'} // Force remount on success state change
                 value={message}
                 onChange={(e) => setMessage(e.target.value.slice(0, 500))}
                 placeholder={t('feedback.placeholder') || 'Describe your feedback...'}
