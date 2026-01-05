@@ -21,7 +21,29 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         { id: 'single', emoji: '👤', label: t('submit.onePerson') },
         { id: 'group', emoji: '👥', label: t('submit.multiple') },
         { id: 'children', emoji: '👶', label: t('submit.children') },
-        { id: 'animals', emoji: '🐕', label: t('submit.animals') }
+        { id: 'elderly', emoji: '👴', label: 'Elderly' },
+        { id: 'dog', emoji: '🐕', label: 'Dog' },
+        { id: 'cat', emoji: '🐈', label: 'Cat' },
+        { id: 'bird', emoji: '🐦', label: 'Bird' },
+        { id: 'wild', emoji: '🐾', label: 'Wild Animal' },
+        { id: 'insect', emoji: '🐞', label: 'Insect' },
+        { id: 'tree', emoji: '🌳', label: 'Tree' },
+        { id: 'flower', emoji: '🌸', label: 'Flower' },
+        { id: 'forest', emoji: '🌲', label: 'Forest' },
+        { id: 'mountain', emoji: '⛰️', label: 'Mountain' },
+        { id: 'river', emoji: '🌊', label: 'River/Water' },
+        { id: 'beach', emoji: '🏖️', label: 'Beach' },
+        { id: 'desert', emoji: '🏜️', label: 'Desert' },
+        { id: 'sun', emoji: '☀️', label: 'Sun' },
+        { id: 'moon', emoji: '🌙', label: 'Moon' },
+        { id: 'star', emoji: '⭐', label: 'Star' },
+        { id: 'cloud', emoji: '☁️', label: 'Cloud' },
+        { id: 'rain', emoji: '🌧️', label: 'Rain' },
+        { id: 'snow', emoji: '❄️', label: 'Snow' },
+        { id: 'fire', emoji: '🔥', label: 'Fire' },
+        { id: 'wind', emoji: '💨', label: 'Wind' },
+        { id: 'planet', emoji: '🪐', label: 'Planet' },
+        { id: 'earth', emoji: '🌍', label: 'Earth' }
     ];
 
     // 'What' need options
