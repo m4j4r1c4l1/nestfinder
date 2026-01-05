@@ -231,7 +231,23 @@ export default {
         restoreWarningTitle: 'Warning',
         restoreWarningMessage: 'Restoring another account will disconnect you from your current account. If you haven\'t saved this account\'s recovery key, you will lose access to it permanently. Continue?',
         restoreConfirmButton: 'Yes, Restore',
-        sameKeyError: 'This is your current account\'s recovery key. You are already logged in with this account.'
+        sameKeyError: 'This is your current account\'s recovery key. You are already logged in with this account.',
+        // Swipe Direction
+        swipeDirection: 'Swipe to Delete',
+        swipe: {
+            right: '→ Swipe Right',
+            left: '← Swipe Left',
+            desc: 'Swipe a message in this direction to delete it.'
+        },
+        // Message Retention
+        messageRetention: 'Message Retention',
+        retention: {
+            '1m': '1 Month',
+            '3m': '3 Months',
+            '6m': '6 Months',
+            forever: 'Forever',
+            desc: '⚠️ Messages older than this will be permanently deleted.'
+        }
     },
 
     // Welcome Message

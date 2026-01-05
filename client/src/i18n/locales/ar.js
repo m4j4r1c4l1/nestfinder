@@ -116,9 +116,17 @@ export default {
     },
     inbox: {
         title: 'الرسائل',
+        received: 'الوارد',
+        sent: 'المرسل',
+        compose: 'إنشاء',
         noMessages: 'لا رسائل',
         markAllRead: 'قراءة الكل',
-        unread: 'غير مقروء'
+        unread: 'غير مقروء',
+        empty: 'عشك فارغ',
+        noSent: 'لا مساهمات بعد',
+        'delete.confirm': 'حذف هذه الرسالة نهائياً؟',
+        'delete.cancel': 'إلغاء',
+        'delete.yes': 'حذف'
     },
     profile: {
         title: 'الملف الشخصي',
@@ -179,7 +187,23 @@ export default {
         restoreWarningTitle: 'تحذير',
         restoreWarningMessage: 'استعادة حساب آخر ستفصلك عن حسابك الحالي. إذا لم تحفظ مفتاح استرداد هذا الحساب، ستفقد الوصول إليه بشكل دائم. هل تريد المتابعة؟',
         restoreConfirmButton: 'نعم، استعادة',
-        sameKeyError: 'هذا هو مفتاح استرداد حسابك الحالي. أنت مسجل الدخول بالفعل بهذا الحساب.'
+        sameKeyError: 'هذا هو مفتاح استرداد حسابك الحالي. أنت مسجل الدخول بالفعل بهذا الحساب.',
+        // Swipe Direction
+        swipeDirection: 'اسحب للحذف',
+        swipe: {
+            right: '← سحب لليمين',
+            left: '→ سحب لليسار',
+            desc: 'اسحب رسالة في هذا الاتجاه لحذفها.'
+        },
+        // Message Retention
+        messageRetention: 'الاحتفاظ بالرسائل',
+        retention: {
+            '1m': 'شهر واحد',
+            '3m': '3 أشهر',
+            '6m': '6 أشهر',
+            forever: 'للأبد',
+            desc: '⚠️ سيتم حذف الرسائل الأقدم نهائياً.'
+        }
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

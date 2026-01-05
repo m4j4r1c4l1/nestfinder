@@ -893,6 +893,27 @@ const SettingsPanel = ({ onClose }) => {
                         {t('settings.retention.desc') || '⚠️ Messages older than this will be permanently deleted.'}
                     </div>
                 </div>
+
+                {/* Swipe Direction */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                        {t('settings.swipeDirection') || 'Swipe to Delete Direction'}
+                    </label>
+                    <select
+                        value={localStorage.getItem('nestfinder_swipe_direction') || 'right'}
+                        onChange={(e) => {
+                            localStorage.setItem('nestfinder_swipe_direction', e.target.value);
+                            window.dispatchEvent(new Event('storage'));
+                        }}
+                        className="form-control"
+                    >
+                        <option value="right">{t('settings.swipe.right') || '→ Swipe Right'}</option>
+                        <option value="left">{t('settings.swipe.left') || '← Swipe Left'}</option>
+                    </select>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
+                        {t('settings.swipe.desc') || 'Swipe a message in this direction to delete it.'}
+                    </div>
+                </div>
                 {/* Share App with QR Code - FIRST SECTION */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.shareApp')}</label>
