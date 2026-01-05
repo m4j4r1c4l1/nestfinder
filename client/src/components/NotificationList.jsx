@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { api } from '../utils/api';
+import NotificationPopup from './NotificationPopup';
 
 // Feedback Section Component (moved from SettingsPanel)
 const FeedbackSection = ({ onFeedbackSent }) => {
@@ -181,7 +182,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     const [sentMessages, setSentMessages] = useState([]);
     const [loadingSent, setLoadingSent] = useState(true);
     const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
+
     const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || 'right');
+    const [selectedMessage, setSelectedMessage] = useState(null);
 
     // Listen for setting changes
     useEffect(() => {
@@ -580,7 +583,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                                         onClick={() => {
                                                             markAsRead(notification.id);
-                                                            alert(notification.body);
+                                                            setSelectedMessage(notification);
                                                         }}
                                                         style={{
                                                             position: 'relative',
@@ -627,7 +630,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         </div>
                                                         {/* 3. Footer Row */}
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
-                                                            <div style={{ fontSize: '1.2rem', lineHeight: 1 }}>🖼️</div>
+                                                            <div style={{ fontSize: '1.2rem', lineHeight: 1 }}>{notification.image_url ? '🖼️' : ''}</div>
                                                             <div>
                                                                 <button
                                                                     onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
@@ -786,6 +789,17 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                     <FeedbackSection onFeedbackSent={fetchSent} />
                 )}
             </div>
+            {/* Message Popup Modal */}
+            {selectedMessage && (
+                <NotificationPopup
+                    message={selectedMessage}
+                    onDismiss={() => setSelectedMessage(null)}
+                    onMarkRead={() => {
+                        markAsRead(selectedMessage.id);
+                        setSelectedMessage(null);
+                    }}
+                />
+            )}
         </div>
     );
 };
