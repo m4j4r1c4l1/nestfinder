@@ -743,7 +743,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             </div>
                                         </SwipeableMessage>
                                     );
-                                })
+                                })}
                             </>
                         )}
                     </div>
