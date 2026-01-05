@@ -345,6 +345,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 display: 'flex',
                 justifyContent: 'space-between',
                 borderTop: 'none',
+                boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)', // Subtle top shadow for blending
                 flexShrink: 0
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
@@ -377,6 +378,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 display: 'flex',
                 justifyContent: 'space-between',
                 borderTop: 'none',
+                boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)', // Subtle top shadow for blending
                 flexShrink: 0
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
