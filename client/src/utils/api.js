@@ -160,6 +160,14 @@ class ApiClient {
     });
   }
 
+  deleteNotification(id) {
+    return this.fetch(`/push/notifications/${id}`, { method: 'DELETE' });
+  }
+
+  deleteFeedback(id) {
+    return this.fetch(`/points/feedback/${id}`, { method: 'DELETE' });
+  }
+
   submitFeedback(type, message, rating) {
     return this.fetch('/points/feedback', {
       method: 'POST',

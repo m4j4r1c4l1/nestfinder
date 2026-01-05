@@ -523,6 +523,15 @@ router.delete('/feedback/prune', (req, res) => {
   res.json({ success: true, message: 'Feedback pruned' });
 });
 
+// Delete individual feedback
+router.delete('/feedback/:id', (req, res) => {
+  const userId = req.headers['x-user-id'];
+  if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+  run('DELETE FROM feedback WHERE id = ? AND user_id = ?', [req.params.id, userId]);
+  res.json({ success: true });
+});
+
 // Submit feedback (bugs, suggestions)
 router.post('/feedback', (req, res) => {
   const userId = req.headers['x-user-id'];
