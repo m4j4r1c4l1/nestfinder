@@ -18,6 +18,36 @@ const generateUserToken = (userId) => {
     );
 };
 
+// Admin Login
+router.post('/admin/login', (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password required' });
+    }
+
+    const admin = get('SELECT * FROM admins WHERE username = ?', [username]);
+
+    if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
+        // Use generic error message for security
+        return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Generate Admin Token (expires in 12h)
+    const token = jwt.sign(
+        { id: admin.id, type: 'admin', username: admin.username },
+        NEST_INTEGRITY,
+        { expiresIn: '12h' }
+    );
+
+    log('admin', 'login', admin.id.toString(), { username });
+
+    res.json({
+        token,
+        username: admin.username
+    });
+});
+
 // Register guest user
 router.post('/register', (req, res) => {
     const { deviceId, nickname } = req.body;
