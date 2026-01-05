@@ -110,7 +110,7 @@ const MapView = () => {
         // When user clicks map, open submit panel with that location
         setClickedLocation(coords);
         setActiveSheet('submit');
-        showToast(t('submit.selectOnMap'), 'success'); // Uses default ✔
+
     };
 
     const handleSheetClose = () => {
