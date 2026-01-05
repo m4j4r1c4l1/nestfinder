@@ -227,6 +227,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     const [messageToDelete, setMessageToDelete] = useState(null);
     const [deletedIds, setDeletedIds] = useState(new Set());
 
+    // Status filter state (null = all, 'new'/'read' for received, 'sent'/'delivered'/'read' for sent)
+    const [receivedFilter, setReceivedFilter] = useState(null);
+    const [sentFilter, setSentFilter] = useState(null);
+
     const handleDeleteClick = (e, id, type) => {
         if (e) e.stopPropagation();
         setMessageToDelete({ id, type });
@@ -256,8 +260,24 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         setMessageToDelete(null);
     };
 
-    const filteredNotifications = filterByRetention(notifications).filter(n => !deletedIds.has(n.id));
-    const filteredSent = filterByRetention(sentMessages);
+    // Apply retention filter first, then status filter
+    const baseNotifications = filterByRetention(notifications).filter(n => !deletedIds.has(n.id));
+    const filteredNotifications = receivedFilter === null
+        ? baseNotifications
+        : receivedFilter === 'new'
+            ? baseNotifications.filter(n => !n.read)
+            : baseNotifications.filter(n => n.read);
+
+    const baseSent = filterByRetention(sentMessages);
+    const filteredSent = sentFilter === null
+        ? baseSent
+        : baseSent.filter(m => {
+            const s = (m.status || '').toLowerCase();
+            if (sentFilter === 'read') return s === 'resolved' || s === 'read';
+            if (sentFilter === 'delivered') return s === 'new' || s === 'pending' || s === 'delivered';
+            if (sentFilter === 'sent') return !s || s === 'sent';
+            return true;
+        });
 
     const tabs = [
         { id: 'received', icon: '🦜', label: t('inbox.received') || 'Received' },
@@ -284,73 +304,91 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         minWidth: '100px'
     };
 
-    // Summary Badge Component (Dashboard style)
-    const SummaryBadge = ({ label, count, color }) => (
-        <span style={{
-            background: `${color}15`,
-            color: color,
-            padding: '0 0.75rem',
-            borderRadius: '4px',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '28px',
-            border: `1px solid ${color}30`,
-            gap: '0.4rem',
-            userSelect: 'none'
-        }}>
+    // Summary Badge Component (Dashboard style, clickable)
+    const SummaryBadge = ({ label, count, color, onClick, isActive }) => (
+        <span
+            onClick={onClick}
+            style={{
+                background: isActive ? `${color}35` : `${color}15`,
+                color: color,
+                padding: '0 0.75rem',
+                borderRadius: '4px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '28px',
+                border: `1px solid ${isActive ? color : `${color}30`}`,
+                gap: '0.4rem',
+                userSelect: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+            }}>
             <span style={{ color: color }}>{label}</span>
             <span style={{ color: 'white', fontWeight: 700 }}>{count}</span>
         </span>
     );
 
-    // Render sticky summary badges row
+    // Render sticky summary badges row for Received tab
     const renderReceivedSummaryBadges = () => {
-        if (filteredNotifications.length === 0) return null;
-        const unreadCount = filteredNotifications.filter(n => !n.read).length;
-        const readCount = filteredNotifications.filter(n => n.read).length;
+        const totalCount = baseNotifications.length;
+        if (totalCount === 0) return null;
+        const unreadCount = baseNotifications.filter(n => !n.read).length;
+        const readCount = baseNotifications.filter(n => n.read).length;
         return (
             <div style={{
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
-                background: 'var(--color-bg-primary)',
+                background: '#0f172a',
                 padding: '0.5rem 0',
                 display: 'flex',
                 justifyContent: 'center',
-                gap: '0.75rem',
+                gap: '0.5rem',
                 borderBottom: '1px solid var(--color-border)',
                 marginBottom: '0.5rem'
             }}>
-                <SummaryBadge label="NEW" count={unreadCount} color="#94a3b8" />
-                <SummaryBadge label="READ" count={readCount} color="#3b82f6" />
+                <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
+                <SummaryBadge label="NEW" count={unreadCount} color="#94a3b8" onClick={() => setReceivedFilter('new')} isActive={receivedFilter === 'new'} />
+                <SummaryBadge label="READ" count={readCount} color="#3b82f6" onClick={() => setReceivedFilter('read')} isActive={receivedFilter === 'read'} />
             </div>
         );
     };
 
+    // Render sticky summary badges row for Sent tab
     const renderSentSummaryBadges = () => {
-        if (filteredSent.length === 0) return null;
-        const sentCount = filteredSent.filter(m => m.status === 'sent').length;
-        const deliveredCount = filteredSent.filter(m => m.status === 'delivered').length;
-        const readCount = filteredSent.filter(m => m.status === 'read').length;
+        const totalCount = baseSent.length;
+        if (totalCount === 0) return null;
+        const sentCount = baseSent.filter(m => {
+            const s = (m.status || '').toLowerCase();
+            return !s || s === 'sent';
+        }).length;
+        const deliveredCount = baseSent.filter(m => {
+            const s = (m.status || '').toLowerCase();
+            return s === 'new' || s === 'pending' || s === 'delivered';
+        }).length;
+        const readCount = baseSent.filter(m => {
+            const s = (m.status || '').toLowerCase();
+            return s === 'resolved' || s === 'read';
+        }).length;
         return (
             <div style={{
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
-                background: 'var(--color-bg-primary)',
+                background: '#0f172a',
                 padding: '0.5rem 0',
                 display: 'flex',
                 justifyContent: 'center',
-                gap: '0.75rem',
+                gap: '0.5rem',
                 borderBottom: '1px solid var(--color-border)',
                 marginBottom: '0.5rem'
             }}>
-                <SummaryBadge label="SENT" count={sentCount} color="#94a3b8" />
-                <SummaryBadge label="DELIVERED" count={deliveredCount} color="#22c55e" />
-                <SummaryBadge label="READ" count={readCount} color="#3b82f6" />
+                <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
+                <SummaryBadge label="SENT" count={sentCount} color="#94a3b8" onClick={() => setSentFilter('sent')} isActive={sentFilter === 'sent'} />
+                <SummaryBadge label="DELIVERED" count={deliveredCount} color="#22c55e" onClick={() => setSentFilter('delivered')} isActive={sentFilter === 'delivered'} />
+                <SummaryBadge label="READ" count={readCount} color="#3b82f6" onClick={() => setSentFilter('read')} isActive={sentFilter === 'read'} />
             </div>
         );
     };
@@ -423,64 +461,54 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         return map[type] || type.charAt(0).toUpperCase() + type.slice(1);
     };
 
-    // Helper: Render Status Badge
+    // Helper: Render Status Badge (Tick marks)
     const renderStatusBadge = (item, type) => {
-        let status = 'SENT';
-        let color = 'gray';
+        let ticks = '✓';
+        let tickColor = '#16a34a'; // green
 
         if (type === 'received') {
             if (!item.read) {
-                status = 'NEW'; // Equiv to DELIVERED/Unread
-                color = 'green';
+                // NEW = Delivered but unread = 2 green ticks
+                ticks = '✓✓';
+                tickColor = '#16a34a';
             } else {
-                status = 'READ';
-                color = 'blue';
+                // READ = 2 blue ticks
+                ticks = '✓✓';
+                tickColor = '#2563eb';
             }
         } else {
             // Sent items
             const s = (item.status || '').toLowerCase();
             if (s === 'resolved' || s === 'read') {
-                status = 'READ';
-                color = 'blue';
+                // READ = 2 blue ticks
+                ticks = '✓✓';
+                tickColor = '#2563eb';
             } else if (s === 'new' || s === 'pending' || s === 'delivered') {
-                status = 'DELIVERED';
-                color = 'green';
+                // DELIVERED = 2 green ticks
+                ticks = '✓✓';
+                tickColor = '#16a34a';
             } else {
-                status = 'SENT';
-                color = 'gray';
+                // SENT = 1 green tick
+                ticks = '✓';
+                tickColor = '#16a34a';
             }
         }
 
-        const bgColors = {
-            gray: 'rgba(148, 163, 184, 0.15)',
-            green: 'rgba(34, 197, 94, 0.15)',
-            blue: 'rgba(59, 130, 246, 0.15)'
-        };
-        const textColors = {
-            gray: '#64748b',
-            green: '#16a34a',
-            blue: '#2563eb'
-        };
-        const borderColors = {
-            gray: 'rgba(148, 163, 184, 0.2)',
-            green: 'rgba(34, 197, 94, 0.2)',
-            blue: 'rgba(59, 130, 246, 0.2)'
-        };
-
         return (
             <span style={{
-                fontSize: '0.65rem',
+                fontSize: '0.85rem',
                 fontWeight: 700,
-                padding: '2px 8px',
+                padding: '2px 10px',
                 borderRadius: '12px',
-                background: bgColors[color],
-                color: textColors[color],
-                border: `1px solid ${borderColors[color]}`,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
+                background: 'var(--color-bg-tertiary)',
+                color: tickColor,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                letterSpacing: '-1px',
                 whiteSpace: 'nowrap'
             }}>
-                {status}
+                {ticks}
             </span>
         );
     };
@@ -579,7 +607,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     </div>
 
                                                     {/* Right: Stacked Date/Time */}
-                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>
+                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3, minWidth: '120px' }}>
                                                         <div>{formatDateTime(notification.created_at).date}</div>
                                                         <div>{formatDateTime(notification.created_at).time}</div>
                                                     </div>
@@ -689,7 +717,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     </div>
 
                                                     {/* Right: Stacked Date/Time */}
-                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>
+                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3, minWidth: '120px' }}>
                                                         <div>{formatDateTime(msg.created_at).date}</div>
                                                         <div>{formatDateTime(msg.created_at).time}</div>
                                                     </div>
