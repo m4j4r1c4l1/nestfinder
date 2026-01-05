@@ -194,7 +194,7 @@ const Messages = () => {
 
         // Handle special templates
         if (templateId === 'happy_new_year') {
-            updates.imageUrl = `${APP_URL}images/new_year_2026.png`;
+            updates.imageUrl = 'https://nestfinder-sa1g.onrender.com/images/new_year_2026.png';
         } else if (templateId === 'share_app') {
             // Generate QR code using the same logic as ComposeSection
             try {
@@ -797,7 +797,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
             const qrImage = await generateQRCode();
             setImageUrl(qrImage);
         } else if (templateId === 'happy_new_year') {
-            setImageUrl(`${APP_URL}images/new_year_2026.png`);
+            setImageUrl('https://nestfinder-sa1g.onrender.com/images/new_year_2026.png');
         }
     };
 
