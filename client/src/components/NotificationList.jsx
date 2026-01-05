@@ -315,43 +315,40 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         );
     };
 
-    // Render the unblurred bin icon (always visible, on top of everything)
-    const renderBinIcon = (id, type, isDeleting) => (
-        <button
-            onClick={(e) => handleDeleteClick(e, id, type)}
-            style={{
-                position: 'absolute',
-                top: '50%',
-                right: '10px',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                opacity: isDeleting ? 1 : 0.3,
-                cursor: 'pointer',
-                fontSize: '1rem',
-                padding: '4px',
-                zIndex: 30
-            }}
-            onMouseEnter={(e) => e.target.style.opacity = 1}
-            onMouseLeave={(e) => { if (!isDeleting) e.target.style.opacity = 0.3 }}
-            title={t('common.delete') || 'Delete'}
-        >
-            🗑️
-        </button>
-    );
-
-    // Helper: Format Time (CET/CEST)
+    // Helper: Format Time (DD/MM/YYYY HH:MM:SS CET/CEST)
     const formatTime = (dateString) => {
         try {
-            return new Intl.DateTimeFormat('en-GB', {
-                day: 'numeric', month: 'short',
-                hour: '2-digit', minute: '2-digit',
-                timeZone: 'Europe/Paris',
-                timeZoneName: 'short'
-            }).format(new Date(dateString));
+            const d = new Date(dateString);
+            // Check for DST (Central European Time)
+            const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
+            const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
+            const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+            const isDST = Math.max(jan, jul) !== parisOffset;
+
+            const datePart = d.toLocaleDateString('en-GB', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                timeZone: 'Europe/Paris'
+            });
+            const timePart = d.toLocaleTimeString('en-GB', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                timeZone: 'Europe/Paris', hour12: false
+            });
+
+            return `${datePart} ${timePart} ${isDST ? 'CEST' : 'CET'}`;
         } catch (e) {
             return '';
         }
+    };
+
+    // Helper: Map Feedback Type to Title
+    const getFeedbackTitle = (type) => {
+        if (!type) return 'Feedback';
+        const map = {
+            'bug': 'Bug',
+            'suggestion': 'Idea',
+            'other': 'Other'
+        };
+        return map[type] || type.charAt(0).toUpperCase() + type.slice(1);
     };
 
     // Helper: Render Status Badge
@@ -489,7 +486,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 }}
                                             >
                                                 {/* 1. Header Row: Icon/Title + Timestamp */}
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                         <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
                                                             {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
@@ -512,26 +509,41 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     fontFamily: 'monospace',
                                                     fontSize: '0.85rem',
                                                     color: '#cbd5e1',
-                                                    marginBottom: '1rem',
+                                                    marginBottom: '0.5rem',
+                                                    marginTop: '0', // Removed to equalise spacing (Header has mb-0.5rem)
                                                     whiteSpace: 'pre-wrap', // Preserve line breaks
                                                     lineHeight: '1.5'
                                                 }}>
                                                     {notification.body}
                                                 </div>
 
-                                                {/* 3. Footer Row: Stars (Left) | Badge (Right) */}
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
-                                                    {/* Left: Placeholder for Stars (Empty for received usually) */}
-                                                    <div></div>
+                                                {/* 3. Footer Row: Stars (Left) | Badge (Center) | Bin (Right) */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', height: '24px' }}>
+                                                    {/* Left: Placeholder for Stars */}
+                                                    <div style={{ justifySelf: 'start' }}></div>
 
-                                                    {/* Right: Status Badge */}
-                                                    <div>
+                                                    {/* Center: Status Badge */}
+                                                    <div style={{ justifySelf: 'center' }}>
                                                         {renderStatusBadge(notification, 'received')}
+                                                    </div>
+
+                                                    {/* Right: Bin Icon */}
+                                                    <div style={{ justifySelf: 'end' }}>
+                                                        <button
+                                                            onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
+                                                            style={{
+                                                                background: 'none', border: 'none', cursor: 'pointer',
+                                                                fontSize: '1rem', padding: '4px', opacity: isDeleting ? 1 : 0.6,
+                                                                transition: 'opacity 0.2s', display: 'flex', alignItems: 'center'
+                                                            }}
+                                                            title={t('common.delete') || 'Delete'}
+                                                        >
+                                                            🗑️
+                                                        </button>
                                                     </div>
                                                 </div>
 
                                                 {renderDeletionOverlay(notification.id)}
-                                                {renderBinIcon(notification.id, 'received', isDeleting)}
                                             </div>
                                         </SwipeableMessage>
                                     );
@@ -581,7 +593,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
                                                     </span>
                                                     <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
-                                                        {msg.type || 'Feedback'}
+                                                        {getFeedbackTitle(msg.type)}
                                                     </span>
                                                 </div>
                                                 <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 500, paddingTop: '4px' }}>
@@ -598,17 +610,18 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 fontFamily: 'monospace',
                                                 fontSize: '0.85rem',
                                                 color: '#cbd5e1',
-                                                marginBottom: '1rem',
+                                                marginBottom: '0.5rem',
+                                                marginTop: '0', // Removed to equalise spacing
                                                 whiteSpace: 'pre-wrap',
                                                 lineHeight: '1.5'
                                             }}>
                                                 {msg.message}
                                             </div>
 
-                                            {/* 3. Footer Row: Stars (Left) | Badge (Right) */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
+                                            {/* 3. Footer Row: Stars (Left) | Badge (Center) | Bin (Right) */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', height: '24px' }}>
                                                 {/* Left: Stars */}
-                                                <div>
+                                                <div style={{ justifySelf: 'start' }}>
                                                     {msg.rating && (
                                                         <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
                                                             {'⭐'.repeat(msg.rating)}
@@ -616,14 +629,28 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     )}
                                                 </div>
 
-                                                {/* Right: Status Badge */}
-                                                <div>
+                                                {/* Center: Status Badge */}
+                                                <div style={{ justifySelf: 'center' }}>
                                                     {renderStatusBadge(msg, 'sent')}
+                                                </div>
+
+                                                {/* Right: Bin Icon */}
+                                                <div style={{ justifySelf: 'end' }}>
+                                                    <button
+                                                        onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
+                                                        style={{
+                                                            background: 'none', border: 'none', cursor: 'pointer',
+                                                            fontSize: '1rem', padding: '4px', opacity: isDeleting ? 1 : 0.6,
+                                                            transition: 'opacity 0.2s', display: 'flex', alignItems: 'center'
+                                                        }}
+                                                        title={t('common.delete') || 'Delete'}
+                                                    >
+                                                        🗑️
+                                                    </button>
                                                 </div>
                                             </div>
 
                                             {renderDeletionOverlay(msg.id)}
-                                            {renderBinIcon(msg.id, 'sent', isDeleting)}
                                         </div>
                                     </SwipeableMessage>
                                 );
