@@ -348,7 +348,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 flexShrink: 0
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
-                <SummaryBadge label="NEW" count={unreadCount} color="#94a3b8" onClick={() => setReceivedFilter('new')} isActive={receivedFilter === 'new'} />
+                <SummaryBadge label="PENDING" count={unreadCount} color="#22c55e" onClick={() => setReceivedFilter('new')} isActive={receivedFilter === 'new'} />
                 <SummaryBadge label="READ" count={readCount} color="#3b82f6" onClick={() => setReceivedFilter('read')} isActive={receivedFilter === 'read'} />
             </div>
         );
@@ -531,7 +531,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             style={{
-                                flex: 1, padding: '0.25rem', background: activeTab === tab.id ? 'rgba(15, 23, 42, 0.95)' : 'transparent', border: 'none',
+                                flex: 1, padding: '0.65rem', background: activeTab === tab.id ? 'rgba(15, 23, 42, 0.95)' : 'transparent', border: 'none',
                                 borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
                                 borderTopLeftRadius: activeTab === tab.id ? 'var(--radius-md)' : '0',
                                 borderTopRightRadius: activeTab === tab.id ? 'var(--radius-md)' : '0',
@@ -578,7 +578,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     {/* (Message Item Content Omitted for Brevity - Keeping existing structure) */}
                                                     <div
                                                         className={`notification-item ${notification.read ? 'read' : 'unread'}`}
-                                                        onClick={() => markAsRead(notification.id)}
+                                                        onClick={() => {
+                                                            markAsRead(notification.id);
+                                                            alert(notification.body);
+                                                        }}
                                                         style={{
                                                             position: 'relative',
                                                             overflow: 'hidden',
@@ -593,7 +596,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                                 <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
-                                                                    {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
+                                                                    {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '🔔'}
                                                                 </span>
                                                                 <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)' }}>
                                                                     {notification.title}
@@ -624,7 +627,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         </div>
                                                         {/* 3. Footer Row */}
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
-                                                            <div></div>
+                                                            <div style={{ fontSize: '1.2rem', lineHeight: 1 }}>🖼️</div>
                                                             <div>
                                                                 <button
                                                                     onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
