@@ -63,8 +63,12 @@ const FeedbackSection = () => {
                 maxLength={500}
                 style={{
                     width: '100%',
-                    height: '120px', // Fixed height to prevent collapse
-                    padding: '0.75rem', // More comfortable padding
+                    minWidth: '100%', // Force full width in Safari
+                    maxWidth: '100%', // Prevent overflow
+                    boxSizing: 'border-box', // Ensure padding doesn't affect width
+                    WebkitAppearance: 'none', // Remove native Safari inner styles
+                    height: '120px',
+                    padding: '0.75rem',
                     background: 'var(--color-bg-tertiary)',
                     border: '1px solid var(--color-border)',
                     borderRadius: 'var(--radius-md)',
