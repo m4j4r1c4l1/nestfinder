@@ -481,35 +481,32 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             <div
                                                 className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                                 onClick={() => markAsRead(notification.id)}
-                                                style={{ position: 'relative', overflow: 'hidden', padding: '1rem' }}
+                                                style={{ position: 'relative', overflow: 'hidden', padding: '1.25rem' }}
                                             >
-                                                {/* Header: Icon+Title | Badge | Time */}
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', position: 'relative', height: '24px' }}>
-                                                    {/* Left: Icon + Title */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '35%' }}>
-                                                        <span className="notification-icon" style={{ fontSize: '1.2rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
+                                                {/* 1. Header Row: Icon/Title + Timestamp */}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
                                                             {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
                                                         </span>
-                                                        <span className="notification-title" style={{ fontSize: '0.9rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)' }}>
                                                             {notification.title}
                                                         </span>
                                                     </div>
-
-                                                    {/* Center: Badge */}
-                                                    <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
-                                                        {renderStatusBadge(notification, 'received')}
-                                                    </div>
-
-                                                    {/* Right: Timestamp */}
-                                                    <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginLeft: 'auto' }}>
+                                                    <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 500, paddingTop: '4px' }}>
                                                         {formatTime(notification.created_at)}
                                                     </div>
                                                 </div>
 
-                                                {/* Body */}
-                                                <p className="notification-body" style={{ margin: 0, paddingRight: '0' }}>
+                                                {/* 2. Body Row: Message Content */}
+                                                <p className="notification-body" style={{ margin: '0 0 1rem 0', padding: '0 0.5rem', lineHeight: '1.5', fontSize: '0.95rem', color: 'var(--color-text-secondary)' }}>
                                                     {notification.body}
                                                 </p>
+
+                                                {/* 3. Footer Row: Status Badge (Centered) */}
+                                                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                                                    {renderStatusBadge(notification, 'received')}
+                                                </div>
 
                                                 {renderDeletionOverlay(notification.id)}
                                                 {renderBinIcon(notification.id, 'received', isDeleting)}
@@ -549,41 +546,36 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         swipeDirection={swipeDirection}
                                         onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
                                     >
-                                        <div className="notification-item read" style={{ position: 'relative', overflow: 'hidden', padding: '1rem' }}>
-                                            {/* Header: Icon+Title | Badge | Time */}
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', position: 'relative', height: '24px' }}>
-                                                {/* Left: Icon + Title */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '35%' }}>
-                                                    <span className="notification-icon" style={{ fontSize: '1.2rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
+                                        <div className="notification-item read" style={{ position: 'relative', overflow: 'hidden', padding: '1.25rem' }}>
+                                            {/* 1. Header Row: Icon/Title + Timestamp */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
                                                         {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
                                                     </span>
-                                                    <span className="notification-title" style={{ fontSize: '0.9rem', fontWeight: 600, textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
                                                         {msg.type || 'Feedback'}
                                                     </span>
                                                 </div>
-
-                                                {/* Center: Badge */}
-                                                <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
-                                                    {renderStatusBadge(msg, 'sent')}
-                                                </div>
-
-                                                {/* Right: Timestamp */}
-                                                <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginLeft: 'auto' }}>
+                                                <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 500, paddingTop: '4px' }}>
                                                     {formatTime(msg.created_at)}
                                                 </div>
                                             </div>
 
-                                            {/* Body */}
-                                            <p className="notification-body" style={{ margin: 0 }}>
+                                            {/* 2. Body Row: Message Content */}
+                                            <p className="notification-body" style={{ margin: '0 0 1rem 0', padding: '0 0.5rem', lineHeight: '1.5', fontSize: '0.95rem', color: 'var(--color-text-secondary)' }}>
                                                 {msg.message}
                                             </p>
 
-                                            {/* Stars (Centered) */}
-                                            {msg.rating && (
-                                                <div style={{ textAlign: 'center', marginTop: '0.75rem', fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
-                                                    {'⭐'.repeat(msg.rating)}
-                                                </div>
-                                            )}
+                                            {/* 3. Footer Row: Status Badge & Stars (Centered Stack) */}
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                                {renderStatusBadge(msg, 'sent')}
+                                                {msg.rating && (
+                                                    <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
+                                                        {'⭐'.repeat(msg.rating)}
+                                                    </div>
+                                                )}
+                                            </div>
 
                                             {renderDeletionOverlay(msg.id)}
                                             {renderBinIcon(msg.id, 'sent', isDeleting)}
