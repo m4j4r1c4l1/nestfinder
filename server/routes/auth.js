@@ -22,6 +22,10 @@ const generateUserToken = (userId) => {
 router.post('/admin/login', (req, res) => {
     const { username, password } = req.body;
 
+    // Capture security metadata
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
     if (!username || !password) {
         return res.status(400).json({ error: 'Username and password required' });
     }
@@ -29,7 +33,13 @@ router.post('/admin/login', (req, res) => {
     const admin = get('SELECT * FROM admins WHERE username = ?', [username]);
 
     if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
-        // Use generic error message for security
+        // Log failed attempt with security metadata
+        log('admin', 'admin_login_failed', null, {
+            username,
+            ip,
+            userAgent,
+            reason: 'Invalid credentials'
+        });
         return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -40,7 +50,12 @@ router.post('/admin/login', (req, res) => {
         { expiresIn: '12h' }
     );
 
-    log('admin', 'login', admin.id.toString(), { username });
+    // Log successful login with security metadata
+    log('admin', 'admin_login', admin.id.toString(), {
+        username: admin.username,
+        ip,
+        userAgent
+    });
 
     res.json({
         token,
