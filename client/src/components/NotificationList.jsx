@@ -773,7 +773,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             );
                                         })
                                     )}
-                                    {renderSentSummaryBadges()}
                                 </>
                             )}
                         </div>
