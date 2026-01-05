@@ -302,7 +302,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         alignItems: 'center',
         gap: '6px',
         fontWeight: 500,
-        minWidth: '100px'
+        minWidth: '150px'
     };
 
     // Summary Badge Component (Dashboard style, clickable, compact)
@@ -520,7 +520,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 borderBottom: '1px solid var(--color-border)',
                 flexShrink: 0
             }}>
-                <div className="card-header flex-between items-center" style={{ borderBottom: 'none', padding: '0.75rem 1rem 0.25rem 1rem' }}>
+                <div className="card-header flex-between items-center" style={{ borderBottom: 'none', padding: '0.5rem 1rem 0.1rem 1rem' }}>
                     <h3 className="card-title" style={{ fontSize: '1.1rem' }}>{t('inbox.title') || 'Inbox'}</h3>
                     {onClose && (
                         <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}>
@@ -534,14 +534,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             style={{
-                                flex: 1, padding: 'var(--space-2)', background: 'transparent', border: 'none',
+                                flex: 1, padding: '0.25rem', background: 'transparent', border: 'none',
                                 borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
                                 color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                                 fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s ease',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px'
                             }}
                         >
-                            <span style={{ fontSize: '1.5rem', lineHeight: 1.2 }}>{tab.icon}</span>
+                            <span style={{ fontSize: '1.25rem', lineHeight: 1.2 }}>{tab.icon}</span>
                             <span style={{ fontSize: '0.85rem' }}>{tab.label}</span>
                         </button>
                     ))}
