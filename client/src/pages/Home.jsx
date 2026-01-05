@@ -96,7 +96,7 @@ const Home = () => {
 
             <form className="welcome-form" onSubmit={handleStart}>
                 <div className="form-group">
-                    <label className="form-label" style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem' }}>
+                    <label className="form-label" style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
                         {t('welcome.nicknameLabel')}
                     </label>
                     <input
