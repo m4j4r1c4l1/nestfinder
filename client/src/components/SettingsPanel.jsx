@@ -260,7 +260,9 @@ const RestoreAccountSection = ({ t }) => {
         setError(null);
 
         try {
-            await recoverFromKey(inputKey.trim().toLowerCase());
+            const keyToRecover = inputKey.trim().toLowerCase();
+            console.log('[DEBUG] Attempting recovery with key:', JSON.stringify(keyToRecover), 'Length:', keyToRecover.length);
+            await recoverFromKey(keyToRecover);
             setSuccess(true);
             // Reload page to refresh user state
             setTimeout(() => window.location.reload(), 1500);
