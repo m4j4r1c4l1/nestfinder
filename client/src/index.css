@@ -1115,6 +1115,15 @@ textarea.form-input {
   animation: popup-enter 0.3s ease-out;
 }
 
+.notification-popup.image-only {
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: auto;
+  max-width: 90vw;
+  box-shadow: none;
+}
+
 @keyframes popup-enter {
   from {
     opacity: 0;
