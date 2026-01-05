@@ -34,8 +34,8 @@ const Observability = () => {
     useEffect(() => {
         loadData();
 
-        // Polling interval as fallback (every 60 seconds instead of 30)
-        const intervalId = setInterval(loadData, 60000);
+        // Polling disabled for testing WebSocket live updates
+        // const intervalId = setInterval(loadData, 60000);
 
         // WebSocket for real-time updates
         const wsUrl = API_URL.replace(/^http/, 'ws') || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
@@ -59,7 +59,7 @@ const Observability = () => {
         ws.onclose = () => console.log('WebSocket disconnected');
 
         return () => {
-            clearInterval(intervalId);
+            // clearInterval(intervalId);
             ws.close();
         };
     }, [timeRange]);
