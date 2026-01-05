@@ -244,7 +244,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     };
 
     return (
-        <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+        <div className="card" style={{ height: '500px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
             {/* Sticky Header & Tabs Container */}
             <div style={{
                 position: 'sticky',
@@ -252,6 +252,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 zIndex: 10,
                 background: 'rgba(15, 23, 42, 0.95)',
                 backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
                 borderBottom: '1px solid var(--color-border)',
                 flexShrink: 0
             }}>
@@ -321,7 +322,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                height: '300px',
+                                height: '100%', // Use full available height
+                                minHeight: '300px',
                                 color: 'var(--color-text-secondary)',
                                 textAlign: 'center'
                             }}>
@@ -363,13 +365,16 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 transform: 'translateY(-50%)',
                                                 background: 'none',
                                                 border: 'none',
-                                                opacity: 0.3,
+                                                opacity: messageToDelete?.id === notification.id ? 1 : 0.3,
                                                 cursor: 'pointer',
                                                 fontSize: '1rem',
-                                                padding: '4px'
+                                                padding: '4px',
+                                                zIndex: 30 // Ensure above overlay
                                             }}
                                             onMouseEnter={(e) => e.target.style.opacity = 1}
-                                            onMouseLeave={(e) => e.target.style.opacity = 0.3}
+                                            onMouseLeave={(e) => {
+                                                if (messageToDelete?.id !== notification.id) e.target.style.opacity = 0.3
+                                            }}
                                             title="Delete"
                                         >
                                             🗑️
@@ -378,7 +383,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         {/* Deletion Overlay */}
                                         {messageToDelete && messageToDelete.id === notification.id && (
                                             <div
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    cancelDelete();
+                                                }}
                                                 style={{
                                                     position: 'absolute',
                                                     top: 0,
@@ -517,13 +525,16 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             transform: 'translateY(-50%)',
                                             background: 'none',
                                             border: 'none',
-                                            opacity: 0.3,
+                                            opacity: messageToDelete?.id === msg.id ? 1 : 0.3,
                                             cursor: 'pointer',
                                             fontSize: '1rem',
-                                            padding: '4px'
+                                            padding: '4px',
+                                            zIndex: 30 // Ensure above overlay
                                         }}
                                         onMouseEnter={(e) => e.target.style.opacity = 1}
-                                        onMouseLeave={(e) => e.target.style.opacity = 0.3}
+                                        onMouseLeave={(e) => {
+                                            if (messageToDelete?.id !== msg.id) e.target.style.opacity = 0.3
+                                        }}
                                         title="Delete"
                                     >
                                         🗑️
@@ -532,7 +543,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                     {/* Deletion Overlay */}
                                     {messageToDelete && messageToDelete.id === msg.id && (
                                         <div
-                                            onClick={(e) => e.stopPropagation()}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                cancelDelete();
+                                            }}
                                             style={{
                                                 position: 'absolute',
                                                 top: 0,
@@ -542,39 +556,37 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 background: 'rgba(15, 23, 42, 0.6)',
                                                 backdropFilter: 'blur(4px)',
                                                 WebkitBackdropFilter: 'blur(4px)',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
                                                 zIndex: 20
                                             }}
                                         >
-                                            <div style={warningStyle}>
-                                                {t('inbox.delete.confirm') || 'Delete this message?'}
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                            {/* Centered Delete Button relative to available space (left to icon) */}
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: '50%',
+                                                left: '0',
+                                                right: '40px', // Space for the icon
+                                                transform: 'translateY(-50%)',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                pointerEvents: 'none' // Let clicks pass through context
+                                            }}>
                                                 <button
-                                                    onClick={cancelDelete}
-                                                    style={{
-                                                        padding: '4px 12px',
-                                                        borderRadius: '4px',
-                                                        border: '1px solid var(--color-border)',
-                                                        background: 'rgba(255,255,255,0.1)',
-                                                        color: 'var(--color-text)',
-                                                        cursor: 'pointer'
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        confirmDelete();
                                                     }}
-                                                >
-                                                    {t('inbox.delete.cancel') || 'Cancel'}
-                                                </button>
-                                                <button
-                                                    onClick={confirmDelete}
                                                     style={{
                                                         padding: '4px 12px',
                                                         borderRadius: '4px',
                                                         border: 'none',
                                                         background: '#ef4444',
                                                         color: 'white',
-                                                        cursor: 'pointer'
+                                                        cursor: 'pointer',
+                                                        fontWeight: 600,
+                                                        fontSize: '0.85rem',
+                                                        pointerEvents: 'auto', // Re-enable pointer events
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                                                     }}
                                                 >
                                                     {t('inbox.delete.yes') || 'Delete'}
