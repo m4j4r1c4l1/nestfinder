@@ -797,7 +797,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
             const qrImage = await generateQRCode();
             setImageUrl(qrImage);
         } else if (templateId === 'happy_new_year') {
-            setImageUrl(`${APP_URL}/images/new_year_2026.png`);
+            setImageUrl(`${APP_URL}images/new_year_2026.png`);
         }
     };
 
