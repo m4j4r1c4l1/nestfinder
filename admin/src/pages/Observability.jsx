@@ -132,7 +132,7 @@ const Observability = () => {
                                     <div className="text-muted text-sm">Locations</div>
                                 </div>
                                 {/* Horizontal Points Info - Restored "Aspect" (Text Style) aligned with User Badges */}
-                                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'center', gap: '0.5rem', width: '100%' }}>
+                                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'center', gap: '0.6rem', width: '100%' }}>
                                     {[
                                         { label: 'Confirmed', count: stats.mapPoints?.confirmed, color: '#22c55e', icon: '🟢' },
                                         { label: 'Pending', count: stats.mapPoints?.pending, color: '#f59e0b', icon: '🟠' },
@@ -140,11 +140,11 @@ const Observability = () => {
                                     ].map(info => (
                                         <div key={info.label} style={{
                                             display: 'flex', alignItems: 'center', gap: '0.3rem',
-                                            fontSize: '0.75rem', whiteSpace: 'nowrap'
+                                            fontSize: '0.8rem', whiteSpace: 'nowrap', padding: '0.25rem 0'
                                         }}>
-                                            <span style={{ fontSize: '0.6rem' }}>{info.icon}</span>
+                                            <span style={{ fontSize: '0.75rem' }}>{info.icon}</span>
                                             <span style={{ color: info.color, fontWeight: 600 }}>{info.label}:</span>
-                                            <span style={{ fontWeight: 700, color: '#e2e8f0' }}>{info.count || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.85rem' }}>{info.count || 0}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -185,7 +185,7 @@ const Observability = () => {
                                 {/* Sent Row */}
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f97316' }}>
                                             {stats.notificationMetrics?.total || 0}
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Sent</div>
