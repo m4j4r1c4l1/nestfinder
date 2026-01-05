@@ -616,7 +616,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     <div
                                                         className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                                         onClick={() => {
-                                                            markAsRead(notification.id);
+                                                            markAsRead(notification);
                                                             setSelectedMessage(notification);
                                                             setViewingImageOnly(false);
                                                         }}
@@ -856,7 +856,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                         setViewingImageOnly(false);
                     }}
                     onMarkRead={() => {
-                        markAsRead(selectedMessage.id);
+                        markAsRead(selectedMessage);
                         setSelectedMessage(null);
                         setViewingImageOnly(false);
                     }}
