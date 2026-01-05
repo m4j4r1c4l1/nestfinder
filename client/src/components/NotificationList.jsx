@@ -185,14 +185,24 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         });
     };
 
-    const handleDelete = async (e, id, type) => {
-        e.stopPropagation(); // Prevent opening message
-        if (!window.confirm(t('common.confirmDelete') || 'Delete this message?')) return;
+    // State for deletion confirmation: { id: string, type: 'received' | 'sent' } | null
+    const [messageToDelete, setMessageToDelete] = useState(null);
+
+    // Since we can't easily modify `notifications` prop, we use a local filter for deleted IDs
+    const [deletedIds, setDeletedIds] = useState(new Set());
+
+    const handleDeleteClick = (e, id, type) => {
+        e.stopPropagation();
+        setMessageToDelete({ id, type });
+    };
+
+    const confirmDelete = async () => {
+        if (!messageToDelete) return;
+        const { id, type } = messageToDelete;
 
         try {
             if (type === 'received') {
                 await api.deleteNotification(id);
-                // Optimistic update handled by markDeleted logic for local state
                 setDeletedIds(prev => new Set(prev).add(id));
             } else {
                 await api.deleteFeedback(id);
@@ -200,13 +210,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
             }
         } catch (err) {
             console.error('Failed to delete', err);
+        } finally {
+            setMessageToDelete(null);
         }
     };
 
-    // Since we can't easily modify `notifications` prop, we use a local filter for deleted IDs
-    const [deletedIds, setDeletedIds] = useState(new Set());
-    const markDeleted = async (e, id) => {
-        handleDelete(e, id, 'received');
+    const cancelDelete = (e) => {
+        if (e) e.stopPropagation();
+        setMessageToDelete(null);
     };
 
     const filteredNotifications = filterByRetention(notifications).filter(n => !deletedIds.has(n.id));
@@ -217,6 +228,20 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         { id: 'sent', icon: '🦩', label: t('inbox.sent') || 'Sent' },
         { id: 'compose', icon: '🪶', label: t('inbox.compose') || 'Compose' }
     ];
+
+    // Warning box style from SettingsPanel
+    const warningStyle = {
+        padding: '0.5rem',
+        background: 'rgba(239, 68, 68, 0.1)',
+        border: '1px solid rgba(239, 68, 68, 0.3)',
+        borderRadius: 'var(--radius-md)',
+        color: '#ef4444',
+        fontSize: '0.85rem',
+        textAlign: 'center',
+        marginBottom: '0.5rem',
+        width: '80%',
+        maxWidth: '300px'
+    };
 
     return (
         <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
@@ -289,11 +314,19 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                 {/* RECEIVED TAB */}
                 {activeTab === 'received' && (
-                    <div className="notification-list" style={{ marginTop: '1rem' }}>
+                    <div className="notification-list" style={{ marginTop: '1rem', height: '100%' }}>
                         {filteredNotifications.length === 0 ? (
-                            <div className="empty-state">
-                                <span style={{ fontSize: '2rem' }}>📭</span>
-                                <p>{t('inbox.empty') || 'No messages'}</p>
+                            <div className="empty-state" style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '300px',
+                                color: 'var(--color-text-secondary)',
+                                textAlign: 'center'
+                            }}>
+                                <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪹</span>
+                                <p style={{ fontSize: '1.1rem', margin: 0 }}>{t('inbox.empty') || 'Your nest is empty'}</p>
                             </div>
                         ) : (
                             <>
@@ -302,7 +335,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         key={notification.id}
                                         className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                         onClick={() => markAsRead(notification.id)}
-                                        style={{ position: 'relative' }}
+                                        style={{ position: 'relative', overflow: 'hidden' }}
                                     >
                                         <div className="notification-icon">
                                             {notification.type === 'alert' ? '🚨' :
@@ -322,7 +355,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                                         {/* Delete Button */}
                                         <button
-                                            onClick={(e) => markDeleted(e, notification.id)}
+                                            onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
                                             style={{
                                                 position: 'absolute',
                                                 top: '50%',
@@ -341,6 +374,60 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         >
                                             🗑️
                                         </button>
+
+                                        {/* Deletion Overlay */}
+                                        {messageToDelete && messageToDelete.id === notification.id && (
+                                            <div
+                                                onClick={(e) => e.stopPropagation()}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    background: 'rgba(15, 23, 42, 0.6)',
+                                                    backdropFilter: 'blur(4px)',
+                                                    WebkitBackdropFilter: 'blur(4px)',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    zIndex: 20
+                                                }}
+                                            >
+                                                <div style={warningStyle}>
+                                                    {t('inbox.delete.confirm') || 'Delete this message?'}
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button
+                                                        onClick={cancelDelete}
+                                                        style={{
+                                                            padding: '4px 12px',
+                                                            borderRadius: '4px',
+                                                            border: '1px solid var(--color-border)',
+                                                            background: 'rgba(255,255,255,0.1)',
+                                                            color: 'var(--color-text)',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        {t('inbox.delete.cancel') || 'Cancel'}
+                                                    </button>
+                                                    <button
+                                                        onClick={confirmDelete}
+                                                        style={{
+                                                            padding: '4px 12px',
+                                                            borderRadius: '4px',
+                                                            border: 'none',
+                                                            background: '#ef4444',
+                                                            color: 'white',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        {t('inbox.delete.yes') || 'Delete'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                                 {filteredNotifications.some(n => !n.read) && (
@@ -359,20 +446,36 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                 {/* SENT TAB */}
                 {activeTab === 'sent' && (
-                    <div className="notification-list" style={{ marginTop: '1rem' }}>
+                    <div className="notification-list" style={{ marginTop: '1rem', height: '100%' }}>
                         {loadingSent ? (
-                            <div className="empty-state">
+                            <div className="empty-state" style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '300px',
+                                color: 'var(--color-text-secondary)',
+                                textAlign: 'center'
+                            }}>
                                 <span style={{ fontSize: '2rem' }}>⌛</span>
                                 <p>Loading...</p>
                             </div>
                         ) : filteredSent.length === 0 ? (
-                            <div className="empty-state">
-                                <span style={{ fontSize: '2rem' }}>🪁</span>
-                                <p>{t('inbox.noSent') || 'No sent messages'}</p>
+                            <div className="empty-state" style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '300px',
+                                color: 'var(--color-text-secondary)',
+                                textAlign: 'center'
+                            }}>
+                                <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪹</span>
+                                <p style={{ fontSize: '1.1rem', margin: 0 }}>{t('inbox.noSent') || 'No sent messages'}</p>
                             </div>
                         ) : (
                             filteredSent.map(msg => (
-                                <div key={msg.id} className="notification-item read" style={{ position: 'relative' }}>
+                                <div key={msg.id} className="notification-item read" style={{ position: 'relative', overflow: 'hidden' }}>
                                     <div className="notification-icon">
                                         {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
                                     </div>
@@ -406,7 +509,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                     </div>
                                     {/* Delete Button */}
                                     <button
-                                        onClick={(e) => handleDelete(e, msg.id, 'sent')}
+                                        onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
                                         style={{
                                             position: 'absolute',
                                             top: '50%',
@@ -425,6 +528,60 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                     >
                                         🗑️
                                     </button>
+
+                                    {/* Deletion Overlay */}
+                                    {messageToDelete && messageToDelete.id === msg.id && (
+                                        <div
+                                            onClick={(e) => e.stopPropagation()}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                background: 'rgba(15, 23, 42, 0.6)',
+                                                backdropFilter: 'blur(4px)',
+                                                WebkitBackdropFilter: 'blur(4px)',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                zIndex: 20
+                                            }}
+                                        >
+                                            <div style={warningStyle}>
+                                                {t('inbox.delete.confirm') || 'Delete this message?'}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button
+                                                    onClick={cancelDelete}
+                                                    style={{
+                                                        padding: '4px 12px',
+                                                        borderRadius: '4px',
+                                                        border: '1px solid var(--color-border)',
+                                                        background: 'rgba(255,255,255,0.1)',
+                                                        color: 'var(--color-text)',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    {t('inbox.delete.cancel') || 'Cancel'}
+                                                </button>
+                                                <button
+                                                    onClick={confirmDelete}
+                                                    style={{
+                                                        padding: '4px 12px',
+                                                        borderRadius: '4px',
+                                                        border: 'none',
+                                                        background: '#ef4444',
+                                                        color: 'white',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    {t('inbox.delete.yes') || 'Delete'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         )}
