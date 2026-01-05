@@ -347,7 +347,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '0.35rem',
-                borderTop: '1px solid var(--color-border)',
+                borderTop: '2px solid red', // DEBUG
                 marginTop: 'auto'
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
@@ -383,7 +383,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '0.35rem',
-                borderTop: '1px solid var(--color-border)',
+                borderTop: '2px solid red', // DEBUG
                 marginTop: 'auto'
             }}>
                 <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
@@ -560,103 +560,98 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                 {/* RECEIVED TAB */}
                 {activeTab === 'received' && (
-                    <div className="notification-list" style={{ marginTop: '0.5rem', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
-                        {filteredNotifications.length === 0 ? (
-                            <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
+                    <div className="notification-list" style={{ marginTop: '0.5rem', minHeight: '100%', display: 'flex', flexDirection: 'column', border: '2px solid lime' }}>
+                        {baseNotifications.length === 0 ? (
+                            <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                 <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪹</span>
                                 <p style={{ fontSize: '1.1rem', margin: 0 }}>{t('inbox.empty') || 'Your nest is empty'}</p>
                             </div>
                         ) : (
                             <>
-                                {filteredNotifications.map(notification => {
-                                    const isDeleting = messageToDelete?.id === notification.id;
-                                    return (
-                                        <SwipeableMessage
-                                            key={notification.id}
-                                            swipeDirection={swipeDirection}
-                                            onSwipeDelete={() => handleDeleteClick(null, notification.id, 'received')}
-                                        >
-                                            <div
-                                                className={`notification-item ${notification.read ? 'read' : 'unread'}`}
-                                                onClick={() => markAsRead(notification.id)}
-                                                style={{
-                                                    position: 'relative',
-                                                    overflow: 'hidden',
-                                                    padding: '0.75rem',
-                                                    borderRadius: 'var(--radius-md)',
-                                                    border: '1px solid var(--color-border)',
-                                                    marginBottom: '0.75rem',
-                                                    background: '#0f172a'
-                                                }}
+                                {filteredNotifications.length === 0 ? (
+                                    <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, minHeight: '200px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
+                                        <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</span>
+                                        <p style={{ fontSize: '1rem', margin: 0 }}>No messages match this filter</p>
+                                    </div>
+                                ) : (
+                                    filteredNotifications.map(notification => {
+                                        const isDeleting = messageToDelete?.id === notification.id;
+                                        return (
+                                            <SwipeableMessage
+                                                key={notification.id}
+                                                swipeDirection={swipeDirection}
+                                                onSwipeDelete={() => handleDeleteClick(null, notification.id, 'received')}
                                             >
-                                                {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
-                                                    {/* Left: Icon + Title */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                        <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
-                                                            {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
-                                                        </span>
-                                                        <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)' }}>
-                                                            {notification.title}
-                                                        </span>
+                                                {/* (Message Item Content Omitted for Brevity - Keeping existing structure) */}
+                                                <div
+                                                    className={`notification-item ${notification.read ? 'read' : 'unread'}`}
+                                                    onClick={() => markAsRead(notification.id)}
+                                                    style={{
+                                                        position: 'relative',
+                                                        overflow: 'hidden',
+                                                        padding: '0.75rem',
+                                                        borderRadius: 'var(--radius-md)',
+                                                        border: '1px solid var(--color-border)',
+                                                        marginBottom: '0.75rem',
+                                                        background: '#0f172a'
+                                                    }}
+                                                >
+                                                    {/* 1. Header Row */}
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
+                                                                {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
+                                                            </span>
+                                                            <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)' }}>
+                                                                {notification.title}
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ justifySelf: 'center' }}>{renderStatusBadge(notification, 'received')}</div>
+                                                        <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3, minWidth: '120px' }}>
+                                                            <div>{formatDateTime(notification.created_at).date}</div>
+                                                            <div>{formatDateTime(notification.created_at).time}</div>
+                                                        </div>
                                                     </div>
-
-                                                    {/* Center: Status Badge */}
-                                                    <div style={{ justifySelf: 'center' }}>
-                                                        {renderStatusBadge(notification, 'received')}
+                                                    {/* 2. Body Row */}
+                                                    <div style={{
+                                                        background: 'var(--color-bg-tertiary)',
+                                                        border: '1px solid #334155',
+                                                        borderRadius: '6px',
+                                                        padding: '0.75rem',
+                                                        fontFamily: 'monospace',
+                                                        fontSize: '0.85rem',
+                                                        color: '#cbd5e1',
+                                                        marginTop: '0.4rem',
+                                                        marginBottom: '0.4rem',
+                                                        whiteSpace: 'pre-wrap',
+                                                        wordBreak: 'break-word',
+                                                        lineHeight: '1.5'
+                                                    }}>
+                                                        {notification.body}
                                                     </div>
-
-                                                    {/* Right: Stacked Date/Time */}
-                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3, minWidth: '120px' }}>
-                                                        <div>{formatDateTime(notification.created_at).date}</div>
-                                                        <div>{formatDateTime(notification.created_at).time}</div>
+                                                    {/* 3. Footer Row */}
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
+                                                        <div></div>
+                                                        <div>
+                                                            <button
+                                                                onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
+                                                                style={{
+                                                                    background: 'none', border: 'none', cursor: 'pointer',
+                                                                    fontSize: '1rem', padding: '4px', opacity: isDeleting ? 1 : 0.6,
+                                                                    transition: 'opacity 0.2s', display: 'flex', alignItems: 'center'
+                                                                }}
+                                                                title={t('common.delete') || 'Delete'}
+                                                            >
+                                                                🗑️
+                                                            </button>
+                                                        </div>
                                                     </div>
+                                                    {renderDeletionOverlay(notification.id)}
                                                 </div>
-
-                                                {/* 2. Body Row: Message Content */}
-                                                <div style={{
-                                                    background: 'var(--color-bg-tertiary)',
-                                                    border: '1px solid #334155',
-                                                    borderRadius: '6px',
-                                                    padding: '0.75rem',
-                                                    fontFamily: 'monospace',
-                                                    fontSize: '0.85rem',
-                                                    color: '#cbd5e1',
-                                                    marginTop: '0.4rem',
-                                                    marginBottom: '0.4rem',
-                                                    whiteSpace: 'pre-wrap',
-                                                    wordBreak: 'break-word',
-                                                    lineHeight: '1.5'
-                                                }}>
-                                                    {notification.body}
-                                                </div>
-
-                                                {/* 3. Footer Row: Stars (Left) | Bin (Right) */}
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
-                                                    {/* Left: Placeholder for Stars */}
-                                                    <div></div>
-
-                                                    {/* Right: Bin Icon */}
-                                                    <div>
-                                                        <button
-                                                            onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
-                                                            style={{
-                                                                background: 'none', border: 'none', cursor: 'pointer',
-                                                                fontSize: '1rem', padding: '4px', opacity: isDeleting ? 1 : 0.6,
-                                                                transition: 'opacity 0.2s', display: 'flex', alignItems: 'center'
-                                                            }}
-                                                            title={t('common.delete') || 'Delete'}
-                                                        >
-                                                            🗑️
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                {renderDeletionOverlay(notification.id)}
-                                            </div>
-                                        </SwipeableMessage>
-                                    );
-                                })}
+                                            </SwipeableMessage>
+                                        );
+                                    })
+                                )}
                                 {filteredNotifications.some(n => !n.read) && (
                                     <button onClick={markAllAsRead} className="btn btn-secondary btn-sm" style={{ width: '100%', marginTop: '1rem' }}>
                                         {t('inbox.markAllRead') || 'Mark all as read'}
@@ -670,110 +665,117 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                 {/* SENT TAB */}
                 {activeTab === 'sent' && (
-                    <div className="notification-list" style={{ marginTop: '0.5rem', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <div className="notification-list" style={{ marginTop: '0.5rem', minHeight: '100%', display: 'flex', flexDirection: 'column', border: '2px solid lime' }}>
                         {loadingSent ? (
                             <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                 <span style={{ fontSize: '2rem' }}>⌛</span>
                                 <p>{t('common.loading') || 'Loading...'}</p>
                             </div>
-                        ) : filteredSent.length === 0 ? (
-                            <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
+                        ) : baseSent.length === 0 ? (
+                            <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                 <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪹</span>
                                 <p style={{ fontSize: '1.1rem', margin: 0 }}>{t('inbox.noSent') || 'No contributions yet'}</p>
                             </div>
                         ) : (
                             <>
-                                {filteredSent.map(msg => {
-                                    const isDeleting = messageToDelete?.id === msg.id;
-                                    return (
-                                        <SwipeableMessage
-                                            key={msg.id}
-                                            swipeDirection={swipeDirection}
-                                            onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
-                                        >
-                                            <div className="notification-item read" style={{
-                                                position: 'relative',
-                                                overflow: 'hidden',
-                                                padding: '0.75rem',
-                                                borderRadius: 'var(--radius-md)',
-                                                border: '1px solid var(--color-border)',
-                                                marginBottom: '0.75rem',
-                                                background: '#0f172a'
-                                            }}>
-                                                {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
-                                                    {/* Left: Icon + Title */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                        <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
-                                                            {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
-                                                        </span>
-                                                        <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
-                                                            {getFeedbackTitle(msg.type)}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Center: Status Badge */}
-                                                    <div style={{ justifySelf: 'center' }}>
-                                                        {renderStatusBadge(msg, 'sent')}
-                                                    </div>
-
-                                                    {/* Right: Stacked Date/Time */}
-                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3, minWidth: '120px' }}>
-                                                        <div>{formatDateTime(msg.created_at).date}</div>
-                                                        <div>{formatDateTime(msg.created_at).time}</div>
-                                                    </div>
-                                                </div>
-
-                                                {/* 2. Body Row: Message Content */}
-                                                <div style={{
-                                                    background: 'var(--color-bg-tertiary)',
-                                                    border: '1px solid #334155',
-                                                    borderRadius: '6px',
+                                {filteredSent.length === 0 ? (
+                                    <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, minHeight: '200px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
+                                        <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</span>
+                                        <p style={{ fontSize: '1.1rem', margin: 0 }}>No messages match this filter</p>
+                                    </div>
+                                ) : (
+                                    filteredSent.map(msg => {
+                                        const isDeleting = messageToDelete?.id === msg.id;
+                                        return (
+                                            <SwipeableMessage
+                                                key={msg.id}
+                                                swipeDirection={swipeDirection}
+                                                onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
+                                            >
+                                                <div className="notification-item read" style={{
+                                                    position: 'relative',
+                                                    overflow: 'hidden',
                                                     padding: '0.75rem',
-                                                    fontFamily: 'monospace',
-                                                    fontSize: '0.85rem',
-                                                    color: '#cbd5e1',
-                                                    marginTop: '0.4rem',
-                                                    marginBottom: '0.4rem',
-                                                    whiteSpace: 'pre-wrap',
-                                                    wordBreak: 'break-word',
-                                                    lineHeight: '1.5'
+                                                    borderRadius: 'var(--radius-md)',
+                                                    border: '1px solid var(--color-border)',
+                                                    marginBottom: '0.75rem',
+                                                    background: '#0f172a'
                                                 }}>
-                                                    {msg.message}
-                                                </div>
+                                                    {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                        {/* Left: Icon + Title */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
+                                                                {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
+                                                            </span>
+                                                            <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
+                                                                {getFeedbackTitle(msg.type)}
+                                                            </span>
+                                                        </div>
 
-                                                {/* 3. Footer Row: Stars (Left) | Bin (Right) */}
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
-                                                    {/* Left: Stars */}
-                                                    <div>
-                                                        {msg.rating && (
-                                                            <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
-                                                                {'⭐'.repeat(msg.rating)}
-                                                            </div>
-                                                        )}
+                                                        {/* Center: Status Badge */}
+                                                        <div style={{ justifySelf: 'center' }}>
+                                                            {renderStatusBadge(msg, 'sent')}
+                                                        </div>
+
+                                                        {/* Right: Stacked Date/Time */}
+                                                        <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3, minWidth: '120px' }}>
+                                                            <div>{formatDateTime(msg.created_at).date}</div>
+                                                            <div>{formatDateTime(msg.created_at).time}</div>
+                                                        </div>
                                                     </div>
 
-                                                    {/* Right: Bin Icon */}
-                                                    <div>
-                                                        <button
-                                                            onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
-                                                            style={{
-                                                                background: 'none', border: 'none', cursor: 'pointer',
-                                                                fontSize: '1rem', padding: '4px', opacity: isDeleting ? 1 : 0.6,
-                                                                transition: 'opacity 0.2s', display: 'flex', alignItems: 'center'
-                                                            }}
-                                                            title={t('common.delete') || 'Delete'}
-                                                        >
-                                                            🗑️
-                                                        </button>
+                                                    {/* 2. Body Row: Message Content */}
+                                                    <div style={{
+                                                        background: 'var(--color-bg-tertiary)',
+                                                        border: '1px solid #334155',
+                                                        borderRadius: '6px',
+                                                        padding: '0.75rem',
+                                                        fontFamily: 'monospace',
+                                                        fontSize: '0.85rem',
+                                                        color: '#cbd5e1',
+                                                        marginTop: '0.4rem',
+                                                        marginBottom: '0.4rem',
+                                                        whiteSpace: 'pre-wrap',
+                                                        wordBreak: 'break-word',
+                                                        lineHeight: '1.5'
+                                                    }}>
+                                                        {msg.message}
                                                     </div>
-                                                </div>
 
-                                                {renderDeletionOverlay(msg.id)}
-                                            </div>
-                                        </SwipeableMessage>
-                                    );
-                                })}
+                                                    {/* 3. Footer Row: Stars (Left) | Bin (Right) */}
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
+                                                        {/* Left: Stars */}
+                                                        <div>
+                                                            {msg.rating && (
+                                                                <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
+                                                                    {'⭐'.repeat(msg.rating)}
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Right: Bin Icon */}
+                                                        <div>
+                                                            <button
+                                                                onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
+                                                                style={{
+                                                                    background: 'none', border: 'none', cursor: 'pointer',
+                                                                    fontSize: '1rem', padding: '4px', opacity: isDeleting ? 1 : 0.6,
+                                                                    transition: 'opacity 0.2s', display: 'flex', alignItems: 'center'
+                                                                }}
+                                                                title={t('common.delete') || 'Delete'}
+                                                            >
+                                                                🗑️
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {renderDeletionOverlay(msg.id)}
+                                                </div>
+                                            </SwipeableMessage>
+                                        );
+                                    })
+                                )}
                                 {renderSentSummaryBadges()}
                             </>
                         )}
