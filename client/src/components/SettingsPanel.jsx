@@ -511,11 +511,30 @@ const SettingsPanel = ({ onClose }) => {
     // Retention Policy
     const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
 
-    const handleRetentionChange = (e) => {
+    const handleRetentionChange = async (e) => {
         const val = e.target.value;
         setRetention(val);
         localStorage.setItem('nestfinder_message_retention', val);
         window.dispatchEvent(new Event('storage'));
+
+        // Trigger permanent deletion immediately
+        if (val !== 'forever') {
+            const now = new Date();
+            const cutoff = new Date();
+            if (val === '1m') cutoff.setMonth(now.getMonth() - 1);
+            else if (val === '3m') cutoff.setMonth(now.getMonth() - 3);
+            else if (val === '6m') cutoff.setMonth(now.getMonth() - 6);
+
+            try {
+                const isoCutoff = cutoff.toISOString();
+                await Promise.all([
+                    api.pruneNotifications(isoCutoff),
+                    api.pruneFeedback(isoCutoff)
+                ]);
+            } catch (err) {
+                console.error('Failed to prune messages', err);
+            }
+        }
     };
 
     const [popupEnabled, setPopupEnabled] = useState(() => {
@@ -870,8 +889,8 @@ const SettingsPanel = ({ onClose }) => {
                         <option value="6m">{t('settings.retention.6m') || '6 Months'}</option>
                         <option value="forever">{t('settings.retention.forever') || 'Forever'}</option>
                     </select>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                        {t('settings.retention.desc') || 'Automatically hide generic messages older than this.'}
+                    <div style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '0.25rem' }}>
+                        {t('settings.retention.desc') || '⚠️ Messages older than this will be permanently deleted.'}
                     </div>
                 </div>
                 {/* Share App with QR Code - FIRST SECTION */}
