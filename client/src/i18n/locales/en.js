@@ -215,7 +215,15 @@ export default {
         statusHatchling: 'Hatchling',
         statusSparrow: 'Sparrow',
         statusOwl: 'Owl',
-        statusEagle: 'Eagle'
+        statusEagle: 'Eagle',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'To restore your account on a new device, type your 3-word key in the nickname field when you open the app.',
+        restoreAccount: 'Restore Account from Key',
+        restoreAccountDescription: 'Enter a recovery key to restore your previous identity.',
+        enterRecoveryKey: 'word-word-word',
+        invalidRecoveryKey: 'Invalid recovery key. Please check and try again.',
+        accountRestored: 'Account restored! Reloading...',
+        restoreButton: 'Restore Account'
     },
 
     // Welcome Message
@@ -235,7 +243,9 @@ export default {
         message2: 'Every act of kindness matters when we help each other.',
         message3: 'Together we can make a difference in our community.',
         callToAction: 'Help locate and assist those who need it most.',
-        button: "Let's Get Started"
+        button: "Let's Get Started",
+        // Recovery error
+        invalidRecoveryKey: 'Invalid recovery key. Please check and try again.'
     },
 
     // Common/Shared

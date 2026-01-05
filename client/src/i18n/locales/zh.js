@@ -165,7 +165,15 @@ export default {
         statusHatchling: '雏鸟',
         statusSparrow: '麻雀',
         statusOwl: '猫头鹰',
-        statusEagle: '老鹰'
+        statusEagle: '老鹰',
+        // Recovery Key Restore
+        recoveryKeyUsage: '要在新设备上恢复您的帐户，请在昵称字段中输入您的3个单词密钥。',
+        restoreAccount: '恢复帐户',
+        restoreAccountDescription: '输入恢复密钥以恢复您的身份。',
+        enterRecoveryKey: '单词-单词-单词',
+        invalidRecoveryKey: '无效的恢复密钥。请检查后重试。',
+        accountRestored: '帐户已恢复！正在重新加载...',
+        restoreButton: '恢复帐户'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
@@ -184,7 +192,9 @@ export default {
         message2: '每一次互助都充满意义。',
         message3: '我们可以共同改变社区。',
         callToAction: '帮助定位并协助需要帮助的人。',
-        button: '开始使用'
+        button: '开始使用',
+        // Recovery error
+        invalidRecoveryKey: '无效的恢复密钥。请检查后重试。'
     },
     common: {
         loading: '加载中...',

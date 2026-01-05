@@ -166,7 +166,15 @@ export default {
         statusHatchling: 'فرخ',
         statusSparrow: 'عصفور',
         statusOwl: 'بومة',
-        statusEagle: 'نسر'
+        statusEagle: 'نسر',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'لاستعادة حسابك على جهاز جديد، أدخل مفتاحك المكون من 3 كلمات في حقل الاسم المستعار.',
+        restoreAccount: 'استعادة الحساب',
+        restoreAccountDescription: 'أدخل مفتاح الاسترداد لاستعادة هويتك.',
+        enterRecoveryKey: 'كلمة-كلمة-كلمة',
+        invalidRecoveryKey: 'مفتاح استرداد غير صالح. تحقق وحاول مرة أخرى.',
+        accountRestored: 'تمت استعادة الحساب! جاري إعادة التحميل...',
+        restoreButton: 'استعادة الحساب'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
@@ -185,7 +193,9 @@ export default {
         message2: 'المساعدة تحدث فرقاً.',
         message3: 'معاً نصنع التغيير.',
         callToAction: 'ساعد من يحتاج للمساعدة.',
-        button: 'ابدأ'
+        button: 'ابدأ',
+        // Recovery error
+        invalidRecoveryKey: 'مفتاح استرداد غير صالح. تحقق وحاول مرة أخرى.'
     },
     common: {
         loading: 'تحميل...',

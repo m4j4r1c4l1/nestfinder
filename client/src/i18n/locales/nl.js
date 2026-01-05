@@ -165,7 +165,15 @@ export default {
         statusHatchling: 'Kuiken',
         statusSparrow: 'Mus',
         statusOwl: 'Uil',
-        statusEagle: 'Arend'
+        statusEagle: 'Arend',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'Om je account op een nieuw apparaat te herstellen, typ je 3-woorden sleutel in het bijnaamveld.',
+        restoreAccount: 'Account Herstellen',
+        restoreAccountDescription: 'Voer een herstelsleutel in om je identiteit te herstellen.',
+        enterRecoveryKey: 'woord-woord-woord',
+        invalidRecoveryKey: 'Ongeldige herstelsleutel. Controleer en probeer opnieuw.',
+        accountRestored: 'Account hersteld! Herladen...',
+        restoreButton: 'Account Herstellen'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
@@ -184,7 +192,9 @@ export default {
         message2: 'Elke daad van vriendelijkheid telt als we elkaar helpen.',
         message3: 'Samen kunnen we een verschil maken in de gemeenschap.',
         callToAction: 'Help om degenen die het nodig hebben te lokaliseren en helpen.',
-        button: 'Aan de slag'
+        button: 'Aan de slag',
+        // Recovery error
+        invalidRecoveryKey: 'Ongeldige herstelsleutel. Controleer en probeer opnieuw.'
     },
     common: {
         loading: 'Laden...',

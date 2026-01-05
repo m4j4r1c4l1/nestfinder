@@ -165,7 +165,15 @@ export default {
         statusHatchling: 'Pollet',
         statusSparrow: 'Pardal',
         statusOwl: 'Mussol',
-        statusEagle: 'Àguila'
+        statusEagle: 'Àguila',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'Per a restaurar el teu compte en un nou dispositiu, escriu la teua clau de 3 paraules en el camp de sobrenom.',
+        restoreAccount: 'Restaurar Compte',
+        restoreAccountDescription: 'Introdueix una clau de recuperació per a restaurar la teua identitat.',
+        enterRecoveryKey: 'paraula-paraula-paraula',
+        invalidRecoveryKey: 'Clau de recuperació invàlida. Revisa-la i torna a intentar-ho.',
+        accountRestored: 'Compte restaurat! Recarregant...',
+        restoreButton: 'Restaurar Compte'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
@@ -184,7 +192,9 @@ export default {
         message2: "Cada acte de bondat compta quan ens ajudem mútuament.",
         message3: 'Junts podem fer la diferència en la nostra comunitat.',
         callToAction: 'Ajuda a localitzar i assistir a qui més ho necessita.',
-        button: 'Començar'
+        button: 'Començar',
+        // Recovery error
+        invalidRecoveryKey: 'Clau de recuperació invàlida. Revisa-la i torna a intentar-ho.'
     },
     common: {
         loading: 'Carregant...',

@@ -199,7 +199,15 @@ export default {
         statusHatchling: 'Polluelo',
         statusSparrow: 'Gorrión',
         statusOwl: 'Búho',
-        statusEagle: 'Águila'
+        statusEagle: 'Águila',
+        // Recovery Key Restore
+        recoveryKeyUsage: 'Para restaurar tu cuenta en otro dispositivo, escribe tu clave de 3 palabras en el campo de apodo al abrir la app.',
+        restoreAccount: 'Restaurar Cuenta con Clave',
+        restoreAccountDescription: 'Ingresa una clave de recuperación para restaurar tu identidad anterior.',
+        enterRecoveryKey: 'palabra-palabra-palabra',
+        invalidRecoveryKey: 'Clave de recuperación inválida. Revísala e intenta de nuevo.',
+        accountRestored: '¡Cuenta restaurada! Recargando...',
+        restoreButton: 'Restaurar Cuenta'
     },
 
     // Welcome Message
@@ -220,7 +228,9 @@ export default {
         message2: 'Cada acto de bondad cuenta cuando nos ayudamos mutuamente.',
         message3: 'Juntos podemos hacer la diferencia en nuestra comunidad.',
         callToAction: 'Ayuda a localizar y asistir a quienes más lo necesitan.',
-        button: 'Comenzar'
+        button: 'Comenzar',
+        // Recovery error
+        invalidRecoveryKey: 'Clave de recuperación inválida. Revísala e intenta de nuevo.'
     },
 
     // Common/Shared
