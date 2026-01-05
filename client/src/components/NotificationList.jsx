@@ -511,7 +511,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
-                background: 'rgba(15, 23, 42, 0.95)',
+                background: 'var(--color-bg-secondary)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 borderBottom: '1px solid var(--color-border)',
@@ -531,8 +531,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             style={{
-                                flex: 1, padding: '0.25rem', background: 'transparent', border: 'none',
+                                flex: 1, padding: '0.25rem', background: activeTab === tab.id ? 'rgba(15, 23, 42, 0.95)' : 'transparent', border: 'none',
                                 borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+                                borderTopLeftRadius: activeTab === tab.id ? 'var(--radius-md)' : '0',
+                                borderTopRightRadius: activeTab === tab.id ? 'var(--radius-md)' : '0',
                                 color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                                 fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s ease',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px'
