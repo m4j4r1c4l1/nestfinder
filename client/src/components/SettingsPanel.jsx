@@ -245,6 +245,12 @@ const RestoreAccountSection = ({ t }) => {
             return;
         }
 
+        // Skip warning if user already copied their recovery key this session
+        if (currentKey) {
+            handleConfirmRestore();
+            return;
+        }
+
         setShowConfirmDialog(true);
     };
 
@@ -388,7 +394,7 @@ const RestoreAccountSection = ({ t }) => {
                             <span style={{
                                 fontWeight: 600,
                                 fontSize: 'var(--font-size-lg)',
-                                color: '#f59e0b'
+                                color: 'var(--color-text-primary)'
                             }}>
                                 {t?.('settings.restoreWarningTitle') || 'Warning'}
                             </span>
@@ -431,10 +437,10 @@ const RestoreAccountSection = ({ t }) => {
                                 onClick={handleConfirmRestore}
                                 style={{
                                     padding: 'var(--space-2) var(--space-4)',
-                                    background: '#f59e0b',
+                                    background: 'var(--color-primary)',
                                     border: 'none',
                                     borderRadius: 'var(--radius-md)',
-                                    color: '#000',
+                                    color: 'white',
                                     cursor: 'pointer',
                                     fontWeight: 600,
                                     transition: 'all 0.2s'
