@@ -22,7 +22,8 @@ const Login = ({ onLogin }) => {
             adminApi.setToken(data.token);
             onLogin(data.token);
         } catch (err) {
-            setError('Invalid credentials');
+            console.error('Login failed:', err);
+            setError(err.message || 'Login failed. Please check your connection.');
         } finally {
             setLoading(false);
         }
