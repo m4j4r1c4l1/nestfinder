@@ -481,7 +481,12 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             <div
                                                 className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                                 onClick={() => markAsRead(notification.id)}
-                                                style={{ position: 'relative', overflow: 'hidden', padding: '1.25rem' }}
+                                                style={{
+                                                    position: 'relative',
+                                                    overflow: 'hidden',
+                                                    padding: '1.25rem',
+                                                    borderBottom: '1px solid var(--color-border)' // Separator
+                                                }}
                                             >
                                                 {/* 1. Header Row: Icon/Title + Timestamp */}
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
@@ -498,14 +503,31 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     </div>
                                                 </div>
 
-                                                {/* 2. Body Row: Message Content */}
-                                                <p className="notification-body" style={{ margin: '0 0 1rem 0', padding: '0 0.5rem', lineHeight: '1.5', fontSize: '0.95rem', color: 'var(--color-text-secondary)' }}>
+                                                {/* 2. Body Row: Message Content (Payload Style from Log Details) */}
+                                                <div style={{
+                                                    background: '#0f172a',
+                                                    border: '1px solid #334155',
+                                                    borderRadius: '6px',
+                                                    padding: '1rem',
+                                                    fontFamily: 'monospace',
+                                                    fontSize: '0.85rem',
+                                                    color: '#cbd5e1',
+                                                    marginBottom: '1rem',
+                                                    whiteSpace: 'pre-wrap', // Preserve line breaks
+                                                    lineHeight: '1.5'
+                                                }}>
                                                     {notification.body}
-                                                </p>
+                                                </div>
 
-                                                {/* 3. Footer Row: Status Badge (Centered) */}
-                                                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
-                                                    {renderStatusBadge(notification, 'received')}
+                                                {/* 3. Footer Row: Stars (Left) | Badge (Right) */}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
+                                                    {/* Left: Placeholder for Stars (Empty for received usually) */}
+                                                    <div></div>
+
+                                                    {/* Right: Status Badge */}
+                                                    <div>
+                                                        {renderStatusBadge(notification, 'received')}
+                                                    </div>
                                                 </div>
 
                                                 {renderDeletionOverlay(notification.id)}
@@ -546,7 +568,12 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         swipeDirection={swipeDirection}
                                         onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
                                     >
-                                        <div className="notification-item read" style={{ position: 'relative', overflow: 'hidden', padding: '1.25rem' }}>
+                                        <div className="notification-item read" style={{
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            padding: '1.25rem',
+                                            borderBottom: '1px solid var(--color-border)' // Separator
+                                        }}>
                                             {/* 1. Header Row: Icon/Title + Timestamp */}
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -562,19 +589,37 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 </div>
                                             </div>
 
-                                            {/* 2. Body Row: Message Content */}
-                                            <p className="notification-body" style={{ margin: '0 0 1rem 0', padding: '0 0.5rem', lineHeight: '1.5', fontSize: '0.95rem', color: 'var(--color-text-secondary)' }}>
+                                            {/* 2. Body Row: Message Content (Payload Style) */}
+                                            <div style={{
+                                                background: '#0f172a',
+                                                border: '1px solid #334155',
+                                                borderRadius: '6px',
+                                                padding: '1rem',
+                                                fontFamily: 'monospace',
+                                                fontSize: '0.85rem',
+                                                color: '#cbd5e1',
+                                                marginBottom: '1rem',
+                                                whiteSpace: 'pre-wrap',
+                                                lineHeight: '1.5'
+                                            }}>
                                                 {msg.message}
-                                            </p>
+                                            </div>
 
-                                            {/* 3. Footer Row: Status Badge & Stars (Centered Stack) */}
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                                                {renderStatusBadge(msg, 'sent')}
-                                                {msg.rating && (
-                                                    <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
-                                                        {'⭐'.repeat(msg.rating)}
-                                                    </div>
-                                                )}
+                                            {/* 3. Footer Row: Stars (Left) | Badge (Right) */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
+                                                {/* Left: Stars */}
+                                                <div>
+                                                    {msg.rating && (
+                                                        <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
+                                                            {'⭐'.repeat(msg.rating)}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Right: Status Badge */}
+                                                <div>
+                                                    {renderStatusBadge(msg, 'sent')}
+                                                </div>
                                             </div>
 
                                             {renderDeletionOverlay(msg.id)}
