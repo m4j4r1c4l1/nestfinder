@@ -198,7 +198,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 background: 'rgba(15, 23, 42, 0.95)',
                 backdropFilter: 'blur(10px)',
                 borderBottom: '1px solid var(--color-border)',
-                flexShrink: 0 // Prevent header from shrinking
+                flexShrink: 0
             }}>
                 {/* Header - Compact */}
                 <div className="card-header flex-between items-center" style={{ borderBottom: 'none', padding: '0.75rem 1rem 0.25rem 1rem' }}>
@@ -278,10 +278,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 {activeTab === 'received' && (
                     <div className="notification-list" style={{ marginTop: '1rem' }}>
                         {filteredNotifications.length === 0 ? (
-                            <div className="empty-state" style={{ textAlign: 'center', padding: 'var(--space-4) 0', color: 'var(--color-text-light)' }}>
-                                <span style={{ fontSize: '2rem', marginBottom: '8px', display: 'block' }}>📭</span>
+                            <div className="empty-state">
+                                <span style={{ fontSize: '2rem' }}>📭</span>
                                 <p>{t('inbox.empty') || 'No messages'}</p>
-                                {/* Retention Hint */}
                                 {notifications.length > 0 && (
                                     <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: 0.7 }}>
                                         ({notifications.length - filteredNotifications.length} hidden by retention)
@@ -295,52 +294,92 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         key={notification.id}
                                         className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                         onClick={() => markAsRead(notification.id)}
-                                        style={{
-                                            padding: '12px',
-                                            borderBottom: '1px solid var(--color-border)',
-                                            background: !notification.read ? 'var(--color-bg-secondary)' : 'transparent',
-                                            borderRadius: '8px',
-                                            marginBottom: '8px',
-                                            cursor: 'pointer',
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            second: '2-digit',
-                                            hour12: false
-                                        });
-                                                    } catch (e) {
-                                                        return n.created_at;
-                                                    }
-                                                })()}
-                            </span>
-                    </div>
-                                        {n.image_url && (
-                    <div style={{ marginBottom: '8px', textAlign: 'center' }}>
-                        <img
-                            src={n.image_url}
-                            alt="Notification"
-                            style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px' }}
-                        />
+                                    >
+                                        <div className="notification-icon">
+                                            {notification.type === 'alert' ? '🚨' :
+                                                notification.type === 'success' ? '✅' :
+                                                    notification.type === 'reward' ? '🏆' : '📩'}
+                                        </div>
+                                        <div className="notification-content">
+                                            <div className="notification-header">
+                                                <span className="notification-title">{notification.title}</span>
+                                                <span className="notification-time">
+                                                    {new Date(notification.created_at).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <p className="notification-body">{notification.body}</p>
+                                        </div>
+                                        {!notification.read && <div className="unread-dot"></div>}
+                                    </div>
+                                ))}
+                                {filteredNotifications.some(n => !n.read) && (
+                                    <button
+                                        onClick={markAllAsRead}
+                                        className="btn btn-secondary btn-sm"
+                                        style={{ width: '100%', marginTop: '1rem' }}
+                                    >
+                                        {t('inbox.markAllRead') || 'Mark all as read'}
+                                    </button>
+                                )}
+                            </>
+                        )}
                     </div>
                 )}
-                <div className="notification-body" style={{ color: 'var(--color-text)', fontSize: '0.95rem' }}>{n.body}</div>
+
+                {/* SENT TAB */}
+                {activeTab === 'sent' && (
+                    <div className="notification-list" style={{ marginTop: '1rem' }}>
+                        {filteredSent.length === 0 ? (
+                            <div className="empty-state">
+                                <span style={{ fontSize: '2rem' }}>🪁</span>
+                                <p>{t('inbox.noSent') || 'No sent messages'}</p>
+                            </div>
+                        ) : (
+                            filteredSent.map(msg => (
+                                <div key={msg.id} className="notification-item read">
+                                    <div className="notification-icon">
+                                        {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
+                                    </div>
+                                    <div className="notification-content">
+                                        <div className="notification-header">
+                                            <span className="notification-title" style={{ textTransform: 'capitalize' }}>
+                                                {msg.type || 'Feedback'}
+                                            </span>
+                                            <span className="notification-time">
+                                                {new Date(msg.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p className="notification-body">{msg.message}</p>
+                                        {msg.rating && (
+                                            <div style={{ fontSize: '0.8rem', marginTop: '0.25rem', color: '#f59e0b' }}>
+                                                {'⭐'.repeat(msg.rating)}
+                                            </div>
+                                        )}
+                                        {/* Status Badge */}
+                                        <div style={{
+                                            fontSize: '0.7rem',
+                                            marginTop: '0.5rem',
+                                            display: 'inline-block',
+                                            padding: '2px 6px',
+                                            borderRadius: '4px',
+                                            background: msg.status === 'resolved' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(148, 163, 184, 0.1)',
+                                            color: msg.status === 'resolved' ? '#22c55e' : 'var(--color-text-secondary)'
+                                        }}>
+                                            {msg.status ? msg.status.toUpperCase() : 'SENT'}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+
+                {/* COMPOSE TAB */}
+                {activeTab === 'compose' && (
+                    <FeedbackSection t={t} />
+                )}
             </div>
-            ))
-                            )}
         </div>
-                    </>
-                ) : activeTab === 'sent' ? (
-    <div style={{ textAlign: 'center', padding: 'var(--space-4) 0', color: 'var(--color-text-secondary)' }}>
-        <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📤</div>
-        <div>{t('inbox.sentPlaceholder') || 'Sent messages will appear here'}</div>
-    </div>
-) : (
-    <FeedbackSection />
-)}
-            </div >
-        </div >
     );
 };
 
