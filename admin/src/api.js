@@ -28,10 +28,20 @@ export const adminApi = {
             headers,
         });
 
-        const data = await response.json();
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            if (!response.ok) {
+                throw new Error(`Server Error (${response.status}): ${response.statusText || 'Unknown Connection Error'}`);
+            }
+            return text; // Should not happen for this API but safe fallback
+        }
 
         if (!response.ok) {
-            throw new Error(data.error || 'Something went wrong');
+            throw new Error(data.error || `request failed with status ${response.status}`);
         }
 
         return data;
