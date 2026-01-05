@@ -294,7 +294,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                     position: 'absolute',
                     top: 0,
                     left: 0,
-                    width: '100%', // Full width coverage
+                    width: '100%',
                     height: '100%',
                     background: 'rgba(15, 23, 42, 0.7)',
                     backdropFilter: 'blur(4px)',
@@ -303,24 +303,23 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                     alignItems: 'center',
                     justifyContent: 'center',
                     zIndex: 20,
-                    borderRadius: 'var(--radius-md)' // Match container radius
+                    borderRadius: 'var(--radius-md)'
                 }}
             >
                 <button
                     onClick={confirmDelete}
                     style={deleteButtonStyle}
                 >
-                    {t('inbox.delete.yes') || 'Delete'}
+                    Delete
                 </button>
             </div>
         );
     };
 
-    // Helper: Format Time (DD/MM/YYYY HH:MM:SS CET/CEST)
-    const formatTime = (dateString) => {
+    // Helper: Format Date/Time (split into two lines)
+    const formatDateTime = (dateString) => {
         try {
             const d = new Date(dateString);
-            // Check for DST (Central European Time)
             const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
             const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
             const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
@@ -335,9 +334,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 timeZone: 'Europe/Paris', hour12: false
             });
 
-            return `${datePart} ${timePart} ${isDST ? 'CEST' : 'CET'}`;
+            return { date: datePart, time: `${timePart} ${isDST ? 'CEST' : 'CET'}` };
         } catch (e) {
-            return '';
+            return { date: '', time: '' };
         }
     };
 
@@ -456,11 +455,11 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
             </div>
 
             {/* Content Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '0 1rem 1rem 1rem' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
 
                 {/* RECEIVED TAB */}
                 {activeTab === 'received' && (
-                    <div className="notification-list" style={{ marginTop: '1rem', height: '100%' }}>
+                    <div className="notification-list" style={{ marginTop: '0.5rem', height: '100%' }}>
                         {filteredNotifications.length === 0 ? (
                             <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                 <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪹</span>
@@ -489,9 +488,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     background: '#0f172a'
                                                 }}
                                             >
-                                                {/* 1. Header Row: Icon/Title + Timestamp (Baseline Aligned) */}
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.4rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                                                {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                    {/* Left: Icon + Title */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                         <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
                                                             {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '📩'}
                                                         </span>
@@ -499,8 +499,16 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             {notification.title}
                                                         </span>
                                                     </div>
-                                                    <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 400 }}>
-                                                        {formatTime(notification.created_at)}
+
+                                                    {/* Center: Status Badge */}
+                                                    <div style={{ justifySelf: 'center' }}>
+                                                        {renderStatusBadge(notification, 'received')}
+                                                    </div>
+
+                                                    {/* Right: Stacked Date/Time */}
+                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>
+                                                        <div>{formatDateTime(notification.created_at).date}</div>
+                                                        <div>{formatDateTime(notification.created_at).time}</div>
                                                     </div>
                                                 </div>
 
@@ -521,18 +529,13 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     {notification.body}
                                                 </div>
 
-                                                {/* 3. Footer Row: Stars (Left) | Badge (Center) | Bin (Right) */}
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', alignItems: 'center', height: '24px' }}>
+                                                {/* 3. Footer Row: Stars (Left) | Bin (Right) */}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
                                                     {/* Left: Placeholder for Stars */}
-                                                    <div style={{ justifySelf: 'start' }}></div>
-
-                                                    {/* Center: Status Badge */}
-                                                    <div style={{ justifySelf: 'center' }}>
-                                                        {renderStatusBadge(notification, 'received')}
-                                                    </div>
+                                                    <div></div>
 
                                                     {/* Right: Bin Icon */}
-                                                    <div style={{ justifySelf: 'end' }}>
+                                                    <div>
                                                         <button
                                                             onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
                                                             style={{
@@ -564,7 +567,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
                 {/* SENT TAB */}
                 {activeTab === 'sent' && (
-                    <div className="notification-list" style={{ marginTop: '1rem', height: '100%' }}>
+                    <div className="notification-list" style={{ marginTop: '0.5rem', height: '100%' }}>
                         {loadingSent ? (
                             <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '300px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                 <span style={{ fontSize: '2rem' }}>⌛</span>
@@ -593,9 +596,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             marginBottom: '0.75rem',
                                             background: '#0f172a'
                                         }}>
-                                            {/* 1. Header Row: Icon/Title + Timestamp (Baseline Aligned) */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.4rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                                            {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                {/* Left: Icon + Title */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                     <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
                                                         {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
                                                     </span>
@@ -603,8 +607,16 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         {getFeedbackTitle(msg.type)}
                                                     </span>
                                                 </div>
-                                                <div className="notification-time" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 400 }}>
-                                                    {formatTime(msg.created_at)}
+
+                                                {/* Center: Status Badge */}
+                                                <div style={{ justifySelf: 'center' }}>
+                                                    {renderStatusBadge(msg, 'sent')}
+                                                </div>
+
+                                                {/* Right: Stacked Date/Time */}
+                                                <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>
+                                                    <div>{formatDateTime(msg.created_at).date}</div>
+                                                    <div>{formatDateTime(msg.created_at).time}</div>
                                                 </div>
                                             </div>
 
@@ -625,10 +637,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 {msg.message}
                                             </div>
 
-                                            {/* 3. Footer Row: Stars (Left) | Badge (Center) | Bin (Right) */}
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', alignItems: 'center', height: '24px' }}>
+                                            {/* 3. Footer Row: Stars (Left) | Bin (Right) */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
                                                 {/* Left: Stars */}
-                                                <div style={{ justifySelf: 'start' }}>
+                                                <div>
                                                     {msg.rating && (
                                                         <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
                                                             {'⭐'.repeat(msg.rating)}
@@ -636,13 +648,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     )}
                                                 </div>
 
-                                                {/* Center: Status Badge */}
-                                                <div style={{ justifySelf: 'center' }}>
-                                                    {renderStatusBadge(msg, 'sent')}
-                                                </div>
-
                                                 {/* Right: Bin Icon */}
-                                                <div style={{ justifySelf: 'end' }}>
+                                                <div>
                                                     <button
                                                         onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
                                                         style={{
