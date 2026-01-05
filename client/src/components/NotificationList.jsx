@@ -185,6 +185,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
     const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || 'right');
     const [selectedMessage, setSelectedMessage] = useState(null);
+    const [viewingImageOnly, setViewingImageOnly] = useState(false);
 
     // Listen for setting changes
     useEffect(() => {
@@ -584,6 +585,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         onClick={() => {
                                                             markAsRead(notification.id);
                                                             setSelectedMessage(notification);
+                                                            setViewingImageOnly(false);
                                                         }}
                                                         style={{
                                                             position: 'relative',
@@ -630,7 +632,18 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         </div>
                                                         {/* 3. Footer Row */}
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
-                                                            <div style={{ fontSize: '1.2rem', lineHeight: 1 }}>{notification.image_url ? '🖼️' : ''}</div>
+                                                            <div
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (notification.image_url) {
+                                                                        setSelectedMessage(notification);
+                                                                        setViewingImageOnly(true);
+                                                                    }
+                                                                }}
+                                                                style={{ fontSize: '1.2rem', lineHeight: 1, cursor: notification.image_url ? 'pointer' : 'default' }}
+                                                            >
+                                                                {notification.image_url ? '🖼️' : ''}
+                                                            </div>
                                                             <div>
                                                                 <button
                                                                     onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
@@ -793,10 +806,15 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
             {selectedMessage && (
                 <NotificationPopup
                     message={selectedMessage}
-                    onDismiss={() => setSelectedMessage(null)}
+                    imageOnly={viewingImageOnly}
+                    onDismiss={() => {
+                        setSelectedMessage(null);
+                        setViewingImageOnly(false);
+                    }}
                     onMarkRead={() => {
                         markAsRead(selectedMessage.id);
                         setSelectedMessage(null);
+                        setViewingImageOnly(false);
                     }}
                 />
             )}
