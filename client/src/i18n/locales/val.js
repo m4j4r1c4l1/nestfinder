@@ -173,7 +173,12 @@ export default {
         enterRecoveryKey: 'paraula-paraula-paraula',
         invalidRecoveryKey: 'Clau de recuperació invàlida. Revisa-la i torna a intentar-ho.',
         accountRestored: 'Compte restaurat! Recarregant...',
-        restoreButton: 'Restaurar Compte'
+        restoreButton: 'Restaurar Compte',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'Advertència',
+        restoreWarningMessage: 'Restaurar un altre compte et desconnectarà del teu compte actual. Si no has guardat la clau de recuperació d\'aquest compte, perdràs l\'accés de manera permanent. Continuar?',
+        restoreConfirmButton: 'Sí, Restaurar',
+        sameKeyError: 'Aquesta és la clau de recuperació del teu compte actual. Ja estàs connectat amb aquest compte.'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

@@ -248,7 +248,7 @@ const MapView = () => {
                         top: 'var(--space-4)',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        zIndex: 350,
+                        zIndex: 150,
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         color: 'white',
                         padding: 'var(--space-4)',

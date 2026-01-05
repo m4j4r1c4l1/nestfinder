@@ -173,7 +173,12 @@ export default {
         enterRecoveryKey: 'слово-слово-слово',
         invalidRecoveryKey: 'Неверный ключ восстановления. Проверьте и попробуйте снова.',
         accountRestored: 'Аккаунт восстановлен! Перезагрузка...',
-        restoreButton: 'Восстановить аккаунт'
+        restoreButton: 'Восстановить аккаунт',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'Предупреждение',
+        restoreWarningMessage: 'Восстановление другого аккаунта отключит вас от текущего аккаунта. Если вы не сохранили ключ восстановления этого аккаунта, вы потеряете доступ навсегда. Продолжить?',
+        restoreConfirmButton: 'Да, Восстановить',
+        sameKeyError: 'Это ключ восстановления вашего текущего аккаунта. Вы уже вошли с этим аккаунтом.'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

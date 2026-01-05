@@ -173,7 +173,12 @@ export default {
         enterRecoveryKey: 'parola-parola-parola',
         invalidRecoveryKey: 'Chiave di recupero non valida. Verifica e riprova.',
         accountRestored: 'Account ripristinato! Ricaricamento...',
-        restoreButton: 'Ripristina Account'
+        restoreButton: 'Ripristina Account',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'Attenzione',
+        restoreWarningMessage: 'Ripristinare un altro account ti disconnetterà dal tuo account attuale. Se non hai salvato la chiave di recupero di questo account, perderai l\'accesso in modo permanente. Continuare?',
+        restoreConfirmButton: 'Sì, Ripristina',
+        sameKeyError: 'Questa è la chiave di recupero del tuo account attuale. Sei già connesso con questo account.'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

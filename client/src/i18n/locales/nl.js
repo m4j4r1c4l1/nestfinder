@@ -173,7 +173,12 @@ export default {
         enterRecoveryKey: 'woord-woord-woord',
         invalidRecoveryKey: 'Ongeldige herstelsleutel. Controleer en probeer opnieuw.',
         accountRestored: 'Account hersteld! Herladen...',
-        restoreButton: 'Account Herstellen'
+        restoreButton: 'Account Herstellen',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'Waarschuwing',
+        restoreWarningMessage: 'Het herstellen van een ander account zal je van je huidige account loskoppelen. Als je de herstelsleutel van dit account niet hebt opgeslagen, verlies je permanent de toegang. Doorgaan?',
+        restoreConfirmButton: 'Ja, Herstellen',
+        sameKeyError: 'Dit is de herstelsleutel van je huidige account. Je bent al ingelogd met dit account.'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

@@ -173,7 +173,12 @@ export default {
         enterRecoveryKey: 'wort-wort-wort',
         invalidRecoveryKey: 'Ungültiger Wiederherstellungsschlüssel. Bitte überprüfen.',
         accountRestored: 'Konto wiederhergestellt! Wird neu geladen...',
-        restoreButton: 'Konto Wiederherstellen'
+        restoreButton: 'Konto Wiederherstellen',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'Warnung',
+        restoreWarningMessage: 'Das Wiederherstellen eines anderen Kontos wird Sie von Ihrem aktuellen Konto trennen. Wenn Sie den Wiederherstellungsschlüssel dieses Kontos nicht gespeichert haben, verlieren Sie den Zugang dauerhaft. Fortfahren?',
+        restoreConfirmButton: 'Ja, Wiederherstellen',
+        sameKeyError: 'Dies ist der Wiederherstellungsschlüssel Ihres aktuellen Kontos. Sie sind bereits mit diesem Konto angemeldet.'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

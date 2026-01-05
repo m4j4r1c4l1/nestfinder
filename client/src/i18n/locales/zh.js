@@ -173,7 +173,12 @@ export default {
         enterRecoveryKey: '单词-单词-单词',
         invalidRecoveryKey: '无效的恢复密钥。请检查后重试。',
         accountRestored: '帐户已恢复！正在重新加载...',
-        restoreButton: '恢复帐户'
+        restoreButton: '恢复帐户',
+        // Restore Warning Dialog
+        restoreWarningTitle: '警告',
+        restoreWarningMessage: '恢复另一个帐户将使您与当前帐户断开连接。如果您没有保存此帐户的恢复密钥，您将永久失去访问权限。继续？',
+        restoreConfirmButton: '是的，恢复',
+        sameKeyError: '这是您当前帐户的恢复密钥。您已经使用此帐户登录。'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

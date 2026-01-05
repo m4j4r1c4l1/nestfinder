@@ -216,10 +216,39 @@ const RestoreAccountSection = ({ t }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-    const handleRestore = async () => {
+    // Tap-to-paste handler
+    const handleInputClick = async () => {
+        if (!inputKey.trim()) {
+            try {
+                const clipboardText = await navigator.clipboard.readText();
+                if (clipboardText && /^\w+-\w+-\w+$/.test(clipboardText.trim().toLowerCase())) {
+                    setInputKey(clipboardText.trim().toLowerCase());
+                    setError(null);
+                }
+            } catch (err) {
+                // Clipboard access denied - silent fail
+                console.log('Clipboard access not available');
+            }
+        }
+    };
+
+    const handleRestoreClick = () => {
         if (!inputKey.trim()) return;
 
+        // Check if trying to restore own key
+        const currentKey = sessionStorage.getItem('nestfinder_recovery_key_temp');
+        if (currentKey && inputKey.trim().toLowerCase() === currentKey.toLowerCase()) {
+            setError(t?.('settings.sameKeyError') || 'This is your current account\'s recovery key. You are already logged in with this account.');
+            return;
+        }
+
+        setShowConfirmDialog(true);
+    };
+
+    const handleConfirmRestore = async () => {
+        setShowConfirmDialog(false);
         setLoading(true);
         setError(null);
 
@@ -253,6 +282,7 @@ const RestoreAccountSection = ({ t }) => {
                 type="text"
                 value={inputKey}
                 onChange={(e) => { setInputKey(e.target.value); setError(null); }}
+                onClick={handleInputClick}
                 placeholder={t?.('settings.enterRecoveryKey') || 'word-word-word'}
                 style={{
                     width: '100%',
@@ -300,7 +330,7 @@ const RestoreAccountSection = ({ t }) => {
             )}
 
             <button
-                onClick={handleRestore}
+                onClick={handleRestoreClick}
                 disabled={loading || !inputKey.trim() || success}
                 style={{
                     width: '100%',
@@ -316,6 +346,102 @@ const RestoreAccountSection = ({ t }) => {
             >
                 {loading ? (t?.('common.loading') || 'Restoring...') : `🔄 ${t?.('settings.restoreButton') || 'Restore Account'}`}
             </button>
+
+            {/* Confirmation Dialog */}
+            {showConfirmDialog && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    padding: 'var(--space-4)',
+                    backdropFilter: 'blur(4px)'
+                }}>
+                    <div style={{
+                        background: 'var(--color-bg-primary)',
+                        borderRadius: 'var(--radius-lg)',
+                        border: '1px solid var(--color-border)',
+                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+                        maxWidth: '400px',
+                        width: '100%',
+                        overflow: 'hidden'
+                    }}>
+                        {/* Header */}
+                        <div style={{
+                            padding: 'var(--space-4)',
+                            borderBottom: '1px solid var(--color-border)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 'var(--space-2)'
+                        }}>
+                            <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+                            <span style={{
+                                fontWeight: 600,
+                                fontSize: 'var(--font-size-lg)',
+                                color: '#f59e0b'
+                            }}>
+                                {t?.('settings.restoreWarningTitle') || 'Warning'}
+                            </span>
+                        </div>
+
+                        {/* Body */}
+                        <div style={{
+                            padding: 'var(--space-4)',
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--font-size-sm)',
+                            lineHeight: 1.6
+                        }}>
+                            {t?.('settings.restoreWarningMessage') || 'Restoring another account will disconnect you from your current account. If you haven\'t saved this account\'s recovery key, you will lose access to it permanently. Continue?'}
+                        </div>
+
+                        {/* Footer */}
+                        <div style={{
+                            padding: 'var(--space-4)',
+                            borderTop: '1px solid var(--color-border)',
+                            display: 'flex',
+                            gap: 'var(--space-3)',
+                            justifyContent: 'flex-end'
+                        }}>
+                            <button
+                                onClick={() => setShowConfirmDialog(false)}
+                                style={{
+                                    padding: 'var(--space-2) var(--space-4)',
+                                    background: 'transparent',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: 'var(--radius-md)',
+                                    color: 'var(--color-text)',
+                                    cursor: 'pointer',
+                                    fontWeight: 500,
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {t?.('common.cancel') || 'Cancel'}
+                            </button>
+                            <button
+                                onClick={handleConfirmRestore}
+                                style={{
+                                    padding: 'var(--space-2) var(--space-4)',
+                                    background: '#f59e0b',
+                                    border: 'none',
+                                    borderRadius: 'var(--radius-md)',
+                                    color: '#000',
+                                    cursor: 'pointer',
+                                    fontWeight: 600,
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {t?.('settings.restoreConfirmButton') || 'Yes, Restore'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

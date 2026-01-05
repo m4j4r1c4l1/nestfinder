@@ -223,7 +223,12 @@ export default {
         enterRecoveryKey: 'word-word-word',
         invalidRecoveryKey: 'Invalid recovery key. Please check and try again.',
         accountRestored: 'Account restored! Reloading...',
-        restoreButton: 'Restore Account'
+        restoreButton: 'Restore Account',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'Warning',
+        restoreWarningMessage: 'Restoring another account will disconnect you from your current account. If you haven\'t saved this account\'s recovery key, you will lose access to it permanently. Continue?',
+        restoreConfirmButton: 'Yes, Restore',
+        sameKeyError: 'This is your current account\'s recovery key. You are already logged in with this account.'
     },
 
     // Welcome Message

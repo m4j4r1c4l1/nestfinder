@@ -173,7 +173,12 @@ export default {
         enterRecoveryKey: 'mot-mot-mot',
         invalidRecoveryKey: 'Clé de récupération invalide. Vérifiez et réessayez.',
         accountRestored: 'Compte restauré! Rechargement...',
-        restoreButton: 'Restaurer le Compte'
+        restoreButton: 'Restaurer le Compte',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'Avertissement',
+        restoreWarningMessage: 'Restaurer un autre compte vous déconnectera de votre compte actuel. Si vous n\'avez pas sauvegardé la clé de récupération de ce compte, vous perdrez l\'accès de façon permanente. Continuer?',
+        restoreConfirmButton: 'Oui, Restaurer',
+        sameKeyError: 'Ceci est la clé de récupération de votre compte actuel. Vous êtes déjà connecté avec ce compte.'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)

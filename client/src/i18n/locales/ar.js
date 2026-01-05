@@ -174,7 +174,12 @@ export default {
         enterRecoveryKey: 'كلمة-كلمة-كلمة',
         invalidRecoveryKey: 'مفتاح استرداد غير صالح. تحقق وحاول مرة أخرى.',
         accountRestored: 'تمت استعادة الحساب! جاري إعادة التحميل...',
-        restoreButton: 'استعادة الحساب'
+        restoreButton: 'استعادة الحساب',
+        // Restore Warning Dialog
+        restoreWarningTitle: 'تحذير',
+        restoreWarningMessage: 'استعادة حساب آخر ستفصلك عن حسابك الحالي. إذا لم تحفظ مفتاح استرداد هذا الحساب، ستفقد الوصول إليه بشكل دائم. هل تريد المتابعة؟',
+        restoreConfirmButton: 'نعم، استعادة',
+        sameKeyError: 'هذا هو مفتاح استرداد حسابك الحالي. أنت مسجل الدخول بالفعل بهذا الحساب.'
     },
     // Welcome Message (Home Page)
     // Welcome Message (Home Page & Modal)
