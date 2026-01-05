@@ -25,14 +25,32 @@ const RecoveryKeySection = ({ t }) => {
     const [keyVisible, setKeyVisible] = useState(true);
     const [fadeOpacity, setFadeOpacity] = useState(1);
 
-    // Load recovery key from session storage on mount (persists during current session only)
+    // Load recovery key from session storage OR check user object on mount
     useEffect(() => {
+        const { user } = useAuth();
         const sessionKey = sessionStorage.getItem('nestfinder_recovery_key_temp');
+
         if (sessionKey) {
             setRecoveryKey(sessionKey);
-            // If loading from session, start hidden
             setKeyVisible(false);
             setFadeOpacity(0);
+        } else if (user?.has_recovery_key) {
+            // User has a key but it's not in session (e.g. fresh login/reload)
+            // We can't show the key itself (security), but we show the "Show Key" UI
+            // which will likely prompt a re-generation or retrieval if we implemented that flow.
+            // Wait, if we can't show the key, we should at least show "Key Generated" state or similar.
+            // Actually, for this PoC, if user has key, let's assume they might want to see it?
+            // No, we can't retrieve it. We can only "Regenerate" it or "Show" if saved locally.
+            // If local session is gone, we can only GENERATE A NEW ONE.
+            // But the Requirement says: "Generate Recovery Key must be set to Show Recovery Key".
+            // If we can't fetch it, we can't show it.
+            // Let's stick strictly to what the user said: "Show Recovery Key button".
+            // But clicking it currently just shows current state.
+            // If we don't have the key string, we can't show it.
+            // Re-reading: "if the account has just been restored... Show Recovery Key".
+            // Restoring sets `nestfinder_recovery_key_temp`? NO. It clears it usually.
+            // Ah, recovery flow uses a key provided by user. Maybe save THAT key to session?
+            // YES. In `handleConfirmRestore`, we should save the inputKey to `nestfinder_recovery_key_temp`.
         }
     }, []);
 
@@ -278,8 +296,13 @@ const RestoreAccountSection = ({ t }) => {
         setError(null);
 
         try {
-            await recoverFromKey(inputKey.trim().toLowerCase());
+            const keyToUse = inputKey.trim().toLowerCase();
+            await recoverFromKey(keyToUse);
             setSuccess(true);
+
+            // Save the restored key to session storage so the "Show Recovery Key" button works
+            sessionStorage.setItem('nestfinder_recovery_key_temp', keyToUse);
+
             // Reload page to refresh user state
             setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
@@ -300,7 +323,7 @@ const RestoreAccountSection = ({ t }) => {
                 🔄 {t?.('settings.restoreAccount') || 'Restore Account from Key'}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
-                {t?.('settings.restoreAccountDescription') || 'Enter a recovery key to restore your previous identity.'}
+                {t?.('settings.restoreAccountDescription') || 'Enter your 3-word recovery key. Type the words separated by spaces.'}
             </div>
 
             <input
@@ -308,7 +331,7 @@ const RestoreAccountSection = ({ t }) => {
                 value={inputKey}
                 onChange={handleInputChange}
                 onClick={handleInputClick}
-                placeholder={t?.('settings.enterRecoveryKey') || 'word-word-word'}
+                placeholder={t?.('settings.enterRecoveryKey') || 'word word word'}
                 style={{
                     width: '100%',
                     padding: 'var(--space-2)',
