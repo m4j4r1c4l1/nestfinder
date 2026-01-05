@@ -490,16 +490,13 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
         return (
             <span style={{
-                fontSize: '0.85rem',
+                fontSize: '1rem',
                 fontWeight: 700,
-                padding: '2px 10px',
-                borderRadius: '12px',
-                background: 'var(--color-bg-tertiary)',
                 color: tickColor,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                letterSpacing: '-1px',
+                letterSpacing: '-2px',
                 whiteSpace: 'nowrap'
             }}>
                 {ticks}
