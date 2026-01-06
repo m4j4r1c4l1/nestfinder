@@ -702,7 +702,43 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
             const maxLeft = -maxRight;
             clampedOffset = Math.max(maxLeft, Math.min(maxRight, dragOffset));
         }
+
+        // Fix bounce: smooth clamping is already applied above by min/max.
+        // The issue might be the spring-back effect or the visual jitter. 
+        // Ensure clampedOffset is strictly within bounds.
+
         style.transform = `${transform} translateX(${clampedOffset}px)`;
+    }
+
+    // Determine dove direction based on drag or current value
+    const isDraggingRight = dragOffset !== null && dragOffset > 0;
+    const isDraggingLeft = dragOffset !== null && dragOffset < 0;
+    const doveDirection = isDraggingRight ? 'right' : isDraggingLeft ? 'left' : (value === 'right' ? 'left' : 'right');
+    // Wait, if value is right (active), dove should face LEFT (pointing back)? 
+    // Or users want it pointing to the direction of swipe?
+    // User request: "pointed at all times towards the direction the user is swiping to"
+
+    // If dragging:
+    //   Drag > 0 (Right) -> Face Right
+    //   Drag < 0 (Left)  -> Face Left
+    // If NOT dragging:
+    //   Value 'left' -> Face Right (ready to swipe right?) OR Face Left (resting state?)
+    //   Let's assume "direction user is swiping to" means if I'm at Left, I swipe Right, so face Right.
+    //   If I'm at Right, I swipe Left, so face Left.
+
+    let doveContent = '🕊️';
+    if (dragOffset !== null) {
+        // Active Dragging
+        if (dragOffset > 5) doveContent = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>; // Face Right
+        else if (dragOffset < -5) doveContent = '🕊️'; // Face Left
+        else doveContent = value === 'left' ? <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span> : '🕊️'; // Neutral/Start
+    } else {
+        // Resting State
+        // If 'left' (default), to delete we swipe Right -> Face Right
+        if (value === 'left') doveContent = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>;
+        // If 'right' (swiped), to undo we swipe Left -> Face Left
+        else if (value === 'right') doveContent = '🕊️';
+        else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Center/Null
     }
 
     return (
@@ -728,9 +764,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
                 {/* Thumb */}
                 <div style={style}>
-                    {value === 'left' ? '🕊️' :
-                        value === 'right' ? <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span> :
-                            <span style={{ fontSize: '1.2rem' }}>🐥</span>}
+                    {doveContent}
                 </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', color: 'var(--color-text-secondary)', fontSize: '0.7rem' }}>
@@ -918,12 +952,31 @@ const RetentionSlider = ({ value, onChange }) => {
                         {steps.map((step, i) => {
                             // Determine mark type
                             const isMajor = ['0d', '1h', '6h', '12h', '1d', '1w', '1m', '6m', '12m', 'forever'].includes(step.val);
-                            // Avoid showing 12m label as it overlaps with forever
-                            const isLabel = ['0d', '1d', '1w', '1m', '6m', 'forever'].includes(step.val);
+                            // Include 12m (1y) in labels now
+                            const isLabel = ['0d', '1d', '1w', '1m', '6m', '12m', 'forever'].includes(step.val);
 
                             // Don't show every single tick if too crowded? 
                             // 46 steps is a lot for small mobile. 
                             const showTick = i % 2 === 0 || isMajor;
+
+                            // Custom transform for strict positioning of 1y and infinity
+                            let labelStyle = {
+                                position: 'absolute',
+                                bottom: '16px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                fontSize: '0.65rem',
+                                color: 'var(--color-text-tertiary)',
+                                whiteSpace: 'nowrap'
+                            };
+
+                            if (step.val === '12m') {
+                                // Shift 1y label to the left to avoid overlap with infinity
+                                labelStyle.transform = 'translateX(-120%)';
+                            } else if (step.val === 'forever') {
+                                // Shift infinity slightly right or keep centered but ensure spacing
+                                labelStyle.transform = 'translateX(-20%)';
+                            }
 
                             return (showTick && (
                                 <div key={i} style={{
@@ -937,15 +990,7 @@ const RetentionSlider = ({ value, onChange }) => {
                                     transform: 'translateX(-50%)'
                                 }}>
                                     {isLabel && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: '16px',
-                                            left: '50%',
-                                            transform: 'translateX(-50%)',
-                                            fontSize: '0.65rem',
-                                            color: 'var(--color-text-tertiary)',
-                                            whiteSpace: 'nowrap'
-                                        }}>
+                                        <div style={labelStyle}>
                                             {step.short}
                                         </div>
                                     )}
@@ -1000,7 +1045,7 @@ const RetentionSlider = ({ value, onChange }) => {
                     color: 'var(--color-primary)',
                     fontSize: '0.85rem',
                     textAlign: 'center',
-                    marginTop: '0.5rem',
+                    marginTop: '1rem',
                     animation: 'fadeIn 0.3s ease-out'
                 }}>
                     <span style={{ marginRight: '0.5rem' }}>ℹ️</span>

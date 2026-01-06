@@ -1191,11 +1191,11 @@ const FeedbackSection = ({
                             display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
                             userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
                         }}>
-                            Showing {paginatedFeedback.length} of {totalItems}
+                            Received: {feedbackCounts.pending} | Read: {feedbackCounts.read}
                         </span>
                         <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
                             <span style={{ fontWeight: 500 }}>
-                                <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedbackCounts.pending} Pending</span>
+                                <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedbackCounts.pending} Received</span>
                             </span>
                             <span style={{ fontWeight: 500 }}>
                                 <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedbackCounts.read} Read</span>
