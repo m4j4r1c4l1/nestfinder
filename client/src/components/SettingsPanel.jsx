@@ -916,7 +916,127 @@ const SettingsPanel = ({ onClose }) => {
             </div>
 
             <div className="card-body">
-                {/* Messages Section */}
+
+                {/* Share App with QR Code - FIRST SECTION */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">{t('settings.shareApp')}</label>
+
+
+                    {/* QR Code Display */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '0.5rem',
+                        background: 'white',
+                        borderRadius: 'var(--radius-md)',
+                        width: '250px',
+                        height: '250px',
+                        margin: '0 auto var(--space-3) auto'
+                    }}>
+                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                            <QRCodeCanvas
+                                value={APP_URL}
+                                size={230}
+                                level="H"
+                                bgColor="white"
+                                fgColor="#1e293b"
+                                style={{ display: 'block' }}
+                            />
+                            {/* Center Emoji Overlay */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                background: 'white',
+                                borderRadius: '50%',
+                                width: '80px',
+                                height: '80px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '50px'
+                            }}>
+                                🪹
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ textAlign: 'center', margin: '0 auto var(--space-3)', color: 'var(--color-text-secondary)', fontSize: '0.9rem', width: '250px' }}>
+                        {t('settings.spreadWarmth') || 'Spread the warmth! 🐣'}
+                    </div>
+
+                    {/* Copy Link Button */}
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div
+                            role="button"
+                            className="btn btn-secondary"
+                            onClick={handleCopyLink}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem',
+                                padding: '0.75rem 1.5rem',
+                                minWidth: '250px',
+                                background: showCopied ? 'var(--color-confirmed)' : 'var(--color-primary)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: 'var(--radius-md)',
+                                transition: 'all 0.3s',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.2rem' }}>{showCopied ? '✓' : '🔗'}</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {showCopied ? t('settings.linkCopied') : t('settings.shareLink')}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+
+                {/* Your Profile Section - Combined User + Recovery */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">{t('settings.yourProfile') || 'Your Profile'}</label>
+
+                    {/* User Status Card */}
+                    <div style={{
+                        background: `linear-gradient(135deg, ${status.color}20, transparent)`,
+                        borderRadius: 'var(--radius-lg)',
+                        padding: 'var(--space-4)',
+                        marginBottom: 'var(--space-3)',
+                        border: `1px solid ${status.color}40`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 'var(--space-3)'
+                    }}>
+                        <div style={{ fontSize: '2.5rem' }}>{status.icon}</div>
+                        <div>
+                            <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                                {user?.nickname || t('settings.anonymousUser') || 'User'}
+                            </div>
+                            <div style={{ color: status.color, fontWeight: 500 }}>
+                                {status.name}
+                            </div>
+                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
+                                {t('settings.trustScore') || 'Trust Score'}: {user?.trust_score || 0}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Recovery Key */}
+                    <RecoveryKeySection t={t} />
+
+                    {/* Restore Account from Key */}
+                    <RestoreAccountSection t={t} />
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+
+                {/* Messages Section - REPOSITIONED */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.messages') || 'Messages'}</label>
 
@@ -1042,125 +1162,6 @@ const SettingsPanel = ({ onClose }) => {
                             <option value="forever">{t('settings.retention.forever') || 'Forever'}</option>
                         </select>
                     </div>
-                </div>
-
-                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
-
-                {/* Share App with QR Code - FIRST SECTION */}
-                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                    <label className="form-label">{t('settings.shareApp')}</label>
-
-
-                    {/* QR Code Display */}
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        padding: '0.5rem',
-                        background: 'white',
-                        borderRadius: 'var(--radius-md)',
-                        width: '250px',
-                        height: '250px',
-                        margin: '0 auto var(--space-3) auto'
-                    }}>
-                        <div style={{ position: 'relative', display: 'inline-block' }}>
-                            <QRCodeCanvas
-                                value={APP_URL}
-                                size={230}
-                                level="H"
-                                bgColor="white"
-                                fgColor="#1e293b"
-                                style={{ display: 'block' }}
-                            />
-                            {/* Center Emoji Overlay */}
-                            <div style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                background: 'white',
-                                borderRadius: '50%',
-                                width: '80px',
-                                height: '80px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '50px'
-                            }}>
-                                🪹
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style={{ textAlign: 'center', margin: '0 auto var(--space-3)', color: 'var(--color-text-secondary)', fontSize: '0.9rem', width: '250px' }}>
-                        {t('settings.spreadWarmth') || 'Spread the warmth! 🐣'}
-                    </div>
-
-                    {/* Copy Link Button */}
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div
-                            role="button"
-                            className="btn btn-secondary"
-                            onClick={handleCopyLink}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.5rem',
-                                padding: '0.75rem 1.5rem',
-                                minWidth: '250px',
-                                background: showCopied ? 'var(--color-confirmed)' : 'var(--color-primary)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: 'var(--radius-md)',
-                                transition: 'all 0.3s',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <span style={{ fontSize: '1.2rem' }}>{showCopied ? '✓' : '🔗'}</span>
-                            <span style={{ fontWeight: 600 }}>
-                                {showCopied ? t('settings.linkCopied') : t('settings.shareLink')}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
-
-                {/* Your Profile Section - Combined User + Recovery */}
-                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                    <label className="form-label">{t('settings.yourProfile') || 'Your Profile'}</label>
-
-                    {/* User Status Card */}
-                    <div style={{
-                        background: `linear-gradient(135deg, ${status.color}20, transparent)`,
-                        borderRadius: 'var(--radius-lg)',
-                        padding: 'var(--space-4)',
-                        marginBottom: 'var(--space-3)',
-                        border: `1px solid ${status.color}40`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--space-3)'
-                    }}>
-                        <div style={{ fontSize: '2.5rem' }}>{status.icon}</div>
-                        <div>
-                            <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
-                                {user?.nickname || t('settings.anonymousUser') || 'User'}
-                            </div>
-                            <div style={{ color: status.color, fontWeight: 500 }}>
-                                {status.name}
-                            </div>
-                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                                {t('settings.trustScore') || 'Trust Score'}: {user?.trust_score || 0}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Recovery Key */}
-                    <RecoveryKeySection t={t} />
-
-                    {/* Restore Account from Key */}
-                    <RestoreAccountSection t={t} />
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
