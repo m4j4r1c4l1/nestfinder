@@ -1178,16 +1178,15 @@ const FeedbackSection = ({
             <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
                     <h3>💬 Received History</h3>
-                    <span style={{
-                        position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
-                        background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
-                        borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
-                    }}>
-                        Showing {paginatedFeedback.length} of {totalItems}
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{
+                            background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
+                            borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
+                            userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
+                        }}>
+                            Showing {paginatedFeedback.length} of {totalItems}
+                        </span>
                         <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
                             <span style={{ fontWeight: 500 }}>
                                 <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => ['new', 'sent', 'delivered', 'pending'].includes(f.status)).length} Pending</span>
