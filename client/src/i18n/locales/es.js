@@ -8,6 +8,19 @@ export default {
         flag: '🇪🇸'
     },
 
+    // Feedback
+    feedback: {
+        title: 'Feedback',
+        description: 'Reporta errores, sugiere funciones o envía comentarios',
+        placeholder: 'Describe tus comentarios en detalle...',
+        send: 'Enviar Feedback',
+        charLimit: 'caracteres',
+        rateApp: 'Califica la App',
+        bugReport: 'Reporte de Error',
+        suggestion: 'Sugerencia',
+        general: 'General'
+    },
+
     // Navigation
     nav: {
         map: 'Mapa',
