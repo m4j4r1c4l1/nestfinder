@@ -1385,9 +1385,12 @@ const HistorySection = ({ users = [] }) => {
     const [selectedBatchId, setSelectedBatchId] = useState(null);
     const [previewMessage, setPreviewMessage] = useState(null);
 
+
     // Pagination & Sort State
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
+    const [sortColumn, setSortColumn] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState('desc');
 
 
     // Resizable columns state
