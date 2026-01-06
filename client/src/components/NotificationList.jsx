@@ -631,7 +631,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         }}
                                                     >
                                                         {/* 1. Header Row */}
-                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                                 <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
                                                                     {notification.type === 'alert' ? '🚨' : notification.type === 'success' ? '✅' : notification.type === 'reward' ? '🏆' : '🔔'}
@@ -640,7 +640,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                                     {notification.title}
                                                                 </span>
                                                             </div>
-                                                            <div style={{ justifySelf: 'center' }}>{renderStatusBadge(notification, 'received')}</div>
                                                             <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3, minWidth: '120px' }}>
                                                                 <div>{formatDateTime(notification.created_at).date}</div>
                                                                 <div>{formatDateTime(notification.created_at).time}</div>
@@ -688,6 +687,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             >
                                                                 {notification.image_url ? '🖼️' : ''}
                                                             </div>
+                                                            <div>{renderStatusBadge(notification, 'received')}</div>
                                                             <div>
                                                                 <button
                                                                     onClick={(e) => handleDeleteClick(e, notification.id, 'received')}
@@ -767,8 +767,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         margin: '0 0 0.75rem 0',
                                                         background: '#0f172a'
                                                     }}>
-                                                        {/* 1. Header Row: Icon/Title | Badge | Stacked Timestamp */}
-                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
+                                                        {/* 1. Header Row: Icon/Title | Stacked Timestamp */}
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
                                                             {/* Left: Icon + Title */}
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                                 <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
@@ -777,11 +777,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                                 <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
                                                                     {getFeedbackTitle(msg.type)}
                                                                 </span>
-                                                            </div>
-
-                                                            {/* Center: Status Badge */}
-                                                            <div style={{ justifySelf: 'center' }}>
-                                                                {renderStatusBadge(msg, 'sent')}
                                                             </div>
 
                                                             {/* Right: Stacked Date/Time */}
@@ -819,6 +814,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                                     </div>
                                                                 )}
                                                             </div>
+
+                                                            {/* Center: Status Badge */}
+                                                            <div>{renderStatusBadge(msg, 'sent')}</div>
 
                                                             {/* Right: Bin Icon */}
                                                             <div>
