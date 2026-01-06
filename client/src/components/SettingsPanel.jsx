@@ -1048,7 +1048,6 @@ const RetentionSlider = ({ value, onChange }) => {
                     marginTop: '1rem',
                     animation: 'fadeIn 0.3s ease-out'
                 }}>
-                    <span style={{ marginRight: '0.5rem' }}>ℹ️</span>
                     {infoMessage}
                 </div>
             )}
