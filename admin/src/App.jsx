@@ -148,7 +148,7 @@ const Login = ({ onLogin }) => {
                     fontSize: '0.8rem',
                     marginTop: '1.5rem'
                 }}>
-                    Finding nests for those without one
+                    Finding Nests ❤️ Bringing Relief
                 </p>
             </div>
         </div>

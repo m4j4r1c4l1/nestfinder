@@ -11,7 +11,7 @@ export default defineConfig({
             manifest: {
                 name: 'NestFinder',
                 short_name: 'NestFinder',
-                description: 'Finding nests for those without one - Track and coordinate homeless assistance locations',
+                description: 'Finding Nests ❤️ Bringing Relief - Track and coordinate homeless assistance locations',
                 theme_color: '#0f172a',
                 background_color: '#0f172a',
                 display: 'standalone',

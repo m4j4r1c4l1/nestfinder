@@ -678,15 +678,31 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         fontSize: '1.2rem',
         cursor: 'grab',
         boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
         transition: isDragging.current ? 'none' : 'left 0.2s ease-out, transform 0.2s ease-out',
         left: leftPos,
         transform: transform
     };
 
-    // Apply visual offset if dragging
-    if (dragOffset !== null) {
-        style.transform = `${transform} translateX(${dragOffset}px)`;
+    // Apply visual offset if dragging (with clamping to prevent bounce past edges)
+    if (dragOffset !== null && trackRef.current) {
+        const trackWidth = trackRef.current.offsetWidth;
+        const thumbWidth = 100; // Fixed thumb width
+        let clampedOffset = dragOffset;
+
+        // Clamp based on current position
+        if (value === 'left') {
+            // Already at left edge, can only go right
+            clampedOffset = Math.max(0, Math.min(trackWidth - thumbWidth - 8, dragOffset));
+        } else if (value === 'right') {
+            // Already at right edge, can only go left
+            clampedOffset = Math.min(0, Math.max(-(trackWidth - thumbWidth - 8), dragOffset));
+        } else {
+            // Center: can go either way but clamp
+            const maxRight = (trackWidth - thumbWidth) / 2 - 4;
+            const maxLeft = -maxRight;
+            clampedOffset = Math.max(maxLeft, Math.min(maxRight, dragOffset));
+        }
+        style.transform = `${transform} translateX(${clampedOffset}px)`;
     }
 
     return (
