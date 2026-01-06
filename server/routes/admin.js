@@ -753,6 +753,26 @@ router.get('/feedback', (req, res) => {
 
         const total = get("SELECT COUNT(*) as count FROM feedback").count;
 
+        // Auto-update status to 'delivered' for fetched items that are still 'new' or 'sent'
+        // This ensures the sender sees "Double Ticks" (Received) when Admin views the list
+        const idsToUpdate = feedback
+            .filter(f => f.status === 'new' || f.status === 'sent')
+            .map(f => f.id);
+
+        if (idsToUpdate.length > 0) {
+            // Use a transaction or bulk update if possible, but for SQLite simple IN clause works well
+            run(`UPDATE feedback SET status = 'delivered' WHERE id IN (${idsToUpdate.join(',')})`);
+
+            // Update the objects in the response so the UI updates immediately (Optional, but better UX)
+            // Actually, let's NOT update the response immediately so we get that "tick... double tick" effect on next poll?
+            // User complained it "didn't eventually turn". Immediate update is better for "Received history table".
+            // However, the user said "entry in Received history table is Sent with one tick".
+            // If we update here, it will be Delivered with 2 ticks.
+            feedback.forEach(f => {
+                if (idsToUpdate.includes(f.id)) f.status = 'delivered';
+            });
+        }
+
         res.json({ feedback, total });
     } catch (error) {
         console.error('Get feedback error:', error);
