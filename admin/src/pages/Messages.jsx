@@ -154,9 +154,9 @@ const Messages = () => {
             const fetchedFeedback = feedbackRes.feedback || [];
             setFeedback(fetchedFeedback);
 
-            // Auto-mark NEW feedback as DELIVERED (Admin received it)
+            // Auto-mark SENT feedback as DELIVERED (Admin received it)
             fetchedFeedback.forEach(f => {
-                if (f.status === 'new') {
+                if (f.status === 'sent') {
                     // Update locally
                     f.status = 'delivered';
                     // Update on server (fire and forget)
@@ -1129,16 +1129,14 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
         setSelectedIds([]);
         onUpdate && onUpdate();
     };
-
-    // Handle row click: open preview AND mark as read if new/delivered
+    // Handle row click: open preview AND mark as read if sent/delivered
     const handleRowClick = async (item) => {
         setPreviewItem(item);
-        if (item.status === 'new' || item.status === 'delivered' || item.status === 'pending') {
-            await onUpdateStatus(item.id, 'reviewed');
+        if (item.status === 'sent' || item.status === 'delivered' || item.status === 'pending') {
+            await onUpdateStatus(item.id, 'read');
             onUpdate && onUpdate();
         }
     };
-
     // Utility function to format timestamp in 24h format with CET/CEST
     const formatTimestamp24h = (isoString) => {
         const date = new Date(isoString);
@@ -1322,7 +1320,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
                                                 <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
-                                                    {item.status === 'new' ? (
+                                                    {item.status === 'sent' || item.status === 'new' ? (
                                                         <span style={{ color: '#22c55e' }}>✓</span>
                                                     ) : (item.status === 'delivered' || item.status === 'pending') ? (
                                                         <span style={{ color: '#22c55e' }}>✓✓</span>
@@ -1331,7 +1329,7 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                                     )}
                                                 </div>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
-                                                    {item.status === 'new' ? 'Sent' : (item.status === 'delivered' || item.status === 'pending') ? 'Received' : 'Read'}
+                                                    {item.status === 'sent' || item.status === 'new' ? 'Sent' : (item.status === 'delivered' || item.status === 'pending') ? 'Received' : 'Read'}
                                                 </span>
                                             </div>
                                         </td>

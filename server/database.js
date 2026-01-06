@@ -254,6 +254,15 @@ export const initDatabase = async () => {
     db.run("ALTER TABLE feedback ADD COLUMN status TEXT DEFAULT 'new'");
   } catch (e) { /* Column exists */ }
 
+  // Migration: Refactor Feedback Statuses (new->sent, reviewed->read)
+  try {
+    // 1. Convert 'new' to 'sent'
+    db.run("UPDATE feedback SET status = 'sent' WHERE status = 'new'");
+    // 2. Convert 'reviewed' or 'resolved' to 'read'
+    db.run("UPDATE feedback SET status = 'read' WHERE status IN ('reviewed', 'resolved')");
+    // Note: 'delivered' stays 'delivered'
+  } catch (e) { console.error('Migration failed:', e); }
+
   // Migration: Extract ratings from existing feedback messages and populate daily_ratings
   // This runs safely multiple times (only processes messages without rating set)
   const feedbackWithRatings = db.exec(`

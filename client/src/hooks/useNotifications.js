@@ -47,6 +47,8 @@ export const useNotifications = (userId) => {
                     const newMsg = data.notifications[0];
                     if (settings.realTime && !newMsg.read) {
                         setPopupMessage(newMsg);
+                        // Mark as read immediately when popping up (user "sees" it)
+                        markAsRead(newMsg);
                     }
                 }
 

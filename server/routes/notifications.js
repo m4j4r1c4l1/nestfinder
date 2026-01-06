@@ -185,8 +185,8 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         let feedbackTotal, feedbackPending, feedbackRead;
         try {
             feedbackTotal = get('SELECT COUNT(*) as count FROM feedback');
-            feedbackPending = get('SELECT COUNT(*) as count FROM feedback WHERE status = ?', ['new']);
-            feedbackRead = get('SELECT COUNT(*) as count FROM feedback WHERE status != ?', ['new']);
+            feedbackPending = get("SELECT COUNT(*) as count FROM feedback WHERE status IN ('sent', 'delivered')");
+            feedbackRead = get("SELECT COUNT(*) as count FROM feedback WHERE status = 'read'");
         } catch (e) {
             console.error('Feedback stats failed:', e.message);
             // Fallback if column missing (should be fixed by migration, but just in case)

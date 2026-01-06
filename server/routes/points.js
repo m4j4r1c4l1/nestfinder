@@ -543,8 +543,8 @@ router.post('/feedback', (req, res) => {
 
   // Store feedback with optional rating
   run(`
-    INSERT INTO feedback (user_id, type, message, rating)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO feedback (user_id, type, message, rating, status)
+    VALUES (?, ?, ?, ?, 'sent')
   `, [userId || null, type || 'general', message, rating || null]);
 
   // If rating provided, update daily_ratings aggregation
