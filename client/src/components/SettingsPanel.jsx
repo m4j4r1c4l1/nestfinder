@@ -914,6 +914,7 @@ const SettingsPanel = ({ onClose }) => {
                         {t('settings.swipe.desc') || 'Swipe a message in this direction to delete it.'}
                     </div>
                 </div>
+
                 {/* Share App with QR Code - FIRST SECTION */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.shareApp')}</label>
@@ -1029,6 +1030,57 @@ const SettingsPanel = ({ onClose }) => {
 
                     {/* Restore Account from Key */}
                     <RestoreAccountSection t={t} />
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+
+                {/* Notification Display Mode */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">{t('settings.notifications') || 'Notifications'}</label>
+                    <div
+                        onClick={togglePopup}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: 'var(--space-3)',
+                            background: 'var(--color-bg-secondary)',
+                            borderRadius: 'var(--radius-md)',
+                            cursor: 'pointer',
+                            border: '1px solid var(--color-border)'
+                        }}
+                    >
+                        <div>
+                            <div style={{ fontWeight: 500 }}>🔔 {t('settings.notifyPopup') || 'Popup Notifications'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                {popupEnabled
+                                    ? (t('settings.notifyPopup.onDesc') || 'Messages appear immediately when received')
+                                    : (t('settings.notifyPopup.offDesc') || 'Messages are saved to inbox silently')}
+                            </div>
+                        </div>
+                        <div
+                            style={{
+                                width: '44px',
+                                height: '24px',
+                                borderRadius: '12px',
+                                background: popupEnabled ? 'var(--color-primary)' : 'var(--color-border)',
+                                position: 'relative',
+                                transition: 'background 0.2s'
+                            }}
+                        >
+                            <div style={{
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: 'white',
+                                position: 'absolute',
+                                top: '2px',
+                                left: popupEnabled ? '22px' : '2px',
+                                transition: 'left 0.2s',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                            }} />
+                        </div>
+                    </div>
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
