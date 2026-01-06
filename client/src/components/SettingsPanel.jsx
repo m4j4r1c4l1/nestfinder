@@ -755,7 +755,7 @@ const RetentionSlider = ({ value, onChange }) => {
     // Months: 1m - 12m (1y)
     // Forever
     const steps = React.useMemo(() => {
-        const s = [{ val: '0d', label: 'Delete on Read', short: '0' }];
+        const s = [{ val: '0d', label: '0 Hours', short: '0' }];
 
         // Hours (1-23)
         for (let i = 1; i < 24; i++) s.push({ val: `${i}h`, label: `${i} Hour${i > 1 ? 's' : ''}`, short: `${i}h` });
@@ -892,23 +892,6 @@ const RetentionSlider = ({ value, onChange }) => {
                 </span>
             </div>
 
-            {/* Info Message */}
-            {infoMessage && (
-                <div style={{
-                    padding: 'var(--space-2)',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--color-primary)',
-                    fontSize: '0.85rem',
-                    textAlign: 'center',
-                    marginBottom: '0.5rem',
-                    animation: 'fadeIn 0.3s ease-out'
-                }}>
-                    {infoMessage}
-                </div>
-            )}
-
             {/* Track Container */}
             <div style={{ padding: '0 12px' }}>
                 <div
@@ -935,7 +918,8 @@ const RetentionSlider = ({ value, onChange }) => {
                         {steps.map((step, i) => {
                             // Determine mark type
                             const isMajor = ['0d', '1h', '6h', '12h', '1d', '1w', '1m', '6m', '12m', 'forever'].includes(step.val);
-                            const isLabel = ['0d', '1d', '1w', '1m', '12m', 'forever'].includes(step.val); // Labels for significant shifts
+                            // Avoid showing 12m label as it overlaps with forever
+                            const isLabel = ['0d', '1d', '1w', '1m', '6m', 'forever'].includes(step.val);
 
                             // Don't show every single tick if too crowded? 
                             // 46 steps is a lot for small mobile. 
@@ -1005,6 +989,24 @@ const RetentionSlider = ({ value, onChange }) => {
                     }} />
                 </div>
             </div>
+
+            {/* Info Message (Moved below track) */}
+            {infoMessage && (
+                <div style={{
+                    padding: 'var(--space-2)',
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--color-primary)',
+                    fontSize: '0.85rem',
+                    textAlign: 'center',
+                    marginTop: '0.5rem',
+                    animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    <span style={{ marginRight: '0.5rem' }}>ℹ️</span>
+                    {infoMessage}
+                </div>
+            )}
         </div>
     );
 };
