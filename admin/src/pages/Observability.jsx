@@ -203,68 +203,66 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
 
                                 {/* Sent Section */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', width: '100%', justifyContent: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
                                             {stats.notificationMetrics?.total || 0}
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
-                                        <div className="text-muted text-sm">Notifications</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Sent</div>
                                     </div>
                                     {/* Sent Badges - Vertical Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
                                         <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600 }} className="text-muted text-sm">Delivered</span>
+                                            <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
                                             <span style={{ fontWeight: 700, color: '#fff' }}>{(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}</span>
                                         </div>
                                         <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#3b82f620', border: '1px solid #3b82f640',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600 }} className="text-muted text-sm">Read</span>
+                                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
                                             <span style={{ fontWeight: 700, color: '#fff' }}>{(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}</span>
                                         </div>
                                         <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#f59e0b20', border: '1px solid #f59e0b40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
-                                            <span style={{ color: '#f59e0b', fontWeight: 600 }} className="text-muted text-sm">Unread</span>
+                                            <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
                                             <span style={{ fontWeight: 700, color: '#fff' }}>{stats.notificationMetrics?.unread || 0}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Received Section */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', borderTop: '1px solid #334155', paddingTop: '0.75rem' }}>
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', borderTop: '1px solid #334155', paddingTop: '0.75rem', width: '100%', justifyContent: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
                                             {stats.feedbackMetrics?.total || stats.totalReceived || 0}
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
-                                        <div className="text-muted text-sm">Feedback</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Received</div>
                                     </div>
                                     {/* Received Badges - Vertical Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
                                         <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600 }} className="text-muted text-sm">Delivered</span>
+                                            <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
                                             <span style={{ fontWeight: 700, color: '#fff' }}>{stats.feedbackMetrics?.pending || 0}</span>
                                         </div>
                                         <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#3b82f620', border: '1px solid #3b82f640',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600 }} className="text-muted text-sm">Read</span>
+                                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
                                             <span style={{ fontWeight: 700, color: '#fff' }}>{stats.feedbackMetrics?.read || 0}</span>
                                         </div>
                                     </div>
@@ -274,50 +272,53 @@ const Observability = () => {
                             <div style={{ width: '1px', height: '80px', background: '#334155', alignSelf: 'center' }} />
 
                             {/* Development Block (Right) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
-                                {/* Main Count: LOC */}
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                        {(stats.devMetrics?.loc || 0).toLocaleString()}
-                                    </div>
-                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>LOC</div>
-                                    <div className="text-muted text-sm">Lines of Code</div>
-                                </div>
-                                {/* Badges Row with 2-line stacked text */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
-                                    <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                        background: '#8b5cf620', border: '1px solid #8b5cf640',
-                                        borderRadius: '8px', padding: '0.4rem 0.75rem'
-                                    }}>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
-                                            <div className="text-muted text-sm">Git History</div>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem', marginBottom: 'auto' }}>🛠️ Development</div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem' }}>
+                                    {/* Main Count: LOC */}
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
+                                            {(stats.devMetrics?.loc || 0).toLocaleString()}
                                         </div>
-                                        <span style={{ fontWeight: 700, color: '#fff', fontSize: '1rem' }}>{(stats.devMetrics?.commits || 0).toLocaleString()}</span>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>LOC</div>
+                                        <div className="text-muted text-sm">Lines of Code</div>
                                     </div>
-                                    <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                        background: '#0ea5e920', border: '1px solid #0ea5e940',
-                                        borderRadius: '8px', padding: '0.4rem 0.75rem'
-                                    }}>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
-                                            <div className="text-muted text-sm">React/JSX</div>
+                                    {/* Badges Row */}
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
+                                        <div style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                            background: '#8b5cf620', border: '1px solid #8b5cf640',
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem'
+                                        }}>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
+                                                <div className="text-muted text-sm">Git History</div>
+                                            </div>
+                                            <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1rem' }}>{(stats.devMetrics?.commits || 0).toLocaleString()}</span>
                                         </div>
-                                        <span style={{ fontWeight: 700, color: '#fff', fontSize: '1rem' }}>{(stats.devMetrics?.components || 0).toLocaleString()}</span>
-                                    </div>
-                                    <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                        background: '#f59e0b20', border: '1px solid #f59e0b40',
-                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontFamily: '"JetBrains Mono", monospace'
-                                    }}>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
-                                            <div className="text-muted text-sm">Latest</div>
+                                        <div style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                            background: '#0ea5e920', border: '1px solid #0ea5e940',
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem'
+                                        }}>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
+                                                <div className="text-muted text-sm">React/JSX</div>
+                                            </div>
+                                            <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '1rem' }}>{(stats.devMetrics?.components || 0).toLocaleString()}</span>
                                         </div>
-                                        <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{stats.devMetrics?.lastCommit || '-'}</span>
+                                        <div style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                            background: '#f9731620', border: '1px solid #f9731640',
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem', fontFamily: '"JetBrains Mono", monospace'
+                                        }}>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
+                                                <div className="text-muted text-sm">Latest</div>
+                                            </div>
+                                            <span style={{ fontWeight: 700, color: '#f97316', fontSize: '0.9rem' }}>{stats.devMetrics?.lastCommit || '-'}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -326,9 +327,10 @@ const Observability = () => {
                 </div>
             </div>
 
+
             {/* Metrics Chart Section */}
             <MetricsSection />
-        </div>
+        </div >
     );
 };
 
