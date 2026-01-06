@@ -385,7 +385,16 @@ router.get('/users', (req, res) => {
         const countResult = get(`SELECT COUNT(*) as count FROM users ${whereClause}`, params);
         const total = countResult ? countResult.count : 0;
 
-        res.json({ users, total });
+        // Badge Counts (Global)
+        const stats = {
+            eagle: get('SELECT COUNT(*) as count FROM users WHERE trust_score >= 50').count,
+            owl: get('SELECT COUNT(*) as count FROM users WHERE trust_score >= 30 AND trust_score < 50').count,
+            sparrow: get('SELECT COUNT(*) as count FROM users WHERE trust_score >= 10 AND trust_score < 30').count,
+            hatchling: get('SELECT COUNT(*) as count FROM users WHERE trust_score < 10 OR trust_score IS NULL').count,
+            blocked: get('SELECT COUNT(*) as count FROM users WHERE blocked = 1').count
+        };
+
+        res.json({ users, total, stats });
     } catch (error) {
         console.error('Get users error:', error);
         res.status(500).json({ error: 'Failed to get users' });
