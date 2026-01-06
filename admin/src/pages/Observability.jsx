@@ -776,8 +776,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
                 {/* Tooltip */}
                 {hoveredPoint !== null && metrics[hoveredPoint.index] && (() => {
-                    // Clamp tooltip Y position to prevent cutoff/scroll
-                    const tooltipY = Math.max(40, Math.min(chartHeight - 40, hoveredPoint.y ? hoveredPoint.y + padding.top : 60));
+                    // Clamp tooltip Y position to prevent cutoff/scroll (80px from top for tooltip height)
+                    const tooltipY = Math.max(80, Math.min(chartHeight - 40, hoveredPoint.y ? hoveredPoint.y + padding.top : 80));
                     return (
                         <div style={{
                             position: 'absolute',
@@ -1053,9 +1053,8 @@ const RatingsChartCard = ({ onPointClick }) => {
     const graphWidth = chartWidth - padding.left - padding.right;
     const graphHeight = chartHeight - padding.top - padding.bottom;
 
-    // Add inner padding for the ratings chart too
-    const innerPadding = graphWidth / (ratings.length * 2);
-    const getX = (i) => innerPadding + (i / (ratings.length - 1 || 1)) * (graphWidth - innerPadding * 2);
+    // No inner padding - first point at 0, last point at graphWidth edge
+    const getX = (i) => (i / (ratings.length - 1 || 1)) * graphWidth;
     const getY = (val) => graphHeight - ((val / 5) * graphHeight); // Scale 0-5
 
     // Get color based on rating value (1-5 scale)
