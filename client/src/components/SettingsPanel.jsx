@@ -76,6 +76,8 @@ const RecoveryKeySection = ({ t }) => {
         } catch (err) {
             console.error('Failed to generate recovery key:', err);
             setErrorMessage(err.message || 'Failed to generate key. Please try again.');
+            // Auto hide error after 10 seconds
+            setTimeout(() => setErrorMessage(null), 10000);
         }
         setLoading(false);
     };
@@ -192,19 +194,36 @@ const RecoveryKeySection = ({ t }) => {
                         </button>
                     )}
 
-                    {/* Usage Instructions - Explicit Options */}
-                    <div style={{ marginTop: 'var(--space-3)' }}>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 500, marginBottom: 'var(--space-2)', color: 'var(--color-text)' }}>
-                            {t?.('settings.restoreOptionsTitle') || 'To restore your account you have 2 options:'}
+                    {/* Usage Instructions - Explicit Options with Animation */}
+                    <div style={{
+                        marginTop: 'var(--space-3)',
+                        animation: 'fadeIn 0.5s ease-out',
+                        opacity: 1
+                    }}>
+                        <div style={{
+                            padding: 'var(--space-3)',
+                            background: 'rgba(59, 130, 246, 0.05)',
+                            border: '1px solid rgba(59, 130, 246, 0.2)',
+                            borderRadius: 'var(--radius-md)',
+                            marginBottom: 'var(--space-2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 'var(--space-2)'
+                        }}>
+                            <span style={{ fontSize: '1.2rem' }}>ℹ️</span>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text)' }}>
+                                {t?.('settings.restoreOptionsTitle') || 'To restore your account you have 2 options:'}
+                            </div>
                         </div>
+
                         {[
                             t?.('settings.restoreOption1') || '**Login:** Type your key in **Nickname** field.',
                             t?.('settings.restoreOption2') || '**New:** Restore from section below.'
                         ].map((part, i) => (
                             <div key={i} style={{
                                 padding: 'var(--space-3)',
-                                background: 'rgba(59, 130, 246, 0.05)',
-                                border: '1px solid rgba(59, 130, 246, 0.2)',
+                                background: 'var(--color-bg-secondary)',
+                                border: '1px solid var(--color-border)',
                                 borderRadius: 'var(--radius-md)',
                                 fontSize: '0.75rem',
                                 color: 'var(--color-text-secondary)',
@@ -212,7 +231,9 @@ const RecoveryKeySection = ({ t }) => {
                                 marginBottom: 'var(--space-2)',
                                 display: 'flex',
                                 alignItems: 'flex-start',
-                                gap: 'var(--space-2)'
+                                gap: 'var(--space-2)',
+                                animation: 'fadeIn 0.5s ease-out backwards',
+                                animationDelay: `${0.2 + (i * 0.1)}s`
                             }}>
                                 <span style={{
                                     minWidth: '20px',
@@ -265,7 +286,8 @@ const RecoveryKeySection = ({ t }) => {
                     fontSize: '0.85rem',
                     textAlign: 'center',
                     marginTop: 'var(--space-2)',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    animation: 'fadeIn 0.3s ease-out'
                 }} onClick={() => setErrorMessage(null)}>
                     ⚠️ {errorMessage}
                 </div>
@@ -706,142 +728,189 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 };
 
 
-const RetentionDial = ({ value, onChange, t }) => {
-    const dialRef = React.useRef(null);
-    const [dragging, setDragging] = useState(false);
-    const [currentAngle, setCurrentAngle] = useState(0);
+const RetentionSlider = ({ value, onChange }) => {
+    const trackRef = React.useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [localValue, setLocalValue] = useState(value);
 
-    // Map values to angles (0 to 270 degrees)
-    // 1m = 0 deg | 3m = 90 deg | 6m = 180 deg | forever = 270 deg
-    const valueMap = React.useMemo(() => ({
-        '1m': 0, '3m': 90, '6m': 180, 'forever': 270
-    }), []);
+    // Constants
+    const MIN_DAYS = 30;
+    const MAX_DAYS = 365;
+    const FOREVER_ZONE_PCT = 90;
 
-    // Reverse map for snapping
-    const angleMap = [
-        { val: '1m', deg: 0 }, { val: '3m', deg: 90 },
-        { val: '6m', deg: 180 }, { val: 'forever', deg: 270 }
-    ];
-
-    useEffect(() => {
-        if (!dragging) {
-            setCurrentAngle(valueMap[value] || 0);
-        }
-    }, [value, dragging, valueMap]);
-
-    const calculateAngle = (clientX, clientY) => {
-        if (!dialRef.current) return 0;
-        const rect = dialRef.current.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        let x = clientX - centerX;
-        let y = clientY - centerY;
-        let rad = Math.atan2(y, x);
-        let deg = rad * (180 / Math.PI);
-
-        // Normalize deg to be 0-360 starting from South-West (-135 / 225)
-        let normalized = deg - 135;
-        if (normalized < 0) normalized += 360;
-
-        // Dead zone clamping
-        if (normalized > 270 && normalized < 315) normalized = 270;
-        if (normalized >= 315) normalized = 0;
-
-        return Math.max(0, Math.min(270, normalized));
+    // Helper: Value -> Days
+    const getDaysFromValue = (v) => {
+        if (!v || v === 'forever') return Infinity;
+        if (v.endsWith('m')) return parseInt(v) * 30;
+        if (v.endsWith('y')) return parseInt(v) * 365;
+        if (v.endsWith('d')) return parseInt(v);
+        return 30;
     };
 
-    const handleStart = (e) => {
-        setDragging(true);
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        setCurrentAngle(calculateAngle(clientX, clientY));
+    // Helper: Days -> %
+    const getPctFromDays = (d) => {
+        if (d === Infinity || d > MAX_DAYS) return 100;
+        return ((d - MIN_DAYS) / (MAX_DAYS - MIN_DAYS)) * FOREVER_ZONE_PCT;
     };
 
-    const handleMove = (e) => {
-        if (!dragging) return;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        setCurrentAngle(calculateAngle(clientX, clientY));
+    // Helper: % -> Days
+    const getDaysFromPct = (pct) => {
+        if (pct > FOREVER_ZONE_PCT) return Infinity;
+        const days = MIN_DAYS + (pct / FOREVER_ZONE_PCT) * (MAX_DAYS - MIN_DAYS);
+        return Math.round(days);
+    };
+
+    // Helper: Format
+    const formatDuration = (d) => {
+        if (d >= Infinity) return '∞ Forever';
+        const months = Math.floor(d / 30);
+        const remDays = d % 30;
+        const weeks = Math.floor(remDays / 7);
+        const days = remDays % 7;
+
+        const parts = [];
+        if (months > 0) parts.push(`${months} Month${months > 1 ? 's' : ''}`);
+        if (weeks > 0) parts.push(`${weeks} Week${weeks > 1 ? 's' : ''}`);
+        if (days > 0) parts.push(`${days} Day${days > 1 ? 's' : ''}`);
+        if (parts.length === 0) return '0 Days';
+        return parts.join(', ');
+    };
+
+    const currentDays = getDaysFromValue(isDragging ? localValue : value);
+    const currentPct = getPctFromDays(currentDays);
+
+    const handleStart = (clientX) => {
+        setIsDragging(true);
+        updateFromClientX(clientX);
+    };
+
+    const handleMove = (clientX) => {
+        if (!isDragging) return;
+        updateFromClientX(clientX);
     };
 
     const handleEnd = () => {
-        setDragging(false);
-        let closest = angleMap[0];
-        let minDiff = 360;
-        angleMap.forEach(item => {
-            const diff = Math.abs(item.deg - currentAngle);
-            if (diff < minDiff) { minDiff = diff; closest = item; }
-        });
-        onChange({ target: { value: closest.val } });
+        if (!isDragging) return;
+        setIsDragging(false);
+        // Commit value
+        const d = getDaysFromValue(localValue);
+        onChange(d === Infinity ? 'forever' : `${d}d`);
     };
 
-    useEffect(() => {
-        if (dragging) {
-            const onTouchMove = (e) => { e.preventDefault(); handleMove(e); };
-            const onMouseMove = (e) => { e.preventDefault(); handleMove(e); };
-            document.addEventListener('touchmove', onTouchMove, { passive: false });
-            document.addEventListener('touchend', handleEnd);
+    const updateFromClientX = (clientX) => {
+        if (!trackRef.current) return;
+        const rect = trackRef.current.getBoundingClientRect();
+        let pct = ((clientX - rect.left) / rect.width) * 100;
+        pct = Math.max(0, Math.min(100, pct));
+
+        const d = getDaysFromPct(pct);
+        setLocalValue(d === Infinity ? 'forever' : `${d}d`);
+    };
+
+    // Event Listeners
+    React.useEffect(() => {
+        const onMouseMove = (e) => handleMove(e.clientX);
+        const onMouseUp = () => handleEnd();
+        const onTouchMove = (e) => handleMove(e.touches[0].clientX);
+        const onTouchEnd = () => handleEnd();
+
+        if (isDragging) {
             document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', handleEnd);
-            return () => {
-                document.removeEventListener('touchmove', onTouchMove);
-                document.removeEventListener('touchend', handleEnd);
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', handleEnd);
-            };
+            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('touchmove', onTouchMove);
+            document.addEventListener('touchend', onTouchEnd);
         }
-    }, [dragging, currentAngle]);
-
-    const getGranularLabel = (deg) => {
-        if (deg < 90) return `${Math.round(30 + (60 * (deg / 90)))} Days`;
-        else if (deg < 180) return `${Math.round(90 + (90 * ((deg - 90) / 90)))} Days`;
-        else {
-            const p = (deg - 180) / 90;
-            if (p > 0.8) return 'Forever';
-            return `${Math.round(180 + (185 * p))} Days`;
-        }
-    };
+        return () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+        };
+    }, [isDragging]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 0' }}>
+        <div style={{ padding: '1rem 0' }}>
+            <div style={{
+                textAlign: 'center',
+                marginBottom: '1rem',
+                fontWeight: 600,
+                color: 'var(--color-primary)',
+                height: '24px'
+            }}>
+                {formatDuration(currentDays)}
+            </div>
+
             <div
-                ref={dialRef}
+                ref={trackRef}
+                onMouseDown={(e) => handleStart(e.clientX)}
+                onTouchStart={(e) => handleStart(e.touches[0].clientX)}
                 style={{
-                    width: '200px', height: '200px', position: 'relative',
-                    cursor: dragging ? 'grabbing' : 'grab', touchAction: 'none'
+                    position: 'relative',
+                    height: '32px',
+                    background: 'var(--color-bg-tertiary)',
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    touchAction: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0 16px'
                 }}
-                onMouseDown={handleStart} onTouchStart={handleStart}
             >
-                <svg width="200" height="200" viewBox="0 0 200 200" style={{ transform: 'rotate(135deg)' }}>
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="#334155" strokeWidth="12" strokeLinecap="round" strokeDasharray="502" strokeDashoffset={502 * 0.25} />
-                    <circle
-                        cx="100" cy="100" r="80" fill="none" stroke="var(--color-primary)" strokeWidth="12" strokeLinecap="round"
-                        strokeDasharray="502" strokeDashoffset={502 - ((currentAngle / 360) * 502)}
-                        style={{ filter: 'drop-shadow(0 0 8px var(--color-primary))', transition: dragging ? 'none' : 'stroke-dashoffset 0.3s' }}
-                    />
-                </svg>
+                {/* Track Line */}
                 <div style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                    transform: `rotate(${currentAngle + 135}deg)`, pointerEvents: 'none', transition: dragging ? 'none' : 'transform 0.3s'
+                    position: 'absolute',
+                    left: '16px', right: '16px',
+                    height: '4px',
+                    background: 'var(--color-border)',
+                    borderRadius: '2px'
                 }}>
+                    {/* Fill */}
                     <div style={{
-                        position: 'absolute', top: '20px', left: '50%', width: '24px', height: '24px',
-                        borderRadius: '50%', background: '#ffffff', transform: 'translate(-50%, -50%)', boxShadow: '0 0 10px rgba(255,255,255,0.5)'
+                        width: `${currentPct}%`,
+                        height: '100%',
+                        background: 'var(--color-primary)',
+                        borderRadius: '2px'
                     }} />
                 </div>
+
+                {/* Milestones */}
+                {[
+                    { l: '1m', p: 0 },
+                    { l: '3m', p: ((90 - 30) / (365 - 30)) * 90 },
+                    { l: '6m', p: ((180 - 30) / (365 - 30)) * 90 },
+                    { l: '1y', p: 90 },
+                    { l: '∞', p: 100 }
+                ].map((m, i) => (
+                    <div key={i} style={{
+                        position: 'absolute',
+                        // Calculate center based on track width logic
+                        left: `${m.p}%`,
+                        top: '12px', width: '2px', height: '8px', background: '#94a3b8',
+                        transform: 'translateX(-50%)'
+                    }} />
+                ))}
+
+                {/* Handle */}
                 <div style={{
-                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none'
-                }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'white', textShadow: '0 0 20px var(--color-primary)' }}>
-                        {dragging ? getGranularLabel(currentAngle) : (t(`settings.retention.${value}`) || value)}
-                    </div>
-                    {!dragging && <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>RETENTION</div>}
-                </div>
-                <div style={{ position: 'absolute', bottom: '30px', left: '40px', fontSize: '0.8rem', color: '#94a3b8' }}>1m</div>
-                <div style={{ position: 'absolute', top: '40px', left: '30px', fontSize: '0.8rem', color: '#94a3b8' }}>3m</div>
-                <div style={{ position: 'absolute', top: '40px', right: '30px', fontSize: '0.8rem', color: '#94a3b8' }}>6m</div>
-                <div style={{ position: 'absolute', bottom: '30px', right: '40px', fontSize: '1.2rem', color: '#94a3b8' }}>∞</div>
+                    position: 'absolute',
+                    left: `${currentPct}%`,
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: 'white',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                    transform: 'translateX(-50%)',
+                    border: '2px solid var(--color-primary)',
+                    zIndex: 10,
+                    transition: isDragging ? 'none' : 'left 0.2s ease-out'
+                }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginTop: '8px', padding: '0 4px' }}>
+                <span>1m</span>
+                <span>3m</span>
+                <span>6m</span>
+                <span>1y</span>
+                <span>∞</span>
             </div>
         </div>
     );
@@ -866,28 +935,40 @@ const SettingsPanel = ({ onClose }) => {
         window.dispatchEvent(new Event('storage'));
     };
 
-    const handleRetentionChange = async (e) => {
-        const val = e.target.value;
-        setRetention(val);
-        localStorage.setItem('nestfinder_message_retention', val);
+    const handleRetentionChange = async (val) => {
+        // Support both event and direct value
+        const value = (val && val.target) ? val.target.value : val;
+
+        setRetention(value);
+        localStorage.setItem('nestfinder_message_retention', value);
         window.dispatchEvent(new Event('storage'));
 
-        // Trigger permanent deletion immediately
-        if (val !== 'forever') {
+        // Trigger prune
+        if (value !== 'forever') {
             const now = new Date();
             const cutoff = new Date();
-            if (val === '1m') cutoff.setMonth(now.getMonth() - 1);
-            else if (val === '3m') cutoff.setMonth(now.getMonth() - 3);
-            else if (val === '6m') cutoff.setMonth(now.getMonth() - 6);
+
+            if (value.endsWith('d')) {
+                cutoff.setDate(now.getDate() - parseInt(value));
+            } else if (value.endsWith('m')) {
+                cutoff.setMonth(now.getMonth() - parseInt(value));
+            } else if (value.endsWith('y')) {
+                cutoff.setFullYear(now.getFullYear() - parseInt(value));
+            } else if (value === '1m') { // Fallback for legacy
+                cutoff.setMonth(now.getMonth() - 1);
+            }
 
             try {
                 const isoCutoff = cutoff.toISOString();
                 await Promise.all([
                     api.pruneNotifications(isoCutoff),
-                    api.pruneFeedback(isoCutoff)
+                    // api.pruneFeedback(isoCutoff) // logic might not exist yet, but existing code had it!!
+                    // Wait, existing code HAD api.pruneFeedback(isoCutoff).
+                    // I should keep it if valid.
+                    api.pruneFeedback ? api.pruneFeedback(isoCutoff) : Promise.resolve()
                 ]);
-            } catch (err) {
-                console.error('Failed to prune messages', err);
+            } catch (e) {
+                console.error('Prune failed', e);
             }
         }
     };
@@ -1419,20 +1500,14 @@ const SettingsPanel = ({ onClose }) => {
                         </div>
 
                         <div style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            background: 'var(--color-bg-tertiary)',
                             padding: '1rem',
                             borderRadius: 'var(--radius-md)',
                             border: '1px solid var(--color-border)',
-                            position: 'relative',
-                            overflow: 'hidden' // Contain glows
+                            background: 'var(--color-bg-tertiary)'
                         }}>
-                            {/* Futuristic Background Grind ??? Optional */}
-                            <RetentionDial
+                            <RetentionSlider
                                 value={retention}
                                 onChange={handleRetentionChange}
-                                t={t}
                             />
                         </div>
                     </div>
@@ -1586,7 +1661,7 @@ const SettingsPanel = ({ onClose }) => {
                                             </div>
                                         </div>
                                         {showCheckmark && (
-                                            <span style={{ color: 'var(--color-primary)', marginRight: '12px' }}>✓</span>
+                                            <span style={{ color: 'var(--color-primary)', marginRight: '22px' }}>✓</span>
                                         )}
                                     </div>
                                 </div>
