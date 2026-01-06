@@ -699,6 +699,148 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     );
 };
 
+
+const RetentionDial = ({ value, onChange, t }) => {
+    const dialRef = React.useRef(null);
+    const [dragging, setDragging] = useState(false);
+    const [currentAngle, setCurrentAngle] = useState(0);
+
+    // Map values to angles (0 to 270 degrees)
+    // 1m = 0 deg | 3m = 90 deg | 6m = 180 deg | forever = 270 deg
+    const valueMap = React.useMemo(() => ({
+        '1m': 0, '3m': 90, '6m': 180, 'forever': 270
+    }), []);
+
+    // Reverse map for snapping
+    const angleMap = [
+        { val: '1m', deg: 0 }, { val: '3m', deg: 90 },
+        { val: '6m', deg: 180 }, { val: 'forever', deg: 270 }
+    ];
+
+    useEffect(() => {
+        if (!dragging) {
+            setCurrentAngle(valueMap[value] || 0);
+        }
+    }, [value, dragging, valueMap]);
+
+    const calculateAngle = (clientX, clientY) => {
+        if (!dialRef.current) return 0;
+        const rect = dialRef.current.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        let x = clientX - centerX;
+        let y = clientY - centerY;
+        let rad = Math.atan2(y, x);
+        let deg = rad * (180 / Math.PI);
+
+        // Normalize deg to be 0-360 starting from South-West (-135 / 225)
+        let normalized = deg - 135;
+        if (normalized < 0) normalized += 360;
+
+        // Dead zone clamping
+        if (normalized > 270 && normalized < 315) normalized = 270;
+        if (normalized >= 315) normalized = 0;
+
+        return Math.max(0, Math.min(270, normalized));
+    };
+
+    const handleStart = (e) => {
+        setDragging(true);
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        setCurrentAngle(calculateAngle(clientX, clientY));
+    };
+
+    const handleMove = (e) => {
+        if (!dragging) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        setCurrentAngle(calculateAngle(clientX, clientY));
+    };
+
+    const handleEnd = () => {
+        setDragging(false);
+        let closest = angleMap[0];
+        let minDiff = 360;
+        angleMap.forEach(item => {
+            const diff = Math.abs(item.deg - currentAngle);
+            if (diff < minDiff) { minDiff = diff; closest = item; }
+        });
+        onChange({ target: { value: closest.val } });
+    };
+
+    useEffect(() => {
+        if (dragging) {
+            const onTouchMove = (e) => { e.preventDefault(); handleMove(e); };
+            const onMouseMove = (e) => { e.preventDefault(); handleMove(e); };
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', handleEnd);
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', handleEnd);
+            return () => {
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', handleEnd);
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', handleEnd);
+            };
+        }
+    }, [dragging, currentAngle]);
+
+    const getGranularLabel = (deg) => {
+        if (deg < 90) return `${Math.round(30 + (60 * (deg / 90)))} Days`;
+        else if (deg < 180) return `${Math.round(90 + (90 * ((deg - 90) / 90)))} Days`;
+        else {
+            const p = (deg - 180) / 90;
+            if (p > 0.8) return 'Forever';
+            return `${Math.round(180 + (185 * p))} Days`;
+        }
+    };
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 0' }}>
+            <div
+                ref={dialRef}
+                style={{
+                    width: '200px', height: '200px', position: 'relative',
+                    cursor: dragging ? 'grabbing' : 'grab', touchAction: 'none'
+                }}
+                onMouseDown={handleStart} onTouchStart={handleStart}
+            >
+                <svg width="200" height="200" viewBox="0 0 200 200" style={{ transform: 'rotate(135deg)' }}>
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="#334155" strokeWidth="12" strokeLinecap="round" strokeDasharray="502" strokeDashoffset={502 * 0.25} />
+                    <circle
+                        cx="100" cy="100" r="80" fill="none" stroke="var(--color-primary)" strokeWidth="12" strokeLinecap="round"
+                        strokeDasharray="502" strokeDashoffset={502 - ((currentAngle / 360) * 502)}
+                        style={{ filter: 'drop-shadow(0 0 8px var(--color-primary))', transition: dragging ? 'none' : 'stroke-dashoffset 0.3s' }}
+                    />
+                </svg>
+                <div style={{
+                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                    transform: `rotate(${currentAngle + 135}deg)`, pointerEvents: 'none', transition: dragging ? 'none' : 'transform 0.3s'
+                }}>
+                    <div style={{
+                        position: 'absolute', top: '20px', left: '50%', width: '24px', height: '24px',
+                        borderRadius: '50%', background: '#ffffff', transform: 'translate(-50%, -50%)', boxShadow: '0 0 10px rgba(255,255,255,0.5)'
+                    }} />
+                </div>
+                <div style={{
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none'
+                }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'white', textShadow: '0 0 20px var(--color-primary)' }}>
+                        {dragging ? getGranularLabel(currentAngle) : (t(`settings.retention.${value}`) || value)}
+                    </div>
+                    {!dragging && <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>RETENTION</div>}
+                </div>
+                <div style={{ position: 'absolute', bottom: '30px', left: '40px', fontSize: '0.8rem', color: '#94a3b8' }}>1m</div>
+                <div style={{ position: 'absolute', top: '40px', left: '30px', fontSize: '0.8rem', color: '#94a3b8' }}>3m</div>
+                <div style={{ position: 'absolute', top: '40px', right: '30px', fontSize: '0.8rem', color: '#94a3b8' }}>6m</div>
+                <div style={{ position: 'absolute', bottom: '30px', right: '40px', fontSize: '1.2rem', color: '#94a3b8' }}>∞</div>
+            </div>
+        </div>
+    );
+};
+
 const SettingsPanel = ({ onClose }) => {
     const { t, language, setLanguage, availableLanguages } = useLanguage();
     const { user } = useAuth();
@@ -842,6 +984,7 @@ const SettingsPanel = ({ onClose }) => {
     };
 
     // Animate scrollOffset with momentum physics
+
     const animateWithMomentum = (initialVelocity) => {
         if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
@@ -1271,34 +1414,20 @@ const SettingsPanel = ({ onClose }) => {
 
                         <div style={{
                             display: 'flex',
+                            justifyContent: 'center',
                             background: 'var(--color-bg-tertiary)',
-                            padding: '4px',
+                            padding: '1rem',
                             borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--color-border)'
+                            border: '1px solid var(--color-border)',
+                            position: 'relative',
+                            overflow: 'hidden' // Contain glows
                         }}>
-                            {['1m', '3m', '6m', 'forever'].map((opt) => {
-                                const isSelected = retention === opt;
-                                return (
-                                    <button
-                                        key={opt}
-                                        onClick={() => handleRetentionChange({ target: { value: opt } })}
-                                        style={{
-                                            flex: 1,
-                                            padding: '8px 0',
-                                            border: 'none',
-                                            background: isSelected ? 'var(--color-primary)' : 'transparent',
-                                            color: isSelected ? 'white' : 'var(--color-text-secondary)',
-                                            borderRadius: 'var(--radius-sm)',
-                                            fontSize: '0.85rem',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            fontWeight: isSelected ? 600 : 400
-                                        }}
-                                    >
-                                        {t(`settings.retention.${opt}`) || opt}
-                                    </button>
-                                );
-                            })}
+                            {/* Futuristic Background Grind ??? Optional */}
+                            <RetentionDial
+                                value={retention}
+                                onChange={handleRetentionChange}
+                                t={t}
+                            />
                         </div>
                     </div>
                 </div>
