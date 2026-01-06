@@ -1182,18 +1182,18 @@ const RatingsChartCard = ({ onPointClick }) => {
                         </linearGradient>
                     </defs>
                     <g transform={`translate(${padding.left}, ${padding.top})`}>
-                        {/* Y-Axis Grid & Labels (Right - Ratings 1-5) */}
+                        {/* Y-Axis Grid & Labels (Left - Ratings 1-5) */}
                         {[1, 2, 3, 4, 5].map((val) => {
                             const y = getY(val);
                             return (
                                 <g key={`grid-${val}`}>
                                     <line x1={0} y1={y} x2={graphWidth} y2={y} stroke="#334155" strokeWidth="1" strokeDasharray="4,4" />
-                                    <text x={graphWidth + 10} y={y + 4} textAnchor="start" fill="#facc15" fontSize="11" fontWeight="500">{val}</text>
+                                    <text x={-10} y={y + 4} textAnchor="end" fill="#facc15" fontSize="11" fontWeight="500">{val}</text>
                                 </g>
                             );
                         })}
 
-                        {/* Y-Axis Labels (Left - Votes) */}
+                        {/* Y-Axis Labels (Right - Votes) */}
                         {(() => {
                             const maxVotes = Math.max(...ratings.map(r => r.count || 0), 5); // Ensure at least 5 for scale
                             // Generate 4-5 ticks for votes
@@ -1203,7 +1203,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                                 const y = graphHeight - (i / ticks) * graphHeight;
                                 // Don't render 0 if it overlaps too much, or render it clearly
                                 return (
-                                    <text key={`vote-${i}`} x={-10} y={y + 4} textAnchor="end" fill="#3b82f6" fontSize="11" fontWeight="500">
+                                    <text key={`vote-${i}`} x={graphWidth + 10} y={y + 4} textAnchor="start" fill="#3b82f6" fontSize="11" fontWeight="500">
                                         {val}
                                     </text>
                                 );
@@ -1217,7 +1217,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                             </text>
                         ))}
 
-                        {/* Votes Bars - Scaled to Left Axis (Votes) */}
+                        {/* Votes Bars - Scaled to Right Axis (Votes) */}
                         {(() => {
                             const maxVotes = Math.max(...ratings.map(r => r.count || 0), 5);
                             const barWidth = Math.max(6, (graphWidth / ratings.length) * 0.4);
@@ -1245,13 +1245,13 @@ const RatingsChartCard = ({ onPointClick }) => {
                             });
                         })()}
 
-                        {/* Area Fill (Ratings - Right Axis) */}
+                        {/* Area Fill (Ratings - Left Axis) */}
                         {hasData && <polygon points={areaPoints} fill="url(#ratings-gradient)" />}
 
-                        {/* Line (Ratings - Right Axis) */}
+                        {/* Line (Ratings - Left Axis) */}
                         {hasData && <polyline points={points} fill="none" stroke="#facc15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
 
-                        {/* Data Points (Ratings - Right Axis) */}
+                        {/* Data Points (Ratings - Left Axis) */}
                         {ratings.map((r, i) => (
                             <text
                                 key={i}
@@ -1316,7 +1316,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                                     Avg Rating
                                 </span>
                                 <span style={{ color: '#fff', fontWeight: 500 }}>
-                                    {ratings[hoveredPoint.index].average > 0 ? ratings[hoveredPoint.index].average.toFixed(1) : '-'} ⭐
+                                    ⭐ {ratings[hoveredPoint.index].average > 0 ? ratings[hoveredPoint.index].average.toFixed(1) : '-'}
                                 </span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', gap: '1.5rem' }}>
