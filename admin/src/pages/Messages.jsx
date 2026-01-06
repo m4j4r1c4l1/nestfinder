@@ -121,6 +121,7 @@ const Messages = () => {
     const [feedbackSortCol, setFeedbackSortCol] = useState('created_at');
     const [feedbackSortDir, setFeedbackSortDir] = useState('desc');
     const [totalFeedback, setTotalFeedback] = useState(0);
+    const [feedbackCounts, setFeedbackCounts] = useState({ pending: 0, read: 0 });
 
     // Broadcast Form State
     const [newBroadcast, setNewBroadcast] = useState({ title: '', message: '', imageUrl: '', startTime: '', endTime: '' });
@@ -138,6 +139,10 @@ const Messages = () => {
             const res = await adminApi.fetch(`/admin/feedback?page=${feedbackPage}&limit=${feedbackPageSize}&sort=${feedbackSortCol}&dir=${feedbackSortDir}`);
             setFeedback(res.feedback || []);
             setTotalFeedback(res.total || 0);
+            setFeedbackCounts({
+                pending: res.pendingCount || 0,
+                read: res.readCount || 0
+            });
         } catch (err) {
             console.error('Failed to fetch feedback:', err);
         }
@@ -1189,10 +1194,10 @@ const FeedbackSection = ({
                         </span>
                         <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
                             <span style={{ fontWeight: 500 }}>
-                                <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => ['new', 'sent', 'delivered', 'pending'].includes(f.status)).length} Pending</span>
+                                <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedbackCounts.pending} Pending</span>
                             </span>
                             <span style={{ fontWeight: 500 }}>
-                                <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => ['read', 'reviewed'].includes(f.status)).length} Read</span>
+                                <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedbackCounts.read} Read</span>
                             </span>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
