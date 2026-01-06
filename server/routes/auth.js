@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { run, get, log } from '../database.js';
+import { requireUser } from '../middleware/auth.js';
 
 const router = express.Router();
 const NEST_INTEGRITY = process.env.NEST_INTEGRITY || 'default-secret-key';
@@ -119,9 +120,9 @@ router.post('/register', (req, res) => {
 });
 
 // Update nickname
-router.put('/nickname', (req, res) => {
+router.put('/nickname', requireUser, (req, res) => {
     const { nickname } = req.body;
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -144,8 +145,8 @@ router.put('/nickname', (req, res) => {
 });
 
 // Generate recovery key
-router.post('/generate-key', (req, res) => {
-    const userId = req.user?.userId;
+router.post('/generate-key', requireUser, (req, res) => {
+    const userId = req.user?.id;
 
     if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
