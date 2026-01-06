@@ -363,7 +363,7 @@ const RestoreAccountSection = ({ t }) => {
             marginTop: 'var(--space-3)'
         }}>
             <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>
-                🌌 {t?.('settings.restoreAccount') || 'Restore Account'}
+                🧿 {t?.('settings.restoreAccount') || 'Restore Account'}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
                 {t?.('settings.restoreAccountDescription') || 'Enter your 3-word recovery key (spaces or dashes).'}
@@ -1085,7 +1085,7 @@ const SettingsPanel = ({ onClose }) => {
                         marginBottom: 'var(--space-2)'
                     }}>
                         <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>🗑️ {t('settings.swipeDirection') || 'Delete'}</div>
+                            <div style={{ fontWeight: 500 }}>🛼 {t('settings.swipeDirection') || 'Delete'}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                                 {t('settings.swipe.desc') || 'Swipe a message in this direction to delete it.'}
                             </div>
@@ -1132,7 +1132,7 @@ const SettingsPanel = ({ onClose }) => {
                         border: '1px solid var(--color-border)'
                     }}>
                         <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>⏰ {t('settings.messageRetention') || 'Retention Period'}</div>
+                            <div style={{ fontWeight: 500 }}>⏳ {t('settings.messageRetention') || 'Retention Period'}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                                 {t('settings.retention.desc') || 'Auto-delete messages older than selected period.'}
                             </div>

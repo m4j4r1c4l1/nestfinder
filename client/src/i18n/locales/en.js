@@ -205,7 +205,7 @@ export default {
         shareLink: 'Share Link',
         linkCopied: 'Link copied!',
         recoveryKey: 'Recovery Key',
-        recoveryKeyDescription: 'Save this key to restore your identity on a new device.',
+        recoveryKeyDescription: 'Save this key to restore your identity at any time.',
         generateKey: 'Generate Recovery Key',
         showKey: 'Show Recovery Key',
         copyKey: 'Copy Key',
@@ -225,7 +225,7 @@ export default {
         // Recovery Key Restore
         recoveryKeyUsage: 'To restore your account, type your 3-word key with dashes in the **Nickname** field when you open the app. or log in with a new account and restore it from the **Restore Account** section below',
         restoreAccount: 'Restore Account',
-        restoreAccountDescription: 'Enter your 3-word recovery key (spaces or dashes).',
+        restoreAccountDescription: 'Enter your 3-word recovery key (with spaces or dashes).',
         enterRecoveryKey: 'word-word-word',
         invalidRecoveryKey: 'Invalid recovery key. Please check and try again.',
         accountRestored: 'Account restored! Reloading...',
