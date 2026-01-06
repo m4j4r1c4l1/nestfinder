@@ -374,9 +374,21 @@ router.get('/users', (req, res) => {
         const params = [];
 
         if (search) {
-            whereClause += ' AND (nickname LIKE ? OR id LIKE ? OR device_id LIKE ?)';
+            whereClause += ` AND (
+                nickname LIKE ? 
+                OR id LIKE ? 
+                OR device_id LIKE ?
+                OR CAST(COALESCE(trust_score, 0) AS TEXT) LIKE ?
+                OR (CASE 
+                    WHEN trust_score >= 50 THEN 'Eagle' 
+                    WHEN trust_score >= 30 THEN 'Owl' 
+                    WHEN trust_score >= 10 THEN 'Sparrow' 
+                    ELSE 'Hatchling' 
+                END) LIKE ?
+                OR (CASE WHEN blocked = 1 THEN 'Blocked' ELSE 'Active' END) LIKE ?
+            )`;
             const searchParam = `%${search}%`;
-            params.push(searchParam, searchParam, searchParam);
+            params.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
         }
 
         // Map sort keys to columns
