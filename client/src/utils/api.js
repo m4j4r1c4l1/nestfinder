@@ -119,7 +119,7 @@ class ApiClient {
 
   // Recovery Key
   generateRecoveryKey() {
-    return this.fetch('/auth/recovery-key', {
+    return this.fetch('/auth/generate-key', {
       method: 'POST',
     });
   }
