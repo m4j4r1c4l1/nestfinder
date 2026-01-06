@@ -1184,16 +1184,33 @@ const RatingsChartCard = ({ onPointClick }) => {
                         </linearGradient>
                     </defs>
                     <g transform={`translate(${padding.left}, ${padding.top})`}>
-                        {/* Y-Axis Grid & Labels (1-5 scale) */}
-                        {[0, 1, 2, 3, 4, 5].map((val) => {
+                        {/* Y-Axis Grid & Labels (Right - Ratings 1-5) */}
+                        {[1, 2, 3, 4, 5].map((val) => {
                             const y = getY(val);
                             return (
-                                <g key={val}>
+                                <g key={`grid-${val}`}>
                                     <line x1={0} y1={y} x2={graphWidth} y2={y} stroke="#334155" strokeWidth="1" strokeDasharray="4,4" />
-                                    <text x={-10} y={y + 4} textAnchor="end" fill="#64748b" fontSize="10">{val}</text>
+                                    <text x={graphWidth + 10} y={y + 4} textAnchor="start" fill="#facc15" fontSize="11" fontWeight="500">{val}</text>
                                 </g>
                             );
                         })}
+
+                        {/* Y-Axis Labels (Left - Votes) */}
+                        {(() => {
+                            const maxVotes = Math.max(...ratings.map(r => r.count || 0), 5); // Ensure at least 5 for scale
+                            // Generate 4-5 ticks for votes
+                            const ticks = 4;
+                            return Array.from({ length: ticks + 1 }).map((_, i) => {
+                                const val = Math.round((i / ticks) * maxVotes);
+                                const y = graphHeight - (i / ticks) * graphHeight;
+                                // Don't render 0 if it overlaps too much, or render it clearly
+                                return (
+                                    <text key={`vote-${i}`} x={-10} y={y + 4} textAnchor="end" fill="#3b82f6" fontSize="11" fontWeight="500">
+                                        {val}
+                                    </text>
+                                );
+                            });
+                        })()}
 
                         {/* X-Axis Labels */}
                         {ratings.map((r, i) => (
@@ -1202,12 +1219,12 @@ const RatingsChartCard = ({ onPointClick }) => {
                             </text>
                         ))}
 
-                        {/* Votes Bars - scaled to max votes */}
+                        {/* Votes Bars - Scaled to Left Axis (Votes) */}
                         {(() => {
-                            const maxVotes = Math.max(...ratings.map(r => r.count || 0), 1);
+                            const maxVotes = Math.max(...ratings.map(r => r.count || 0), 5);
                             const barWidth = Math.max(6, (graphWidth / ratings.length) * 0.4);
                             return ratings.map((r, i) => {
-                                const barHeight = (r.count / maxVotes) * (graphHeight * 0.4); // Max 40% of graph height
+                                const barHeight = (r.count / maxVotes) * graphHeight; // Full height scale for votes axis
 
                                 // Adjust x position for edges to prevent overflow
                                 let barX = getX(i) - barWidth / 2;
@@ -1222,7 +1239,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                                         width={barWidth}
                                         height={barHeight}
                                         fill="#3b82f6"
-                                        opacity={hoveredPoint?.index === i ? 0.9 : 0.5}
+                                        opacity={hoveredPoint?.index === i ? 0.9 : 0.3} // Lower base opacity to not obscure grid too much
                                         rx={2}
                                         style={{ transition: 'opacity 0.15s ease' }}
                                     />
@@ -1230,13 +1247,13 @@ const RatingsChartCard = ({ onPointClick }) => {
                             });
                         })()}
 
-                        {/* Area Fill */}
+                        {/* Area Fill (Ratings - Right Axis) */}
                         {hasData && <polygon points={areaPoints} fill="url(#ratings-gradient)" />}
 
-                        {/* Line */}
+                        {/* Line (Ratings - Right Axis) */}
                         {hasData && <polyline points={points} fill="none" stroke="#facc15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
 
-                        {/* Data Points - Stars instead of circles */}
+                        {/* Data Points (Ratings - Right Axis) */}
                         {ratings.map((r, i) => (
                             <text
                                 key={i}
