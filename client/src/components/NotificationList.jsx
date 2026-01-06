@@ -69,7 +69,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
                     maxWidth: '100%',
                     boxSizing: 'border-box',
                     WebkitAppearance: 'none',
-                    height: '120px',
+                    height: '110px',
                     padding: '0.75rem',
                     background: 'var(--color-bg-tertiary)',
                     border: '1px solid var(--color-border)',
@@ -87,7 +87,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
             </div>
 
             {/* Application Rating */}
-            <div style={{ marginBottom: '0.5rem', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ marginBottom: '1rem', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text)', marginBottom: '0.1rem', textAlign: 'center', fontWeight: 500 }}>
                     {t('feedback.rateApp') || 'Rate the App'}
                 </div>
