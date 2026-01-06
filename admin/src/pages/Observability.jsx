@@ -73,7 +73,7 @@ const Observability = () => {
         <div className="notifications-page" style={{ width: '75%', maxWidth: '1500px', margin: '0 auto', padding: '1.5rem 1rem' }}>
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                    🐦 Metrics
+                    🐦 Observability
                 </h1>
                 <p className="text-muted">Monitor system health, usage statistics, and developer insights</p>
             </div>
@@ -169,22 +169,25 @@ const Observability = () => {
                             <div style={{ width: '1px', height: '60%', alignSelf: 'center', background: '#334155', margin: '0 1rem' }} />
 
                             {/* Rating Block */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '0.5rem', height: '100%' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem', height: '100%' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>⭐ Rating</div>
-                                <div style={{ flex: 1, display: 'flex', gap: '1.5rem', alignItems: 'center', marginTop: 'auto', marginBottom: 'auto' }}>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
-                                            {stats.avgRating ? stats.avgRating.toFixed(1) : '-'}
-                                        </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Average</div>
-                                        <div className="text-muted text-sm">All time</div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#facc15', lineHeight: 1 }}>
+                                        {stats.avgRating ? stats.avgRating.toFixed(1) : '-'}
                                     </div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#06b6d4' }}>
-                                            {stats.totalRatings || 0}
-                                        </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Votes</div>
-                                        <div className="text-muted text-sm">Total</div>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Average</div>
+                                    <div className="text-muted text-sm">All time</div>
+                                </div>
+                                {/* Badges */}
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                        background: '#facc1520', border: '1px solid #facc1540',
+                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
+                                    }}>
+                                        <span style={{ fontSize: '0.9rem' }}>⭐</span>
+                                        <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Votes</span>
+                                        <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{stats.totalRatings || 0}</span>
                                     </div>
                                 </div>
                             </div>
@@ -753,46 +756,48 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                 </svg>
 
                 {/* Tooltip */}
-                {hoveredPoint !== null && metrics[hoveredPoint.index] && (
-                    <div style={{
-                        position: 'absolute',
-                        left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
-                        top: `${hoveredPoint.y ? hoveredPoint.y + padding.top : 20}px`, // Follow cursor Y
-                        transform: `translate(${hoveredPoint.index > metrics.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50%)`, // Center vertically relative to cursor
-                        background: '#0f172a',
-                        border: '1px solid #334155',
-                        borderRadius: '8px',
-                        padding: '0.75rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                        zIndex: 20,
-                        pointerEvents: 'none',
-                        minWidth: '120px'
-                    }}>
-                        <div style={{ color: '#e2e8f0', fontWeight: 600, borderBottom: '1px solid #334155', marginBottom: '0.5rem', paddingBottom: '0.2rem', fontSize: '0.9rem' }}>
-                            {new Date(metrics[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                {hoveredPoint !== null && metrics[hoveredPoint.index] && (() => {
+                    // Clamp tooltip Y position to prevent cutoff/scroll
+                    const tooltipY = Math.max(40, Math.min(chartHeight - 40, hoveredPoint.y ? hoveredPoint.y + padding.top : 60));
+                    return (
+                        <div style={{
+                            position: 'absolute',
+                            left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
+                            top: `${tooltipY}px`,
+                            transform: `translate(${hoveredPoint.index > metrics.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
+                            background: '#0f172a',
+                            border: '1px solid #334155',
+                            borderRadius: '8px',
+                            padding: '0.75rem',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            zIndex: 20,
+                            pointerEvents: 'none',
+                            minWidth: '120px'
+                        }}>
+                            <div style={{ color: '#e2e8f0', fontWeight: 600, borderBottom: '1px solid #334155', marginBottom: '0.5rem', paddingBottom: '0.2rem', fontSize: '0.9rem' }}>
+                                {new Date(metrics[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </div>
+                            {seriesConfig.map(s => {
+                                let tipColor = s.color;
+                                if (type === 'bar' && seriesConfig.length === 1) {
+                                    const val = metrics[hoveredPoint.index][s.key] || 0;
+                                    tipColor = getHeatColor(val, heatMin, heatMax);
+                                }
+                                return (
+                                    <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem', gap: '1rem' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                                            <span style={{ width: 8, height: 8, background: tipColor, borderRadius: '50%', flexShrink: 0 }} />
+                                            {s.label}
+                                        </span>
+                                        <span style={{ color: '#fff', fontWeight: 500 }}>
+                                            {(metrics[hoveredPoint.index][s.key] || 0).toLocaleString()}
+                                        </span>
+                                    </div>
+                                );
+                            })}
                         </div>
-                        {seriesConfig.map(s => {
-                            // Calculate color dynamically for Heat Bar tooltip
-                            let tipColor = s.color;
-                            if (type === 'bar' && seriesConfig.length === 1) {
-                                const val = metrics[hoveredPoint.index][s.key] || 0;
-                                tipColor = getHeatColor(val, heatMin, heatMax);
-                            }
-
-                            return (
-                                <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem', gap: '1rem' }}>
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                                        <span style={{ width: 8, height: 8, background: tipColor, borderRadius: '50%', flexShrink: 0 }} />
-                                        {s.label}
-                                    </span>
-                                    <span style={{ color: '#fff', fontWeight: 500 }}>
-                                        {(metrics[hoveredPoint.index][s.key] || 0).toLocaleString()}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
+                    );
+                })()}
             </div>
         </div>
     );
@@ -1204,44 +1209,48 @@ const RatingsChartCard = ({ onPointClick }) => {
                 </svg>
 
                 {/* Tooltip */}
-                {hoveredPoint !== null && ratings[hoveredPoint.index] && (
-                    <div style={{
-                        position: 'absolute',
-                        left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
-                        top: `${hoveredPoint.y ? hoveredPoint.y + padding.top : 20}px`,
-                        transform: `translate(${hoveredPoint.index > ratings.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
-                        background: '#0f172a',
-                        border: '1px solid #334155',
-                        borderRadius: '8px',
-                        padding: '0.75rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                        zIndex: 20,
-                        pointerEvents: 'none',
-                        whiteSpace: 'nowrap'
-                    }}>
-                        <div style={{ color: '#e2e8f0', fontWeight: 600, borderBottom: '1px solid #334155', marginBottom: '0.5rem', paddingBottom: '0.2rem', fontSize: '0.9rem' }}>
-                            {new Date(ratings[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                {hoveredPoint !== null && ratings[hoveredPoint.index] && (() => {
+                    // Clamp tooltip Y position to prevent cutoff/scroll
+                    const tooltipY = Math.max(40, Math.min(chartHeight - 40, hoveredPoint.y ? hoveredPoint.y + padding.top : 60));
+                    return (
+                        <div style={{
+                            position: 'absolute',
+                            left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
+                            top: `${tooltipY}px`,
+                            transform: `translate(${hoveredPoint.index > ratings.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
+                            background: '#0f172a',
+                            border: '1px solid #334155',
+                            borderRadius: '8px',
+                            padding: '0.75rem',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            zIndex: 20,
+                            pointerEvents: 'none',
+                            whiteSpace: 'nowrap'
+                        }}>
+                            <div style={{ color: '#e2e8f0', fontWeight: 600, borderBottom: '1px solid #334155', marginBottom: '0.5rem', paddingBottom: '0.2rem', fontSize: '0.9rem' }}>
+                                {new Date(ratings[hoveredPoint.index].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem', gap: '1.5rem' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
+                                    <span style={{ width: 8, height: 8, background: '#facc15', borderRadius: '50%' }} />
+                                    Avg Rating
+                                </span>
+                                <span style={{ color: '#fff', fontWeight: 500 }}>
+                                    {ratings[hoveredPoint.index].average > 0 ? ratings[hoveredPoint.index].average.toFixed(1) : '-'} ⭐
+                                </span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', gap: '1.5rem' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
+                                    <span style={{ width: 8, height: 8, background: '#3b82f6', borderRadius: '50%' }} />
+                                    Votes
+                                </span>
+                                <span style={{ color: '#fff', fontWeight: 500 }}>
+                                    {ratings[hoveredPoint.index].count}
+                                </span>
+                            </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: '0.25rem', gap: '1.5rem' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
-                                <span style={{ width: 8, height: 8, background: '#facc15', borderRadius: '50%' }} />
-                                Avg Rating
-                            </span>
-                            <span style={{ color: '#fff', fontWeight: 500 }}>
-                                {ratings[hoveredPoint.index].average > 0 ? ratings[hoveredPoint.index].average.toFixed(1) : '-'} ⭐
-                            </span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', gap: '1.5rem' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
-                                <span style={{ width: 8, height: 8, background: '#3b82f6', borderRadius: '50%' }} />
-                                Votes
-                            </span>
-                            <span style={{ color: '#fff', fontWeight: 500 }}>
-                                {ratings[hoveredPoint.index].count}
-                            </span>
-                        </div>
-                    </div>
-                )}
+                    );
+                })()}
             </div>
         </div>
     );

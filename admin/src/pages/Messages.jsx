@@ -326,7 +326,7 @@ const Messages = () => {
             }}>
                 <div style={{ marginBottom: '1.5rem' }}>
                     <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                        🔔 In-App Notifications
+                        🔔 Messages
                     </h1>
                     <p style={{ color: 'var(--color-text-secondary)' }}>
                         Manage communications, broadcasts, and user feedback
