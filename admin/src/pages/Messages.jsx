@@ -433,6 +433,7 @@ const Messages = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
                             <FeedbackSection
                                 feedback={feedback}
+                                feedbackCounts={feedbackCounts}
                                 onUpdate={fetchData}
                                 onUpdateStatus={handleUpdateFeedbackStatus}
                                 onDelete={handleDeleteFeedback}
@@ -1025,7 +1026,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 };
 
 const FeedbackSection = ({
-    feedback, onUpdate, onUpdateStatus, onDelete,
+    feedback, feedbackCounts, onUpdate, onUpdateStatus, onDelete,
     page, setPage, pageSize, totalItems,
     sortColumn, setSortColumn, sortDirection, setSortDirection
 }) => {
