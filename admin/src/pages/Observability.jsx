@@ -97,8 +97,8 @@ const Observability = () => {
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                     <div className="text-muted text-sm">Registered</div>
                                 </div>
-                                {/* Horizontal Badges */}
-                                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'center', gap: '0.3rem', width: '100%', maxWidth: '100%' }}>
+                                {/* 2x2 Grid Badges */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', width: '100%', maxWidth: '240px' }}>
                                     {[
                                         { label: 'Eagle', count: stats.userLevels?.eagle, color: '#f59e0b', icon: '🦅' },
                                         { label: 'Owl', count: stats.userLevels?.owl, color: '#8b5cf6', icon: '🦉' },
@@ -106,14 +106,13 @@ const Observability = () => {
                                         { label: 'Hatchling', count: stats.userLevels?.hatchling, color: '#94a3b8', icon: '🥚' }
                                     ].map(badge => (
                                         <div key={badge.label} style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.2rem',
-                                            background: `${badge.color}15`, border: `1px solid ${badge.color}30`,
-                                            borderRadius: '6px', padding: '0.2rem 0.3rem', fontSize: '0.7rem',
-                                            whiteSpace: 'nowrap', flexShrink: 1
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                                            background: `${badge.color}20`, border: `1px solid ${badge.color}40`,
+                                            borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem'
                                         }}>
-                                            <span style={{ fontSize: '0.75rem' }}>{badge.icon}</span>
+                                            <span style={{ fontSize: '1rem' }}>{badge.icon}</span>
                                             <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
-                                            <span style={{ fontWeight: 700, color: badge.color, marginLeft: '0.1rem' }}>{badge.count || 0}</span>
+                                            <span style={{ fontWeight: 700, color: badge.color, marginLeft: '0.2rem' }}>{badge.count || 0}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -131,20 +130,21 @@ const Observability = () => {
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                     <div className="text-muted text-sm">Locations</div>
                                 </div>
-                                {/* Horizontal Points Info - Restored "Aspect" (Text Style) aligned with User Badges */}
-                                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'center', gap: '0.6rem', width: '100%' }}>
+                                {/* Badges arranged around total */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem', width: '100%', maxWidth: '280px' }}>
                                     {[
                                         { label: 'Confirmed', count: stats.mapPoints?.confirmed, color: '#22c55e', icon: '🟢' },
                                         { label: 'Pending', count: stats.mapPoints?.pending, color: '#f59e0b', icon: '🟠' },
                                         { label: 'Inactive', count: stats.mapPoints?.deactivated, color: '#ef4444', icon: '🔴' }
                                     ].map(info => (
                                         <div key={info.label} style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.3rem',
-                                            fontSize: '0.8rem', whiteSpace: 'nowrap', padding: '0.25rem 0'
+                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            background: `${info.color}20`, border: `1px solid ${info.color}40`,
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
                                         }}>
-                                            <span style={{ fontSize: '0.75rem' }}>{info.icon}</span>
-                                            <span style={{ color: info.color, fontWeight: 600 }}>{info.label}:</span>
-                                            <span style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.85rem' }}>{info.count || 0}</span>
+                                            <span style={{ fontSize: '0.9rem' }}>{info.icon}</span>
+                                            <span style={{ color: info.color, fontWeight: 600 }}>{info.label}</span>
+                                            <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{info.count || 0}</span>
                                         </div>
                                     ))}
                                 </div>
