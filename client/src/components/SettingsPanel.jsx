@@ -840,10 +840,10 @@ const RetentionSlider = ({ value, onChange }) => {
                 border: '1px solid var(--color-border)',
                 borderRadius: 'var(--radius-md)',
                 minHeight: '60px',
+                height: '60px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s ease-out'
+                justifyContent: 'center'
             }}>
                 <span style={{
                     fontWeight: 600,
@@ -910,7 +910,7 @@ const RetentionSlider = ({ value, onChange }) => {
                 {STEPS.map((s, i) => (
                     <div key={i} style={{
                         position: 'absolute',
-                        left: `calc(12px + ${getPctFromStepIndex(i)}% * (100% - 24px) / 100)`,
+                        left: `calc(12px + (100% - 24px) * ${getPctFromStepIndex(i)} / 100)`,
                         top: '8px',
                         width: '3px',
                         height: '24px',
@@ -923,7 +923,7 @@ const RetentionSlider = ({ value, onChange }) => {
                 {/* Handle */}
                 <div style={{
                     position: 'absolute',
-                    left: `calc(12px + ${currentPct}% * (100% - 24px) / 100)`,
+                    left: `calc(12px + (100% - 24px) * ${currentPct} / 100)`,
                     width: '28px',
                     height: '28px',
                     borderRadius: '50%',
