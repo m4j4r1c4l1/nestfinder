@@ -1310,7 +1310,7 @@ const FeedbackSection = ({
                                                         <span style={{ color: '#3b82f6' }}>✓✓</span>
                                                     )}
                                                 </div>
-                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0', textAlign: 'left', marginLeft: '8px' }}>
                                                     {item.status === 'sent' || item.status === 'new' ? 'Sent' : (item.status === 'delivered' || item.status === 'pending') ? 'Received' : 'Read'}
                                                 </span>
                                             </div>
@@ -2106,7 +2106,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         {headerIcon}
-                        <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{headerTitle}</h3>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{headerTitle}</h3>
                     </div>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
                 </div>
