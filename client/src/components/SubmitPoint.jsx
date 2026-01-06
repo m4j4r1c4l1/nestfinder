@@ -16,17 +16,31 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     const [isGeocoding, setIsGeocoding] = useState(false);
     const [error, setError] = useState('');
 
-    // 'Who' tag options
+    // 'Who' tag options - expanded to 52 emojis
     const tagOptions = [
+        // People
         { id: 'single', emoji: '👤', label: t('submit.onePerson') },
         { id: 'group', emoji: '👥', label: t('submit.multiple') },
         { id: 'children', emoji: '👶', label: t('submit.children') },
         { id: 'elderly', emoji: '👴', label: 'Elderly' },
+        { id: 'woman', emoji: '👩', label: 'Woman' },
+        { id: 'man', emoji: '👨', label: 'Man' },
+        { id: 'family', emoji: '👨‍👩‍👧', label: 'Family' },
+        { id: 'pregnant', emoji: '🤰', label: 'Pregnant' },
+        { id: 'disabled', emoji: '♿', label: 'Disabled' },
+        { id: 'wheelchair', emoji: '🧑‍🦽', label: 'Wheelchair' },
+        // Animals
         { id: 'dog', emoji: '🐕', label: 'Dog' },
         { id: 'cat', emoji: '🐈', label: 'Cat' },
         { id: 'bird', emoji: '🐦', label: 'Bird' },
         { id: 'wild', emoji: '🐾', label: 'Wild Animal' },
         { id: 'insect', emoji: '🐞', label: 'Insect' },
+        { id: 'rabbit', emoji: '🐇', label: 'Rabbit' },
+        { id: 'horse', emoji: '🐴', label: 'Horse' },
+        { id: 'cow', emoji: '🐄', label: 'Cow' },
+        { id: 'sheep', emoji: '🐑', label: 'Sheep' },
+        { id: 'fish', emoji: '🐟', label: 'Fish' },
+        // Nature
         { id: 'tree', emoji: '🌳', label: 'Tree' },
         { id: 'flower', emoji: '🌸', label: 'Flower' },
         { id: 'forest', emoji: '🌲', label: 'Forest' },
@@ -34,6 +48,10 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         { id: 'river', emoji: '🌊', label: 'River/Water' },
         { id: 'beach', emoji: '🏖️', label: 'Beach' },
         { id: 'desert', emoji: '🏜️', label: 'Desert' },
+        { id: 'island', emoji: '🏝️', label: 'Island' },
+        { id: 'cave', emoji: '🕳️', label: 'Cave' },
+        { id: 'park', emoji: '🏞️', label: 'Park' },
+        // Weather
         { id: 'sun', emoji: '☀️', label: 'Sun' },
         { id: 'moon', emoji: '🌙', label: 'Moon' },
         { id: 'star', emoji: '⭐', label: 'Star' },
@@ -42,17 +60,40 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         { id: 'snow', emoji: '❄️', label: 'Snow' },
         { id: 'fire', emoji: '🔥', label: 'Fire' },
         { id: 'wind', emoji: '💨', label: 'Wind' },
+        { id: 'thunder', emoji: '⛈️', label: 'Storm' },
+        { id: 'rainbow', emoji: '🌈', label: 'Rainbow' },
+        // Infrastructure
+        { id: 'house', emoji: '🏠', label: 'House' },
+        { id: 'building', emoji: '🏢', label: 'Building' },
+        { id: 'hospital', emoji: '🏥', label: 'Hospital' },
+        { id: 'school', emoji: '🏫', label: 'School' },
+        { id: 'church', emoji: '⛪', label: 'Church' },
+        { id: 'bridge', emoji: '🌉', label: 'Bridge' },
+        { id: 'road', emoji: '🛤️', label: 'Road' },
+        { id: 'car', emoji: '🚗', label: 'Car' },
+        { id: 'truck', emoji: '🚚', label: 'Truck' },
+        { id: 'ambulance', emoji: '🚑', label: 'Ambulance' },
         { id: 'planet', emoji: '🪐', label: 'Planet' },
         { id: 'earth', emoji: '🌍', label: 'Earth' }
     ];
 
-    // 'What' need options
+    // 'What' need options - expanded to 15 emojis
     const needOptions = [
         { id: 'clothes', emoji: '👕', label: t('submit.needClothes') },
         { id: 'food', emoji: '🍲', label: t('submit.needFood') },
         { id: 'medicine', emoji: '💊', label: t('submit.needMedicine') },
         { id: 'water', emoji: '💧', label: t('submit.needWater') },
-        { id: 'shelter', emoji: '⛺', label: t('submit.needShelter') }
+        { id: 'shelter', emoji: '⛺', label: t('submit.needShelter') },
+        { id: 'blanket', emoji: '🛏️', label: 'Blanket' },
+        { id: 'firstaid', emoji: '🩹', label: 'First Aid' },
+        { id: 'phone', emoji: '📱', label: 'Phone/Charge' },
+        { id: 'transport', emoji: '🚐', label: 'Transport' },
+        { id: 'money', emoji: '💰', label: 'Money' },
+        { id: 'tools', emoji: '🔧', label: 'Tools' },
+        { id: 'flashlight', emoji: '🔦', label: 'Flashlight' },
+        { id: 'soap', emoji: '🧼', label: 'Hygiene' },
+        { id: 'baby', emoji: '🍼', label: 'Baby Items' },
+        { id: 'pet', emoji: '🦴', label: 'Pet Supplies' }
     ];
 
     const toggleTag = (tagId) => {
