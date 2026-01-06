@@ -223,7 +223,10 @@ export default {
         statusOwl: 'Owl',
         statusEagle: 'Eagle',
         // Recovery Key Restore
-        recoveryKeyUsage: 'To restore your account, type your 3-word key with dashes in the **Nickname** field when you open the app. or log in with a new account and restore it from the **Restore Account** section below',
+        // recoveryKeyUsage: Deprecated in favor of explicit options below
+        restoreOptionsTitle: 'To restore your account you have 2 options:',
+        restoreOption1: '**Login:** Type your 3-word key **with dashes** in the **Nickname** field when you log in to app.',
+        restoreOption2: '**New account:** Log in with a new account and restore it from the **Restore Account** section below',
         restoreAccount: 'Restore Account',
         restoreAccountDescription: 'Enter your 3-word recovery key (with spaces or dashes).',
         enterRecoveryKey: 'word-word-word',
