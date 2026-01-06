@@ -1200,6 +1200,23 @@ const FeedbackSection = ({
                                     <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🗑️ Delete ({selectedIds.length})</button>
                                 </>
                             )}
+                            <button
+                                onClick={async () => {
+                                    if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Received History?\nThis will remove all feedback messages from this list.')) return;
+                                    try {
+                                        // Delete all feedback
+                                        for (const item of feedback) {
+                                            await onDelete(item.id);
+                                        }
+                                        onUpdate && onUpdate();
+                                    } catch (err) { alert('Cleanup failed: ' + err.message); }
+                                }}
+                                className="btn btn-sm"
+                                style={{ marginRight: '0.5rem', background: '#6366f1', color: 'white', width: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px', border: 'none', borderRadius: '6px' }}
+                                title="Delete all received messages"
+                            >
+                                🗑️ Clear History
+                            </button>
                             <button onClick={onUpdate} className="btn btn-secondary btn-sm" style={{ height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🔄 Refresh</button>
                         </div>
                     </div>
@@ -1571,8 +1588,8 @@ const HistorySection = ({ users = [] }) => {
                                     }
                                 } catch (err) { alert('Cleanup failed: ' + err.message); }
                             }}
-                            className="btn btn-sm btn-danger"
-                            style={{ marginRight: '0.5rem', background: '#ef4444', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px' }}
+                            className="btn btn-sm"
+                            style={{ marginRight: '0.5rem', background: '#6366f1', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px', border: 'none', borderRadius: '6px' }}
                             title="Delete all sent history logs"
                         >
                             🗑️ Clear History
