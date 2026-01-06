@@ -745,54 +745,113 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 const RetentionSlider = ({ value, onChange }) => {
     const trackRef = React.useRef(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [localValue, setLocalValue] = useState(value);
+    const [dragPct, setDragPct] = useState(0); // 0-100 local drag state
 
-    // Linear scale: 0 to 53
-    // 0 = Delete on Read ('0d')
-    // 1-52 = X Weeks (X * 7 + 'd')
-    // 53 = Forever ('forever')
-    const MAX_STEPS = 53;
+    // Scale Definitions:
+    // 0 - 20%: 0h - 24h
+    // 20 - 40%: 1d - 7d
+    // 40 - 60%: 1w - 4w
+    // 60 - 90%: 1m - 12m
+    // 90 - 100%: Forever
 
-    // Helper: Value -> Step (0-53)
-    const getStepFromValue = (v) => {
-        if (!v || v === 'forever') return MAX_STEPS;
+    // Helper: Value String -> Percentage (for syncing initial state)
+    const getPctFromValue = (v) => {
+        if (!v || v === 'forever') return 100;
         if (v === '0' || v === '0d') return 0;
 
-        // Convert days/months/years to closest week
-        let days = 0;
-        if (v.endsWith('m')) days = parseInt(v) * 30;
-        else if (v.endsWith('y')) days = parseInt(v) * 365;
-        else if (v.endsWith('w')) days = parseInt(v) * 7;
-        else if (v.endsWith('d')) days = parseInt(v);
-        else days = 30; // default
+        let minutes = 0;
+        if (v.endsWith('d')) minutes = parseInt(v) * 1440;
+        else if (v.endsWith('w')) minutes = parseInt(v) * 10080;
+        else if (v.endsWith('m')) minutes = parseInt(v) * 43200; // 30 days default
+        else if (v.endsWith('y')) minutes = parseInt(v) * 525600;
 
-        const weeks = Math.round(days / 7);
-        return Math.max(1, Math.min(MAX_STEPS - 1, weeks));
+        // Inverse mapping
+        if (minutes <= 1440) return (minutes / 1440) * 20;
+        if (minutes <= 10080) return 20 + ((minutes - 1440) / (10080 - 1440)) * 20;
+        if (minutes <= 40320) return 40 + ((minutes - 10080) / (40320 - 10080)) * 20;
+        if (minutes <= 525600) return 60 + ((minutes - 40320) / (525600 - 40320)) * 30;
+        return 100;
     };
 
-    // Helper: Step -> Value String
-    const getValueFromStep = (step) => {
-        if (step >= MAX_STEPS) return 'forever';
-        if (step <= 0) return '0d';
-        return `${step * 7}d`;
+    // Helper: Percentage -> Value { label, valueStr }
+    const getValueFromPct = (pct) => {
+        if (pct >= 90) return { label: '∞', valueStr: 'forever' };
+        if (pct <= 0) return { label: 'Delete on Read', valueStr: '0d' };
+
+        let minutes = 0;
+        let granularity = ''; // for rounding
+
+        if (pct < 20) {
+            // 0 - 24h
+            minutes = (pct / 20) * 1440;
+            const hours = Math.round(minutes / 60);
+            if (hours === 0) return { label: 'Delete on Read', valueStr: '0d' };
+            return { label: `${hours} Hour${hours > 1 ? 's' : ''}`, valueStr: `${hours / 24}d` }; // Fractional days not supported by backend well, stick to whole logic? Backend likely parses integers. 
+            // Wait, existing logic used days. If I send '0.5d', backend might fail. 
+            // Stick to existing formats: d, m, y. 
+            // Actually, backend prune uses `cutoff.setDate(now.getDate() - parseInt(value))`.
+            // parseInt('0.5') is 0. So < 1 day becomes 0d. 
+            // I should stick to > 1 day granularity OR update backend. 
+            // FOR NOW: Let's assume hours isn't critical or round to nearest day >= 1?
+            // User ASKED for hours. "From 0 to 1 day, the bar will have day granularity of hours."
+            // If backend only supports days, I might need to send fractional days and ensure backend handles it? 
+            // Checking SettingsPanel.jsx again... `value.endsWith('d') { cutoff.setDate(now.getDate() - parseInt(value)); }`
+            // Okay, parseInt(0.2) is 0. So sub-day retention is treated as 0d (Delete on Read).
+            // This is a logic gap. To support hours, I'd need to update backend or parsing logic in `handleRetentionChange`.
+            // User requested UI changes. I will implement UI but map < 1d to 0d for now to avoid breaking backend, OR treat 1h as 1d? No, that's misleading.
+            // Actually, if I change the stored format to 'Xh', I can update `handleRetentionChange` to parse 'h'.
+            return { label: `${hours} Hour${hours > 1 ? 's' : ''}`, valueStr: `${hours}h` };
+        } else if (pct < 40) {
+            // 1d - 7d
+            const range = pct - 20;
+            const days = 1 + Math.round((range / 20) * 6);
+            return { label: `${days} Day${days > 1 ? 's' : ''}`, valueStr: `${days}d` };
+        } else if (pct < 60) {
+            // 1w - 4w
+            const range = pct - 40;
+            const weeks = 1 + Math.round((range / 20) * 3);
+            return { label: `${weeks} Week${weeks > 1 ? 's' : ''}`, valueStr: `${weeks}w` };
+        } else {
+            // 1m - 12m
+            const range = pct - 60;
+            const months = 1 + Math.round((range / 30) * 11);
+            return { label: `${months} Month${months > 1 ? 's' : ''}`, valueStr: `${months}m` };
+        }
     };
 
-    const currentStep = isDragging ? getStepFromValue(localValue) : getStepFromValue(value);
-    const currentPct = (currentStep / MAX_STEPS) * 100;
+    // Initialize drag state from prop
+    React.useEffect(() => {
+        if (!isDragging) {
+            setDragPct(getPctFromValue(value));
+        }
+    }, [value, isDragging]);
 
-    // Get display label and info message
-    let displayLabel = '';
-    let infoMessage = null;
+    const { label: displayLabel, valueStr: currentValueStr } = getValueFromPct(dragPct);
 
-    if (currentStep >= MAX_STEPS) {
-        displayLabel = '∞';
-        infoMessage = 'Messages are kept indefinitely.';
-    } else if (currentStep <= 0) {
-        displayLabel = 'Delete on Read';
-        infoMessage = 'Messages will be deleted upon being read.';
-    } else {
-        displayLabel = `${currentStep} Week${currentStep > 1 ? 's' : ''}`;
-    }
+    // Resistance/Magnet logic
+    const applyResistance = (rawPct) => {
+        const zones = [0, 20, 40, 60, 90, 100];
+        const resistance = 1.5; // Width of resistance zone
+
+        for (let zone of zones) {
+            if (rawPct > zone - resistance && rawPct < zone + resistance) {
+                return zone; // Snap to exact boundary
+            }
+        }
+        return rawPct;
+    };
+
+    const updateFromClientX = (clientX) => {
+        if (!trackRef.current) return;
+        const rect = trackRef.current.getBoundingClientRect();
+        let pct = ((clientX - rect.left) / rect.width) * 100;
+        pct = Math.max(0, Math.min(100, pct));
+
+        // Apply resistance
+        pct = applyResistance(pct);
+
+        setDragPct(pct);
+    };
 
     const handleStart = (clientX) => {
         setIsDragging(true);
@@ -807,20 +866,11 @@ const RetentionSlider = ({ value, onChange }) => {
     const handleEnd = () => {
         if (!isDragging) return;
         setIsDragging(false);
-        onChange(getValueFromStep(getStepFromValue(localValue)));
+        const { valueStr } = getValueFromPct(dragPct);
+        onChange(valueStr);
     };
 
-    const updateFromClientX = (clientX) => {
-        if (!trackRef.current) return;
-        const rect = trackRef.current.getBoundingClientRect();
-        let pct = ((clientX - rect.left) / rect.width) * 100;
-        pct = Math.max(0, Math.min(100, pct));
-
-        const step = Math.round((pct / 100) * MAX_STEPS);
-        setLocalValue(getValueFromStep(step));
-    };
-
-    // Event Listeners
+    // Global listeners for drag
     React.useEffect(() => {
         const onMouseMove = (e) => handleMove(e.clientX);
         const onMouseUp = () => handleEnd();
@@ -839,7 +889,17 @@ const RetentionSlider = ({ value, onChange }) => {
             document.removeEventListener('touchmove', onTouchMove);
             document.removeEventListener('touchend', onTouchEnd);
         };
-    }, [isDragging]);
+    }, [isDragging, dragPct]); // dragPct dependency not needed for logic but harmless
+
+    // Info Message Logic
+    let infoMessage = null;
+    if (dragPct >= 90) infoMessage = 'Messages are kept indefinitely.';
+    else if (dragPct <= 0 || (dragPct < 20 && currentValueStr.endsWith('h'))) infoMessage = 'Messages will be deleted upon being read.'; // Treat hours as basically immediate for the badge? Or distinct? User said "For 0 or infinity states...". 0d is 0. 
+
+    // Refined: Only at exact 0 or Forever.
+    if (dragPct >= 90) infoMessage = 'Messages are kept indefinitely.';
+    else if (dragPct <= 0) infoMessage = 'Messages will be deleted upon being read.';
+
 
     return (
         <div style={{ padding: '0.5rem 0' }}>
@@ -855,13 +915,14 @@ const RetentionSlider = ({ value, onChange }) => {
                 height: '60px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                position: 'relative'
             }}>
                 <span style={{
                     fontWeight: 600,
                     color: 'var(--color-primary)',
-                    fontSize: isDragging ? '1.8rem' : '1.5rem',
-                    transition: 'font-size 0.15s ease-out'
+                    fontSize: displayLabel === '∞' ? '2.2rem' : '1.5rem',
+                    transition: 'font-size 0.2s ease-out'
                 }}>
                     {displayLabel}
                 </span>
@@ -884,60 +945,82 @@ const RetentionSlider = ({ value, onChange }) => {
                 </div>
             )}
 
-            {/* Track */}
-            <div
-                ref={trackRef}
-                onMouseDown={(e) => handleStart(e.clientX)}
-                onTouchStart={(e) => handleStart(e.touches[0].clientX)}
-                style={{
-                    position: 'relative',
-                    height: '40px',
-                    background: 'var(--color-bg-tertiary)',
-                    borderRadius: 'var(--radius-md)',
-                    cursor: 'pointer',
-                    touchAction: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '0 12px'
-                }}
-            >
-                {/* Track Line (Thicker) */}
-                <div style={{
-                    position: 'absolute',
-                    left: '12px', right: '12px',
-                    height: '10px',
-                    background: 'var(--color-border)',
-                    borderRadius: '5px'
-                }}>
-                    {/* Fill */}
+            {/* Track Container */}
+            <div style={{ padding: '0 6px' }}> {/* Padding for handle edges */}
+                <div
+                    ref={trackRef}
+                    onMouseDown={(e) => handleStart(e.clientX)}
+                    onTouchStart={(e) => handleStart(e.touches[0].clientX)}
+                    style={{
+                        position: 'relative',
+                        height: '48px',
+                        cursor: 'pointer',
+                        touchAction: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                    }}
+                >
+                    {/* Ruler Scale Background */}
                     <div style={{
-                        width: `${currentPct}%`,
-                        height: '100%',
-                        background: 'var(--color-primary)',
-                        borderRadius: '5px'
+                        position: 'absolute',
+                        left: 0, right: 0,
+                        bottom: 0,
+                        height: '20px',
+                        display: 'flex',
+                        pointerEvents: 'none'
+                    }}>
+                        {/* Ticks at 20, 40, 60, 90 */}
+                        {[20, 40, 60, 90].map(p => (
+                            <div key={p} style={{
+                                position: 'absolute',
+                                left: `${p}%`,
+                                bottom: '0',
+                                height: '8px',
+                                width: '1px',
+                                background: 'var(--color-text-tertiary)'
+                            }} />
+                        ))}
+                    </div>
+
+                    {/* Track Line */}
+                    <div style={{
+                        position: 'absolute',
+                        left: 0, right: 0,
+                        height: '6px',
+                        background: 'var(--color-bg-tertiary)',
+                        borderRadius: '3px',
+                        overflow: 'hidden' // Ensure fill matches radius
+                    }}>
+                        {/* Fill */}
+                        <div style={{
+                            width: `${dragPct}%`,
+                            height: '100%',
+                            background: 'var(--color-primary)',
+                            borderRadius: '3px'
+                        }} />
+                    </div>
+
+                    {/* Handle */}
+                    <div style={{
+                        position: 'absolute',
+                        left: `${dragPct}%`,
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        background: 'white',
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                        transform: 'translateX(-50%)',
+                        border: '2px solid var(--color-primary)',
+                        transition: isDragging ? 'none' : 'left 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Spring effect fallback
+                        zIndex: 10
                     }} />
                 </div>
 
-                {/* Handle */}
-                <div style={{
-                    position: 'absolute',
-                    left: `calc(12px + (100% - 24px) * ${currentPct} / 100)`,
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    background: 'white',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
-                    transform: 'translateX(-50%)',
-                    border: '3px solid var(--color-primary)',
-                    zIndex: 10,
-                    transition: isDragging ? 'none' : 'left 0.1s ease-out'
-                }} />
-            </div>
-
-            {/* Scale Labels */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px', padding: '0 8px' }}>
-                <span>0</span>
-                <span>∞</span>
+                {/* Scale Labels */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginTop: '-8px' }}>
+                    <span style={{ marginLeft: '-4px' }}>0</span>
+                    <span style={{ marginRight: '-4px' }}>∞</span>
+                </div>
             </div>
         </div>
     );
@@ -977,13 +1060,21 @@ const SettingsPanel = ({ onClose }) => {
 
             if (value.endsWith('d')) {
                 cutoff.setDate(now.getDate() - parseInt(value));
+            } else if (value.endsWith('h')) { // New: Support for hours
+                cutoff.setHours(now.getHours() - parseInt(value));
             } else if (value.endsWith('m')) {
                 cutoff.setMonth(now.getMonth() - parseInt(value));
+            } else if (value.endsWith('w')) { // New: Support for weeks
+                cutoff.setDate(now.getDate() - (parseInt(value) * 7));
             } else if (value.endsWith('y')) {
                 cutoff.setFullYear(now.getFullYear() - parseInt(value));
             } else if (value === '1m') { // Fallback for legacy
                 cutoff.setMonth(now.getMonth() - 1);
             }
+            // If value is 0d, cutoff is just now, which deletes everything read?
+            // "Messages will be deleted upon being read." 
+            // The prune argument is `before` date. So if cuttoff is NOW, anything before NOW is pruned.
+            // If "Delete on Read" means instant, we probably rely on 'read' flag mainly, but prune takes a date.
 
             try {
                 const isoCutoff = cutoff.toISOString();
