@@ -420,7 +420,16 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         );
     };
 
-    // ... (helper functions omitted) ...
+    // Helper: Get title based on feedback type
+    const getFeedbackTitle = (type) => {
+        switch (type) {
+            case 'bug': return t('feedback.bugReport') || 'Bug Report';
+            case 'suggestion': return t('feedback.suggestion') || 'Suggestion';
+            default: return t('feedback.general') || 'Feedback';
+        }
+    };
+
+    // Helper: Determine CSS class based on notification type
 
     // Helper: Render Status Badge (Tick marks)
     const renderStatusBadge = (item, type) => {
