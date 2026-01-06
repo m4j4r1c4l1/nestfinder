@@ -420,6 +420,67 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         );
     };
 
+    // Render deletion overlay for a message
+    const renderDeletionOverlay = (itemId) => {
+        if (!messageToDelete || messageToDelete.id !== itemId) return null;
+
+        return (
+            <div
+                onClick={cancelDelete}
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(15, 23, 42, 0.7)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 20,
+                    borderRadius: 'var(--radius-md)'
+                }}
+            >
+                <button
+                    onClick={confirmDelete}
+                    style={deleteButtonStyle}
+                >
+                    Delete
+                </button>
+            </div>
+        );
+    };
+
+    // Helper: Format Date/Time (split into two lines)
+    const formatDateTime = (dateString) => {
+        try {
+            // Database stores timestamps in UTC without timezone suffix
+            // Normalize to ISO format and append 'Z' to treat as UTC
+            const utcString = dateString.replace(' ', 'T') + 'Z';
+            const d = new Date(utcString);
+
+            const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
+            const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
+            const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+            const isDST = Math.max(jan, jul) !== parisOffset;
+
+            const datePart = d.toLocaleDateString('en-GB', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                timeZone: 'Europe/Paris'
+            });
+            const timePart = d.toLocaleTimeString('en-GB', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                timeZone: 'Europe/Paris', hour12: false
+            });
+
+            return { date: datePart, time: `${timePart} ${isDST ? 'CEST' : 'CET'}` };
+        } catch (e) {
+            return { date: '', time: '' };
+        }
+    };
+
     // Helper: Get title based on feedback type
     const getFeedbackTitle = (type) => {
         switch (type) {
