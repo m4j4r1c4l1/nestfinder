@@ -391,9 +391,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 borderTop: 'none',
                 flexShrink: 0
             }}>
-                <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
-                <SummaryBadge label="PENDING" count={unreadCount} color="#22c55e" onClick={() => setReceivedFilter('new')} isActive={receivedFilter === 'new'} />
-                <SummaryBadge label="READ" count={readCount} color="#3b82f6" onClick={() => setReceivedFilter('read')} isActive={receivedFilter === 'read'} />
+                <SummaryBadge label="Total" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
+                <SummaryBadge label="Pending" count={unreadCount} color="#22c55e" onClick={() => setReceivedFilter('new')} isActive={receivedFilter === 'new'} />
+                <SummaryBadge label="Read" count={readCount} color="#3b82f6" onClick={() => setReceivedFilter('read')} isActive={receivedFilter === 'read'} />
             </div>
         );
     };
@@ -423,10 +423,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 borderTop: 'none',
                 flexShrink: 0
             }}>
-                <SummaryBadge label="TOTAL" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
-                <SummaryBadge label="SENT" count={sentCount} color="#94a3b8" onClick={() => setSentFilter('sent')} isActive={sentFilter === 'sent'} />
-                <SummaryBadge label="DELIVERED" count={deliveredCount} color="#22c55e" onClick={() => setSentFilter('delivered')} isActive={sentFilter === 'delivered'} />
-                <SummaryBadge label="READ" count={readCount} color="#3b82f6" onClick={() => setSentFilter('read')} isActive={sentFilter === 'read'} />
+                <SummaryBadge label="Total" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
+                <SummaryBadge label="Sent" count={sentCount} color="#94a3b8" onClick={() => setSentFilter('sent')} isActive={sentFilter === 'sent'} />
+                <SummaryBadge label="Delivered" count={deliveredCount} color="#22c55e" onClick={() => setSentFilter('delivered')} isActive={sentFilter === 'delivered'} />
+                <SummaryBadge label="Read" count={readCount} color="#3b82f6" onClick={() => setSentFilter('read')} isActive={sentFilter === 'read'} />
             </div>
         );
     };
