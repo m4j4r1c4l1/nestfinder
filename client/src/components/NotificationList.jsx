@@ -802,10 +802,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             {msg.message}
                                                         </div>
 
-                                                        {/* 3. Footer Row: Stars (Left) | Bin (Right) */}
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '24px' }}>
+                                                        {/* 3. Footer Row: Stars (Left) | Ticks (Center) | Bin (Right) */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', height: '24px' }}>
                                                             {/* Left: Stars */}
-                                                            <div>
+                                                            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
                                                                 {msg.rating && (
                                                                     <div style={{ fontSize: '0.9rem', color: '#f59e0b', lineHeight: 1 }}>
                                                                         {'⭐'.repeat(msg.rating)}
@@ -814,10 +814,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             </div>
 
                                                             {/* Center: Status Badge */}
-                                                            <div>{renderStatusBadge(msg, 'sent')}</div>
+                                                            <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>{renderStatusBadge(msg, 'sent')}</div>
 
                                                             {/* Right: Bin Icon */}
-                                                            <div>
+                                                            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
                                                                 <button
                                                                     onClick={(e) => handleDeleteClick(e, msg.id, 'sent')}
                                                                     style={{
