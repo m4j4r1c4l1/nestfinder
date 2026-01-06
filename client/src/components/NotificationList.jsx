@@ -372,7 +372,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         const readCount = baseNotifications.filter(n => n.read).length;
         return (
             <div style={{
-                background: 'var(--color-bg-secondary)',
                 padding: '0.85rem 1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -404,7 +403,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         }).length;
         return (
             <div style={{
-                background: 'var(--color-bg-secondary)',
                 padding: '0.85rem 1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
