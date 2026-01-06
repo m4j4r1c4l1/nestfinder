@@ -593,14 +593,14 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         const threshold = trackWidth * 0.25;
 
         // Calculate absolute drag distance to determine switch
-        // We need to know effective movement relative to start state
-        // If start was Left: > threshold -> Right
-        // If start was Right: < -threshold -> Left
-        // If start was Center: > 50 -> Right, < -50 -> Left
+        // Logic depending on start state
+        // If null (center): drag right -> right, drag left -> left
+        // If left: drag right -> right
+        // If right: drag left -> left
 
         if (value === null) {
-            if (dragOffset > 50) onChange('right');
-            else if (dragOffset < -50) onChange('left');
+            if (dragOffset > threshold) onChange('right');
+            else if (dragOffset < -threshold) onChange('left');
         } else if (value === 'left') {
             if (dragOffset > threshold) onChange('right');
         } else if (value === 'right') {
@@ -681,13 +681,14 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const isMirrored = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>;
 
     if (dragOffset !== null) {
-        if (dragOffset > 5) doveContent = isMirrored; // Moving Right -> Face Right
-        else if (dragOffset < -5) doveContent = '🕊️'; // Moving Left -> Face Left
+        // User reported inversion: Drag Right -> Default Icon, Drag Left -> Mirrored Icon
+        if (dragOffset > 0) doveContent = '🕊️'; // Dragging right
+        else if (dragOffset < 0) doveContent = isMirrored; // Dragging left
         else {
             // Neutral/Deadzone: Keep starting orientation
             if (value === 'left') doveContent = isMirrored;
             else if (value === 'right') doveContent = '🕊️';
-            else doveContent = '🕊️';
+            else doveContent = '🕊️'; // Default for center if no drag
         }
     } else {
         // Resting
@@ -893,14 +894,12 @@ const RetentionSlider = ({ value, onChange }) => {
                     }}
                 >
                     {/* Ruler Scale */}
+                    {/* Ticks/Labels (Moved down) */}
                     <div style={{
-                        position: 'absolute',
-                        left: 0, right: 0,
-                        bottom: 0,
+                        position: 'relative',
                         height: '24px',
-                        display: 'flex',
-                        alignItems: 'flex-end',
-                        pointerEvents: 'none',
+                        marginTop: '12px', // Added separation
+                        pointerEvents: 'none'
                     }}>
                         {steps.map((step, i) => {
                             // Determine mark type
@@ -998,7 +997,7 @@ const RetentionSlider = ({ value, onChange }) => {
                     color: 'var(--color-primary)',
                     fontSize: '0.85rem',
                     textAlign: 'center',
-                    marginTop: '1rem',
+                    marginTop: '2.5rem', // Increased separation
                     animation: 'fadeIn 0.3s ease-out'
                 }}>
                     {infoMessage}
