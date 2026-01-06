@@ -500,15 +500,31 @@ router.post('/admin/notifications/cleanup', requireAdmin, (req, res) => {
 });
 
 // Get notification history (logs)
+// Get notification history (logs)
 router.get('/admin/notifications/history', requireAdmin, (req, res) => {
     try {
+        const { page = 1, limit = 50, sort = 'created_at', dir = 'desc' } = req.query;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        const direction = dir === 'asc' ? 'ASC' : 'DESC';
+
+        // Map sort keys to DB columns or JSON paths
+        let orderBy = 'created_at';
+        if (sort === 'title') orderBy = "json_extract(metadata, '$.title')";
+        else if (sort === 'body') orderBy = "json_extract(metadata, '$.body')";
+        else if (sort === 'target') orderBy = "json_extract(metadata, '$.count')"; // Sort by target count
+        else if (sort === 'image') orderBy = "json_extract(metadata, '$.image')";
+
         const logs = all(
             `SELECT * FROM logs 
              WHERE action = 'notification_sent' 
-             ORDER BY created_at DESC 
-             LIMIT 1000`
+             ORDER BY ${orderBy} ${direction} 
+             LIMIT ? OFFSET ?`,
+            [limit, offset]
         );
-        res.json({ logs });
+
+        const total = get("SELECT COUNT(*) as count FROM logs WHERE action = 'notification_sent'").count;
+
+        res.json({ logs, total });
     } catch (error) {
         console.error('History error:', error);
         res.status(500).json({ error: 'Failed to get history' });
