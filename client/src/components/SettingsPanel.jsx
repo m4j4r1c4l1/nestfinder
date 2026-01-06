@@ -569,19 +569,14 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const [dragOffset, setDragOffset] = useState(null); // Pixel offset during drag
     const isDragging = React.useRef(false);
     const startX = React.useRef(0);
-    const currentX = React.useRef(0);
 
     // Determine current position based on value or drag
     // value: 'left' | 'right' | null (center)
-    // We'll use CSS classes or inline styles for positioning
 
     const handleStart = (clientX) => {
         if (!trackRef.current) return;
         isDragging.current = true;
         startX.current = clientX;
-        // If we were already offset? We generally start from the resolved position.
-        // But simpler to just track delta.
-        currentX.current = clientX;
         setDragOffset(0);
     };
 
@@ -589,7 +584,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         if (!isDragging.current || !trackRef.current) return;
         const delta = clientX - startX.current;
         setDragOffset(delta);
-        currentX.current = clientX;
     };
 
     const handleEnd = () => {
@@ -604,17 +598,13 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         // If left: drag right -> right
         // If right: drag left -> left
 
-        // Simpler: just calculate final "intended" position based on relative touch point?
-        // Let's use the delta.
-
         if (value === null) {
-            if (dragOffset > 50) onChange('right');
-            else if (dragOffset < -50) onChange('left');
+            if (dragOffset > threshold) onChange('right');
+            else if (dragOffset < -threshold) onChange('left');
         } else if (value === 'left') {
-            if (dragOffset > 50) onChange('right');
-            // Check if dragged far enough to be center? User didn't request return to center.
+            if (dragOffset > threshold) onChange('right');
         } else if (value === 'right') {
-            if (dragOffset < -50) onChange('left');
+            if (dragOffset < -threshold) onChange('left');
         }
 
         setDragOffset(null);
@@ -650,18 +640,9 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         transform = 'none';
     } else if (value === 'right') {
         leftPos = 'auto'; // Clear left
-        // We use right prop or calc. Let's use left with calc to be consistent?
-        // Or simplified: Flex alignment?
-        // Let's stick to absolute for smooth drag.
-        leftPos = 'calc(100% - 4px)'; // Will need translateX(-100%)?
+        leftPos = 'calc(100% - 4px)';
         transform = 'translateX(-100%)';
     }
-
-    // Apply Drag Offset
-    // This is tricky mixing absolute positions and transforms.
-    // Let's simplify:
-    // Render the thumb inside a container that aligns it?
-    // No, absolute is best.
 
     // If dragging, we add `dragOffset` to `transform`.
     const style = {
@@ -703,42 +684,32 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
             clampedOffset = Math.max(maxLeft, Math.min(maxRight, dragOffset));
         }
 
-        // Fix bounce: smooth clamping is already applied above by min/max.
-        // The issue might be the spring-back effect or the visual jitter. 
-        // Ensure clampedOffset is strictly within bounds.
-
         style.transform = `${transform} translateX(${clampedOffset}px)`;
     }
 
-    // Determine dove direction based on drag or current value
-    const isDraggingRight = dragOffset !== null && dragOffset > 0;
-    const isDraggingLeft = dragOffset !== null && dragOffset < 0;
-    const doveDirection = isDraggingRight ? 'right' : isDraggingLeft ? 'left' : (value === 'right' ? 'left' : 'right');
-    // Wait, if value is right (active), dove should face LEFT (pointing back)? 
-    // Or users want it pointing to the direction of swipe?
-    // User request: "pointed at all times towards the direction the user is swiping to"
-
-    // If dragging:
-    //   Drag > 0 (Right) -> Face Right
-    //   Drag < 0 (Left)  -> Face Left
-    // If NOT dragging:
-    //   Value 'left' -> Face Right (ready to swipe right?) OR Face Left (resting state?)
-    //   Let's assume "direction user is swiping to" means if I'm at Left, I swipe Right, so face Right.
-    //   If I'm at Right, I swipe Left, so face Left.
+    // Dove Logic (Updated per user feedback)
+    // Left Swipe (dragOffset < 0) -> Face Left
+    // Right Swipe (dragOffset > 0) -> Face Right
+    // Default 🕊️ faces Right (according to user report). Mirrored faces Left.
+    // If user says "Swiping Left (drag < 0) points to Right (Default)", then Default = Right-facing.
+    // So for Left-facing, we need Mirrored.
 
     let doveContent = '🕊️';
+    const isMirrored = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>;
+
     if (dragOffset !== null) {
-        // Active Dragging
-        if (dragOffset > 5) doveContent = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>; // Face Right
-        else if (dragOffset < -5) doveContent = '🕊️'; // Face Left
-        else doveContent = value === 'left' ? <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span> : '🕊️'; // Neutral/Start
+        if (dragOffset > 0) doveContent = '🕊️'; // Dragging Right -> Face Right (Default)
+        else if (dragOffset < 0) doveContent = isMirrored; // Dragging Left -> Face Left (Mirrored)
+        else {
+            if (value === 'left') doveContent = isMirrored;
+            else if (value === 'right') doveContent = '🕊️';
+            else doveContent = '🕊️';
+        }
     } else {
-        // Resting State
-        // If 'left' (default), to delete we swipe Right -> Face Right
-        if (value === 'left') doveContent = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>;
-        // If 'right' (swiped), to undo we swipe Left -> Face Left
-        else if (value === 'right') doveContent = '🕊️';
-        else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Center/Null
+        // Resting
+        if (value === 'left') doveContent = isMirrored; // Ready to go Right
+        else if (value === 'right') doveContent = '🕊️'; // Ready to go Left
+        else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Center
     }
 
     return (
@@ -760,8 +731,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 onTouchEnd={onTouchEnd}
                 onMouseDown={onMouseDown}
             >
-                {/* Labels/Tracks Background to indicate zones? Optional */}
-
                 {/* Thumb */}
                 <div style={style}>
                     {doveContent}
