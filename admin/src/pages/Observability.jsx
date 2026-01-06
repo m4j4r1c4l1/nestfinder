@@ -81,7 +81,7 @@ const Observability = () => {
             {/* Totals Summary */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: '1rem' }}>📊 Totals</h3>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>📊 Totals</h3>
                 </div>
                 <div className="card-body">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
