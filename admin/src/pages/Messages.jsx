@@ -2002,9 +2002,17 @@ const DetailModal = ({ batchId, onClose }) => {
                                 <tbody>
                                     {details.messages.map(msg => (
                                         <tr key={msg.id} style={{ borderBottom: '1px solid #334155' }}>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
-                                                <div style={{ fontWeight: 500, color: '#e2e8f0' }}>{msg.nickname || 'Anonymous'}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{msg.device_id?.substr(0, 8)}...</div>
+                                            <td style={{ padding: '0.6rem 0.75rem', verticalAlign: 'middle' }}>
+                                                <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={msg.nickname || 'Anonymous'}>
+                                                    {msg.nickname ? (
+                                                        msg.nickname.length > 30 ? msg.nickname.substring(0, 30) + '...' : msg.nickname
+                                                    ) : (
+                                                        <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>
+                                                    )}
+                                                </div>
+                                                <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={msg.device_id}>
+                                                    {msg.device_id?.length > 30 ? msg.device_id.substring(0, 30) + '...' : msg.device_id}
+                                                </code>
                                             </td>
                                             <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                 <DateTimeCell isoString={msg.created_at || msg.timestamp} />
