@@ -6,6 +6,17 @@ export default {
         nativeName: 'Français',
         flag: '🇫🇷'
     },
+    feedback: {
+        title: 'Feedback',
+        description: 'Signalez des bugs, suggérez des fonctionnalités ou envoyez des avis',
+        placeholder: 'Décrivez votre retour en détail...',
+        send: 'Envoyer',
+        charLimit: 'caractères',
+        rateApp: "Noter l'application",
+        bugReport: 'Signalement de Bug',
+        suggestion: 'Suggestion',
+        general: 'Général'
+    },
     nav: {
         map: 'Carte',
         report: 'Signaler',

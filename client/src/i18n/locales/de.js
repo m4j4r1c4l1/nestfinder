@@ -6,6 +6,18 @@ export default {
         nativeName: 'Deutsch',
         flag: '🇩🇪'
     },
+    // Feedback (English fallback)
+    feedback: {
+        title: 'Feedback',
+        description: 'Report bugs, suggest features, or send feedback',
+        placeholder: 'Describe your feedback in detail...',
+        send: 'Send Feedback',
+        charLimit: 'characters',
+        rateApp: 'Rate the App',
+        bugReport: 'Bug Report',
+        suggestion: 'Suggestion',
+        general: 'Feedback'
+    },
     nav: {
         map: 'Karte',
         report: 'Melden',

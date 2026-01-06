@@ -15,7 +15,10 @@ export default {
         placeholder: 'Describe your feedback in detail...',
         send: 'Send Feedback',
         charLimit: 'characters',
-        rateApp: 'Rate the App'
+        rateApp: 'Rate the App',
+        bugReport: 'Bug Report',
+        suggestion: 'Suggestion',
+        general: 'Feedback'
     },
 
     // Navigation
