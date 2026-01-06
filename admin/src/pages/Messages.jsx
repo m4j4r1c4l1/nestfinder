@@ -115,60 +115,51 @@ const Messages = () => {
     const [broadcastPage, setBroadcastPage] = useState(1);
     const broadcastPageSize = 50; // Increased to 50 per request
 
-    // Broadcast form
-    const [newBroadcast, setNewBroadcast] = useState({
-        message: '',
-        imageUrl: '',
-        startTime: '',
-        endTime: ''
-    });
-    const [showBroadcastEmojiPicker, setShowBroadcastEmojiPicker] = useState(false);
-    const [creatingBroadcast, setCreatingBroadcast] = useState(false);
-    const [selectedBroadcastTemplate, setSelectedBroadcastTemplate] = useState('custom');
+    // Feedback Pagination & Sort State
+    const [feedbackPage, setFeedbackPage] = useState(1);
+    const [feedbackPageSize, setFeedbackPageSize] = useState(50);
+    const [feedbackSortCol, setFeedbackSortCol] = useState('created_at');
+    const [feedbackSortDir, setFeedbackSortDir] = useState('desc');
+    const [totalFeedback, setTotalFeedback] = useState(0);
 
+    // Watch for Feedback Pagination Changes
+    useEffect(() => {
+        fetchFeedbackOnly();
+    }, [feedbackPage, feedbackSortCol, feedbackSortDir]);
+
+    const fetchFeedbackOnly = async () => {
+        try {
+            const res = await adminApi.fetch(`/admin/feedback?page=${feedbackPage}&limit=${feedbackPageSize}&sort=${feedbackSortCol}&dir=${feedbackSortDir}`);
+            setFeedback(res.feedback || []);
+            setTotalFeedback(res.total || 0);
+        } catch (err) {
+            console.error('Failed to fetch feedback:', err);
+        }
+    };
+
+    // Initial Load & Interval (Keep existing efficient pattern but allow independent feedback updates)
     useEffect(() => {
         fetchData();
-        // Set up interval for refreshing data
-        // Set up interval for refreshing data (10s to match Notifications)
         const interval = setInterval(fetchData, 10000);
         return () => clearInterval(interval);
     }, []);
 
     const fetchData = async () => {
-        // No explicit setLoading(true) here to prevent flickering on intervals
-        // Initial load is handled by default state = true
-
         try {
             const token = localStorage.getItem('nestfinder_admin_token');
-            const [broadcastRes, feedbackRes, statsRes] = await Promise.all([
+            const [broadcastRes, statsRes] = await Promise.all([
                 adminApi.fetch('/admin/broadcasts'),
-                adminApi.fetch('/admin/feedback'),
                 fetch(`${API_URL}/api/push/admin/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }).then(res => res.ok ? res.json() : { subscribers: [], totalSubscribers: 0 })
             ]);
 
-
             setBroadcasts(broadcastRes.broadcasts || []);
-
-            const fetchedFeedback = feedbackRes.feedback || [];
-            setFeedback(fetchedFeedback);
-
-            // Auto-mark SENT feedback as DELIVERED (Admin received it)
-            fetchedFeedback.forEach(f => {
-                if (f.status === 'sent') {
-                    // Update locally
-                    f.status = 'delivered';
-                    // Update on server (fire and forget)
-                    adminApi.fetch(`/admin/feedback/${f.id}/status`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ status: 'delivered' })
-                    }).catch(err => console.error('Failed to auto-mark delivered:', err));
-                }
-            });
             setSubscribers(statsRes.subscribers || []);
             setStats(statsRes);
+
+            // Also refresh feedback in background (using current pagination)
+            fetchFeedbackOnly();
         } catch (err) {
             console.error('Failed to fetch messages data:', err);
         } finally {
@@ -434,6 +425,14 @@ const Messages = () => {
                                 onUpdate={fetchData}
                                 onUpdateStatus={handleUpdateFeedbackStatus}
                                 onDelete={handleDeleteFeedback}
+                                page={feedbackPage}
+                                setPage={setFeedbackPage}
+                                pageSize={feedbackPageSize}
+                                totalItems={totalFeedback}
+                                sortColumn={feedbackSortCol}
+                                setSortColumn={setFeedbackSortCol}
+                                sortDirection={feedbackSortDir}
+                                setSortDirection={setFeedbackSortDir}
                             />
                         </div>
                     )}
@@ -1014,17 +1013,15 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     );
 };
 
-const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
+const FeedbackSection = ({
+    feedback, onUpdate, onUpdateStatus, onDelete,
+    page, setPage, pageSize, totalItems,
+    sortColumn, setSortColumn, sortDirection, setSortDirection
+}) => {
     const [selectedIds, setSelectedIds] = useState([]);
     const [previewItem, setPreviewItem] = useState(null);
-    const [sortColumn, setSortColumn] = useState('created_at');
-    const [sortDirection, setSortDirection] = useState('desc');
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
-
-    // Pagination
-    const [page, setPage] = useState(1);
-    const pageSize = 30;
 
     // Resizable columns state
     // Resizable columns state
@@ -1165,32 +1162,10 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
     };
 
     // Sort feedback based on current column and direction
-    const sortedFeedback = [...feedback].sort((a, b) => {
-        let aVal, bVal;
-        if (sortColumn === 'created_at') {
-            aVal = new Date(a.created_at).getTime();
-            bVal = new Date(b.created_at).getTime();
-        } else if (sortColumn === 'user_nickname') {
-            aVal = (a.user_nickname || 'Anonymous').toLowerCase();
-            bVal = (b.user_nickname || 'Anonymous').toLowerCase();
-        } else if (sortColumn === 'type') {
-            aVal = a.type.toLowerCase();
-            bVal = b.type.toLowerCase();
-        } else if (sortColumn === 'rating') {
-            aVal = a.rating || 0;
-            bVal = b.rating || 0;
-        } else {
-            return 0;
-        }
-        if (sortDirection === 'asc') {
-            return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-        } else {
-            return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-        }
-    });
-
-    const totalPages = Math.ceil(sortedFeedback.length / pageSize);
-    const paginatedFeedback = sortedFeedback.slice((page - 1) * pageSize, page * pageSize);
+    // Server-side pagination
+    const sortedFeedback = feedback;
+    const paginatedFeedback = feedback;
+    const totalPages = Math.ceil(totalItems / pageSize);
 
     return (
         <>
@@ -1397,21 +1372,22 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                     />
                 )}
             </div>
-            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedFeedback.length} currentCount={paginatedFeedback.length} pageSize={pageSize} itemLabel="messages" />
+            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={totalItems} currentCount={paginatedFeedback.length} pageSize={pageSize} itemLabel="messages" />
         </>
     );
 };
 
 const HistorySection = ({ users = [] }) => {
     const [logs, setLogs] = useState([]);
+    const [totalLogs, setTotalLogs] = useState(0);
     const [loading, setLoading] = useState(false);
     const [selectedBatchId, setSelectedBatchId] = useState(null);
     const [previewMessage, setPreviewMessage] = useState(null);
-    const [sortColumn, setSortColumn] = useState('created_at');
-    const [sortDirection, setSortDirection] = useState('desc');
 
+    // Pagination & Sort State
     const [page, setPage] = useState(1);
-    const pageSize = 30;
+    const [pageSize, setPageSize] = useState(50);
+
 
     // Resizable columns state
     // Resizable columns state
@@ -1483,22 +1459,30 @@ const HistorySection = ({ users = [] }) => {
 
     useEffect(() => {
         loadHistory();
+        // Set up interval for refreshing data (10s to match Notifications)
         const interval = setInterval(loadHistory, 10000);
         return () => clearInterval(interval);
-    }, []);
+    }, [page, pageSize, sortColumn, sortDirection]);
 
     const loadHistory = async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/push/admin/notifications/history`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch(`${API_URL}/api/push/admin/notifications/history?page=${page}&limit=${pageSize}&sort=${sortColumn}&dir=${sortDirection}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setLogs(data.logs || []);
+                setTotalLogs(data.total || 0);
             }
-        } catch (err) { console.error(err); }
-        setLoading(false);
+        } catch (err) {
+            console.error('Failed to load history:', err);
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     const handlePreview = async (log) => {
         const meta = typeof log.metadata === 'string' ? JSON.parse(log.metadata || '{ }') : (log.metadata || {});
@@ -1535,46 +1519,15 @@ const HistorySection = ({ users = [] }) => {
         setPreviewMessage({ ...meta, timestamp: date, target_id: log.target_id, nickname: resolvedNickname });
     };
 
-    const sortedLogs = [...logs].sort((a, b) => {
-        const parseMeta = (item) => typeof item.metadata === 'string' ? JSON.parse(item.metadata || '{ }') : (item.metadata || {});
-
-        let valA, valB;
-        if (sortColumn === 'created_at') {
-            valA = new Date(a.created_at).getTime();
-            valB = new Date(b.created_at).getTime();
-        } else if (sortColumn === 'title') {
-            const metaA = parseMeta(a);
-            const metaB = parseMeta(b);
-            valA = (metaA.title || '').toLowerCase();
-            valB = (metaB.title || '').toLowerCase();
-        } else if (sortColumn === 'body') {
-            const metaA = parseMeta(a);
-            const metaB = parseMeta(b);
-            valA = (metaA.body || '').toLowerCase();
-            valB = (metaB.body || '').toLowerCase();
-        } else if (sortColumn === 'image') {
-            const metaA = parseMeta(a);
-            const metaB = parseMeta(b);
-            valA = metaA.image ? 1 : 0;
-            valB = metaB.image ? 1 : 0;
-        } else if (sortColumn === 'target') {
-            const metaA = parseMeta(a);
-            const metaB = parseMeta(b);
-            valA = metaA.count || 0;
-            valB = metaB.count || 0;
-        }
-
-        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    const totalPages = Math.ceil(sortedLogs.length / pageSize);
-    const paginatedLogs = sortedLogs.slice((page - 1) * pageSize, page * pageSize);
+    // Server-side pagination is now used
+    const sortedLogs = logs;
+    const paginatedLogs = logs;
+    const totalPages = Math.ceil(totalLogs / pageSize);
 
     const handleSort = (column) => {
         setSortDirection(current => sortColumn === column && current === 'asc' ? 'desc' : 'asc');
         setSortColumn(column);
+        setPage(1);
     };
 
     return (
@@ -1587,9 +1540,9 @@ const HistorySection = ({ users = [] }) => {
                         background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
                         borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: '170px'
+                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
                     }}>
-                        Total: {logs.length}
+                        Showing {logs.length} of {totalLogs}
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button

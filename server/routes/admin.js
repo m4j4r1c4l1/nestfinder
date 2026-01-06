@@ -351,15 +351,45 @@ router.get('/logs', (req, res) => {
 
 // Get all users
 router.get('/users', (req, res) => {
-    const users = all(`
-    SELECT u.*,
-      (SELECT COUNT(*) FROM points WHERE user_id = u.id) as points_count,
-      (SELECT COUNT(*) FROM confirmations WHERE user_id = u.id) as actions_count
-    FROM users u
-    ORDER BY u.last_active DESC
-  `);
+    try {
+        const { page = 1, limit = 50, sort = 'last_active', dir = 'desc', search = '' } = req.query;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        const direction = dir === 'asc' ? 'ASC' : 'DESC';
 
-    res.json({ users });
+        // Prepare SQL for filtering
+        let whereClause = 'WHERE 1=1';
+        const params = [];
+
+        if (search) {
+            whereClause += ' AND (nickname LIKE ? OR id LIKE ? OR device_id LIKE ?)';
+            const searchParam = `%${search}%`;
+            params.push(searchParam, searchParam, searchParam);
+        }
+
+        // Map sort keys to columns
+        const validSorts = ['id', 'nickname', 'created_at', 'last_active', 'trust_score', 'points_count', 'actions_count'];
+        const orderBy = validSorts.includes(sort) ? sort : 'last_active';
+
+        // Main Query
+        const users = all(`
+            SELECT u.*,
+              (SELECT COUNT(*) FROM points WHERE user_id = u.id) as points_count,
+              (SELECT COUNT(*) FROM confirmations WHERE user_id = u.id) as actions_count
+            FROM users u
+            ${whereClause}
+            ORDER BY ${orderBy} ${direction}
+            LIMIT ? OFFSET ?
+        `, [...params, limit, offset]);
+
+        // Count for Pagination
+        const countResult = get(`SELECT COUNT(*) as count FROM users ${whereClause}`, params);
+        const total = countResult ? countResult.count : 0;
+
+        res.json({ users, total });
+    } catch (error) {
+        console.error('Get users error:', error);
+        res.status(500).json({ error: 'Failed to get users' });
+    }
 });
 
 // Get specific user details
@@ -705,13 +735,29 @@ router.delete('/broadcasts/:id', (req, res) => {
 
 // List all feedback
 router.get('/feedback', (req, res) => {
-    const feedback = all(`
-        SELECT f.*, u.nickname as user_nickname
-        FROM feedback f
-        LEFT JOIN users u ON f.user_id = u.id
-        ORDER BY f.created_at DESC
-    `);
-    res.json({ feedback });
+    try {
+        const { page = 1, limit = 50, sort = 'created_at', dir = 'desc' } = req.query;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        const direction = dir === 'asc' ? 'ASC' : 'DESC';
+
+        const validSorts = ['created_at', 'rating', 'status', 'type', 'message'];
+        const orderBy = validSorts.includes(sort) ? sort : 'created_at';
+
+        const feedback = all(`
+            SELECT f.*, u.nickname as user_nickname
+            FROM feedback f
+            LEFT JOIN users u ON f.user_id = u.id
+            ORDER BY ${orderBy} ${direction}
+            LIMIT ? OFFSET ?
+        `, [limit, offset]);
+
+        const total = get("SELECT COUNT(*) as count FROM feedback").count;
+
+        res.json({ feedback, total });
+    } catch (error) {
+        console.error('Get feedback error:', error);
+        res.status(500).json({ error: 'Failed to get feedback' });
+    }
 });
 
 // Update feedback status

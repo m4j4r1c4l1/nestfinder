@@ -25,8 +25,10 @@ const formatTimestampCET = (isoString) => {
 
 const Users = () => {
     const [users, setUsers] = useState([]);
+    const [totalUsers, setTotalUsers] = useState(0);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
     const [sortColumn, setSortColumn] = useState('last_active');
     const [sortDirection, setSortDirection] = useState('desc');
@@ -110,55 +112,38 @@ const Users = () => {
         />
     );
 
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+            setPage(1); // Reset page on search change
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [page, sortColumn, sortDirection, debouncedSearch]);
+
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const data = await adminApi.getUsers();
-            setUsers(data.users || []);
+            const res = await adminApi.fetch(`/admin/users?page=${page}&limit=${pageSize}&sort=${sortColumn}&dir=${sortDirection}&search=${encodeURIComponent(debouncedSearch)}`);
+            setUsers(res.users || []);
+            setTotalUsers(res.total || 0);
         } catch (err) {
-            console.error('Failed to load users:', err);
+            console.error('Failed to fetch users:', err);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => { fetchUsers(); }, []);
-
-    // Sort users
-    const sortedUsers = [...users].sort((a, b) => {
-        let aVal = a[sortColumn], bVal = b[sortColumn];
-        if (sortColumn === 'last_active' || sortColumn === 'created_at') {
-            aVal = new Date(aVal || 0).getTime();
-            bVal = new Date(bVal || 0).getTime();
-        } else if (typeof aVal === 'string') {
-            aVal = (aVal || '').toLowerCase();
-            bVal = (bVal || '').toLowerCase();
-        }
-        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    // Filter and paginate
-    const filteredUsers = sortedUsers.filter(user => {
-        const search = searchTerm.toLowerCase();
-        const badge = getBadge(user.trust_score);
-
-        // Badge Filter
-        if (selectedBadgeFilter) {
-            if (selectedBadgeFilter === 'blocked') {
-                if (!user.blocked) return false;
-            } else if (selectedBadgeFilter !== badge.name.toLowerCase()) {
-                return false;
-            }
-        }
-
-        return (user.nickname || '').toLowerCase().includes(search) ||
-            (user.id || '').toLowerCase().includes(search) ||
-            badge.name.toLowerCase().includes(search);
-    });
-    const totalPages = Math.ceil(filteredUsers.length / pageSize);
-    const paginatedUsers = filteredUsers.slice((page - 1) * pageSize, page * pageSize);
+    // Client-side filtering is removed, we use server-side filtered results directly
+    // Maintain variable names for compatibility with render logic
+    const filteredUsers = users;
+    const sortedUsers = users;
+    const totalPages = Math.ceil(totalUsers / pageSize);
+    const paginatedUsers = users;
 
     const handleSort = (column) => {
         if (sortColumn === column) {
@@ -167,6 +152,7 @@ const Users = () => {
             setSortColumn(column);
             setSortDirection('desc');
         }
+        setPage(1);
     };
 
     const handleDeleteUser = async (userId) => {
@@ -622,7 +608,7 @@ const Users = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 0', marginTop: '0.5rem', borderTop: '1px solid #334155' }}>
                 <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                    Showing {paginatedUsers.length === 0 ? 0 : (page - 1) * pageSize + 1}-{Math.min((page - 1) * pageSize + 1 + paginatedUsers.length - 1, filteredUsers.length)} of {filteredUsers.length} users
+                    Showing {users.length === 0 ? 0 : (page - 1) * pageSize + 1}-{Math.min((page - 1) * pageSize + users.length, totalUsers)} of {totalUsers} users
                 </span>
 
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>
