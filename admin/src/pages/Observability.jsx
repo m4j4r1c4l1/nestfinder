@@ -81,7 +81,7 @@ const Observability = () => {
             {/* Totals Summary */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: '1.25rem' }}>📊 Totals</h3>
+                    <h3 style={{ fontSize: '1rem' }}>📊 Totals</h3>
                 </div>
                 <div className="card-body">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -112,7 +112,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '1rem' }}>{badge.icon}</span>
                                             <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
-                                            <span style={{ fontWeight: 700, color: badge.color, marginLeft: '0.2rem' }}>{badge.count || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{badge.count || 0}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -140,7 +140,7 @@ const Observability = () => {
                                     }}>
                                         <span style={{ fontSize: '0.9rem' }}>🟠</span>
                                         <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Pending</span>
-                                        <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{stats.mapPoints?.pending || 0}</span>
+                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{stats.mapPoints?.pending || 0}</span>
                                     </div>
                                     {/* Confirmed + Inactive row */}
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -151,7 +151,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '0.9rem' }}>🟢</span>
                                             <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Confirmed</span>
-                                            <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{stats.mapPoints?.confirmed || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{stats.mapPoints?.confirmed || 0}</span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
@@ -160,7 +160,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '0.9rem' }}>🔴</span>
                                             <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Inactive</span>
-                                            <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{stats.mapPoints?.deactivated || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{stats.mapPoints?.deactivated || 0}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -178,8 +178,8 @@ const Observability = () => {
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Average</div>
                                     <div className="text-muted text-sm">All time</div>
                                 </div>
-                                {/* Badges */}
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                {/* Badge - vertically centered to align with Users 2x2 grid center */}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
                                     <div style={{
                                         display: 'flex', alignItems: 'center', gap: '0.4rem',
                                         background: '#facc1520', border: '1px solid #facc1540',
@@ -187,7 +187,7 @@ const Observability = () => {
                                     }}>
                                         <span style={{ fontSize: '0.9rem' }}>⭐</span>
                                         <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Votes</span>
-                                        <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{stats.totalRatings || 0}</span>
+                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{stats.totalRatings || 0}</span>
                                     </div>
                                 </div>
                             </div>
@@ -208,33 +208,34 @@ const Observability = () => {
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
                                             {stats.notificationMetrics?.total || 0}
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Sent</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
+                                        <div className="text-muted text-sm">Notifications</div>
                                     </div>
                                     {/* Sent Badges - Vertical Stack */}
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
                                         }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                            <span style={{ fontWeight: 700, color: '#22c55e' }}>{(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}</span>
+                                            <span style={{ color: '#22c55e', fontWeight: 600 }} className="text-muted text-sm">Delivered</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}>{(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}</span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
                                             background: '#3b82f620', border: '1px solid #3b82f640',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
                                         }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                            <span style={{ fontWeight: 700, color: '#3b82f6' }}>{(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}</span>
+                                            <span style={{ color: '#3b82f6', fontWeight: 600 }} className="text-muted text-sm">Read</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}>{(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}</span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
                                             background: '#f59e0b20', border: '1px solid #f59e0b40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
                                         }}>
-                                            <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
-                                            <span style={{ fontWeight: 700, color: '#f59e0b' }}>{stats.notificationMetrics?.unread || 0}</span>
+                                            <span style={{ color: '#f59e0b', fontWeight: 600 }} className="text-muted text-sm">Unread</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.notificationMetrics?.unread || 0}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -245,25 +246,26 @@ const Observability = () => {
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
                                             {stats.feedbackMetrics?.total || stats.totalReceived || 0}
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Received</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
+                                        <div className="text-muted text-sm">Feedback</div>
                                     </div>
                                     {/* Received Badges - Vertical Stack */}
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
                                         }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                            <span style={{ fontWeight: 700, color: '#22c55e' }}>{stats.feedbackMetrics?.pending || 0}</span>
+                                            <span style={{ color: '#22c55e', fontWeight: 600 }} className="text-muted text-sm">Delivered</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.feedbackMetrics?.pending || 0}</span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
                                             background: '#3b82f620', border: '1px solid #3b82f640',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
+                                            borderRadius: '8px', padding: '0.3rem 0.6rem'
                                         }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                            <span style={{ fontWeight: 700, color: '#3b82f6' }}>{stats.feedbackMetrics?.read || 0}</span>
+                                            <span style={{ color: '#3b82f6', fontWeight: 600 }} className="text-muted text-sm">Read</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.feedbackMetrics?.read || 0}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -282,31 +284,40 @@ const Observability = () => {
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>LOC</div>
                                     <div className="text-muted text-sm">Lines of Code</div>
                                 </div>
-                                {/* Badges Row */}
+                                {/* Badges Row with 2-line stacked text */}
                                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
                                     <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
                                         background: '#8b5cf620', border: '1px solid #8b5cf640',
-                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
+                                        borderRadius: '8px', padding: '0.4rem 0.75rem'
                                     }}>
-                                        <span style={{ color: '#8b5cf6', fontWeight: 600 }}>Commits</span>
-                                        <span style={{ fontWeight: 700, color: '#8b5cf6' }}>{(stats.devMetrics?.commits || 0).toLocaleString()}</span>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
+                                            <div className="text-muted text-sm">Git History</div>
+                                        </div>
+                                        <span style={{ fontWeight: 700, color: '#fff', fontSize: '1rem' }}>{(stats.devMetrics?.commits || 0).toLocaleString()}</span>
                                     </div>
                                     <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
                                         background: '#0ea5e920', border: '1px solid #0ea5e940',
-                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
+                                        borderRadius: '8px', padding: '0.4rem 0.75rem'
                                     }}>
-                                        <span style={{ color: '#0ea5e9', fontWeight: 600 }}>Components</span>
-                                        <span style={{ fontWeight: 700, color: '#0ea5e9' }}>{(stats.devMetrics?.components || 0).toLocaleString()}</span>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
+                                            <div className="text-muted text-sm">React/JSX</div>
+                                        </div>
+                                        <span style={{ fontWeight: 700, color: '#fff', fontSize: '1rem' }}>{(stats.devMetrics?.components || 0).toLocaleString()}</span>
                                     </div>
                                     <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
                                         background: '#f59e0b20', border: '1px solid #f59e0b40',
-                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem', fontFamily: '"JetBrains Mono", monospace'
+                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontFamily: '"JetBrains Mono", monospace'
                                     }}>
-                                        <span style={{ color: '#f59e0b', fontWeight: 600 }}>ID</span>
-                                        <span style={{ fontWeight: 700, color: '#f59e0b' }}>{stats.devMetrics?.lastCommit || '-'}</span>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
+                                            <div className="text-muted text-sm">Latest</div>
+                                        </div>
+                                        <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{stats.devMetrics?.lastCommit || '-'}</span>
                                     </div>
                                 </div>
                             </div>
