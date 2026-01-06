@@ -208,7 +208,8 @@ const Observability = () => {
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
                                             {stats.notificationMetrics?.total || 0}
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Sent</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
+                                        <div className="text-muted text-sm">Sent</div>
                                     </div>
                                     {/* Sent Badges - Vertical Stack */}
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
@@ -245,7 +246,8 @@ const Observability = () => {
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
                                             {stats.feedbackMetrics?.total || stats.totalReceived || 0}
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Received</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
+                                        <div className="text-muted text-sm">Received</div>
                                     </div>
                                     {/* Received Badges - Vertical Stack */}
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
@@ -273,7 +275,7 @@ const Observability = () => {
 
                             {/* Development Block (Right) */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem', marginBottom: 'auto' }}>🛠️ Development</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem', marginBottom: 'auto', paddingBottom: '1rem' }}>🛠️ Development</div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem' }}>
                                     {/* Main Count: LOC */}
@@ -310,14 +312,14 @@ const Observability = () => {
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                            background: '#f9731620', border: '1px solid #f9731640',
-                                            borderRadius: '8px', padding: '0.4rem 0.75rem', fontFamily: '"JetBrains Mono", monospace'
+                                            background: '#1e3a8a40', border: '1px solid #1e3a8a',
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem'
                                         }}>
                                             <div style={{ textAlign: 'center' }}>
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
                                                 <div className="text-muted text-sm">Latest</div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#f97316', fontSize: '0.9rem' }}>{stats.devMetrics?.lastCommit || '-'}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem', fontFamily: '"JetBrains Mono", monospace' }}>{stats.devMetrics?.lastCommit || '-'}</span>
                                         </div>
                                     </div>
                                 </div>
