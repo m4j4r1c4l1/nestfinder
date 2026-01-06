@@ -369,7 +369,7 @@ const Dashboard = ({ onNavigate }) => {
                                     </div>
                                     {stats.system.ips && stats.system.ips.length > 0 && (
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                            <span style={{ color: 'var(--color-text-secondary)' }}>IPs</span>
+                                            <span style={{ color: 'var(--color-text-secondary)' }}>Local IP</span>
                                             <div style={{ textAlign: 'right' }}>
                                                 {stats.system.ips.map((net, i) => (
                                                     <div key={i} style={{ fontWeight: 500, fontSize: '0.7rem' }}>{net.ip}</div>
@@ -378,8 +378,8 @@ const Dashboard = ({ onNavigate }) => {
                                         </div>
                                     )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: 'var(--color-text-secondary)' }}>Node.js</span>
-                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>{stats.system.nodeVersion}</span>
+                                        <span style={{ color: 'var(--color-text-secondary)' }}>Public IP</span>
+                                        <span style={{ fontWeight: 500, fontSize: '0.7rem' }}>{stats.system.publicIp || 'Unknown'}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: 'var(--color-text-secondary)' }}>Uptime</span>

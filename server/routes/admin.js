@@ -12,11 +12,12 @@ const router = Router();
 router.use(requireAdmin);
 
 // Get dashboard stats
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {
     // Get disk usage (Linux/Mac only, fallback for Windows)
     let disk = null;
     let osDistro = 'Unknown';
     let networkIps = [];
+    let publicIp = 'Unknown';
 
     try {
         // Disk Usage
@@ -63,6 +64,17 @@ router.get('/stats', (req, res) => {
         }
     } catch (e) { }
 
+    // Fetch Public IP
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        if (response.ok) {
+            const data = await response.json();
+            publicIp = data.ip;
+        }
+    } catch (e) {
+        // Keep as 'Unknown'
+    }
+
     // Get DB file size
     let dbSizeBytes = 0;
     try {
@@ -108,6 +120,7 @@ router.get('/stats', (req, res) => {
             distro: osDistro,
             hostname: os.hostname(),
             ips: networkIps,
+            publicIp,
             nodeVersion: process.version,
             disk,
             // Render-specific info (null if not on Render)
