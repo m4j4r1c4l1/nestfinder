@@ -1206,10 +1206,16 @@ const RatingsChartCard = ({ onPointClick }) => {
                             const barWidth = Math.max(6, (graphWidth / ratings.length) * 0.4);
                             return ratings.map((r, i) => {
                                 const barHeight = (r.count / maxVotes) * (graphHeight * 0.4); // Max 40% of graph height
+
+                                // Adjust x position for edges to prevent overflow
+                                let barX = getX(i) - barWidth / 2;
+                                if (i === 0) barX = getX(i); // First bar aligns left
+                                if (i === ratings.length - 1) barX = getX(i) - barWidth; // Last bar aligns right
+
                                 return (
                                     <rect
                                         key={`bar-${i}`}
-                                        x={getX(i) - barWidth / 2}
+                                        x={barX}
                                         y={graphHeight - barHeight}
                                         width={barWidth}
                                         height={barHeight}
