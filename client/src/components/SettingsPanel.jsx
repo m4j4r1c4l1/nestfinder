@@ -747,47 +747,52 @@ const RetentionSlider = ({ value, onChange }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [localValue, setLocalValue] = useState(value);
 
-    // Discrete steps: 0 (1h), 1w, 2w, 1m, 3m, 6m, 1y, forever
-    const STEPS = [
-        { days: 0, label: '1 Hour', short: '1h' },
-        { days: 7, label: '1 Week', short: '1w' },
-        { days: 14, label: '2 Weeks', short: '2w' },
-        { days: 30, label: '1 Month', short: '1m' },
-        { days: 90, label: '3 Months', short: '3m' },
-        { days: 180, label: '6 Months', short: '6m' },
-        { days: 365, label: '1 Year', short: '1y' },
-        { days: Infinity, label: 'Forever', short: '∞' }
-    ];
+    // Linear scale: 0 to 53
+    // 0 = Delete on Read ('0d')
+    // 1-52 = X Weeks (X * 7 + 'd')
+    // 53 = Forever ('forever')
+    const MAX_STEPS = 53;
 
-    // Helper: Value -> Days
-    const getDaysFromValue = (v) => {
-        if (!v || v === 'forever') return Infinity;
+    // Helper: Value -> Step (0-53)
+    const getStepFromValue = (v) => {
+        if (!v || v === 'forever') return MAX_STEPS;
         if (v === '0' || v === '0d') return 0;
-        if (v.endsWith('m')) return parseInt(v) * 30;
-        if (v.endsWith('y')) return parseInt(v) * 365;
-        if (v.endsWith('w')) return parseInt(v) * 7;
-        if (v.endsWith('d')) return parseInt(v);
-        return 30;
+
+        // Convert days/months/years to closest week
+        let days = 0;
+        if (v.endsWith('m')) days = parseInt(v) * 30;
+        else if (v.endsWith('y')) days = parseInt(v) * 365;
+        else if (v.endsWith('w')) days = parseInt(v) * 7;
+        else if (v.endsWith('d')) days = parseInt(v);
+        else days = 30; // default
+
+        const weeks = Math.round(days / 7);
+        return Math.max(1, Math.min(MAX_STEPS - 1, weeks));
     };
 
-    // Helper: Days -> Step Index
-    const getStepIndexFromDays = (d) => {
-        for (let i = STEPS.length - 1; i >= 0; i--) {
-            if (d >= STEPS[i].days) return i;
-        }
-        return 0;
+    // Helper: Step -> Value String
+    const getValueFromStep = (step) => {
+        if (step >= MAX_STEPS) return 'forever';
+        if (step <= 0) return '0d';
+        return `${step * 7}d`;
     };
 
-    // Helper: Step Index -> Percent
-    const getPctFromStepIndex = (idx) => (idx / (STEPS.length - 1)) * 100;
+    const currentStep = isDragging ? getStepFromValue(localValue) : getStepFromValue(value);
+    const currentPct = (currentStep / MAX_STEPS) * 100;
 
-    // Helper: Percent -> Step Index
-    const getStepIndexFromPct = (pct) => Math.round((pct / 100) * (STEPS.length - 1));
+    // Get display label and info message
+    let displayLabel = '';
+    let infoMessage = null;
 
-    const currentDays = getDaysFromValue(isDragging ? localValue : value);
-    const currentStepIndex = getStepIndexFromDays(currentDays);
-    const currentPct = getPctFromStepIndex(currentStepIndex);
-    const currentStep = STEPS[currentStepIndex];
+    if (currentStep >= MAX_STEPS) {
+        displayLabel = '∞';
+        infoMessage = 'Messages are kept indefinitely.';
+    } else if (currentStep <= 0) {
+        displayLabel = 'Delete on Read';
+        infoMessage = 'Messages will be deleted upon being read.';
+    } else {
+        displayLabel = `${currentStep} Week${currentStep > 1 ? 's' : ''}`;
+    }
 
     const handleStart = (clientX) => {
         setIsDragging(true);
@@ -802,14 +807,7 @@ const RetentionSlider = ({ value, onChange }) => {
     const handleEnd = () => {
         if (!isDragging) return;
         setIsDragging(false);
-        const d = getDaysFromValue(localValue);
-        if (d === Infinity) {
-            onChange('forever');
-        } else if (d === 0) {
-            onChange('0d');
-        } else {
-            onChange(`${d}d`);
-        }
+        onChange(getValueFromStep(getStepFromValue(localValue)));
     };
 
     const updateFromClientX = (clientX) => {
@@ -817,9 +815,9 @@ const RetentionSlider = ({ value, onChange }) => {
         const rect = trackRef.current.getBoundingClientRect();
         let pct = ((clientX - rect.left) / rect.width) * 100;
         pct = Math.max(0, Math.min(100, pct));
-        const stepIdx = getStepIndexFromPct(pct);
-        const step = STEPS[stepIdx];
-        setLocalValue(step.days === Infinity ? 'forever' : step.days === 0 ? '0d' : `${step.days}d`);
+
+        const step = Math.round((pct / 100) * MAX_STEPS);
+        setLocalValue(getValueFromStep(step));
     };
 
     // Event Listeners
@@ -843,8 +841,6 @@ const RetentionSlider = ({ value, onChange }) => {
         };
     }, [isDragging]);
 
-    const isZeroValue = currentStep.days === 0;
-
     return (
         <div style={{ padding: '0.5rem 0' }}>
             {/* Value Display Box */}
@@ -864,15 +860,15 @@ const RetentionSlider = ({ value, onChange }) => {
                 <span style={{
                     fontWeight: 600,
                     color: 'var(--color-primary)',
-                    fontSize: isDragging ? '1.8rem' : '1rem',
+                    fontSize: isDragging ? '1.8rem' : '1.5rem',
                     transition: 'font-size 0.15s ease-out'
                 }}>
-                    {currentStep.label}
+                    {displayLabel}
                 </span>
             </div>
 
-            {/* Zero Value Warning */}
-            {isZeroValue && (
+            {/* Info Message (Only for 0 or Infinity) */}
+            {infoMessage && (
                 <div style={{
                     padding: 'var(--space-2)',
                     background: 'rgba(59, 130, 246, 0.1)',
@@ -884,7 +880,7 @@ const RetentionSlider = ({ value, onChange }) => {
                     marginBottom: '0.5rem',
                     animation: 'fadeIn 0.3s ease-out'
                 }}>
-                    ℹ️ Messages will be deleted 1 hour after being read.
+                    {infoMessage}
                 </div>
             )}
 
@@ -922,20 +918,6 @@ const RetentionSlider = ({ value, onChange }) => {
                     }} />
                 </div>
 
-                {/* Step Markers */}
-                {STEPS.map((s, i) => (
-                    <div key={i} style={{
-                        position: 'absolute',
-                        left: `calc(12px + (100% - 24px) * ${getPctFromStepIndex(i)} / 100)`,
-                        top: '8px',
-                        width: '3px',
-                        height: '24px',
-                        background: i <= currentStepIndex ? 'var(--color-primary)' : '#64748b',
-                        borderRadius: '2px',
-                        transform: 'translateX(-50%)'
-                    }} />
-                ))}
-
                 {/* Handle */}
                 <div style={{
                     position: 'absolute',
@@ -948,17 +930,14 @@ const RetentionSlider = ({ value, onChange }) => {
                     transform: 'translateX(-50%)',
                     border: '3px solid var(--color-primary)',
                     zIndex: 10,
-                    transition: isDragging ? 'none' : 'left 0.15s ease-out'
+                    transition: isDragging ? 'none' : 'left 0.1s ease-out'
                 }} />
             </div>
 
-            {/* Milestone Labels */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#94a3b8', marginTop: '4px', padding: '0 8px' }}>
-                {STEPS.map((s, i) => (
-                    <span key={i} style={{ textAlign: 'center', width: 0, overflow: 'visible', whiteSpace: 'nowrap' }}>
-                        {s.short}
-                    </span>
-                ))}
+            {/* Scale Labels */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px', padding: '0 8px' }}>
+                <span>0</span>
+                <span>∞</span>
             </div>
         </div>
     );
