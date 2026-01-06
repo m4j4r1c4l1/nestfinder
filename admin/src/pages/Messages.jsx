@@ -1130,10 +1130,10 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
         onUpdate && onUpdate();
     };
 
-    // Handle row click: open preview AND mark as read if new
+    // Handle row click: open preview AND mark as read if new/delivered
     const handleRowClick = async (item) => {
         setPreviewItem(item);
-        if (item.status === 'new') {
+        if (item.status === 'new' || item.status === 'delivered' || item.status === 'pending') {
             await onUpdateStatus(item.id, 'reviewed');
             onUpdate && onUpdate();
         }
@@ -1323,15 +1323,15 @@ const FeedbackSection = ({ feedback, onUpdate, onUpdateStatus, onDelete }) => {
                                             <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
                                                 <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
                                                     {item.status === 'new' ? (
+                                                        <span style={{ color: '#22c55e' }}>✓</span>
+                                                    ) : (item.status === 'delivered' || item.status === 'pending') ? (
                                                         <span style={{ color: '#22c55e' }}>✓✓</span>
-                                                    ) : item.status === 'reviewed' ? (
-                                                        <span style={{ color: '#3b82f6' }}>✓✓</span>
                                                     ) : (
-                                                        <span style={{ color: '#8b5cf6' }}>✓✓</span>
+                                                        <span style={{ color: '#3b82f6' }}>✓✓</span>
                                                     )}
                                                 </div>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
-                                                    {item.status === 'new' ? 'Pending' : item.status === 'reviewed' ? 'Read' : 'Resolved'}
+                                                    {item.status === 'new' ? 'Sent' : (item.status === 'delivered' || item.status === 'pending') ? 'Received' : 'Read'}
                                                 </span>
                                             </div>
                                         </td>
