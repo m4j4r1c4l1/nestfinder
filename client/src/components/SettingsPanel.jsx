@@ -745,101 +745,67 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 const RetentionSlider = ({ value, onChange }) => {
     const trackRef = React.useRef(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [dragPct, setDragPct] = useState(0); // 0-100 local drag state
+    const [dragPct, setDragPct] = useState(0);
 
-    // Scale Definitions:
-    // 0 - 20%: 0h - 24h
-    // 20 - 40%: 1d - 7d
-    // 40 - 60%: 1w - 4w
-    // 60 - 90%: 1m - 12m
-    // 90 - 100%: Forever
+    // Generate discrete steps for precise control
+    // 0: Delete on Read
+    // Hours: 1h - 23h
+    // Days: 1d - 6d
+    // Weeks: 1w - 3w
+    // Months: 1m - 12m (1y)
+    // Forever
+    const steps = React.useMemo(() => {
+        const s = [{ val: '0d', label: 'Delete on Read', short: '0' }];
 
-    // Helper: Value String -> Percentage (for syncing initial state)
-    const getPctFromValue = (v) => {
-        if (!v || v === 'forever') return 100;
-        if (v === '0' || v === '0d') return 0;
+        // Hours (1-23)
+        for (let i = 1; i < 24; i++) s.push({ val: `${i}h`, label: `${i} Hour${i > 1 ? 's' : ''}`, short: `${i}h` });
 
-        let minutes = 0;
-        if (v.endsWith('d')) minutes = parseInt(v) * 1440;
-        else if (v.endsWith('w')) minutes = parseInt(v) * 10080;
-        else if (v.endsWith('m')) minutes = parseInt(v) * 43200; // 30 days default
-        else if (v.endsWith('y')) minutes = parseInt(v) * 525600;
+        // Days (1-6)
+        for (let i = 1; i < 7; i++) s.push({ val: `${i}d`, label: `${i} Day${i > 1 ? 's' : ''}`, short: `${i}d` });
 
-        // Inverse mapping
-        if (minutes <= 1440) return (minutes / 1440) * 20;
-        if (minutes <= 10080) return 20 + ((minutes - 1440) / (10080 - 1440)) * 20;
-        if (minutes <= 40320) return 40 + ((minutes - 10080) / (40320 - 10080)) * 20;
-        if (minutes <= 525600) return 60 + ((minutes - 40320) / (525600 - 40320)) * 30;
-        return 100;
-    };
+        // Weeks (1-3)
+        for (let i = 1; i < 4; i++) s.push({ val: `${i}w`, label: `${i} Week${i > 1 ? 's' : ''}`, short: `${i}w` });
 
-    // Helper: Percentage -> Value { label, valueStr }
-    const getValueFromPct = (pct) => {
-        if (pct >= 90) return { label: '∞', valueStr: 'forever' };
-        if (pct <= 0) return { label: 'Delete on Read', valueStr: '0d' };
-
-        let minutes = 0;
-        let granularity = ''; // for rounding
-
-        if (pct < 20) {
-            // 0 - 24h
-            minutes = (pct / 20) * 1440;
-            const hours = Math.round(minutes / 60);
-            if (hours === 0) return { label: 'Delete on Read', valueStr: '0d' };
-            return { label: `${hours} Hour${hours > 1 ? 's' : ''}`, valueStr: `${hours / 24}d` }; // Fractional days not supported by backend well, stick to whole logic? Backend likely parses integers. 
-            // Wait, existing logic used days. If I send '0.5d', backend might fail. 
-            // Stick to existing formats: d, m, y. 
-            // Actually, backend prune uses `cutoff.setDate(now.getDate() - parseInt(value))`.
-            // parseInt('0.5') is 0. So < 1 day becomes 0d. 
-            // I should stick to > 1 day granularity OR update backend. 
-            // FOR NOW: Let's assume hours isn't critical or round to nearest day >= 1?
-            // User ASKED for hours. "From 0 to 1 day, the bar will have day granularity of hours."
-            // If backend only supports days, I might need to send fractional days and ensure backend handles it? 
-            // Checking SettingsPanel.jsx again... `value.endsWith('d') { cutoff.setDate(now.getDate() - parseInt(value)); }`
-            // Okay, parseInt(0.2) is 0. So sub-day retention is treated as 0d (Delete on Read).
-            // This is a logic gap. To support hours, I'd need to update backend or parsing logic in `handleRetentionChange`.
-            // User requested UI changes. I will implement UI but map < 1d to 0d for now to avoid breaking backend, OR treat 1h as 1d? No, that's misleading.
-            // Actually, if I change the stored format to 'Xh', I can update `handleRetentionChange` to parse 'h'.
-            return { label: `${hours} Hour${hours > 1 ? 's' : ''}`, valueStr: `${hours}h` };
-        } else if (pct < 40) {
-            // 1d - 7d
-            const range = pct - 20;
-            const days = 1 + Math.round((range / 20) * 6);
-            return { label: `${days} Day${days > 1 ? 's' : ''}`, valueStr: `${days}d` };
-        } else if (pct < 60) {
-            // 1w - 4w
-            const range = pct - 40;
-            const weeks = 1 + Math.round((range / 20) * 3);
-            return { label: `${weeks} Week${weeks > 1 ? 's' : ''}`, valueStr: `${weeks}w` };
-        } else {
-            // 1m - 12m
-            const range = pct - 60;
-            const months = 1 + Math.round((range / 30) * 11);
-            return { label: `${months} Month${months > 1 ? 's' : ''}`, valueStr: `${months}m` };
+        // Months (1-12)
+        for (let i = 1; i <= 12; i++) {
+            const label = i === 12 ? '1 Year' : `${i} Month${i > 1 ? 's' : ''}`;
+            s.push({ val: `${i}m`, label: label, short: i === 12 ? '1y' : `${i}m` });
         }
+
+        s.push({ val: 'forever', label: 'Indefinitely', short: '∞' });
+        return s;
+    }, []);
+
+    // Get step index from percentage
+    const getIndexFromPct = (pct) => {
+        return Math.round((pct / 100) * (steps.length - 1));
     };
 
-    // Initialize drag state from prop
+    // Get percentage from value string
+    const getPctFromValue = (v) => {
+        if (!v) return 100; // default forever?
+        // Normalization for legacy values if needed
+        let match = v;
+        if (v === '0') match = '0d';
+
+        const index = steps.findIndex(s => s.val === match);
+        if (index === -1) {
+            // Fallback for custom values not in steps (e.g. 90d -> approx)
+            if (v === 'forever') return 100;
+            return 50; // default middle
+        }
+        return (index / (steps.length - 1)) * 100;
+    };
+
+    const currentStepIndex = Math.round((dragPct / 100) * (steps.length - 1));
+    const currentStep = steps[currentStepIndex] || steps[steps.length - 1];
+
+    // Initialize drag state
     React.useEffect(() => {
         if (!isDragging) {
             setDragPct(getPctFromValue(value));
         }
-    }, [value, isDragging]);
-
-    const { label: displayLabel, valueStr: currentValueStr } = getValueFromPct(dragPct);
-
-    // Resistance/Magnet logic
-    const applyResistance = (rawPct) => {
-        const zones = [0, 20, 40, 60, 90, 100];
-        const resistance = 1.5; // Width of resistance zone
-
-        for (let zone of zones) {
-            if (rawPct > zone - resistance && rawPct < zone + resistance) {
-                return zone; // Snap to exact boundary
-            }
-        }
-        return rawPct;
-    };
+    }, [value, isDragging, steps]);
 
     const updateFromClientX = (clientX) => {
         if (!trackRef.current) return;
@@ -847,10 +813,12 @@ const RetentionSlider = ({ value, onChange }) => {
         let pct = ((clientX - rect.left) / rect.width) * 100;
         pct = Math.max(0, Math.min(100, pct));
 
-        // Apply resistance
-        pct = applyResistance(pct);
+        // Snap to steps immediately for responsive feel
+        const rawIndex = (pct / 100) * (steps.length - 1);
+        const snappedIndex = Math.round(rawIndex);
+        const snappedPct = (snappedIndex / (steps.length - 1)) * 100;
 
-        setDragPct(pct);
+        setDragPct(snappedPct);
     };
 
     const handleStart = (clientX) => {
@@ -866,11 +834,12 @@ const RetentionSlider = ({ value, onChange }) => {
     const handleEnd = () => {
         if (!isDragging) return;
         setIsDragging(false);
-        const { valueStr } = getValueFromPct(dragPct);
-        onChange(valueStr);
+        const idx = getIndexFromPct(dragPct);
+        const step = steps[idx];
+        if (step) onChange(step.val);
     };
 
-    // Global listeners for drag
+    // Global listeners
     React.useEffect(() => {
         const onMouseMove = (e) => handleMove(e.clientX);
         const onMouseUp = () => handleEnd();
@@ -889,17 +858,12 @@ const RetentionSlider = ({ value, onChange }) => {
             document.removeEventListener('touchmove', onTouchMove);
             document.removeEventListener('touchend', onTouchEnd);
         };
-    }, [isDragging, dragPct]); // dragPct dependency not needed for logic but harmless
+    }, [isDragging, dragPct]);
 
-    // Info Message Logic
+    // Info Message
     let infoMessage = null;
-    if (dragPct >= 90) infoMessage = 'Messages are kept indefinitely.';
-    else if (dragPct <= 0 || (dragPct < 20 && currentValueStr.endsWith('h'))) infoMessage = 'Messages will be deleted upon being read.'; // Treat hours as basically immediate for the badge? Or distinct? User said "For 0 or infinity states...". 0d is 0. 
-
-    // Refined: Only at exact 0 or Forever.
-    if (dragPct >= 90) infoMessage = 'Messages are kept indefinitely.';
-    else if (dragPct <= 0) infoMessage = 'Messages will be deleted upon being read.';
-
+    if (currentStep.val === 'forever') infoMessage = 'Messages are kept indefinitely.';
+    else if (currentStep.val === '0d') infoMessage = 'Messages will be deleted upon being read.';
 
     return (
         <div style={{ padding: '0.5rem 0' }}>
@@ -921,14 +885,14 @@ const RetentionSlider = ({ value, onChange }) => {
                 <span style={{
                     fontWeight: 600,
                     color: 'var(--color-primary)',
-                    fontSize: displayLabel === '∞' ? '2.2rem' : '1.5rem',
-                    transition: 'font-size 0.2s ease-out'
+                    fontSize: currentStep.short === '∞' ? '2.2rem' : '1.5rem',
+                    transition: 'all 0.1s'
                 }}>
-                    {displayLabel}
+                    {currentStep.short === '∞' ? '∞' : currentStep.label}
                 </span>
             </div>
 
-            {/* Info Message (Only for 0 or Infinity) */}
+            {/* Info Message */}
             {infoMessage && (
                 <div style={{
                     padding: 'var(--space-2)',
@@ -946,50 +910,74 @@ const RetentionSlider = ({ value, onChange }) => {
             )}
 
             {/* Track Container */}
-            <div style={{ padding: '0 6px' }}> {/* Padding for handle edges */}
+            <div style={{ padding: '0 12px' }}>
                 <div
                     ref={trackRef}
                     onMouseDown={(e) => handleStart(e.clientX)}
                     onTouchStart={(e) => handleStart(e.touches[0].clientX)}
                     style={{
                         position: 'relative',
-                        height: '48px',
+                        height: '56px', // Taller for ruler
                         cursor: 'pointer',
                         touchAction: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
                     }}
                 >
-                    {/* Ruler Scale Background */}
+                    {/* Ruler Scale */}
                     <div style={{
                         position: 'absolute',
                         left: 0, right: 0,
                         bottom: 0,
-                        height: '20px',
+                        height: '24px',
                         display: 'flex',
-                        pointerEvents: 'none'
+                        alignItems: 'flex-end',
+                        pointerEvents: 'none',
                     }}>
-                        {/* Ticks at 20, 40, 60, 90 */}
-                        {[20, 40, 60, 90].map(p => (
-                            <div key={p} style={{
-                                position: 'absolute',
-                                left: `${p}%`,
-                                bottom: '0',
-                                height: '8px',
-                                width: '1px',
-                                background: 'var(--color-text-tertiary)'
-                            }} />
-                        ))}
+                        {steps.map((step, i) => {
+                            // Determine mark type
+                            const isMajor = ['0d', '1h', '6h', '12h', '1d', '1w', '1m', '6m', '12m', 'forever'].includes(step.val);
+                            const isLabel = ['0d', '1d', '1w', '1m', '12m', 'forever'].includes(step.val); // Labels for significant shifts
+
+                            // Don't show every single tick if too crowded? 
+                            // 46 steps is a lot for small mobile. 
+                            const showTick = i % 2 === 0 || isMajor;
+
+                            return (showTick && (
+                                <div key={i} style={{
+                                    position: 'absolute',
+                                    left: `${(i / (steps.length - 1)) * 100}%`,
+                                    bottom: 0,
+                                    width: '1px',
+                                    height: isMajor ? '12px' : '6px',
+                                    background: isMajor ? 'var(--color-text-secondary)' : 'var(--color-text-tertiary)',
+                                    opacity: isMajor ? 0.8 : 0.4,
+                                    transform: 'translateX(-50%)'
+                                }}>
+                                    {isLabel && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '16px',
+                                            left: '50%',
+                                            transform: 'translateX(-50%)',
+                                            fontSize: '0.65rem',
+                                            color: 'var(--color-text-tertiary)',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {step.short}
+                                        </div>
+                                    )}
+                                </div>
+                            ));
+                        })}
                     </div>
 
                     {/* Track Line */}
                     <div style={{
                         position: 'absolute',
                         left: 0, right: 0,
+                        top: '12px',
                         height: '6px',
                         background: 'var(--color-bg-tertiary)',
                         borderRadius: '3px',
-                        overflow: 'hidden' // Ensure fill matches radius
                     }}>
                         {/* Fill */}
                         <div style={{
@@ -1004,6 +992,7 @@ const RetentionSlider = ({ value, onChange }) => {
                     <div style={{
                         position: 'absolute',
                         left: `${dragPct}%`,
+                        top: '3px', // Center on track
                         width: '24px',
                         height: '24px',
                         borderRadius: '50%',
@@ -1011,15 +1000,9 @@ const RetentionSlider = ({ value, onChange }) => {
                         boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
                         transform: 'translateX(-50%)',
                         border: '2px solid var(--color-primary)',
-                        transition: isDragging ? 'none' : 'left 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Spring effect fallback
-                        zIndex: 10
+                        zIndex: 10,
+                        transition: isDragging ? 'none' : 'left 0.1s ease-out'
                     }} />
-                </div>
-
-                {/* Scale Labels */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginTop: '-8px' }}>
-                    <span style={{ marginLeft: '-4px' }}>0</span>
-                    <span style={{ marginRight: '-4px' }}>∞</span>
                 </div>
             </div>
         </div>
