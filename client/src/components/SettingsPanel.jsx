@@ -906,75 +906,145 @@ const SettingsPanel = ({ onClose }) => {
     return (
         <div className="card" style={{ height: '100%', maxHeight: '100%', overflowY: 'auto' }}>
             <div className="card-header flex-between items-center">
-                <h3 className="card-title">{t('settings.title')}</h3>
+                <h3 className="card-title">Settings</h3>
                 <button
                     onClick={onClose}
-                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                 >
                     &times;
                 </button>
             </div>
 
             <div className="card-body">
-                {/* Language (Existing) */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
-                        {t('settings.language')}
-                    </label>
-                    <select
-                        value={language}
-                        onChange={(e) => setLanguage(e.target.value)}
-                        className="form-control"
-                    >
-                        <option value="en">English (UK)</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                        <option value="it">Italiano</option>
-                        <option value="pt">Português</option>
-                    </select>
-                </div>
+                {/* Messages Section */}
+                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">{t('settings.messages') || 'Messages'}</label>
 
-                {/* Message Retention (New) */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
-                        {t('settings.messageRetention') || 'Message Retention'}
-                    </label>
-                    <select
-                        value={retention}
-                        onChange={handleRetentionChange}
-                        className="form-control"
-                    >
-                        <option value="1m">{t('settings.retention.1m') || '1 Month'}</option>
-                        <option value="3m">{t('settings.retention.3m') || '3 Months'}</option>
-                        <option value="6m">{t('settings.retention.6m') || '6 Months'}</option>
-                        <option value="forever">{t('settings.retention.forever') || 'Forever'}</option>
-                    </select>
-                    <div style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '0.25rem' }}>
-                        {t('settings.retention.desc') || '⚠️ Messages older than this will be permanently deleted.'}
-                    </div>
-                </div>
-
-                {/* Swipe Direction */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
-                        {t('settings.swipeDirection') || 'Swipe to Delete Direction'}
-                    </label>
-                    <select
-                        value={localStorage.getItem('nestfinder_swipe_direction') || 'right'}
-                        onChange={(e) => {
-                            localStorage.setItem('nestfinder_swipe_direction', e.target.value);
-                            window.dispatchEvent(new Event('storage'));
+                    {/* Popup Notifications Toggle */}
+                    <div
+                        onClick={togglePopup}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: 'var(--space-3)',
+                            background: 'var(--color-bg-secondary)',
+                            borderRadius: 'var(--radius-md)',
+                            cursor: 'pointer',
+                            border: '1px solid var(--color-border)',
+                            marginBottom: 'var(--space-2)'
                         }}
-                        className="form-control"
                     >
-                        <option value="right">{t('settings.swipe.right') || '→ Swipe Right'}</option>
-                        <option value="left">{t('settings.swipe.left') || '← Swipe Left'}</option>
-                    </select>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                        {t('settings.swipe.desc') || 'Swipe a message in this direction to delete it.'}
+                        <div>
+                            <div style={{ fontWeight: 500 }}>🔔 {t('settings.notifyPopup') || 'Popup Notifications'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                {popupEnabled
+                                    ? (t('settings.notifyPopup.onDesc') || 'Messages appear immediately when received')
+                                    : (t('settings.notifyPopup.offDesc') || 'Messages are saved to inbox silently')}
+                            </div>
+                        </div>
+                        <div
+                            style={{
+                                width: '44px',
+                                height: '24px',
+                                borderRadius: '12px',
+                                background: popupEnabled ? 'var(--color-primary)' : 'var(--color-border)',
+                                position: 'relative',
+                                transition: 'background 0.2s'
+                            }}
+                        >
+                            <div style={{
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: 'white',
+                                position: 'absolute',
+                                top: '2px',
+                                left: popupEnabled ? '22px' : '2px',
+                                transition: 'left 0.2s',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                            }} />
+                        </div>
+                    </div>
+
+                    {/* Swipe Direction */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: 'var(--space-3)',
+                            background: 'var(--color-bg-secondary)',
+                            borderRadius: 'var(--radius-md)',
+                            border: '1px solid var(--color-border)',
+                            marginBottom: 'var(--space-2)'
+                        }}
+                    >
+                        <div>
+                            <div style={{ fontWeight: 500 }}>👈 {t('settings.swipeDirection') || 'Swipe to Delete'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                {t('settings.swipe.desc') || 'Swipe a message in this direction to delete it.'}
+                            </div>
+                        </div>
+                        <select
+                            value={localStorage.getItem('nestfinder_swipe_direction') || 'right'}
+                            onChange={(e) => {
+                                localStorage.setItem('nestfinder_swipe_direction', e.target.value);
+                                window.dispatchEvent(new Event('storage'));
+                            }}
+                            style={{
+                                background: 'var(--color-bg-tertiary)',
+                                color: 'var(--color-text)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            <option value="right">→ Right</option>
+                            <option value="left">← Left</option>
+                        </select>
+                    </div>
+
+                    {/* Retention Period */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: 'var(--space-3)',
+                            background: 'var(--color-bg-secondary)',
+                            borderRadius: 'var(--radius-md)',
+                            border: '1px solid var(--color-border)'
+                        }}
+                    >
+                        <div>
+                            <div style={{ fontWeight: 500 }}>🗑️ {t('settings.messageRetention') || 'Retention Period'}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#ef4444' }}>
+                                {t('settings.retention.desc') || '⚠️ Messages older than this will be permanently deleted.'}
+                            </div>
+                        </div>
+                        <select
+                            value={retention}
+                            onChange={handleRetentionChange}
+                            style={{
+                                background: 'var(--color-bg-tertiary)',
+                                color: 'var(--color-text)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            <option value="1m">{t('settings.retention.1m') || '1 Month'}</option>
+                            <option value="3m">{t('settings.retention.3m') || '3 Months'}</option>
+                            <option value="6m">{t('settings.retention.6m') || '6 Months'}</option>
+                            <option value="forever">{t('settings.retention.forever') || 'Forever'}</option>
+                        </select>
                     </div>
                 </div>
+
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
 
                 {/* Share App with QR Code - FIRST SECTION */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
@@ -1091,57 +1161,6 @@ const SettingsPanel = ({ onClose }) => {
 
                     {/* Restore Account from Key */}
                     <RestoreAccountSection t={t} />
-                </div>
-
-                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
-
-                {/* Notification Display Mode */}
-                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                    <label className="form-label">{t('settings.notifications') || 'Notifications'}</label>
-                    <div
-                        onClick={togglePopup}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: 'var(--space-3)',
-                            background: 'var(--color-bg-secondary)',
-                            borderRadius: 'var(--radius-md)',
-                            cursor: 'pointer',
-                            border: '1px solid var(--color-border)'
-                        }}
-                    >
-                        <div>
-                            <div style={{ fontWeight: 500 }}>🔔 {t('settings.notifyPopup') || 'Popup Notifications'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                {popupEnabled
-                                    ? (t('settings.notifyPopup.onDesc') || 'Messages appear immediately when received')
-                                    : (t('settings.notifyPopup.offDesc') || 'Messages are saved to inbox silently')}
-                            </div>
-                        </div>
-                        <div
-                            style={{
-                                width: '44px',
-                                height: '24px',
-                                borderRadius: '12px',
-                                background: popupEnabled ? 'var(--color-primary)' : 'var(--color-border)',
-                                position: 'relative',
-                                transition: 'background 0.2s'
-                            }}
-                        >
-                            <div style={{
-                                width: '20px',
-                                height: '20px',
-                                borderRadius: '50%',
-                                background: 'white',
-                                position: 'absolute',
-                                top: '2px',
-                                left: popupEnabled ? '22px' : '2px',
-                                transition: 'left 0.2s',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                            }} />
-                        </div>
-                    </div>
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
