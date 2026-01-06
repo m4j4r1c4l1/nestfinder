@@ -774,6 +774,8 @@ router.get('/feedback', (req, res) => {
         `, [limit, offset]);
 
         const total = get("SELECT COUNT(*) as count FROM feedback").count;
+        const pendingCount = get("SELECT COUNT(*) as count FROM feedback WHERE status IN ('new', 'sent', 'delivered', 'pending')").count;
+        const readCount = get("SELECT COUNT(*) as count FROM feedback WHERE status IN ('read', 'reviewed')").count;
 
         // Auto-update status to 'delivered' for fetched items that are still 'new' or 'sent'
         // This ensures the sender sees "Double Ticks" (Received) when Admin views the list
@@ -795,7 +797,7 @@ router.get('/feedback', (req, res) => {
             });
         }
 
-        res.json({ feedback, total });
+        res.json({ feedback, total, pendingCount, readCount });
     } catch (error) {
         console.error('Get feedback error:', error);
         res.status(500).json({ error: 'Failed to get feedback' });
