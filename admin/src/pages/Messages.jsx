@@ -1751,7 +1751,7 @@ const HistorySection = ({ users = [] }) => {
                     </div>
                 </div>
             </div>
-            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={sortedLogs.length} currentCount={paginatedLogs.length} pageSize={pageSize} itemLabel="messages" />
+            <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={totalLogs} currentCount={paginatedLogs.length} pageSize={pageSize} itemLabel="messages" />
 
             {selectedBatchId && (
                 <DetailModal batchId={selectedBatchId} onClose={() => setSelectedBatchId(null)} />
