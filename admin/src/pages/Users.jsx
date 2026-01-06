@@ -26,6 +26,7 @@ const formatTimestampCET = (isoString) => {
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [totalUsers, setTotalUsers] = useState(0);
+    const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -131,6 +132,7 @@ const Users = () => {
             const res = await adminApi.fetch(`/admin/users?page=${page}&limit=${pageSize}&sort=${sortColumn}&dir=${sortDirection}&search=${encodeURIComponent(debouncedSearch)}`);
             setUsers(res.users || []);
             setTotalUsers(res.total || 0);
+            if (res.stats) setStats(res.stats);
         } catch (err) {
             console.error('Failed to fetch users:', err);
         } finally {
@@ -193,12 +195,13 @@ const Users = () => {
         } catch (err) { alert('Failed: ' + err.message); }
     };
 
-    // Badge counts for stats
-    const badgeCounts = {
+    // Badge counts for stats (Use backend stats if available)
+    const badgeCounts = stats || {
         eagle: users.filter(u => (u.trust_score || 0) >= 50).length,
         owl: users.filter(u => (u.trust_score || 0) >= 30 && (u.trust_score || 0) < 50).length,
         sparrow: users.filter(u => (u.trust_score || 0) >= 10 && (u.trust_score || 0) < 30).length,
         hatchling: users.filter(u => (u.trust_score || 0) < 10).length,
+        blocked: users.filter(u => u.blocked).length
     };
 
     return (
@@ -332,7 +335,7 @@ const Users = () => {
                     }}
                 >
                     <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>🚫 Blocked</div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>{users.filter(u => u.blocked).length}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>{badgeCounts.blocked}</div>
                 </div>
             </div>
 
