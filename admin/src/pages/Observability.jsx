@@ -203,8 +203,8 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
 
                                 {/* Sent Section */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', width: '100%', justifyContent: 'center' }}>
-                                    <div style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                    <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
                                             {stats.notificationMetrics?.total || 0}
                                         </div>
@@ -241,8 +241,8 @@ const Observability = () => {
                                 </div>
 
                                 {/* Received Section - No Separator */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', paddingTop: '0.5rem', width: '100%', justifyContent: 'center' }}>
-                                    <div style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', paddingTop: '0.5rem', width: '100%', justifyContent: 'center' }}>
+                                    <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
                                             {stats.feedbackMetrics?.total || stats.totalReceived || 0}
                                         </div>
