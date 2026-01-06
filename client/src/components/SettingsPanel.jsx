@@ -75,7 +75,7 @@ const RecoveryKeySection = ({ t }) => {
             sessionStorage.setItem('nestfinder_recovery_key_temp', result.recoveryKey);
         } catch (err) {
             console.error('Failed to generate recovery key:', err);
-            setErrorMessage(`Failed to generate recovery key: ${err.message}\n\nTip: Try logging out and back in, or refresh the page.`);
+            setErrorMessage(err.message || 'Failed to generate key. Please try again.');
         }
         setLoading(false);
     };
@@ -226,63 +226,20 @@ const RecoveryKeySection = ({ t }) => {
                 </button>
             )}
 
-            {/* Error Modal with Blur */}
+            {/* Error Badge */}
             {errorMessage && (
                 <div style={{
-                    position: 'fixed',
-                    inset: 0,
-                    zIndex: 10001,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'rgba(0, 0, 0, 0.7)',
-                    backdropFilter: 'blur(4px)'
-                }}>
-                    <div style={{
-                        background: 'linear-gradient(135deg, #1e293b, #0f172a)',
-                        borderRadius: 'var(--radius-xl)',
-                        padding: 'var(--space-6)',
-                        maxWidth: '90vw',
-                        width: '400px',
-                        border: '1px solid var(--color-border)',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-                        animation: 'slideUp 0.3s ease-out'
-                    }}>
-                        <div style={{
-                            textAlign: 'center',
-                            marginBottom: 'var(--space-4)'
-                        }}>
-                            <span style={{ fontSize: '3rem' }}>⚠️</span>
-                        </div>
-
-                        <div style={{
-                            fontSize: 'var(--font-size-md)',
-                            color: 'var(--color-text)',
-                            lineHeight: 1.6,
-                            marginBottom: 'var(--space-6)',
-                            textAlign: 'center',
-                            whiteSpace: 'pre-wrap'
-                        }}>
-                            {errorMessage}
-                        </div>
-
-                        <button
-                            onClick={() => setErrorMessage(null)}
-                            style={{
-                                width: '100%',
-                                padding: 'var(--space-3)',
-                                background: 'var(--color-primary)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: 'var(--radius-md)',
-                                fontSize: 'var(--font-size-md)',
-                                fontWeight: 600,
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {t?.('common.ok') || 'OK'}
-                        </button>
-                    </div>
+                    padding: 'var(--space-2)',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: 'var(--radius-md)',
+                    color: '#ef4444',
+                    fontSize: '0.85rem',
+                    textAlign: 'center',
+                    marginTop: 'var(--space-2)',
+                    cursor: 'pointer'
+                }} onClick={() => setErrorMessage(null)}>
+                    ⚠️ {errorMessage}
                 </div>
             )}
         </div>
