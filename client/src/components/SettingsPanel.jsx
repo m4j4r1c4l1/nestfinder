@@ -566,30 +566,22 @@ const RestoreAccountSection = ({ t }) => {
 
 const SwipeControl = ({ value, onChange, labelCenter }) => {
     const trackRef = React.useRef(null);
-    const [dragOffset, setDragOffset] = useState(null); // Pixel offset during drag
+    const [dragOffset, setDragOffset] = useState(null); // Pixel offset from start
     const isDragging = React.useRef(false);
     const startX = React.useRef(0);
-    const currentX = React.useRef(0);
 
-    // Determine current position based on value or drag
-    // value: 'left' | 'right' | null (center)
-    // We'll use CSS classes or inline styles for positioning
-
+    // Touch handlers
     const handleStart = (clientX) => {
         if (!trackRef.current) return;
         isDragging.current = true;
         startX.current = clientX;
-        // If we were already offset? We generally start from the resolved position.
-        // But simpler to just track delta.
-        currentX.current = clientX;
         setDragOffset(0);
     };
 
     const handleMove = (clientX) => {
-        if (!isDragging.current || !trackRef.current) return;
+        if (!isDragging.current) return;
         const delta = clientX - startX.current;
         setDragOffset(delta);
-        currentX.current = clientX;
     };
 
     const handleEnd = () => {
@@ -597,39 +589,34 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         isDragging.current = false;
 
         const trackWidth = trackRef.current.offsetWidth;
-        const threshold = trackWidth * 0.25; // Drag at least 25% to switch
+        const thumbWidth = 100;
+        const threshold = trackWidth * 0.25;
 
-        // Logic depending on start state
-        // If null (center): drag right -> right, drag left -> left
-        // If left: drag right -> right
-        // If right: drag left -> left
-
-        // Simpler: just calculate final "intended" position based on relative touch point?
-        // Let's use the delta.
+        // Calculate absolute drag distance to determine switch
+        // We need to know effective movement relative to start state
+        // If start was Left: > threshold -> Right
+        // If start was Right: < -threshold -> Left
+        // If start was Center: > 50 -> Right, < -50 -> Left
 
         if (value === null) {
             if (dragOffset > 50) onChange('right');
             else if (dragOffset < -50) onChange('left');
         } else if (value === 'left') {
-            if (dragOffset > 50) onChange('right');
-            // Check if dragged far enough to be center? User didn't request return to center.
+            if (dragOffset > threshold) onChange('right');
         } else if (value === 'right') {
-            if (dragOffset < -50) onChange('left');
+            if (dragOffset < -threshold) onChange('left');
         }
 
         setDragOffset(null);
     };
 
-    // Touch handlers
+    // Event Wrappers
     const onTouchStart = (e) => handleStart(e.touches[0].clientX);
     const onTouchMove = (e) => handleMove(e.touches[0].clientX);
     const onTouchEnd = () => handleEnd();
-
-    // Mouse handlers
     const onMouseDown = (e) => {
-        e.preventDefault(); // Prevent text selection
+        e.preventDefault();
         handleStart(e.clientX);
-
         const onMouseMove = (ev) => handleMove(ev.clientX);
         const onMouseUp = () => {
             handleEnd();
@@ -640,37 +627,14 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         document.addEventListener('mouseup', onMouseUp);
     };
 
-    // Calculate Thumb Style
-    let leftPos = '50%';
-    let transform = 'translateX(-50%)'; // Default Center
-
-    // Apply state override
-    if (value === 'left') {
-        leftPos = '4px';
-        transform = 'none';
-    } else if (value === 'right') {
-        leftPos = 'auto'; // Clear left
-        // We use right prop or calc. Let's use left with calc to be consistent?
-        // Or simplified: Flex alignment?
-        // Let's stick to absolute for smooth drag.
-        leftPos = 'calc(100% - 4px)'; // Will need translateX(-100%)?
-        transform = 'translateX(-100%)';
-    }
-
-    // Apply Drag Offset
-    // This is tricky mixing absolute positions and transforms.
-    // Let's simplify:
-    // Render the thumb inside a container that aligns it?
-    // No, absolute is best.
-
-    // If dragging, we add `dragOffset` to `transform`.
-    const style = {
+    // Render Logic
+    let style = {
         position: 'absolute',
         top: '4px',
         bottom: '4px',
-        width: '100px', // Fixed width for thumb
+        width: '100px',
         borderRadius: 'var(--radius-sm)',
-        background: 'var(--color-primary)',
+        background: 'var(--color-primary)', // Keeping primary color for now
         color: 'white',
         display: 'flex',
         alignItems: 'center',
@@ -678,67 +642,58 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         fontSize: '1.2rem',
         cursor: 'grab',
         boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-        transition: isDragging.current ? 'none' : 'left 0.2s ease-out, transform 0.2s ease-out',
-        left: leftPos,
-        transform: transform
+        transition: dragOffset !== null ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)', // Smooth snap
+        left: 0, // Always use 0 and control via transform
+        zIndex: 10
     };
 
-    // Apply visual offset if dragging (with clamping to prevent bounce past edges)
-    if (dragOffset !== null && trackRef.current) {
-        const trackWidth = trackRef.current.offsetWidth;
-        const thumbWidth = 100; // Fixed thumb width
-        let clampedOffset = dragOffset;
+    // Calculate Transform
+    let translateX = 0;
+    const trackWidth = trackRef.current ? trackRef.current.offsetWidth : 300; // Fallback
+    const thumbWidth = 100;
+    const padding = 4;
 
-        // Clamp based on current position
-        if (value === 'left') {
-            // Already at left edge, can only go right
-            clampedOffset = Math.max(0, Math.min(trackWidth - thumbWidth - 8, dragOffset));
-        } else if (value === 'right') {
-            // Already at right edge, can only go left
-            clampedOffset = Math.min(0, Math.max(-(trackWidth - thumbWidth - 8), dragOffset));
-        } else {
-            // Center: can go either way but clamp
-            const maxRight = (trackWidth - thumbWidth) / 2 - 4;
-            const maxLeft = -maxRight;
-            clampedOffset = Math.max(maxLeft, Math.min(maxRight, dragOffset));
-        }
+    // Base Positions (px)
+    const posLeft = padding;
+    const posRight = trackWidth - thumbWidth - padding;
+    const posCenter = (trackWidth - thumbWidth) / 2;
 
-        // Fix bounce: smooth clamping is already applied above by min/max.
-        // The issue might be the spring-back effect or the visual jitter. 
-        // Ensure clampedOffset is strictly within bounds.
+    let currentBase = posCenter; // Default null
+    if (value === 'left') currentBase = posLeft;
+    else if (value === 'right') currentBase = posRight;
 
-        style.transform = `${transform} translateX(${clampedOffset}px)`;
+    // Apply Drag
+    if (dragOffset !== null) {
+        let rawPos = currentBase + dragOffset;
+        // Strict Clamping
+        rawPos = Math.max(posLeft, Math.min(posRight, rawPos));
+        translateX = rawPos;
+    } else {
+        translateX = currentBase;
     }
 
-    // Determine dove direction based on drag or current value
-    const isDraggingRight = dragOffset !== null && dragOffset > 0;
-    const isDraggingLeft = dragOffset !== null && dragOffset < 0;
-    const doveDirection = isDraggingRight ? 'right' : isDraggingLeft ? 'left' : (value === 'right' ? 'left' : 'right');
-    // Wait, if value is right (active), dove should face LEFT (pointing back)? 
-    // Or users want it pointing to the direction of swipe?
-    // User request: "pointed at all times towards the direction the user is swiping to"
+    style.transform = `translateX(${translateX}px)`;
 
-    // If dragging:
-    //   Drag > 0 (Right) -> Face Right
-    //   Drag < 0 (Left)  -> Face Left
-    // If NOT dragging:
-    //   Value 'left' -> Face Right (ready to swipe right?) OR Face Left (resting state?)
-    //   Let's assume "direction user is swiping to" means if I'm at Left, I swipe Right, so face Right.
-    //   If I'm at Right, I swipe Left, so face Left.
-
+    // Dove Logic
+    // If dragging: based on DELTA (dragOffset)
+    // If resting: based on VALUE
     let doveContent = '🕊️';
+    const isMirrored = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>;
+
     if (dragOffset !== null) {
-        // Active Dragging
-        if (dragOffset > 5) doveContent = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>; // Face Right
-        else if (dragOffset < -5) doveContent = '🕊️'; // Face Left
-        else doveContent = value === 'left' ? <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span> : '🕊️'; // Neutral/Start
+        if (dragOffset > 5) doveContent = isMirrored; // Moving Right -> Face Right
+        else if (dragOffset < -5) doveContent = '🕊️'; // Moving Left -> Face Left
+        else {
+            // Neutral/Deadzone: Keep starting orientation
+            if (value === 'left') doveContent = isMirrored;
+            else if (value === 'right') doveContent = '🕊️';
+            else doveContent = '🕊️';
+        }
     } else {
-        // Resting State
-        // If 'left' (default), to delete we swipe Right -> Face Right
-        if (value === 'left') doveContent = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>;
-        // If 'right' (swiped), to undo we swipe Left -> Face Left
-        else if (value === 'right') doveContent = '🕊️';
-        else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Center/Null
+        // Resting
+        if (value === 'left') doveContent = isMirrored; // Ready to go Right
+        else if (value === 'right') doveContent = '🕊️'; // Ready to go Left/Undo
+        else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Center
     }
 
     return (
@@ -760,8 +715,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 onTouchEnd={onTouchEnd}
                 onMouseDown={onMouseDown}
             >
-                {/* Labels/Tracks Background to indicate zones? Optional */}
-
                 {/* Thumb */}
                 <div style={style}>
                     {doveContent}
