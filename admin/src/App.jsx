@@ -16,14 +16,13 @@ const Login = ({ onLogin }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
         try {
             const data = await adminApi.login(username, password);
             adminApi.setToken(data.token);
             onLogin(data.token);
         } catch (err) {
             console.error('Login failed:', err);
-            setError(err.message || 'Login failed. Please check your connection.');
+            setError('Invalid credentials or connection error.');
         } finally {
             setLoading(false);
         }

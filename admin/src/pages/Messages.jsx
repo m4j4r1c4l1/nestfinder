@@ -295,7 +295,7 @@ const Messages = () => {
     const tabs = [
         { id: 'composer', label: '🪶 Composer', count: 0 },
         { id: 'outbox', label: '🐦 Sent', count: 0 },
-        { id: 'feedback', label: '🥚 Received', count: feedback.filter(f => f.status === 'new').length },
+        { id: 'feedback', label: '🥚 Received', count: feedback.filter(f => ['new', 'sent', 'delivered', 'pending'].includes(f.status)).length },
         { id: 'broadcasts', label: '🦅 Broadcasts', count: broadcasts.length }
     ];
 
@@ -1175,10 +1175,10 @@ const FeedbackSection = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
                             <span style={{ fontWeight: 500 }}>
-                                <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => f.status === 'new').length} Pending</span>
+                                <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => ['new', 'sent', 'delivered', 'pending'].includes(f.status)).length} Pending</span>
                             </span>
                             <span style={{ fontWeight: 500 }}>
-                                <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => f.status === 'reviewed').length} Read</span>
+                                <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedback.filter(f => ['read', 'reviewed'].includes(f.status)).length} Read</span>
                             </span>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -1198,6 +1198,7 @@ const FeedbackSection = ({
                         </div>
                     </div>
                 </div>
+
                 {showConfirmModal && (
                     <ConfirmationModal
                         title="Confirm Action"
@@ -1371,7 +1372,7 @@ const FeedbackSection = ({
                         onClose={() => setPreviewItem(null)}
                     />
                 )}
-            </div>
+            </div >
             <PaginationControls page={page} totalPages={totalPages} setPage={setPage} totalItems={totalItems} currentCount={paginatedFeedback.length} pageSize={pageSize} itemLabel="messages" />
         </>
     );
