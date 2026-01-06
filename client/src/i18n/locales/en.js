@@ -223,9 +223,9 @@ export default {
         statusOwl: 'Owl',
         statusEagle: 'Eagle',
         // Recovery Key Restore
-        recoveryKeyUsage: 'To restore your account on a new device, type your 3-word key in the nickname field when you open the app.',
-        restoreAccount: 'Restore Account from Key',
-        restoreAccountDescription: 'Enter a recovery key to restore your previous identity.',
+        recoveryKeyUsage: 'To restore your account, type your 3-word key with dashes in the **Nickname** field when you open the app.',
+        restoreAccount: 'Restore Account',
+        restoreAccountDescription: 'Enter your 3-word recovery key (spaces or dashes).',
         enterRecoveryKey: 'word-word-word',
         invalidRecoveryKey: 'Invalid recovery key. Please check and try again.',
         accountRestored: 'Account restored! Reloading...',
@@ -243,7 +243,7 @@ export default {
             desc: 'Swipe a message in this direction to delete it.'
         },
         // Message Retention
-        messageRetention: 'Message Retention',
+        messageRetention: 'Retention Period',
         retention: {
             '1m': '1 Month',
             '3m': '3 Months',
