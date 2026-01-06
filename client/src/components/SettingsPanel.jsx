@@ -192,9 +192,15 @@ const RecoveryKeySection = ({ t }) => {
                         </button>
                     )}
 
-                    {/* Usage Instructions - Button List Manner */}
+                    {/* Usage Instructions - Explicit Options */}
                     <div style={{ marginTop: 'var(--space-3)' }}>
-                        {(t?.('settings.recoveryKeyUsage') || 'To restore... or ...').split(/\s+or\s+/).map((part, i) => (
+                        <div style={{ fontSize: '0.85rem', fontWeight: 500, marginBottom: 'var(--space-2)', color: 'var(--color-text)' }}>
+                            {t?.('settings.restoreOptionsTitle') || 'To restore your account you have 2 options:'}
+                        </div>
+                        {[
+                            t?.('settings.restoreOption1') || '**Login:** Type your key in **Nickname** field.',
+                            t?.('settings.restoreOption2') || '**New:** Restore from section below.'
+                        ].map((part, i) => (
                             <div key={i} style={{
                                 padding: 'var(--space-3)',
                                 background: 'rgba(59, 130, 246, 0.05)',
@@ -548,9 +554,9 @@ const RestoreAccountSection = ({ t }) => {
 const SwipeControl = ({ value, onChange, labelCenter }) => {
     const trackRef = React.useRef(null);
     const [dragOffset, setDragOffset] = useState(null); // Pixel offset during drag
-    const isDragging = useRef(false);
-    const startX = useRef(0);
-    const currentX = useRef(0);
+    const isDragging = React.useRef(false);
+    const startX = React.useRef(0);
+    const currentX = React.useRef(0);
 
     // Determine current position based on value or drag
     // value: 'left' | 'right' | null (center)
@@ -1580,7 +1586,7 @@ const SettingsPanel = ({ onClose }) => {
                                             </div>
                                         </div>
                                         {showCheckmark && (
-                                            <span style={{ color: 'var(--color-primary)', marginRight: '44px' }}>✓</span>
+                                            <span style={{ color: 'var(--color-primary)', marginRight: '12px' }}>✓</span>
                                         )}
                                     </div>
                                 </div>
