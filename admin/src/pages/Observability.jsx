@@ -1157,7 +1157,11 @@ const RatingsChartCard = ({ onPointClick }) => {
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text'
                     }}>★</span>
-                    <span style={{ color: '#94a3b8' }}>Average Rating (1-5)</span>
+                    <span style={{ color: '#94a3b8' }}>Avg Rating (1-5)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+                    <span style={{ width: 12, height: 12, background: '#3b82f6', borderRadius: '2px' }} />
+                    <span style={{ color: '#94a3b8' }}>Votes</span>
                 </div>
             </div>
 
@@ -1193,6 +1197,28 @@ const RatingsChartCard = ({ onPointClick }) => {
                                 {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </text>
                         ))}
+
+                        {/* Votes Bars - scaled to max votes */}
+                        {(() => {
+                            const maxVotes = Math.max(...ratings.map(r => r.count || 0), 1);
+                            const barWidth = Math.max(6, (graphWidth / ratings.length) * 0.4);
+                            return ratings.map((r, i) => {
+                                const barHeight = (r.count / maxVotes) * (graphHeight * 0.4); // Max 40% of graph height
+                                return (
+                                    <rect
+                                        key={`bar-${i}`}
+                                        x={getX(i) - barWidth / 2}
+                                        y={graphHeight - barHeight}
+                                        width={barWidth}
+                                        height={barHeight}
+                                        fill="#3b82f6"
+                                        opacity={hoveredPoint?.index === i ? 0.9 : 0.5}
+                                        rx={2}
+                                        style={{ transition: 'opacity 0.15s ease' }}
+                                    />
+                                );
+                            });
+                        })()}
 
                         {/* Area Fill */}
                         {hasData && <polygon points={areaPoints} fill="url(#ratings-gradient)" />}
@@ -1270,7 +1296,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', gap: '1.5rem' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8' }}>
-                                    <span style={{ width: 8, height: 8, background: '#3b82f6', borderRadius: '50%' }} />
+                                    <span style={{ width: 8, height: 8, background: '#3b82f6', borderRadius: '2px' }} />
                                     Votes
                                 </span>
                                 <span style={{ color: '#fff', fontWeight: 500 }}>
