@@ -200,20 +200,8 @@ const RecoveryKeySection = ({ t }) => {
                         animation: 'fadeIn 0.5s ease-out',
                         opacity: 1
                     }}>
-                        <div style={{
-                            padding: 'var(--space-3)',
-                            background: 'rgba(59, 130, 246, 0.05)',
-                            border: '1px solid rgba(59, 130, 246, 0.2)',
-                            borderRadius: 'var(--radius-md)',
-                            marginBottom: 'var(--space-2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 'var(--space-2)'
-                        }}>
-                            <span style={{ fontSize: '1.2rem' }}>ℹ️</span>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text)' }}>
-                                {t?.('settings.restoreOptionsTitle') || 'To restore your account you have 2 options:'}
-                            </div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: 'var(--space-2)' }}>
+                            {t?.('settings.restoreOptionsTitle') || 'To restore your account you have 2 options:'}
                         </div>
 
                         {[
@@ -230,7 +218,7 @@ const RecoveryKeySection = ({ t }) => {
                                 lineHeight: 1.4,
                                 marginBottom: 'var(--space-2)',
                                 display: 'flex',
-                                alignItems: 'flex-start',
+                                alignItems: 'center',
                                 gap: 'var(--space-2)',
                                 animation: 'fadeIn 0.5s ease-out backwards',
                                 animationDelay: `${0.2 + (i * 0.1)}s`
@@ -273,25 +261,28 @@ const RecoveryKeySection = ({ t }) => {
                 >
                     {copied ? `✓ ${t?.('settings.keyGenerated') || 'Key Generated & Copied!'}` : loading ? (t?.('common.loading') || 'Generating...') : `🔑 ${t?.('settings.generateKey') || 'Generate Recovery Key'}`}
                 </button>
-            )}
+            )
+            }
 
             {/* Error Badge */}
-            {errorMessage && (
-                <div style={{
-                    padding: 'var(--space-2)',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    borderRadius: 'var(--radius-md)',
-                    color: '#ef4444',
-                    fontSize: '0.85rem',
-                    textAlign: 'center',
-                    marginTop: 'var(--space-2)',
-                    cursor: 'pointer',
-                    animation: 'fadeIn 0.3s ease-out'
-                }} onClick={() => setErrorMessage(null)}>
-                    ⚠️ {errorMessage}
-                </div>
-            )}
+            {
+                errorMessage && (
+                    <div style={{
+                        padding: 'var(--space-2)',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        borderRadius: 'var(--radius-md)',
+                        color: '#ef4444',
+                        fontSize: '0.85rem',
+                        textAlign: 'center',
+                        marginTop: 'var(--space-2)',
+                        cursor: 'pointer',
+                        animation: 'fadeIn 0.3s ease-out'
+                    }} onClick={() => setErrorMessage(null)}>
+                        ⚠️ {errorMessage}
+                    </div>
+                )
+            }
         </div>
     );
 };
@@ -678,7 +669,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         top: '4px',
         bottom: '4px',
         width: '100px', // Fixed width for thumb
-        borderRadius: '20px',
+        borderRadius: 'var(--radius-sm)',
         background: 'var(--color-primary)',
         color: 'white',
         display: 'flex',
@@ -687,7 +678,8 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         fontSize: '1.2rem',
         cursor: 'grab',
         boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-        transition: isDragging.current ? 'none' : 'left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+        transition: isDragging.current ? 'none' : 'left 0.2s ease-out, transform 0.2s ease-out',
         left: leftPos,
         transform: transform
     };
@@ -698,30 +690,36 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     }
 
     return (
-        <div
-            ref={trackRef}
-            style={{
-                position: 'relative',
-                height: '48px',
-                background: 'var(--color-bg-tertiary)',
-                borderRadius: '24px',
-                border: '1px solid var(--color-border)',
-                overflow: 'hidden',
-                userSelect: 'none',
-                touchAction: 'none'
-            }}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-            onMouseDown={onMouseDown}
-        >
-            {/* Labels/Tracks Background to indicate zones? Optional */}
+        <div>
+            <div
+                ref={trackRef}
+                style={{
+                    position: 'relative',
+                    height: '48px',
+                    background: 'var(--color-bg-tertiary)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-border)',
+                    overflow: 'hidden',
+                    userSelect: 'none',
+                    touchAction: 'none'
+                }}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                onMouseDown={onMouseDown}
+            >
+                {/* Labels/Tracks Background to indicate zones? Optional */}
 
-            {/* Thumb */}
-            <div style={style}>
-                {value === 'left' ? '🕊️' :
-                    value === 'right' ? <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span> :
-                        <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{labelCenter}</span>}
+                {/* Thumb */}
+                <div style={style}>
+                    {value === 'left' ? '🕊️' :
+                        value === 'right' ? <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span> :
+                            <span style={{ fontSize: '1.2rem' }}>🐥</span>}
+                </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', color: 'var(--color-text-secondary)', fontSize: '0.7rem' }}>
+                <span>← Left</span>
+                <span>Right →</span>
             </div>
         </div>
     );
@@ -733,51 +731,47 @@ const RetentionSlider = ({ value, onChange }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [localValue, setLocalValue] = useState(value);
 
-    // Constants
-    const MIN_DAYS = 30;
-    const MAX_DAYS = 365;
-    const FOREVER_ZONE_PCT = 90;
+    // Discrete steps: 0 (1h), 1w, 2w, 1m, 3m, 6m, 1y, forever
+    const STEPS = [
+        { days: 0, label: '1 Hour', short: '1h' },
+        { days: 7, label: '1 Week', short: '1w' },
+        { days: 14, label: '2 Weeks', short: '2w' },
+        { days: 30, label: '1 Month', short: '1m' },
+        { days: 90, label: '3 Months', short: '3m' },
+        { days: 180, label: '6 Months', short: '6m' },
+        { days: 365, label: '1 Year', short: '1y' },
+        { days: Infinity, label: 'Forever', short: '∞' }
+    ];
 
     // Helper: Value -> Days
     const getDaysFromValue = (v) => {
         if (!v || v === 'forever') return Infinity;
+        if (v === '0' || v === '0d') return 0;
         if (v.endsWith('m')) return parseInt(v) * 30;
         if (v.endsWith('y')) return parseInt(v) * 365;
+        if (v.endsWith('w')) return parseInt(v) * 7;
         if (v.endsWith('d')) return parseInt(v);
         return 30;
     };
 
-    // Helper: Days -> %
-    const getPctFromDays = (d) => {
-        if (d === Infinity || d > MAX_DAYS) return 100;
-        return ((d - MIN_DAYS) / (MAX_DAYS - MIN_DAYS)) * FOREVER_ZONE_PCT;
+    // Helper: Days -> Step Index
+    const getStepIndexFromDays = (d) => {
+        for (let i = STEPS.length - 1; i >= 0; i--) {
+            if (d >= STEPS[i].days) return i;
+        }
+        return 0;
     };
 
-    // Helper: % -> Days
-    const getDaysFromPct = (pct) => {
-        if (pct > FOREVER_ZONE_PCT) return Infinity;
-        const days = MIN_DAYS + (pct / FOREVER_ZONE_PCT) * (MAX_DAYS - MIN_DAYS);
-        return Math.round(days);
-    };
+    // Helper: Step Index -> Percent
+    const getPctFromStepIndex = (idx) => (idx / (STEPS.length - 1)) * 100;
 
-    // Helper: Format
-    const formatDuration = (d) => {
-        if (d >= Infinity) return '∞ Forever';
-        const months = Math.floor(d / 30);
-        const remDays = d % 30;
-        const weeks = Math.floor(remDays / 7);
-        const days = remDays % 7;
-
-        const parts = [];
-        if (months > 0) parts.push(`${months} Month${months > 1 ? 's' : ''}`);
-        if (weeks > 0) parts.push(`${weeks} Week${weeks > 1 ? 's' : ''}`);
-        if (days > 0) parts.push(`${days} Day${days > 1 ? 's' : ''}`);
-        if (parts.length === 0) return '0 Days';
-        return parts.join(', ');
-    };
+    // Helper: Percent -> Step Index
+    const getStepIndexFromPct = (pct) => Math.round((pct / 100) * (STEPS.length - 1));
 
     const currentDays = getDaysFromValue(isDragging ? localValue : value);
-    const currentPct = getPctFromDays(currentDays);
+    const currentStepIndex = getStepIndexFromDays(currentDays);
+    const currentPct = getPctFromStepIndex(currentStepIndex);
+    const currentStep = STEPS[currentStepIndex];
 
     const handleStart = (clientX) => {
         setIsDragging(true);
@@ -792,9 +786,14 @@ const RetentionSlider = ({ value, onChange }) => {
     const handleEnd = () => {
         if (!isDragging) return;
         setIsDragging(false);
-        // Commit value
         const d = getDaysFromValue(localValue);
-        onChange(d === Infinity ? 'forever' : `${d}d`);
+        if (d === Infinity) {
+            onChange('forever');
+        } else if (d === 0) {
+            onChange('0d');
+        } else {
+            onChange(`${d}d`);
+        }
     };
 
     const updateFromClientX = (clientX) => {
@@ -802,9 +801,9 @@ const RetentionSlider = ({ value, onChange }) => {
         const rect = trackRef.current.getBoundingClientRect();
         let pct = ((clientX - rect.left) / rect.width) * 100;
         pct = Math.max(0, Math.min(100, pct));
-
-        const d = getDaysFromPct(pct);
-        setLocalValue(d === Infinity ? 'forever' : `${d}d`);
+        const stepIdx = getStepIndexFromPct(pct);
+        const step = STEPS[stepIdx];
+        setLocalValue(step.days === Infinity ? 'forever' : step.days === 0 ? '0d' : `${step.days}d`);
     };
 
     // Event Listeners
@@ -828,64 +827,95 @@ const RetentionSlider = ({ value, onChange }) => {
         };
     }, [isDragging]);
 
+    const isZeroValue = currentStep.days === 0;
+
     return (
-        <div style={{ padding: '1rem 0' }}>
+        <div style={{ padding: '0.5rem 0' }}>
+            {/* Value Display Box */}
             <div style={{
                 textAlign: 'center',
-                marginBottom: '1rem',
-                fontWeight: 600,
-                color: 'var(--color-primary)',
-                height: '24px'
+                marginBottom: '0.5rem',
+                padding: 'var(--space-3)',
+                background: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                minHeight: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease-out'
             }}>
-                {formatDuration(currentDays)}
+                <span style={{
+                    fontWeight: 600,
+                    color: 'var(--color-primary)',
+                    fontSize: isDragging ? '1.8rem' : '1rem',
+                    transition: 'font-size 0.15s ease-out'
+                }}>
+                    {currentStep.label}
+                </span>
             </div>
 
+            {/* Zero Value Warning */}
+            {isZeroValue && (
+                <div style={{
+                    padding: 'var(--space-2)',
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--color-primary)',
+                    fontSize: '0.85rem',
+                    textAlign: 'center',
+                    marginBottom: '0.5rem',
+                    animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    ℹ️ Messages will be deleted 1 hour after being read.
+                </div>
+            )}
+
+            {/* Track */}
             <div
                 ref={trackRef}
                 onMouseDown={(e) => handleStart(e.clientX)}
                 onTouchStart={(e) => handleStart(e.touches[0].clientX)}
                 style={{
                     position: 'relative',
-                    height: '32px',
+                    height: '40px',
                     background: 'var(--color-bg-tertiary)',
-                    borderRadius: '16px',
+                    borderRadius: 'var(--radius-md)',
                     cursor: 'pointer',
                     touchAction: 'none',
                     display: 'flex',
                     alignItems: 'center',
-                    padding: '0 16px'
+                    padding: '0 12px'
                 }}
             >
-                {/* Track Line */}
+                {/* Track Line (Thicker) */}
                 <div style={{
                     position: 'absolute',
-                    left: '16px', right: '16px',
-                    height: '4px',
+                    left: '12px', right: '12px',
+                    height: '10px',
                     background: 'var(--color-border)',
-                    borderRadius: '2px'
+                    borderRadius: '5px'
                 }}>
                     {/* Fill */}
                     <div style={{
                         width: `${currentPct}%`,
                         height: '100%',
                         background: 'var(--color-primary)',
-                        borderRadius: '2px'
+                        borderRadius: '5px'
                     }} />
                 </div>
 
-                {/* Milestones */}
-                {[
-                    { l: '1m', p: 0 },
-                    { l: '3m', p: ((90 - 30) / (365 - 30)) * 90 },
-                    { l: '6m', p: ((180 - 30) / (365 - 30)) * 90 },
-                    { l: '1y', p: 90 },
-                    { l: '∞', p: 100 }
-                ].map((m, i) => (
+                {/* Step Markers */}
+                {STEPS.map((s, i) => (
                     <div key={i} style={{
                         position: 'absolute',
-                        // Calculate center based on track width logic
-                        left: `${m.p}%`,
-                        top: '12px', width: '2px', height: '8px', background: '#94a3b8',
+                        left: `calc(12px + ${getPctFromStepIndex(i)}% * (100% - 24px) / 100)`,
+                        top: '8px',
+                        width: '3px',
+                        height: '24px',
+                        background: i <= currentStepIndex ? 'var(--color-primary)' : '#64748b',
+                        borderRadius: '2px',
                         transform: 'translateX(-50%)'
                     }} />
                 ))}
@@ -893,24 +923,26 @@ const RetentionSlider = ({ value, onChange }) => {
                 {/* Handle */}
                 <div style={{
                     position: 'absolute',
-                    left: `${currentPct}%`,
-                    width: '24px',
-                    height: '24px',
+                    left: `calc(12px + ${currentPct}% * (100% - 24px) / 100)`,
+                    width: '28px',
+                    height: '28px',
                     borderRadius: '50%',
                     background: 'white',
-                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
                     transform: 'translateX(-50%)',
-                    border: '2px solid var(--color-primary)',
+                    border: '3px solid var(--color-primary)',
                     zIndex: 10,
-                    transition: isDragging ? 'none' : 'left 0.2s ease-out'
+                    transition: isDragging ? 'none' : 'left 0.15s ease-out'
                 }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginTop: '8px', padding: '0 4px' }}>
-                <span>1m</span>
-                <span>3m</span>
-                <span>6m</span>
-                <span>1y</span>
-                <span>∞</span>
+
+            {/* Milestone Labels */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#94a3b8', marginTop: '4px', padding: '0 8px' }}>
+                {STEPS.map((s, i) => (
+                    <span key={i} style={{ textAlign: 'center', width: 0, overflow: 'visible', whiteSpace: 'nowrap' }}>
+                        {s.short}
+                    </span>
+                ))}
             </div>
         </div>
     );
