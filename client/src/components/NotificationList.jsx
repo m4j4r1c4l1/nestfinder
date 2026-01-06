@@ -511,12 +511,12 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 // READ = 2 blue ticks
                 ticks = '✓✓';
                 tickColor = '#2563eb';
-            } else if (s === 'new' || s === 'pending' || s === 'delivered') {
+            } else if (s === 'delivered' || s === 'pending') {
                 // DELIVERED = 2 green ticks
                 ticks = '✓✓';
                 tickColor = '#16a34a';
             } else {
-                // SENT = 1 green tick
+                // SENT (including 'new') = 1 green tick
                 ticks = '✓';
                 tickColor = '#16a34a';
             }

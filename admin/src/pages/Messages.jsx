@@ -148,8 +148,25 @@ const Messages = () => {
                 }).then(res => res.ok ? res.json() : { subscribers: [], totalSubscribers: 0 })
             ]);
 
+
             setBroadcasts(broadcastRes.broadcasts || []);
-            setFeedback(feedbackRes.feedback || []);
+
+            const fetchedFeedback = feedbackRes.feedback || [];
+            setFeedback(fetchedFeedback);
+
+            // Auto-mark NEW feedback as DELIVERED (Admin received it)
+            fetchedFeedback.forEach(f => {
+                if (f.status === 'new') {
+                    // Update locally
+                    f.status = 'delivered';
+                    // Update on server (fire and forget)
+                    adminApi.fetch(`/admin/feedback/${f.id}/status`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'delivered' })
+                    }).catch(err => console.error('Failed to auto-mark delivered:', err));
+                }
+            });
             setSubscribers(statsRes.subscribers || []);
             setStats(statsRes);
         } catch (err) {
