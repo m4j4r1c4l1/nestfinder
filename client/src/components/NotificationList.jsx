@@ -134,20 +134,19 @@ const FeedbackSection = ({ onFeedbackSent }) => {
     );
 };
 
-// Swipeable Message Item Component with Wipe Blur Effect
+// Swipeable Message Item Component with Progressive Blur
 const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right' }) => {
-    const containerRef = useRef(null);
     const touchStartX = useRef(0);
     const touchCurrentX = useRef(0);
     const [swiping, setSwiping] = useState(false);
-    const [swipePixels, setSwipePixels] = useState(0); // Actual pixels swiped
+    const [swipeProgress, setSwipeProgress] = useState(0); // 0 to 1
     const SWIPE_THRESHOLD = 80;
 
     const handleTouchStart = (e) => {
         touchStartX.current = e.touches[0].clientX;
         touchCurrentX.current = e.touches[0].clientX;
         setSwiping(true);
-        setSwipePixels(0);
+        setSwipeProgress(0);
     };
 
     const handleTouchMove = (e) => {
@@ -155,16 +154,19 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right' })
         touchCurrentX.current = e.touches[0].clientX;
 
         const diff = touchCurrentX.current - touchStartX.current;
+        const absDiff = Math.abs(diff);
 
-        // Only track if swiping in the correct direction
+        // Only track progress if swiping in the correct direction
         const isCorrectDirection =
             (swipeDirection === 'right' && diff > 0) ||
             (swipeDirection === 'left' && diff < 0);
 
         if (isCorrectDirection) {
-            setSwipePixels(Math.abs(diff));
+            // Calculate progress as percentage of threshold (capped at 1)
+            const progress = Math.min(absDiff / SWIPE_THRESHOLD, 1);
+            setSwipeProgress(progress);
         } else {
-            setSwipePixels(0);
+            setSwipeProgress(0);
         }
     };
 
@@ -180,38 +182,24 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right' })
             onSwipeDelete();
         }
 
-        // Reset after touch ends
-        setSwipePixels(0);
+        // Reset progress after touch ends
+        setSwipeProgress(0);
     };
+
+    // Calculate blur based on progress (max 8px blur at full swipe for stronger effect)
+    const blurAmount = swipeProgress * 8;
 
     return (
         <div
-            ref={containerRef}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            style={{ position: 'relative' }}
+            style={{
+                filter: swipeProgress > 0 ? `blur(${blurAmount}px)` : 'none',
+                transition: swiping ? 'none' : 'filter 0.2s ease-out'
+            }}
         >
             {children}
-            {/* Blur overlay that wipes from the swipe direction */}
-            {swipePixels > 0 && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        bottom: 0,
-                        // Position from left or right based on swipe direction
-                        [swipeDirection === 'right' ? 'left' : 'right']: 0,
-                        width: `${swipePixels}px`,
-                        background: 'rgba(15, 23, 42, 0.6)',
-                        backdropFilter: 'blur(6px)',
-                        WebkitBackdropFilter: 'blur(6px)',
-                        borderRadius: 'var(--radius-md)',
-                        pointerEvents: 'none',
-                        transition: swiping ? 'none' : 'width 0.2s ease-out, opacity 0.2s ease-out'
-                    }}
-                />
-            )}
         </div>
     );
 };
