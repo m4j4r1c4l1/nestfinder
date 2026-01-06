@@ -1062,7 +1062,7 @@ const RatingsChartCard = ({ onPointClick }) => {
     // Chart Dimensions
     const chartWidth = 800;
     const chartHeight = 220;
-    const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+    const padding = { top: 20, right: 40, bottom: 40, left: 30 };
     const graphWidth = chartWidth - padding.left - padding.right;
     const graphHeight = chartHeight - padding.top - padding.bottom;
 
@@ -1203,7 +1203,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                                 const y = graphHeight - (i / ticks) * graphHeight;
                                 // Don't render 0 if it overlaps too much, or render it clearly
                                 return (
-                                    <text key={`vote-${i}`} x={graphWidth + 10} y={y + 4} textAnchor="start" fill="#3b82f6" fontSize="11" fontWeight="500">
+                                    <text key={`vote-${i}`} x={graphWidth + 6} y={y + 4} textAnchor="start" fill="#3b82f6" fontSize="11" fontWeight="500">
                                         {val}
                                     </text>
                                 );
