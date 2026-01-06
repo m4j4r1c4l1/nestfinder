@@ -154,7 +154,7 @@ class ApiClient {
   }
 
   pruneNotifications(cutoffDate) {
-    return this.fetch('/push/notifications/prune', {
+    return this.fetch('/push/prune', {
       method: 'DELETE',
       body: JSON.stringify({ cutoff: cutoffDate }),
     });
@@ -203,16 +203,6 @@ class ApiClient {
   reactivatePoint(id) {
     return this.fetch(`/points/${id}/reactivate`, {
       method: 'POST',
-    });
-  }
-
-  getRoute(points) {
-    // In a real app, this would call a routing API directly or via proxy
-    // For MVP, we'll calculate simple Euclidean distance or use OSRM via frontend if needed
-    // This method might be used if we move routing logic to backend
-    return this.fetch('/points/route', {
-      method: 'POST',
-      body: JSON.stringify({ points }),
     });
   }
 
