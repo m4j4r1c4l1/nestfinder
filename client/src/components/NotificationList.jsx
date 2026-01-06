@@ -226,8 +226,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     }, []);
 
     // Fetch sent messages
-    const fetchSent = async () => {
-        setLoadingSent(true);
+    const fetchSent = async (silent = false) => {
+        if (!silent) setLoadingSent(true);
         try {
             const data = await api.getFeedback();
             if (data && data.feedback) {
@@ -236,14 +236,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         } catch (err) {
             console.error('Failed to fetch sent messages', err);
         } finally {
-            setLoadingSent(false);
+            if (!silent) setLoadingSent(false);
         }
     };
 
     useEffect(() => {
         fetchSent();
         // Poll for status updates (e.g. delivered/read ticks) every 5s
-        const interval = setInterval(fetchSent, 5000);
+        const interval = setInterval(() => fetchSent(true), 5000);
         return () => clearInterval(interval);
     }, []);
 
