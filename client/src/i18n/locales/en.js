@@ -223,7 +223,7 @@ export default {
         statusOwl: 'Owl',
         statusEagle: 'Eagle',
         // Recovery Key Restore
-        recoveryKeyUsage: 'To restore your account, type your 3-word key with dashes in the **Nickname** field when you open the app.',
+        recoveryKeyUsage: 'To restore your account, type your 3-word key with dashes in the **Nickname** field when you open the app. or log in with a new account and restore it from the **Restore Account** section below',
         restoreAccount: 'Restore Account',
         restoreAccountDescription: 'Enter your 3-word recovery key (spaces or dashes).',
         enterRecoveryKey: 'word-word-word',
@@ -236,7 +236,7 @@ export default {
         restoreConfirmButton: 'Yes, Restore',
         sameKeyError: 'This is your current account\'s recovery key. You are already logged in with this account.',
         // Swipe Direction
-        swipeDirection: 'Swipe to Delete',
+        swipeDirection: 'Delete',
         swipe: {
             right: '→ Swipe Right',
             left: '← Swipe Left',
@@ -249,8 +249,9 @@ export default {
             '3m': '3 Months',
             '6m': '6 Months',
             forever: 'Forever',
-            desc: '⚠️ Messages older than this will be permanently deleted.'
-        }
+            desc: 'Auto-delete messages older than selected period.'
+        },
+        messages: 'Messages'
     },
 
     // Welcome Message

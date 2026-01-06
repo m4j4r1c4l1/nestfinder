@@ -192,18 +192,40 @@ const RecoveryKeySection = ({ t }) => {
                         </button>
                     )}
 
-                    {/* Usage Instructions - Always visible when key exists */}
-                    <div style={{
-                        marginTop: 'var(--space-3)',
-                        padding: 'var(--space-2)',
-                        background: 'rgba(59, 130, 246, 0.1)',
-                        border: '1px solid rgba(59, 130, 246, 0.2)',
-                        borderRadius: 'var(--radius-md)',
-                        fontSize: '0.75rem',
-                        color: 'var(--color-text-secondary)',
-                        lineHeight: 1.5
-                    }}>
-                        💡 {(t?.('settings.recoveryKeyUsage') || 'To restore your account, type your 3-word key with dashes in the **Nickname** field when you open the app.').split('**').map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)}
+                    {/* Usage Instructions - Button List Manner */}
+                    <div style={{ marginTop: 'var(--space-3)' }}>
+                        {(t?.('settings.recoveryKeyUsage') || 'To restore... or ...').split(/\s+or\s+/).map((part, i) => (
+                            <div key={i} style={{
+                                padding: 'var(--space-3)',
+                                background: 'rgba(59, 130, 246, 0.05)',
+                                border: '1px solid rgba(59, 130, 246, 0.2)',
+                                borderRadius: 'var(--radius-md)',
+                                fontSize: '0.75rem',
+                                color: 'var(--color-text-secondary)',
+                                lineHeight: 1.4,
+                                marginBottom: 'var(--space-2)',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: 'var(--space-2)'
+                            }}>
+                                <span style={{
+                                    minWidth: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    background: 'var(--color-primary)',
+                                    color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.7rem',
+                                    marginTop: '1px'
+                                }}>{i + 1}</span>
+                                <div>
+                                    {part.split('**').map((chunk, j) => j % 2 === 1 ? <strong key={j}>{chunk}</strong> : chunk)}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             ) : (
@@ -341,7 +363,7 @@ const RestoreAccountSection = ({ t }) => {
             marginTop: 'var(--space-3)'
         }}>
             <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>
-                🐣 {t?.('settings.restoreAccount') || 'Restore Account'}
+                🌌 {t?.('settings.restoreAccount') || 'Restore Account'}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-3)' }}>
                 {t?.('settings.restoreAccountDescription') || 'Enter your 3-word recovery key (spaces or dashes).'}
@@ -531,6 +553,15 @@ const SettingsPanel = ({ onClose }) => {
 
     // Retention Policy
     const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
+
+    // Swipe Direction
+    const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || 'right');
+
+    const handleSwipeChange = (dir) => {
+        setSwipeDirection(dir);
+        localStorage.setItem('nestfinder_swipe_direction', dir);
+        window.dispatchEvent(new Event('storage'));
+    };
 
     const handleRetentionChange = async (e) => {
         const val = e.target.value;
@@ -1000,7 +1031,7 @@ const SettingsPanel = ({ onClose }) => {
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.messages') || 'Messages'}</label>
 
-                    {/* Popup Notifications Toggle */}
+                    {/* Popup Notifications Box */}
                     <div
                         onClick={togglePopup}
                         style={{
@@ -1045,44 +1076,34 @@ const SettingsPanel = ({ onClose }) => {
                         </div>
                     </div>
 
-                    {/* Swipe Direction */}
-                    <div style={{ marginBottom: 'var(--space-4)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>👈 {t('settings.swipeDirection') || 'Swipe to Delete'}</div>
+                    {/* Swipe Direction Box */}
+                    <div style={{
+                        padding: 'var(--space-3)',
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--color-border)',
+                        marginBottom: 'var(--space-2)'
+                    }}>
+                        <div style={{ marginBottom: 'var(--space-2)' }}>
+                            <div style={{ fontWeight: 500 }}>🗑️ {t('settings.swipeDirection') || 'Delete'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                {t('settings.swipe.desc') || 'Swipe a message in this direction to delete it.'}
+                            </div>
                         </div>
 
                         <div style={{
                             display: 'flex',
-                            background: 'var(--color-bg-secondary)', // Use secondary bg for container
+                            background: 'var(--color-bg-tertiary)',
                             padding: '4px',
                             borderRadius: 'var(--radius-md)',
                             border: '1px solid var(--color-border)'
                         }}>
                             {['right', 'left'].map((dir) => {
-                                const isSelected = (localStorage.getItem('nestfinder_swipe_direction') || 'right') === dir;
+                                const isSelected = swipeDirection === dir;
                                 return (
                                     <button
                                         key={dir}
-                                        onClick={() => {
-                                            localStorage.setItem('nestfinder_swipe_direction', dir);
-                                            window.dispatchEvent(new Event('storage'));
-                                            // Force re-render if needed, but storage event might handle it elsewhere or just rely on react state update if we had it.
-                                            // Since we read directly from localStorage in render, we need to force update or use state.
-                                            // SettingsPanel doesn't seem to have state for swipe direction.
-                                            // I'll add a forceUpdate or just relying on the fact that this component re-renders often or straightforwardly.
-                                            // Actually, the original code read from localStorage on render: value={localStorage...}.
-                                            // React won't re-render just because localStorage changed unless we use state.
-                                            // I'll assume we need a local state trigger or just use forceRender which exists in this component.
-                                            // Since we are inside the render loop, I can't access set functions easily without hooks. 
-                                            // Wait, the original was a controlled input? No, `value={localStorage...}` implies it wasn't strictly controlled by React state unless `onChange` triggered a re-render.
-                                            // It had `window.dispatchEvent(new Event('storage'))`.
-                                            // Use `forceRender` logic if available. `forceRender` is defined in `SettingsPanel` line 527 (hidden in my view but I saw `forceRender` usage in scroll logic).
-                                            // Ah, `forceRender` is a state setter `const [, forceRender] = useState(0);`.
-                                            // But that's inside the component, I can't access it here easily inside `map` unless it's in scope.
-                                            // It IS in scope of `SettingsPanel`.
-                                            // But wait, I'm replacing lines inside `SettingsPanel`. Yes, `forceRender` is available.
-                                            // `forceRender(n => n + 1)`
-                                        }}
+                                        onClick={() => handleSwipeChange(dir)}
                                         style={{
                                             flex: 1,
                                             padding: '8px 0',
@@ -1101,20 +1122,25 @@ const SettingsPanel = ({ onClose }) => {
                                 );
                             })}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: 'var(--space-2)' }}>
-                            {t('settings.swipe.desc') || 'Swipe a message in this direction to delete it.'}
-                        </div>
                     </div>
 
-                    {/* Retention Period */}
-                    <div style={{ marginBottom: 'var(--space-4)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>🗑️ {t('settings.messageRetention') || 'Retention Period'}</div>
+                    {/* Retention Period Box */}
+                    <div style={{
+                        padding: 'var(--space-3)',
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--color-border)'
+                    }}>
+                        <div style={{ marginBottom: 'var(--space-2)' }}>
+                            <div style={{ fontWeight: 500 }}>⏰ {t('settings.messageRetention') || 'Retention Period'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                {t('settings.retention.desc') || 'Auto-delete messages older than selected period.'}
+                            </div>
                         </div>
 
                         <div style={{
                             display: 'flex',
-                            background: 'var(--color-bg-secondary)',
+                            background: 'var(--color-bg-tertiary)',
                             padding: '4px',
                             borderRadius: 'var(--radius-md)',
                             border: '1px solid var(--color-border)'
@@ -1142,9 +1168,6 @@ const SettingsPanel = ({ onClose }) => {
                                     </button>
                                 );
                             })}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: 'var(--space-2)' }}>
-                            {t('settings.retention.desc') || 'Messages older than this will be permanently deleted.'}
                         </div>
                     </div>
                 </div>

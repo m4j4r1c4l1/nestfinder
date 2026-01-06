@@ -122,6 +122,12 @@ const Messages = () => {
     const [feedbackSortDir, setFeedbackSortDir] = useState('desc');
     const [totalFeedback, setTotalFeedback] = useState(0);
 
+    // Broadcast Form State
+    const [newBroadcast, setNewBroadcast] = useState({ title: '', message: '', imageUrl: '', startTime: '', endTime: '' });
+    const [creatingBroadcast, setCreatingBroadcast] = useState(false);
+    const [activeBroadcastTemplate, setActiveBroadcastTemplate] = useState('custom');
+    const [showBroadcastEmojiPicker, setShowBroadcastEmojiPicker] = useState(false);
+
     // Watch for Feedback Pagination Changes
     useEffect(() => {
         fetchFeedbackOnly();
@@ -178,8 +184,8 @@ const Messages = () => {
                 method: 'POST',
                 body: JSON.stringify(newBroadcast)
             });
-            setNewBroadcast({ message: '', imageUrl: '', startTime: '', endTime: '' });
-            setSelectedBroadcastTemplate('custom');
+            setNewBroadcast({ title: '', message: '', imageUrl: '', startTime: '', endTime: '' });
+            setActiveBroadcastTemplate('custom');
             fetchData();
         } catch (err) {
             console.error('Failed to create broadcast:', err);
@@ -191,7 +197,7 @@ const Messages = () => {
         const tmpl = templates[templateId];
         if (!tmpl) return;
 
-        setSelectedBroadcastTemplate(templateId);
+        setActiveBroadcastTemplate(templateId);
 
         // Build update object with title and message
         const updates = {
@@ -457,12 +463,12 @@ const Messages = () => {
                                                         onClick={() => handleBroadcastTemplateChange(tmpl.id)}
                                                         style={{
                                                             padding: '0.5rem 0.2rem',
-                                                            border: selectedBroadcastTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #334155',
+                                                            border: activeBroadcastTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #334155',
                                                             borderRadius: '8px',
-                                                            background: selectedBroadcastTemplate === tmpl.id ? '#1e293b' : '#0f172a',
-                                                            color: selectedBroadcastTemplate === tmpl.id ? '#60a5fa' : '#94a3b8',
+                                                            background: activeBroadcastTemplate === tmpl.id ? '#1e293b' : '#0f172a',
+                                                            color: activeBroadcastTemplate === tmpl.id ? '#60a5fa' : '#94a3b8',
                                                             cursor: 'pointer',
-                                                            fontWeight: selectedBroadcastTemplate === tmpl.id ? 600 : 400,
+                                                            fontWeight: activeBroadcastTemplate === tmpl.id ? 600 : 400,
                                                             fontSize: '0.85rem',
                                                             whiteSpace: 'nowrap',
                                                             overflow: 'hidden',
@@ -471,13 +477,13 @@ const Messages = () => {
                                                         }}
                                                         title={tmpl.name}
                                                         onMouseEnter={e => {
-                                                            if (selectedBroadcastTemplate !== tmpl.id) {
+                                                            if (activeBroadcastTemplate !== tmpl.id) {
                                                                 e.currentTarget.style.color = '#e2e8f0';
                                                                 e.currentTarget.style.background = '#1e293b';
                                                             }
                                                         }}
                                                         onMouseLeave={e => {
-                                                            if (selectedBroadcastTemplate !== tmpl.id) {
+                                                            if (activeBroadcastTemplate !== tmpl.id) {
                                                                 e.currentTarget.style.color = '#94a3b8';
                                                                 e.currentTarget.style.background = '#0f172a';
                                                             }
