@@ -159,7 +159,7 @@ initDatabase().then(() => {
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
 ║   🪹 NestFinder API Server                            ║
-║   Finding nests for those without one                 ║
+║   Finding Nests ❤️ Bringing Relief                    ║
 ║                                                       ║
 ║   HTTP:      http://localhost:${PORT}                   ║
 ║   WebSocket: ws://localhost:${PORT}                     ║
