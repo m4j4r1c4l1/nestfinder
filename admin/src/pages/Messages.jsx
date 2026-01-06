@@ -424,7 +424,7 @@ const Messages = () => {
                     {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
                         <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
-                            <HistorySection users={subscribers} />
+                            <HistorySection users={subscribers} totalSent={stats.notificationMetrics?.total || 0} />
                         </div>
                     )}
 
@@ -1419,7 +1419,7 @@ const FeedbackSection = ({
     );
 };
 
-const HistorySection = ({ users = [] }) => {
+const HistorySection = ({ users = [], totalSent = 0 }) => {
     const [logs, setLogs] = useState([]);
     const [totalLogs, setTotalLogs] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -1587,12 +1587,7 @@ const HistorySection = ({ users = [] }) => {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
                         userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
                     }}>
-                        {(() => {
-                            if (totalLogs === 0) return 'Showing 0 of 0';
-                            const start = (page - 1) * pageSize + 1;
-                            const end = Math.min(page * pageSize, totalLogs);
-                            return `Showing ${start}-${end} of ${totalLogs}`;
-                        })()}
+                        Total: {totalSent}
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button
