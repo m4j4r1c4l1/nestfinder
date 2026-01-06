@@ -81,7 +81,7 @@ const Observability = () => {
             {/* Totals Summary */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3>📊 Totals</h3>
+                    <h3 style={{ fontSize: '1.25rem' }}>📊 Totals</h3>
                 </div>
                 <div className="card-body">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -89,7 +89,7 @@ const Observability = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
                             {/* Users Block */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>🦚 Users</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🦚 Users</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)', lineHeight: 1 }}>
                                         {stats.totalSubscribers}
@@ -122,7 +122,7 @@ const Observability = () => {
 
                             {/* Points Block */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>📍 Points</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>📍 Points</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', lineHeight: 1 }}>
                                         {(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)}
@@ -130,23 +130,39 @@ const Observability = () => {
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                     <div className="text-muted text-sm">Locations</div>
                                 </div>
-                                {/* Badges arranged around total */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem', width: '100%', maxWidth: '280px' }}>
-                                    {[
-                                        { label: 'Confirmed', count: stats.mapPoints?.confirmed, color: '#22c55e', icon: '🟢' },
-                                        { label: 'Pending', count: stats.mapPoints?.pending, color: '#f59e0b', icon: '🟠' },
-                                        { label: 'Inactive', count: stats.mapPoints?.deactivated, color: '#ef4444', icon: '🔴' }
-                                    ].map(info => (
-                                        <div key={info.label} style={{
+                                {/* Badges: Pending on top, Confirmed+Inactive below */}
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%', maxWidth: '280px' }}>
+                                    {/* Pending badge on top */}
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                        background: '#f59e0b20', border: '1px solid #f59e0b40',
+                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
+                                    }}>
+                                        <span style={{ fontSize: '0.9rem' }}>🟠</span>
+                                        <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Pending</span>
+                                        <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{stats.mapPoints?.pending || 0}</span>
+                                    </div>
+                                    {/* Confirmed + Inactive row */}
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
-                                            background: `${info.color}20`, border: `1px solid ${info.color}40`,
+                                            background: '#22c55e20', border: '1px solid #22c55e40',
                                             borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
                                         }}>
-                                            <span style={{ fontSize: '0.9rem' }}>{info.icon}</span>
-                                            <span style={{ color: info.color, fontWeight: 600 }}>{info.label}</span>
-                                            <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{info.count || 0}</span>
+                                            <span style={{ fontSize: '0.9rem' }}>🟢</span>
+                                            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Confirmed</span>
+                                            <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{stats.mapPoints?.confirmed || 0}</span>
                                         </div>
-                                    ))}
+                                        <div style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            background: '#ef444420', border: '1px solid #ef444440',
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
+                                        }}>
+                                            <span style={{ fontSize: '0.9rem' }}>🔴</span>
+                                            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Inactive</span>
+                                            <span style={{ fontWeight: 700, color: '#e2e8f0', marginLeft: '0.2rem' }}>{stats.mapPoints?.deactivated || 0}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -154,7 +170,7 @@ const Observability = () => {
 
                             {/* Rating Block */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '0.5rem', height: '100%' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>⭐ Rating</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>⭐ Rating</div>
                                 <div style={{ flex: 1, display: 'flex', gap: '1.5rem', alignItems: 'center', marginTop: 'auto', marginBottom: 'auto' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#facc15' }}>
@@ -181,11 +197,11 @@ const Observability = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
                             {/* Messages Block (Left) */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', justifyContent: 'center' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>🔔 Messages</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
                                 {/* Sent Row */}
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f97316' }}>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316' }}>
                                             {stats.notificationMetrics?.total || 0}
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Sent</div>
@@ -213,7 +229,7 @@ const Observability = () => {
                                 {/* Received Row */}
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', borderTop: '1px solid #334155', paddingTop: '0.75rem' }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
                                             {stats.feedbackMetrics?.total || stats.totalReceived || 0}
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Total Received</div>
@@ -223,7 +239,7 @@ const Observability = () => {
                                         <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#22c55e' }}>
                                             {stats.feedbackMetrics?.pending || 0}
                                         </div>
-                                        <div className="text-muted text-sm">Pending</div>
+                                        <div className="text-muted text-sm">Delivered</div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#3b82f6' }}>
@@ -238,7 +254,7 @@ const Observability = () => {
 
                             {/* Devel Block (Right) */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem', marginBottom: '0.5rem' }}>🛠️ Development</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem', marginBottom: '0.5rem' }}>🛠️ Development</div>
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '2rem' }}>
                                     <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
                                         <div style={{ textAlign: 'center' }}>
