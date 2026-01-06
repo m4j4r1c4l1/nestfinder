@@ -506,7 +506,7 @@ router.get('/admin/notifications/history', requireAdmin, (req, res) => {
             `SELECT * FROM logs 
              WHERE action = 'notification_sent' 
              ORDER BY created_at DESC 
-             LIMIT 50`
+             LIMIT 1000`
         );
         res.json({ logs });
     } catch (error) {
