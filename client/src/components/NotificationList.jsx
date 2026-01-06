@@ -709,8 +709,16 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                         })
                                     )}
                                     {filteredNotifications.some(n => !n.read) && (
-                                        <button onClick={markAllAsRead} className="btn btn-secondary btn-sm" style={{ width: '100%', marginTop: '1rem' }}>
-                                            {t('inbox.markAllRead') || 'Mark all as read'}
+                                        <button
+                                            onClick={markAllAsRead}
+                                            className="btn btn-primary btn-sm"
+                                            style={{
+                                                width: '100%',
+                                                marginTop: '0.75rem',
+                                                marginBottom: '0.75rem'
+                                            }}
+                                        >
+                                            Mark all as read
                                         </button>
                                     )}
                                 </>
