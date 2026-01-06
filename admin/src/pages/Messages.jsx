@@ -1346,9 +1346,13 @@ const FeedbackSection = ({
                                                 </span>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', color: '#e2e8f0', fontWeight: 500, maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                            {item.user_nickname || 'Anonymous'}
-                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.user_id ? item.user_id.substr(0, 8) + '...' : ''}</div>
+                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
+                                            <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.user_nickname || 'Anonymous'}>
+                                                {(item.user_nickname || '').length > 30 ? (item.user_nickname.substring(0, 30) + '...') : (item.user_nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>)}
+                                            </div>
+                                            <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.user_id}>
+                                                {item.user_id ? (item.user_id.length > 30 ? (item.user_id.substring(0, 30) + '...') : item.user_id) : ''}
+                                            </code>
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                             <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>
