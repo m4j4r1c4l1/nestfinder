@@ -211,8 +211,8 @@ const Observability = () => {
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                         <div className="text-muted text-sm">Sent</div>
                                     </div>
-                                    {/* Sent Badges - Horizontal Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center' }}>
+                                    {/* Sent Badges - Vertical Stack */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
@@ -249,8 +249,8 @@ const Observability = () => {
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                         <div className="text-muted text-sm">Received</div>
                                     </div>
-                                    {/* Received Badges - Horizontal Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center' }}>
+                                    {/* Received Badges - Vertical Stack */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
