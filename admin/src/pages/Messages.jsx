@@ -306,7 +306,7 @@ const Messages = () => {
     const tabs = [
         { id: 'composer', label: '🪶 Composer', count: 0 },
         { id: 'outbox', label: '🐦 Sent', count: 0 },
-        { id: 'feedback', label: '🥚 Received', count: feedback.filter(f => ['new', 'sent', 'delivered', 'pending'].includes(f.status)).length },
+        { id: 'feedback', label: '🥚 Received', count: feedbackCounts.pending },
         { id: 'broadcasts', label: '🦅 Broadcasts', count: broadcasts.length }
     ];
 
@@ -1191,7 +1191,7 @@ const FeedbackSection = ({
                             display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
                             userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
                         }}>
-                            Received: {feedbackCounts.pending} | Read: {feedbackCounts.read}
+                            Showing {paginatedFeedback.length} of {totalItems}
                         </span>
                         <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
                             <span style={{ fontWeight: 500 }}>
