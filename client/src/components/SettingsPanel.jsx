@@ -544,6 +544,161 @@ const RestoreAccountSection = ({ t }) => {
 
 
 
+
+const SwipeControl = ({ value, onChange, labelCenter }) => {
+    const trackRef = React.useRef(null);
+    const [dragOffset, setDragOffset] = useState(null); // Pixel offset during drag
+    const isDragging = useRef(false);
+    const startX = useRef(0);
+    const currentX = useRef(0);
+
+    // Determine current position based on value or drag
+    // value: 'left' | 'right' | null (center)
+    // We'll use CSS classes or inline styles for positioning
+
+    const handleStart = (clientX) => {
+        if (!trackRef.current) return;
+        isDragging.current = true;
+        startX.current = clientX;
+        // If we were already offset? We generally start from the resolved position.
+        // But simpler to just track delta.
+        currentX.current = clientX;
+        setDragOffset(0);
+    };
+
+    const handleMove = (clientX) => {
+        if (!isDragging.current || !trackRef.current) return;
+        const delta = clientX - startX.current;
+        setDragOffset(delta);
+        currentX.current = clientX;
+    };
+
+    const handleEnd = () => {
+        if (!isDragging.current || !trackRef.current) return;
+        isDragging.current = false;
+
+        const trackWidth = trackRef.current.offsetWidth;
+        const threshold = trackWidth * 0.25; // Drag at least 25% to switch
+
+        // Logic depending on start state
+        // If null (center): drag right -> right, drag left -> left
+        // If left: drag right -> right
+        // If right: drag left -> left
+
+        // Simpler: just calculate final "intended" position based on relative touch point?
+        // Let's use the delta.
+
+        if (value === null) {
+            if (dragOffset > 50) onChange('right');
+            else if (dragOffset < -50) onChange('left');
+        } else if (value === 'left') {
+            if (dragOffset > 50) onChange('right');
+            // Check if dragged far enough to be center? User didn't request return to center.
+        } else if (value === 'right') {
+            if (dragOffset < -50) onChange('left');
+        }
+
+        setDragOffset(null);
+    };
+
+    // Touch handlers
+    const onTouchStart = (e) => handleStart(e.touches[0].clientX);
+    const onTouchMove = (e) => handleMove(e.touches[0].clientX);
+    const onTouchEnd = () => handleEnd();
+
+    // Mouse handlers
+    const onMouseDown = (e) => {
+        e.preventDefault(); // Prevent text selection
+        handleStart(e.clientX);
+
+        const onMouseMove = (ev) => handleMove(ev.clientX);
+        const onMouseUp = () => {
+            handleEnd();
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    };
+
+    // Calculate Thumb Style
+    let leftPos = '50%';
+    let transform = 'translateX(-50%)'; // Default Center
+
+    // Apply state override
+    if (value === 'left') {
+        leftPos = '4px';
+        transform = 'none';
+    } else if (value === 'right') {
+        leftPos = 'auto'; // Clear left
+        // We use right prop or calc. Let's use left with calc to be consistent?
+        // Or simplified: Flex alignment?
+        // Let's stick to absolute for smooth drag.
+        leftPos = 'calc(100% - 4px)'; // Will need translateX(-100%)?
+        transform = 'translateX(-100%)';
+    }
+
+    // Apply Drag Offset
+    // This is tricky mixing absolute positions and transforms.
+    // Let's simplify:
+    // Render the thumb inside a container that aligns it?
+    // No, absolute is best.
+
+    // If dragging, we add `dragOffset` to `transform`.
+    const style = {
+        position: 'absolute',
+        top: '4px',
+        bottom: '4px',
+        width: '100px', // Fixed width for thumb
+        borderRadius: '20px',
+        background: 'var(--color-primary)',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.2rem',
+        cursor: 'grab',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+        transition: isDragging.current ? 'none' : 'left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        left: leftPos,
+        transform: transform
+    };
+
+    // Apply visual offset if dragging
+    if (dragOffset !== null) {
+        style.transform = `${transform} translateX(${dragOffset}px)`;
+    }
+
+    return (
+        <div
+            ref={trackRef}
+            style={{
+                position: 'relative',
+                height: '48px',
+                background: 'var(--color-bg-tertiary)',
+                borderRadius: '24px',
+                border: '1px solid var(--color-border)',
+                overflow: 'hidden',
+                userSelect: 'none',
+                touchAction: 'none'
+            }}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            onMouseDown={onMouseDown}
+        >
+            {/* Labels/Tracks Background to indicate zones? Optional */}
+
+            {/* Thumb */}
+            <div style={style}>
+                {value === 'left' ? '🕊️' :
+                    value === 'right' ? <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span> :
+                        <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{labelCenter}</span>}
+            </div>
+        </div>
+    );
+};
+
 const SettingsPanel = ({ onClose }) => {
     const { t, language, setLanguage, availableLanguages } = useLanguage();
     const { user } = useAuth();
@@ -555,7 +710,7 @@ const SettingsPanel = ({ onClose }) => {
     const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
 
     // Swipe Direction
-    const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || 'right');
+    const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || null);
 
     const handleSwipeChange = (dir) => {
         setSwipeDirection(dir);
@@ -1091,36 +1246,12 @@ const SettingsPanel = ({ onClose }) => {
                             </div>
                         </div>
 
-                        <div style={{
-                            display: 'flex',
-                            background: 'var(--color-bg-tertiary)',
-                            padding: '4px',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--color-border)'
-                        }}>
-                            {['right', 'left'].map((dir) => {
-                                const isSelected = swipeDirection === dir;
-                                return (
-                                    <button
-                                        key={dir}
-                                        onClick={() => handleSwipeChange(dir)}
-                                        style={{
-                                            flex: 1,
-                                            padding: '8px 0',
-                                            border: 'none',
-                                            background: isSelected ? 'var(--color-primary)' : 'transparent',
-                                            color: isSelected ? 'white' : 'var(--color-text-secondary)',
-                                            borderRadius: 'var(--radius-sm)',
-                                            fontSize: '0.9rem',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            fontWeight: isSelected ? 600 : 400
-                                        }}
-                                    >
-                                        {dir === 'right' ? (t('settings.swipe.right') || '→ Right') : (t('settings.swipe.left') || '← Left')}
-                                    </button>
-                                );
-                            })}
+                        <div style={{ padding: '0 0.5rem' }}>
+                            <SwipeControl
+                                value={swipeDirection}
+                                onChange={handleSwipeChange}
+                                labelCenter={t('settings.swipe.controlLabel') || 'Swipe'}
+                            />
                         </div>
                     </div>
 
