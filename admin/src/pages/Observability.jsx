@@ -211,8 +211,8 @@ const Observability = () => {
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                         <div className="text-muted text-sm">Sent</div>
                                     </div>
-                                    {/* Sent Badges - Vertical Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
+                                    {/* Sent Badges - Horizontal Stack */}
+                                    <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center' }}>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
@@ -240,8 +240,8 @@ const Observability = () => {
                                     </div>
                                 </div>
 
-                                {/* Received Section */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', borderTop: '1px solid #334155', paddingTop: '0.75rem', width: '100%', justifyContent: 'center' }}>
+                                {/* Received Section - No Separator */}
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', paddingTop: '0.5rem', width: '100%', justifyContent: 'center' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
                                             {stats.feedbackMetrics?.total || stats.totalReceived || 0}
@@ -249,8 +249,8 @@ const Observability = () => {
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                         <div className="text-muted text-sm">Received</div>
                                     </div>
-                                    {/* Received Badges - Vertical Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
+                                    {/* Received Badges - Horizontal Stack */}
+                                    <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center' }}>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
@@ -271,13 +271,11 @@ const Observability = () => {
                                 </div>
                             </div>
 
-                            <div style={{ width: '1px', height: '80px', background: '#334155', alignSelf: 'center' }} />
-
-                            {/* Development Block (Right) */}
+                            {/* Development Block (Right) - Removed Vertical Separator */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem', marginBottom: 'auto', paddingBottom: '1rem' }}>🛠️ Development</div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem', marginTop: '1.5rem' }}>
                                     {/* Main Count: LOC */}
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
