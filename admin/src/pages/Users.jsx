@@ -233,7 +233,7 @@ const Users = () => {
                     }}
                 >
                     <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>Total</div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{users.length}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{totalUsers}</div>
                 </div>
 
                 {/* Eagle */}
