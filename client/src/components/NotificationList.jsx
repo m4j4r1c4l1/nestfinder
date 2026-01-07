@@ -199,7 +199,7 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', s
         if (!isDeleting) setSwipeProgress(0);
     }, [isDeleting]);
 
-    const effectiveProgress = isDeleting ? 1 : swipeProgress;
+    const effectiveProgress = isDeleting ? 0 : swipeProgress;
 
     // Calculate blur based on progress (max 4px to match deletion overlay)
     const blurAmount = effectiveProgress * 4;
