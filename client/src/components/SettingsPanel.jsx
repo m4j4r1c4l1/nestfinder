@@ -604,7 +604,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 addLog('🐶 WATCHDOG');
                 handleEnd();
             }
-        }, 1500); // 1.5s silence = reset
+        }, 500); // 0.5s silence = reset (fast recovery)
     };
 
     // Robust width tracking
