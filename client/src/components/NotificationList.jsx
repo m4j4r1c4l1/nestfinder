@@ -664,7 +664,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px'
                             }}
                         >
-                            <span style={{ fontSize: '1.25rem', lineHeight: 1.2 }}>{tab.icon}</span>
+                            <span style={{ fontSize: '2rem', lineHeight: 1.2 }}>{tab.icon}</span>
                             <span style={{ fontSize: '0.85rem' }}>{tab.label}</span>
                         </button>
                     ))}

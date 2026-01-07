@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import QRCode from 'qrcode';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { adminApi } from '../api';
 
 const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder/';
@@ -102,6 +104,63 @@ const getTemplateInfo = (key) => {
 };
 
 const Messages = () => {
+    // Custom styles for DatePicker
+    const datePickerStyles = `
+        .react-datepicker {
+            font-family: inherit;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+        }
+        .react-datepicker__header {
+            background-color: #0f172a;
+            border-bottom: 1px solid #334155;
+        }
+        .react-datepicker__current-month, .react-datepicker-time__header {
+            color: #f8fafc;
+        }
+        .react-datepicker__day-name {
+            color: #94a3b8;
+        }
+        .react-datepicker__day {
+            color: #cbd5e1;
+        }
+        .react-datepicker__day:hover {
+            background-color: #334155;
+        }
+        .react-datepicker__day--selected, .react-datepicker__time-list-item--selected {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+        .react-datepicker__time-container {
+            border-left: 1px solid #334155;
+        }
+        .react-datepicker__time-container .react-datepicker__time {
+            background-color: #1e293b;
+        }
+        .react-datepicker__time-list-item {
+            color: #cbd5e1;
+        }
+        .react-datepicker__time-list-item:hover {
+            background-color: #334155 !important;
+        }
+        .react-datepicker-wrapper {
+            width: 100%;
+        }
+        .custom-datepicker-input {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: #f8fafc;
+            font-size: 0.95rem;
+        }
+        .custom-datepicker-input:focus {
+            outline: 2px solid #3b82f6;
+            border-color: #3b82f6;
+        }
+    `;
     const [activeTab, setActiveTab] = useState('composer');
     const [loading, setLoading] = useState(true);
 
@@ -328,6 +387,7 @@ const Messages = () => {
             overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
             minHeight: (activeTab === 'outbox' || activeTab === 'feedback') ? '100%' : 'auto'
         }}>
+            <style>{datePickerStyles}</style>
             {/* Sticky Header Container for page-scroll tabs */}
             <div style={{
                 position: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'sticky' : 'static',
@@ -594,20 +654,30 @@ const Messages = () => {
                                         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                                             <div style={{ flex: 1 }}>
                                                 <label className="form-label">Start Time</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    value={newBroadcast.startTime}
-                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, startTime: e.target.value })}
-                                                    className="form-input"
+                                                <DatePicker
+                                                    selected={newBroadcast.startTime ? new Date(newBroadcast.startTime) : null}
+                                                    onChange={(date) => setNewBroadcast({ ...newBroadcast, startTime: date })}
+                                                    showTimeSelect
+                                                    timeFormat="HH:mm"
+                                                    timeIntervals={15}
+                                                    dateFormat="MMMM d, yyyy h:mm aa"
+                                                    className="custom-datepicker-input"
+                                                    placeholderText="Select start time"
+                                                    calendarClassName="dark-theme-calendar"
                                                 />
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <label className="form-label">End Time</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    value={newBroadcast.endTime}
-                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, endTime: e.target.value })}
-                                                    className="form-input"
+                                                <DatePicker
+                                                    selected={newBroadcast.endTime ? new Date(newBroadcast.endTime) : null}
+                                                    onChange={(date) => setNewBroadcast({ ...newBroadcast, endTime: date })}
+                                                    showTimeSelect
+                                                    timeFormat="HH:mm"
+                                                    timeIntervals={15}
+                                                    dateFormat="MMMM d, yyyy h:mm aa"
+                                                    className="custom-datepicker-input"
+                                                    placeholderText="Select end time"
+                                                    minDate={newBroadcast.startTime ? new Date(newBroadcast.startTime) : null}
                                                 />
                                             </div>
                                         </div>
