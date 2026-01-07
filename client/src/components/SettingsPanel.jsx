@@ -642,8 +642,16 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     };
 
     // Event Wrappers
-    const onTouchStart = (e) => handleStart(e.touches[0].clientX);
-    const onTouchMove = (e) => handleMove(e.touches[0].clientX);
+    const onTouchStart = (e) => {
+        // Prevent mouse emulation and scrolling while dragging
+        // This stops ghost mouse events from firing and resetting the drag
+        if (e.cancelable) e.preventDefault();
+        handleStart(e.touches[0].clientX);
+    };
+    const onTouchMove = (e) => {
+        if (e.cancelable) e.preventDefault();
+        handleMove(e.touches[0].clientX);
+    };
     const onTouchEnd = () => handleEnd();
     const onMouseDown = (e) => {
         e.preventDefault();
@@ -722,7 +730,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
             // Neutral/Deadzone: Keep starting orientation
             if (value === 'left') doveContent = isMirrored;
             else if (value === 'right') doveContent = '🕊️';
-            else doveContent = '🕊️';
+            else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Keep hatchling in deadzone
         }
     } else {
         // Resting
