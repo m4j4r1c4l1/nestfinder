@@ -568,6 +568,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const trackRef = React.useRef(null);
     const thumbRef = React.useRef(null);
     const [dragOffset, setDragOffset] = useState(null); // Pixel offset from start
+    const dragOffsetRef = React.useRef(null); // Mirror for handleEnd closure
     const [trackWidth, setTrackWidth] = useState(300); // Default fallback
     const isDragging = React.useRef(false);
     const startX = React.useRef(0);
@@ -634,6 +635,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         if (!isDragging.current) return;
         const delta = clientX - startX.current;
         console.log('[SWIPE DEBUG] handleMove:', { clientX, startX: startX.current, delta });
+        dragOffsetRef.current = delta; // Update ref for handleEnd
         setDragOffset(delta);
     };
 
@@ -645,15 +647,20 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         const thumbWidth = 100;
         const threshold = trackWidth * 0.25;
 
+        // Read from REF to avoid stale closure
+        const finalOffset = dragOffsetRef.current;
+        console.log('[SWIPE DEBUG] handleEnd:', { value, finalOffset, threshold });
+
         if (value === null) {
-            if (dragOffset > 50) onChange('right');
-            else if (dragOffset < -50) onChange('left');
+            if (finalOffset > 50) onChange('right');
+            else if (finalOffset < -50) onChange('left');
         } else if (value === 'left') {
-            if (dragOffset > threshold) onChange('right');
+            if (finalOffset > threshold) onChange('right');
         } else if (value === 'right') {
-            if (dragOffset < -threshold) onChange('left');
+            if (finalOffset < -threshold) onChange('left');
         }
 
+        dragOffsetRef.current = null;
         setDragOffset(null);
     };
 
