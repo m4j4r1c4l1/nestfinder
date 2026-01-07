@@ -563,6 +563,66 @@ const RestoreAccountSection = ({ t }) => {
 
 
 
+// Simple 2-state toggle with dove emoji - replaces unreliable SwipeControl
+const DoveToggle = ({ value, onChange }) => {
+    const isRight = value === 'right';
+
+    const handleClick = () => {
+        onChange(isRight ? 'left' : 'right');
+    };
+
+    return (
+        <div>
+            <div
+                onClick={handleClick}
+                style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '48px',
+                    boxSizing: 'border-box',
+                    background: isRight ? '#10b981' : '#3b82f6', // Green right, Blue left
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-border)',
+                    cursor: 'pointer',
+                    transition: 'background 0.3s ease',
+                    userSelect: 'none'
+                }}
+            >
+                {/* Thumb with dove */}
+                <div style={{
+                    position: 'absolute',
+                    top: '4px',
+                    left: isRight ? 'calc(100% - 104px)' : '4px',
+                    width: '100px',
+                    height: '40px',
+                    borderRadius: 'var(--radius-sm)',
+                    background: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.4rem',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                    transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: isRight ? 'none' : 'scaleX(-1)' // Mirror dove when left
+                }}>
+                    🕊️
+                </div>
+            </div>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '0 4px',
+                marginTop: '4px',
+                color: 'var(--color-text-secondary)',
+                fontSize: '0.7rem'
+            }}>
+                <span>← Left</span>
+                <span>Right →</span>
+            </div>
+        </div>
+    );
+};
+
 
 const SwipeControl = ({ value, onChange, labelCenter }) => {
     const trackRef = React.useRef(null);
@@ -1812,10 +1872,9 @@ const SettingsPanel = ({ onClose }) => {
                         </div>
 
                         <div style={{ padding: '0 0.5rem' }}>
-                            <SwipeControl
+                            <DoveToggle
                                 value={swipeDirection}
                                 onChange={handleSwipeChange}
-                                labelCenter={t('settings.swipe.controlLabel') || 'Swipe'}
                             />
                         </div>
                     </div>
