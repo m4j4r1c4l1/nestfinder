@@ -586,11 +586,13 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         if (!trackRef.current) return;
         if (trackRef.current.offsetWidth > 0) {
             setTrackWidth(trackRef.current.offsetWidth);
+            // addLog(`Init W:${trackRef.current.offsetWidth}`); // Too noisy?
         }
         const observer = new ResizeObserver(entries => {
             for (const entry of entries) {
                 if (entry.contentRect.width > 0) {
                     setTrackWidth(entry.contentRect.width);
+                    // addLog(`RO W:${Math.round(entry.contentRect.width)}`);
                 }
             }
         });
@@ -613,10 +615,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         const effectiveX = thumbRect.left - trackRect.left;
 
         const width = trackRect.width || 300; // Use precise rect width
-        if (Math.abs(width - trackWidth) > 1) {
-            setTrackWidth(width); // FORCE update if state disagrees
-            addLog(`SYNC w:${Math.round(width)}`);
-        }
+        // Removed SYNC logic to avoid re-render during touch start which kills events on iOS
         const thumb = 100;
         const padding = 4;
         const pRight = width - thumb - padding;
