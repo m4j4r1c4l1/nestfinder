@@ -576,6 +576,10 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const dragBase = React.useRef(0);
     const dragMax = React.useRef(0);
 
+    // Visual Debug Logger (for iOS testing without console)
+    const [debugLog, setDebugLog] = useState([]);
+    const addLog = (msg) => setDebugLog(prev => [...prev.slice(-4), msg]); // Keep last 5
+
     // Robust width tracking
     React.useLayoutEffect(() => {
         if (!trackRef.current) return;
@@ -670,7 +674,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         // Capture pointer to track even if it leaves the element
         e.target.setPointerCapture(e.pointerId);
         e.preventDefault();
-        console.log('[SWIPE DEBUG] onPointerDown:', { pointerId: e.pointerId, clientX: e.clientX });
+        addLog(`DOWN x:${Math.round(e.clientX)}`);
         handleStart(e.clientX);
     };
 
@@ -681,20 +685,20 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     const onPointerUp = (e) => {
         e.target.releasePointerCapture(e.pointerId);
-        console.log('[SWIPE DEBUG] onPointerUp:', { pointerId: e.pointerId });
+        addLog(`UP off:${dragOffsetRef.current}`);
         handleEnd();
     };
 
     const onPointerCancel = (e) => {
         // Handle iOS edge cases where touch is cancelled
-        console.log('[SWIPE DEBUG] onPointerCancel');
+        addLog('CANCEL');
         handleEnd();
     };
 
     const onLostPointerCapture = (e) => {
         // Fallback: fires when capture is lost for ANY reason
         // This ensures handleEnd always runs even if onPointerUp misses
-        console.log('[SWIPE DEBUG] onLostPointerCapture');
+        addLog('LOST');
         if (isDragging.current) {
             handleEnd();
         }
@@ -810,6 +814,20 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', color: 'var(--color-text-secondary)', fontSize: '0.7rem' }}>
                 <span>← Left</span>
                 <span>Right →</span>
+            </div>
+            {/* Visual Debug Log (for iOS testing) */}
+            <div style={{
+                marginTop: '8px',
+                padding: '4px',
+                background: '#1a1a2e',
+                borderRadius: '4px',
+                fontSize: '0.6rem',
+                fontFamily: 'monospace',
+                color: '#0f0',
+                maxHeight: '60px',
+                overflow: 'hidden'
+            }}>
+                {debugLog.map((log, i) => <div key={i}>{log}</div>)}
             </div>
         </div>
     );
