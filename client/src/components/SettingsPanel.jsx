@@ -667,6 +667,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
         dragOffsetRef.current = null;
         setDragOffset(null);
+        addLog(`END v:${value || 'null'}→snap`);
     };
 
     // Pointer Event Handlers (unified for touch/mouse, better iOS support)
@@ -674,7 +675,8 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         // Capture pointer to track even if it leaves the element
         e.target.setPointerCapture(e.pointerId);
         e.preventDefault();
-        addLog(`DOWN x:${Math.round(e.clientX)}`);
+        addLog('────────────'); // Separator for new gesture
+        addLog(`DOWN x:${Math.round(e.clientX)} v:${value || 'null'}`);
         handleStart(e.clientX);
     };
 
