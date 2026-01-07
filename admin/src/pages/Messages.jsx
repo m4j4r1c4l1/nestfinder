@@ -406,7 +406,7 @@ const Messages = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
-                    padding: '1rem 1rem 1.5rem 1rem'
+                    padding: '1.25rem 1rem'
                 }}>
 
                     {/* COMPOSER TAB */}
