@@ -572,16 +572,21 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const startX = React.useRef(0);
 
     // Robust width tracking
+    // Robust width tracking
     React.useLayoutEffect(() => {
         if (!trackRef.current) return;
 
         // Initial measure
-        setTrackWidth(trackRef.current.offsetWidth);
+        if (trackRef.current.offsetWidth > 0) {
+            setTrackWidth(trackRef.current.offsetWidth);
+        }
 
         // Observer for resizes/animations
         const observer = new ResizeObserver(entries => {
             for (const entry of entries) {
-                setTrackWidth(entry.contentRect.width);
+                if (entry.contentRect.width > 0) {
+                    setTrackWidth(entry.contentRect.width);
+                }
             }
         });
 
@@ -592,7 +597,9 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     // Touch handlers
     const handleStart = (clientX) => {
         if (!trackRef.current) return;
-        setTrackWidth(trackRef.current.offsetWidth); // Force update to ensure precision
+        if (trackRef.current.offsetWidth > 0) {
+            setTrackWidth(trackRef.current.offsetWidth); // Force update to ensure precision
+        }
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
@@ -669,14 +676,15 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     // Calculate Transform
     let translateX = 0;
-    // trackWidth is managed by state
+    // Ensure effective width is never too small to prevent clamping to 0
+    const effectiveWidth = Math.max(trackWidth, 200);
     const thumbWidth = 100;
     const padding = 4;
 
     // Base Positions (px)
     const posLeft = padding;
-    const posRight = trackWidth - thumbWidth - padding;
-    const posCenter = (trackWidth - thumbWidth) / 2;
+    const posRight = effectiveWidth - thumbWidth - padding;
+    const posCenter = (effectiveWidth - thumbWidth) / 2;
 
     let currentBase = posCenter; // Default null
     if (value === 'left') currentBase = posLeft;
