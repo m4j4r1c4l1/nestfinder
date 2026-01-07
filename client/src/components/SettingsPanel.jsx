@@ -587,6 +587,8 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     };
 
     const wasJustDragging = React.useRef(false); // Track transition for SNAP log
+    const moveCount = React.useRef(0); // Count moves in this gesture
+    const gestureStartTime = React.useRef(0); // Timestamp when gesture started
 
     // Helpers to manage watchdog
     const clearWatchdog = () => {
@@ -673,12 +675,15 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
+        moveCount.current = 0; // Reset move counter
+        gestureStartTime.current = Date.now(); // Record start time
 
         startWatchdog();
     };
 
     const handleMove = (clientX) => {
         if (!isDragging.current) return;
+        moveCount.current++; // Increment move counter
         const delta = clientX - startX.current;
         dragOffsetRef.current = delta; // Update ref for handleEnd
         setDragOffset(delta);
@@ -712,29 +717,37 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
             dragOffsetRef.current = null;
             setDragOffset(null);
-            addLog(`END v:${value || 'null'}→snap`);
+            const duration = Date.now() - gestureStartTime.current;
+            addLog(`END moves:${moveCount.current} ${duration}ms v:${value || 'null'}`);
         } catch (err) {
             addLog(`ERR: ${err.message}`);
             console.error(err);
         }
     };
 
-    // Pointer Event Handlers (unified for touch/mouse, better iOS support)
     const onPointerDown = (e) => {
         // Capture pointer to track even if it leaves the element
+        let hasCap = false;
         try {
             e.target.setPointerCapture(e.pointerId);
+            hasCap = e.target.hasPointerCapture(e.pointerId);
         } catch (err) {
             addLog(`CAP_ERR:${err.message}`);
         }
         e.preventDefault();
         addLog('────────────');
-        addLog(`DOWN id:${e.pointerId} type:${e.pointerType || '?'}`);
+        addLog(`DOWN id:${e.pointerId} pri:${e.isPrimary} cap:${hasCap}`);
+        addLog(`  btn:${e.buttons} pres:${e.pressure?.toFixed(2) || '?'}`);
         handleStart(e.clientX);
     };
 
     const onPointerMove = (e) => {
         if (!isDragging.current) return;
+        // Log every 10th move to avoid spam, or first move
+        if (moveCount.current === 0 || moveCount.current % 20 === 0) {
+            const hasCap = e.target.hasPointerCapture?.(e.pointerId) ?? '?';
+            addLog(`MOVE #${moveCount.current} x:${Math.round(e.clientX)} cap:${hasCap}`);
+        }
         handleMove(e.clientX);
     };
 
