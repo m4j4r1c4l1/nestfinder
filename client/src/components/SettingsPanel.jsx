@@ -566,6 +566,7 @@ const RestoreAccountSection = ({ t }) => {
 
 const SwipeControl = ({ value, onChange, labelCenter }) => {
     const trackRef = React.useRef(null);
+    const thumbRef = React.useRef(null);
     const [dragOffset, setDragOffset] = useState(null); // Pixel offset from start
     const [trackWidth, setTrackWidth] = useState(300); // Default fallback
     const isDragging = React.useRef(false);
@@ -592,23 +593,26 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     }, []);
 
     // Touch handlers
+    // Touch handlers
     const handleStart = (clientX) => {
-        if (!trackRef.current) return;
+        if (!trackRef.current || !thumbRef.current) return;
 
-        // Lock geometry at start of drag
+        // Lock geometry using VISUAL DOM position (WYSIWYG)
+        // This fixes stale state issues where logic might think we are Left but visual is Right
+        const trackRect = trackRef.current.getBoundingClientRect();
+        const thumbRect = thumbRef.current.getBoundingClientRect();
+
+        // Calculate current relative X of the thumb
+        // We trust the Visual Position as the source of truth
+        const effectiveX = thumbRect.left - trackRect.left;
+
         const width = trackRef.current.offsetWidth || 300;
         const thumb = 100;
         const padding = 4;
-
-        const pLeft = padding;
         const pRight = width - thumb - padding;
-        const pCenter = (width - thumb) / 2;
 
+        dragBase.current = effectiveX;
         dragMax.current = pRight;
-
-        if (value === 'left') dragBase.current = pLeft;
-        else if (value === 'right') dragBase.current = pRight;
-        else dragBase.current = pCenter;
 
         isDragging.current = true;
         startX.current = clientX;
@@ -759,7 +763,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 onMouseDown={onMouseDown}
             >
                 {/* Thumb */}
-                <div style={style}>
+                <div ref={thumbRef} style={style}>
                     {doveContent}
                 </div>
             </div>
