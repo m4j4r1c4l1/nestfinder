@@ -247,7 +247,15 @@ const Dashboard = ({ onNavigate }) => {
                                 <button
                                     className="btn"
                                     onClick={() => {
-                                        window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/debug/download`;
+                                        let API_URL = import.meta.env.VITE_API_URL;
+                                        if (!API_URL) {
+                                            if (window.location.hostname.includes('github.io') || window.location.hostname.includes('onrender.com')) {
+                                                API_URL = 'https://nestfinder-sa1g.onrender.com';
+                                            } else {
+                                                API_URL = 'http://localhost:3001';
+                                            }
+                                        }
+                                        window.location.href = `${API_URL}/api/debug/download`;
                                     }}
                                     title="Download Debug Logs"
                                     style={{
