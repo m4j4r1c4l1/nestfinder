@@ -107,10 +107,15 @@ const MapView = () => {
     };
 
     const handleMapClick = (coords) => {
+        // If a menu/sheet is open, clicking the map should just close it
+        if (activeSheet) {
+            setActiveSheet(null);
+            return;
+        }
+
         // When user clicks map, open submit panel with that location
         setClickedLocation(coords);
         setActiveSheet('submit');
-
     };
 
     const handleSheetClose = () => {
