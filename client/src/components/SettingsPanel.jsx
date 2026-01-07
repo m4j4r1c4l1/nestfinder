@@ -855,6 +855,40 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 maxHeight: '120px',
                 overflowY: 'auto'
             }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', borderBottom: '1px solid #333' }}>
+                    <span>DEBUG LOG</span>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+                                const res = await fetch(`${API_URL}/api/debug/logs`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        logs: debugLog,
+                                        platform: navigator.platform,
+                                        userAgent: navigator.userAgent
+                                    })
+                                });
+                                if (res.ok) alert('Logs sent!');
+                                else alert('Failed to send logs');
+                            } catch (e) {
+                                alert('Error: ' + e.message);
+                            }
+                        }}
+                        style={{
+                            background: '#333',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '2px',
+                            fontSize: '0.6rem',
+                            cursor: 'pointer',
+                            padding: '1px 4px'
+                        }}
+                    >
+                        SEND LOGS
+                    </button>
+                </div>
                 {debugLog.map((log, i) => <div key={i}>{log}</div>)}
             </div>
         </div>

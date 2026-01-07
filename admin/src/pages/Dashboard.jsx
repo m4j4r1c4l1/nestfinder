@@ -243,6 +243,26 @@ const Dashboard = ({ onNavigate }) => {
                     <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            {showBackup && (
+                                <button
+                                    className="btn"
+                                    onClick={() => {
+                                        window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/debug/download`;
+                                    }}
+                                    title="Download Debug Logs"
+                                    style={{
+                                        background: '#333',
+                                        color: '#0f0',
+                                        padding: '0.2rem 0.5rem',
+                                        fontSize: '0.75rem',
+                                        fontFamily: 'monospace',
+                                        border: '1px solid #444',
+                                        marginRight: '0.5rem'
+                                    }}
+                                >
+                                    LOGS
+                                </button>
+                            )}
                             {filteredPoints && (
                                 <button
                                     onClick={handleClearFilter}
