@@ -185,9 +185,16 @@ const Messages = () => {
 
         setCreatingBroadcast(true);
         try {
+            // Helper to convert local input time to UTC ISO string
+            const toISO = (dateStr) => new Date(dateStr).toISOString();
+
             await adminApi.fetch('/admin/broadcasts', {
                 method: 'POST',
-                body: JSON.stringify(newBroadcast)
+                body: JSON.stringify({
+                    ...newBroadcast,
+                    startTime: toISO(newBroadcast.startTime),
+                    endTime: toISO(newBroadcast.endTime)
+                })
             });
             setNewBroadcast({ title: '', message: '', imageUrl: '', startTime: '', endTime: '', maxViews: '', priority: 0 });
             setActiveBroadcastTemplate('custom');

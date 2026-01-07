@@ -156,8 +156,9 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right' })
         const diff = touchCurrentX.current - touchStartX.current;
         const absDiff = Math.abs(diff);
 
-        // Only track progress if swiping in the correct direction
+        // Only track progress if swiping in the allowed direction(s)
         const isCorrectDirection =
+            (swipeDirection === 'both') ||
             (swipeDirection === 'right' && diff > 0) ||
             (swipeDirection === 'left' && diff < 0);
 
@@ -175,10 +176,18 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right' })
         setSwiping(false);
 
         const diff = touchCurrentX.current - touchStartX.current;
+        const absDiff = Math.abs(diff);
+
+        // Check if swipe met allow criteria
         const isRightSwipe = diff > SWIPE_THRESHOLD;
         const isLeftSwipe = diff < -SWIPE_THRESHOLD;
 
-        if ((swipeDirection === 'right' && isRightSwipe) || (swipeDirection === 'left' && isLeftSwipe)) {
+        const isValidSwipe =
+            (swipeDirection === 'both' && (isRightSwipe || isLeftSwipe)) ||
+            (swipeDirection === 'right' && isRightSwipe) ||
+            (swipeDirection === 'left' && isLeftSwipe);
+
+        if (isValidSwipe) {
             onSwipeDelete();
         }
 
@@ -195,11 +204,32 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right' })
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             style={{
-                filter: swipeProgress > 0 ? `blur(${blurAmount}px)` : 'none',
+                position: 'relative', // Needed for absolute overlay
+                overflow: 'hidden', // Contain overlay
                 transition: swiping ? 'none' : 'filter 0.2s ease-out'
             }}
         >
-            {children}
+            {/* Darkening Overlay */}
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: '#0f172a', // Dark background color
+                opacity: swipeProgress * 0.7, // Target 0.7 opacity at max
+                zIndex: 10,
+                pointerEvents: 'none',
+                transition: swiping ? 'none' : 'opacity 0.2s ease-out'
+            }} />
+
+            {/* Content with Blur */}
+            <div style={{
+                filter: swipeProgress > 0 ? `blur(${blurAmount}px)` : 'none',
+                transition: swiping ? 'none' : 'filter 0.2s ease-out'
+            }}>
+                {children}
+            </div>
         </div>
     );
 };
@@ -211,7 +241,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     const [loadingSent, setLoadingSent] = useState(true);
     const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
 
-    const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || 'right');
+    const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || 'both');
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [viewingImageOnly, setViewingImageOnly] = useState(false);
 
@@ -219,7 +249,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     useEffect(() => {
         const handleStorage = () => {
             setRetention(localStorage.getItem('nestfinder_message_retention') || '1m');
-            setSwipeDirection(localStorage.getItem('nestfinder_swipe_direction') || 'right');
+            setSwipeDirection(localStorage.getItem('nestfinder_swipe_direction') || 'both');
         };
         window.addEventListener('storage', handleStorage);
         return () => window.removeEventListener('storage', handleStorage);
