@@ -406,7 +406,7 @@ const Messages = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
-                    padding: '1.25rem 1rem'
+                    padding: '0.5rem 1rem 1.25rem 1rem'
                 }}>
 
                     {/* COMPOSER TAB */}
@@ -423,7 +423,7 @@ const Messages = () => {
                     {/* OUTBOX TAB */}
                     {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <HistorySection users={subscribers} totalSent={stats.notificationMetrics?.total || 0} />
                         </div>
                     )}
