@@ -135,7 +135,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
 };
 
 // Swipeable Message Item Component with Progressive Blur
-const SwipeableMessage = ({ children, onSwipeDelete, onConfirm, onCancel, swipeDirection = 'right', style, className, onClick, isDeleting }) => {
+const SwipeableMessage = ({ children, onSwipeDelete, onConfirm, onCancel, swipeDirection = 'right', hideButton = false, style, className, onClick, isDeleting }) => {
     const touchStartX = useRef(0);
     const touchCurrentX = useRef(0);
     const [swiping, setSwiping] = useState(false);
@@ -247,7 +247,7 @@ const SwipeableMessage = ({ children, onSwipeDelete, onConfirm, onCancel, swipeD
             {/* UI Layer */}
             <div style={{
                 position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                display: hideButton ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center',
                 zIndex: 20,
                 opacity: effectiveProgress,
                 pointerEvents: isDeleting ? 'auto' : 'none',
@@ -715,7 +715,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             return (
                                                 <SwipeableMessage
                                                     key={notification.id}
-                                                    swipeDirection={swipeEnabled ? swipeDirection : 'none'} // Disable swipe if disabled
+                                                    swipeDirection={swipeDirection} // Always enable swipe gesture
+                                                    hideButton={swipeEnabled} // Hide button UI if instant delete mode
                                                     isDeleting={isDeleting}
                                                     onSwipeDelete={() => {
                                                         // Instant delete if swipe is enabled
@@ -896,7 +897,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             return (
                                                 <SwipeableMessage
                                                     key={msg.id}
-                                                    swipeDirection={swipeEnabled ? swipeDirection : 'none'}
+                                                    swipeDirection={swipeDirection}
+                                                    hideButton={swipeEnabled}
                                                     isDeleting={isDeleting}
                                                     onSwipeDelete={() => {
                                                         if (swipeEnabled) {
