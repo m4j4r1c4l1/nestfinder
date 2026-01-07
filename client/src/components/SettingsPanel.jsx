@@ -860,7 +860,16 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                     <button
                         onClick={async () => {
                             try {
-                                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+                                let API_URL = import.meta.env.VITE_API_URL;
+                                if (!API_URL) {
+                                    // Fallback logic
+                                    if (window.location.hostname.includes('github.io') || window.location.hostname.includes('onrender.com')) {
+                                        API_URL = 'https://nestfinder-sa1g.onrender.com';
+                                    } else {
+                                        API_URL = 'http://localhost:3001';
+                                    }
+                                }
+
                                 const res = await fetch(`${API_URL}/api/debug/logs`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
