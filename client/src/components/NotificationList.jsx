@@ -241,7 +241,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     const [loadingSent, setLoadingSent] = useState(true);
     const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
 
-    const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || 'both');
+    const [swipeDirection, setSwipeDirection] = useState(() => {
+        const val = localStorage.getItem('nestfinder_swipe_direction');
+        return (val && val !== 'null') ? val : 'both';
+    });
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [viewingImageOnly, setViewingImageOnly] = useState(false);
 
@@ -249,7 +252,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     useEffect(() => {
         const handleStorage = () => {
             setRetention(localStorage.getItem('nestfinder_message_retention') || '1m');
-            setSwipeDirection(localStorage.getItem('nestfinder_swipe_direction') || 'both');
+            const val = localStorage.getItem('nestfinder_swipe_direction');
+            setSwipeDirection((val && val !== 'null') ? val : 'both');
         };
         window.addEventListener('storage', handleStorage);
         return () => window.removeEventListener('storage', handleStorage);

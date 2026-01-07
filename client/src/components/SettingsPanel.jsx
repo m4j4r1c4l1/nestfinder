@@ -568,7 +568,7 @@ const RestoreAccountSection = ({ t }) => {
 const DoveToggle = ({ value, onChange }) => {
     const isLeft = value === 'left';
     const isRight = value === 'right';
-    const isCenter = value === null || value === undefined || value === 'center';
+    const isCenter = value === 'both' || value === 'center' || value === null || value === undefined;
 
     // Click to select: left third → left, center third → center, right third → right
     const handleClick = (e) => {
@@ -581,7 +581,7 @@ const DoveToggle = ({ value, onChange }) => {
         } else if (clickX > thirdWidth * 2) {
             onChange('right');
         } else {
-            onChange(null); // Center = both
+            onChange('both'); // Center = both
         }
     };
 
@@ -1066,63 +1066,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 <span>← Left</span>
                 <span>Right →</span>
             </div>
-            {/* Visual Debug Log (for iOS testing) */}
-            <div style={{
-                marginTop: '8px',
-                padding: '4px',
-                background: '#1a1a2e',
-                borderRadius: '4px',
-                fontSize: '0.6rem',
-                fontFamily: 'monospace',
-                color: '#0f0',
-                maxHeight: '120px',
-                overflowY: 'auto'
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', borderBottom: '1px solid #333' }}>
-                    <span>DEBUG LOG</span>
-                    <button
-                        onClick={async () => {
-                            try {
-                                let API_URL = import.meta.env.VITE_API_URL;
-                                if (!API_URL) {
-                                    // Fallback logic
-                                    if (window.location.hostname.includes('github.io') || window.location.hostname.includes('onrender.com')) {
-                                        API_URL = 'https://nestfinder-sa1g.onrender.com';
-                                    } else {
-                                        API_URL = 'http://localhost:3001';
-                                    }
-                                }
-
-                                const res = await fetch(`${API_URL}/api/debug/logs`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        logs: logRef.current,
-                                        platform: navigator.platform,
-                                        userAgent: navigator.userAgent
-                                    })
-                                });
-                                if (res.ok) alert('Logs sent!');
-                                else alert('Failed to send logs');
-                            } catch (e) {
-                                alert('Error: ' + e.message);
-                            }
-                        }}
-                        style={{
-                            background: '#333',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '2px',
-                            fontSize: '0.6rem',
-                            cursor: 'pointer',
-                            padding: '1px 4px'
-                        }}
-                    >
-                        SEND LOGS
-                    </button>
-                </div>
-                {debugLog.map((log, i) => <div key={i}>{log}</div>)}
-            </div>
+            {/* Visual Debug Log - REMOVED */}
         </div>
     );
 };
