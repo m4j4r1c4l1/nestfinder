@@ -202,7 +202,11 @@ export default {
         sameKeyError: 'هذا هو مفتاح استرداد حسابك الحالي. أنت مسجل الدخول بالفعل بهذا الحساب.',
         // Swipe Direction
         swipeDirection: 'حذف الرسائل',
+        deleteSettingDesc: 'Select how you would like to delete a message',
+        safeDelete: 'Safe Delete',
+        tapToSelect: 'Tap to select the swipe direction',
         swipe: {
+            controlLabel: 'Swipe',
             right: '← سحب لليمين',
             left: '→ سحب لليسار',
             desc: 'اسحب رسالة في هذا الاتجاه لحذفها.'

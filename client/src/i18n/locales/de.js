@@ -201,7 +201,11 @@ export default {
         sameKeyError: 'Dies ist der Wiederherstellungsschlüssel Ihres aktuellen Kontos. Sie sind bereits mit diesem Konto angemeldet.',
         // Swipe Direction
         swipeDirection: 'Nachrichten löschen',
+        deleteSettingDesc: 'Select how you would like to delete a message',
+        safeDelete: 'Safe Delete',
+        tapToSelect: 'Tap to select the swipe direction',
         swipe: {
+            controlLabel: 'Swipe',
             right: '→ Nach rechts wischen',
             left: '← Nach links wischen',
             desc: 'Wischen Sie eine Nachricht in diese Richtung, um sie zu löschen.'

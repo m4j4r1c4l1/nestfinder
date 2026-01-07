@@ -201,7 +201,11 @@ export default {
         sameKeyError: 'Это ключ восстановления вашего текущего аккаунта. Вы уже вошли с этим аккаунтом.',
         // Swipe Direction
         swipeDirection: 'Удалить сообщения',
+        deleteSettingDesc: 'Select how you would like to delete a message',
+        safeDelete: 'Safe Delete',
+        tapToSelect: 'Tap to select the swipe direction',
         swipe: {
+            controlLabel: 'Swipe',
             right: '→ Свайп вправо',
             left: '← Свайп влево',
             desc: 'Проведите по сообщению в этом направлении, чтобы удалить.'
