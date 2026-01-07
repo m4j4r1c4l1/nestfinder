@@ -653,8 +653,7 @@ const DoveToggle = ({ value, onChange }) => {
                     textAlign: 'center',
                     lineHeight: '1.2'
                 }}>
-                    <div>Current:</div>
-                    <div><b>Both</b></div>
+
                 </div>
                 <div style={{
                     color: 'rgba(255,255,255,0.9)',
@@ -667,8 +666,7 @@ const DoveToggle = ({ value, onChange }) => {
                     textAlign: 'center',
                     lineHeight: '1.2'
                 }}>
-                    <div>Current:</div>
-                    <div><b>Both</b></div>
+
                 </div>
             </>
         );
@@ -1193,7 +1191,7 @@ const RetentionSlider = ({ value, onChange }) => {
     }, [isDragging, dragPct]);
 
     // Info Message
-    let infoMessage = null;
+    let infoMessage = `Messages are kept for ${currentStep.label}.`;
     if (currentStep.val === 'forever') infoMessage = 'Messages are kept indefinitely.';
     else if (currentStep.val === '0d') infoMessage = 'Messages will be deleted upon being read.';
 
@@ -1862,47 +1860,64 @@ const SettingsPanel = ({ onClose }) => {
                     <label className="form-label">{t('settings.messages') || 'Messages'}</label>
 
                     {/* Popup Notifications Box */}
-                    <div
-                        onClick={togglePopup}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: 'var(--space-3)',
-                            background: 'var(--color-bg-secondary)',
-                            borderRadius: 'var(--radius-md)',
-                            cursor: 'pointer',
-                            border: '1px solid var(--color-border)',
-                            marginBottom: 'var(--space-2)'
-                        }}
-                    >
-                        <div>
-                            <div style={{ fontWeight: 500 }}>🔔 {t('settings.popupMessages') || 'Real-time Popups'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                {t('settings.popupDescription') || 'Show messages immediately as they arrive'}
-                            </div>
-                        </div>
+                    {/* Popup Notifications Box */}
+                    <div style={{
+                        padding: 'var(--space-3)',
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--color-border)',
+                        marginBottom: 'var(--space-2)'
+                    }}>
                         <div
+                            onClick={togglePopup}
                             style={{
-                                width: '44px',
-                                height: '24px',
-                                borderRadius: '12px',
-                                background: popupEnabled ? 'var(--color-primary)' : 'var(--color-border)',
-                                position: 'relative',
-                                transition: 'background 0.2s'
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                cursor: 'pointer'
                             }}
                         >
-                            <div style={{
-                                width: '20px',
-                                height: '20px',
-                                borderRadius: '50%',
-                                background: 'white',
-                                position: 'absolute',
-                                top: '2px',
-                                left: popupEnabled ? '22px' : '2px',
-                                transition: 'left 0.2s',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                            }} />
+                            <div>
+                                <div style={{ fontWeight: 500 }}>🔔 {t('settings.popupMessages') || 'Real-time Popups'}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                    {t('settings.popupDescription') || 'Show messages immediately as they arrive'}
+                                </div>
+                            </div>
+                            <div
+                                style={{
+                                    width: '44px',
+                                    height: '24px',
+                                    borderRadius: '12px',
+                                    background: popupEnabled ? 'var(--color-primary)' : 'var(--color-border)',
+                                    position: 'relative',
+                                    transition: 'background 0.2s'
+                                }}
+                            >
+                                <div style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    background: 'white',
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: popupEnabled ? '22px' : '2px',
+                                    transition: 'left 0.2s',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                                }} />
+                            </div>
+                        </div>
+                        <div style={{
+                            padding: 'var(--space-2)',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--color-primary)',
+                            fontSize: '0.85rem',
+                            textAlign: 'center',
+                            marginTop: '0.75rem',
+                            animation: 'fadeIn 0.3s ease-out'
+                        }}>
+                            {popupEnabled ? (t('settings.popupEnabledInfo') || 'With the current settings, messages will be displayed as they are received.') : (t('settings.popupDisabledInfo') || 'Messages will not appear as popups.')}
                         </div>
                     </div>
 
@@ -1953,6 +1968,19 @@ const SettingsPanel = ({ onClose }) => {
                                 value={swipeDirection}
                                 onChange={handleSwipeChange}
                             />
+                        </div>
+                        <div style={{
+                            padding: 'var(--space-2)',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--color-primary)',
+                            fontSize: '0.85rem',
+                            textAlign: 'center',
+                            marginTop: '0.75rem',
+                            animation: 'fadeIn 0.3s ease-out'
+                        }}>
+                            {swipeDirection === 'left' ? 'Swipe left to delete messages.' : swipeDirection === 'right' ? 'Swipe right to delete messages.' : 'Swipe left or right to delete messages.'}
                         </div>
                     </div>
                 </div>
