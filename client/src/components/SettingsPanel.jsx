@@ -564,169 +564,171 @@ const RestoreAccountSection = ({ t }) => {
 
 
 
-const trackRef = React.useRef(null);
-const [dragOffset, setDragOffset] = useState(null); // Pixel offset from start
-const isDragging = React.useRef(false);
-const startX = React.useRef(0);
+const SwipeControl = ({ value, onChange, labelCenter }) => {
+    const trackRef = React.useRef(null);
+    const [dragOffset, setDragOffset] = useState(null); // Pixel offset from start
+    const isDragging = React.useRef(false);
+    const startX = React.useRef(0);
 
-// Touch handlers
-const handleStart = (clientX) => {
-    if (!trackRef.current) return;
-    // Always update trackWidth when drag starts
-    setTrackWidth(trackRef.current.offsetWidth);
-    isDragging.current = true;
-    startX.current = clientX;
-    setDragOffset(0);
-};
-
-const handleMove = (clientX) => {
-    if (!isDragging.current) return;
-    const delta = clientX - startX.current;
-    setDragOffset(delta);
-};
-
-const handleEnd = () => {
-    if (!isDragging.current || !trackRef.current) return;
-    isDragging.current = false;
-
-    const trackWidth = trackRef.current.offsetWidth;
-    const thumbWidth = 100;
-    const threshold = trackWidth * 0.25;
-
-    // Calculate absolute drag distance to determine switch
-    // We need to know effective movement relative to start state
-    // If start was Left: > threshold -> Right
-    // If start was Right: < -threshold -> Left
-    // If start was Center: > 50 -> Right, < -50 -> Left
-
-    if (value === null) {
-        if (dragOffset > 50) onChange('right');
-        else if (dragOffset < -50) onChange('left');
-    } else if (value === 'left') {
-        if (dragOffset > threshold) onChange('right');
-    } else if (value === 'right') {
-        if (dragOffset < -threshold) onChange('left');
-    }
-
-    setDragOffset(null);
-};
-
-// Event Wrappers
-const onTouchStart = (e) => handleStart(e.touches[0].clientX);
-const onTouchMove = (e) => handleMove(e.touches[0].clientX);
-const onTouchEnd = () => handleEnd();
-const onMouseDown = (e) => {
-    e.preventDefault();
-    handleStart(e.clientX);
-    const onMouseMove = (ev) => handleMove(ev.clientX);
-    const onMouseUp = () => {
-        handleEnd();
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
+    // Touch handlers
+    const handleStart = (clientX) => {
+        if (!trackRef.current) return;
+        // Always update trackWidth when drag starts
+        setTrackWidth(trackRef.current.offsetWidth);
+        isDragging.current = true;
+        startX.current = clientX;
+        setDragOffset(0);
     };
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-};
 
-// Render Logic
-let style = {
-    position: 'absolute',
-    top: '4px',
-    bottom: '4px',
-    width: '100px',
-    borderRadius: 'var(--radius-sm)',
-    background: 'var(--color-primary)', // Keeping primary color for now
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.2rem',
-    cursor: 'grab',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-    transition: dragOffset !== null ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)', // Smooth snap
-    left: 0, // Always use 0 and control via transform
-    zIndex: 10
-};
+    const handleMove = (clientX) => {
+        if (!isDragging.current) return;
+        const delta = clientX - startX.current;
+        setDragOffset(delta);
+    };
 
-// Calculate Transform
-let translateX = 0;
-const trackWidth = trackRef.current ? trackRef.current.offsetWidth : 300;
-const thumbWidth = 100;
-const padding = 4;
+    const handleEnd = () => {
+        if (!isDragging.current || !trackRef.current) return;
+        isDragging.current = false;
 
-// Base Positions (px)
-const posLeft = padding;
-const posRight = trackWidth - thumbWidth - padding;
-const posCenter = (trackWidth - thumbWidth) / 2;
+        const trackWidth = trackRef.current.offsetWidth;
+        const thumbWidth = 100;
+        const threshold = trackWidth * 0.25;
 
-let currentBase = posCenter; // Default null
-if (value === 'left') currentBase = posLeft;
-else if (value === 'right') currentBase = posRight;
+        // Calculate absolute drag distance to determine switch
+        // We need to know effective movement relative to start state
+        // If start was Left: > threshold -> Right
+        // If start was Right: < -threshold -> Left
+        // If start was Center: > 50 -> Right, < -50 -> Left
 
-// Apply Drag
-if (dragOffset !== null) {
-    let rawPos = currentBase + dragOffset;
-    // Strict Clamping
-    rawPos = Math.max(posLeft, Math.min(posRight, rawPos));
-    translateX = rawPos;
-} else {
-    translateX = currentBase;
-}
+        if (value === null) {
+            if (dragOffset > 50) onChange('right');
+            else if (dragOffset < -50) onChange('left');
+        } else if (value === 'left') {
+            if (dragOffset > threshold) onChange('right');
+        } else if (value === 'right') {
+            if (dragOffset < -threshold) onChange('left');
+        }
 
-style.transform = `translateX(${translateX}px)`;
+        setDragOffset(null);
+    };
 
-// Dove Logic
-// If dragging: based on DELTA (dragOffset)
-// If resting: based on VALUE
-let doveContent = '🕊️';
-const isMirrored = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>;
+    // Event Wrappers
+    const onTouchStart = (e) => handleStart(e.touches[0].clientX);
+    const onTouchMove = (e) => handleMove(e.touches[0].clientX);
+    const onTouchEnd = () => handleEnd();
+    const onMouseDown = (e) => {
+        e.preventDefault();
+        handleStart(e.clientX);
+        const onMouseMove = (ev) => handleMove(ev.clientX);
+        const onMouseUp = () => {
+            handleEnd();
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    };
 
-if (dragOffset !== null) {
-    if (dragOffset > 5) doveContent = isMirrored; // Moving Right -> Face Right
-    else if (dragOffset < -5) doveContent = '🕊️'; // Moving Left -> Face Left
-    else {
-        // Neutral/Deadzone: Keep starting orientation
-        if (value === 'left') doveContent = isMirrored;
-        else if (value === 'right') doveContent = '🕊️';
-        else doveContent = '🕊️';
+    // Render Logic
+    let style = {
+        position: 'absolute',
+        top: '4px',
+        bottom: '4px',
+        width: '100px',
+        borderRadius: 'var(--radius-sm)',
+        background: 'var(--color-primary)', // Keeping primary color for now
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.2rem',
+        cursor: 'grab',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+        transition: dragOffset !== null ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)', // Smooth snap
+        left: 0, // Always use 0 and control via transform
+        zIndex: 10
+    };
+
+    // Calculate Transform
+    let translateX = 0;
+    const trackWidth = trackRef.current ? trackRef.current.offsetWidth : 300;
+    const thumbWidth = 100;
+    const padding = 4;
+
+    // Base Positions (px)
+    const posLeft = padding;
+    const posRight = trackWidth - thumbWidth - padding;
+    const posCenter = (trackWidth - thumbWidth) / 2;
+
+    let currentBase = posCenter; // Default null
+    if (value === 'left') currentBase = posLeft;
+    else if (value === 'right') currentBase = posRight;
+
+    // Apply Drag
+    if (dragOffset !== null) {
+        let rawPos = currentBase + dragOffset;
+        // Strict Clamping
+        rawPos = Math.max(posLeft, Math.min(posRight, rawPos));
+        translateX = rawPos;
+    } else {
+        translateX = currentBase;
     }
-} else {
-    // Resting
-    if (value === 'left') doveContent = isMirrored; // Ready to go Right
-    else if (value === 'right') doveContent = '🕊️'; // Ready to go Left/Undo
-    else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Center
-}
 
-return (
-    <div>
-        <div
-            ref={trackRef}
-            style={{
-                position: 'relative',
-                height: '48px',
-                background: 'var(--color-bg-tertiary)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--color-border)',
-                overflow: 'hidden',
-                userSelect: 'none',
-                touchAction: 'none'
-            }}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-            onMouseDown={onMouseDown}
-        >
-            {/* Thumb */}
-            <div style={style}>
-                {doveContent}
+    style.transform = `translateX(${translateX}px)`;
+
+    // Dove Logic
+    // If dragging: based on DELTA (dragOffset)
+    // If resting: based on VALUE
+    let doveContent = '🕊️';
+    const isMirrored = <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🕊️</span>;
+
+    if (dragOffset !== null) {
+        if (dragOffset > 5) doveContent = isMirrored; // Moving Right -> Face Right
+        else if (dragOffset < -5) doveContent = '🕊️'; // Moving Left -> Face Left
+        else {
+            // Neutral/Deadzone: Keep starting orientation
+            if (value === 'left') doveContent = isMirrored;
+            else if (value === 'right') doveContent = '🕊️';
+            else doveContent = '🕊️';
+        }
+    } else {
+        // Resting
+        if (value === 'left') doveContent = isMirrored; // Ready to go Right
+        else if (value === 'right') doveContent = '🕊️'; // Ready to go Left/Undo
+        else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Center
+    }
+
+    return (
+        <div>
+            <div
+                ref={trackRef}
+                style={{
+                    position: 'relative',
+                    height: '48px',
+                    background: 'var(--color-bg-tertiary)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-border)',
+                    overflow: 'hidden',
+                    userSelect: 'none',
+                    touchAction: 'none'
+                }}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                onMouseDown={onMouseDown}
+            >
+                {/* Thumb */}
+                <div style={style}>
+                    {doveContent}
+                </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', color: 'var(--color-text-secondary)', fontSize: '0.7rem' }}>
+                <span>← Left</span>
+                <span>Right →</span>
             </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', color: 'var(--color-text-secondary)', fontSize: '0.7rem' }}>
-            <span>← Left</span>
-            <span>Right →</span>
-        </div>
-    </div>
-);
+    );
+};
 
 
 
