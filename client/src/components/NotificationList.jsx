@@ -298,6 +298,12 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         const val = localStorage.getItem('nestfinder_swipe_direction');
         return (val && val !== 'null') ? val : 'both';
     });
+    const [swipeEnabled, setSwipeEnabled] = useState(() => {
+        try {
+            const stored = localStorage.getItem('nestfinder_swipe_enabled');
+            return stored !== 'false';
+        } catch (e) { return true; }
+    });
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [viewingImageOnly, setViewingImageOnly] = useState(false);
 
@@ -307,7 +313,11 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
             setRetention(localStorage.getItem('nestfinder_message_retention') || '1m');
             const val = localStorage.getItem('nestfinder_swipe_direction');
             setSwipeDirection((val && val !== 'null') ? val : 'both');
+
+            const storedEnabled = localStorage.getItem('nestfinder_swipe_enabled');
+            setSwipeEnabled(storedEnabled !== 'false'); // Default true
         };
+        handleStorage(); // Ensure initial load matches if localStorage changed elsewhere
         window.addEventListener('storage', handleStorage);
         return () => window.removeEventListener('storage', handleStorage);
     }, []);
@@ -630,6 +640,11 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
     return (
         <div className="card" style={{ height: '500px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+            <style>{`
+                .notification-item { position: relative; }
+                .delete-btn-hover { opacity: 0; transition: opacity 0.2s; }
+                .notification-item:hover .delete-btn-hover { opacity: 1; }
+            `}</style>
             {/* Sticky Header & Tabs */}
             <div style={{
                 position: 'sticky',
@@ -697,7 +712,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             return (
                                                 <SwipeableMessage
                                                     key={notification.id}
-                                                    swipeDirection={swipeDirection}
+                                                    swipeDirection={swipeEnabled ? swipeDirection : 'none'} // Disable swipe if disabled
                                                     isDeleting={isDeleting}
                                                     onSwipeDelete={() => handleDeleteClick(null, notification.id, 'received')}
                                                     onConfirm={() => confirmDelete()}
@@ -713,9 +728,40 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         borderRadius: 'var(--radius-md)',
                                                         border: '1px solid var(--color-border)',
                                                         margin: '0 0 0.75rem 0',
-                                                        background: '#0f172a'
+                                                        background: '#0f172a',
+                                                        position: 'relative' // Ensure relative for button positioning
                                                     }}
                                                 >
+                                                    {/* Hover Delete Button */}
+                                                    {!swipeEnabled && (
+                                                        <button
+                                                            className="delete-btn-hover"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteClick(null, notification.id, 'received');
+                                                            }}
+                                                            style={{
+                                                                position: 'absolute',
+                                                                top: '0.5rem',
+                                                                right: '0.5rem',
+                                                                background: 'rgba(239, 68, 68, 0.9)',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '50%',
+                                                                width: '28px',
+                                                                height: '28px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                cursor: 'pointer',
+                                                                zIndex: 10,
+                                                                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                                                            }}
+                                                            title="Delete"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    )}
                                                     {/* (Message Item Content Omitted for Brevity - Keeping existing structure) */}
                                                     {/* 1. Header Row */}
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>

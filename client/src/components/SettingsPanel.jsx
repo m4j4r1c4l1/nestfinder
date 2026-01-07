@@ -1353,6 +1353,21 @@ const SettingsPanel = ({ onClose }) => {
         window.dispatchEvent(new Event('storage'));
     };
 
+    // Swipe Enabled Toggle
+    const [swipeEnabled, setSwipeEnabled] = useState(() => {
+        try {
+            const stored = localStorage.getItem('nestfinder_swipe_enabled');
+            return stored !== 'false'; // Default true
+        } catch (e) { return true; }
+    });
+
+    const toggleSwipeEnabled = () => {
+        const newValue = !swipeEnabled;
+        setSwipeEnabled(newValue);
+        localStorage.setItem('nestfinder_swipe_enabled', newValue);
+        window.dispatchEvent(new Event('storage'));
+    };
+
     const handleRetentionChange = async (val) => {
         // Support both event and direct value
         const value = (val && val.target) ? val.target.value : val;
@@ -1950,12 +1965,13 @@ const SettingsPanel = ({ onClose }) => {
                                 const units = { d: 'Day', w: 'Week', m: 'Month', y: 'Year', h: 'Hour' };
                                 const fullUnit = units[unit] || '';
                                 const label = `${val} ${fullUnit}${val > 1 ? 's' : ''}`;
-                                return `Messages are kept for ${label}.`;
+                                return `Messages older than ${label} will be deleted.`;
                             })()}
                         </div>
                     </div>
 
                     {/* Swipe Direction Box */}
+                    {/* Delete Settings Box */}
                     <div style={{
                         padding: 'var(--space-3)',
                         background: 'var(--color-bg-secondary)',
@@ -1963,18 +1979,63 @@ const SettingsPanel = ({ onClose }) => {
                         border: '1px solid var(--color-border)'
                     }}>
                         <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>🔥 {t('settings.swipeDirection') || 'Delete'}</div>
+                            <div style={{ fontWeight: 500 }}>🔥 {t('settings.deleteActions') || 'Delete Actions'}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                {t('settings.swipe.desc') || 'Tap on the swiping gesture direction you prefer to delete a message.'}
+                                {t('settings.delete.desc') || 'Choose how you want to delete messages.'}
                             </div>
                         </div>
 
-                        <div style={{ padding: '0 0.5rem' }}>
+                        {/* Swipe Enable Toggle */}
+                        <div
+                            onClick={toggleSwipeEnabled}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                cursor: 'pointer',
+                                marginBottom: '1rem',
+                                padding: '0.5rem',
+                                background: 'var(--color-bg-tertiary)',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid var(--color-border)'
+                            }}
+                        >
+                            <div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>Swipe to Delete</div>
+                            </div>
+                            <div
+                                style={{
+                                    width: '44px',
+                                    height: '24px',
+                                    borderRadius: '12px',
+                                    background: swipeEnabled ? 'var(--color-primary)' : 'var(--color-border)',
+                                    position: 'relative',
+                                    transition: 'background 0.2s'
+                                }}
+                            >
+                                <div style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    background: 'white',
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: swipeEnabled ? '22px' : '2px',
+                                    transition: 'left 0.2s',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                                }} />
+                            </div>
+                        </div>
+
+                        {/* Direction Toggle (Always visible) */}
+                        <div style={{ padding: '0 0.5rem', opacity: swipeEnabled ? 1 : 0.5, pointerEvents: swipeEnabled ? 'auto' : 'none', transition: 'opacity 0.2s' }}>
                             <DoveToggle
                                 value={swipeDirection}
                                 onChange={handleSwipeChange}
                             />
                         </div>
+
+                        {/* Info Badge */}
                         <div style={{
                             padding: 'var(--space-2)',
                             background: 'rgba(59, 130, 246, 0.1)',
@@ -1986,7 +2047,15 @@ const SettingsPanel = ({ onClose }) => {
                             marginTop: '0.75rem',
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
-                            {swipeDirection === 'left' ? 'Messages will be deleted upon swiping Left over it.' : swipeDirection === 'right' ? 'Messages will be deleted upon swiping Right over it.' : 'Messages will be deleted upon swiping Left or Right over it.'}
+                            {!swipeEnabled ? (
+                                <span>A delete button will appear when hovering over a message.</span>
+                            ) : swipeDirection === 'left' ? (
+                                <span>Messages will be deleted upon swiping <b>Left</b> over it.</span>
+                            ) : swipeDirection === 'right' ? (
+                                <span>Messages will be deleted upon swiping <b>Right</b> over it.</span>
+                            ) : (
+                                <span>Messages will be deleted upon swiping <b>Left</b> or <b>Right</b> over it.</span>
+                            )}
                         </div>
                     </div>
                 </div>
