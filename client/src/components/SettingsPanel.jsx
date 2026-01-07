@@ -612,7 +612,11 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         // We trust the Visual Position as the source of truth
         const effectiveX = thumbRect.left - trackRect.left;
 
-        const width = trackRef.current.offsetWidth || 300;
+        const width = trackRect.width || 300; // Use precise rect width
+        if (Math.abs(width - trackWidth) > 1) {
+            setTrackWidth(width); // FORCE update if state disagrees
+            addLog(`SYNC w:${Math.round(width)}`);
+        }
         const thumb = 100;
         const padding = 4;
         const pRight = width - thumb - padding;
