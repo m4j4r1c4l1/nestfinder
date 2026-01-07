@@ -817,16 +817,25 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                     border: '1px solid var(--color-border)',
                     overflow: 'hidden',
                     userSelect: 'none',
-                    touchAction: 'none'
+                    touchAction: 'none',
+                    WebkitUserSelect: 'none', // Safari extra safety
+                    cursor: 'grab'
                 }}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
                 onLostPointerCapture={onLostPointerCapture}
+                draggable="false"
+                onDragStart={(e) => e.preventDefault()} // Prevent native drag (Firefox/Desktop)
             >
                 {/* Thumb */}
-                <div ref={thumbRef} style={style}>
+                <div
+                    ref={thumbRef}
+                    style={{ ...style, touchAction: 'none' }}
+                    draggable="false"
+                    onDragStart={(e) => e.preventDefault()}
+                >
                     {doveContent}
                 </div>
             </div>
