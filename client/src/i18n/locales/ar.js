@@ -201,7 +201,7 @@ export default {
         restoreConfirmButton: 'نعم، استعادة',
         sameKeyError: 'هذا هو مفتاح استرداد حسابك الحالي. أنت مسجل الدخول بالفعل بهذا الحساب.',
         // Swipe Direction
-        swipeDirection: 'اسحب للحذف',
+        swipeDirection: 'حذف الرسائل',
         swipe: {
             right: '← سحب لليمين',
             left: '→ سحب لليسار',

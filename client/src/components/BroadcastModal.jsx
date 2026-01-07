@@ -52,9 +52,16 @@ const BroadcastModal = ({ isSettled = false }) => {
         return () => clearTimeout(timer);
     }, [isSettled]);
 
-    const handleDismiss = () => {
+    const handleDismiss = async () => {
         if (broadcast) {
             markSeen(broadcast.id);
+            // Notify server that user has read/dismissed the broadcast
+            try {
+                await api.post(`/points/broadcast/${broadcast.id}/read`);
+            } catch (e) {
+                // Non-critical, log and continue
+                console.warn('Failed to mark broadcast as read:', e);
+            }
         }
         setVisible(false);
     };

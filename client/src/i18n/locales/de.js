@@ -200,7 +200,7 @@ export default {
         restoreConfirmButton: 'Ja, Wiederherstellen',
         sameKeyError: 'Dies ist der Wiederherstellungsschlüssel Ihres aktuellen Kontos. Sie sind bereits mit diesem Konto angemeldet.',
         // Swipe Direction
-        swipeDirection: 'Wischen zum Löschen',
+        swipeDirection: 'Nachrichten löschen',
         swipe: {
             right: '→ Nach rechts wischen',
             left: '← Nach links wischen',

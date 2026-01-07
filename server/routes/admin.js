@@ -729,37 +729,87 @@ router.get('/backup', (req, res) => {
 
 // ================== BROADCASTS ==================
 
-// List all broadcasts
+// List all broadcasts with view stats
 router.get('/broadcasts', (req, res) => {
     const broadcasts = all(`
-        SELECT * FROM broadcasts 
-        ORDER BY created_at DESC
+        SELECT b.*,
+            (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id) as total_users,
+            (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'sent') as sent_count,
+            (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'delivered') as delivered_count,
+            (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'read') as read_count
+        FROM broadcasts b
+        ORDER BY b.created_at DESC
     `);
     res.json({ broadcasts });
 });
 
-// Create a new broadcast
+// Get views for a specific broadcast (Sent History style)
+router.get('/broadcasts/:id/views', (req, res) => {
+    const { id } = req.params;
+
+    const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [id]);
+    if (!broadcast) {
+        return res.status(404).json({ error: 'Broadcast not found' });
+    }
+
+    const views = all(`
+        SELECT bv.*, u.nickname as user_nickname
+        FROM broadcast_views bv
+        LEFT JOIN users u ON bv.user_id = u.id
+        WHERE bv.broadcast_id = ?
+        ORDER BY bv.created_at DESC
+    `, [id]);
+
+    // Stats summary
+    const stats = {
+        total: views.length,
+        sent: views.filter(v => v.status === 'sent').length,
+        delivered: views.filter(v => v.status === 'delivered').length,
+        read: views.filter(v => v.status === 'read').length
+    };
+
+    res.json({ broadcast, views, stats });
+});
+
+// Create a new broadcast (with max_views support)
 router.post('/broadcasts', (req, res) => {
-    const { message, imageUrl, startTime, endTime } = req.body;
+    const { message, imageUrl, startTime, endTime, maxViews, priority } = req.body;
 
     if (!message || !startTime || !endTime) {
         return res.status(400).json({ error: 'Message, start time, and end time are required' });
     }
 
     run(`
-        INSERT INTO broadcasts (message, image_url, start_time, end_time)
-        VALUES (?, ?, ?, ?)
-    `, [message, imageUrl, startTime, endTime]);
+        INSERT INTO broadcasts (message, image_url, start_time, end_time, max_views, priority)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `, [message, imageUrl, startTime, endTime, maxViews || null, priority || 0]);
 
     const broadcast = get('SELECT * FROM broadcasts ORDER BY id DESC LIMIT 1');
-    log('admin', 'broadcast_created', broadcast.id.toString(), { message: message.substring(0, 50) });
+    log('admin', 'broadcast_created', broadcast.id.toString(), { message: message.substring(0, 50), maxViews });
 
     res.json({ broadcast });
 });
 
-// Delete a broadcast
+// Update broadcast max_views
+router.put('/broadcasts/:id', (req, res) => {
+    const { id } = req.params;
+    const { maxViews, priority } = req.body;
+
+    if (maxViews !== undefined) {
+        run('UPDATE broadcasts SET max_views = ? WHERE id = ?', [maxViews || null, id]);
+    }
+    if (priority !== undefined) {
+        run('UPDATE broadcasts SET priority = ? WHERE id = ?', [priority, id]);
+    }
+
+    const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [id]);
+    res.json({ broadcast });
+});
+
+// Delete a broadcast (and its views)
 router.delete('/broadcasts/:id', (req, res) => {
     const { id } = req.params;
+    run('DELETE FROM broadcast_views WHERE broadcast_id = ?', [id]);
     run('DELETE FROM broadcasts WHERE id = ?', [id]);
     log('admin', 'broadcast_deleted', id);
     res.json({ success: true });

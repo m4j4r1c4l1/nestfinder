@@ -235,7 +235,7 @@ export default {
         restoreConfirmButton: 'Sí, Restaurar',
         sameKeyError: 'Esta es la clave de recuperación de tu cuenta actual. Ya estás conectado con esta cuenta.',
         // Swipe Direction
-        swipeDirection: 'Deslizar para Eliminar',
+        swipeDirection: 'Borrar Mensajes',
         swipe: {
             right: '→ Deslizar a la derecha',
             left: '← Deslizar a la izquierda',

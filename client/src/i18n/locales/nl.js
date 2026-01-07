@@ -200,7 +200,7 @@ export default {
         restoreConfirmButton: 'Ja, Herstellen',
         sameKeyError: 'Dit is de herstelsleutel van je huidige account. Je bent al ingelogd met dit account.',
         // Swipe Direction
-        swipeDirection: 'Veeg om te Verwijderen',
+        swipeDirection: 'Berichten verwijderen',
         swipe: {
             right: '→ Veeg naar rechts',
             left: '← Veeg naar links',

@@ -228,6 +228,38 @@ export const initDatabase = async () => {
     db.run("ALTER TABLE broadcasts ADD COLUMN image_url TEXT");
   } catch (e) { /* Column exists */ }
 
+  // Migration: Add max_views to broadcasts (limit how many times a user sees it)
+  try {
+    db.run("ALTER TABLE broadcasts ADD COLUMN max_views INTEGER DEFAULT NULL");
+  } catch (e) { /* Column exists */ }
+
+  // Migration: Add priority to broadcasts (higher shows first)
+  try {
+    db.run("ALTER TABLE broadcasts ADD COLUMN priority INTEGER DEFAULT 0");
+  } catch (e) { /* Column exists */ }
+
+  // Broadcast Views table (tracks per-user broadcast delivery status)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS broadcast_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      broadcast_id INTEGER NOT NULL,
+      user_id TEXT NOT NULL,
+      status TEXT DEFAULT 'sent' CHECK (status IN ('sent', 'delivered', 'read')),
+      view_count INTEGER DEFAULT 0,
+      first_seen_at DATETIME,
+      delivered_at DATETIME,
+      read_at DATETIME,
+      dismissed BOOLEAN DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (broadcast_id) REFERENCES broadcasts(id),
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      UNIQUE(broadcast_id, user_id)
+    );
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_broadcast ON broadcast_views(broadcast_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_user ON broadcast_views(user_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_status ON broadcast_views(status);`);
+
   // Daily ratings aggregation table
   db.run(`
     CREATE TABLE IF NOT EXISTS daily_ratings (
