@@ -716,11 +716,12 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 <SwipeableMessage
                                                     key={notification.id}
                                                     swipeDirection={swipeDirection} // Always enable swipe gesture
-                                                    hideButton={swipeEnabled} // Hide button UI if instant delete mode
+                                                    hideButton={!swipeEnabled} // Hide button UI if Instant Mode (Safe Delete OFF)
                                                     isDeleting={isDeleting}
                                                     onSwipeDelete={() => {
-                                                        // Instant delete if swipe is enabled
-                                                        if (swipeEnabled) {
+                                                        // If Safe Delete is OFF (Instant Mode), delete immediately
+                                                        // If Safe Delete is ON, trigger confirmation/reveal (handleDeleteClick)
+                                                        if (!swipeEnabled) {
                                                             performDelete(notification.id, 'received');
                                                         } else {
                                                             handleDeleteClick(null, notification.id, 'received');
@@ -898,10 +899,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 <SwipeableMessage
                                                     key={msg.id}
                                                     swipeDirection={swipeDirection}
-                                                    hideButton={swipeEnabled}
+                                                    hideButton={!swipeEnabled}
                                                     isDeleting={isDeleting}
                                                     onSwipeDelete={() => {
-                                                        if (swipeEnabled) {
+                                                        if (!swipeEnabled) {
                                                             performDelete(msg.id, 'sent');
                                                         } else {
                                                             handleDeleteClick(null, msg.id, 'sent');

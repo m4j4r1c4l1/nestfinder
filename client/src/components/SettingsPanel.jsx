@@ -695,7 +695,7 @@ const DoveToggle = ({ value, onChange }) => {
                 {/* Thumb with roller/chick */}
                 <div style={{
                     position: 'absolute',
-                    top: '4px',
+                    top: '1px',
                     left: thumbLeft,
                     width: '100px',
                     height: '40px',
@@ -1979,11 +1979,11 @@ const SettingsPanel = ({ onClose }) => {
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid var(--color-border)'
                     }}>
-                        <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>🔥 {t('settings.deleteActions') || 'Delete Actions'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                {t('settings.delete.desc') || 'Choose how you want to delete messages.'}
-                            </div>
+                        <div className="card-header flex-between items-center" style={{ borderBottom: 'none', paddingBottom: '0.5rem' }}>
+                            <h3 className="card-title" style={{ fontSize: '1rem' }}>{t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}</h3>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                            {t('settings.delete.desc') || 'Choose how you want to delete messages.'}
                         </div>
 
                         {/* Swipe Enable Toggle */}
@@ -2004,7 +2004,7 @@ const SettingsPanel = ({ onClose }) => {
                             }}
                         >
                             <div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>Swipe to Delete</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>Safe Delete</div>
                             </div>
                             <div
                                 style={{
@@ -2043,16 +2043,25 @@ const SettingsPanel = ({ onClose }) => {
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
                             {swipeEnabled ? (
-                                <span>Swipe over a message to <b>delete it instantly</b>.</span>
+                                <span>A <b>Delete</b> button will appear upon swiping over a message to delete it.</span>
                             ) : (
-                                <span>Swipe disabled. <b>Hover</b> over a message to see the delete button.</span>
+                                <span>You can now delete a message just by swiping over it.</span>
                             )}
+                        </div>
+
+                        {/* Tap to Select Text (Double Margin) */}
+                        <div style={{
+                            fontSize: '1rem', // Same as header size? Or smaller? User said "like the settings.delete.desc". Header is 1rem.
+                            fontWeight: 600,
+                            color: 'var(--color-text)',
+                            marginTop: '1.5rem', // Twice the margin of badge (0.75rem * 2)
+                            marginBottom: '0.5rem' // Standard spacing to toggle
+                        }}>
+                            {t('settings.tapToSelect') || 'Tap to select the swipe direction'}
                         </div>
 
                         {/* Direction Toggle (Always visible, matched style NO PADDING) */}
                         <div style={{
-                            opacity: swipeEnabled ? 1 : 0.5,
-                            pointerEvents: swipeEnabled ? 'auto' : 'none',
                             transition: 'opacity 0.2s',
                             boxSizing: 'border-box'
                         }}>
