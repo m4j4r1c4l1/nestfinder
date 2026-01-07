@@ -18,6 +18,7 @@ import settingsRoutes, { setBroadcast as setSettingsBroadcast } from './routes/s
 import adminRoutes from './routes/admin.js';
 import notificationsRoutes from './routes/notifications.js';
 import webhookRoutes, { setBroadcast as setWebhookBroadcast } from './routes/webhook.js';
+import debugRoutes from './routes/debug.js';
 
 const app = express();
 // Enable trust proxy for Render/load balancers
@@ -90,6 +91,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/push', notificationsRoutes);
 app.use('/api/webhook', webhookRoutes);
+app.use('/api/debug', debugRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
