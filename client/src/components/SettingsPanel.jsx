@@ -590,7 +590,25 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
             }
         });
         observer.observe(trackRef.current);
-        return () => observer.disconnect();
+
+        // Global Safety Net: If user releases anywhere (even if we lost capture silently)
+        // This handles cases where Android browser swallows events but eventually fires a global up/cancel
+        const handleGlobalUp = (e) => {
+            if (isDragging.current) {
+                console.log('[SWIPE DEBUG] Global UP caught!');
+                addLog('GLOB_UP');
+                handleEnd();
+            }
+        };
+
+        window.addEventListener('pointerup', handleGlobalUp);
+        window.addEventListener('pointercancel', handleGlobalUp);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('pointerup', handleGlobalUp);
+            window.removeEventListener('pointercancel', handleGlobalUp);
+        };
     }, []);
 
     // Touch handlers
