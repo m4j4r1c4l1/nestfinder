@@ -645,30 +645,35 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     };
 
     const handleEnd = () => {
-        console.log('[SWIPE DEBUG] handleEnd CALLED:', { isDragging: isDragging.current, hasTrack: !!trackRef.current });
-        if (!isDragging.current || !trackRef.current) return;
-        isDragging.current = false;
+        try {
+            console.log('[SWIPE DEBUG] handleEnd CALLED:', { isDragging: isDragging.current, hasTrack: !!trackRef.current });
+            if (!isDragging.current || !trackRef.current) return;
+            isDragging.current = false;
 
-        const trackWidth = trackRef.current.offsetWidth;
-        const thumbWidth = 100;
-        const threshold = trackWidth * 0.25;
+            const trackWidth = trackRef.current.offsetWidth;
+            const thumbWidth = 100;
+            const threshold = trackWidth * 0.25;
 
-        // Read from REF to avoid stale closure
-        const finalOffset = dragOffsetRef.current;
-        console.log('[SWIPE DEBUG] handleEnd:', { value, finalOffset, threshold });
+            // Read from REF to avoid stale closure
+            const finalOffset = dragOffsetRef.current;
+            console.log('[SWIPE DEBUG] handleEnd:', { value, finalOffset, threshold });
 
-        if (value === null) {
-            if (finalOffset > 50) onChange('right');
-            else if (finalOffset < -50) onChange('left');
-        } else if (value === 'left') {
-            if (finalOffset > threshold) onChange('right');
-        } else if (value === 'right') {
-            if (finalOffset < -threshold) onChange('left');
+            if (value === null) {
+                if (finalOffset > 50) onChange('right');
+                else if (finalOffset < -50) onChange('left');
+            } else if (value === 'left') {
+                if (finalOffset > threshold) onChange('right');
+            } else if (value === 'right') {
+                if (finalOffset < -threshold) onChange('left');
+            }
+
+            dragOffsetRef.current = null;
+            setDragOffset(null);
+            addLog(`END v:${value || 'null'}→snap`);
+        } catch (err) {
+            addLog(`ERR: ${err.message}`);
+            console.error(err);
         }
-
-        dragOffsetRef.current = null;
-        setDragOffset(null);
-        addLog(`END v:${value || 'null'}→snap`);
     };
 
     // Pointer Event Handlers (unified for touch/mouse, better iOS support)
