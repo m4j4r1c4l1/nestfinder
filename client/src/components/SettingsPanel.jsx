@@ -1980,10 +1980,10 @@ const SettingsPanel = ({ onClose }) => {
                         border: '1px solid var(--color-border)'
                     }}>
                         <div className="card-header flex-between items-center" style={{ borderBottom: 'none', paddingBottom: '0.5rem' }}>
-                            <h3 className="card-title" style={{ fontSize: '1rem' }}>{t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}</h3>
+                            <h3 className="card-title" style={{ fontSize: '1rem' }}>🔥 {t('settings.deleteActions') || 'Delete Messages'}</h3>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                            {t('settings.delete.desc') || 'Choose how you want to delete messages.'}
+                            {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
                         </div>
 
                         {/* Swipe Enable Toggle */}
@@ -2004,7 +2004,7 @@ const SettingsPanel = ({ onClose }) => {
                             }}
                         >
                             <div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>Safe Delete</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t('settings.safeDelete') || 'Safe Delete'}</div>
                             </div>
                             <div
                                 style={{
@@ -2049,13 +2049,12 @@ const SettingsPanel = ({ onClose }) => {
                             )}
                         </div>
 
-                        {/* Tap to Select Text (Double Margin) */}
+                        {/* Tap to Select Text (Double Margin, Performance Style) */}
                         <div style={{
-                            fontSize: '1rem', // Same as header size? Or smaller? User said "like the settings.delete.desc". Header is 1rem.
-                            fontWeight: 600,
-                            color: 'var(--color-text)',
-                            marginTop: '1.5rem', // Twice the margin of badge (0.75rem * 2)
-                            marginBottom: '0.5rem' // Standard spacing to toggle
+                            fontSize: '0.75rem',
+                            color: 'var(--color-text-secondary)',
+                            marginTop: '1.5rem', // Twice the margin of badge
+                            marginBottom: '0.5rem'
                         }}>
                             {t('settings.tapToSelect') || 'Tap to select the swipe direction'}
                         </div>
@@ -2086,11 +2085,11 @@ const SettingsPanel = ({ onClose }) => {
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
                             {swipeDirection === 'left' ? (
-                                <span>Messages will be deleted upon swiping <b>Left</b> over it.</span>
+                                <span>Swipe <b>left</b> over a message to delete it</span>
                             ) : swipeDirection === 'right' ? (
-                                <span>Messages will be deleted upon swiping <b>Right</b> over it.</span>
+                                <span>Swipe <b>right</b> over a message to delete it</span>
                             ) : (
-                                <span>Messages will be deleted upon swiping <b>Left</b> or <b>Right</b> over it.</span>
+                                <span>Swipe <b>left</b> or <b>right</b> over a message to delete it</span>
                             )}
                         </div>
                     </div>

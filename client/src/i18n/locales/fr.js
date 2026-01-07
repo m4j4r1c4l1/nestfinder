@@ -200,7 +200,11 @@ export default {
         sameKeyError: 'Ceci est la clé de récupération de votre compte actuel. Vous êtes déjà connecté avec ce compte.',
         // Swipe Direction
         swipeDirection: 'Supprimer les messages',
+        deleteSettingDesc: 'Select how you would like to delete a message',
+        safeDelete: 'Safe Delete',
+        tapToSelect: 'Tap to select the swipe direction',
         swipe: {
+            controlLabel: 'Swipe',
             right: '→ Glisser vers la droite',
             left: '← Glisser vers la gauche',
             desc: 'Glissez un message dans cette direction pour le supprimer.'

@@ -244,6 +244,7 @@ export default {
         swipeDirection: 'Delete Direction',
         deleteActions: 'Delete Messages',
         deleteSettingDesc: 'Select how you would like to delete a message',
+        safeDelete: 'Safe Delete',
         tapToSelect: 'Tap to select the swipe direction',
         swipe: {
             right: '→ Swipe Right',

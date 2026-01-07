@@ -201,7 +201,11 @@ export default {
         sameKeyError: '这是您当前帐户的恢复密钥。您已经使用此帐户登录。',
         // Swipe Direction
         swipeDirection: '删除消息',
+        deleteSettingDesc: 'Select how you would like to delete a message',
+        safeDelete: 'Safe Delete',
+        tapToSelect: 'Tap to select the swipe direction',
         swipe: {
+            controlLabel: 'Swipe',
             right: '→ 向右滑动',
             left: '← 向左滑动',
             desc: '向这个方向滑动消息以删除。'

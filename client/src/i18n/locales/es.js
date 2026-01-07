@@ -236,10 +236,14 @@ export default {
         sameKeyError: 'Esta es la clave de recuperación de tu cuenta actual. Ya estás conectado con esta cuenta.',
         // Swipe Direction
         swipeDirection: 'Borrar Mensajes',
+        deleteSettingDesc: 'Selecciona cómo quieres eliminar un mensaje',
+        safeDelete: 'Borrado Seguro',
+        tapToSelect: 'Toca para seleccionar la dirección de deslizamiento',
         swipe: {
             right: '→ Deslizar a la derecha',
             left: '← Deslizar a la izquierda',
-            desc: 'Desliza un mensaje en esta dirección para eliminarlo.'
+            desc: 'Desliza un mensaje en esta dirección para eliminarlo.',
+            controlLabel: 'Deslizar'
         },
         // Message Retention
         messageRetention: 'Retención de Mensajes',
