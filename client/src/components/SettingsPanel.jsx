@@ -852,27 +852,39 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
             if (!isDragging.current || !trackRef.current) return;
             isDragging.current = false;
 
-            const trackWidth = trackRef.current.offsetWidth;
+            const effectiveWidth = Math.max(trackRef.current.offsetWidth, 200);
             const thumbWidth = 100;
-            const threshold = trackWidth * 0.25;
+            const padding = 4;
 
-            // Read from REF to avoid stale closure
-            const finalOffset = dragOffsetRef.current;
-            console.log('[SWIPE DEBUG] handleEnd:', { value, finalOffset, threshold });
+            // Calculate current base position to determine final absolute position
+            const posLeft = padding;
+            const posRight = effectiveWidth - thumbWidth - padding;
+            const posCenter = (effectiveWidth - thumbWidth) / 2;
 
-            if (value === null) {
-                if (finalOffset > 50) onChange('right');
-                else if (finalOffset < -50) onChange('left');
-            } else if (value === 'left') {
-                if (finalOffset > threshold) onChange('right');
-            } else if (value === 'right') {
-                if (finalOffset < -threshold) onChange('left');
+            let currentBase = posCenter;
+            if (value === 'left') currentBase = posLeft;
+            else if (value === 'right') currentBase = posRight;
+
+            // Final position of the thumb (left edge)
+            const finalPos = currentBase + dragOffsetRef.current;
+            const finalCenter = finalPos + (thumbWidth / 2);
+
+            // Zone thresholds (33% split)
+            const zoneLeft = effectiveWidth * 0.33;
+            const zoneRight = effectiveWidth * 0.66;
+
+            if (finalCenter < zoneLeft) {
+                onChange('left');
+            } else if (finalCenter > zoneRight) {
+                onChange('right');
+            } else {
+                onChange('both'); // Center/Both
             }
 
             dragOffsetRef.current = null;
             setDragOffset(null);
             const duration = Date.now() - gestureStartTime.current;
-            addLog(`END moves:${moveCount.current} ${duration}ms v:${value || 'null'}`);
+            addLog(`END moves:${moveCount.current} ${duration}ms v:${value || 'both'}`);
         } catch (err) {
             addLog(`ERR: ${err.message}`);
             console.error(err);
@@ -1408,7 +1420,7 @@ const SettingsPanel = ({ onClose }) => {
     const [retention, setRetention] = useState(() => localStorage.getItem('nestfinder_message_retention') || '1m');
 
     // Swipe Direction
-    const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || null);
+    const [swipeDirection, setSwipeDirection] = useState(() => localStorage.getItem('nestfinder_swipe_direction') || 'both');
 
     const handleSwipeChange = (dir) => {
         setSwipeDirection(dir);
