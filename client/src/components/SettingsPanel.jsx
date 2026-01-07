@@ -590,23 +590,75 @@ const DoveToggle = ({ value, onChange }) => {
     if (isLeft) thumbLeft = '4px';
     if (isRight) thumbLeft = 'calc(100% - 104px)';
 
-    // Emoji and transform
+    // Emoji and transform - roller points to where it IS (inverted from before)
     let emoji = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Chick for center
     let thumbTransform = 'none';
     if (isLeft) {
         emoji = '🛼';
-        thumbTransform = 'none'; // Dove faces RIGHT (where it can go)
+        thumbTransform = 'scaleX(-1)'; // Roller faces LEFT (where it is)
     }
     if (isRight) {
         emoji = '🛼';
-        thumbTransform = 'scaleX(-1)'; // Faces LEFT (where it can go)
+        thumbTransform = 'none'; // Roller faces RIGHT (where it is)
     }
 
-    // Status message for the gap area
-    let statusMessage = '';
-    if (isLeft) statusMessage = 'Swipe left to delete';
-    if (isRight) statusMessage = 'Swipe right to delete';
-    if (isCenter) statusMessage = 'Swipe either way';
+    // Status messages for the gap areas
+    // When on edge: "Delete Messages <b>Left/Right</b>"
+    // When center: symmetric text on both sides
+    let statusContent = null;
+    if (isLeft) {
+        statusContent = (
+            <span style={{
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: '0.75rem',
+                pointerEvents: 'none',
+                position: 'absolute',
+                left: '116px',
+                whiteSpace: 'nowrap'
+            }}>
+                Delete Messages <b>Left</b>
+            </span>
+        );
+    } else if (isRight) {
+        statusContent = (
+            <span style={{
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: '0.75rem',
+                pointerEvents: 'none',
+                position: 'absolute',
+                right: '116px',
+                whiteSpace: 'nowrap'
+            }}>
+                Delete Messages <b>Right</b>
+            </span>
+        );
+    } else {
+        // Center: symmetric text on both sides
+        statusContent = (
+            <>
+                <span style={{
+                    color: 'rgba(255,255,255,0.9)',
+                    fontSize: '0.7rem',
+                    pointerEvents: 'none',
+                    position: 'absolute',
+                    left: '8px',
+                    whiteSpace: 'nowrap'
+                }}>
+                    ← Left
+                </span>
+                <span style={{
+                    color: 'rgba(255,255,255,0.9)',
+                    fontSize: '0.7rem',
+                    pointerEvents: 'none',
+                    position: 'absolute',
+                    right: '8px',
+                    whiteSpace: 'nowrap'
+                }}>
+                    Right →
+                </span>
+            </>
+        );
+    }
 
     return (
         <div>
@@ -617,33 +669,17 @@ const DoveToggle = ({ value, onChange }) => {
                     width: '100%',
                     height: '48px',
                     boxSizing: 'border-box',
-                    background: '#3b82f6', // Always blue
+                    background: '#3b82f6',
                     borderRadius: 'var(--radius-md)',
                     border: '1px solid var(--color-border)',
                     cursor: 'pointer',
-                    userSelect: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: isCenter ? 'center' : (isLeft ? 'flex-end' : 'flex-start'),
-                    padding: '0 12px'
+                    userSelect: 'none'
                 }}
             >
                 {/* Status text in the gap */}
-                <span style={{
-                    color: 'rgba(255,255,255,0.9)',
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    pointerEvents: 'none',
-                    position: 'absolute',
-                    left: isLeft ? '116px' : (isRight ? 'auto' : '50%'),
-                    right: isRight ? '116px' : 'auto',
-                    transform: isCenter ? 'translateX(-50%)' : 'none',
-                    whiteSpace: 'nowrap'
-                }}>
-                    {statusMessage}
-                </span>
+                {statusContent}
 
-                {/* Thumb with dove/chick */}
+                {/* Thumb with roller/chick */}
                 <div style={{
                     position: 'absolute',
                     top: '4px',
@@ -1931,7 +1967,7 @@ const SettingsPanel = ({ onClose }) => {
                         border: '1px solid var(--color-border)'
                     }}>
                         <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>⏳ {t('settings.messageRetention') || 'Retention Period'}</div>
+                            <div style={{ fontWeight: 500 }}>⏱️ {t('settings.messageRetention') || 'Retention Period'}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                                 {t('settings.retention.desc') || 'Auto-delete messages older than selected period.'}
                             </div>
