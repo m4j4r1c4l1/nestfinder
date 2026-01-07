@@ -727,7 +727,7 @@ return (
         </div>
     </div>
 );
-};
+
 
 
 const RetentionSlider = ({ value, onChange }) => {
