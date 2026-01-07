@@ -575,11 +575,31 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     // Stable geometry for the current drag session
     const dragBase = React.useRef(0); // Stable geometry for drag session
     const dragMax = React.useRef(0);
+    const watchdogTimer = React.useRef(null); // Safety reset timer
 
     // Visual Debug Logger (for iOS testing without console)
     const [debugLog, setDebugLog] = useState([]);
-    const addLog = (msg) => setDebugLog(prev => [...prev.slice(-14), msg]); // Keep last 15
+    const addLog = (msg) => setDebugLog(prev => [...prev.slice(-49), msg]); // Keep last 50
     const wasJustDragging = React.useRef(false); // Track transition for SNAP log
+
+    // Helpers to manage watchdog
+    const clearWatchdog = () => {
+        if (watchdogTimer.current) {
+            clearTimeout(watchdogTimer.current);
+            watchdogTimer.current = null;
+        }
+    };
+
+    const startWatchdog = () => {
+        clearWatchdog();
+        watchdogTimer.current = setTimeout(() => {
+            if (isDragging.current) {
+                console.log('[SWIPE DEBUG] Watchdog Triggered!');
+                addLog('🐶 WATCHDOG');
+                handleEnd();
+            }
+        }, 1500); // 1.5s silence = reset
+    };
 
     // Robust width tracking
     React.useLayoutEffect(() => {
@@ -613,6 +633,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
             observer.disconnect();
             window.removeEventListener('pointerup', handleGlobalUp);
             window.removeEventListener('pointercancel', handleGlobalUp);
+            clearWatchdog(); // Clear watchdog on unmount
         };
     }, []);
 
@@ -640,29 +661,27 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
         console.log('[SWIPE DEBUG] handleStart:', {
             value,
-            clientX,
-            trackWidth: width,
-            thumbRect_left: thumbRect.left,
-            trackRect_left: trackRect.left,
-            effectiveX,
-            dragBase: dragBase.current,
-            dragMax: dragMax.current
+            clientX
         });
 
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
+
+        startWatchdog();
     };
 
     const handleMove = (clientX) => {
         if (!isDragging.current) return;
         const delta = clientX - startX.current;
-        console.log('[SWIPE DEBUG] handleMove:', { clientX, startX: startX.current, delta });
         dragOffsetRef.current = delta; // Update ref for handleEnd
         setDragOffset(delta);
+
+        startWatchdog(); // Reset timer on every move
     };
 
     const handleEnd = () => {
+        clearWatchdog(); // Stop the timer
         try {
             console.log('[SWIPE DEBUG] handleEnd CALLED:', { isDragging: isDragging.current, hasTrack: !!trackRef.current });
             if (!isDragging.current || !trackRef.current) return;
@@ -697,10 +716,14 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     // Pointer Event Handlers (unified for touch/mouse, better iOS support)
     const onPointerDown = (e) => {
         // Capture pointer to track even if it leaves the element
-        e.target.setPointerCapture(e.pointerId);
+        try {
+            e.target.setPointerCapture(e.pointerId);
+        } catch (err) {
+            addLog(`CAP_ERR:${err.message}`);
+        }
         e.preventDefault();
-        addLog('────────────'); // Separator for new gesture
-        addLog(`DOWN x:${Math.round(e.clientX)} v:${value || 'null'}`);
+        addLog('────────────');
+        addLog(`DOWN id:${e.pointerId} type:${e.pointerType || '?'}`);
         handleStart(e.clientX);
     };
 
