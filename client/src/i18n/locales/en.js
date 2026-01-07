@@ -199,6 +199,8 @@ export default {
         notifications: 'Notifications',
         popupMessages: 'Real-time Popups',
         popupDescription: 'Show messages immediately as they arrive',
+        popupEnabledInfo: 'With the current settings, messages will be displayed as they are received.',
+        popupDisabledInfo: 'Messages will not appear as popups.',
         shareApp: 'Share NestFinder',
         scanToShare: 'Scan to open NestFinder',
         copyLink: 'Copy Link',
