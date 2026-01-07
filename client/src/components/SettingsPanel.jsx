@@ -579,7 +579,13 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     // Visual Debug Logger (for iOS testing without console)
     const [debugLog, setDebugLog] = useState([]);
-    const addLog = (msg) => setDebugLog(prev => [...prev.slice(-49), msg]); // Keep last 50
+    const logRef = React.useRef([]); // Sync source for API sending
+
+    const addLog = (msg) => {
+        logRef.current = [...logRef.current.slice(-499), msg]; // Keep 500 in Ref
+        setDebugLog(prev => [...prev.slice(-49), msg]); // Keep 50 in UI (performance)
+    };
+
     const wasJustDragging = React.useRef(false); // Track transition for SNAP log
 
     // Helpers to manage watchdog
@@ -912,7 +918,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
-                                        logs: debugLog,
+                                        logs: logRef.current,
                                         platform: navigator.platform,
                                         userAgent: navigator.userAgent
                                     })
