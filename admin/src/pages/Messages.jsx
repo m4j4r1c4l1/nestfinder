@@ -423,7 +423,7 @@ const Messages = () => {
                     {/* OUTBOX TAB */}
                     {/* SENT (OUTBOX) TAB */}
                     {activeTab === 'outbox' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
                             <HistorySection users={subscribers} totalSent={stats.notificationMetrics?.total || 0} />
                         </div>
                     )}
