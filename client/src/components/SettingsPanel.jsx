@@ -1993,11 +1993,13 @@ const SettingsPanel = ({ onClose }) => {
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
                                 cursor: 'pointer',
-                                marginBottom: '1rem',
+                                marginBottom: '0.5rem',
                                 padding: '0.5rem',
                                 background: 'var(--color-bg-tertiary)',
                                 borderRadius: 'var(--radius-md)',
-                                border: '1px solid var(--color-border)'
+                                border: '1px solid var(--color-border)',
+                                height: '42px', // Fixed height for matching
+                                boxSizing: 'border-box'
                             }}
                         >
                             <div>
@@ -2027,15 +2029,7 @@ const SettingsPanel = ({ onClose }) => {
                             </div>
                         </div>
 
-                        {/* Direction Toggle (Always visible) */}
-                        <div style={{ padding: '0 0.5rem', opacity: swipeEnabled ? 1 : 0.5, pointerEvents: swipeEnabled ? 'auto' : 'none', transition: 'opacity 0.2s' }}>
-                            <DoveToggle
-                                value={swipeDirection}
-                                onChange={handleSwipeChange}
-                            />
-                        </div>
-
-                        {/* Info Badge */}
+                        {/* Info Badge - BETWEEN components */}
                         <div style={{
                             padding: 'var(--space-2)',
                             background: 'rgba(59, 130, 246, 0.1)',
@@ -2044,18 +2038,37 @@ const SettingsPanel = ({ onClose }) => {
                             color: 'var(--color-primary)',
                             fontSize: '0.85rem',
                             textAlign: 'center',
-                            marginTop: '0.75rem',
+                            marginBottom: '0.5rem',
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
-                            {!swipeEnabled ? (
-                                <span>A delete button will appear when hovering over a message.</span>
-                            ) : swipeDirection === 'left' ? (
-                                <span>Messages will be deleted upon swiping <b>Left</b> over it.</span>
-                            ) : swipeDirection === 'right' ? (
-                                <span>Messages will be deleted upon swiping <b>Right</b> over it.</span>
+                            {swipeEnabled ? (
+                                <span>Swipe over a message to <b>delete it instantly</b>.</span>
                             ) : (
-                                <span>Messages will be deleted upon swiping <b>Left</b> or <b>Right</b> over it.</span>
+                                <span>Swipe disabled. <b>Hover</b> over a message to see the delete button.</span>
                             )}
+                        </div>
+
+                        {/* Direction Toggle (Always visible, matched style) */}
+                        <div style={{
+                            padding: '0.5rem',
+                            background: 'var(--color-bg-tertiary)',
+                            borderRadius: 'var(--radius-md)',
+                            border: '1px solid var(--color-border)',
+                            opacity: swipeEnabled ? 1 : 0.5,
+                            pointerEvents: swipeEnabled ? 'auto' : 'none',
+                            transition: 'opacity 0.2s',
+                            height: '42px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxSizing: 'border-box'
+                        }}>
+                            <div style={{ width: '100%' }}>
+                                <DoveToggle
+                                    value={swipeDirection}
+                                    onChange={handleSwipeChange}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

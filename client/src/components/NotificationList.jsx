@@ -368,10 +368,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         setMessageToDelete({ id, type });
     };
 
-    const confirmDelete = async (e) => {
-        if (e) e.stopPropagation();
-        if (!messageToDelete) return;
-        const { id, type } = messageToDelete;
+    const performDelete = async (id, type) => {
         try {
             if (type === 'received') {
                 await api.deleteNotification(id);
@@ -382,9 +379,15 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
             }
         } catch (err) {
             console.error('Failed to delete', err);
-        } finally {
-            setMessageToDelete(null);
         }
+    };
+
+    const confirmDelete = async (e) => {
+        if (e) e.stopPropagation();
+        if (!messageToDelete) return;
+        const { id, type } = messageToDelete;
+        await performDelete(id, type);
+        setMessageToDelete(null);
     };
 
     const cancelDelete = (e) => {
@@ -714,7 +717,14 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     key={notification.id}
                                                     swipeDirection={swipeEnabled ? swipeDirection : 'none'} // Disable swipe if disabled
                                                     isDeleting={isDeleting}
-                                                    onSwipeDelete={() => handleDeleteClick(null, notification.id, 'received')}
+                                                    onSwipeDelete={() => {
+                                                        // Instant delete if swipe is enabled
+                                                        if (swipeEnabled) {
+                                                            performDelete(notification.id, 'received');
+                                                        } else {
+                                                            handleDeleteClick(null, notification.id, 'received');
+                                                        }
+                                                    }}
                                                     onConfirm={() => confirmDelete()}
                                                     onCancel={cancelDelete}
                                                     className={`notification-item ${notification.read ? 'read' : 'unread'}`}
@@ -886,9 +896,15 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                             return (
                                                 <SwipeableMessage
                                                     key={msg.id}
-                                                    swipeDirection={swipeDirection}
+                                                    swipeDirection={swipeEnabled ? swipeDirection : 'none'}
                                                     isDeleting={isDeleting}
-                                                    onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
+                                                    onSwipeDelete={() => {
+                                                        if (swipeEnabled) {
+                                                            performDelete(msg.id, 'sent');
+                                                        } else {
+                                                            handleDeleteClick(null, msg.id, 'sent');
+                                                        }
+                                                    }}
                                                     onConfirm={() => confirmDelete()}
                                                     onCancel={cancelDelete}
                                                     className="notification-item read"
