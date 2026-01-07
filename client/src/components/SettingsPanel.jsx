@@ -591,12 +591,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     // Touch handlers
     const handleStart = (clientX) => {
-        console.log('Swipe: handleStart', clientX, trackRef.current);
         if (!trackRef.current) return;
-        // Always update trackWidth when drag starts
-        // We removed state, so this comment is legacy, but let's log the width
-        console.log('Swipe: width on start', trackRef.current.offsetWidth);
-
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
