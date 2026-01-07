@@ -135,7 +135,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
 };
 
 // Swipeable Message Item Component with Progressive Blur
-const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', style, className, onClick }) => {
+const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', style, className, onClick, isDeleting }) => {
     const touchStartX = useRef(0);
     const touchCurrentX = useRef(0);
     const [swiping, setSwiping] = useState(false);
@@ -189,14 +189,20 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', s
 
         if (isValidSwipe) {
             onSwipeDelete();
+        } else {
+            setSwipeProgress(0);
         }
-
-        // Reset progress after touch ends
-        setSwipeProgress(0);
     };
 
-    // Calculate blur based on progress (max 8px blur at full swipe for stronger effect)
-    const blurAmount = swipeProgress * 8;
+    // Reset progress when deletion cancelled
+    useEffect(() => {
+        if (!isDeleting) setSwipeProgress(0);
+    }, [isDeleting]);
+
+    const effectiveProgress = isDeleting ? 1 : swipeProgress;
+
+    // Calculate blur based on progress (max 4px to match deletion overlay)
+    const blurAmount = effectiveProgress * 4;
 
     return (
         <div
@@ -220,7 +226,7 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', s
                 width: '100%',
                 height: '100%',
                 background: '#0f172a', // Dark background color
-                opacity: swipeProgress * 0.7, // Target 0.7 opacity at max
+                opacity: effectiveProgress * 0.7, // Target 0.7 opacity at max
                 zIndex: 10,
                 pointerEvents: 'none',
                 transition: swiping ? 'none' : 'opacity 0.2s ease-out'
@@ -228,7 +234,7 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', s
 
             {/* Content with Blur */}
             <div style={{
-                filter: swipeProgress > 0 ? `blur(${blurAmount}px)` : 'none',
+                filter: effectiveProgress > 0 ? `blur(${blurAmount}px)` : 'none',
                 transition: swiping ? 'none' : 'filter 0.2s ease-out',
                 height: '100%'
             }}>
@@ -649,6 +655,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 <SwipeableMessage
                                                     key={notification.id}
                                                     swipeDirection={swipeDirection}
+                                                    isDeleting={isDeleting}
                                                     onSwipeDelete={() => handleDeleteClick(null, notification.id, 'received')}
                                                     className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                                     onClick={() => {
@@ -790,6 +797,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                 <SwipeableMessage
                                                     key={msg.id}
                                                     swipeDirection={swipeDirection}
+                                                    isDeleting={isDeleting}
                                                     onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
                                                     className="notification-item read"
                                                     style={{
