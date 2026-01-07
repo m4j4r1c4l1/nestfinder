@@ -577,17 +577,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const dragMax = React.useRef(0);
     const watchdogTimer = React.useRef(null); // Safety reset timer
 
-    // Visual Debug Logger (for iOS testing without console)
-    const [debugLog, setDebugLog] = useState([]);
-    const logRef = React.useRef([]); // Sync source for API sending
-
-    const addLog = (msg) => {
-        logRef.current = [...logRef.current.slice(-499), msg]; // Keep 500 in Ref
-        setDebugLog(prev => [...prev.slice(-49), msg]); // Keep 50 in UI (performance)
-    };
-
-    const wasJustDragging = React.useRef(false); // Track transition for SNAP log
-
     // Helpers to manage watchdog
     const clearWatchdog = () => {
         if (watchdogTimer.current) {
@@ -600,8 +589,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         clearWatchdog();
         watchdogTimer.current = setTimeout(() => {
             if (isDragging.current) {
-                console.log('[SWIPE DEBUG] Watchdog Triggered!');
-                addLog('🐶 WATCHDOG');
                 handleEnd();
             }
         }, 500); // 0.5s silence = reset (fast recovery)
@@ -626,8 +613,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         // This handles cases where Android browser swallows events but eventually fires a global up/cancel
         const handleGlobalUp = (e) => {
             if (isDragging.current) {
-                console.log('[SWIPE DEBUG] Global UP caught!');
-                addLog('GLOB_UP');
                 handleEnd();
             }
         };
@@ -665,11 +650,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         dragBase.current = effectiveX;
         dragMax.current = pRight;
 
-        console.log('[SWIPE DEBUG] handleStart:', {
-            value,
-            clientX
-        });
-
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
@@ -689,7 +669,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const handleEnd = () => {
         clearWatchdog(); // Stop the timer
         try {
-            console.log('[SWIPE DEBUG] handleEnd CALLED:', { isDragging: isDragging.current, hasTrack: !!trackRef.current });
             if (!isDragging.current || !trackRef.current) return;
             isDragging.current = false;
 
@@ -699,7 +678,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
             // Read from REF to avoid stale closure
             const finalOffset = dragOffsetRef.current;
-            console.log('[SWIPE DEBUG] handleEnd:', { value, finalOffset, threshold });
 
             if (value === null) {
                 if (finalOffset > 50) onChange('right');
@@ -712,9 +690,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
             dragOffsetRef.current = null;
             setDragOffset(null);
-            addLog(`END v:${value || 'null'}→snap`);
         } catch (err) {
-            addLog(`ERR: ${err.message}`);
             console.error(err);
         }
     };
@@ -725,11 +701,9 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         try {
             e.target.setPointerCapture(e.pointerId);
         } catch (err) {
-            addLog(`CAP_ERR:${err.message}`);
+            // Silently handle capture errors
         }
         e.preventDefault();
-        addLog('────────────');
-        addLog(`DOWN id:${e.pointerId} type:${e.pointerType || '?'}`);
         handleStart(e.clientX);
     };
 
@@ -740,20 +714,17 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     const onPointerUp = (e) => {
         e.target.releasePointerCapture(e.pointerId);
-        addLog(`UP off:${dragOffsetRef.current}`);
         handleEnd();
     };
 
     const onPointerCancel = (e) => {
         // Handle iOS edge cases where touch is cancelled
-        addLog('CANCEL');
         handleEnd();
     };
 
     const onLostPointerCapture = (e) => {
         // Fallback: fires when capture is lost for ANY reason
         // This ensures handleEnd always runs even if onPointerUp misses
-        addLog('LOST');
         if (isDragging.current) {
             handleEnd();
         }
@@ -800,27 +771,12 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         // Use STABLE geometry captured at toggle start
         let rawPos = dragBase.current + dragOffset;
 
-        console.log('[SWIPE DEBUG] Render:', {
-            value,
-            dragBase: dragBase.current,
-            dragMax: dragMax.current,
-            dragOffset,
-            rawPos,
-            clampedPos: Math.max(4, Math.min(dragMax.current, rawPos))
-        });
-
         // Strict Clamping using captured max
         // Left limit is always padding (4)
         rawPos = Math.max(4, Math.min(dragMax.current, rawPos));
         translateX = rawPos;
-        wasJustDragging.current = true;
     } else {
         translateX = currentBase;
-        // Log only on transition from dragging to snapped
-        if (wasJustDragging.current) {
-            addLog(`SNAP tx:${Math.round(translateX)} v:${value || 'null'}`);
-            wasJustDragging.current = false;
-        }
     }
 
     style.transform = `translateX(${translateX}px)`;
@@ -886,63 +842,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', color: 'var(--color-text-secondary)', fontSize: '0.7rem' }}>
                 <span>← Left</span>
                 <span>Right →</span>
-            </div>
-            {/* Visual Debug Log (for iOS testing) */}
-            <div style={{
-                marginTop: '8px',
-                padding: '4px',
-                background: '#1a1a2e',
-                borderRadius: '4px',
-                fontSize: '0.6rem',
-                fontFamily: 'monospace',
-                color: '#0f0',
-                maxHeight: '120px',
-                overflowY: 'auto'
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', borderBottom: '1px solid #333' }}>
-                    <span>DEBUG LOG</span>
-                    <button
-                        onClick={async () => {
-                            try {
-                                let API_URL = import.meta.env.VITE_API_URL;
-                                if (!API_URL) {
-                                    // Fallback logic
-                                    if (window.location.hostname.includes('github.io') || window.location.hostname.includes('onrender.com')) {
-                                        API_URL = 'https://nestfinder-sa1g.onrender.com';
-                                    } else {
-                                        API_URL = 'http://localhost:3001';
-                                    }
-                                }
-
-                                const res = await fetch(`${API_URL}/api/debug/logs`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        logs: logRef.current,
-                                        platform: navigator.platform,
-                                        userAgent: navigator.userAgent
-                                    })
-                                });
-                                if (res.ok) alert('Logs sent!');
-                                else alert('Failed to send logs');
-                            } catch (e) {
-                                alert('Error: ' + e.message);
-                            }
-                        }}
-                        style={{
-                            background: '#333',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '2px',
-                            fontSize: '0.6rem',
-                            cursor: 'pointer',
-                            padding: '1px 4px'
-                        }}
-                    >
-                        SEND LOGS
-                    </button>
-                </div>
-                {debugLog.map((log, i) => <div key={i}>{log}</div>)}
             </div>
         </div>
     );
