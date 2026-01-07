@@ -243,7 +243,7 @@ export default {
         swipe: {
             right: '→ Swipe Right',
             left: '← Swipe Left',
-            desc: 'Choose the sense of the swiping gesture over a message to delete it.',
+            desc: 'Tap on the swiping gesture direction you prefer to delete a message.',
             controlLabel: 'Swipe'
         },
         // Message Retention
