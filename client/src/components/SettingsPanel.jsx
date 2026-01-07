@@ -592,6 +592,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     // Touch handlers
     const handleStart = (clientX) => {
         if (!trackRef.current) return;
+        setTrackWidth(trackRef.current.offsetWidth); // Force update to ensure precision
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
