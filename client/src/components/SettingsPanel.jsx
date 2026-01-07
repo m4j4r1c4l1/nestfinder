@@ -915,7 +915,7 @@ const RetentionSlider = ({ value, onChange }) => {
                             // Custom transform for strict positioning of 1y and infinity
                             let labelStyle = {
                                 position: 'absolute',
-                                bottom: '16px',
+                                bottom: '17px',
                                 left: '50%',
                                 transform: 'translateX(-50%)',
                                 fontSize: '0.65rem',
@@ -998,10 +998,9 @@ const RetentionSlider = ({ value, onChange }) => {
                     color: 'var(--color-primary)',
                     fontSize: '0.85rem',
                     textAlign: 'center',
-                    marginTop: '1rem',
+                    marginTop: '1.5rem',
                     animation: 'fadeIn 0.3s ease-out'
                 }}>
-                    <span style={{ marginRight: '0.5rem' }}>ℹ️</span>
                     {infoMessage}
                 </div>
             )}
