@@ -614,6 +614,17 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         dragBase.current = effectiveX;
         dragMax.current = pRight;
 
+        console.log('[SWIPE DEBUG] handleStart:', {
+            value,
+            clientX,
+            trackWidth: width,
+            thumbRect_left: thumbRect.left,
+            trackRect_left: trackRect.left,
+            effectiveX,
+            dragBase: dragBase.current,
+            dragMax: dragMax.current
+        });
+
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
@@ -622,6 +633,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const handleMove = (clientX) => {
         if (!isDragging.current) return;
         const delta = clientX - startX.current;
+        console.log('[SWIPE DEBUG] handleMove:', { clientX, startX: startX.current, delta });
         setDragOffset(delta);
     };
 
@@ -710,6 +722,15 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     if (dragOffset !== null) {
         // Use STABLE geometry captured at toggle start
         let rawPos = dragBase.current + dragOffset;
+
+        console.log('[SWIPE DEBUG] Render:', {
+            value,
+            dragBase: dragBase.current,
+            dragMax: dragMax.current,
+            dragOffset,
+            rawPos,
+            clampedPos: Math.max(4, Math.min(dragMax.current, rawPos))
+        });
 
         // Strict Clamping using captured max
         // Left limit is always padding (4)
