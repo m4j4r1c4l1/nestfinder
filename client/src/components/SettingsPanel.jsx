@@ -579,6 +579,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     // Visual Debug Logger (for iOS testing without console)
     const [debugLog, setDebugLog] = useState([]);
     const addLog = (msg) => setDebugLog(prev => [...prev.slice(-14), msg]); // Keep last 15
+    const wasJustDragging = React.useRef(false); // Track transition for SNAP log
 
     // Robust width tracking
     React.useLayoutEffect(() => {
@@ -760,11 +761,13 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         // Left limit is always padding (4)
         rawPos = Math.max(4, Math.min(dragMax.current, rawPos));
         translateX = rawPos;
+        wasJustDragging.current = true;
     } else {
         translateX = currentBase;
-        // Log only when transitioning from dragging to snapped
-        if (dragOffsetRef.current !== null) {
+        // Log only on transition from dragging to snapped
+        if (wasJustDragging.current) {
             addLog(`SNAP tx:${Math.round(translateX)} v:${value || 'null'}`);
+            wasJustDragging.current = false;
         }
     }
 
