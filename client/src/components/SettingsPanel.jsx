@@ -1262,7 +1262,7 @@ const RetentionSlider = ({ value, onChange }) => {
                                 left: '50%',
                                 transform: 'translateX(-50%)',
                                 fontSize: '0.65rem',
-                                color: 'var(--color-text-tertiary)',
+                                color: 'var(--color-text-secondary)',
                                 whiteSpace: 'nowrap'
                             };
 
@@ -1330,23 +1330,6 @@ const RetentionSlider = ({ value, onChange }) => {
                     }} />
                 </div>
             </div>
-
-            {/* Info Message (Moved below track) */}
-            {infoMessage && (
-                <div style={{
-                    padding: 'var(--space-2)',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--color-primary)',
-                    fontSize: '0.85rem',
-                    textAlign: 'center',
-                    marginTop: '1.5rem',
-                    animation: 'fadeIn 0.3s ease-out'
-                }}>
-                    {infoMessage}
-                </div>
-            )}
         </div>
     );
 };
@@ -1917,7 +1900,7 @@ const SettingsPanel = ({ onClose }) => {
                             marginTop: '0.75rem',
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
-                            {popupEnabled ? (t('settings.popupEnabledInfo') || 'With the current settings, messages will be displayed as they are received.') : (t('settings.popupDisabledInfo') || 'Messages will not appear as popups.')}
+                            {popupEnabled ? (t('settings.popupEnabledInfo') || 'Messages will be shown as popups when received.') : (t('settings.popupDisabledInfo') || 'Messages will not be shown when received but saved in your inbox.')}
                         </div>
                     </div>
 
@@ -1938,6 +1921,7 @@ const SettingsPanel = ({ onClose }) => {
 
                         <div style={{
                             padding: '1rem',
+                            paddingBottom: '0.25rem',
                             borderRadius: 'var(--radius-md)',
                             border: '1px solid var(--color-border)',
                             background: 'var(--color-bg-tertiary)'
@@ -1946,6 +1930,28 @@ const SettingsPanel = ({ onClose }) => {
                                 value={retention}
                                 onChange={handleRetentionChange}
                             />
+                        </div>
+                        <div style={{
+                            padding: 'var(--space-2)',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--color-primary)',
+                            fontSize: '0.85rem',
+                            textAlign: 'center',
+                            marginTop: '0.75rem',
+                            animation: 'fadeIn 0.3s ease-out'
+                        }}>
+                            {(() => {
+                                if (retention === 'forever') return 'Messages are kept indefinitely.';
+                                if (retention === '0d') return 'Messages will be deleted upon being read.';
+                                const val = parseInt(retention);
+                                const unit = retention.slice(-1);
+                                const units = { d: 'Day', w: 'Week', m: 'Month', y: 'Year', h: 'Hour' };
+                                const fullUnit = units[unit] || '';
+                                const label = `${val} ${fullUnit}${val > 1 ? 's' : ''}`;
+                                return `Messages are kept for ${label}.`;
+                            })()}
                         </div>
                     </div>
 
@@ -1980,7 +1986,7 @@ const SettingsPanel = ({ onClose }) => {
                             marginTop: '0.75rem',
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
-                            {swipeDirection === 'left' ? 'Swipe left to delete messages.' : swipeDirection === 'right' ? 'Swipe right to delete messages.' : 'Swipe left or right to delete messages.'}
+                            {swipeDirection === 'left' ? 'Messages will be deleted upon swiping Left over it.' : swipeDirection === 'right' ? 'Messages will be deleted upon swiping Right over it.' : 'Messages will be deleted upon swiping Left or Right over it.'}
                         </div>
                     </div>
                 </div>
