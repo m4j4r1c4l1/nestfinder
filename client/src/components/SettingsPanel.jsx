@@ -710,8 +710,8 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         }
     } else {
         // Resting
-        if (value === 'left') doveContent = isMirrored; // Ready to go Right
-        else if (value === 'right') doveContent = '🕊️'; // Ready to go Left/Undo
+        if (value === 'left') doveContent = '🕊️'; // Ready to go Right? No, just stay facing Left (outwards/start)
+        else if (value === 'right') doveContent = isMirrored; // Stay facing Right (outwards/end)
         else doveContent = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Center
     }
 
