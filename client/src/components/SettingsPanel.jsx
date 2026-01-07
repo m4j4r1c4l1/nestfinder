@@ -573,26 +573,19 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const isDragging = React.useRef(false);
     const startX = React.useRef(0);
     // Stable geometry for the current drag session
-    const dragBase = React.useRef(0);
+    const dragBase = React.useRef(0); // Stable geometry for drag session
     const dragMax = React.useRef(0);
-
-    // Visual Debug Logger (for iOS testing without console)
-    const [debugLog, setDebugLog] = useState([]);
-    const addLog = (msg) => setDebugLog(prev => [...prev.slice(-14), msg]); // Keep last 15
-    const wasJustDragging = React.useRef(false); // Track transition for SNAP log
 
     // Robust width tracking
     React.useLayoutEffect(() => {
         if (!trackRef.current) return;
         if (trackRef.current.offsetWidth > 0) {
             setTrackWidth(trackRef.current.offsetWidth);
-            // addLog(`Init W:${trackRef.current.offsetWidth}`); // Too noisy?
         }
         const observer = new ResizeObserver(entries => {
             for (const entry of entries) {
                 if (entry.contentRect.width > 0) {
                     setTrackWidth(entry.contentRect.width);
-                    // addLog(`RO W:${Math.round(entry.contentRect.width)}`);
                 }
             }
         });
@@ -600,7 +593,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         return () => observer.disconnect();
     }, []);
 
-    // Touch handlers
     // Touch handlers
     const handleStart = (clientX) => {
         if (!trackRef.current || !thumbRef.current) return;
