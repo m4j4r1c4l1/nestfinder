@@ -578,7 +578,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     // Visual Debug Logger (for iOS testing without console)
     const [debugLog, setDebugLog] = useState([]);
-    const addLog = (msg) => setDebugLog(prev => [...prev.slice(-4), msg]); // Keep last 5
+    const addLog = (msg) => setDebugLog(prev => [...prev.slice(-14), msg]); // Keep last 15
 
     // Robust width tracking
     React.useLayoutEffect(() => {
@@ -826,8 +826,8 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 fontSize: '0.6rem',
                 fontFamily: 'monospace',
                 color: '#0f0',
-                maxHeight: '60px',
-                overflow: 'hidden'
+                maxHeight: '120px',
+                overflowY: 'auto'
             }}>
                 {debugLog.map((log, i) => <div key={i}>{log}</div>)}
             </div>
