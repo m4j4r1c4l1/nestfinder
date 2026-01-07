@@ -576,6 +576,11 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const dragBase = React.useRef(0); // Stable geometry for drag session
     const dragMax = React.useRef(0);
 
+    // Visual Debug Logger (for iOS testing without console)
+    const [debugLog, setDebugLog] = useState([]);
+    const addLog = (msg) => setDebugLog(prev => [...prev.slice(-14), msg]); // Keep last 15
+    const wasJustDragging = React.useRef(false); // Track transition for SNAP log
+
     // Robust width tracking
     React.useLayoutEffect(() => {
         if (!trackRef.current) return;
