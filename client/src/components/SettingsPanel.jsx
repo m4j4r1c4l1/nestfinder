@@ -567,8 +567,16 @@ const RestoreAccountSection = ({ t }) => {
 const SwipeControl = ({ value, onChange, labelCenter }) => {
     const trackRef = React.useRef(null);
     const [dragOffset, setDragOffset] = useState(null); // Pixel offset from start
+    const [trackWidth, setTrackWidth] = useState(300); // Default fallback
     const isDragging = React.useRef(false);
     const startX = React.useRef(0);
+
+    // Update trackWidth once ref is available
+    React.useEffect(() => {
+        if (trackRef.current) {
+            setTrackWidth(trackRef.current.offsetWidth);
+        }
+    }, []);
 
     // Touch handlers
     const handleStart = (clientX) => {
@@ -649,7 +657,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     // Calculate Transform
     let translateX = 0;
-    const trackWidth = trackRef.current ? trackRef.current.offsetWidth : 300; // Fallback
+    // trackWidth is now a state variable set via useEffect
     const thumbWidth = 100;
     const padding = 4;
 
