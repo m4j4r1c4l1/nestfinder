@@ -563,23 +563,25 @@ const RestoreAccountSection = ({ t }) => {
 
 
 
-// Simple 3-state toggle with dove/chick emoji - replaces unreliable SwipeControl
-// Center state is initial only - after first choice, toggles between left/right
+// Simple 3-state toggle with dove/chick emoji
+// States: left (swipe left to delete), center (both work), right (swipe right to delete)
 const DoveToggle = ({ value, onChange }) => {
     const isLeft = value === 'left';
     const isRight = value === 'right';
-    const isCenter = value === null || value === undefined;
+    const isCenter = value === null || value === undefined || value === 'center';
 
+    // Click to select: left third → left, center third → center, right third → right
     const handleClick = (e) => {
-        if (isCenter) {
-            // First time: click left half → left, click right half → right
-            const rect = e.currentTarget.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const halfWidth = rect.width / 2;
-            onChange(clickX < halfWidth ? 'left' : 'right');
+        const rect = e.currentTarget.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const thirdWidth = rect.width / 3;
+
+        if (clickX < thirdWidth) {
+            onChange('left');
+        } else if (clickX > thirdWidth * 2) {
+            onChange('right');
         } else {
-            // After initial choice: simple toggle between left and right
-            onChange(isLeft ? 'right' : 'left');
+            onChange(null); // Center = both
         }
     };
 
@@ -588,17 +590,23 @@ const DoveToggle = ({ value, onChange }) => {
     if (isLeft) thumbLeft = '4px';
     if (isRight) thumbLeft = 'calc(100% - 104px)';
 
-    // Emoji and transform - dove points to where it can GO (inverted)
+    // Emoji and transform
     let emoji = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Chick for center
     let thumbTransform = 'none';
     if (isLeft) {
-        emoji = '🕊️';
+        emoji = '🛼';
         thumbTransform = 'none'; // Dove faces RIGHT (where it can go)
     }
     if (isRight) {
-        emoji = '🕊️';
-        thumbTransform = 'scaleX(-1)'; // Dove faces LEFT (where it can go)
+        emoji = '🛼';
+        thumbTransform = 'scaleX(-1)'; // Faces LEFT (where it can go)
     }
+
+    // Status message for the gap area
+    let statusMessage = '';
+    if (isLeft) statusMessage = 'Swipe left to delete';
+    if (isRight) statusMessage = 'Swipe right to delete';
+    if (isCenter) statusMessage = 'Swipe either way';
 
     return (
         <div>
@@ -613,10 +621,28 @@ const DoveToggle = ({ value, onChange }) => {
                     borderRadius: 'var(--radius-md)',
                     border: '1px solid var(--color-border)',
                     cursor: 'pointer',
-                    transition: 'background 0.3s ease',
-                    userSelect: 'none'
+                    userSelect: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: isCenter ? 'center' : (isLeft ? 'flex-end' : 'flex-start'),
+                    padding: '0 12px'
                 }}
             >
+                {/* Status text in the gap */}
+                <span style={{
+                    color: 'rgba(255,255,255,0.9)',
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    pointerEvents: 'none',
+                    position: 'absolute',
+                    left: isLeft ? '116px' : (isRight ? 'auto' : '50%'),
+                    right: isRight ? '116px' : 'auto',
+                    transform: isCenter ? 'translateX(-50%)' : 'none',
+                    whiteSpace: 'nowrap'
+                }}>
+                    {statusMessage}
+                </span>
+
                 {/* Thumb with dove/chick */}
                 <div style={{
                     position: 'absolute',
@@ -637,20 +663,6 @@ const DoveToggle = ({ value, onChange }) => {
                     {emoji}
                 </div>
             </div>
-            {/* Status badge - only shown after initial choice */}
-            {!isCenter && (
-                <div style={{
-                    marginTop: '8px',
-                    padding: '6px 12px',
-                    background: '#3b82f6',
-                    borderRadius: 'var(--radius-sm)',
-                    color: 'white',
-                    fontSize: '0.75rem',
-                    textAlign: 'center'
-                }}>
-                    Current settings allow to delete a message by swiping {isLeft ? 'left' : 'right'} over a message
-                </div>
-            )}
         </div>
     );
 };
@@ -1897,9 +1909,9 @@ const SettingsPanel = ({ onClose }) => {
                         marginBottom: 'var(--space-2)'
                     }}>
                         <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>🛼 {t('settings.swipeDirection') || 'Delete'}</div>
+                            <div style={{ fontWeight: 500 }}>🔥 {t('settings.swipeDirection') || 'Delete'}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                {t('settings.swipe.desc') || 'Swipe a message in this direction to delete it.'}
+                                {t('settings.swipe.desc') || 'Tap on the swiping gesture direction you prefer to delete a message.'}
                             </div>
                         </div>
 
