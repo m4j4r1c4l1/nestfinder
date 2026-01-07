@@ -691,6 +691,15 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         handleEnd();
     };
 
+    const onLostPointerCapture = (e) => {
+        // Fallback: fires when capture is lost for ANY reason
+        // This ensures handleEnd always runs even if onPointerUp misses
+        console.log('[SWIPE DEBUG] onLostPointerCapture');
+        if (isDragging.current) {
+            handleEnd();
+        }
+    };
+
     // Render Logic
     let style = {
         position: 'absolute',
@@ -791,6 +800,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
+                onLostPointerCapture={onLostPointerCapture}
             >
                 {/* Thumb */}
                 <div ref={thumbRef} style={style}>
