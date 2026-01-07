@@ -595,11 +595,11 @@ const DoveToggle = ({ value, onChange }) => {
     let thumbTransform = 'none';
     if (isLeft) {
         emoji = '🕊️';
-        thumbTransform = 'scaleX(-1)'; // Roller faces LEFT (where it is)
+        thumbTransform = 'none'; // Point LEFT (Outward)
     }
     if (isRight) {
         emoji = '🕊️';
-        thumbTransform = 'none'; // Roller faces RIGHT (where it is)
+        thumbTransform = 'scaleX(-1)'; // Point RIGHT (Outward)
     }
 
     // Status messages for the gap areas
