@@ -567,14 +567,36 @@ const RestoreAccountSection = ({ t }) => {
 const SwipeControl = ({ value, onChange, labelCenter }) => {
     const trackRef = React.useRef(null);
     const [dragOffset, setDragOffset] = useState(null); // Pixel offset from start
+    const [trackWidth, setTrackWidth] = useState(300); // Default fallback
     const isDragging = React.useRef(false);
     const startX = React.useRef(0);
 
+    // Robust width tracking
+    React.useLayoutEffect(() => {
+        if (!trackRef.current) return;
+
+        // Initial measure
+        setTrackWidth(trackRef.current.offsetWidth);
+
+        // Observer for resizes/animations
+        const observer = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                setTrackWidth(entry.contentRect.width);
+            }
+        });
+
+        observer.observe(trackRef.current);
+        return () => observer.disconnect();
+    }, []);
+
     // Touch handlers
     const handleStart = (clientX) => {
+        console.log('Swipe: handleStart', clientX, trackRef.current);
         if (!trackRef.current) return;
         // Always update trackWidth when drag starts
-        setTrackWidth(trackRef.current.offsetWidth);
+        // We removed state, so this comment is legacy, but let's log the width
+        console.log('Swipe: width on start', trackRef.current.offsetWidth);
+
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
@@ -651,7 +673,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     // Calculate Transform
     let translateX = 0;
-    const trackWidth = trackRef.current ? trackRef.current.offsetWidth : 300;
+    // trackWidth is managed by state
     const thumbWidth = 100;
     const padding = 4;
 
