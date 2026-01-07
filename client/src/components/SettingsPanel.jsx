@@ -603,59 +603,73 @@ const DoveToggle = ({ value, onChange }) => {
     }
 
     // Status messages for the gap areas
-    // When on edge: "Delete Messages <b>Left/Right</b>"
-    // When center: symmetric text on both sides
+    // When on edge: "You can now swipe <b>Right/Left</b> over a message to delete it"
+    // When center: stacked "Current:" + "Both" on both sides
     let statusContent = null;
     if (isLeft) {
         statusContent = (
             <span style={{
                 color: 'rgba(255,255,255,0.9)',
-                fontSize: '0.75rem',
+                fontSize: '0.65rem',
                 pointerEvents: 'none',
                 position: 'absolute',
                 left: '116px',
-                whiteSpace: 'nowrap'
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                textAlign: 'center'
             }}>
-                Delete Messages <b>Left</b>
+                You can now swipe <b>Left</b> over a message to delete it
             </span>
         );
     } else if (isRight) {
         statusContent = (
             <span style={{
                 color: 'rgba(255,255,255,0.9)',
-                fontSize: '0.75rem',
+                fontSize: '0.65rem',
                 pointerEvents: 'none',
                 position: 'absolute',
+                left: '8px',
                 right: '116px',
-                whiteSpace: 'nowrap'
+                top: '50%',
+                transform: 'translateY(-50%)',
+                textAlign: 'center'
             }}>
-                Delete Messages <b>Right</b>
+                You can now swipe <b>Right</b> over a message to delete it
             </span>
         );
     } else {
-        // Center: symmetric text on both sides
+        // Center: stacked 2-line text on both sides
         statusContent = (
             <>
-                <span style={{
+                <div style={{
                     color: 'rgba(255,255,255,0.9)',
-                    fontSize: '0.7rem',
+                    fontSize: '0.65rem',
                     pointerEvents: 'none',
                     position: 'absolute',
                     left: '8px',
-                    whiteSpace: 'nowrap'
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    textAlign: 'center',
+                    lineHeight: '1.2'
                 }}>
-                    ← Left
-                </span>
-                <span style={{
+                    <div>Current:</div>
+                    <div><b>Both</b></div>
+                </div>
+                <div style={{
                     color: 'rgba(255,255,255,0.9)',
-                    fontSize: '0.7rem',
+                    fontSize: '0.65rem',
                     pointerEvents: 'none',
                     position: 'absolute',
                     right: '8px',
-                    whiteSpace: 'nowrap'
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    textAlign: 'center',
+                    lineHeight: '1.2'
                 }}>
-                    Right →
-                </span>
+                    <div>Current:</div>
+                    <div><b>Both</b></div>
+                </div>
             </>
         );
     }
