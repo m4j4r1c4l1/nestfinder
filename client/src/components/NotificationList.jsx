@@ -135,7 +135,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
 };
 
 // Swipeable Message Item Component with Progressive Blur
-const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', style, className, onClick, isDeleting }) => {
+const SwipeableMessage = ({ children, onSwipeDelete, onConfirm, onCancel, swipeDirection = 'right', style, className, onClick, isDeleting }) => {
     const touchStartX = useRef(0);
     const touchCurrentX = useRef(0);
     const [swiping, setSwiping] = useState(false);
@@ -199,10 +199,22 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', s
         if (!isDeleting) setSwipeProgress(0);
     }, [isDeleting]);
 
-    const effectiveProgress = isDeleting ? 0 : swipeProgress;
+    const effectiveProgress = isDeleting ? 1 : swipeProgress;
 
     // Calculate blur based on progress (max 4px to match deletion overlay)
     const blurAmount = effectiveProgress * 4;
+
+    const deleteButtonStyle = {
+        padding: '0.5rem 1.5rem',
+        background: 'rgba(239, 68, 68, 0.1)',
+        border: '1px solid rgba(239, 68, 68, 0.3)',
+        borderRadius: 'var(--radius-md)',
+        color: '#ef4444',
+        fontSize: '0.85rem',
+        cursor: 'pointer',
+        fontWeight: 500,
+        pointerEvents: isDeleting ? 'auto' : 'none'
+    };
 
     return (
         <div
@@ -231,6 +243,37 @@ const SwipeableMessage = ({ children, onSwipeDelete, swipeDirection = 'right', s
                 pointerEvents: 'none',
                 transition: swiping ? 'none' : 'opacity 0.2s ease-out'
             }} />
+
+            {/* UI Layer */}
+            <div style={{
+                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                zIndex: 20,
+                opacity: effectiveProgress,
+                pointerEvents: isDeleting ? 'auto' : 'none',
+                transition: swiping ? 'none' : 'opacity 0.2s ease-out'
+            }}
+                onClick={(e) => {
+                    if (isDeleting && onCancel) {
+                        e.stopPropagation();
+                        onCancel();
+                    }
+                }}
+            >
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (onConfirm) onConfirm();
+                    }}
+                    style={{
+                        ...deleteButtonStyle,
+                        transform: `scale(${0.9 + 0.1 * effectiveProgress})`,
+                        transition: swiping ? 'none' : 'transform 0.2s ease-out'
+                    }}
+                >
+                    Delete
+                </button>
+            </div>
 
             {/* Content with Blur */}
             <div style={{
@@ -657,6 +700,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     swipeDirection={swipeDirection}
                                                     isDeleting={isDeleting}
                                                     onSwipeDelete={() => handleDeleteClick(null, notification.id, 'received')}
+                                                    onConfirm={() => confirmDelete()}
+                                                    onCancel={cancelDelete}
                                                     className={`notification-item ${notification.read ? 'read' : 'unread'}`}
                                                     onClick={() => {
                                                         markAsRead(notification);
@@ -744,7 +789,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             </button>
                                                         </div>
                                                     </div>
-                                                    {renderDeletionOverlay(notification.id)}
                                                 </SwipeableMessage>
                                             );
                                         })
@@ -799,6 +843,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     swipeDirection={swipeDirection}
                                                     isDeleting={isDeleting}
                                                     onSwipeDelete={() => handleDeleteClick(null, msg.id, 'sent')}
+                                                    onConfirm={() => confirmDelete()}
+                                                    onCancel={cancelDelete}
                                                     className="notification-item read"
                                                     style={{
                                                         padding: '0.75rem',
@@ -874,8 +920,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             </button>
                                                         </div>
                                                     </div>
-
-                                                    {renderDeletionOverlay(msg.id)}
                                                 </SwipeableMessage>
                                             );
                                         })
