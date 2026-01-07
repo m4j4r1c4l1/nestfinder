@@ -205,7 +205,7 @@ const SwipeableMessage = ({ children, onSwipeDelete, onConfirm, onCancel, swipeD
     const blurAmount = effectiveProgress * 4;
 
     const deleteButtonStyle = {
-        padding: '0.5rem 1.5rem',
+        padding: '0.5rem 2.25rem',
         background: 'rgba(239, 68, 68, 0.1)',
         border: '1px solid rgba(239, 68, 68, 0.3)',
         borderRadius: 'var(--radius-md)',
@@ -402,9 +402,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         });
 
     const tabs = [
-        { id: 'received', icon: '🦜', label: t('inbox.received') || 'Received' },
-        { id: 'sent', icon: '🦩', label: t('inbox.sent') || 'Sent' },
-        { id: 'compose', icon: '🪶', label: t('inbox.compose') || 'Compose' }
+        { id: 'received', icon: '�', label: t('inbox.received') || 'Received' },
+        { id: 'sent', icon: '�', label: t('inbox.sent') || 'Sent' },
+        { id: 'compose', icon: '🕊️', label: t('inbox.compose') || 'Compose' }
     ];
 
     // Error-style delete button (matches SettingsPanel invalid key style)

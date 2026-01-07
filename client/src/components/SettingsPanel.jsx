@@ -594,11 +594,11 @@ const DoveToggle = ({ value, onChange }) => {
     let emoji = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Chick for center
     let thumbTransform = 'none';
     if (isLeft) {
-        emoji = '🛼';
+        emoji = '🕊️';
         thumbTransform = 'scaleX(-1)'; // Roller faces LEFT (where it is)
     }
     if (isRight) {
-        emoji = '🛼';
+        emoji = '🕊️';
         thumbTransform = 'none'; // Roller faces RIGHT (where it is)
     }
 
