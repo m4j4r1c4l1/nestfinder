@@ -199,7 +199,7 @@ export default {
         restoreConfirmButton: 'Oui, Restaurer',
         sameKeyError: 'Ceci est la clé de récupération de votre compte actuel. Vous êtes déjà connecté avec ce compte.',
         // Swipe Direction
-        swipeDirection: 'Glisser pour Supprimer',
+        swipeDirection: 'Supprimer les messages',
         swipe: {
             right: '→ Glisser vers la droite',
             left: '← Glisser vers la gauche',

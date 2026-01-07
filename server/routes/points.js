@@ -20,18 +20,88 @@ const escapeXml = (str) => {
 let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
 
-// Get currently active broadcast (public endpoint)
+// Get currently active broadcast (with view tracking)
 router.get('/broadcast/active', (req, res) => {
+  const userId = req.headers['x-user-id'];
   const now = new Date().toISOString();
-  const activeBroadcast = get(`
+
+  // Get all active broadcasts
+  const activeBroadcasts = all(`
     SELECT * FROM broadcasts 
     WHERE datetime(start_time) <= datetime(?)
     AND datetime(end_time) >= datetime(?)
-    ORDER BY created_at DESC
-    LIMIT 1
+    ORDER BY priority DESC, created_at DESC
   `, [now, now]);
 
-  res.json({ broadcast: activeBroadcast || null });
+  if (!activeBroadcasts.length) {
+    return res.json({ broadcast: null });
+  }
+
+  // Find a broadcast the user hasn't exceeded max_views for
+  let selectedBroadcast = null;
+
+  for (const broadcast of activeBroadcasts) {
+    if (!userId) {
+      // No user tracking possible, just return first
+      selectedBroadcast = broadcast;
+      break;
+    }
+
+    // Check user's view record for this broadcast
+    let viewRecord = get(`
+      SELECT * FROM broadcast_views 
+      WHERE broadcast_id = ? AND user_id = ?
+    `, [broadcast.id, userId]);
+
+    // Check if max_views is exceeded
+    if (broadcast.max_views !== null && viewRecord && viewRecord.view_count >= broadcast.max_views) {
+      continue; // Skip this broadcast, user has seen it enough
+    }
+
+    // This is a valid broadcast for this user
+    selectedBroadcast = broadcast;
+
+    // Create or update view record
+    if (!viewRecord) {
+      // First time seeing - create record with 'delivered' status
+      run(`
+        INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at)
+        VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `, [broadcast.id, userId]);
+    } else {
+      // Increment view count and ensure delivered
+      run(`
+        UPDATE broadcast_views 
+        SET view_count = view_count + 1, 
+            status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
+            delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
+        WHERE broadcast_id = ? AND user_id = ?
+      `, [broadcast.id, userId]);
+    }
+
+    break;
+  }
+
+  res.json({ broadcast: selectedBroadcast });
+});
+
+// Mark broadcast as read (when user dismisses/closes it)
+router.post('/broadcast/:id/read', (req, res) => {
+  const userId = req.headers['x-user-id'];
+  const broadcastId = req.params.id;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID required' });
+  }
+
+  // Update to read status
+  run(`
+    UPDATE broadcast_views 
+    SET status = 'read', read_at = CURRENT_TIMESTAMP, dismissed = 1
+    WHERE broadcast_id = ? AND user_id = ?
+  `, [broadcastId, userId]);
+
+  res.json({ success: true });
 });
 
 // Get all points (with optional filters)

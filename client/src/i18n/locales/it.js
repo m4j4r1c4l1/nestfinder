@@ -200,7 +200,7 @@ export default {
         restoreConfirmButton: 'Sì, Ripristina',
         sameKeyError: 'Questa è la chiave di recupero del tuo account attuale. Sei già connesso con questo account.',
         // Swipe Direction
-        swipeDirection: 'Scorri per Eliminare',
+        swipeDirection: 'Elimina messaggi',
         swipe: {
             right: '→ Scorri a destra',
             left: '← Scorri a sinistra',

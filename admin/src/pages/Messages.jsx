@@ -124,7 +124,7 @@ const Messages = () => {
     const [feedbackCounts, setFeedbackCounts] = useState({ pending: 0, read: 0 });
 
     // Broadcast Form State
-    const [newBroadcast, setNewBroadcast] = useState({ title: '', message: '', imageUrl: '', startTime: '', endTime: '' });
+    const [newBroadcast, setNewBroadcast] = useState({ title: '', message: '', imageUrl: '', startTime: '', endTime: '', maxViews: '', priority: 0 });
     const [creatingBroadcast, setCreatingBroadcast] = useState(false);
     const [activeBroadcastTemplate, setActiveBroadcastTemplate] = useState('custom');
     const [showBroadcastEmojiPicker, setShowBroadcastEmojiPicker] = useState(false);
@@ -189,7 +189,7 @@ const Messages = () => {
                 method: 'POST',
                 body: JSON.stringify(newBroadcast)
             });
-            setNewBroadcast({ title: '', message: '', imageUrl: '', startTime: '', endTime: '' });
+            setNewBroadcast({ title: '', message: '', imageUrl: '', startTime: '', endTime: '', maxViews: '', priority: 0 });
             setActiveBroadcastTemplate('custom');
             fetchData();
         } catch (err) {
@@ -604,6 +604,28 @@ const Messages = () => {
                                                 />
                                             </div>
                                         </div>
+                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                            <div style={{ flex: 1 }}>
+                                                <label className="form-label">Max Views (Optional)</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="Unlimited"
+                                                    value={newBroadcast.maxViews || ''}
+                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, maxViews: e.target.value })}
+                                                    className="form-input"
+                                                />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <label className="form-label">Priority (Higher = First)</label>
+                                                <input
+                                                    type="number"
+                                                    value={newBroadcast.priority || 0}
+                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, priority: parseInt(e.target.value) || 0 })}
+                                                    className="form-input"
+                                                />
+                                            </div>
+                                        </div>
                                         <button
                                             type="submit"
                                             disabled={creatingBroadcast || !newBroadcast.message}
@@ -622,86 +644,7 @@ const Messages = () => {
                             </div>
 
                             {/* Manage Broadcasts */}
-                            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: 0 }}>
-                                <div className="card-header">
-                                    <h3>🎬 Manage Broadcasts</h3>
-                                </div>
-                                <div className="card-body" style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
-                                    <div style={{ padding: '1.5rem' }}>
-                                        {broadcasts.length === 0 ? (
-                                            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-                                                No broadcasts found
-                                            </div>
-                                        ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                {broadcasts.slice((broadcastPage - 1) * broadcastPageSize, broadcastPage * broadcastPageSize).map(b => {
-                                                    const now = new Date();
-                                                    const start = new Date(b.start_time);
-                                                    const end = new Date(b.end_time);
-                                                    const isActive = now >= start && now <= end;
-                                                    const isPast = now > end;
-
-                                                    return (
-                                                        <div
-                                                            key={b.id}
-                                                            className="card"
-                                                            style={{
-                                                                borderLeft: isActive ? '4px solid var(--color-confirmed)' : '1px solid var(--color-border)',
-                                                                opacity: isPast ? 0.7 : 1,
-                                                                marginBottom: 0
-                                                            }}
-                                                        >
-                                                            <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                                <div style={{ flex: 1 }}>
-                                                                    <div style={{ marginBottom: '0.75rem', fontSize: '1.05rem' }}>{b.message}</div>
-                                                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                                                        <span>📅 {new Date(b.start_time).toLocaleString()}</span>
-                                                                        <span>→</span>
-                                                                        <span>→</span>
-                                                                        <span>{new Date(b.end_time).toLocaleString()}</span>
-                                                                    </div>
-                                                                    {b.image_url && (
-                                                                        <div style={{ marginTop: '0.75rem' }}>
-                                                                            <img src={b.image_url} alt="Broadcast" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
-                                                                        </div>
-                                                                    )}
-                                                                    <div style={{ marginTop: '0.75rem' }}>
-                                                                        <span style={{
-                                                                            padding: '0.25rem 0.75rem',
-                                                                            borderRadius: '20px',
-                                                                            fontSize: '0.75rem',
-                                                                            fontWeight: 600,
-                                                                            background: isActive ? 'var(--color-confirmed)' : isPast ? 'var(--color-text-muted)' : 'var(--color-pending)',
-                                                                            color: 'white'
-                                                                        }}>
-                                                                            {isActive ? '🟢 ACTIVE' : isPast ? '⚫ ENDED' : '🟡 SCHEDULED'}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <button
-                                                                    onClick={() => handleDeleteBroadcast(b.id)}
-                                                                    className="btn btn-secondary btn-sm"
-                                                                    style={{ color: 'var(--color-deactivated)', borderColor: 'var(--color-deactivated)' }}
-                                                                >
-                                                                    🗑️ Delete
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                {Math.ceil(broadcasts.length / broadcastPageSize) >= 1 && (
-                                    <PaginationControls
-                                        page={broadcastPage}
-                                        totalPages={Math.ceil(broadcasts.length / broadcastPageSize)}
-                                        setPage={setBroadcastPage}
-                                        pageSize={broadcastPageSize}
-                                    />
-                                )}
-                            </div>
+                            <BroadcastsSection broadcasts={broadcasts} page={broadcastPage} setPage={setBroadcastPage} pageSize={broadcastPageSize} onDelete={handleDeleteBroadcast} />
                         </div>
                     )}
 
@@ -710,6 +653,212 @@ const Messages = () => {
         </div>
     );
 };
+
+// --- Broadcast Component ---
+function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
+    const [expandedId, setExpandedId] = useState(null);
+    const [views, setViews] = useState([]);
+    const [loadingViews, setLoadingViews] = useState(false);
+
+    // Fetch views when expanding
+    const handleExpand = async (id) => {
+        if (expandedId === id) {
+            setExpandedId(null);
+            return;
+        }
+
+        setExpandedId(id);
+        setLoadingViews(true);
+        try {
+            const token = localStorage.getItem('nestfinder_admin_token');
+            const res = await fetch(`${API_URL}/api/push/admin/broadcasts/${id}/views`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setViews(data.views || []);
+            }
+        } catch (e) {
+            console.error('Failed to load views:', e);
+        } finally {
+            setLoadingViews(false);
+        }
+    };
+
+    const paginatedBroadcasts = broadcasts.slice((page - 1) * pageSize, page * pageSize);
+    const totalPages = Math.ceil(broadcasts.length / pageSize);
+
+    return (
+        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: 0 }}>
+            <div className="card-header">
+                <h3>🎬 Manage Broadcasts</h3>
+            </div>
+            <div className="card-body" style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
+                <div style={{ padding: '1.5rem' }}>
+                    {broadcasts.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
+                            No broadcasts found
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {paginatedBroadcasts.map(b => {
+                                const now = new Date();
+                                const start = new Date(b.start_time);
+                                const end = new Date(b.end_time);
+                                const isActive = now >= start && now <= end;
+                                const isPast = now > end;
+                                const isExpanded = expandedId === b.id;
+
+                                return (
+                                    <div key={b.id} className="card" style={{
+                                        borderLeft: isActive ? '4px solid #22c55e' : '1px solid #334155',
+                                        opacity: isPast ? 0.8 : 1,
+                                        marginBottom: 0,
+                                        background: '#1e293b'
+                                    }}>
+                                        <div className="card-body">
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 500, color: '#f8fafc' }}>
+                                                        {b.message}
+                                                    </div>
+
+                                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem' }}>
+                                                        <span title="Start Time">📅 {start.toLocaleString()}</span>
+                                                        <span>→</span>
+                                                        <span title="End Time">{end.toLocaleString()}</span>
+                                                        <span style={{
+                                                            padding: '0.1rem 0.6rem',
+                                                            borderRadius: '12px',
+                                                            fontSize: '0.7rem',
+                                                            fontWeight: 600,
+                                                            background: isActive ? '#22c55e' : isPast ? '#475569' : '#eab308',
+                                                            color: 'white'
+                                                        }}>
+                                                            {isActive ? 'ACTIVE' : isPast ? 'ENDED' : 'SCHEDULED'}
+                                                        </span>
+                                                        {b.max_views && (
+                                                            <span style={{ background: '#334155', padding: '0.1rem 0.6rem', borderRadius: '12px', color: '#cbd5e1' }}>
+                                                                Max Views: {b.max_views}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {b.image_url && (
+                                                        <div style={{ marginBottom: '1rem' }}>
+                                                            <img src={b.image_url} alt="Broadcast" style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '8px', border: '1px solid #334155' }} />
+                                                        </div>
+                                                    )}
+
+                                                    {/* Stats Row */}
+                                                    <div style={{ display: 'flex', gap: '2rem', padding: '0.75rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155' }}>
+                                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                                            <span style={{ fontSize: '1.2rem' }}>👥</span>
+                                                            <div>
+                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Reach</div>
+                                                                <div style={{ fontWeight: 600, color: '#f8fafc' }}>{b.total_users || 0}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ width: '1px', background: '#334155' }}></div>
+                                                        <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                                            <div>
+                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Sent</div>
+                                                                <div style={{ fontWeight: 600, color: '#94a3b8' }}>{b.sent_count || 0}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Received</div>
+                                                                <div style={{ fontWeight: 600, color: '#f8fafc' }}>{b.delivered_count || 0}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Read</div>
+                                                                <div style={{ fontWeight: 600, color: '#3b82f6' }}>{b.read_count || 0}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginLeft: '1rem' }}>
+                                                    <button
+                                                        onClick={() => onDelete(b.id)}
+                                                        className="btn btn-secondary btn-sm"
+                                                        style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)', width: '100px' }}
+                                                    >
+                                                        🗑️ Delete
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleExpand(b.id)}
+                                                        className="btn btn-primary btn-sm"
+                                                        style={{ width: '100px' }}
+                                                    >
+                                                        {isExpanded ? '⬆️ Hide' : '⬇️ Details'}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Expanded User List */}
+                                            {isExpanded && (
+                                                <div style={{ marginTop: '1rem', borderTop: '1px solid #334155', paddingTop: '1rem', animation: 'fadeIn 0.2s' }}>
+                                                    <h4 style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '0.5rem' }}>User Status</h4>
+                                                    {loadingViews ? (
+                                                        <div style={{ color: '#94a3b8', fontStyle: 'italic', padding: '1rem', textAlign: 'center' }}>Loading views...</div>
+                                                    ) : views.length === 0 ? (
+                                                        <div style={{ color: '#64748b', fontStyle: 'italic', padding: '0.5rem' }}>No views recorded yet.</div>
+                                                    ) : (
+                                                        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                                                                <thead style={{ background: '#0f172a', position: 'sticky', top: 0 }}>
+                                                                    <tr>
+                                                                        <th style={{ padding: '0.5rem', textAlign: 'left', color: '#94a3b8' }}>User</th>
+                                                                        <th style={{ padding: '0.5rem', textAlign: 'center', color: '#94a3b8' }}>Status</th>
+                                                                        <th style={{ padding: '0.5rem', textAlign: 'right', color: '#94a3b8' }}>Last Upd.</th>
+                                                                        <th style={{ padding: '0.5rem', textAlign: 'center', color: '#94a3b8' }}>Views</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {views.map(v => (
+                                                                        <tr key={v.id} style={{ borderBottom: '1px solid #334155' }}>
+                                                                            <td style={{ padding: '0.5rem', color: '#e2e8f0' }}>
+                                                                                <div style={{ fontWeight: 500 }}>{v.user_nickname || 'Anonymous'}</div>
+                                                                                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{v.user_id}</div>
+                                                                            </td>
+                                                                            <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                                                                                {v.status === 'sent' && <span style={{ color: '#94a3b8' }}>✓ Sent</span>}
+                                                                                {v.status === 'delivered' && <span style={{ color: '#e2e8f0' }}>✓✓ Received</span>}
+                                                                                {v.status === 'read' && <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ Read</span>}
+                                                                            </td>
+                                                                            <td style={{ padding: '0.5rem', textAlign: 'right', color: '#94a3b8' }}>
+                                                                                {new Date(v.read_at || v.delivered_at || v.created_at).toLocaleString()}
+                                                                            </td>
+                                                                            <td style={{ padding: '0.5rem', textAlign: 'center', color: '#cbd5e1' }}>
+                                                                                {v.view_count}
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+            {totalPages > 1 && (
+                <PaginationControls
+                    page={page}
+                    totalPages={totalPages}
+                    setPage={setPage}
+                    pageSize={pageSize}
+                />
+            )}
+        </div>
+    );
+}
 
 // --- Sub-components ---
 

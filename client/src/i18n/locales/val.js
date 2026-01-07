@@ -200,7 +200,7 @@ export default {
         restoreConfirmButton: 'Sí, Restaurar',
         sameKeyError: 'Aquesta és la clau de recuperació del teu compte actual. Ja estàs connectat amb aquest compte.',
         // Swipe Direction
-        swipeDirection: 'Lliscar per Eliminar',
+        swipeDirection: 'Esborrar Missatges',
         swipe: {
             right: '→ Lliscar a la dreta',
             left: '← Lliscar a l\'esquerra',

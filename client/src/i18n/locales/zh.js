@@ -200,7 +200,7 @@ export default {
         restoreConfirmButton: '是的，恢复',
         sameKeyError: '这是您当前帐户的恢复密钥。您已经使用此帐户登录。',
         // Swipe Direction
-        swipeDirection: '滑动删除',
+        swipeDirection: '删除消息',
         swipe: {
             right: '→ 向右滑动',
             left: '← 向左滑动',

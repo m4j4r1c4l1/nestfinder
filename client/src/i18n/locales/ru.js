@@ -200,7 +200,7 @@ export default {
         restoreConfirmButton: 'Да, Восстановить',
         sameKeyError: 'Это ключ восстановления вашего текущего аккаунта. Вы уже вошли с этим аккаунтом.',
         // Swipe Direction
-        swipeDirection: 'Свайп для удаления',
+        swipeDirection: 'Удалить сообщения',
         swipe: {
             right: '→ Свайп вправо',
             left: '← Свайп влево',
