@@ -1936,35 +1936,13 @@ const SettingsPanel = ({ onClose }) => {
                         </div>
                     </div>
 
-                    {/* Swipe Direction Box */}
+                    {/* Retention Period Box */}
                     <div style={{
                         padding: 'var(--space-3)',
                         background: 'var(--color-bg-secondary)',
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid var(--color-border)',
                         marginBottom: 'var(--space-2)'
-                    }}>
-                        <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>🔥 {t('settings.swipeDirection') || 'Delete'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                {t('settings.swipe.desc') || 'Tap on the swiping gesture direction you prefer to delete a message.'}
-                            </div>
-                        </div>
-
-                        <div style={{ padding: '0 0.5rem' }}>
-                            <DoveToggle
-                                value={swipeDirection}
-                                onChange={handleSwipeChange}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Retention Period Box */}
-                    <div style={{
-                        padding: 'var(--space-3)',
-                        background: 'var(--color-bg-secondary)',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--color-border)'
                     }}>
                         <div style={{ marginBottom: 'var(--space-2)' }}>
                             <div style={{ fontWeight: 500 }}>⏱️ {t('settings.messageRetention') || 'Retention Period'}</div>
@@ -1982,6 +1960,28 @@ const SettingsPanel = ({ onClose }) => {
                             <RetentionSlider
                                 value={retention}
                                 onChange={handleRetentionChange}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Swipe Direction Box */}
+                    <div style={{
+                        padding: 'var(--space-3)',
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--color-border)'
+                    }}>
+                        <div style={{ marginBottom: 'var(--space-2)' }}>
+                            <div style={{ fontWeight: 500 }}>🔥 {t('settings.swipeDirection') || 'Delete'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                {t('settings.swipe.desc') || 'Tap on the swiping gesture direction you prefer to delete a message.'}
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '0 0.5rem' }}>
+                            <DoveToggle
+                                value={swipeDirection}
+                                onChange={handleSwipeChange}
                             />
                         </div>
                     </div>
