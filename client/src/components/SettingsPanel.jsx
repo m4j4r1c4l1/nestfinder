@@ -679,7 +679,8 @@ const DoveToggle = ({ value, onChange }) => {
                 style={{
                     position: 'relative',
                     width: '100%',
-                    height: '48px',
+                    height: '42px',
+                    boxSizing: 'border-box',
                     boxSizing: 'border-box',
                     background: '#3b82f6',
                     borderRadius: 'var(--radius-md)',
@@ -2029,7 +2030,7 @@ const SettingsPanel = ({ onClose }) => {
                             </div>
                         </div>
 
-                        {/* Info Badge - BETWEEN components */}
+                        {/* Info Badge - BETWEEN components - Matched Margins */}
                         <div style={{
                             padding: 'var(--space-2)',
                             background: 'rgba(59, 130, 246, 0.1)',
@@ -2038,7 +2039,7 @@ const SettingsPanel = ({ onClose }) => {
                             color: 'var(--color-primary)',
                             fontSize: '0.85rem',
                             textAlign: 'center',
-                            marginBottom: '0.5rem',
+                            margin: '0.75rem 0', // Matched margin up and down
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
                             {swipeEnabled ? (
@@ -2048,19 +2049,11 @@ const SettingsPanel = ({ onClose }) => {
                             )}
                         </div>
 
-                        {/* Direction Toggle (Always visible, matched style) */}
+                        {/* Direction Toggle (Always visible, matched style NO PADDING) */}
                         <div style={{
-                            padding: '0.5rem',
-                            background: 'var(--color-bg-tertiary)',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--color-border)',
                             opacity: swipeEnabled ? 1 : 0.5,
                             pointerEvents: swipeEnabled ? 'auto' : 'none',
                             transition: 'opacity 0.2s',
-                            height: '42px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
                             boxSizing: 'border-box'
                         }}>
                             <div style={{ width: '100%' }}>
@@ -2069,6 +2062,27 @@ const SettingsPanel = ({ onClose }) => {
                                     onChange={handleSwipeChange}
                                 />
                             </div>
+                        </div>
+
+                        {/* Bottom Badge - Direction Info */}
+                        <div style={{
+                            padding: 'var(--space-2)',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--color-primary)',
+                            fontSize: '0.85rem',
+                            textAlign: 'center',
+                            marginTop: '0.75rem',
+                            animation: 'fadeIn 0.3s ease-out'
+                        }}>
+                            {swipeDirection === 'left' ? (
+                                <span>Messages will be deleted upon swiping <b>Left</b> over it.</span>
+                            ) : swipeDirection === 'right' ? (
+                                <span>Messages will be deleted upon swiping <b>Right</b> over it.</span>
+                            ) : (
+                                <span>Messages will be deleted upon swiping <b>Left</b> or <b>Right</b> over it.</span>
+                            )}
                         </div>
                     </div>
                 </div>
