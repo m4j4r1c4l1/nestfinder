@@ -956,7 +956,7 @@ const RetentionSlider = ({ value, onChange }) => {
                     <div style={{
                         position: 'absolute',
                         left: 0, right: 0,
-                        top: '12px',
+                        top: '10px',
                         height: '6px',
                         background: 'var(--color-bg-tertiary)',
                         borderRadius: '3px',
@@ -974,7 +974,7 @@ const RetentionSlider = ({ value, onChange }) => {
                     <div style={{
                         position: 'absolute',
                         left: `${dragPct}%`,
-                        top: '3px', // Center on track
+                        top: '1px', // Center on track
                         width: '24px',
                         height: '24px',
                         borderRadius: '50%',
