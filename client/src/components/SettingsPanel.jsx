@@ -810,7 +810,9 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 ref={trackRef}
                 style={{
                     position: 'relative',
+                    width: '100%',
                     height: '48px',
+                    boxSizing: 'border-box',
                     background: 'var(--color-bg-tertiary)',
                     borderRadius: 'var(--radius-md)',
                     border: '1px solid var(--color-border)',
