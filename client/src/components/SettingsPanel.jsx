@@ -915,7 +915,7 @@ const RetentionSlider = ({ value, onChange }) => {
                             // Custom transform for strict positioning of 1y and infinity
                             let labelStyle = {
                                 position: 'absolute',
-                                bottom: '17px',
+                                bottom: '18px',
                                 left: '50%',
                                 transform: 'translateX(-50%)',
                                 fontSize: '0.65rem',
