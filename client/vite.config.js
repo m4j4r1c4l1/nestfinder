@@ -39,7 +39,7 @@ export default defineConfig({
             },
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-                navigateFallbackDenylist: [/^\/admin-panel/], // Don't intercept admin panel requests
+                navigateFallbackDenylist: [/^\/admin-panel/, /^\/api/], // Don't intercept admin or API requests
                 runtimeCaching: [
                     {
                         // OSM Tile caching - increased for offline areas
