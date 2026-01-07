@@ -570,18 +570,16 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     const [trackWidth, setTrackWidth] = useState(300); // Default fallback
     const isDragging = React.useRef(false);
     const startX = React.useRef(0);
+    // Stable geometry for the current drag session
+    const dragBase = React.useRef(0);
+    const dragMax = React.useRef(0);
 
-    // Robust width tracking
     // Robust width tracking
     React.useLayoutEffect(() => {
         if (!trackRef.current) return;
-
-        // Initial measure
         if (trackRef.current.offsetWidth > 0) {
             setTrackWidth(trackRef.current.offsetWidth);
         }
-
-        // Observer for resizes/animations
         const observer = new ResizeObserver(entries => {
             for (const entry of entries) {
                 if (entry.contentRect.width > 0) {
@@ -589,7 +587,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                 }
             }
         });
-
         observer.observe(trackRef.current);
         return () => observer.disconnect();
     }, []);
@@ -597,9 +594,22 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     // Touch handlers
     const handleStart = (clientX) => {
         if (!trackRef.current) return;
-        if (trackRef.current.offsetWidth > 0) {
-            setTrackWidth(trackRef.current.offsetWidth); // Force update to ensure precision
-        }
+
+        // Lock geometry at start of drag
+        const width = trackRef.current.offsetWidth || 300;
+        const thumb = 100;
+        const padding = 4;
+
+        const pLeft = padding;
+        const pRight = width - thumb - padding;
+        const pCenter = (width - thumb) / 2;
+
+        dragMax.current = pRight;
+
+        if (value === 'left') dragBase.current = pLeft;
+        else if (value === 'right') dragBase.current = pRight;
+        else dragBase.current = pCenter;
+
         isDragging.current = true;
         startX.current = clientX;
         setDragOffset(0);
@@ -618,12 +628,6 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         const trackWidth = trackRef.current.offsetWidth;
         const thumbWidth = 100;
         const threshold = trackWidth * 0.25;
-
-        // Calculate absolute drag distance to determine switch
-        // We need to know effective movement relative to start state
-        // If start was Left: > threshold -> Right
-        // If start was Right: < -threshold -> Left
-        // If start was Center: > 50 -> Right, < -50 -> Left
 
         if (value === null) {
             if (dragOffset > 50) onChange('right');
@@ -692,9 +696,12 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
     // Apply Drag
     if (dragOffset !== null) {
-        let rawPos = currentBase + dragOffset;
-        // Strict Clamping
-        rawPos = Math.max(posLeft, Math.min(posRight, rawPos));
+        // Use STABLE geometry captured at toggle start
+        let rawPos = dragBase.current + dragOffset;
+
+        // Strict Clamping using captured max
+        // Left limit is always padding (4)
+        rawPos = Math.max(4, Math.min(dragMax.current, rawPos));
         translateX = rawPos;
     } else {
         translateX = currentBase;
