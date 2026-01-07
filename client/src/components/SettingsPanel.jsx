@@ -762,6 +762,10 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         translateX = rawPos;
     } else {
         translateX = currentBase;
+        // Log only when transitioning from dragging to snapped
+        if (dragOffsetRef.current !== null) {
+            addLog(`SNAP tx:${Math.round(translateX)} v:${value || 'null'}`);
+        }
     }
 
     style.transform = `translateX(${translateX}px)`;
