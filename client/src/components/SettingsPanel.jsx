@@ -640,6 +640,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
     };
 
     const handleEnd = () => {
+        console.log('[SWIPE DEBUG] handleEnd CALLED:', { isDragging: isDragging.current, hasTrack: !!trackRef.current });
         if (!isDragging.current || !trackRef.current) return;
         isDragging.current = false;
 
@@ -664,29 +665,30 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
         setDragOffset(null);
     };
 
-    // Event Wrappers
-    const onTouchStart = (e) => {
-        // Prevent mouse emulation and scrolling while dragging
-        // This stops ghost mouse events from firing and resetting the drag
-        if (e.cancelable) e.preventDefault();
-        handleStart(e.touches[0].clientX);
-    };
-    const onTouchMove = (e) => {
-        if (e.cancelable) e.preventDefault();
-        handleMove(e.touches[0].clientX);
-    };
-    const onTouchEnd = () => handleEnd();
-    const onMouseDown = (e) => {
+    // Pointer Event Handlers (unified for touch/mouse, better iOS support)
+    const onPointerDown = (e) => {
+        // Capture pointer to track even if it leaves the element
+        e.target.setPointerCapture(e.pointerId);
         e.preventDefault();
+        console.log('[SWIPE DEBUG] onPointerDown:', { pointerId: e.pointerId, clientX: e.clientX });
         handleStart(e.clientX);
-        const onMouseMove = (ev) => handleMove(ev.clientX);
-        const onMouseUp = () => {
-            handleEnd();
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-        };
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
+    };
+
+    const onPointerMove = (e) => {
+        if (!isDragging.current) return;
+        handleMove(e.clientX);
+    };
+
+    const onPointerUp = (e) => {
+        e.target.releasePointerCapture(e.pointerId);
+        console.log('[SWIPE DEBUG] onPointerUp:', { pointerId: e.pointerId });
+        handleEnd();
+    };
+
+    const onPointerCancel = (e) => {
+        // Handle iOS edge cases where touch is cancelled
+        console.log('[SWIPE DEBUG] onPointerCancel');
+        handleEnd();
     };
 
     // Render Logic
@@ -785,10 +787,10 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
                     userSelect: 'none',
                     touchAction: 'none'
                 }}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-                onMouseDown={onMouseDown}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerCancel}
             >
                 {/* Thumb */}
                 <div ref={thumbRef} style={style}>
