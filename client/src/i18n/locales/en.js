@@ -241,7 +241,8 @@ export default {
         restoreConfirmButton: 'Yes, Restore',
         sameKeyError: 'This is your current account\'s recovery key. You are already logged in with this account.',
         // Swipe Direction
-        swipeDirection: 'Delete Messages',
+        swipeDirection: 'Delete Direction',
+        deleteActions: 'Delete Messages',
         swipe: {
             right: '→ Swipe Right',
             left: '← Swipe Left',
