@@ -563,13 +563,42 @@ const RestoreAccountSection = ({ t }) => {
 
 
 
-// Simple 2-state toggle with dove emoji - replaces unreliable SwipeControl
+// Simple 3-state toggle with dove/chick emoji - replaces unreliable SwipeControl
+// Center state is initial only - after first choice, toggles between left/right
 const DoveToggle = ({ value, onChange }) => {
+    const isLeft = value === 'left';
     const isRight = value === 'right';
+    const isCenter = value === null || value === undefined;
 
-    const handleClick = () => {
-        onChange(isRight ? 'left' : 'right');
+    const handleClick = (e) => {
+        if (isCenter) {
+            // First time: click left half → left, click right half → right
+            const rect = e.currentTarget.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const halfWidth = rect.width / 2;
+            onChange(clickX < halfWidth ? 'left' : 'right');
+        } else {
+            // After initial choice: simple toggle between left and right
+            onChange(isLeft ? 'right' : 'left');
+        }
     };
+
+    // Calculate thumb position
+    let thumbLeft = 'calc(50% - 50px)'; // Center default
+    if (isLeft) thumbLeft = '4px';
+    if (isRight) thumbLeft = 'calc(100% - 104px)';
+
+    // Emoji and transform - dove points to where it can GO (inverted)
+    let emoji = <span style={{ fontSize: '1.2rem' }}>🐥</span>; // Chick for center
+    let thumbTransform = 'none';
+    if (isLeft) {
+        emoji = '🕊️';
+        thumbTransform = 'none'; // Dove faces RIGHT (where it can go)
+    }
+    if (isRight) {
+        emoji = '🕊️';
+        thumbTransform = 'scaleX(-1)'; // Dove faces LEFT (where it can go)
+    }
 
     return (
         <div>
@@ -580,7 +609,7 @@ const DoveToggle = ({ value, onChange }) => {
                     width: '100%',
                     height: '48px',
                     boxSizing: 'border-box',
-                    background: isRight ? '#10b981' : '#3b82f6', // Green right, Blue left
+                    background: '#3b82f6', // Always blue
                     borderRadius: 'var(--radius-md)',
                     border: '1px solid var(--color-border)',
                     cursor: 'pointer',
@@ -588,11 +617,11 @@ const DoveToggle = ({ value, onChange }) => {
                     userSelect: 'none'
                 }}
             >
-                {/* Thumb with dove */}
+                {/* Thumb with dove/chick */}
                 <div style={{
                     position: 'absolute',
                     top: '4px',
-                    left: isRight ? 'calc(100% - 104px)' : '4px',
+                    left: thumbLeft,
                     width: '100px',
                     height: '40px',
                     borderRadius: 'var(--radius-sm)',
@@ -603,22 +632,25 @@ const DoveToggle = ({ value, onChange }) => {
                     fontSize: '1.4rem',
                     boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
                     transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    transform: isRight ? 'none' : 'scaleX(-1)' // Mirror dove when left
+                    transform: thumbTransform
                 }}>
-                    🕊️
+                    {emoji}
                 </div>
             </div>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '0 4px',
-                marginTop: '4px',
-                color: 'var(--color-text-secondary)',
-                fontSize: '0.7rem'
-            }}>
-                <span>← Left</span>
-                <span>Right →</span>
-            </div>
+            {/* Status badge - only shown after initial choice */}
+            {!isCenter && (
+                <div style={{
+                    marginTop: '8px',
+                    padding: '6px 12px',
+                    background: '#3b82f6',
+                    borderRadius: 'var(--radius-sm)',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    textAlign: 'center'
+                }}>
+                    Current settings allow to delete a message by swiping {isLeft ? 'left' : 'right'} over a message
+                </div>
+            )}
         </div>
     );
 };
