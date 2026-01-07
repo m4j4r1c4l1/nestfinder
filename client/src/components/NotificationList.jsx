@@ -402,9 +402,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         });
 
     const tabs = [
-        { id: 'received', icon: '\u{1FABBA}', label: t('inbox.received') || 'Received' },
-        { id: 'sent', icon: '\u{1FABB9}', label: t('inbox.sent') || 'Sent' },
-        { id: 'compose', icon: '\u{1FAB6}', label: t('inbox.compose') || 'Compose' }
+        { id: 'received', icon: '\u{1FABA}', label: t('inbox.received') || 'Received' },
+        { id: 'sent', icon: '\u{1FAB9}', label: t('inbox.sent') || 'Sent' },
+        { id: 'compose', icon: '\u{1FAB6}', label: t('inbox.compose') || 'Compose' } // Feather U+1FAB6
     ];
 
     // Error-style delete button (matches SettingsPanel invalid key style)
