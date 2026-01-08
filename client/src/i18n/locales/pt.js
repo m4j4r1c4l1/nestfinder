@@ -254,9 +254,9 @@ export default {
             desc: '⚠️ Mensagens mais antigas serão eliminadas permanentemente.'
         },
         retentionHelp: {
-            forever: 'Mensagens são mantidas **Indefinidamente**.',
-            read: 'Mensagens serão apagadas após **Leitura**.',
-            period: 'Mensagens mais antigas que **{time}** serão apagadas.',
+            forever: 'Mensagens são mantidas <b>Indefinidamente</b>.',
+            read: 'Mensagens serão apagadas após <b>Leitura</b>.',
+            period: 'Mensagens mais antigas que <b>{time}</b> serão apagadas.',
             unit: {
                 d: 'Dia',
                 w: 'Semana',

@@ -254,9 +254,9 @@ export default {
             desc: '⚠️ 超出时间的消息将被永久删除。'
         },
         retentionHelp: {
-            forever: '消息将**无限期**保留。',
-            read: '消息将在**阅读**后删除。',
-            period: '早于 **{time}** 的消息将被删除。',
+            forever: '消息将<b>无限期</b>保留。',
+            read: '消息将在<b>阅读</b>后删除。',
+            period: '早于 <b>{time}</b> 的消息将被删除。',
             unit: {
                 d: '天',
                 w: '周',

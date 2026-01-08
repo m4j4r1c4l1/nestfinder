@@ -1049,8 +1049,36 @@ const RetentionSlider = ({ value, onChange, t }) => {
 
         const pluralize = (val, unitKey) => {
             const unit = getUnit(unitKey);
-            // Very basic pluralization: add 's' if > 1 and not Chinese/Japanese typically
-            const suffix = (val > 1 && ['en', 'es', 'fr', 'pt', 'nl', 'it'].includes(i18n.language?.substring(0, 2))) ? 's' : '';
+            if (val <= 1) return `${val} ${unit}`;
+
+            const lang = i18n.language?.substring(0, 2);
+
+            // Spanish/Portuguese/Valencian: Mes -> Meses
+            if (['es', 'pt', 'val'].includes(lang) && unitKey === 'm') {
+                return `${val} ${unit}es`;
+            }
+
+            // Italian: Ora -> Ore, Settimana -> Settimane, Mese -> Mesi, Giorno -> Giorni, Anno -> Anni
+            if (lang === 'it') {
+                if (unitKey === 'h') return `${val} Ore`;
+                if (unitKey === 'w') return `${val} Settimane`;
+                if (unitKey === 'm') return `${val} Mesi`;
+                if (unitKey === 'd') return `${val} Giorni`;
+                if (unitKey === 'y') return `${val} Anni`;
+            }
+
+            // German: Tag -> Tage, Woche -> Wochen, Monat -> Monate, Jahr -> Jahre, Stunde -> Stunden
+            if (lang === 'de') {
+                if (unitKey === 'd') return `${val} Tage`;
+                if (unitKey === 'w') return `${val} Wochen`;
+                if (unitKey === 'm') return `${val} Monate`;
+                if (unitKey === 'y') return `${val} Jahre`;
+                if (unitKey === 'h') return `${val} Stunden`;
+            }
+
+            // French: Standard 's' usually works for these units
+            // English: Standard 's'
+            const suffix = ['en', 'es', 'fr', 'pt', 'nl'].includes(lang) ? 's' : '';
             return `${val} ${unit}${suffix}`;
         };
 
