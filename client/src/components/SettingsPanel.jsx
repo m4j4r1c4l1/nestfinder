@@ -628,7 +628,7 @@ const DoveToggle = ({ value, onChange }) => {
                 {/* Thumb with roller/chick */}
                 <div style={{
                     position: 'absolute',
-                    top: '1px',
+                    top: '0',
                     left: thumbLeft,
                     width: '100px',
                     height: '40px',
