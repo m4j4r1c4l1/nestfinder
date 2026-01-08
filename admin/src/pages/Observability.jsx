@@ -140,36 +140,32 @@ const BarrelDigit = ({ value }) => {
 
     return (
         <div style={{
-            position: 'relative',
-            display: 'inline-block',
-            width: /^[0-9]$/.test(display) ? '0.6em' : 'auto', // Fixed width for nums, auto for others (like . or ,)
-            minWidth: /^[0-9]$/.test(display) ? '0.6em' : '0.2em', // Ensure separator has some width
-            height: '1em', // Restored: Required because children are absolute
-            overflow: 'hidden', // Restored: Clip sliding animation
-            margin: /^[0-9]$/.test(display) ? 0 : '0 1px', // Tiny margin for separator if needed
-            verticalAlign: 'baseline', // Align with text baseline
-            fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
+            display: 'inline-flex',
+            flexDirection: 'column',
+            verticalAlign: 'baseline',
+            height: '1.2em', // Standard text height
+            overflow: 'hidden',
+            width: /^[0-9]$/.test(display) ? '0.6em' : 'auto',
+            minWidth: /^[0-9]$/.test(display) ? '0.6em' : '0.2em',
+            margin: /^[0-9]$/.test(display) ? 0 : '0 1px',
+            fontVariantNumeric: 'tabular-nums',
+            textAlign: 'center'
         }}>
-            {/* Hidden strut to establish a text baseline for the absolutely positioned digits */}
-            <span style={{ visibility: 'hidden', pointerEvents: 'none', userSelect: 'none' }}>0</span>
             <div key={display} style={{
-                position: 'absolute',
-                top: 0, left: 0,
-                width: '100%', // Ensure full width for centering
                 display: 'flex',
                 flexDirection: 'column',
-                // If animating: Stack is [New, Old]. Height 2em.
-                // Start -50% (Show Old). End 0 (Show New).
-                // If not animating: Just show New.
-                // Slower animation (~20% slower -> 0.5s) + Snappy "Ease Out Back" effect
+                flexShrink: 0,
                 animation: animating ? 'barrelDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
-                transform: 'translateY(0)' // Default resting state (showing New)
+                transform: 'translateY(0)'
             }}>
-                {/* New Value (Top) */}
-                <div style={{ height: '1em', lineHeight: 1, textAlign: 'center', width: '100%' }}>{display}</div>
+                {/* 
+                  The first div's baseline determines the baseline of the entire inline-flex container.
+                  Using 1.2 line-height for a natural text feel.
+                */}
+                <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{display}</div>
 
                 {/* Old Value (Bottom) - Only rendered during animation */}
-                {animating && <div style={{ height: '1em', lineHeight: 1, textAlign: 'center', width: '100%' }}>{prev}</div>}
+                {animating && <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{prev}</div>}
             </div>
         </div>
     );
@@ -177,8 +173,6 @@ const BarrelDigit = ({ value }) => {
 
 // Barrel Counter Container
 const BarrelCounter = ({ value }) => {
-    // Inject the keyframes here if not global (ensure it exists)
-    // Slower, snappier drop (0.5s)
     const styles = `
         @keyframes barrelDrop {
             0% { transform: translateY(-50%); filter: blur(0); }
@@ -188,10 +182,9 @@ const BarrelCounter = ({ value }) => {
         }
     `;
 
-    // If value is already formatted string, use it. Otherwise round and stringify.
     const str = typeof value === 'string' ? value : Math.round(value || 0).toString();
     return (
-        <div style={{ display: 'inline-flex', alignItems: 'baseline', overflow: 'hidden' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'baseline' }}>
             <style>{styles}</style>
             {str.split('').map((char, i) => (
                 <BarrelDigit key={i} value={char} />
