@@ -153,8 +153,8 @@ const BarrelDigit = ({ value }) => {
 
 // Barrel Counter Container
 const BarrelCounter = ({ value }) => {
-    // Convert number to string to split digits
-    const str = Math.round(value || 0).toString();
+    // If value is already formatted string, use it. Otherwise round and stringify.
+    const str = typeof value === 'string' ? value : Math.round(value || 0).toString();
     return (
         <div style={{ display: 'inline-flex', overflow: 'hidden' }}>
             {str.split('').map((char, i) => (
@@ -165,7 +165,7 @@ const BarrelCounter = ({ value }) => {
 };
 
 // Rolling Barrel Counter (CountUp + Barrel)
-const RollingBarrelCounter = ({ end, duration = 2000 }) => {
+const RollingBarrelCounter = ({ end, duration = 2000, separator = null }) => {
     const [count, setCount] = useState(0);
     const endVal = parseFloat(end) || 0;
     const isInitial = React.useRef(true);
@@ -202,7 +202,25 @@ const RollingBarrelCounter = ({ end, duration = 2000 }) => {
         return () => cancelAnimationFrame(animationFrame);
     }, [endVal, duration]);
 
-    return <BarrelCounter value={count} />;
+    // Format the count for display
+    let displayValue = Math.round(count).toString();
+    if (separator) {
+        // Simple regex to add separator every 3 digits
+        displayValue = displayValue.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+    }
+
+    return <BarrelCounter value={displayValue} />;
+};
+
+// Randomly chooses between Barrel and CountUp for variety
+const RandomCounter = (props) => {
+    // Stable random choice on mount
+    const useBarrel = React.useRef(Math.random() > 0.5).current;
+
+    if (useBarrel) {
+        return <RollingBarrelCounter {...props} />;
+    }
+    return <CountUp {...props} />;
 };
 
 const Observability = () => {
@@ -287,7 +305,7 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🦚 Users</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)', lineHeight: 1 }}>
-                                        <CountUp end={stats.totalSubscribers} />
+                                        <RandomCounter end={stats.totalSubscribers} />
                                     </div>
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Registered</div>
                                     <div className="text-muted text-sm">Total</div>
@@ -307,7 +325,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '1rem' }}>{badge.icon}</span>
                                             <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
-                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={badge.count || 0} /></span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={badge.count || 0} /></span>
                                         </div>
                                     ))}
                                 </div>
@@ -320,7 +338,7 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>📍 Points</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', lineHeight: 1 }}>
-                                        <CountUp end={(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)} />
+                                        <RandomCounter end={(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)} />
                                     </div>
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Submitted</div>
                                     <div className="text-muted text-sm">Total</div>
@@ -335,7 +353,7 @@ const Observability = () => {
                                     }}>
                                         <span style={{ fontSize: '0.9rem' }}>🟠</span>
                                         <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Pending</span>
-                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={stats.mapPoints?.pending || 0} /></span>
+                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.pending || 0} /></span>
                                     </div>
                                     {/* Confirmed + Inactive row */}
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -346,7 +364,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '0.9rem' }}>🟢</span>
                                             <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Confirmed</span>
-                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={stats.mapPoints?.confirmed || 0} /></span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.confirmed || 0} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
@@ -355,7 +373,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '0.9rem' }}>🔴</span>
                                             <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Inactive</span>
-                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={stats.mapPoints?.deactivated || 0} /></span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.deactivated || 0} /></span>
                                         </div>
                                     </div>
                                 </div>
@@ -368,7 +386,7 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>⭐ Rating</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#facc15', lineHeight: 1 }}>
-                                        {stats.avgRating !== undefined ? <CountUp end={stats.avgRating} decimals={1} /> : '-'}
+                                        {stats.avgRating !== undefined ? <RandomCounter end={stats.avgRating} decimals={1} /> : '-'}
                                     </div>
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Average</div>
                                     <div className="text-muted text-sm">All time</div>
@@ -382,7 +400,7 @@ const Observability = () => {
                                     }}>
                                         <span style={{ fontSize: '0.9rem' }}>⭐</span>
                                         <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Votes</span>
-                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={stats.totalRatings || 0} /></span>
+                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.totalRatings || 0} /></span>
                                     </div>
                                 </div>
                             </div>
@@ -401,7 +419,7 @@ const Observability = () => {
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
-                                                <CountUp end={stats.notificationMetrics?.total || 0} />
+                                                <RandomCounter end={stats.notificationMetrics?.total || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
                                             <div className="text-muted text-sm">Total</div>
@@ -409,15 +427,15 @@ const Observability = () => {
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.notificationMetrics?.unread || 0} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.unread || 0} /></span>
                                             </div>
                                         </div>
                                     </div>
@@ -425,7 +443,7 @@ const Observability = () => {
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
-                                                <CountUp end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
+                                                <RandomCounter end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
                                             <div className="text-muted text-sm">Total</div>
@@ -433,11 +451,11 @@ const Observability = () => {
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.feedbackMetrics?.pending || 0} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.pending || 0} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.feedbackMetrics?.read || 0} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.read || 0} /></span>
                                             </div>
                                         </div>
                                     </div>
@@ -452,7 +470,7 @@ const Observability = () => {
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22d3ee', lineHeight: 1 }}>
-                                                <CountUp end={stats.broadcastMetrics?.active || 0} />
+                                                <RandomCounter end={stats.broadcastMetrics?.active || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Banners</div>
                                             <div className="text-muted text-sm">Active</div>
@@ -460,11 +478,11 @@ const Observability = () => {
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.broadcastMetrics?.delivered || 0} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.delivered || 0} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.broadcastMetrics?.read || 0} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.read || 0} /></span>
                                             </div>
                                         </div>
                                     </div>
@@ -472,7 +490,7 @@ const Observability = () => {
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4ade80', lineHeight: 1 }}>
-                                                <CountUp end={stats.broadcastMetrics?.total || 0} />
+                                                <RandomCounter end={stats.broadcastMetrics?.total || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Created</div>
                                             <div className="text-muted text-sm">Total</div>
@@ -494,7 +512,7 @@ const Observability = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem', width: '100%' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                            <CountUp end={stats.devMetrics?.loc || 0} separator="." />
+                                            <RandomCounter end={stats.devMetrics?.loc || 0} separator="." />
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Lines of Code</div>
                                         <div className="text-muted text-sm">Total</div>
@@ -513,8 +531,8 @@ const Observability = () => {
                                                 boxStyle: { background: '#1e3a8a40', border: '1px solid #1e3a8a' }
                                             },
                                             { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6' },
-                                            { label: 'Components', sub: 'React/JSX', count: <CountUp end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
-                                            { label: 'Files', sub: 'Total Count', count: <CountUp end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
+                                            { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
+                                            { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
                                             <div key={i} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
