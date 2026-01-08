@@ -99,8 +99,27 @@ const CommitReveal = ({ text, duration = 2000 }) => {
         return () => cancelAnimationFrame(animationFrame);
     }, [text]);
 
-    return <>{display}</>;
+    const prefix = display.slice(0, -1);
+    const lastChar = display.slice(-1);
 
+    return (
+        <div style={{ display: 'inline-flex', alignItems: 'baseline' }}>
+            <style>{`
+                @keyframes barrelDrop {
+                    0% { transform: translateY(-50%); filter: blur(0); }
+                    10% { filter: blur(2px); }
+                    90% { filter: blur(2px); }
+                    100% { transform: translateY(0); filter: blur(0); }
+                }
+            `}</style>
+            <span>{prefix}</span>
+            {text && text !== '-' ? (
+                <BarrelDigit value={lastChar} />
+            ) : (
+                <span>{lastChar}</span>
+            )}
+        </div>
+    );
 };
 
 // Barrel/Slot Machine Digit Component
