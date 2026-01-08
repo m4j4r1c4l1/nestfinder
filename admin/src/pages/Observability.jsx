@@ -759,9 +759,13 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
 
 // Reusable Chart Card Component with independent state
 const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true, onPointClick }) => {
+    const storageKey = `observability_scope_${title ? title.toLowerCase().replace(/\s+/g, '_') : 'default'}`;
     const [metrics, setMetrics] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [days, setDays] = useState(7);
+    const [days, setDays] = useState(() => {
+        const saved = localStorage.getItem(storageKey);
+        return saved ? parseInt(saved) : 7;
+    });
     const [refreshInterval, setRefreshInterval] = useState(0);
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const cardRef = useRef(null);
@@ -906,7 +910,11 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <select
                     value={days}
-                    onChange={(e) => setDays(parseInt(e.target.value))}
+                    onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setDays(val);
+                        localStorage.setItem(storageKey, val);
+                    }}
                     style={{
                         background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
                         borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
@@ -1359,9 +1367,13 @@ const RatingsBreakdownModal = ({ data, onClose }) => {
 
 // Ratings Chart Card Component (Area Chart with Stars)
 const RatingsChartCard = ({ onPointClick }) => {
+    const storageKey = 'observability_scope_ratings';
     const [ratings, setRatings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [days, setDays] = useState(7);
+    const [days, setDays] = useState(() => {
+        const saved = localStorage.getItem(storageKey);
+        return saved ? parseInt(saved) : 7;
+    });
     const [refreshInterval, setRefreshInterval] = useState(0);
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const cardRef = useRef(null);
@@ -1478,7 +1490,11 @@ const RatingsChartCard = ({ onPointClick }) => {
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <select
                 value={days}
-                onChange={(e) => setDays(parseInt(e.target.value))}
+                onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    setDays(val);
+                    localStorage.setItem(storageKey, val);
+                }}
                 style={{
                     background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
                     borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
