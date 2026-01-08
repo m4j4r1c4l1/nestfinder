@@ -669,6 +669,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
     // Scroll Trigger & Animation
     useEffect(() => {
+        if (isVisible || loading || metrics.length === 0) return;
+
         const observer = new IntersectionObserver(([entry]) => {
             if (entry.isIntersecting) {
                 setIsVisible(true);
@@ -677,7 +679,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         }, { threshold: 0.5 });
         if (cardRef.current) observer.observe(cardRef.current);
         return () => observer.disconnect();
-    }, []);
+    }, [loading, metrics.length, isVisible]);
 
     useEffect(() => {
         if (!metrics.length) return;
@@ -1252,6 +1254,8 @@ const RatingsChartCard = ({ onPointClick }) => {
 
     // Scroll Trigger & Animation
     useEffect(() => {
+        if (isVisible || loading || ratings.length === 0) return;
+
         const observer = new IntersectionObserver(([entry]) => {
             if (entry.isIntersecting) {
                 setIsVisible(true);
@@ -1260,7 +1264,7 @@ const RatingsChartCard = ({ onPointClick }) => {
         }, { threshold: 0.5 });
         if (cardRef.current) observer.observe(cardRef.current);
         return () => observer.disconnect();
-    }, []);
+    }, [loading, ratings.length, isVisible]);
 
     useEffect(() => {
         if (!ratings.length) return;
