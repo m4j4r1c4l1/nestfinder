@@ -615,9 +615,9 @@ const DoveToggle = ({ value, onChange }) => {
                     height: '42px',
                     boxSizing: 'border-box',
                     boxSizing: 'border-box',
-                    background: '#3b82f6',
+                    background: 'rgba(239, 68, 68, 0.1)',
                     borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--color-border)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
                     cursor: 'pointer',
                     userSelect: 'none'
                 }}
