@@ -280,10 +280,15 @@ export default {
             period: 'Messages older than <b>{time}</b> will be deleted.',
             unit: {
                 d: 'Day',
+                d_plural: 'Days',
                 w: 'Week',
+                w_plural: 'Weeks',
                 m: 'Month',
+                m_plural: 'Months',
                 y: 'Year',
-                h: 'Hour'
+                y_plural: 'Years',
+                h: 'Hour',
+                h_plural: 'Hours'
             }
         },
         swipeHelp: {

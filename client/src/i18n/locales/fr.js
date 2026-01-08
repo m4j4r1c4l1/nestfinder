@@ -258,10 +258,15 @@ export default {
             period: 'Les messages datant de plus de <b>{time}</b> seront supprimés.',
             unit: {
                 d: 'Jour',
+                d_plural: 'Jours',
                 w: 'Semaine',
+                w_plural: 'Semaines',
                 m: 'Mois',
+                m_plural: 'Mois',
                 y: 'Année',
-                h: 'Heure'
+                y_plural: 'Années',
+                h: 'Heure',
+                h_plural: 'Heures'
             }
         },
         swipeHelp: {

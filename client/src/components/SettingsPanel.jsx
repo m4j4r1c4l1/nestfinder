@@ -2088,13 +2088,26 @@ const SettingsPanel = ({ onClose }) => {
                                 const unitKey = { d: 'd', w: 'w', m: 'm', y: 'y', h: 'h' }[unitChar];
                                 // Fallback to basic English map if translation fails or key missing
                                 const englishMap = { d: 'Day', w: 'Week', m: 'Month', y: 'Year', h: 'Hour' };
-                                const translatedUnit = t(`settings.retentionHelp.unit.${unitKey}`) || englishMap[unitChar];
 
-                                // Simple pluralization for English, others will just show the unit name
-                                // Accessing language from t's closure isn't direct, so we assume English defaults if not handled
-                                // The new translation keys allow us to be more flexible, but for now we construct the string
-                                const suffix = (val > 1 && (!t('settings.retentionHelp.unit.d') || t('settings.retentionHelp.unit.d') === 'Day')) ? 's' : '';
-                                const label = `${val} ${translatedUnit}${suffix}`;
+                                // Pluralization Logic
+                                const isPlural = val > 1;
+                                let translatedUnit = t(`settings.retentionHelp.unit.${unitKey}`);
+
+                                if (isPlural) {
+                                    // Try to fetch plural key first (e.g. 'm_plural')
+                                    const pluralUnit = t(`settings.retentionHelp.unit.${unitKey}_plural`);
+                                    if (pluralUnit) {
+                                        translatedUnit = pluralUnit;
+                                    } else {
+                                        // Fallback to English simple plural (append 's') if single form exists
+                                        translatedUnit = (translatedUnit || englishMap[unitChar]) + 's';
+                                    }
+                                } else {
+                                    // Singular fallback
+                                    translatedUnit = translatedUnit || englishMap[unitChar];
+                                }
+
+                                const label = `${val} ${translatedUnit}`;
 
                                 return <span dangerouslySetInnerHTML={{ __html: t('settings.retentionHelp.period', { time: label }) || `Messages older than <b>${label}</b> will be deleted.` }} />;
                             })()}

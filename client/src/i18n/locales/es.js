@@ -288,10 +288,15 @@ export default {
             period: 'Los mensajes anteriores a <b>{time}</b> serán eliminados.',
             unit: {
                 d: 'Día',
+                d_plural: 'Días',
                 w: 'Semana',
+                w_plural: 'Semanas',
                 m: 'Mes',
+                m_plural: 'Meses',
                 y: 'Año',
-                h: 'Hora'
+                y_plural: 'Años',
+                h: 'Hora',
+                h_plural: 'Horas'
             }
         },
         swipeHelp: {
