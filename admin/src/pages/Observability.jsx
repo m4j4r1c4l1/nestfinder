@@ -142,7 +142,6 @@ const BarrelDigit = ({ value }) => {
                 // If not animating: Just show New.
                 // Slower animation (~20% slower -> 0.5s) + Snappy "Ease Out Back" effect
                 animation: animating ? 'barrelDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
-                filter: animating ? 'blur(1.5px)' : 'none', // Add motion blur during transition
                 transform: 'translateY(0)' // Default resting state (showing New)
             }}>
                 {/* New Value (Top) */}
@@ -161,8 +160,10 @@ const BarrelCounter = ({ value }) => {
     // Slower, snappier drop (0.5s)
     const styles = `
         @keyframes barrelDrop {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(0); }
+            0% { transform: translateY(-50%); filter: blur(0); }
+            10% { filter: blur(2px); }
+            90% { filter: blur(2px); }
+            100% { transform: translateY(0); filter: blur(0); }
         }
     `;
 
