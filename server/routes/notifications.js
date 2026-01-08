@@ -200,34 +200,6 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         // 1. Dev Metrics
         const devMetrics = await calculateDevMetrics(rootDir);
 
-        // 2 & 3. Specific Shallow/Render overrides if needed (though calculateDevMetrics handles basics)
-        if (!devMetrics.commits || devMetrics.commits === 0) {
-            // Render / Shallow Clone Fallback
-            const headers = { 'User-Agent': 'nestfinder-admin' };
-            const token = process.env.GITHUB_TOKEN || process.env.NEST_TRACKER;
-            if (token) headers['Authorization'] = `token ${token}`;
-
-            try {
-                const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', { headers });
-                if (response.ok) {
-                    const linkHeader = response.headers.get('Link');
-                    if (linkHeader) {
-                        const links = linkHeader.split(',');
-                        const lastLink = links.find(link => link.includes('rel="last"'));
-                        if (lastLink) {
-                            const match = lastLink.match(/[?&]page=(\d+)/);
-                            if (match) devMetrics.commits = parseInt(match[1], 10);
-                        }
-                    }
-                    const data = await response.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        if (!devMetrics.commits) devMetrics.commits = data.length;
-                        devMetrics.lastCommit = data[0].sha.substring(0, 7);
-                    }
-                }
-            } catch (e) { console.error('GitHub API failed:', e.message); }
-        }
-
         // Calculate Broadcast Metrics
         let broadcastMetrics = { total: 0, active: 0, delivered: 0, read: 0 };
         try {
