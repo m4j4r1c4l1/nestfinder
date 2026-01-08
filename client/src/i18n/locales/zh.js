@@ -8,12 +8,12 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
-        sentStatus: '✓ Sent!',
-        sending: 'Sending...',
+        sentStatus: '✓ 已发送!',
+        sending: '发送中...',
         types: {
-            bug: '🐛 Bug',
-            suggestion: '💡 Idea',
-            other: '📝 Other'
+            bug: '🐛 错误',
+            suggestion: '💡 想法',
+            other: '📝 其他'
         },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
@@ -112,12 +112,19 @@ export default {
         geocodeError: '地理编码错误。',
         addressRequired: '请输入城市和街道',
         locationRequired: '需要位置信息。请使用GPS、地图或地址。',
-        tagsLabel: '快速标签',
+        tagsLabel: '那是谁？ (可选)',
         onePerson: '一个人',
-        multiple: '多人',
+        multiple: '团体',
         children: '儿童',
         animals: '动物'
-    },
+    ,
+        voiceMode: '语音',
+        needsLabel: '他们需要什么？ (可选)',
+        needFood: '食物',
+        needWater: '水',
+        needClothes: '衣服',
+        needMedicine: '药物',
+        needShelter: '避难所'},
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',

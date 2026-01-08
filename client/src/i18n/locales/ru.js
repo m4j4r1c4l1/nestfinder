@@ -8,12 +8,12 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
-        sentStatus: '✓ Sent!',
-        sending: 'Sending...',
+        sentStatus: '✓ Отправлено!',
+        sending: 'Отправка...',
         types: {
-            bug: '🐛 Bug',
-            suggestion: '💡 Idea',
-            other: '📝 Other'
+            bug: '🐛 Ошибка',
+            suggestion: '💡 Идея',
+            other: '📝 Другое'
         },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
@@ -112,12 +112,19 @@ export default {
         geocodeError: 'Ошибка геокодирования.',
         addressRequired: 'Введите город и улицу',
         locationRequired: 'Требуется местоположение.',
-        tagsLabel: 'Быстрые теги',
+        tagsLabel: 'Кто там? (Опционально)',
         onePerson: 'Один человек',
-        multiple: 'Несколько',
+        multiple: 'Группа',
         children: 'Дети',
         animals: 'Животные'
-    },
+    ,
+        voiceMode: 'Голос',
+        needsLabel: 'Что им нужно? (Опционально)',
+        needFood: 'Еда',
+        needWater: 'Вода',
+        needClothes: 'Одежда',
+        needMedicine: 'Лекарства',
+        needShelter: 'Убежище'},
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',

@@ -8,12 +8,12 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
-        sentStatus: '✓ Sent!',
-        sending: 'Sending...',
+        sentStatus: '✓ Verzonden!',
+        sending: 'Verzenden...',
         types: {
-            bug: '🐛 Bug',
-            suggestion: '💡 Idea',
-            other: '📝 Other'
+            bug: '🐛 Fout',
+            suggestion: '💡 Idee',
+            other: '📝 Overig'
         },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
@@ -112,12 +112,19 @@ export default {
         geocodeError: 'Geocoding fout.',
         addressRequired: 'Voer ten minste stad en straat in',
         locationRequired: 'Locatie vereist. Gebruik GPS, kaart of adres.',
-        tagsLabel: 'Snelle Tags',
+        tagsLabel: 'Wie is daar? (Optioneel)',
         onePerson: 'Eén persoon',
-        multiple: 'Meerdere',
+        multiple: 'Groep',
         children: 'Kinderen',
         animals: 'Dieren'
-    },
+    ,
+        voiceMode: 'Stem',
+        needsLabel: 'Wat hebben ze nodig? (Optioneel)',
+        needFood: 'Eten',
+        needWater: 'Water',
+        needClothes: 'Kleding',
+        needMedicine: 'Medicijnen',
+        needShelter: 'Onderdak'},
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',

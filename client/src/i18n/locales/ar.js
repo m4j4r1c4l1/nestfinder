@@ -9,12 +9,12 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
-        sentStatus: '✓ Sent!',
-        sending: 'Sending...',
+        sentStatus: '✓ تم الإرسال!',
+        sending: 'جاري الإرسال...',
         types: {
-            bug: '🐛 Bug',
-            suggestion: '💡 Idea',
-            other: '📝 Other'
+            bug: '🐛 خطأ',
+            suggestion: '💡 فكرة',
+            other: '📝 آخر'
         },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
@@ -113,12 +113,19 @@ export default {
         geocodeError: 'خطأ في العنوان.',
         addressRequired: 'المدينة والشارع مطلوبان',
         locationRequired: 'الموقع مطلوب.',
-        tagsLabel: 'وسوم',
-        onePerson: 'شخص',
-        multiple: 'أشخاص',
+        tagsLabel: 'من هناك؟ (اختياري)',
+        onePerson: 'شخص واحد',
+        multiple: 'مجموعة',
         children: 'أطفال',
         animals: 'حيوانات'
-    },
+    ,
+        voiceMode: 'صوتي',
+        needsLabel: 'ماذا يحتاجون؟ (اختياري)',
+        needFood: 'طعام',
+        needWater: 'ماء',
+        needClothes: 'ملابس',
+        needMedicine: 'دواء',
+        needShelter: 'مأوى'},
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',

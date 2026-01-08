@@ -8,12 +8,12 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
-        sentStatus: '✓ Sent!',
-        sending: 'Sending...',
+        sentStatus: '✓ Enviat!',
+        sending: 'Enviant...',
         types: {
-            bug: '🐛 Bug',
+            bug: '🐛 Error',
             suggestion: '💡 Idea',
-            other: '📝 Other'
+            other: '📝 Altre'
         },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
@@ -112,12 +112,19 @@ export default {
         geocodeError: 'Error al cercar adreça.',
         addressRequired: 'Introdueix almenys ciutat i carrer',
         locationRequired: 'Ubicació requerida. Usa GPS, toca el mapa o una adreça.',
-        tagsLabel: 'Etiquetes Ràpides',
+        tagsLabel: 'Qui hi ha? (Opcional)',
         onePerson: 'Una persona',
-        multiple: 'Vàries',
+        multiple: 'Grup',
         children: 'Xiquets',
         animals: 'Animals'
-    },
+    ,
+        voiceMode: 'Veu',
+        needsLabel: 'Què necessiten? (Opcional)',
+        needFood: 'Menjar',
+        needWater: 'Aigua',
+        needClothes: 'Roba',
+        needMedicine: 'Medicina',
+        needShelter: 'Refugi'},
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',

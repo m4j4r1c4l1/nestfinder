@@ -22,8 +22,8 @@ const RecoveryKeySection = ({ t }) => {
     const [recoveryKey, setRecoveryKey] = useState(null);
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
-    const [showKey, setShowKey] = useState(true);
-    const [keyVisible, setKeyVisible] = useState(true);
+    const [showKey, setShowKey] = useState(false);
+    const [keyVisible, setKeyVisible] = useState(false);
     const [fadeOpacity, setFadeOpacity] = useState(1);
     const [errorMessage, setErrorMessage] = useState(null);
 
@@ -195,7 +195,7 @@ const RecoveryKeySection = ({ t }) => {
                     )}
 
                     {/* Usage Instructions - Explicit Options with Animation */}
-                    {showKey && (
+                    {keyVisible && (
                         <div style={{
                             marginTop: 'var(--space-3)',
                             animation: 'fadeIn 0.5s ease-out',

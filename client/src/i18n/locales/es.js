@@ -10,12 +10,12 @@ export default {
 
     // Feedback
     feedback: {
-        sentStatus: '✓ Sent!',
-        sending: 'Sending...',
+        sentStatus: '✓ ¡Enviado!',
+        sending: 'Enviando...',
         types: {
-            bug: '🐛 Bug',
+            bug: '🐛 Error',
             suggestion: '💡 Idea',
-            other: '📝 Other'
+            other: '📝 Otro'
         },
         title: 'Feedback',
         description: 'Reporta errores, sugiere funciones o envía comentarios',
@@ -133,7 +133,7 @@ export default {
         // Tags
         tagsLabel: '¿Quién está ahí? (Opcional)',
         onePerson: 'Una persona',
-        multiple: 'Varias',
+        multiple: 'Grupo',
         children: 'Niños',
         animals: 'Animales',
         needsLabel: '¿Qué necesitan? (Opcional)',
@@ -142,7 +142,8 @@ export default {
         needClothes: 'Ropa',
         needMedicine: 'Medicina',
         needShelter: 'Refugio'
-    },
+    ,
+        voiceMode: 'Voz'},
 
     // Route Panel
     route: {
