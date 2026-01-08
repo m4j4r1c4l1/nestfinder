@@ -240,7 +240,7 @@ export default {
         // Recovery Key Restore
         // recoveryKeyUsage: Deprecated in favor of explicit options below
         restoreOptionsTitle: 'To restore your account you have 2 options:',
-        restoreOption1: '**Login:** Type your 3-word key **with dashes** in the **Nickname** field when you log in to app.',
+        restoreOption1: '**Login:** Type your 3-word key **with dashes** in the **Nickname** field when you log in to **Nestfinder**.',
         restoreOption2: '**New account:** Log in with a new account and restore it from the **Restore Account** section below',
         restoreAccount: 'Restore Account',
         restoreAccountDescription: 'Enter your 3-word recovery key (with spaces or dashes).',
@@ -287,9 +287,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Swipe <b>left</b> over a message to delete it',
-            right: 'Swipe <b>right</b> over a message to delete it',
-            both: 'Swipe <b>left</b> or <b>right</b> over a message to delete it'
+            left: 'You can now swipe <b>left</b> over a message to delete it',
+            right: 'You can now swipe <b>right</b> over a message to delete it',
+            both: 'You can now swipe <b>left</b> or <b>right</b> over a message to delete it'
         },
         safeDeleteHelp: {
             enabled: 'A <delete>Delete</delete> button will appear upon swiping over a message to delete it.',
