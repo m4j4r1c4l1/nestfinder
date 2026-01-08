@@ -42,6 +42,45 @@ const CountUp = ({ end, duration = 2000, decimals = 0 }) => {
     return <>{count.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
 };
 
+// Reusable Commit ID Reveal Component
+const CommitReveal = ({ text, duration = 2000 }) => {
+    const [display, setDisplay] = useState(text || '-');
+    const chars = '0123456789abcdef';
+
+    useEffect(() => {
+        if (!text || text === '-') {
+            setDisplay('-');
+            return;
+        }
+
+        let startTime;
+        let animationFrame;
+        const len = text.length;
+
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+
+            if (progress < 1) {
+                // Generate random hex string of same length
+                let str = '';
+                for (let i = 0; i < len; i++) {
+                    str += chars[Math.floor(Math.random() * 16)];
+                }
+                setDisplay(str);
+                animationFrame = requestAnimationFrame(animate);
+            } else {
+                setDisplay(text);
+            }
+        };
+
+        animationFrame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(animationFrame);
+    }, [text, duration]);
+
+    return <>{display}</>;
+};
+
 const Observability = () => {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
@@ -337,7 +376,7 @@ const Observability = () => {
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
                                                 <div className="text-muted text-sm">Latest</div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#4ade80', fontSize: '1.4rem', fontFamily: '"JetBrains Mono", monospace' }}>{stats.devMetrics?.lastCommit || '-'}</span>
+                                            <span style={{ fontWeight: 700, color: '#4ade80', fontSize: '1.4rem', fontFamily: '"JetBrains Mono", monospace' }}><CommitReveal text={stats.devMetrics?.lastCommit} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.5rem',
