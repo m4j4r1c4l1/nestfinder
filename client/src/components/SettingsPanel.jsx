@@ -1845,7 +1845,108 @@ const SettingsPanel = ({ onClose }) => {
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
 
-                {/* Messages Section - REPOSITIONED */}
+                {/* Language Selection - MOVED HERE */}
+                <div className="form-group" ref={sectionRef} style={{ marginBottom: 'var(--space-4)' }}>
+                    <label className="form-label">{t('profile.language')}</label>
+                    {/* Carousel Guidance */}
+                    <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', lineHeight: '1.4' }}>
+                        {t('settings.scrollInstruction') || '🌍 Scroll + Tap or wait 2s to confirm'}
+                    </div>
+
+                    <div
+                        ref={carouselRef}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        style={{
+                            height: `${CONTAINER_HEIGHT - 4}px`,
+                            overflow: 'hidden',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: 'var(--radius-md)',
+                            background: 'rgba(51, 65, 85, 0.5)',
+                            boxShadow: 'inset 0 10px 20px -10px rgba(0,0,0,0.3), inset 0 -10px 20px -10px rgba(0,0,0,0.3)',
+                            position: 'relative',
+                            cursor: 'ns-resize',
+                            touchAction: 'none'
+                        }}
+                    >
+                        {/* Fixed center indicator - blue border always in middle */}
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: `${centerSlotY}px`,
+                                left: '8px',
+                                right: '8px',
+                                height: `${ITEM_HEIGHT - 8}px`,
+                                border: '2px solid var(--color-primary)',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--color-primary-light)',
+                                pointerEvents: 'none',
+                                zIndex: 15
+                            }}
+                        />
+
+                        {/* Items with absolute positioning */}
+                        {availableLanguages.map((lang, index) => {
+                            const yPos = getItemY(index);
+                            const isVisible = yPos > -ITEM_HEIGHT && yPos < CONTAINER_HEIGHT + ITEM_HEIGHT;
+                            if (!isVisible) return null;
+
+                            const isInCenter = Math.abs(yPos - centerSlotY) < 5;
+                            const showCheckmark = isConfirmed && index === centeredItemIndex;
+
+                            return (
+                                <div
+                                    key={lang.code}
+                                    onClick={() => handleItemClick(index)}
+                                    style={{
+                                        position: 'absolute',
+                                        left: '8px',
+                                        right: '8px',
+                                        top: `${yPos - 4}px`,
+                                        zIndex: isInCenter ? 10 : 1,
+                                        opacity: isInCenter ? 1 : 0.5,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 'var(--space-3)',
+                                            padding: 'var(--space-3)',
+                                            background: 'rgba(15, 23, 42, 0.95)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: 'var(--radius-md)',
+                                            color: 'var(--color-text)',
+                                            height: `${ITEM_HEIGHT - 8}px`,
+                                            marginBottom: '4px',
+                                            marginTop: '4px',
+                                            boxSizing: 'border-box'
+                                        }}
+                                    >
+                                        <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
+                                        <div style={{ textAlign: 'left', flex: 1 }}>
+                                            <div style={{ fontWeight: isInCenter ? 600 : 400 }}>
+                                                {lang.nativeName}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                                {lang.name}
+                                            </div>
+                                        </div>
+                                        {showCheckmark && (
+                                            <span style={{ color: 'var(--color-primary)', marginRight: '22px' }}>✓</span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+
+                {/* Messages Section */}
                 <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
                     <label className="form-label">{t('settings.messages') || 'Messages'}</label>
 
@@ -2178,109 +2279,7 @@ const SettingsPanel = ({ onClose }) => {
                     </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
 
-                {/* Language Selection */}
-                <div className="form-group" ref={sectionRef}>
-                    <label className="form-label">{t('profile.language')}</label>
-                    {/* Carousel Guidance */}
-                    <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', lineHeight: '1.4' }}>
-                        {t('settings.scrollInstruction') || '🌍 Scroll + Tap or wait 2s to confirm'}
-                    </div>
-
-                    <div
-                        ref={carouselRef}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        style={{
-                            height: `${CONTAINER_HEIGHT - 4}px`, // Cropped top margin only
-                            overflow: 'hidden',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-md)',
-                            background: 'rgba(51, 65, 85, 0.5)',
-                            boxShadow: 'inset 0 10px 20px -10px rgba(0,0,0,0.3), inset 0 -10px 20px -10px rgba(0,0,0,0.3)',
-                            position: 'relative',
-                            cursor: 'ns-resize',
-                            touchAction: 'none'
-                        }}
-                    >
-                        {/* Fixed center indicator - blue border always in middle */}
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: `${centerSlotY}px`,
-                                left: '8px',
-                                right: '8px',
-                                height: `${ITEM_HEIGHT - 8}px`,
-                                border: '2px solid var(--color-primary)',
-                                borderRadius: 'var(--radius-md)',
-                                background: 'var(--color-primary-light)',
-                                pointerEvents: 'none',
-                                zIndex: 15
-                            }}
-                        />
-
-                        {/* Items with absolute positioning */}
-                        {availableLanguages.map((lang, index) => {
-                            const yPos = getItemY(index);
-                            // Only render if in or near visible area
-                            const isVisible = yPos > -ITEM_HEIGHT && yPos < CONTAINER_HEIGHT + ITEM_HEIGHT;
-                            if (!isVisible) return null;
-
-                            // Visual check: is this item in the center slot
-                            const isInCenter = Math.abs(yPos - centerSlotY) < 5;
-                            // Checkmark shows when confirmed (after 2s or tap)
-                            const showCheckmark = isConfirmed && index === centeredItemIndex;
-
-                            return (
-                                <div
-                                    key={lang.code}
-                                    onClick={() => handleItemClick(index)}
-                                    style={{
-                                        position: 'absolute',
-                                        left: '8px',
-                                        right: '8px',
-                                        top: `${yPos - 4}px`, // Shift up to align with tighter container
-                                        zIndex: isInCenter ? 10 : 1,
-                                        opacity: isInCenter ? 1 : 0.5,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 'var(--space-3)',
-                                            padding: 'var(--space-3)',
-                                            background: 'rgba(15, 23, 42, 0.95)',
-                                            border: '1px solid var(--color-border)',
-                                            borderRadius: 'var(--radius-md)',
-                                            color: 'var(--color-text)',
-                                            height: `${ITEM_HEIGHT - 8}px`,
-                                            marginBottom: '4px',
-                                            marginTop: '4px',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    >
-                                        <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
-                                        <div style={{ textAlign: 'left', flex: 1 }}>
-                                            <div style={{ fontWeight: isInCenter ? 600 : 400 }}>
-                                                {lang.nativeName}
-                                            </div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                                {lang.name}
-                                            </div>
-                                        </div>
-                                        {showCheckmark && (
-                                            <span style={{ color: 'var(--color-primary)', marginRight: '22px' }}>✓</span>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
             </div>
         </div>
     );
