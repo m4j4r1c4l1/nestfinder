@@ -7,6 +7,13 @@ export default {
         flag: '🇫🇷'
     },
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Signalez des bugs, suggérez des fonctionnalités ou envoyez des avis',
         placeholder: 'Décrivez votre retour en détail...',
@@ -70,6 +77,8 @@ export default {
         reactivatedMessage: 'Point réactivé !'
     },
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: 'Signaler un lieu',
         subtitle: 'Aidez les autres en signalant un lieu',
         addressLabel: 'Adresse',
@@ -109,6 +118,8 @@ export default {
         animals: 'Animaux'
     },
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: "Calcul d'itinéraire",
         optimizeRoute: "Calculer l'itinéraire",
         clearRoute: "Effacer l'itinéraire",
@@ -125,6 +136,7 @@ export default {
         readyDescription: 'Calculez un itinéraire pédestre optimisé visitant tous les points sélectionnés.'
     },
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: 'Messages',
         received: 'Reçus',
         sent: 'Envoyés',
@@ -162,6 +174,8 @@ export default {
         notifications: 'Notifications',
         popupMessages: 'Popups en temps réel',
         popupDescription: 'Afficher les messages dès leur arrivée',
+        popupEnabledInfo: 'Les messages s'afficheront sous forme de pop-up à la réception.'afficheront sous forme de popups à leur réception.',
+        popupDisabledInfo: 'Les messages ne s'afficheront pas mais seront enregistrés dans votre boîte de réception.'afficheront pas mais seront enregistrés dans votre boîte de réception.',
         shareApp: "Partager NestFinder",
         scanToShare: 'Scanner pour ouvrir NestFinder',
         copyLink: 'Copier le Lien',
@@ -186,7 +200,10 @@ export default {
         statusOwl: 'Hibou',
         statusEagle: 'Aigle',
         // Recovery Key Restore
-        recoveryKeyUsage: 'Pour restaurer votre compte sur un autre appareil, tapez votre clé de 3 mots dans le champ pseudo.',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: 'Pour restaurer votre compte, vous avez 2 options :',
+        restoreOption1: '**Connexion :** Tapez votre clé de 3 mots **avec des tirets** dans le champ **Surnom** lors de la connexion.',
+        restoreOption2: '**Nouveau compte :** Connectez-vous avec un nouveau compte et restaurez-le depuis la section **Restaurer le compte** ci-dessous.',
         restoreAccount: 'Restaurer le Compte',
         restoreAccountDescription: 'Entrez une clé de récupération pour restaurer votre identité.',
         enterRecoveryKey: 'mot-mot-mot',
@@ -217,6 +234,27 @@ export default {
             '6m': '6 Mois',
             forever: 'Toujours',
             desc: '⚠️ Les messages plus anciens seront définitivement supprimés.'
+        },
+        retentionHelp: {
+            forever: 'Les messages sont conservés **Indéfiniment**.',
+            read: 'Les messages seront supprimés après **Lecture**.',
+            period: 'Les messages datant de plus de **{time}** seront supprimés.',
+            unit: {
+                d: 'Jour',
+                w: 'Semaine',
+                m: 'Mois',
+                y: 'Année',
+                h: 'Heure'
+            }
+        },
+        swipeHelp: {
+            left: 'Glissez vers la **gauche** sur un message pour le supprimer',
+            right: 'Glissez vers la **droite** sur un message pour le supprimer',
+            both: 'Glissez vers la **gauche** ou la **droite** sur un message pour le supprimer'
+        },
+        safeDeleteHelp: {
+            enabled: 'Un bouton <delete>Supprimer</delete> apparaîtra en glissant sur un message.',
+            disabled: 'Vous pouvez maintenant supprimer un message simplement en glissant dessus.'
         }
     },
     // Welcome Message (Home Page)

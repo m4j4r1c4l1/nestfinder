@@ -8,6 +8,13 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
@@ -71,6 +78,8 @@ export default {
         reactivatedMessage: 'Punkt reaktiviert!'
     },
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: 'Ort melden',
         subtitle: 'Helfen Sie anderen, indem Sie einen Ort melden',
         addressLabel: 'Adresse',
@@ -110,6 +119,8 @@ export default {
         animals: 'Tiere'
     },
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: 'Routenplaner',
         optimizeRoute: 'Route berechnen',
         clearRoute: 'Route löschen',
@@ -126,6 +137,7 @@ export default {
         readyDescription: 'Berechnen Sie eine optimierte Route zu allen ausgewählten Punkten.'
     },
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: 'Nachrichten',
         received: 'Empfangen',
         sent: 'Gesendet',
@@ -163,6 +175,8 @@ export default {
         notifications: 'Benachrichtigungen',
         popupMessages: 'Echtzeit-Popups',
         popupDescription: 'Nachrichten sofort anzeigen',
+        popupEnabledInfo: 'Nachrichten werden beim Empfang als Popups angezeigt.',
+        popupDisabledInfo: 'Nachrichten werden nicht angezeigt, aber im Posteingang gespeichert.',
         shareApp: 'NestFinder teilen',
         scanToShare: 'Scannen um NestFinder zu öffnen',
         copyLink: 'Link Kopieren',
@@ -187,7 +201,10 @@ export default {
         statusOwl: 'Eule',
         statusEagle: 'Adler',
         // Recovery Key Restore
-        recoveryKeyUsage: 'Um Ihr Konto auf einem neuen Gerät wiederherzustellen, geben Sie Ihren 3-Wort-Schlüssel im Spitznamen-Feld ein.',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: 'Um dein Konto wiederherzustellen, hast du 2 Optionen:',
+        restoreOption1: '**Login:** Gib deinen 3-Wörter-Schlüssel **mit Bindestrichen** im **Spitznamen**-Feld ein, wenn du dich anmeldest.',
+        restoreOption2: '**Neues Konto:** Melde dich mit einem neuen Konto an und stelle es im Abschnitt **Konto wiederherstellen** unten wieder her.',
         restoreAccount: 'Konto Wiederherstellen',
         restoreAccountDescription: 'Geben Sie einen Wiederherstellungsschlüssel ein, um Ihre Identität wiederherzustellen.',
         enterRecoveryKey: 'wort-wort-wort',
@@ -218,6 +235,27 @@ export default {
             '6m': '6 Monate',
             forever: 'Für immer',
             desc: '⚠️ Ältere Nachrichten werden dauerhaft gelöscht.'
+        },
+        retentionHelp: {
+            forever: 'Nachrichten werden **unbegrenzt** aufbewahrt.',
+            read: 'Nachrichten werden nach dem **Lesen** gelöscht.',
+            period: 'Nachrichten, die älter als **{time}** sind, werden gelöscht.',
+            unit: {
+                d: 'Tag',
+                w: 'Woche',
+                m: 'Monat',
+                y: 'Jahr',
+                h: 'Stunde'
+            }
+        },
+        swipeHelp: {
+            left: 'Wische nach **links** über eine Nachricht, um sie zu löschen',
+            right: 'Wische nach **rechts** über eine Nachricht, um sie zu löschen',
+            both: 'Wische nach **links** oder **rechts** über eine Nachricht, um sie zu löschen'
+        },
+        safeDeleteHelp: {
+            enabled: 'Ein <delete>Löschen</delete>-Button erscheint beim Wischen über eine Nachricht.',
+            disabled: 'Du kannst eine Nachricht jetzt einfach durch Wischen löschen.'
         }
     },
     // Welcome Message (Home Page)

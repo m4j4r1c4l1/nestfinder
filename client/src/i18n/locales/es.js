@@ -10,6 +10,13 @@ export default {
 
     // Feedback
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Reporta errores, sugiere funciones o envía comentarios',
         placeholder: 'Describe tus comentarios en detalle...',
@@ -85,6 +92,8 @@ export default {
 
     // Submit/Report Form
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: 'Reportar Ubicación',
         subtitle: 'Ayuda a otros reportando una ubicación',
         addressLabel: 'Dirección',
@@ -137,6 +146,8 @@ export default {
 
     // Route Panel
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: 'Planificador de Ruta',
         optimizeRoute: 'Calcular Ruta',
         clearRoute: 'Limpiar Ruta',
@@ -155,6 +166,7 @@ export default {
 
     // Notifications/Inbox
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: 'Bandeja de Entrada',
         received: 'Recibidos',
         sent: 'Enviados',
@@ -198,6 +210,8 @@ export default {
         notifications: 'Notificaciones',
         popupMessages: 'Popups en Tiempo Real',
         popupDescription: 'Mostrar mensajes inmediatamente al recibirlos',
+        popupEnabledInfo: 'Los mensajes se mostrarán como ventanas emergentes al recibirlos.',
+        popupDisabledInfo: 'Los mensajes no se mostrarán al recibirlos, pero se guardarán en tu bandeja de entrada.',
         shareApp: 'Compartir NestFinder',
         scanToShare: 'Escanea para abrir NestFinder',
         copyLink: 'Copiar Enlace',
@@ -222,7 +236,10 @@ export default {
         statusOwl: 'Búho',
         statusEagle: 'Águila',
         // Recovery Key Restore
-        recoveryKeyUsage: 'Para restaurar tu cuenta en otro dispositivo, escribe tu clave de 3 palabras en el campo de apodo al abrir la app.',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: 'Para restaurar tu cuenta tienes 2 opciones:',
+        restoreOption1: '**Iniciar sesión:** Escribe tu clave de 3 palabras **con guiones** en el campo **Apodo** al entrar.',
+        restoreOption2: '**Cuenta nueva:** Entra con una cuenta nueva y restáurala desde la sección **Restaurar Cuenta** abajo.',
         restoreAccount: 'Restaurar Cuenta con Clave',
         restoreAccountDescription: 'Ingresa una clave de recuperación para restaurar tu identidad anterior.',
         enterRecoveryKey: 'palabra-palabra-palabra',
@@ -253,6 +270,27 @@ export default {
             '6m': '6 Meses',
             forever: 'Para siempre',
             desc: '⚠️ Los mensajes más antiguos serán eliminados permanentemente.'
+        },
+        retentionHelp: {
+            forever: 'Los mensajes se guardan **Indefinidamente**.',
+            read: 'Los mensajes se borrarán al ser **Leídos**.',
+            period: 'Los mensajes anteriores a **{time}** serán eliminados.',
+            unit: {
+                d: 'Día',
+                w: 'Semana',
+                m: 'Mes',
+                y: 'Año',
+                h: 'Hora'
+            }
+        },
+        swipeHelp: {
+            left: 'Desliza a la **izquierda** sobre un mensaje para eliminarlo',
+            right: 'Desliza a la **derecha** sobre un mensaje para eliminarlo',
+            both: 'Desliza a la **izquierda** o **derecha** sobre un mensaje para eliminarlo'
+        },
+        safeDeleteHelp: {
+            enabled: 'Aparecerá un botón de <delete>Eliminar</delete> al deslizar sobre un mensaje.',
+            disabled: 'Ahora puedes eliminar un mensaje simplemente deslizando sobre él.'
         }
     },
 

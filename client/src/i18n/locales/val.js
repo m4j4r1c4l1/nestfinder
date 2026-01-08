@@ -8,6 +8,13 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
@@ -71,6 +78,8 @@ export default {
         reactivatedMessage: 'Punt reactivat!'
     },
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: 'Reportar Ubicació',
         subtitle: 'Ajuda als altres reportant un lloc',
         addressLabel: 'Adreça',
@@ -110,6 +119,8 @@ export default {
         animals: 'Animals'
     },
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: 'Planificador de Ruta',
         optimizeRoute: 'Calcular Ruta',
         clearRoute: 'Netejar Ruta',
@@ -126,6 +137,7 @@ export default {
         readyDescription: 'Calcula una ruta a peu optimitzada visitant tots els punts seleccionats.'
     },
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: "Bústia d'entrada",
         received: 'Rebuts',
         sent: 'Enviats',
@@ -163,6 +175,8 @@ export default {
         notifications: 'Notificacions',
         popupMessages: 'Popups en Temps Reals',
         popupDescription: 'Mostrar missatges immediatament',
+        popupEnabledInfo: 'Els missatges es mostraran com a finestres emergents.'ls.",
+        popupDisabledInfo: 'Els missatges no es mostraran, però es guardaran a la bústia.'ls, però es guardaran a la teua bústia d'entrada.",
         shareApp: 'Compartir NestFinder',
         scanToShare: 'Escaneja per obrir NestFinder',
         copyLink: 'Copiar Enllaç',
@@ -187,7 +201,10 @@ export default {
         statusOwl: 'Mussol',
         statusEagle: 'Àguila',
         // Recovery Key Restore
-        recoveryKeyUsage: 'Per a restaurar el teu compte en un nou dispositiu, escriu la teua clau de 3 paraules en el camp de sobrenom.',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: 'Per a restaurar el teu compte tens 2 opcions:',
+        restoreOption1: '**Iniciar sessió:** Escriu la teua clau de 3 paraules **amb guions** en el camp **Sobrenom** en entrar.',
+        restoreOption2: '**Compte nou:** Entra amb un compte nou i restaura\'l des de la secció **Restaurar Compte** baix.',
         restoreAccount: 'Restaurar Compte',
         restoreAccountDescription: 'Introdueix una clau de recuperació per a restaurar la teua identitat.',
         enterRecoveryKey: 'paraula-paraula-paraula',
@@ -218,6 +235,27 @@ export default {
             '6m': '6 Mesos',
             forever: 'Per sempre',
             desc: '⚠️ Els missatges més antics seran eliminats permanentment.'
+        },
+        retentionHelp: {
+            forever: 'Els missatges es guarden **Indefinidament**.',
+            read: 'Els missatges s\'esborraran després de ser **Llegits**.',
+            period: 'Els missatges anteriors a **{time}** seran eliminats.',
+            unit: {
+                d: 'Dia',
+                w: 'Setmana',
+                m: 'Mes',
+                y: 'Any',
+                h: 'Hora'
+            }
+        },
+        swipeHelp: {
+            left: 'Llisca a l\'**esquerra** sobre un missatge per a eliminar-lo',
+            right: 'Llisca a la **dreta** sobre un missatge per a eliminar-lo',
+            both: 'Llisca a l\'**esquerra** o **dreta** sobre un missatge per a eliminar-lo'
+        },
+        safeDeleteHelp: {
+            enabled: 'Apareixerà un botó d\'<delete>Eliminar</delete> en lliscar sobre un missatge.',
+            disabled: 'Ara pots eliminar un missatge simplement lliscant sobre ell.'
         }
     },
     // Welcome Message (Home Page)

@@ -8,6 +8,13 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
@@ -71,6 +78,8 @@ export default {
         reactivatedMessage: 'Ponto reativado!'
     },
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: 'Reportar Localização',
         subtitle: 'Ajude os outros reportando um local',
         addressLabel: 'Morada',
@@ -110,6 +119,8 @@ export default {
         animals: 'Animais'
     },
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: 'Planeador de Rota',
         optimizeRoute: 'Calcular Rota',
         clearRoute: 'Limpar Rota',
@@ -126,6 +137,7 @@ export default {
         readyDescription: 'Calcule uma rota a pé otimizada visitando todos os pontos selecionados.'
     },
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: 'Mensagens',
         received: 'Recebidas',
         sent: 'Enviadas',
@@ -163,6 +175,8 @@ export default {
         notifications: 'Notificações',
         popupMessages: 'Popups em Tempo Real',
         popupDescription: 'Mostrar mensagens assim que chegam',
+        popupEnabledInfo: 'Mensagens serão exibidas como pop-ups ao chegar.',
+        popupDisabledInfo: 'Mensagens não serão exibidas, mas salvas na caixa de entrada.',
         shareApp: 'Compartilhar NestFinder',
         scanToShare: 'Escaneie para abrir NestFinder',
         copyLink: 'Copiar Link',
@@ -187,7 +201,10 @@ export default {
         statusOwl: 'Coruja',
         statusEagle: 'Águia',
         // Recovery Key Restore
-        recoveryKeyUsage: 'Para restaurar a sua conta num novo dispositivo, digite a sua chave de 3 palavras no campo de alcunha.',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: 'Para restaurar sua conta, você tem 2 opções:',
+        restoreOption1: '**Login:** Digite sua chave de 3 palavras **com hifens** no campo **apelido** ao entrar.',
+        restoreOption2: '**Nova conta:** Faça login com uma nova conta e restaure-a na seção **Restaurar Conta** abaixo.',
         restoreAccount: 'Restaurar Conta',
         restoreAccountDescription: 'Insira uma chave de recuperação para restaurar a sua identidade.',
         enterRecoveryKey: 'palavra-palavra-palavra',
@@ -218,6 +235,27 @@ export default {
             '6m': '6 Meses',
             forever: 'Para sempre',
             desc: '⚠️ Mensagens mais antigas serão eliminadas permanentemente.'
+        },
+        retentionHelp: {
+            forever: 'Mensagens são mantidas **Indefinidamente**.',
+            read: 'Mensagens serão apagadas após **Leitura**.',
+            period: 'Mensagens mais antigas que **{time}** serão apagadas.',
+            unit: {
+                d: 'Dia',
+                w: 'Semana',
+                m: 'Mês',
+                y: 'Ano',
+                h: 'Hora'
+            }
+        },
+        swipeHelp: {
+            left: 'Deslize para a **esquerda** sobre uma mensagem para apagar',
+            right: 'Deslize para a **direita** sobre uma mensagem para apagar',
+            both: 'Deslize para a **esquerda** ou **direita** sobre uma mensagem para apagar'
+        },
+        safeDeleteHelp: {
+            enabled: 'Um botão <delete>Apagar</delete> aparecerá ao deslizar sobre uma mensagem.',
+            disabled: 'Agora pode apagar uma mensagem simplesmente deslizando sobre ela.'
         }
     },
     // Welcome Message (Home Page)

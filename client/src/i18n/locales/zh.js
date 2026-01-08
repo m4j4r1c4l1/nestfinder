@@ -8,6 +8,13 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
@@ -71,6 +78,8 @@ export default {
         reactivatedMessage: '地点已重新激活！'
     },
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: '报告地点',
         subtitle: '报告地点以帮助他人',
         addressLabel: '地址',
@@ -110,6 +119,8 @@ export default {
         animals: '动物'
     },
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: '路线规划',
         optimizeRoute: '计算路线',
         clearRoute: '清除路线',
@@ -126,6 +137,7 @@ export default {
         readyDescription: 'Calculate optimized walking path visiting all selected points.'
     },
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: '消息',
         received: '收到的',
         sent: '已发送',
@@ -163,6 +175,8 @@ export default {
         notifications: '通知',
         popupMessages: '实时弹窗',
         popupDescription: '收到消息时立即显示',
+        popupEnabledInfo: '收到消息时将显示弹窗。',
+        popupDisabledInfo: '收到消息时不会显示弹窗，但会保存在收件箱中。',
         shareApp: '分享 NestFinder',
         scanToShare: '扫码打开 NestFinder',
         copyLink: '复制链接',
@@ -187,7 +201,10 @@ export default {
         statusOwl: '猫头鹰',
         statusEagle: '老鹰',
         // Recovery Key Restore
-        recoveryKeyUsage: '要在新设备上恢复您的帐户，请在昵称字段中输入您的3个单词密钥。',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: '恢复您的帐户有两个选项：',
+        restoreOption1: '**登录：** 登录时在**昵称**字段中输入您的 3 个单词的密钥（**带连字符**）。',
+        restoreOption2: '**新帐户：** 使用新帐户登录，然后从下面的**恢复帐户**部分进行恢复。',
         restoreAccount: '恢复帐户',
         restoreAccountDescription: '输入恢复密钥以恢复您的身份。',
         enterRecoveryKey: '单词-单词-单词',
@@ -218,6 +235,27 @@ export default {
             '6m': '6 个月',
             forever: '永久',
             desc: '⚠️ 超出时间的消息将被永久删除。'
+        },
+        retentionHelp: {
+            forever: '消息将**无限期**保留。',
+            read: '消息将在**阅读**后删除。',
+            period: '早于 **{time}** 的消息将被删除。',
+            unit: {
+                d: '天',
+                w: '周',
+                m: '月',
+                y: '年',
+                h: '小时'
+            }
+        },
+        swipeHelp: {
+            left: '向**左**滑动消息以将其删除',
+            right: '向**右**滑动消息以将其删除',
+            both: '向**左**或向**右**滑动消息以将其删除'
+        },
+        safeDeleteHelp: {
+            enabled: '滑动消息时会出现一个 <delete>删除</delete> 按钮。',
+            disabled: '现在您只需滑动即可删除消息。'
         }
     },
     // Welcome Message (Home Page)

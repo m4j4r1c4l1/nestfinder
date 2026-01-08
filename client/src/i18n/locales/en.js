@@ -14,11 +14,18 @@ export default {
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
         send: 'Send Feedback',
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
         charLimit: 'characters',
         rateApp: 'Rate the App',
         bugReport: 'Bug Report',
         suggestion: 'Suggestion',
-        general: 'Feedback'
+        general: 'Feedback',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        }
     },
 
     // Navigation
@@ -129,6 +136,8 @@ export default {
         children: 'Children',
         animals: 'Animals',
         needsLabel: 'What do they need? (Optional)',
+        locationFound: 'Location found!',
+        foundPrefix: 'Found:',
         needFood: 'Food',
         needWater: 'Water',
         needClothes: 'Clothes',
@@ -140,6 +149,8 @@ export default {
     route: {
         title: 'Route Planner',
         optimizeRoute: 'Calculate Route',
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         clearRoute: 'Clear Route',
         calculating: 'Calculating...',
         distance: 'Distance',
@@ -167,7 +178,8 @@ export default {
         'delete.confirm': 'Delete this message permanently?',
         'delete.cancel': 'Cancel',
         'delete.yes': 'Delete',
-        unread: 'unread'
+        unread: 'unread',
+        noFilterMatch: 'No messages match this filter'
     },
 
     // Profile
@@ -201,6 +213,7 @@ export default {
         popupDescription: 'Show messages immediately as they arrive',
         popupEnabledInfo: 'Messages will be shown as popups when received.',
         popupDisabledInfo: 'Messages will not be shown when received but saved in your inbox.',
+
         shareApp: 'Share NestFinder',
         scanToShare: 'Scan to open NestFinder',
         copyLink: 'Copy Link',
@@ -260,6 +273,27 @@ export default {
             '6m': '6 Months',
             forever: 'Forever',
             desc: 'Auto-delete messages older than selected period.'
+        },
+        retentionHelp: {
+            forever: 'Messages are kept <b>Indefinitely</b>.',
+            read: 'Messages will be deleted upon being <b>Read</b>.',
+            period: 'Messages older than <b>{time}</b> will be deleted.',
+            unit: {
+                d: 'Day',
+                w: 'Week',
+                m: 'Month',
+                y: 'Year',
+                h: 'Hour'
+            }
+        },
+        swipeHelp: {
+            left: 'Swipe <b>left</b> over a message to delete it',
+            right: 'Swipe <b>right</b> over a message to delete it',
+            both: 'Swipe <b>left</b> or <b>right</b> over a message to delete it'
+        },
+        safeDeleteHelp: {
+            enabled: 'A <delete>Delete</delete> button will appear upon swiping over a message to delete it.',
+            disabled: 'You can now delete a message just by swiping over it.'
         },
         messages: 'Messages'
     },

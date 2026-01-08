@@ -22,7 +22,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         { id: 'single', emoji: '👤', label: t('submit.onePerson') },
         { id: 'group', emoji: '👥', label: t('submit.multiple') },
         { id: 'children', emoji: '👶', label: t('submit.children') },
-        { id: 'dog', emoji: '🐕', label: 'Animals' }
+        { id: 'dog', emoji: '🐕', label: t('submit.animals') }
     ];
 
     // 'What' need options - expanded to 15 emojis
@@ -291,7 +291,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                             </button>
                             {location && address && inputMode === 'address' && (
                                 <div style={{ marginTop: 'var(--space-3)', padding: 'var(--space-3)', background: 'var(--color-confirmed-light)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
-                                    ✅ Found: {address.substring(0, 60)}...
+                                    ✅ {t('submit.foundPrefix')} {address.substring(0, 60)}...
                                 </div>
                             )}
                         </div>
@@ -300,7 +300,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                     {inputMode === 'voice' && (
                         <div className="form-group" style={{ textAlign: 'center', padding: 'var(--space-4) 0' }}>
                             <div style={{ marginBottom: 'var(--space-3)' }}>
-                                <label className="form-label">{t('submit.voiceInstructions') || 'Tap microphone and speak the address'}</label>
+                                <label className="form-label">{t('submit.voiceInstructions')}</label>
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-3)' }}>
@@ -316,7 +316,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                             {isGeocoding && (
                                 <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', marginBottom: 'var(--space-2)' }}>
                                     <span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', marginRight: 6 }} />
-                                    {t('common.searching') || 'Searching location...'}
+                                    {t('common.searching')}
                                 </div>
                             )}
 
@@ -336,7 +336,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                     </div>
                                     {location && (
                                         <div style={{ fontSize: '0.8rem', color: 'var(--color-confirmed)', marginTop: 'var(--space-1)' }}>
-                                            Location found!
+                                            {t('submit.locationFound')}
                                         </div>
                                     )}
                                 </div>

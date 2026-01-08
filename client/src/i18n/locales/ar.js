@@ -9,6 +9,13 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
@@ -72,6 +79,8 @@ export default {
         reactivatedMessage: 'تم إعادة التنشيط!'
     },
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: 'الإبلاغ عن موقع',
         subtitle: 'ساعد الآخرين بالإبلاغ عن موقع',
         addressLabel: 'العنوان',
@@ -111,6 +120,8 @@ export default {
         animals: 'حيوانات'
     },
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: 'المسار',
         optimizeRoute: 'حساب المسار',
         clearRoute: 'مسح',
@@ -127,6 +138,7 @@ export default {
         readyDescription: 'Calculate optimized walking path visiting all selected points.'
     },
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: 'الرسائل',
         received: 'الوارد',
         sent: 'المرسل',
@@ -164,6 +176,8 @@ export default {
         notifications: 'إشعارات',
         popupMessages: 'نوافذ فورية',
         popupDescription: 'عرض الرسائل فوراً',
+        popupEnabledInfo: 'سيتم عرض الرسائل كنوافذ منبثقة عند استلامها.',
+        popupDisabledInfo: 'لن يتم عرض الرسائل عند استلامها ولكن سيتم حفظها في صندوق الوارد الخاص بك.',
         shareApp: 'مشاركة NestFinder',
         scanToShare: 'امسح لفتح NestFinder',
         copyLink: 'نسخ الرابط',
@@ -188,7 +202,10 @@ export default {
         statusOwl: 'بومة',
         statusEagle: 'نسر',
         // Recovery Key Restore
-        recoveryKeyUsage: 'لاستعادة حسابك على جهاز جديد، أدخل مفتاحك المكون من 3 كلمات في حقل الاسم المستعار.',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: 'لاستعادة حسابك لديك خياران:',
+        restoreOption1: '**تسجيل الدخول:** اكتب مفتاحك المكون من 3 كلمات **مع الفواصل** في حقل **الاسم المستعار** عند تسجيل الدخول.',
+        restoreOption2: '**حساب جديد:** سجل الدخول بحساب جديد واستعد حسابك من قسم **استعادة الحساب** أدناه',
         restoreAccount: 'استعادة الحساب',
         restoreAccountDescription: 'أدخل مفتاح الاسترداد لاستعادة هويتك.',
         enterRecoveryKey: 'كلمة-كلمة-كلمة',
@@ -219,6 +236,27 @@ export default {
             '6m': '6 أشهر',
             forever: 'للأبد',
             desc: '⚠️ سيتم حذف الرسائل الأقدم نهائياً.'
+        },
+        retentionHelp: {
+            forever: 'يتم الاحتفاظ بالرسائل **لأجل غير مسمى**.',
+            read: 'سيتم حذف الرسائل بمجرد **قراءتها**.',
+            period: 'سيتم حذف الرسائل الأقدم من **{time}**.',
+            unit: {
+                d: 'يوم',
+                w: 'أسبوع',
+                m: 'شهر',
+                y: 'سنة',
+                h: 'ساعة'
+            }
+        },
+        swipeHelp: {
+            left: 'اسحب إلى **اليسار** فوق رسالة لحذفها',
+            right: 'اسحب إلى **اليمين** فوق رسالة لحذفها',
+            both: 'اسحب إلى **اليسار** أو **اليمين** فوق رسالة لحذفها'
+        },
+        safeDeleteHelp: {
+            enabled: 'سيظهر زر <delete>حذف</delete> عند التمرير فوق رسالة لحذفها.',
+            disabled: 'يمكنك الآن حذف رسالة بمجرد التمرير فوقها.'
         }
     },
     // Welcome Message (Home Page)

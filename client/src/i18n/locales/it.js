@@ -8,6 +8,13 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
@@ -71,6 +78,8 @@ export default {
         reactivatedMessage: 'Punto riattivato!'
     },
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: 'Segnala Posizione',
         subtitle: 'Aiuta gli altri segnalando un luogo',
         addressLabel: 'Indirizzo',
@@ -110,6 +119,8 @@ export default {
         animals: 'Animali'
     },
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: 'Pianificatore Percorso',
         optimizeRoute: 'Calcola Percorso',
         clearRoute: 'Cancella Percorso',
@@ -126,6 +137,7 @@ export default {
         readyDescription: 'Calcola un percorso a piedi ottimizzato visitando tutti i punti selezionati.'
     },
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: 'Messaggi',
         received: 'Ricevuti',
         sent: 'Inviati',
@@ -163,6 +175,8 @@ export default {
         notifications: 'Notifiche',
         popupMessages: 'Popup in Tempo Reale',
         popupDescription: 'Mostra messaggi appena arrivano',
+        popupEnabledInfo: 'I messaggi verranno mostrati come popup alla ricezione.',
+        popupDisabledInfo: 'I messaggi non verranno mostrati ma salvati nella posta in arrivo.',
         shareApp: 'Condividi NestFinder',
         scanToShare: 'Scansiona per aprire NestFinder',
         copyLink: 'Copia Link',
@@ -187,7 +201,10 @@ export default {
         statusOwl: 'Gufo',
         statusEagle: 'Aquila',
         // Recovery Key Restore
-        recoveryKeyUsage: 'Per ripristinare il tuo account su un nuovo dispositivo, digita la tua chiave di 3 parole nel campo soprannome.',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: 'Per ripristinare il tuo account hai 2 opzioni:',
+        restoreOption1: '**Accedi:** Digita la tua chiave di 3 parole **con trattini** nel campo **Soprannome** quando accedi.',
+        restoreOption2: '**Nuovo account:** Accedi con un nuovo account e ripristinalo dalla sezione **Ripristina Account** qui sotto.',
         restoreAccount: 'Ripristina Account',
         restoreAccountDescription: 'Inserisci una chiave di recupero per ripristinare la tua identità.',
         enterRecoveryKey: 'parola-parola-parola',
@@ -218,6 +235,27 @@ export default {
             '6m': '6 Mesi',
             forever: 'Per sempre',
             desc: '⚠️ I messaggi più vecchi verranno eliminati definitivamente.'
+        },
+        retentionHelp: {
+            forever: 'I messaggi sono conservati **Indefinitamente**.',
+            read: 'I messaggi verranno eliminati dopo la **Lettura**.',
+            period: 'I messaggi più vecchi di **{time}** verranno eliminati.',
+            unit: {
+                d: 'Giorno',
+                w: 'Settimana',
+                m: 'Mese',
+                y: 'Anno',
+                h: 'Ora'
+            }
+        },
+        swipeHelp: {
+            left: 'Scorri a **sinistra** su un messaggio per eliminarlo',
+            right: 'Scorri a **destra** su un messaggio per eliminarlo',
+            both: 'Scorri a **sinistra** o **destra** su un messaggio per eliminarlo'
+        },
+        safeDeleteHelp: {
+            enabled: 'Un pulsante <delete>Elimina</delete> apparirà scorrendo su un messaggio.',
+            disabled: 'Ora puoi eliminare un messaggio semplicemente scorrendo su di esso.'
         }
     },
     // Welcome Message (Home Page)
