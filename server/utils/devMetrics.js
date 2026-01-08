@@ -40,7 +40,8 @@ const countCodeStats = (dirPath) => {
                         const socketMatches = content.match(/socket\.(on|emit)\(/g) ||
                             content.match(/io\.on\(/g) ||
                             content.match(/useWebSocket\(/g) ||
-                            content.match(/ws\.on\(/g);
+                            content.match(/ws\.on\(/g) ||
+                            content.match(/broadcast\(/g);
                         if (socketMatches) stats.socketEvents += socketMatches.length;
                     }
                 } catch (e) { /* ignore */ }

@@ -62,24 +62,22 @@ router.post('/github', async (req, res) => {
         const ref = payload.ref || 'refs/heads/master';
         const branch = ref.replace('refs/heads/', '');
 
-        // Store in database
+        // Recalculate full dev metrics
+        const fullDevMetrics = await calculateDevMetrics(rootDir);
+        // Ensure the latest commit from webhook is reflected even if git lag occurs
+        fullDevMetrics.lastCommit = lastCommitHash;
+
+        // Store in database (Update with actual calculated count to prevent inflation)
         run(`
             INSERT OR REPLACE INTO dev_metrics (
                 id, last_commit_hash, last_commit_message, last_commit_author, 
                 last_commit_time, total_commits, updated_at
             ) VALUES (
-                1, ?, ?, ?, ?, 
-                COALESCE((SELECT total_commits FROM dev_metrics WHERE id = 1), 0) + ?,
-                datetime('now')
+                1, ?, ?, ?, ?, ?, datetime('now')
             )
-        `, [lastCommitHash, lastCommitMessage, lastCommitAuthor, lastCommitTime, commits]);
+        `, [lastCommitHash, lastCommitMessage, lastCommitAuthor, lastCommitTime, fullDevMetrics.commits]);
 
-        console.log(`GitHub webhook: Received push with ${commits} commits. Latest: ${lastCommitHash}`);
-
-        // Recalculate full dev metrics
-        const fullDevMetrics = await calculateDevMetrics(rootDir);
-        // Ensure the latest commit from webhook is reflected even if git lag occurs
-        fullDevMetrics.lastCommit = lastCommitHash;
+        console.log(`GitHub webhook: Received push with ${commits} commits. Latest: ${lastCommitHash}. Persistent total: ${fullDevMetrics.commits}`);
 
         // Broadcast real-time update to connected admin clients
         broadcast({
@@ -97,7 +95,8 @@ router.post('/github', async (req, res) => {
         res.json({
             success: true,
             commits_received: commits,
-            last_commit: lastCommitHash
+            last_commit: lastCommitHash,
+            actual_total: fullDevMetrics.commits
         });
     } catch (err) {
         console.error('GitHub webhook error:', err);
