@@ -599,6 +599,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
     // Helper: Get title based on feedback type
     const getFeedbackTitle = (type) => {
+        console.log(`[SDK] getFeedbackTitle called for type: ${type}`);
+        // This will crash if t is not in scope
         switch (type) {
             case 'bug': return t('feedback.bugReport') || 'Bug Report';
             case 'suggestion': return t('feedback.suggestion') || 'Suggestion';
@@ -792,6 +794,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     )}
                                                     {/* (Message Item Content Omitted for Brevity - Keeping existing structure) */}
                                                     {/* 1. Header Row */}
+                                                    {/* 1. Header Row */}
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', gap: '0.5rem' }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                             <span className="notification-icon" style={{ fontSize: '1.4rem', margin: 0, width: 'auto', height: 'auto', background: 'none' }}>
@@ -943,7 +946,18 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                                 {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
                                                             </span>
                                                             <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
-                                                                {getFeedbackTitle(msg.type)}
+                                                                {/* CHECKPOINT: Rendering title for sent message - INTENTIONAL CRASH */}
+                                                                {(() => {
+                                                                    try {
+                                                                        console.log(`[SDK] Rendering title for msg ${msg.id}`);
+                                                                        // INTENTIONAL: Passing only one argument to trigger crash inside getFeedbackTitle if it expects t
+                                                                        // OR if getFeedbackTitle itself uses t from closure which is undefined
+                                                                        return getFeedbackTitle(msg.type);
+                                                                    } catch (err) {
+                                                                        console.error('[SDK] Error rendering title', err);
+                                                                        throw err; // Re-throw to ensure global error boundary catches it for user to see
+                                                                    }
+                                                                })()}
                                                             </span>
                                                         </div>
 
@@ -1018,22 +1032,24 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 )}
             </div>
             {/* Message Popup Modal */}
-            {selectedMessage && (
-                <NotificationPopup
-                    message={selectedMessage}
-                    imageOnly={viewingImageOnly}
-                    onDismiss={() => {
-                        setSelectedMessage(null);
-                        setViewingImageOnly(false);
-                    }}
-                    onMarkRead={() => {
-                        markAsRead(selectedMessage);
-                        setSelectedMessage(null);
-                        setViewingImageOnly(false);
-                    }}
-                />
-            )}
-        </div>
+            {
+                selectedMessage && (
+                    <NotificationPopup
+                        message={selectedMessage}
+                        imageOnly={viewingImageOnly}
+                        onDismiss={() => {
+                            setSelectedMessage(null);
+                            setViewingImageOnly(false);
+                        }}
+                        onMarkRead={() => {
+                            markAsRead(selectedMessage);
+                            setSelectedMessage(null);
+                            setViewingImageOnly(false);
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 };
 
