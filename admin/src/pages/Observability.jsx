@@ -322,7 +322,7 @@ const Observability = () => {
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', lineHeight: 1 }}>
                                         <CountUp end={(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)} />
                                     </div>
-                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Verified</div>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Submitted</div>
                                     <div className="text-muted text-sm">Total</div>
                                 </div>
                                 {/* Badges: Pending on top, Confirmed+Inactive below */}
@@ -494,7 +494,7 @@ const Observability = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem', width: '100%' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                            <CountUp end={stats.devMetrics?.loc || 0} />
+                                            <CountUp end={stats.devMetrics?.loc || 0} separator="." />
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Lines of Code</div>
                                         <div className="text-muted text-sm">Total</div>
