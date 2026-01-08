@@ -156,8 +156,10 @@ const BarrelCounter = ({ value }) => {
     const styles = `
         @keyframes barrelDrop {
             0% { transform: translateY(-50%); filter: blur(0); }
-            10% { filter: blur(2px); }
-            90% { filter: blur(2px); }
+            20% { filter: blur(1.5px); }
+            50% { filter: blur(3.5px); } /* Peak Velocity */
+            80% { filter: blur(1.2px); } /* Deceleration */
+            92% { filter: blur(0.4px); } /* Snap-back Velocity */
             100% { transform: translateY(0); filter: blur(0); }
         }
     `;
