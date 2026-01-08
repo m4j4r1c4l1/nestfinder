@@ -22,7 +22,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         { id: 'single', emoji: '👤', label: t('submit.onePerson') },
         { id: 'group', emoji: '👥', label: t('submit.multiple') },
         { id: 'children', emoji: '👶', label: t('submit.children') },
-        { id: 'dog', emoji: '🐕', label: 'Dog' }
+        { id: 'dog', emoji: '🐕', label: 'Animals' }
     ];
 
     // 'What' need options - expanded to 15 emojis
@@ -371,7 +371,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                         border: tags.includes(tag.id)
                                             ? '2px solid var(--color-primary)'
                                             : '1px solid var(--color-border)',
-                                        borderRadius: 'var(--radius-lg)',
+                                        borderRadius: 'var(--radius-md)',
                                         cursor: 'pointer',
                                         transition: 'all var(--transition-fast)',
                                         minWidth: 0 // Allow shrinking
@@ -422,7 +422,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                         border: needs.includes(need.id)
                                             ? '2px solid var(--color-primary)'
                                             : '1px solid var(--color-border)',
-                                        borderRadius: 'var(--radius-lg)',
+                                        borderRadius: 'var(--radius-md)',
                                         cursor: 'pointer',
                                         transition: 'all var(--transition-fast)',
                                         minWidth: 0 // Allow shrinking
