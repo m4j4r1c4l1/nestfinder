@@ -578,6 +578,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const [days, setDays] = useState(7);
     const [refreshInterval, setRefreshInterval] = useState(0);
     const [hoveredPoint, setHoveredPoint] = useState(null);
+    const cardRef = useRef(null);
+    const [isVisible, setIsVisible] = useState(false);
+    const [animatedMetrics, setAnimatedMetrics] = useState([]);
 
     const fetchMetrics = async () => {
         try {
@@ -607,6 +610,64 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         }
     }, [refreshInterval, days]);
 
+    // Scroll Trigger & Animation
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                observer.disconnect();
+            }
+        }, { threshold: 0.5 });
+        if (cardRef.current) observer.observe(cardRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (!metrics.length) return;
+
+        if (!isVisible) {
+            const zeroed = metrics.map(m => {
+                const newM = { ...m };
+                seriesConfig.forEach(s => newM[s.key] = 0);
+                return newM;
+            });
+            setAnimatedMetrics(zeroed);
+            return;
+        }
+
+        let startTime;
+        let animationFrame;
+        const duration = 1000;
+
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease out
+
+            const current = metrics.map(m => {
+                const newM = { ...m };
+                seriesConfig.forEach(s => {
+                    const target = m[s.key] || 0;
+                    newM[s.key] = target * ease;
+                });
+                return newM;
+            });
+
+            setAnimatedMetrics(current);
+
+            if (progress < 1) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        };
+
+        animationFrame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(animationFrame);
+    }, [isVisible, metrics, seriesConfig]);
+
+    const displayData = animatedMetrics.length > 0 ? animatedMetrics : [];
+
+
+
     // Chart Dimensions
     const chartWidth = 800;
     const chartHeight = 220;
@@ -615,8 +676,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const graphHeight = chartHeight - padding.top - padding.bottom;
 
     // Helper functions - add inner padding so bars don't overlap Y-axis
-    const innerPadding = type === 'bar' ? graphWidth / (metrics.length * 2) : 0;
-    const getX = (i) => innerPadding + (i / (metrics.length - 1 || 1)) * (graphWidth - innerPadding * 2);
+    const innerPadding = type === 'bar' ? graphWidth / (displayData.length * 2) : 0;
+    const getX = (i) => innerPadding + (i / (displayData.length - 1 || 1)) * (graphWidth - innerPadding * 2);
     const getY = (val, max) => graphHeight - ((val / max) * graphHeight);
 
     if (loading || metrics.length === 0) {
@@ -677,7 +738,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const renderLineChart = () => (
         <g>
             {seriesConfig.map(s => {
-                const points = metrics.map((m, i) => `${getX(i)},${getY(m[s.key] || 0, maxY)}`).join(' ');
+                const points = displayData.map((m, i) => `${getX(i)},${getY(m[s.key] || 0, maxY)}`).join(' ');
                 const areaPoints = `0,${graphHeight} ${points} ${graphWidth},${graphHeight}`;
                 return (
                     <g key={s.key}>
@@ -689,7 +750,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                         </defs>
                         <polygon points={areaPoints} fill={`url(#gradient-${s.key})`} />
                         <polyline points={points} fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        {metrics.map((m, i) => (
+                        {displayData.map((m, i) => (
                             <circle
                                 key={i}
                                 cx={getX(i)}
@@ -725,11 +786,11 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const heatMax = Math.max(...heatValues);
 
     const renderBarChart = () => {
-        const barWidth = (graphWidth / metrics.length) * 0.3; // Half width (was 0.6)
+        const barWidth = (graphWidth / displayData.length) * 0.3; // Half width (was 0.6)
 
         return (
             <g>
-                {metrics.map((m, i) => {
+                {displayData.map((m, i) => {
                     const val = m[seriesConfig[0].key] || 0;
                     const h = (val / maxY) * graphHeight;
                     const x = getX(i) - (barWidth / 2);
@@ -759,7 +820,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     };
 
     return (
-        <div className="card" style={{ marginBottom: '1.5rem', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155', borderRadius: '8px', backdropFilter: 'blur(8px)' }}>
+        <div ref={cardRef} className="card" style={{ marginBottom: '1.5rem', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155', borderRadius: '8px', backdropFilter: 'blur(8px)' }}>
             {/* Header */}
             <div className="card-header" style={{ background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -831,12 +892,12 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                         {type === 'bar' ? renderBarChart() : renderLineChart()}
 
                         {/* Hover Overlay Columns */}
-                        {metrics.map((m, i) => (
+                        {displayData.map((m, i) => (
                             <rect
                                 key={`hover-col-${i}`}
-                                x={getX(i) - (graphWidth / metrics.length) / 2}
+                                x={getX(i) - (graphWidth / displayData.length) / 2}
                                 y={0}
-                                width={graphWidth / metrics.length}
+                                width={graphWidth / displayData.length}
                                 height={graphHeight}
                                 fill="transparent"
                                 style={{ cursor: onPointClick ? 'pointer' : 'default' }}
@@ -1100,6 +1161,9 @@ const RatingsChartCard = ({ onPointClick }) => {
     const [days, setDays] = useState(7);
     const [refreshInterval, setRefreshInterval] = useState(0);
     const [hoveredPoint, setHoveredPoint] = useState(null);
+    const cardRef = useRef(null);
+    const [isVisible, setIsVisible] = useState(false);
+    const [animatedRatings, setAnimatedRatings] = useState([]);
 
     const fetchRatings = async () => {
         try {
@@ -1129,6 +1193,55 @@ const RatingsChartCard = ({ onPointClick }) => {
         }
     }, [refreshInterval, days]);
 
+    // Scroll Trigger & Animation
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                observer.disconnect();
+            }
+        }, { threshold: 0.5 });
+        if (cardRef.current) observer.observe(cardRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (!ratings.length) return;
+
+        if (!isVisible) {
+            const zeroed = ratings.map(r => ({ ...r, count: 0, average: 0 }));
+            setAnimatedRatings(zeroed);
+            return;
+        }
+
+        let startTime;
+        let animationFrame;
+        const duration = 1000;
+
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            const current = ratings.map(r => ({
+                ...r,
+                count: r.count * ease,
+                average: r.average * ease
+            }));
+
+            setAnimatedRatings(current);
+
+            if (progress < 1) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        };
+
+        animationFrame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(animationFrame);
+    }, [isVisible, ratings]);
+
+    const displayData = animatedRatings.length > 0 ? animatedRatings : [];
+
     // Chart Dimensions
     const chartWidth = 800;
     const chartHeight = 220;
@@ -1137,7 +1250,7 @@ const RatingsChartCard = ({ onPointClick }) => {
     const graphHeight = chartHeight - padding.top - padding.bottom;
 
     // No inner padding - first point at 0, last point at graphWidth edge
-    const getX = (i) => (i / (ratings.length - 1 || 1)) * graphWidth;
+    const getX = (i) => (i / (displayData.length - 1 || 1)) * graphWidth;
     const getY = (val) => graphHeight - ((val / 5) * graphHeight); // Scale 0-5
 
     // Get color based on rating value (1-5 scale)
@@ -1197,15 +1310,15 @@ const RatingsChartCard = ({ onPointClick }) => {
     }
 
     // Filter to only show days with data for the area chart
-    const hasData = ratings.some(r => r.count > 0);
+    const hasData = displayData.some(r => r.count > 0);
     const maxY = 5; // Ratings are 1-5
 
     // Build area path
-    const points = ratings.map((r, i) => `${getX(i)},${getY(r.average || 0)}`).join(' ');
+    const points = displayData.map((r, i) => `${getX(i)},${getY(r.average || 0)}`).join(' ');
     const areaPoints = `0,${graphHeight} ${points} ${graphWidth},${graphHeight}`;
 
     return (
-        <div className="card" style={{ marginBottom: '1.5rem', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155', borderRadius: '8px', backdropFilter: 'blur(8px)' }}>
+        <div ref={cardRef} className="card" style={{ marginBottom: '1.5rem', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155', borderRadius: '8px', backdropFilter: 'blur(8px)' }}>
             {/* Header */}
             <div className="card-header" style={{ background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -1281,7 +1394,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                         })()}
 
                         {/* X-Axis Labels */}
-                        {ratings.map((r, i) => (
+                        {displayData.map((r, i) => (
                             <text key={i} x={getX(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
                                 {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </text>
@@ -1289,9 +1402,9 @@ const RatingsChartCard = ({ onPointClick }) => {
 
                         {/* Votes Bars - Scaled to Right Axis (Votes) */}
                         {(() => {
-                            const maxVotes = Math.max(...ratings.map(r => r.count || 0), 5);
-                            const barWidth = Math.max(6, (graphWidth / ratings.length) * 0.4);
-                            return ratings.map((r, i) => {
+                            const maxVotes = Math.max(...displayData.map(r => r.count || 0), 5);
+                            const barWidth = Math.max(6, (graphWidth / displayData.length) * 0.4);
+                            return displayData.map((r, i) => {
                                 const barHeight = (r.count / maxVotes) * graphHeight; // Full height scale for votes axis
 
                                 // Adjust x position for edges to prevent overflow
@@ -1322,7 +1435,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                         {hasData && <polyline points={points} fill="none" stroke="#facc15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
 
                         {/* Data Points (Ratings - Left Axis) */}
-                        {ratings.map((r, i) => (
+                        {displayData.map((r, i) => (
                             <text
                                 key={i}
                                 x={getX(i)}
@@ -1338,12 +1451,12 @@ const RatingsChartCard = ({ onPointClick }) => {
                         ))}
 
                         {/* Hover Overlay Columns */}
-                        {ratings.map((r, i) => (
+                        {displayData.map((r, i) => (
                             <rect
                                 key={`hover-col-${i}`}
-                                x={getX(i) - (graphWidth / ratings.length) / 2}
+                                x={getX(i) - (graphWidth / displayData.length) / 2}
                                 y={0}
-                                width={graphWidth / ratings.length}
+                                width={graphWidth / displayData.length}
                                 height={graphHeight}
                                 fill="transparent"
                                 style={{ cursor: r.count > 0 ? 'pointer' : 'default' }}
