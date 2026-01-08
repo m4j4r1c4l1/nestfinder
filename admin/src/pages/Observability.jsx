@@ -730,6 +730,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const cardRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const [animatedMetrics, setAnimatedMetrics] = useState([]);
+    const hasAnimated = useRef(false);
 
     const fetchMetrics = async () => {
         try {
@@ -785,6 +786,12 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             setAnimatedMetrics(zeroed);
             return;
         }
+
+        if (hasAnimated.current) {
+            setAnimatedMetrics(metrics);
+            return;
+        }
+        hasAnimated.current = true;
 
         let startTime;
         let animationFrame;
@@ -1315,6 +1322,7 @@ const RatingsChartCard = ({ onPointClick }) => {
     const cardRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const [animatedRatings, setAnimatedRatings] = useState([]);
+    const hasAnimated = useRef(false);
 
     const fetchRatings = async () => {
         try {
@@ -1353,7 +1361,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                 setIsVisible(true);
                 observer.disconnect();
             }
-        }, { threshold: 0.5 });
+        }, { threshold: 0.7, rootMargin: '0px 0px -50px 0px' });
         if (cardRef.current) observer.observe(cardRef.current);
         return () => observer.disconnect();
     }, [loading, ratings.length, isVisible]);
@@ -1366,6 +1374,12 @@ const RatingsChartCard = ({ onPointClick }) => {
             setAnimatedRatings(zeroed);
             return;
         }
+
+        if (hasAnimated.current) {
+            setAnimatedRatings(ratings);
+            return;
+        }
+        hasAnimated.current = true;
 
         let startTime;
         let animationFrame;
