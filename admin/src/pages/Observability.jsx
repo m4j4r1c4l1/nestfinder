@@ -531,7 +531,7 @@ const Observability = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem', width: '100%' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                            <RandomCounter end={stats.devMetrics?.loc || 0} separator="." />
+                                            <RandomCounter end={stats.devMetrics?.loc || 0} />
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Lines of Code</div>
                                         <div className="text-muted text-sm">Total</div>
