@@ -1,8 +1,13 @@
 import express from 'express';
 import crypto from 'crypto';
 import { run, get } from '../database.js';
+import { calculateDevMetrics } from '../utils/devMetrics.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const router = express.Router();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '../../');
 
 // Broadcast function (injected from index.js for real-time updates)
 let broadcast = () => { };
@@ -24,7 +29,7 @@ const verifySignature = (req, secret) => {
 };
 
 // GitHub webhook endpoint for push events
-router.post('/github', (req, res) => {
+router.post('/github', async (req, res) => {
     const secret = process.env.NEST_HOOK;
 
     // Verify the webhook secret
@@ -69,6 +74,11 @@ router.post('/github', (req, res) => {
 
         console.log(`GitHub webhook: Received push with ${commits} commits. Latest: ${lastCommitHash}`);
 
+        // Recalculate full dev metrics
+        const fullDevMetrics = await calculateDevMetrics(rootDir);
+        // Ensure the latest commit from webhook is reflected even if git lag occurs
+        fullDevMetrics.lastCommit = lastCommitHash;
+
         // Broadcast real-time update to connected admin clients
         broadcast({
             type: 'commit-update',
@@ -77,7 +87,8 @@ router.post('/github', (req, res) => {
                 lastCommitMessage,
                 lastCommitAuthor,
                 lastCommitTime,
-                commits
+                commits,
+                devMetrics: fullDevMetrics
             }
         });
 

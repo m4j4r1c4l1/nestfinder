@@ -8,6 +8,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
+import { calculateDevMetrics } from '../utils/devMetrics.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -195,98 +196,35 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
             feedbackRead = { count: 0 };
         }
 
-        // Calculate Dev Metrics
-        let devMetrics = { commits: 0, components: 0, loc: 0, files: 0 };
-        const rootDir = path.resolve(__dirname, '../../'); // Project root
+        // 1. Dev Metrics
+        const devMetrics = await calculateDevMetrics(rootDir);
 
-        // First, check if we have stored data from GitHub webhook
-        const storedMetrics = get('SELECT * FROM dev_metrics WHERE id = 1');
-        if (storedMetrics && storedMetrics.total_commits > 0) {
-            devMetrics.commits = storedMetrics.total_commits;
-            devMetrics.lastCommit = storedMetrics.last_commit_hash || '-';
-        }
+        // 2 & 3. Specific Shallow/Render overrides if needed (though calculateDevMetrics handles basics)
+        if (!devMetrics.commits || devMetrics.commits === 0) {
+            // Render / Shallow Clone Fallback
+            const headers = { 'User-Agent': 'nestfinder-admin' };
+            const token = process.env.GITHUB_TOKEN || process.env.NEST_TRACKER;
+            if (token) headers['Authorization'] = `token ${token}`;
 
-        // Cache for commits to avoid API rate limits and flakiness on Render
-        if (!global.cachedCommits) global.cachedCommits = 0;
-
-        try {
-            // Check if we are in a shallow clone (Render uses shallow clones)
-            let isShallow = false;
             try {
-                const { stdout } = await execAsync('git rev-parse --is-shallow-repository', { cwd: rootDir });
-                isShallow = stdout.trim() === 'true';
-            } catch (e) {
-                isShallow = true; // Assume shallow/problematic if git checks fail
-            }
-
-            if (!isShallow) {
-                // 1. Local Dev / Full Clone: Use Git (Fastest & Most Accurate)
-                const { stdout: count } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
-                devMetrics.commits = parseInt(count.trim(), 10);
-
-                const { stdout: hash } = await execAsync('git rev-parse --short HEAD', { cwd: rootDir });
-                devMetrics.lastCommit = hash.trim();
-            } else {
-                // 2. Render / Shallow Clone: Use GitHub API with Token & Caching
-                const headers = { 'User-Agent': 'nestfinder-admin' };
-                const token = process.env.GITHUB_TOKEN || process.env.NEST_TRACKER;
-                if (token) {
-                    headers['Authorization'] = `token ${token}`;
-                }
-
-                try {
-                    const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', { headers });
-
-                    if (response.ok) {
-                        const linkHeader = response.headers.get('Link');
-                        if (linkHeader) {
-                            const links = linkHeader.split(',');
-                            const lastLink = links.find(link => link.includes('rel="last"'));
-                            if (lastLink) {
-                                const match = lastLink.match(/[?&]page=(\d+)/);
-                                if (match) {
-                                    devMetrics.commits = parseInt(match[1], 10);
-                                }
-                            }
+                const response = await fetch('https://api.github.com/repos/m4j4r1c4l1/nestfinder/commits?per_page=1', { headers });
+                if (response.ok) {
+                    const linkHeader = response.headers.get('Link');
+                    if (linkHeader) {
+                        const links = linkHeader.split(',');
+                        const lastLink = links.find(link => link.includes('rel="last"'));
+                        if (lastLink) {
+                            const match = lastLink.match(/[?&]page=(\d+)/);
+                            if (match) devMetrics.commits = parseInt(match[1], 10);
                         }
-                        // Fallback: If no link header (single page), count body
-                        // Get Latest Hash from Body (always fetch this now)
-                        const data = await response.json();
-                        if (Array.isArray(data) && data.length > 0) {
-                            if (!devMetrics.commits) devMetrics.commits = data.length;
-                            devMetrics.lastCommit = data[0].sha.substring(0, 7);
-                        }
-
-                        // Update cache on success
-                        if (devMetrics.commits > 0) global.cachedCommits = devMetrics.commits;
                     }
-                } catch (apiErr) {
-                    console.error('GitHub API failed:', apiErr.message);
+                    const data = await response.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        if (!devMetrics.commits) devMetrics.commits = data.length;
+                        devMetrics.lastCommit = data[0].sha.substring(0, 7);
+                    }
                 }
-
-                // Fallback to cache if API failed or returned 0
-                if ((!devMetrics.commits || devMetrics.commits === 0) && global.cachedCommits > 0) {
-                    devMetrics.commits = global.cachedCommits;
-                }
-
-                // Final fallback
-                if (!devMetrics.commits) devMetrics.commits = 1;
-                if (!devMetrics.lastCommit) devMetrics.lastCommit = '-';
-            }
-
-            // 2. Code Stats
-            const clientStats = countCodeStats(path.join(rootDir, 'client/src'));
-            const adminStats = countCodeStats(path.join(rootDir, 'admin/src'));
-            const serverStats = countCodeStats(path.join(rootDir, 'server'));
-
-            devMetrics.components = (clientStats.components || 0) + (adminStats.components || 0);
-            devMetrics.loc = (clientStats.lines || 0) + (adminStats.lines || 0) + (serverStats.lines || 0);
-            devMetrics.files = (clientStats.files || 0) + (adminStats.files || 0) + (serverStats.files || 0);
-            devMetrics.apiEndpoints = (clientStats.apiEndpoints || 0) + (adminStats.apiEndpoints || 0) + (serverStats.apiEndpoints || 0);
-            devMetrics.socketEvents = (clientStats.socketEvents || 0) + (adminStats.socketEvents || 0) + (serverStats.socketEvents || 0);
-
-        } catch (err) {
-            console.error('Dev metrics calculation failed:', err);
+            } catch (e) { console.error('GitHub API failed:', e.message); }
         }
 
         // Calculate Broadcast Metrics
@@ -342,55 +280,6 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
     }
 });
 
-// Helper to count code stats recursively
-const countCodeStats = (dirPath) => {
-    let stats = { files: 0, lines: 0, components: 0, apiEndpoints: 0, socketEvents: 0 };
-
-    if (!fs.existsSync(dirPath)) return stats;
-
-    const files = fs.readdirSync(dirPath);
-
-    for (const file of files) {
-        // Skip node_modules, .git, dist, build, etc.
-        if (['node_modules', '.git', 'dist', 'build', '.vite', 'coverage'].includes(file)) continue;
-
-        const fullPath = path.join(dirPath, file);
-        const stat = fs.statSync(fullPath);
-
-        if (stat.isDirectory()) {
-            const subStats = countCodeStats(fullPath);
-            stats.files += subStats.files;
-            stats.lines += subStats.lines;
-            stats.components += subStats.components;
-            stats.apiEndpoints += subStats.apiEndpoints;
-            stats.socketEvents += subStats.socketEvents;
-        } else if (stat.isFile()) {
-            // Check extensions for LOC
-            if (/\.(js|jsx|ts|tsx|css|scss|html)$/.test(file)) {
-                stats.files++;
-                try {
-                    const content = fs.readFileSync(fullPath, 'utf8');
-                    stats.lines += content.split('\n').length;
-
-                    // Count API Endpoints (in server files mainly)
-                    if (/\.js$/.test(file)) {
-                        const apiMatches = content.match(/router\.(get|post|put|delete|patch)/g);
-                        if (apiMatches) stats.apiEndpoints += apiMatches.length;
-
-                        const socketMatches = content.match(/socket\.on\(/g) || content.match(/io\.on\(/g);
-                        if (socketMatches) stats.socketEvents += socketMatches.length;
-                    }
-
-                } catch (e) { /* ignore read errors */ }
-            }
-            // Check for Components (.jsx/.tsx)
-            if (/\.(jsx|tsx)$/.test(file)) {
-                stats.components++;
-            }
-        }
-    }
-    return stats;
-};
 
 // Send notification (In-App only)
 router.post('/admin/send', requireAdmin, async (req, res) => {
