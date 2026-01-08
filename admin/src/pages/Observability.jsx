@@ -423,8 +423,8 @@ const Observability = () => {
                         <div style={{ height: '1px', background: '#334155', width: '100%' }} />
 
                         {/* Row 2: Messages | Broadcasts | Development */}
-                        {/* Using Grid: 27.5% | 27.5% | 45%. Dev block gets 45% width to shift it left while keeping symmetry for others. */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2.75fr) minmax(0, 2.75fr) minmax(0, 4.5fr)', gap: '0.8rem', width: '100%' }}>
+                        {/* Using Grid: 25% | 25% | 50%. Dev block gets 50% width to shift it left. */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '1rem', width: '100%' }}>
                             {/* Messages Block (Left) */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
