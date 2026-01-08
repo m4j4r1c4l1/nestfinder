@@ -128,7 +128,7 @@ const BarrelDigit = ({ value }) => {
             height: '1em', // Restored: Required because children are absolute
             overflow: 'hidden', // Restored: Clip sliding animation
             margin: /^[0-9]$/.test(display) ? 0 : '0 1px', // Tiny margin for separator if needed
-            verticalAlign: 'middle', // Align with text middle
+            verticalAlign: 'baseline', // Align with text baseline
             fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
         }}>
             <div key={display} style={{
@@ -169,7 +169,7 @@ const BarrelCounter = ({ value }) => {
     // If value is already formatted string, use it. Otherwise round and stringify.
     const str = typeof value === 'string' ? value : Math.round(value || 0).toString();
     return (
-        <div style={{ display: 'inline-flex', alignItems: 'center', overflow: 'hidden' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'baseline', overflow: 'hidden' }}>
             <style>{styles}</style>
             {str.split('').map((char, i) => (
                 <BarrelDigit key={i} value={char} />
@@ -333,7 +333,7 @@ const Observability = () => {
                                         { label: 'Hatchling', count: stats.userLevels?.hatchling, color: '#94a3b8', icon: '🥚' }
                                     ].map(badge => (
                                         <div key={badge.label} style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                                            display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.4rem',
                                             background: `${badge.color}20`, border: `1px solid ${badge.color}40`,
                                             borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem'
                                         }}>
@@ -361,7 +361,7 @@ const Observability = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%', maxWidth: '280px' }}>
                                     {/* Pending badge on top */}
                                     <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                        display: 'flex', alignItems: 'baseline', gap: '0.4rem',
                                         background: '#f59e0b20', border: '1px solid #f59e0b40',
                                         borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
                                     }}>
@@ -372,7 +372,7 @@ const Observability = () => {
                                     {/* Confirmed + Inactive row */}
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            display: 'flex', alignItems: 'baseline', gap: '0.4rem',
                                             background: '#22c55e20', border: '1px solid #22c55e40',
                                             borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
                                         }}>
@@ -381,7 +381,7 @@ const Observability = () => {
                                             <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.confirmed || 0} /></span>
                                         </div>
                                         <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                            display: 'flex', alignItems: 'baseline', gap: '0.4rem',
                                             background: '#ef444420', border: '1px solid #ef444440',
                                             borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
                                         }}>
@@ -408,7 +408,7 @@ const Observability = () => {
                                 {/* Badge - vertically centered to align with Users 2x2 grid center */}
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
                                     <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                        display: 'flex', alignItems: 'baseline', gap: '0.4rem',
                                         background: '#facc1520', border: '1px solid #facc1540',
                                         borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
                                     }}>
@@ -440,15 +440,15 @@ const Observability = () => {
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.unread || 0} /></span>
                                             </div>
@@ -464,11 +464,11 @@ const Observability = () => {
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.pending || 0} /></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.read || 0} /></span>
                                             </div>
@@ -491,11 +491,11 @@ const Observability = () => {
                                             <div className="text-muted text-sm">Active</div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.delivered || 0} /></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.read || 0} /></span>
                                             </div>
