@@ -79,6 +79,63 @@ const CommitReveal = ({ text, duration = 2000 }) => {
     }, [text, duration]);
 
     return <>{display}</>;
+
+};
+
+// Barrel/Slot Machine Digit Component
+const BarrelDigit = ({ value }) => {
+    const [display, setDisplay] = useState(value);
+    const [prev, setPrev] = useState(null);
+    const [animating, setAnimating] = useState(false);
+
+    useEffect(() => {
+        if (value !== display) {
+            setPrev(display);
+            setDisplay(value);
+            setAnimating(true);
+            const timer = setTimeout(() => setAnimating(false), 600); // slightly longer than CSS transition
+            return () => clearTimeout(timer);
+        }
+    }, [value, display]);
+
+    return (
+        <div style={{
+            position: 'relative',
+            display: 'inline-block',
+            width: '0.6em', // Fixed width for monospaced look
+            height: '1em',
+            overflow: 'hidden',
+            verticalAlign: 'bottom'
+        }}>
+            {/* New Value (Enters from Top) */}
+            <div style={{
+                position: 'absolute',
+                top: 0, left: 0,
+                transform: animating ? 'translateY(0%)' : 'translateY(0%)',
+                transition: animating ? 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none', // overshoot "bounce" effect
+                marginTop: animating ? '-100%' : '0'
+            }}>
+                {animating && <div style={{ height: '1em' }}>{prev}</div>}
+                <div style={{ height: '1em' }}>{display}</div>
+            </div>
+
+            {/* Simple static render if not animating to ensure baseline consistency */}
+            {!animating && <div style={{ visibility: 'hidden' }}>{display}</div>}
+        </div>
+    );
+};
+
+// Barrel Counter Container
+const BarrelCounter = ({ end }) => {
+    // Convert number to string to split digits
+    const str = Math.round(end || 0).toString();
+    return (
+        <div style={{ display: 'inline-flex', overflow: 'hidden' }}>
+            {str.split('').map((char, i) => (
+                <BarrelDigit key={i} value={char} />
+            ))}
+        </div>
+    );
 };
 
 const Observability = () => {
@@ -365,7 +422,7 @@ const Observability = () => {
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
                                                 <div className="text-muted text-sm">Git History</div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.8rem' }}><CountUp end={stats.devMetrics?.commits || 0} /></span>
+                                            <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.8rem', lineHeight: 1 }}><BarrelCounter end={stats.devMetrics?.commits || 0} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.5rem',
