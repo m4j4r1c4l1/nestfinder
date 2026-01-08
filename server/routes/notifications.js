@@ -12,6 +12,7 @@ import { calculateDevMetrics } from '../utils/devMetrics.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '../../');
 
 const router = express.Router();
 
