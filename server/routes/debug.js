@@ -39,4 +39,9 @@ router.get('/download', (req, res) => {
     }
 });
 
+// GET /api/debug/ping-test - Dummy endpoint for metrics testing
+router.get('/ping-test', (req, res) => {
+    res.json({ message: 'pong' });
+});
+
 export default router;
