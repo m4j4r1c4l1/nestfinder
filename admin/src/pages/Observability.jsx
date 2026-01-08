@@ -503,22 +503,28 @@ const Observability = () => {
                                     {/* 2x2 Badges Grid */}
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', width: '100%', maxWidth: '300px' }}>
                                         {[
-                                            { label: 'Latest', count: <CommitReveal text={stats.devMetrics?.lastCommit} />, color: '#4ade80', icon: '🆔' },
-                                            { label: 'Commits', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6', icon: '📝' },
-                                            { label: 'Comps', count: <CountUp end={stats.devMetrics?.components || 0} />, color: '#0ea5e9', icon: '🧩' },
-                                            { label: 'Files', count: <CountUp end={stats.devMetrics?.files || 0} />, color: '#64748b', icon: '📁' }
-                                        ].map(badge => (
-                                            <div key={badge.label} style={{
+                                            { label: 'Commit ID', sub: 'Latest', count: <CommitReveal text={stats.devMetrics?.lastCommit} />, color: '#4ade80', mono: true },
+                                            { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6' },
+                                            { label: 'Components', sub: 'React/JSX', count: <CountUp end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
+                                            { label: 'Files', sub: 'Total Count', count: <CountUp end={stats.devMetrics?.files || 0} />, color: '#64748b' }
+                                        ].map((badge, i) => (
+                                            <div key={i} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                                background: `${badge.color}20`, border: `1px solid ${badge.color}40`,
-                                                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.8rem',
-                                                minHeight: '42px'
+                                                background: `${badge.color}15`, border: `1px solid ${badge.color}30`,
+                                                borderRadius: '8px', padding: '0.5rem 0.75rem',
+                                                minHeight: '52px'
                                             }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span style={{ fontSize: '1rem' }}>{badge.icon}</span>
-                                                    <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.75rem', lineHeight: 1.2 }}>{badge.label}</div>
+                                                    <div className="text-muted" style={{ fontSize: '0.65rem', lineHeight: 1.2 }}>{badge.sub}</div>
                                                 </div>
-                                                <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem', fontFamily: badge.label === 'Latest' ? '"JetBrains Mono", monospace' : 'inherit' }}>
+                                                <span style={{
+                                                    fontWeight: 700,
+                                                    color: badge.color,
+                                                    fontSize: badge.mono ? '1rem' : '1.5rem',
+                                                    fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
+                                                    lineHeight: 1
+                                                }}>
                                                     {badge.count}
                                                 </span>
                                             </div>
