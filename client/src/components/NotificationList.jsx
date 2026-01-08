@@ -136,6 +136,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
 
 // Swipeable Message Item Component with Progressive Blur
 const SwipeableMessage = ({ children, onSwipeDelete, onConfirm, onCancel, swipeDirection = 'right', hideButton = false, style, className, onClick, isDeleting }) => {
+    const { t } = useLanguage();
     const touchStartX = useRef(0);
     const touchCurrentX = useRef(0);
     const [swiping, setSwiping] = useState(false);
