@@ -554,22 +554,24 @@ const Observability = () => {
                                             { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
                                             <div key={i} style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.2rem',
                                                 background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
                                                 border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
-                                                borderRadius: '8px', padding: '0.5rem 0.75rem',
-                                                minHeight: '52px'
+                                                borderRadius: '6px', padding: '0.4rem 0.3rem', // Tighter padding
+                                                minHeight: '48px',
+                                                overflow: 'hidden' // Safety
                                             }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
-                                                    <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flexShrink: 1 }}>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{badge.label}</div>
+                                                    <div className="text-muted" style={{ fontSize: '0.65rem', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{badge.sub}</div>
                                                 </div>
                                                 <span style={{
                                                     fontWeight: 700,
                                                     color: badge.color,
-                                                    fontSize: badge.mono ? '1.1rem' : '1.8rem',
+                                                    fontSize: badge.mono ? '0.9rem' : '1.4rem', // Smaller fonts to fit
                                                     fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
-                                                    lineHeight: 1
+                                                    lineHeight: 1,
+                                                    flexShrink: 0
                                                 }}>
                                                     {badge.count}
                                                 </span>
