@@ -254,9 +254,9 @@ export default {
             desc: '⚠️ Oudere berichten worden permanent verwijderd.'
         },
         retentionHelp: {
-            forever: 'Berichten worden **Onbeperkt** bewaard.',
-            read: 'Berichten worden verwijderd na **Lezen**.',
-            period: 'Berichten ouder dan **{time}** worden verwijderd.',
+            forever: 'Berichten worden <b>Onbeperkt</b> bewaard.',
+            read: 'Berichten worden verwijderd na <b>Lezen</b>.',
+            period: 'Berichten ouder dan <b>{time}</b> worden verwijderd.',
             unit: {
                 d: 'Dag',
                 w: 'Week',

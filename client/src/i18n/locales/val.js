@@ -254,9 +254,9 @@ export default {
             desc: '⚠️ Els missatges més antics seran eliminats permanentment.'
         },
         retentionHelp: {
-            forever: 'Els missatges es guarden **Indefinidament**.',
-            read: 'Els missatges s\'esborraran després de ser **Llegits**.',
-            period: 'Els missatges anteriors a **{time}** seran eliminats.',
+            forever: 'Els missatges es guarden <b>Indefinidament</b>.',
+            read: 'Els missatges s\'esborraran després de ser <b>Llegits</b>.',
+            period: 'Els missatges anteriors a <b>{time}</b> seran eliminats.',
             unit: {
                 d: 'Dia',
                 w: 'Setmana',

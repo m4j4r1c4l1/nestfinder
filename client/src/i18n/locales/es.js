@@ -283,9 +283,9 @@ export default {
             desc: '⚠️ Los mensajes más antiguos serán eliminados permanentemente.'
         },
         retentionHelp: {
-            forever: 'Los mensajes se guardan **Indefinidamente**.',
-            read: 'Los mensajes se borrarán al ser **Leídos**.',
-            period: 'Los mensajes anteriores a **{time}** serán eliminados.',
+            forever: 'Los mensajes se guardan <b>Indefinidamente</b>.',
+            read: 'Los mensajes se borrarán al ser <b>Leídos</b>.',
+            period: 'Los mensajes anteriores a <b>{time}</b> serán eliminados.',
             unit: {
                 d: 'Día',
                 w: 'Semana',

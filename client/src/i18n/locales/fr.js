@@ -253,9 +253,9 @@ export default {
             desc: '⚠️ Les messages plus anciens seront définitivement supprimés.'
         },
         retentionHelp: {
-            forever: 'Les messages sont conservés **Indéfiniment**.',
-            read: 'Les messages seront supprimés après **Lecture**.',
-            period: 'Les messages datant de plus de **{time}** seront supprimés.',
+            forever: 'Les messages sont conservés <b>Indéfiniment</b>.',
+            read: 'Les messages seront supprimés après <b>Lecture</b>.',
+            period: 'Les messages datant de plus de <b>{time}</b> seront supprimés.',
             unit: {
                 d: 'Jour',
                 w: 'Semaine',

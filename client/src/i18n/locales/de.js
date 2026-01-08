@@ -254,9 +254,9 @@ export default {
             desc: '⚠️ Ältere Nachrichten werden dauerhaft gelöscht.'
         },
         retentionHelp: {
-            forever: 'Nachrichten werden **unbegrenzt** aufbewahrt.',
-            read: 'Nachrichten werden nach dem **Lesen** gelöscht.',
-            period: 'Nachrichten, die älter als **{time}** sind, werden gelöscht.',
+            forever: 'Nachrichten werden <b>unbegrenzt</b> aufbewahrt.',
+            read: 'Nachrichten werden nach dem <b>Lesen</b> gelöscht.',
+            period: 'Nachrichten, die älter als <b>{time}</b> sind, werden gelöscht.',
             unit: {
                 d: 'Tag',
                 w: 'Woche',

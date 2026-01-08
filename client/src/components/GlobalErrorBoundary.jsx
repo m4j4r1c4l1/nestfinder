@@ -208,22 +208,24 @@ export class GlobalErrorBoundary extends Component {
 
                         {/* Footer - Nest + Nestfinder */}
                         <div style={{
-                            marginTop: '1.5rem',
+                            marginTop: '2rem',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '0.5rem',
-                            color: 'var(--color-text-secondary, #64748b)',
-                            fontSize: '1.3rem'
+                            gap: '0.75rem',
+                            color: 'var(--color-text-secondary, #64748b)'
                         }}>
-                            <span>🪹</span>
+                            <span style={{ fontSize: '2.2rem', lineHeight: 1, display: 'flex', alignItems: 'center' }}>🪹</span>
                             <span style={{
                                 fontWeight: 700,
-                                fontSize: '1.5rem',
+                                fontSize: '1.8rem',
                                 background: 'linear-gradient(135deg, var(--color-text-primary, #f1f5f9), var(--color-primary, #667eea))',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text'
+                                backgroundClip: 'text',
+                                lineHeight: 1,
+                                display: 'flex',
+                                alignItems: 'center'
                             }}>Nestfinder</span>
                         </div>
                     </div>
