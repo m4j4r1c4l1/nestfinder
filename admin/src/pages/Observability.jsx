@@ -218,7 +218,7 @@ const Observability = () => {
         mapPoints: { total: 0, confirmed: 0, pending: 0, rejected: 0 },
         notificationMetrics: { total: 0, sent: 0, delivered: 0, read: 0, unread: 0 },
         feedbackMetrics: { total: 0, pending: 0, read: 0 },
-        devMetrics: { loc: 0, components: 0, commits: 0 },
+        devMetrics: { loc: 0, components: 0, commits: 0, files: 0 },
         broadcastMetrics: { total: 0, active: 0, delivered: 0, read: 0 }
     });
 
@@ -415,6 +415,10 @@ const Observability = () => {
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                             </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.notificationMetrics?.unread || 0} /></span>
+                                            </div>
                                         </div>
                                     </div>
                                     {/* Received Section */}
@@ -486,39 +490,39 @@ const Observability = () => {
                             {/* Development Block (Right) */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
-                                    {/* Codebase Section */}
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                                <CountUp end={stats.devMetrics?.loc || 0} />
-                                            </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>LOC</div>
-                                            <div className="text-muted text-sm">Lines</div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem', width: '100%' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
+                                            <CountUp end={stats.devMetrics?.loc || 0} />
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1e3a8a40', border: '1px solid #1e3a8a', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem', width: '100%' }}>
-                                                <span style={{ fontWeight: 700, color: '#4ade80', fontSize: '1.1rem', fontFamily: '"JetBrains Mono", monospace' }}><CommitReveal text={stats.devMetrics?.lastCommit} /></span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#0ea5e920', border: '1px solid #0ea5e940', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>
-                                                <span style={{ color: '#0ea5e9', fontWeight: 600 }}>{stats.devMetrics?.components || 0} Components</span>
-                                            </div>
-                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
+                                        <div className="text-muted text-sm">Lines of Code</div>
                                     </div>
-                                    {/* History Section */}
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
-                                                <CountUp end={stats.devMetrics?.commits || 0} />
+
+                                    {/* 2x2 Badges Grid */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', width: '100%', maxWidth: '300px' }}>
+                                        {[
+                                            { label: 'Latest', count: <CommitReveal text={stats.devMetrics?.lastCommit} />, color: '#4ade80', icon: '🆔' },
+                                            { label: 'Commits', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6', icon: '📝' },
+                                            { label: 'Comps', count: <CountUp end={stats.devMetrics?.components || 0} />, color: '#0ea5e9', icon: '🧩' },
+                                            { label: 'Files', count: <CountUp end={stats.devMetrics?.files || 0} />, color: '#64748b', icon: '📁' }
+                                        ].map(badge => (
+                                            <div key={badge.label} style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
+                                                background: `${badge.color}20`, border: `1px solid ${badge.color}40`,
+                                                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.8rem',
+                                                minHeight: '42px'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span style={{ fontSize: '1rem' }}>{badge.icon}</span>
+                                                    <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
+                                                </div>
+                                                <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem', fontFamily: badge.label === 'Latest' ? '"JetBrains Mono", monospace' : 'inherit' }}>
+                                                    {badge.count}
+                                                </span>
                                             </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Commits</div>
-                                            <div className="text-muted text-sm">History</div>
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#8b5cf620', border: '1px solid #8b5cf640', borderRadius: '8px', padding: '0.5rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#8b5cf6', fontWeight: 600 }}>Git Sync ✅</span>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
