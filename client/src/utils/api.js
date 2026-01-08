@@ -69,10 +69,10 @@ class ApiClient {
         // Non-JSON response (likely HTML error page or plain text)
         const text = await response.text();
         console.error('Non-JSON response:', text.substring(0, 500));
-        throw new Error(`Server error: Expected JSON but received ${contentType || 'unknown content type'}`);
+        throw new Error('The server returned an unexpected response. Please try again later.');
       }
     } catch (parseError) {
-      if (parseError.message.includes('Server error')) {
+      if (parseError.message.includes('Server error') || parseError.message.includes('The server returned')) {
         throw parseError;
       }
       // JSON parse failed
