@@ -423,7 +423,7 @@ const Observability = () => {
 
                         {/* Row 2: Messages | Broadcasts | Development */}
                         {/* Using Grid to ensure exact 1/3 spacing and alignment */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', width: '100%' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', width: '100%' }}>
                             {/* Messages Block (Left) */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
