@@ -615,9 +615,9 @@ const DoveToggle = ({ value, onChange }) => {
                     height: '42px',
                     boxSizing: 'border-box',
                     boxSizing: 'border-box',
-                    background: 'rgba(239, 68, 68, 0.1)',
+                    background: '#3b82f6',
                     borderRadius: 'var(--radius-md)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    border: '1px solid var(--color-border)',
                     cursor: 'pointer',
                     userSelect: 'none'
                 }}
@@ -633,7 +633,9 @@ const DoveToggle = ({ value, onChange }) => {
                     width: '100px',
                     height: '40px',
                     borderRadius: 'var(--radius-sm)',
-                    background: 'white',
+                    borderRadius: 'var(--radius-sm)',
+                    background: 'var(--color-bg-tertiary)',
+                    color: 'var(--color-text-primary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
