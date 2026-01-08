@@ -1963,7 +1963,7 @@ const SettingsPanel = ({ onClose }) => {
                             fontSize: '0.75rem',
                             color: 'var(--color-text-secondary)',
                             marginBottom: '0.5rem',
-                            marginTop: '0.5rem'
+                            marginTop: '1rem'
                         }}>
                             {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
                         </div>
@@ -1986,7 +1986,7 @@ const SettingsPanel = ({ onClose }) => {
                             }}
                         >
                             <div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t('settings.safeDelete') || 'Safe Delete'}</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>🧸 {t('settings.safeDelete') || 'Safe Delete'}</div>
                             </div>
                             <div
                                 style={{
