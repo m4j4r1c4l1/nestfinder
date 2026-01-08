@@ -118,41 +118,34 @@ const BarrelDigit = ({ value }) => {
         }
     }, [value, display]);
 
-    const isDigit = /^[0-9]$/.test(display);
-
     return (
         <div style={{
-            display: 'inline-grid',
+            display: 'inline-flex',
+            flexDirection: 'column',
             verticalAlign: 'baseline',
+            height: '1.2em', // Standard text height
             overflow: 'hidden',
-            width: isDigit ? '0.6em' : 'auto',
-            minWidth: isDigit ? '0.6em' : '0.2em',
-            margin: isDigit ? 0 : '0 1px',
+            width: /^[0-9]$/.test(display) ? '0.6em' : 'auto',
+            minWidth: /^[0-9]$/.test(display) ? '0.6em' : '0.2em',
+            margin: /^[0-9]$/.test(display) ? 0 : '0 1px',
             fontVariantNumeric: 'tabular-nums',
             textAlign: 'center'
         }}>
-            {/* 
-              The Strut: Inherits parent font/line-height metrics and establishes a stable 
-              baseline for the grid cell. It determines the height and width automatically.
-            */}
-            <div style={{ gridArea: '1/1', visibility: 'hidden', pointerEvents: 'none', userSelect: 'none' }}>
-                {display}
-            </div>
-
-            {/* 
-              The Content: Locked to the same grid cell.
-              - 0% -> translateY(-50%) shows 'prev' (bottom of stack)
-              - 100% -> translateY(0) shows 'display' (top of stack)
-            */}
             <div key={display} style={{
-                gridArea: '1/1',
                 display: 'flex',
                 flexDirection: 'column',
-                animation: animating && isDigit ? 'barrelDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
+                flexShrink: 0,
+                animation: animating ? 'barrelDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
                 transform: 'translateY(0)'
             }}>
-                <div style={{ flexShrink: 0 }}>{display}</div>
-                {animating && isDigit && <div style={{ flexShrink: 0 }}>{prev}</div>}
+                {/* 
+                  The first div's baseline determines the baseline of the entire inline-flex container.
+                  Using 1.2 line-height for a natural text feel.
+                */}
+                <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{display}</div>
+
+                {/* Old Value (Bottom) - Only rendered during animation */}
+                {animating && <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{prev}</div>}
             </div>
         </div>
     );
