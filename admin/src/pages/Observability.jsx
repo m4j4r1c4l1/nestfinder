@@ -54,6 +54,7 @@ const CommitReveal = ({ text, duration = 2000 }) => {
         }
 
         let startTime;
+        let lastUpdate = 0;
         let animationFrame;
         const len = text.length;
 
@@ -62,12 +63,15 @@ const CommitReveal = ({ text, duration = 2000 }) => {
             const progress = Math.min((timestamp - startTime) / duration, 1);
 
             if (progress < 1) {
-                // Generate random hex string of same length
-                let str = '';
-                for (let i = 0; i < len; i++) {
-                    str += chars[Math.floor(Math.random() * 16)];
+                // Throttle updates to ~40ms (25fps) to slow down the scramble effect
+                if (timestamp - lastUpdate > 40) {
+                    let str = '';
+                    for (let i = 0; i < len; i++) {
+                        str += chars[Math.floor(Math.random() * 16)];
+                    }
+                    setDisplay(str);
+                    lastUpdate = timestamp;
                 }
-                setDisplay(str);
                 animationFrame = requestAnimationFrame(animate);
             } else {
                 setDisplay(text);
