@@ -554,29 +554,45 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     };
 
     // Helper: Format Date/Time (split into two lines)
+    // Helper: Format Date/Time (split into two lines)
     const formatDateTime = (dateString) => {
         try {
-            // Database stores timestamps in UTC without timezone suffix
-            // Normalize to ISO format and append 'Z' to treat as UTC
-            const utcString = dateString.replace(' ', 'T') + 'Z';
+            // Normalize inputs
+            if (!dateString) return { date: '', time: '' };
+
+            // Ensure YYYY-MM-DDTHH:MM:SSZ format
+            const utcString = dateString.replace(' ', 'T') + (dateString.includes('Z') ? '' : 'Z');
             const d = new Date(utcString);
 
-            const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
-            const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
-            const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
-            const isDST = Math.max(jan, jul) !== parisOffset;
+            if (isNaN(d.getTime())) return { date: '', time: '' }; // Safety check
 
+            // Use native Intl for Paris formatting (handles DST automatically)
             const datePart = d.toLocaleDateString('en-GB', {
                 day: '2-digit', month: '2-digit', year: 'numeric',
                 timeZone: 'Europe/Paris'
             });
-            const timePart = d.toLocaleTimeString('en-GB', {
+
+            // timeZoneName: 'short' -> 'CET' or 'CEST' (standard in browsers)
+            // But we can get just the time and append custom logic if preferred, 
+            // OR trust the browser. en-GB short is usually "CET" or "CEST".
+            // Let's stick to safe parsing first.
+            const timePartWithZone = d.toLocaleTimeString('en-GB', {
                 hour: '2-digit', minute: '2-digit', second: '2-digit',
-                timeZone: 'Europe/Paris', hour12: false
+                timeZone: 'Europe/Paris',
+                timeZoneName: 'short',
+                hour12: false
             });
 
-            return { date: datePart, time: `${timePart} ${isDST ? 'CEST' : 'CET'}` };
+            // timePartWithZone output: "14:30:00 CET" or "14:30:00 CEST"
+            // We can return it directly or parse if we need specific formatting.
+            // Returning directly is safest.
+            const [time, zone] = timePartWithZone.split(' ');
+
+            // If strict formatting needed:
+            return { date: datePart, time: timePartWithZone };
+
         } catch (e) {
+            console.error('Date parsing error', e);
             return { date: '', time: '' };
         }
     };
