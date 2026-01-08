@@ -158,9 +158,9 @@ const BarrelCounter = ({ value }) => {
     // Slower, snappier drop (0.5s)
     const styles = `
         @keyframes barrelDrop {
-            0% { transform: translateY(-150%); opacity: 0; filter: blur(8px); }
-            50% { opacity: 1; filter: blur(2px); }
-            100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+            0% { transform: translateY(-150%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
         }
     `;
 
