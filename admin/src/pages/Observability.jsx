@@ -815,6 +815,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         if (!metrics.length) return;
 
         if (!isVisible) {
+            // Start zeroed
             const zeroed = metrics.map(m => {
                 const newM = { ...m };
                 seriesConfig.forEach(s => newM[s.key] = 0);
@@ -824,39 +825,12 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             return;
         }
 
-        if (hasAnimated.current) {
-            setAnimatedMetrics(metrics);
-            return;
-        }
+        // Fix: Immediately show full metrics when visible to prevent "zeroed" graph bug.
+        // The previous JS animation loop was occasionally failing to update state correctly.
+        setAnimatedMetrics(metrics);
         hasAnimated.current = true;
 
-        let startTime;
-        let animationFrame;
-        const duration = 1000;
-
-        const animate = (timestamp) => {
-            if (!startTime) startTime = timestamp;
-            const progress = Math.min((timestamp - startTime) / duration, 1);
-            const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease out
-
-            const current = metrics.map(m => {
-                const newM = { ...m };
-                seriesConfig.forEach(s => {
-                    const target = m[s.key] || 0;
-                    newM[s.key] = target * ease;
-                });
-                return newM;
-            });
-
-            setAnimatedMetrics(current);
-
-            if (progress < 1) {
-                animationFrame = requestAnimationFrame(animate);
-            }
-        };
-
-        return () => cancelAnimationFrame(animationFrame);
-    }, [isVisible, metrics]);
+    }, [isVisible, metrics, seriesConfig]);
 
     const displayData = animatedMetrics.length > 0 ? animatedMetrics : [];
 
