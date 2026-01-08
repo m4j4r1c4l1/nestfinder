@@ -87,7 +87,7 @@ export class GlobalErrorBoundary extends Component {
                     left: 0,
                     width: '100vw',
                     height: '100vh',
-                    background: 'rgba(15, 23, 42, 0.95)',
+                    background: 'rgba(15, 23, 42, 0.7)',
                     backdropFilter: 'blur(10px)',
                     WebkitBackdropFilter: 'blur(10px)',
                     display: 'flex',
@@ -102,7 +102,7 @@ export class GlobalErrorBoundary extends Component {
                         background: 'rgba(30, 41, 59, 0.8)',
                         border: '1px solid rgba(148, 163, 184, 0.2)',
                         borderRadius: 'var(--radius-lg, 12px)',
-                        padding: '2rem',
+                        padding: '1.25rem',
                         maxWidth: '400px',
                         width: '100%',
                         display: 'flex',
@@ -122,8 +122,8 @@ export class GlobalErrorBoundary extends Component {
 
                         {/* Error Badge - Red Transparent */}
                         <div style={{
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            background: 'rgba(59, 130, 246, 0.15)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
                             borderRadius: 'var(--radius-md, 8px)',
                             padding: '0.75rem 1rem',
                             marginBottom: '1.5rem',
@@ -131,7 +131,7 @@ export class GlobalErrorBoundary extends Component {
                             maxWidth: '100%'
                         }}>
                             <p style={{
-                                color: '#ef4444',
+                                color: '#3b82f6',
                                 fontSize: '0.85rem',
                                 margin: 0,
                                 wordBreak: 'break-word',
@@ -212,7 +212,7 @@ export class GlobalErrorBoundary extends Component {
                             justifyContent: 'center',
                             gap: '0.5rem',
                             color: 'var(--color-text-secondary, #64748b)',
-                            fontSize: '0.8rem'
+                            fontSize: '1.3rem'
                         }}>
                             <span>🪹</span>
                             <span style={{ fontWeight: 500 }}>Nestfinder</span>

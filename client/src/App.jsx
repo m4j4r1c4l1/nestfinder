@@ -9,7 +9,7 @@ import Home from './pages/Home';
 import MapView from './pages/MapView';
 
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
-import { ScreenLogger } from './components/ScreenLogger';
+
 
 const AppContent = () => {
     const { user, loading } = useAuth();
@@ -36,7 +36,7 @@ const AppContent = () => {
 const App = () => {
     return (
         <>
-            <ScreenLogger />
+
             <GlobalErrorBoundary>
                 <LanguageProvider>
                     <ToastProvider>
