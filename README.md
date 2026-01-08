@@ -27,7 +27,7 @@
 ## ✨ Key Features
 
 - **🗺️ Interactive Map** — View resources with status markers (Confirmed/Pending/Deactivated).
-- **📍 Easy Reporting** — Submit locations via GPS, Map Tap, Address, or **Voice Input** 🎤.
+- **📍 Easy Reporting** — Submit locations via GPS, Map Tap, or Address.
 - **🚶 Smart Routing** — [Calculate optimal walking paths](docs/ROUTE.md) to visible points.
 - **🌍 11 Languages** — Native support for EN, ES, FR, PT, IT, DE, NL, RU, AR, ZH, VAL.
 - **🔔 Real-time Alerts** — Toast notifications for achievements, plus In-App Push notifications.
