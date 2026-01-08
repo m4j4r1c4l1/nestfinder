@@ -123,9 +123,9 @@ const BarrelDigit = ({ value }) => {
         <div style={{
             position: 'relative',
             display: 'inline-block',
-            width: '0.6em',
-            height: '1em',
-            overflow: 'hidden',
+            width: /^[0-9]$/.test(display) ? '0.6em' : 'auto', // Fixed width for nums, auto for others (like . or ,)
+            minWidth: /^[0-9]$/.test(display) ? '0.6em' : '0.2em', // Ensure separator has some width
+            margin: /^[0-9]$/.test(display) ? 0 : '0 1px', // Tiny margin for separator if needed
             verticalAlign: 'middle', // Align with text middle
             fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
         }}>
@@ -827,10 +827,39 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             return;
         }
 
-        // Fix: Immediately show full metrics when visible to prevent "zeroed" graph bug.
-        // The previous JS animation loop was occasionally failing to update state correctly.
-        setAnimatedMetrics(metrics);
+        if (hasAnimated.current) {
+            setAnimatedMetrics(metrics);
+            return;
+        }
         hasAnimated.current = true;
+
+        let startTime;
+        let animationFrame;
+        const duration = 1000;
+
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease out
+
+            const current = metrics.map(m => {
+                const newM = { ...m };
+                seriesConfig.forEach(s => {
+                    const target = m[s.key] || 0;
+                    newM[s.key] = target * ease;
+                });
+                return newM;
+            });
+
+            setAnimatedMetrics(current);
+
+            if (progress < 1) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        };
+
+        animationFrame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(animationFrame);
 
     }, [isVisible, metrics, seriesConfig]);
 
