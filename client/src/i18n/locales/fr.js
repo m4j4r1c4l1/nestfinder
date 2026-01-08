@@ -7,12 +7,12 @@ export default {
         flag: '🇫🇷'
     },
     feedback: {
-        sentStatus: '✓ Sent!',
-        sending: 'Sending...',
+        sentStatus: '✓ Envoyé !',
+        sending: 'Envoi...',
         types: {
             bug: '🐛 Bug',
-            suggestion: '💡 Idea',
-            other: '📝 Other'
+            suggestion: '💡 Idée',
+            other: '📝 Autre'
         },
         title: 'Feedback',
         description: 'Signalez des bugs, suggérez des fonctionnalités ou envoyez des avis',
@@ -111,12 +111,19 @@ export default {
         geocodeError: 'Erreur de géocodage.',
         addressRequired: 'Veuillez entrer au moins la ville et la rue',
         locationRequired: 'Lieu requis. Utilisez le GPS, la carte ou une adresse.',
-        tagsLabel: 'Tags rapides',
+        tagsLabel: 'Qui est là ? (Optionnel)',
         onePerson: 'Une personne',
-        multiple: 'Plusieurs',
+        multiple: 'Groupe',
         children: 'Enfants',
         animals: 'Animaux'
-    },
+    ,
+        voiceMode: 'Voix',
+        needsLabel: 'De quoi ont-ils besoin ? (Optionnel)',
+        needFood: 'Nourriture',
+        needWater: 'Eau',
+        needClothes: 'Vêtements',
+        needMedicine: 'Médicaments',
+        needShelter: 'Abri'},
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',

@@ -8,12 +8,12 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
-        sentStatus: '✓ Sent!',
-        sending: 'Sending...',
+        sentStatus: '✓ Enviado!',
+        sending: 'Enviando...',
         types: {
-            bug: '🐛 Bug',
-            suggestion: '💡 Idea',
-            other: '📝 Other'
+            bug: '🐛 Erro',
+            suggestion: '💡 Ideia',
+            other: '📝 Outro'
         },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
@@ -112,12 +112,19 @@ export default {
         geocodeError: 'Erro de geocodificação.',
         addressRequired: 'Insira pelo menos cidade e rua',
         locationRequired: 'Localização necessária. Use GPS, mapa ou morada.',
-        tagsLabel: 'Tags Rápidas',
+        tagsLabel: 'Quem está lá? (Opcional)',
         onePerson: 'Uma pessoa',
-        multiple: 'Várias',
+        multiple: 'Grupo',
         children: 'Crianças',
         animals: 'Animais'
-    },
+    ,
+        voiceMode: 'Voz',
+        needsLabel: 'O que eles precisam? (Opcional)',
+        needFood: 'Comida',
+        needWater: 'Água',
+        needClothes: 'Roupas',
+        needMedicine: 'Remédio',
+        needShelter: 'Abrigo'},
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
