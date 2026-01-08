@@ -10,6 +10,14 @@ export default {
 
     // Feedback
     feedback: {
+        description: 'Reporta errores, sugiere funciones o envía comentarios',
+        placeholder: 'Describe tus comentarios en detalle...',
+        send: 'Enviar Feedback',
+        charLimit: 'caracteres',
+        rateApp: 'Califica la App',
+        bugReport: 'Reporte de Error',
+        suggestion: 'Sugerencia',
+        general: 'General',
         sentStatus: '✓ ¡Enviado!',
         sending: 'Enviando...',
         types: {
@@ -207,6 +215,7 @@ export default {
 
     // Settings
     settings: {
+        deleteActions: 'Borrar Mensajes',
         yourProfile: 'Tu Perfil',
         notifications: 'Notificaciones',
         popupMessages: 'Popups en Tiempo Real',

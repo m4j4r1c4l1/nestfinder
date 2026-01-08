@@ -8,6 +8,14 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        description: 'Сообщайте об ошибках, предлагайте функции или отправляйте отзывы',
+        placeholder: 'Опишите ваш отзыв подробно...',
+        send: 'Отправить отзыв',
+        charLimit: 'символов',
+        rateApp: 'Оценить приложение',
+        bugReport: 'Отчет об ошибке',
+        suggestion: 'Предложение',
+        general: 'Общее',
         sentStatus: '✓ Отправлено!',
         sending: 'Отправка...',
         types: {
@@ -178,6 +186,7 @@ export default {
         continue: 'Продолжить'
     },
     settings: {
+        deleteActions: 'Удалить сообщения',
         yourProfile: 'Ваш Профиль',
         notifications: 'Уведомления',
         popupMessages: 'Всплывающие сообщения',

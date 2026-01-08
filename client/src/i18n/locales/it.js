@@ -8,6 +8,14 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        description: 'Segnala bug, suggerisci funzionalità o invia feedback',
+        placeholder: 'Descrivi il tuo feedback in dettaglio...',
+        send: 'Invia Feedback',
+        charLimit: 'caratteri',
+        rateApp: 'Valuta l\'App',
+        bugReport: 'Segnalazione Bug',
+        suggestion: 'Suggerimento',
+        general: 'Generale',
         sentStatus: '✓ Inviato!',
         sending: 'Invio...',
         types: {
@@ -179,6 +187,7 @@ export default {
         continue: 'Continua'
     },
     settings: {
+        deleteActions: 'Elimina Messaggi',
         yourProfile: 'Il Tuo Profilo',
         notifications: 'Notifiche',
         popupMessages: 'Popup in Tempo Reale',

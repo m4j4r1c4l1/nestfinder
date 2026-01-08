@@ -8,6 +8,14 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        description: 'Reporta errors, suggereix funcions o envia comentaris',
+        placeholder: 'Descriu els teus comentaris en detall...',
+        send: 'Enviar Feedback',
+        charLimit: 'caràcters',
+        rateApp: 'Valora l\'App',
+        bugReport: 'Report d\'Error',
+        suggestion: 'Suggeriment',
+        general: 'General',
         sentStatus: '✓ Enviat!',
         sending: 'Enviant...',
         types: {
@@ -178,6 +186,7 @@ export default {
         continue: 'Continuar'
     },
     settings: {
+        deleteActions: 'Esborrar Missatges',
         yourProfile: 'El Teu Perfil',
         notifications: 'Notificacions',
         popupMessages: 'Popups en Temps Reals',

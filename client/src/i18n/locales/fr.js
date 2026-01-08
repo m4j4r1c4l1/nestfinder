@@ -7,6 +7,14 @@ export default {
         flag: '🇫🇷'
     },
     feedback: {
+        description: 'Signaler des bugs, suggérer des fonctionnalités ou envoyer des commentaires',
+        placeholder: 'Décrivez vos commentaires en détail...',
+        send: 'Envoyer',
+        charLimit: 'caractères',
+        rateApp: 'Noter l\'application',
+        bugReport: 'Rapport de bug',
+        suggestion: 'Suggestion',
+        general: 'Général',
         sentStatus: '✓ Envoyé !',
         sending: 'Envoi...',
         types: {
@@ -177,6 +185,7 @@ export default {
         continue: 'Continuer'
     },
     settings: {
+        deleteActions: 'Supprimer les messages',
         yourProfile: 'Votre Profil',
         notifications: 'Notifications',
         popupMessages: 'Popups en temps réel',

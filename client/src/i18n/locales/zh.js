@@ -8,6 +8,14 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        description: '报告错误，建议功能或发送反馈',
+        placeholder: '详细描述您的反馈...',
+        send: '发送反馈',
+        charLimit: '字符',
+        rateApp: '评价应用',
+        bugReport: '错误报告',
+        suggestion: '建议',
+        general: '一般',
         sentStatus: '✓ 已发送!',
         sending: '发送中...',
         types: {
@@ -178,6 +186,7 @@ export default {
         continue: '继续'
     },
     settings: {
+        deleteActions: '删除消息',
         yourProfile: '您的资料',
         notifications: '通知',
         popupMessages: '实时弹窗',
