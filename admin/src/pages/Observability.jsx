@@ -126,7 +126,8 @@ const BarrelDigit = ({ value }) => {
             width: '0.6em',
             height: '1em',
             overflow: 'hidden',
-            verticalAlign: 'bottom'
+            verticalAlign: 'bottom',
+            fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
         }}>
             {/* Inject Keyframes uniquely once or per usage (idempotent style block) */}
             <style>{`
@@ -139,6 +140,7 @@ const BarrelDigit = ({ value }) => {
             <div style={{
                 position: 'absolute',
                 top: 0, left: 0,
+                width: '100%', // Ensure full width for centering
                 display: 'flex',
                 flexDirection: 'column',
                 // If animating: Stack is [New, Old]. Height 2em.
@@ -148,10 +150,10 @@ const BarrelDigit = ({ value }) => {
                 transform: 'translateY(0)' // Default resting state (showing New)
             }}>
                 {/* New Value (Top) */}
-                <div style={{ height: '1em', lineHeight: 1 }}>{display}</div>
+                <div style={{ height: '1em', lineHeight: 1, textAlign: 'center', width: '100%' }}>{display}</div>
 
                 {/* Old Value (Bottom) - Only rendered during animation */}
-                {animating && <div style={{ height: '1em', lineHeight: 1 }}>{prev}</div>}
+                {animating && <div style={{ height: '1em', lineHeight: 1, textAlign: 'center', width: '100%' }}>{prev}</div>}
             </div>
         </div>
     );
