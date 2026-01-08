@@ -254,7 +254,7 @@ const Observability = () => {
         mapPoints: { total: 0, confirmed: 0, pending: 0, rejected: 0 },
         notificationMetrics: { total: 0, sent: 0, delivered: 0, read: 0, unread: 0 },
         feedbackMetrics: { total: 0, pending: 0, read: 0 },
-        devMetrics: { loc: 0, components: 0, commits: 0, files: 0 },
+        devMetrics: { loc: 0, components: 0, commits: 0, files: 0, apiEndpoints: 0, socketEvents: 0 },
         broadcastMetrics: { total: 0, active: 0, delivered: 0, read: 0 }
     });
 
@@ -269,8 +269,17 @@ const Observability = () => {
     useWebSocket(wsUrl, (message) => {
         if (message.type === 'commit-update') {
             console.log(`Real-time commit update: ${message.data.lastCommit} - refreshing stats`);
-            // Add small delay to allow server to finish startup/DB init
-            setTimeout(loadData, 1000);
+
+            // Apply full dev metrics from broadcast if available
+            if (message.data.devMetrics) {
+                setStats(prev => ({
+                    ...prev,
+                    devMetrics: message.data.devMetrics
+                }));
+            } else {
+                // Fallback for older broadcasts
+                setTimeout(loadData, 1000);
+            }
         }
     });
 
@@ -554,9 +563,9 @@ const Observability = () => {
                                             // 3. Components
                                             { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
                                             // 4. API (New)
-                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 67} />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
+                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
                                             // 5. Websockets (New)
-                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 12} />, color: '#eab308' },
+                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} />, color: '#eab308' },
                                             // 6. Files
                                             { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
