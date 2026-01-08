@@ -220,7 +220,7 @@ export default {
         // Recovery Key Restore
         // recoveryKeyUsage: Deprecated
         restoreOptionsTitle: 'Om je account te herstellen heb je 2 opties:',
-        restoreOption1: '**Inloggen:** Typ je 3-woorden sleutel **met streepjes** in het **Bijnaam** veld wanneer je inlogt.',
+        restoreOption1: '**Inloggen:** Typ je 3-woorden sleutel **met streepjes** in het **Bijnaam** veld wanneer je inlogt bij **Nestfinder**.',
         restoreOption2: '**Nieuw account:** Log in met een nieuw account en herstel het via de **Account Herstellen** sectie hieronder.',
         restoreAccount: 'Account Herstellen',
         restoreAccountDescription: 'Voer een herstelsleutel in om je identiteit te herstellen.',

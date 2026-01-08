@@ -219,7 +219,7 @@ export default {
         // Recovery Key Restore
         // recoveryKeyUsage: Deprecated
         restoreOptionsTitle: 'Per ripristinare il tuo account hai 2 opzioni:',
-        restoreOption1: '**Accedi:** Digita la tua chiave di 3 parole **con trattini** nel campo **Soprannome** quando accedi.',
+        restoreOption1: '**Accedi:** Digita la tua chiave di 3 parole **con trattini** nel campo **Soprannome** quando accedi a **Nestfinder**.',
         restoreOption2: '**Nuovo account:** Accedi con un nuovo account e ripristinalo dalla sezione **Ripristina Account** qui sotto.',
         restoreAccount: 'Ripristina Account',
         restoreAccountDescription: 'Inserisci una chiave di recupero per ripristinare la tua identità.',

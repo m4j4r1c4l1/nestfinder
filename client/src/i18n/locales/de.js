@@ -220,7 +220,7 @@ export default {
         // Recovery Key Restore
         // recoveryKeyUsage: Deprecated
         restoreOptionsTitle: 'Um dein Konto wiederherzustellen, hast du 2 Optionen:',
-        restoreOption1: '**Login:** Gib deinen 3-Wörter-Schlüssel **mit Bindestrichen** im **Spitznamen**-Feld ein, wenn du dich anmeldest.',
+        restoreOption1: '**Login:** Gib deinen 3-Wörter-Schlüssel **mit Bindestrichen** im **Spitznamen**-Feld ein, wenn du dich bei **Nestfinder** anmeldest.',
         restoreOption2: '**Neues Konto:** Melde dich mit einem neuen Konto an und stelle es im Abschnitt **Konto wiederherstellen** unten wieder her.',
         restoreAccount: 'Konto Wiederherstellen',
         restoreAccountDescription: 'Geben Sie einen Wiederherstellungsschlüssel ein, um Ihre Identität wiederherzustellen.',
