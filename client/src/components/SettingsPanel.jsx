@@ -95,11 +95,11 @@ const RecoveryKeySection = ({ t }) => {
 
             // Hide key after "Copied" message duration (3 seconds)
             setTimeout(() => {
-                setCopied(false);
                 setFadeOpacity(0);
                 setTimeout(() => {
                     setKeyVisible(false);
                     setShowKey(false);
+                    setCopied(false);
                 }, 200); // Wait for fade
             }, 3000);
         }
