@@ -1077,11 +1077,17 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                         })}
 
                         {/* X-Axis Labels */}
-                        {metrics.map((m, i) => (
-                            <text key={i} x={getX(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
-                                {new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </text>
-                        ))}
+                        {metrics.map((m, i) => {
+                            // Calculate step based on number of days to prevent overlap
+                            const labelStep = days > 14 ? 5 : (days > 7 ? 2 : 1);
+                            if (i % labelStep !== 0 && i !== metrics.length - 1) return null;
+
+                            return (
+                                <text key={i} x={getX(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
+                                    {new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </text>
+                            );
+                        })}
 
                         {/* Render Chart Type */}
                         {type === 'bar' ? renderBarChart() : renderLineChart()}
@@ -1598,11 +1604,17 @@ const RatingsChartCard = ({ onPointClick }) => {
                         })()}
 
                         {/* X-Axis Labels */}
-                        {displayData.map((r, i) => (
-                            <text key={i} x={getX(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
-                                {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </text>
-                        ))}
+                        {displayData.map((r, i) => {
+                            // Calculate step based on number of days to prevent overlap
+                            const labelStep = days > 14 ? 5 : (days > 7 ? 2 : 1);
+                            if (i % labelStep !== 0 && i !== displayData.length - 1) return null;
+
+                            return (
+                                <text key={i} x={getX(i)} y={graphHeight + 20} textAnchor="middle" fill="#64748b" fontSize="10">
+                                    {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </text>
+                            );
+                        })}
 
                         {/* Votes Bars - Scaled to Right Axis (Votes) */}
                         {(() => {
