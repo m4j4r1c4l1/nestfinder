@@ -53,6 +53,7 @@ export class GlobalErrorBoundary extends Component {
 
     render() {
         if (this.state.hasError) {
+            const errorMsg = this.state.error?.toString() || 'Unknown Error';
             return (
                 <div style={{
                     position: 'fixed',
@@ -60,66 +61,100 @@ export class GlobalErrorBoundary extends Component {
                     left: 0,
                     width: '100vw',
                     height: '100vh',
-                    background: 'rgba(0,0,0,0.95)',
-                    color: '#ff4444',
-                    padding: '2rem',
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     zIndex: 99999,
-                    overflow: 'auto',
-                    fontFamily: 'monospace'
+                    padding: '2rem',
+                    textAlign: 'center'
                 }}>
-                    <h2>⚠️ Application Crashed</h2>
-                    <p><strong>Error:</strong> {this.state.error?.toString()}</p>
-                    <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem', color: '#ccc' }}>
-                        {this.state.errorInfo?.componentStack}
-                    </pre>
+                    <div style={{
+                        background: 'rgba(30, 41, 59, 0.8)',
+                        border: '1px solid rgba(148, 163, 184, 0.2)',
+                        borderRadius: 'var(--radius-lg, 12px)',
+                        padding: '2rem',
+                        maxWidth: '400px',
+                        width: '100%'
+                    }}>
+                        <h2 style={{
+                            color: '#ef4444',
+                            fontSize: '1.5rem',
+                            marginBottom: '0.5rem',
+                            fontFamily: 'inherit'
+                        }}>
+                            ⚠️ Application Crashed
+                        </h2>
+                        <p style={{
+                            color: 'var(--color-text-secondary, #94a3b8)',
+                            fontSize: '0.9rem',
+                            marginBottom: '1.5rem',
+                            wordBreak: 'break-word'
+                        }}>
+                            {errorMsg}
+                        </p>
 
-                    <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                        <button
-                            onClick={() => window.location.reload()}
-                            style={{
-                                padding: '1rem',
-                                background: '#333',
-                                color: 'white',
-                                border: '1px solid #666',
-                                borderRadius: '5px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Reload App
-                        </button>
+                        <div style={{
+                            display: 'flex',
+                            gap: '0.75rem',
+                            justifyContent: 'center',
+                            flexWrap: 'wrap'
+                        }}>
+                            <button
+                                onClick={() => window.location.reload()}
+                                style={{
+                                    padding: '0.75rem 1rem',
+                                    background: 'var(--color-bg-tertiary, #334155)',
+                                    color: 'white',
+                                    border: '1px solid rgba(148, 163, 184, 0.3)',
+                                    borderRadius: 'var(--radius-md, 8px)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 500
+                                }}
+                            >
+                                Reload
+                            </button>
 
-                        <button
-                            onClick={this.handleSendReport}
-                            disabled={this.state.sendingReport || this.state.reportSent}
-                            style={{
-                                padding: '1rem',
-                                background: this.state.reportSent ? '#16a34a' : '#2563eb', // Green if sent, Blue otherwise
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                cursor: (this.state.sendingReport || this.state.reportSent) ? 'default' : 'pointer',
-                                opacity: this.state.sendingReport ? 0.7 : 1,
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            {this.state.sendingReport ? 'Sending...' : this.state.reportSent ? 'Report Sent ✅' : 'Send Crash Report to Admin'}
-                        </button>
+                            <button
+                                onClick={this.handleSendReport}
+                                disabled={this.state.sendingReport || this.state.reportSent}
+                                style={{
+                                    padding: '0.75rem 1rem',
+                                    background: this.state.reportSent ? '#16a34a' : 'var(--color-primary, #3b82f6)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: 'var(--radius-md, 8px)',
+                                    cursor: (this.state.sendingReport || this.state.reportSent) ? 'default' : 'pointer',
+                                    opacity: this.state.sendingReport ? 0.7 : 1,
+                                    fontSize: '0.85rem',
+                                    fontWeight: 600
+                                }}
+                            >
+                                {this.state.sendingReport ? 'Sending...' : this.state.reportSent ? 'Sent ✅' : 'Report'}
+                            </button>
 
-                        <button
-                            onClick={() => {
-                                this.setState({ hasError: false, error: null });
-                            }}
-                            style={{
-                                padding: '1rem',
-                                background: '#333',
-                                color: 'white',
-                                border: '1px solid #666',
-                                borderRadius: '5px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Try to Dismiss
-                        </button>
+                            <button
+                                onClick={() => {
+                                    this.setState({ hasError: false, error: null });
+                                }}
+                                style={{
+                                    padding: '0.75rem 1rem',
+                                    background: 'var(--color-bg-tertiary, #334155)',
+                                    color: 'white',
+                                    border: '1px solid rgba(148, 163, 184, 0.3)',
+                                    borderRadius: 'var(--radius-md, 8px)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 500
+                                }}
+                            >
+                                Dismiss
+                            </button>
+                        </div>
                     </div>
                 </div>
             );
