@@ -99,27 +99,7 @@ const CommitReveal = ({ text, duration = 2000 }) => {
         return () => cancelAnimationFrame(animationFrame);
     }, [text]);
 
-    const prefix = display.slice(0, -1);
-    const lastChar = display.slice(-1);
-
-    return (
-        <div style={{ display: 'inline-flex', alignItems: 'baseline' }}>
-            <style>{`
-                @keyframes barrelDrop {
-                    0% { transform: translateY(-50%); filter: blur(0); }
-                    10% { filter: blur(2px); }
-                    90% { filter: blur(2px); }
-                    100% { transform: translateY(0); filter: blur(0); }
-                }
-            `}</style>
-            <span>{prefix}</span>
-            {text && text !== '-' ? (
-                <BarrelDigit value={lastChar} />
-            ) : (
-                <span>{lastChar}</span>
-            )}
-        </div>
-    );
+    return <>{display}</>;
 };
 
 // Barrel/Slot Machine Digit Component
@@ -138,34 +118,41 @@ const BarrelDigit = ({ value }) => {
         }
     }, [value, display]);
 
+    const isDigit = /^[0-9]$/.test(display);
+
     return (
         <div style={{
-            display: 'inline-flex',
-            flexDirection: 'column',
+            display: 'inline-grid',
             verticalAlign: 'baseline',
-            height: '1.2em', // Standard text height
             overflow: 'hidden',
-            width: /^[0-9]$/.test(display) ? '0.6em' : 'auto',
-            minWidth: /^[0-9]$/.test(display) ? '0.6em' : '0.2em',
-            margin: /^[0-9]$/.test(display) ? 0 : '0 1px',
+            width: isDigit ? '0.6em' : 'auto',
+            minWidth: isDigit ? '0.6em' : '0.2em',
+            margin: isDigit ? 0 : '0 1px',
             fontVariantNumeric: 'tabular-nums',
             textAlign: 'center'
         }}>
+            {/* 
+              The Strut: Inherits parent font/line-height metrics and establishes a stable 
+              baseline for the grid cell. It determines the height and width automatically.
+            */}
+            <div style={{ gridArea: '1/1', visibility: 'hidden', pointerEvents: 'none', userSelect: 'none' }}>
+                {display}
+            </div>
+
+            {/* 
+              The Content: Locked to the same grid cell.
+              - 0% -> translateY(-50%) shows 'prev' (bottom of stack)
+              - 100% -> translateY(0) shows 'display' (top of stack)
+            */}
             <div key={display} style={{
+                gridArea: '1/1',
                 display: 'flex',
                 flexDirection: 'column',
-                flexShrink: 0,
-                animation: animating ? 'barrelDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
+                animation: animating && isDigit ? 'barrelDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
                 transform: 'translateY(0)'
             }}>
-                {/* 
-                  The first div's baseline determines the baseline of the entire inline-flex container.
-                  Using 1.2 line-height for a natural text feel.
-                */}
-                <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{display}</div>
-
-                {/* Old Value (Bottom) - Only rendered during animation */}
-                {animating && <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{prev}</div>}
+                <div style={{ flexShrink: 0 }}>{display}</div>
+                {animating && isDigit && <div style={{ flexShrink: 0 }}>{prev}</div>}
             </div>
         </div>
     );
