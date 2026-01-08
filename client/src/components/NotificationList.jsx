@@ -52,7 +52,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
                             textTransform: 'capitalize'
                         }}
                     >
-                        {typeOption === 'bug' ? '🐛 Bug' : typeOption === 'suggestion' ? '💡 Idea' : '📝 Other'}
+                        {typeOption === 'bug' ? (t('feedback.types.bug') || '🐛 Bug') : typeOption === 'suggestion' ? (t('feedback.types.suggestion') || '💡 Idea') : (t('feedback.types.other') || '📝 Other')}
                     </button>
                 ))}
             </div>
@@ -128,7 +128,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
                     fontWeight: 500
                 }}
             >
-                {success ? '✓ Sent!' : loading ? 'Sending...' : t('feedback.send') || 'Send Feedback'}
+                {success ? t('feedback.sentStatus') : loading ? t('feedback.sending') : t('feedback.send')}
             </button>
         </div>
     );
@@ -271,7 +271,7 @@ const SwipeableMessage = ({ children, onSwipeDelete, onConfirm, onCancel, swipeD
                         transition: swiping ? 'none' : 'transform 0.2s ease-out'
                     }}
                 >
-                    Delete
+                    {t('common.delete')}
                 </button>
             </div>
 
@@ -547,7 +547,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                     onClick={confirmDelete}
                     style={deleteButtonStyle}
                 >
-                    Delete
+                    {t('common.delete')}
                 </button>
             </div>
         );
@@ -706,7 +706,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                     {filteredNotifications.length === 0 ? (
                                         <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '200px', width: '100%', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                                             <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</span>
-                                            <p style={{ fontSize: '1rem', margin: 0 }}>No messages match this filter</p>
+                                            <p style={{ fontSize: '1rem', margin: 0 }}>{t('inbox.noFilterMatch')}</p>
                                         </div>
                                     ) : (
                                         filteredNotifications.map(notification => {

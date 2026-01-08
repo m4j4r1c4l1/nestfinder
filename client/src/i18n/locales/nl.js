@@ -8,6 +8,13 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        sentStatus: '✓ Sent!',
+        sending: 'Sending...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idea',
+            other: '📝 Other'
+        },
         title: 'Feedback',
         description: 'Report bugs, suggest features, or send feedback',
         placeholder: 'Describe your feedback in detail...',
@@ -71,6 +78,8 @@ export default {
         reactivatedMessage: 'Punt gereactiveerd!'
     },
     submit: {
+        foundPrefix: 'Found:',
+        locationFound: 'Location found!',
         title: 'Locatie Melden',
         subtitle: 'Help anderen door een locatie te melden',
         addressLabel: 'Adres',
@@ -110,6 +119,8 @@ export default {
         animals: 'Dieren'
     },
     route: {
+        needPointsError: 'Need at least 2 points to calculate a route',
+        failed: 'Could not calculate route',
         title: 'Routeplanner',
         optimizeRoute: 'Route Berekenen',
         clearRoute: 'Route Wissen',
@@ -126,6 +137,7 @@ export default {
         readyDescription: 'Bereken een geoptimaliseerde wandelroute langs alle geselecteerde punten.'
     },
     inbox: {
+        noFilterMatch: 'No messages match this filter',
         title: 'Berichten',
         received: 'Ontvangen',
         sent: 'Verzonden',
@@ -163,6 +175,8 @@ export default {
         notifications: 'Meldingen',
         popupMessages: 'Real-time Popups',
         popupDescription: 'Toon berichten direct bij ontvangst',
+        popupEnabledInfo: 'Berichten worden als pop-ups weergegeven bij ontvangst.',
+        popupDisabledInfo: 'Berichten worden niet weergegeven maar opgeslagen in je inbox.',
         shareApp: 'NestFinder delen',
         scanToShare: 'Scan om NestFinder te openen',
         copyLink: 'Link Kopiëren',
@@ -187,7 +201,10 @@ export default {
         statusOwl: 'Uil',
         statusEagle: 'Arend',
         // Recovery Key Restore
-        recoveryKeyUsage: 'Om je account op een nieuw apparaat te herstellen, typ je 3-woorden sleutel in het bijnaamveld.',
+        // recoveryKeyUsage: Deprecated
+        restoreOptionsTitle: 'Om je account te herstellen heb je 2 opties:',
+        restoreOption1: '**Inloggen:** Typ je 3-woorden sleutel **met streepjes** in het **Bijnaam** veld wanneer je inlogt.',
+        restoreOption2: '**Nieuw account:** Log in met een nieuw account en herstel het via de **Account Herstellen** sectie hieronder.',
         restoreAccount: 'Account Herstellen',
         restoreAccountDescription: 'Voer een herstelsleutel in om je identiteit te herstellen.',
         enterRecoveryKey: 'woord-woord-woord',
@@ -218,6 +235,27 @@ export default {
             '6m': '6 Maanden',
             forever: 'Altijd',
             desc: '⚠️ Oudere berichten worden permanent verwijderd.'
+        },
+        retentionHelp: {
+            forever: 'Berichten worden **Onbeperkt** bewaard.',
+            read: 'Berichten worden verwijderd na **Lezen**.',
+            period: 'Berichten ouder dan **{time}** worden verwijderd.',
+            unit: {
+                d: 'Dag',
+                w: 'Week',
+                m: 'Maand',
+                y: 'Jaar',
+                h: 'Uur'
+            }
+        },
+        swipeHelp: {
+            left: 'Veeg naar **links** over een bericht om het te verwijderen',
+            right: 'Veeg naar **rechts** over een bericht om het te verwijderen',
+            both: 'Veeg naar **links** of **rechts** over een bericht om het te verwijderen'
+        },
+        safeDeleteHelp: {
+            enabled: 'Een <delete>Verwijder</delete> knop verschijnt bij het vegen.',
+            disabled: 'Je kunt nu een bericht verwijderen door erover te vegen.'
         }
     },
     // Welcome Message (Home Page)

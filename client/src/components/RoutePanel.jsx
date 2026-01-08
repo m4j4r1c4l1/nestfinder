@@ -46,7 +46,7 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLoca
     const calculateRoute = async () => {
         const filteredPoints = getFilteredPoints();
         if (filteredPoints.length < 2) {
-            setError('Need at least 2 points to calculate a route');
+            setError(t('route.needPointsError'));
             return;
         }
 
@@ -94,7 +94,7 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLoca
             const data = await response.json();
 
             if (data.code !== 'Ok' || !data.routes?.[0]) {
-                throw new Error('Could not calculate route');
+                throw new Error(t('route.failed'));
             }
 
             const route = data.routes[0];
@@ -122,7 +122,7 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLoca
             onCalculate(result);
         } catch (err) {
             console.error('Route calculation error:', err);
-            setError(err.message || 'Failed to calculate route. Try again.');
+            setError(err.message || t('route.failed'));
             onCalculate({ path: getFilteredPoints(), geometry: null });
         } finally {
             setLoading(false);

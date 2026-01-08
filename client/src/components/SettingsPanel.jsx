@@ -1007,7 +1007,7 @@ const SwipeControl = ({ value, onChange, labelCenter }) => {
 
 
 
-const RetentionSlider = ({ value, onChange }) => {
+const RetentionSlider = ({ value, onChange, t }) => {
 
     const trackRef = React.useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -1021,26 +1021,64 @@ const RetentionSlider = ({ value, onChange }) => {
     // Months: 1m - 12m (1y)
     // Forever
     const steps = React.useMemo(() => {
-        const s = [{ val: '0d', label: '0 Hours', short: '0' }];
+        // Helper for pluralization
+        // Only English strictly needs 's' suffix logic here for simplicity, 
+        // but for full correctness we rely on the translated string if possible.
+        // However, t('unit.d') returns "Day" or "Día".
+        // A simple append 's' works for EN/ES/PT/FR often but not always (German plural rules etc).
+        // For this UI, simple appending 's' if val > 1 is a decent heuristic for European langs,
+        // or we can just show "2 Day" if acceptable, OR use t to handle it if we had plural keys.
+        // Given existing keys are just nouns, we will try to handle 's' generically or just leave it.
+        // User requested localized units.
+
+        const getUnit = (key) => t(`settings.retentionHelp.unit.${key}`) || key;
+        const pluralize = (val, unitKey) => {
+            const unit = getUnit(unitKey);
+            // Very basic pluralization: add 's' if > 1 and not Chinese/Japanese typically
+            // Checking if unit ends in vowel? No.
+            // Let's just use the unit for now. 
+            // Better: "1 Day", "2 Days" -> "1 " + unit + (val > 1 ? "s" : "")
+            // This is imperfect for many langs but better than English only.
+            const suffix = (val > 1 && ['en', 'es', 'fr', 'pt', 'nl', 'it'].includes(i18n.language?.substring(0, 2))) ? 's' : '';
+            return `${val} ${unit}${suffix}`;
+        };
+
+        const s = [{ val: '0d', label: '0 ' + (t('settings.retentionHelp.unit.h') || 'Hours'), short: '0' }];
 
         // Hours (1-23)
-        for (let i = 1; i < 24; i++) s.push({ val: `${i}h`, label: `${i} Hour${i > 1 ? 's' : ''}`, short: `${i}h` });
+        for (let i = 1; i < 24; i++) {
+            const label = `${i} ${t('settings.retentionHelp.unit.h') || 'Hour'}${i > 1 ? 's' : ''}`;
+            s.push({ val: `${i}h`, label, short: `${i}h` });
+        }
 
         // Days (1-6)
-        for (let i = 1; i < 7; i++) s.push({ val: `${i}d`, label: `${i} Day${i > 1 ? 's' : ''}`, short: `${i}d` });
+        for (let i = 1; i < 7; i++) {
+            const label = `${i} ${t('settings.retentionHelp.unit.d') || 'Day'}${i > 1 ? 's' : ''}`;
+            s.push({ val: `${i}d`, label, short: `${i}d` });
+        }
 
         // Weeks (1-3)
-        for (let i = 1; i < 4; i++) s.push({ val: `${i}w`, label: `${i} Week${i > 1 ? 's' : ''}`, short: `${i}w` });
+        for (let i = 1; i < 4; i++) {
+            const label = `${i} ${t('settings.retentionHelp.unit.w') || 'Week'}${i > 1 ? 's' : ''}`;
+            s.push({ val: `${i}w`, label, short: `${i}w` });
+        }
 
         // Months (1-12)
         for (let i = 1; i <= 12; i++) {
-            const label = i === 12 ? '1 Year' : `${i} Month${i > 1 ? 's' : ''}`;
+            let label;
+            if (i === 12) {
+                label = `1 ${t('settings.retentionHelp.unit.y') || 'Year'}`;
+            } else {
+                label = `${i} ${t('settings.retentionHelp.unit.m') || 'Month'}${i > 1 ? 's' : ''}`;
+            }
             s.push({ val: `${i}m`, label: label, short: i === 12 ? '1y' : `${i}m` });
         }
 
-        s.push({ val: 'forever', label: 'Indefinitely', short: '∞' });
+        s.push({ val: 'forever', label: '∞', short: '∞' });
         return s;
-    }, []);
+    }, [t]); // Re-run when t changes (language change)
+
+    // ... (rest of logic same) ...
 
     // Get step index from percentage
     const getIndexFromPct = (pct) => {
@@ -1880,6 +1918,7 @@ const SettingsPanel = ({ onClose }) => {
                             <RetentionSlider
                                 value={retention}
                                 onChange={handleRetentionChange}
+                                t={t}
                             />
                         </div>
                         <div style={{
@@ -1894,14 +1933,23 @@ const SettingsPanel = ({ onClose }) => {
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
                             {(() => {
-                                if (retention === 'forever') return <span>Messages are kept <b>Indefinitely</b>.</span>;
-                                if (retention === '0d') return <span>Messages will be deleted upon being <b>Read</b>.</span>;
+                                if (retention === 'forever') return <span dangerouslySetInnerHTML={{ __html: t('settings.retentionHelp.forever') || 'Messages are kept <b>Indefinitely</b>.' }} />;
+                                if (retention === '0d') return <span dangerouslySetInnerHTML={{ __html: t('settings.retentionHelp.read') || 'Messages will be deleted upon being <b>Read</b>.' }} />;
+
                                 const val = parseInt(retention);
-                                const unit = retention.slice(-1);
-                                const units = { d: 'Day', w: 'Week', m: 'Month', y: 'Year', h: 'Hour' };
-                                const fullUnit = units[unit] || '';
-                                const label = `${val} ${fullUnit}${val > 1 ? 's' : ''}`;
-                                return <span>Messages older than <b>{label}</b> will be deleted.</span>;
+                                const unitChar = retention.slice(-1);
+                                const unitKey = { d: 'd', w: 'w', m: 'm', y: 'y', h: 'h' }[unitChar];
+                                // Fallback to basic English map if translation fails or key missing
+                                const englishMap = { d: 'Day', w: 'Week', m: 'Month', y: 'Year', h: 'Hour' };
+                                const translatedUnit = t(`settings.retentionHelp.unit.${unitKey}`) || englishMap[unitChar];
+
+                                // Simple pluralization for English, others will just show the unit name
+                                // Accessing language from t's closure isn't direct, so we assume English defaults if not handled
+                                // The new translation keys allow us to be more flexible, but for now we construct the string
+                                const suffix = (val > 1 && (!t('settings.retentionHelp.unit.d') || t('settings.retentionHelp.unit.d') === 'Day')) ? 's' : '';
+                                const label = `${val} ${translatedUnit}${suffix}`;
+
+                                return <span dangerouslySetInnerHTML={{ __html: t('settings.retentionHelp.period', { time: label }) || `Messages older than <b>${label}</b> will be deleted.` }} />;
                             })()}
                         </div>
                     </div>
@@ -1952,11 +2000,11 @@ const SettingsPanel = ({ onClose }) => {
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
                             {swipeDirection === 'left' ? (
-                                <span>Swipe <b>left</b> over a message to delete it</span>
+                                <span dangerouslySetInnerHTML={{ __html: t('settings.swipeHelp.left') || 'Swipe <b>left</b> over a message to delete it' }} />
                             ) : swipeDirection === 'right' ? (
-                                <span>Swipe <b>right</b> over a message to delete it</span>
+                                <span dangerouslySetInnerHTML={{ __html: t('settings.swipeHelp.right') || 'Swipe <b>right</b> over a message to delete it' }} />
                             ) : (
-                                <span>Swipe <b>left</b> or <b>right</b> over a message to delete it</span>
+                                <span dangerouslySetInnerHTML={{ __html: t('settings.swipeHelp.both') || 'Swipe <b>left</b> or <b>right</b> over a message to delete it' }} />
                             )}
                         </div>
 
@@ -2025,23 +2073,36 @@ const SettingsPanel = ({ onClose }) => {
                             marginTop: '0.75rem',
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
-                            {swipeEnabled ? (
-                                <span>A <span style={{
-                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                    color: '#ef4444',
-                                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                    fontWeight: 600,
-                                    fontSize: '0.75em',
-                                    verticalAlign: 'middle',
-                                    display: 'inline-block',
-                                    lineHeight: '1.2',
-                                    margin: '0 2px'
-                                }}>Delete</span> button will appear upon swiping over a message to delete it.</span>
-                            ) : (
-                                <span>You can now delete a message just by swiping over it.</span>
-                            )}
+                            {(() => {
+                                const text = swipeEnabled
+                                    ? (t('settings.safeDeleteHelp.enabled') || 'A <delete>Delete</delete> button will appear upon swiping over a message to delete it.')
+                                    : (t('settings.safeDeleteHelp.disabled') || 'You can now delete a message just by swiping over it.');
+
+                                const deleteMatch = text.match(/<delete>(.*?)<\/delete>/);
+                                if (deleteMatch) {
+                                    const parts = text.split(/<delete>.*?<\/delete>/);
+                                    return (
+                                        <span>
+                                            {parts[0]}
+                                            <span style={{
+                                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                color: '#ef4444',
+                                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                fontWeight: 600,
+                                                fontSize: '0.75em',
+                                                verticalAlign: 'middle',
+                                                display: 'inline-block',
+                                                lineHeight: '1.2',
+                                                margin: '0 2px'
+                                            }}>{deleteMatch[1]}</span>
+                                            {parts[1]}
+                                        </span>
+                                    );
+                                }
+                                return <span>{text}</span>;
+                            })()}
                         </div>
                     </div>
                 </div>
