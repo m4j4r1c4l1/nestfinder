@@ -602,75 +602,8 @@ const DoveToggle = ({ value, onChange }) => {
         thumbTransform = 'scaleX(-1)'; // Point RIGHT (Outward)
     }
 
-    // Status messages for the gap areas
-    // When on edge: "You can now swipe <b>Right/Left</b> over a message to delete it"
-    // When center: stacked "Current:" + "Both" on both sides
-    let statusContent = null;
-    if (isLeft) {
-        statusContent = (
-            <span style={{
-                color: 'rgba(255,255,255,0.9)',
-                fontSize: '0.65rem',
-                pointerEvents: 'none',
-                position: 'absolute',
-                left: '116px',
-                right: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                textAlign: 'center'
-            }}>
-                You can now swipe <b>Left</b> over a message to delete it
-            </span>
-        );
-    } else if (isRight) {
-        statusContent = (
-            <span style={{
-                color: 'rgba(255,255,255,0.9)',
-                fontSize: '0.65rem',
-                pointerEvents: 'none',
-                position: 'absolute',
-                left: '8px',
-                right: '116px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                textAlign: 'center'
-            }}>
-                You can now swipe <b>Right</b> over a message to delete it
-            </span>
-        );
-    } else {
-        // Center: stacked 2-line text on both sides
-        statusContent = (
-            <>
-                <div style={{
-                    color: 'rgba(255,255,255,0.9)',
-                    fontSize: '0.65rem',
-                    pointerEvents: 'none',
-                    position: 'absolute',
-                    left: '8px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    textAlign: 'center',
-                    lineHeight: '1.2'
-                }}>
-
-                </div>
-                <div style={{
-                    color: 'rgba(255,255,255,0.9)',
-                    fontSize: '0.65rem',
-                    pointerEvents: 'none',
-                    position: 'absolute',
-                    right: '8px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    textAlign: 'center',
-                    lineHeight: '1.2'
-                }}>
-
-                </div>
-            </>
-        );
-    }
+    // Status messages for the gap areas - REMOVED per user request
+    const statusContent = null;
 
     return (
         <div>
@@ -689,8 +622,8 @@ const DoveToggle = ({ value, onChange }) => {
                     userSelect: 'none'
                 }}
             >
-                {/* Status text in the gap */}
-                {statusContent}
+                {/* Status text in the gap - REMOVED */}
+                {null}
 
                 {/* Thumb with roller/chick */}
                 <div style={{
@@ -1959,14 +1892,14 @@ const SettingsPanel = ({ onClose }) => {
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
                             {(() => {
-                                if (retention === 'forever') return 'Messages are kept indefinitely.';
-                                if (retention === '0d') return 'Messages will be deleted upon being read.';
+                                if (retention === 'forever') return <span>Messages are kept <b>Indefinitely</b>.</span>;
+                                if (retention === '0d') return <span>Messages will be deleted upon being <b>Read</b>.</span>;
                                 const val = parseInt(retention);
                                 const unit = retention.slice(-1);
                                 const units = { d: 'Day', w: 'Week', m: 'Month', y: 'Year', h: 'Hour' };
                                 const fullUnit = units[unit] || '';
                                 const label = `${val} ${fullUnit}${val > 1 ? 's' : ''}`;
-                                return `Messages older than ${label} will be deleted.`;
+                                return <span>Messages older than <b>{label}</b> will be deleted.</span>;
                             })()}
                         </div>
                     </div>
@@ -2047,21 +1980,180 @@ const SettingsPanel = ({ onClose }) => {
                                 padding: '0.5rem',
                                 background: 'var(--color-bg-tertiary)',
                                 borderRadius: 'var(--radius-md)',
-                                border: '1px solid var(--color-border)',
-                                height: '42px', // Fixed height for matching
-                                boxSizing: 'border-box',
-                                marginTop: '1.5rem' // Added margin to separate from block above
+                                border: '1px solid var(--color-border)'
+                            }}
+                        >
+                            {/* Header converted to match other sections */}
+                            <div style={{ marginBottom: '0.5rem' }}>
+                                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>🔥 {t('settings.deleteActions') || 'Delete Messages'}</div>
+                            </div>
+
+                            {/* Swipe Direction Block (Restored) */}
+
+                            {/* Tap to Select Text (Performance Style) */}
+                            <div style={{
+                                fontSize: '0.75rem',
+                                color: 'var(--color-text-secondary)',
+                                marginTop: '0',
+                                marginBottom: '0.5rem'
+                            }}>
+                                {t('settings.tapToSelect') || 'Tap to select the swipe direction'}
+                            </div>
+
+                            {/* Direction Toggle */}
+                            <div style={{
+                                transition: 'opacity 0.2s',
+                                boxSizing: 'border-box'
+                            }}>
+                                <div style={{ width: '100%' }}>
+                                    <DoveToggle
+                                        value={swipeDirection}
+                                        onChange={handleSwipeChange}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Bottom Badge for Swipe Direction */}
+                            <div style={{
+                                padding: 'var(--space-2)',
+                                background: 'rgba(59, 130, 246, 0.1)',
+                                border: '1px solid rgba(59, 130, 246, 0.3)',
+                                borderRadius: 'var(--radius-md)',
+                                color: 'var(--color-primary)',
+                                fontSize: '0.85rem',
+                                textAlign: 'center',
+                                marginTop: '0.75rem',
+                                animation: 'fadeIn 0.3s ease-out'
+                            }}>
+                                {swipeDirection === 'left' ? (
+                                    <span>Swipe <b>left</b> over a message to delete it</span>
+                                ) : swipeDirection === 'right' ? (
+                                    <span>Swipe <b>right</b> over a message to delete it</span>
+                                ) : (
+                                    <span>Swipe <b>left</b> or <b>right</b> over a message to delete it</span>
+                                )}
+                            </div>
+
+                            {/* Tagline Moved Here - Above Safe Delete */}
+                            <div style={{
+                                fontSize: '0.75rem',
+                                color: 'var(--color-text-secondary)',
+                                marginBottom: '0.5rem',
+                                marginTop: '1.5rem' // Separation from Swipe block above
+                            }}>
+                                {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
+                            </div>
+
+                            {/* Swipe Enable (Safe Delete) Toggle */}
+                            <div
+                                onClick={toggleSwipeEnabled}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    cursor: 'pointer',
+                                    marginBottom: '0.5rem',
+                                    padding: '0.5rem',
+                                    background: 'var(--color-bg-tertiary)',
+                                    borderRadius: 'var(--radius-md)',
+                                    border: '1px solid var(--color-border)',
+                                    height: '42px', // Fixed height for matching
+                                    boxSizing: 'border-box'
+                                }}
+                            >
+                                <div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t('settings.safeDelete') || 'Safe Delete'}</div>
+                                </div>
+                                <div
+                                    style={{
+                                        width: '44px',
+                                        height: '24px',
+                                        borderRadius: '12px',
+                                        background: swipeEnabled ? 'var(--color-primary)' : 'var(--color-border)',
+                                        position: 'relative',
+                                        transition: 'background 0.2s'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        borderRadius: '50%',
+                                        background: 'white',
+                                        position: 'absolute',
+                                        top: '2px',
+                                        left: swipeEnabled ? '22px' : '2px',
+                                        transition: 'left 0.2s',
+                                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                                    }} />
+                                </div>
+                            </div>
+
+                            <div style={{
+                                padding: 'var(--space-2)',
+                                background: 'rgba(59, 130, 246, 0.1)',
+                                border: '1px solid rgba(59, 130, 246, 0.3)',
+                                borderRadius: 'var(--radius-md)',
+                                color: 'var(--color-primary)',
+                                fontSize: '0.85rem',
+                                textAlign: 'center',
+                                marginTop: '0.75rem', // Changed from margin: '0.75rem 0' to align with style below
+                                animation: 'fadeIn 0.3s ease-out'
+                            }}>
+                                {swipeEnabled ? (
+                                    <span>A <span style={{
+                                        backgroundColor: '#ef4444', // Red 500
+                                        color: 'white',
+                                        padding: '2px 6px',
+                                        borderRadius: '4px',
+                                        fontWeight: 600,
+                                        fontSize: '0.75em',
+                                        verticalAlign: 'middle',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                                        display: 'inline-block',
+                                        lineHeight: '1.2',
+                                        margin: '0 2px'
+                                    }}>DELETE</span> button will appear upon swiping over a message to delete it.</span>
+                                ) : (
+                                    <span>You can now delete a message just by swiping over it.</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+
+                    {/* Lite Mode Toggle */}
+                    <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+                        <label className="form-label">{t('settings.performance') || 'Performance'}</label>
+                        <div
+                            onClick={() => {
+                                const current = localStorage.getItem('nestfinder_lite_mode') === 'true';
+                                localStorage.setItem('nestfinder_lite_mode', (!current).toString());
+                                window.location.reload(); // Reload to apply changes
+                            }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: 'var(--space-3)',
+                                background: 'var(--color-bg-secondary)',
+                                borderRadius: 'var(--radius-md)',
+                                cursor: 'pointer',
+                                border: '1px solid var(--color-border)'
                             }}
                         >
                             <div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t('settings.safeDelete') || 'Safe Delete'}</div>
+                                <div style={{ fontWeight: 500 }}>🪶 {t('settings.liteMode') || 'Lite Mode'}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                    {t('settings.liteModeDescription') || 'Reduce animations for smoother performance'}
+                                </div>
                             </div>
                             <div
                                 style={{
                                     width: '44px',
                                     height: '24px',
                                     borderRadius: '12px',
-                                    background: swipeEnabled ? 'var(--color-primary)' : 'var(--color-border)',
+                                    background: localStorage.getItem('nestfinder_lite_mode') === 'true' ? 'var(--color-primary)' : 'var(--color-border)',
                                     position: 'relative',
                                     transition: 'background 0.2s'
                                 }}
@@ -2073,193 +2165,120 @@ const SettingsPanel = ({ onClose }) => {
                                     background: 'white',
                                     position: 'absolute',
                                     top: '2px',
-                                    left: swipeEnabled ? '22px' : '2px',
+                                    left: localStorage.getItem('nestfinder_lite_mode') === 'true' ? '22px' : '2px',
                                     transition: 'left 0.2s',
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
                                 }} />
                             </div>
                         </div>
-
-                        {/* Info Badge - BETWEEN components - Matched Margins */}
-                        <div style={{
-                            padding: 'var(--space-2)',
-                            background: 'rgba(59, 130, 246, 0.1)',
-                            border: '1px solid rgba(59, 130, 246, 0.3)',
-                            borderRadius: 'var(--radius-md)',
-                            color: 'var(--color-primary)',
-                            fontSize: '0.85rem',
-                            textAlign: 'center',
-                            marginTop: '0.75rem', // Changed from margin: '0.75rem 0' to align with style below
-                            animation: 'fadeIn 0.3s ease-out'
-                        }}>
-                            {swipeEnabled ? (
-                                <span>A <b>Delete</b> button will appear upon swiping over a message to delete it.</span>
-                            ) : (
-                                <span>You can now delete a message just by swiping over it.</span>
-                            )}
-                        </div>
                     </div>
-                </div>
 
-                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+                    <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
 
-                {/* Lite Mode Toggle */}
-                <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                    <label className="form-label">{t('settings.performance') || 'Performance'}</label>
-                    <div
-                        onClick={() => {
-                            const current = localStorage.getItem('nestfinder_lite_mode') === 'true';
-                            localStorage.setItem('nestfinder_lite_mode', (!current).toString());
-                            window.location.reload(); // Reload to apply changes
-                        }}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: 'var(--space-3)',
-                            background: 'var(--color-bg-secondary)',
-                            borderRadius: 'var(--radius-md)',
-                            cursor: 'pointer',
-                            border: '1px solid var(--color-border)'
-                        }}
-                    >
-                        <div>
-                            <div style={{ fontWeight: 500 }}>🪶 {t('settings.liteMode') || 'Lite Mode'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                {t('settings.liteModeDescription') || 'Reduce animations for smoother performance'}
-                            </div>
+                    {/* Language Selection */}
+                    <div className="form-group" ref={sectionRef}>
+                        <label className="form-label">{t('profile.language')}</label>
+                        {/* Carousel Guidance */}
+                        <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', lineHeight: '1.4' }}>
+                            {t('settings.scrollInstruction') || '🌍 Scroll + Tap or wait 2s to confirm'}
                         </div>
+
                         <div
+                            ref={carouselRef}
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
                             style={{
-                                width: '44px',
-                                height: '24px',
-                                borderRadius: '12px',
-                                background: localStorage.getItem('nestfinder_lite_mode') === 'true' ? 'var(--color-primary)' : 'var(--color-border)',
+                                height: `${CONTAINER_HEIGHT - 4}px`, // Cropped top margin only
+                                overflow: 'hidden',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'rgba(51, 65, 85, 0.5)',
+                                boxShadow: 'inset 0 10px 20px -10px rgba(0,0,0,0.3), inset 0 -10px 20px -10px rgba(0,0,0,0.3)',
                                 position: 'relative',
-                                transition: 'background 0.2s'
+                                cursor: 'ns-resize',
+                                touchAction: 'none'
                             }}
                         >
-                            <div style={{
-                                width: '20px',
-                                height: '20px',
-                                borderRadius: '50%',
-                                background: 'white',
-                                position: 'absolute',
-                                top: '2px',
-                                left: localStorage.getItem('nestfinder_lite_mode') === 'true' ? '22px' : '2px',
-                                transition: 'left 0.2s',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                            }} />
-                        </div>
-                    </div>
-                </div>
+                            {/* Fixed center indicator - blue border always in middle */}
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: `${centerSlotY}px`,
+                                    left: '8px',
+                                    right: '8px',
+                                    height: `${ITEM_HEIGHT - 8}px`,
+                                    border: '2px solid var(--color-primary)',
+                                    borderRadius: 'var(--radius-md)',
+                                    background: 'var(--color-primary-light)',
+                                    pointerEvents: 'none',
+                                    zIndex: 15
+                                }}
+                            />
 
-                <div style={{ borderTop: '1px solid var(--color-border)', margin: 'var(--space-4) 0' }} />
+                            {/* Items with absolute positioning */}
+                            {availableLanguages.map((lang, index) => {
+                                const yPos = getItemY(index);
+                                // Only render if in or near visible area
+                                const isVisible = yPos > -ITEM_HEIGHT && yPos < CONTAINER_HEIGHT + ITEM_HEIGHT;
+                                if (!isVisible) return null;
 
-                {/* Language Selection */}
-                <div className="form-group" ref={sectionRef}>
-                    <label className="form-label">{t('profile.language')}</label>
-                    {/* Carousel Guidance */}
-                    <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', lineHeight: '1.4' }}>
-                        {t('settings.scrollInstruction') || '🌍 Scroll + Tap or wait 2s to confirm'}
-                    </div>
+                                // Visual check: is this item in the center slot
+                                const isInCenter = Math.abs(yPos - centerSlotY) < 5;
+                                // Checkmark shows when confirmed (after 2s or tap)
+                                const showCheckmark = isConfirmed && index === centeredItemIndex;
 
-                    <div
-                        ref={carouselRef}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        style={{
-                            height: `${CONTAINER_HEIGHT - 4}px`, // Cropped top margin only
-                            overflow: 'hidden',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-md)',
-                            background: 'rgba(51, 65, 85, 0.5)',
-                            boxShadow: 'inset 0 10px 20px -10px rgba(0,0,0,0.3), inset 0 -10px 20px -10px rgba(0,0,0,0.3)',
-                            position: 'relative',
-                            cursor: 'ns-resize',
-                            touchAction: 'none'
-                        }}
-                    >
-                        {/* Fixed center indicator - blue border always in middle */}
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: `${centerSlotY}px`,
-                                left: '8px',
-                                right: '8px',
-                                height: `${ITEM_HEIGHT - 8}px`,
-                                border: '2px solid var(--color-primary)',
-                                borderRadius: 'var(--radius-md)',
-                                background: 'var(--color-primary-light)',
-                                pointerEvents: 'none',
-                                zIndex: 15
-                            }}
-                        />
-
-                        {/* Items with absolute positioning */}
-                        {availableLanguages.map((lang, index) => {
-                            const yPos = getItemY(index);
-                            // Only render if in or near visible area
-                            const isVisible = yPos > -ITEM_HEIGHT && yPos < CONTAINER_HEIGHT + ITEM_HEIGHT;
-                            if (!isVisible) return null;
-
-                            // Visual check: is this item in the center slot
-                            const isInCenter = Math.abs(yPos - centerSlotY) < 5;
-                            // Checkmark shows when confirmed (after 2s or tap)
-                            const showCheckmark = isConfirmed && index === centeredItemIndex;
-
-                            return (
-                                <div
-                                    key={lang.code}
-                                    onClick={() => handleItemClick(index)}
-                                    style={{
-                                        position: 'absolute',
-                                        left: '8px',
-                                        right: '8px',
-                                        top: `${yPos - 4}px`, // Shift up to align with tighter container
-                                        zIndex: isInCenter ? 10 : 1,
-                                        opacity: isInCenter ? 1 : 0.5,
-                                        cursor: 'pointer'
-                                    }}
-                                >
+                                return (
                                     <div
+                                        key={lang.code}
+                                        onClick={() => handleItemClick(index)}
                                         style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 'var(--space-3)',
-                                            padding: 'var(--space-3)',
-                                            background: 'rgba(15, 23, 42, 0.95)',
-                                            border: '1px solid var(--color-border)',
-                                            borderRadius: 'var(--radius-md)',
-                                            color: 'var(--color-text)',
-                                            height: `${ITEM_HEIGHT - 8}px`,
-                                            marginBottom: '4px',
-                                            marginTop: '4px',
-                                            boxSizing: 'border-box'
+                                            position: 'absolute',
+                                            left: '8px',
+                                            right: '8px',
+                                            top: `${yPos - 4}px`, // Shift up to align with tighter container
+                                            zIndex: isInCenter ? 10 : 1,
+                                            opacity: isInCenter ? 1 : 0.5,
+                                            cursor: 'pointer'
                                         }}
                                     >
-                                        <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
-                                        <div style={{ textAlign: 'left', flex: 1 }}>
-                                            <div style={{ fontWeight: isInCenter ? 600 : 400 }}>
-                                                {lang.nativeName}
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 'var(--space-3)',
+                                                padding: 'var(--space-3)',
+                                                background: 'rgba(15, 23, 42, 0.95)',
+                                                border: '1px solid var(--color-border)',
+                                                borderRadius: 'var(--radius-md)',
+                                                color: 'var(--color-text)',
+                                                height: `${ITEM_HEIGHT - 8}px`,
+                                                marginBottom: '4px',
+                                                marginTop: '4px',
+                                                boxSizing: 'border-box'
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
+                                            <div style={{ textAlign: 'left', flex: 1 }}>
+                                                <div style={{ fontWeight: isInCenter ? 600 : 400 }}>
+                                                    {lang.nativeName}
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                                    {lang.name}
+                                                </div>
                                             </div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                                                {lang.name}
-                                            </div>
+                                            {showCheckmark && (
+                                                <span style={{ color: 'var(--color-primary)', marginRight: '22px' }}>✓</span>
+                                            )}
                                         </div>
-                                        {showCheckmark && (
-                                            <span style={{ color: 'var(--color-primary)', marginRight: '22px' }}>✓</span>
-                                        )}
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
+            );
 };
 
-export default SettingsPanel;
+            export default SettingsPanel;
