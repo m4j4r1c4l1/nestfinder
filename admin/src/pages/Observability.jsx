@@ -881,7 +881,7 @@ const MetricsSection = () => {
                 {/* Clients Graph - FIRST */}
                 <ChartCard
                     title="Connected Clients"
-                    icon="👥"
+                    icon="👨‍👩‍👧‍👦"
                     type="bar"
                     seriesConfig={[
                         { key: 'users', label: 'Total Users', color: '#06b6d4' }
