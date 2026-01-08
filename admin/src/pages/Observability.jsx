@@ -289,8 +289,8 @@ const Observability = () => {
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)', lineHeight: 1 }}>
                                         <CountUp end={stats.totalSubscribers} />
                                     </div>
-                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
-                                    <div className="text-muted text-sm">Registered</div>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Registered</div>
+                                    <div className="text-muted text-sm">Total</div>
                                 </div>
                                 {/* 2x2 Grid Badges */}
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', width: '100%', maxWidth: '240px' }}>
@@ -322,8 +322,8 @@ const Observability = () => {
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', lineHeight: 1 }}>
                                         <CountUp end={(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)} />
                                     </div>
-                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
-                                    <div className="text-muted text-sm">Locations</div>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Verified</div>
+                                    <div className="text-muted text-sm">Total</div>
                                 </div>
                                 {/* Badges: Pending on top, Confirmed+Inactive below */}
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%', maxWidth: '280px' }}>
@@ -403,8 +403,8 @@ const Observability = () => {
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
                                                 <CountUp end={stats.notificationMetrics?.total || 0} />
                                             </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
-                                            <div className="text-muted text-sm">Sent</div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
+                                            <div className="text-muted text-sm">Total</div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
@@ -427,8 +427,8 @@ const Observability = () => {
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
                                                 <CountUp end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
                                             </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
-                                            <div className="text-muted text-sm">Received</div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
+                                            <div className="text-muted text-sm">Total</div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
@@ -454,8 +454,8 @@ const Observability = () => {
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22d3ee', lineHeight: 1 }}>
                                                 <CountUp end={stats.broadcastMetrics?.active || 0} />
                                             </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Active</div>
-                                            <div className="text-muted text-sm">Banners</div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Banners</div>
+                                            <div className="text-muted text-sm">Active</div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
@@ -474,8 +474,8 @@ const Observability = () => {
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4ade80', lineHeight: 1 }}>
                                                 <CountUp end={stats.broadcastMetrics?.total || 0} />
                                             </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
-                                            <div className="text-muted text-sm">Created</div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Created</div>
+                                            <div className="text-muted text-sm">Total</div>
                                         </div>
                                         {/* Status badge */}
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
@@ -496,8 +496,8 @@ const Observability = () => {
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
                                             <CountUp end={stats.devMetrics?.loc || 0} />
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
-                                        <div className="text-muted text-sm">Lines of Code</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Lines of Code</div>
+                                        <div className="text-muted text-sm">Total</div>
                                     </div>
 
                                     {/* 2x2 Badges Grid */}
