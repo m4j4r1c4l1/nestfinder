@@ -131,6 +131,8 @@ const BarrelDigit = ({ value }) => {
             verticalAlign: 'baseline', // Align with text baseline
             fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
         }}>
+            {/* Hidden strut to establish a text baseline for the absolutely positioned digits */}
+            <span style={{ visibility: 'hidden', pointerEvents: 'none', userSelect: 'none' }}>0</span>
             <div key={display} style={{
                 position: 'absolute',
                 top: 0, left: 0,
