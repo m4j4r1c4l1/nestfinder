@@ -326,7 +326,7 @@ const Observability = () => {
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
                                                 <div className="text-muted text-sm">Git History</div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.2rem' }}><CountUp end={stats.devMetrics?.commits || 0} /></span>
+                                            <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.8rem' }}><CountUp end={stats.devMetrics?.commits || 0} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.5rem',
@@ -337,7 +337,7 @@ const Observability = () => {
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
                                                 <div className="text-muted text-sm">Latest</div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#4ade80', fontSize: '1.1rem', fontFamily: '"JetBrains Mono", monospace' }}>{stats.devMetrics?.lastCommit || '-'}</span>
+                                            <span style={{ fontWeight: 700, color: '#4ade80', fontSize: '1.4rem', fontFamily: '"JetBrains Mono", monospace' }}>{stats.devMetrics?.lastCommit || '-'}</span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.5rem',
@@ -348,7 +348,7 @@ const Observability = () => {
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
                                                 <div className="text-muted text-sm">React/JSX</div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '1.2rem' }}><CountUp end={stats.devMetrics?.components || 0} /></span>
+                                            <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '1.8rem' }}><CountUp end={stats.devMetrics?.components || 0} /></span>
                                         </div>
                                     </div>
                                 </div>
