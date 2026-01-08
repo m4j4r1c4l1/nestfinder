@@ -129,14 +129,6 @@ const BarrelDigit = ({ value }) => {
             verticalAlign: 'bottom',
             fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
         }}>
-            {/* Inject Keyframes uniquely once or per usage (idempotent style block) */}
-            <style>{`
-                @keyframes barrelDrop {
-                    from { transform: translateY(-50%); }
-                    to { transform: translateY(0); }
-                }
-            `}</style>
-
             <div style={{
                 position: 'absolute',
                 top: 0, left: 0,

@@ -1218,3 +1218,14 @@ textarea.form-input {
 .bottom-sheet::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
 }
+
+/* Barrel Animation - Global */
+@keyframes barrelDrop {
+  from {
+    transform: translateY(-50%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
