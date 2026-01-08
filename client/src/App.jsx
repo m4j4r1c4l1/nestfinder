@@ -8,6 +8,9 @@ import { ToastProvider } from './components/ToastProvider';
 import Home from './pages/Home';
 import MapView from './pages/MapView';
 
+import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
+import { ScreenLogger } from './components/ScreenLogger';
+
 const AppContent = () => {
     const { user, loading } = useAuth();
 
@@ -32,14 +35,17 @@ const AppContent = () => {
 
 const App = () => {
     return (
-        <LanguageProvider>
-            <ToastProvider>
-                <OfflineIndicator />
-                <WelcomeMessage />
-                <LanguagePicker />
-                <AppContent />
-            </ToastProvider>
-        </LanguageProvider>
+        <GlobalErrorBoundary>
+            <ScreenLogger />
+            <LanguageProvider>
+                <ToastProvider>
+                    <OfflineIndicator />
+                    <WelcomeMessage />
+                    <LanguagePicker />
+                    <AppContent />
+                </ToastProvider>
+            </LanguageProvider>
+        </GlobalErrorBoundary>
     );
 };
 
