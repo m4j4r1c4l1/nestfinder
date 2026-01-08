@@ -287,6 +287,24 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
             console.error('Dev metrics calculation failed:', err);
         }
 
+        // Calculate Broadcast Metrics
+        let broadcastMetrics = { total: 0, active: 0, delivered: 0, read: 0 };
+        try {
+            const totalBroadcasts = get('SELECT COUNT(*) as count FROM broadcasts');
+            const activeBroadcasts = get("SELECT COUNT(*) as count FROM broadcasts WHERE end_time > datetime('now')");
+            const deliveredBroadcasts = get("SELECT COUNT(*) as count FROM broadcast_views WHERE status IN ('delivered', 'read')");
+            const readBroadcasts = get("SELECT COUNT(*) as count FROM broadcast_views WHERE status = 'read'");
+
+            broadcastMetrics = {
+                total: totalBroadcasts?.count || 0,
+                active: activeBroadcasts?.count || 0,
+                delivered: deliveredBroadcasts?.count || 0,
+                read: readBroadcasts?.count || 0
+            };
+        } catch (err) {
+            console.error('Broadcast metrics failed:', err);
+        }
+
         res.json({
             totalSubscribers: total?.count || 0,
             subscribers: users,
@@ -297,6 +315,7 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
                 hatchling: hatchlingCount?.count || 0
             },
             devMetrics,
+            broadcastMetrics,
             notificationMetrics: {
                 total: notificationCount?.count || 0,
                 unread: unreadCount?.count || 0

@@ -218,7 +218,8 @@ const Observability = () => {
         mapPoints: { total: 0, confirmed: 0, pending: 0, rejected: 0 },
         notificationMetrics: { total: 0, sent: 0, delivered: 0, read: 0, unread: 0 },
         feedbackMetrics: { total: 0, pending: 0, read: 0 },
-        devMetrics: { loc: 0, components: 0, commits: 0 }
+        devMetrics: { loc: 0, components: 0, commits: 0 },
+        broadcastMetrics: { total: 0, active: 0, delivered: 0, read: 0 }
     });
 
     const [activeTab, setActiveTab] = useState('notifications');
@@ -390,136 +391,132 @@ const Observability = () => {
                         {/* Separator Line */}
                         <div style={{ height: '1px', background: '#334155', width: '100%' }} />
 
-                        {/* Row 2: Messages (left) | Devel (right) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
+                        {/* Row 2: Messages | Broadcasts | Development */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: '1.5rem', width: '100%' }}>
                             {/* Messages Block (Left) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', justifyContent: 'flex-start' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
-
-                                {/* Sent Section */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                    <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
-                                            <CountUp end={stats.notificationMetrics?.total || 0} />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
+                                    {/* Sent Section */}
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
+                                                <CountUp end={stats.notificationMetrics?.total || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
+                                            <div className="text-muted text-sm">Sent</div>
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
-                                        <div className="text-muted text-sm">Sent</div>
-                                    </div>
-                                    {/* Sent Badges - Vertical Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
-                                        <div style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                            background: '#22c55e20', border: '1px solid #22c55e40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
-                                        }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
-                                        </div>
-                                        <div style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                            background: '#3b82f620', border: '1px solid #3b82f640',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
-                                        }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
-                                        </div>
-                                        <div style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                            background: '#f59e0b20', border: '1px solid #f59e0b40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
-                                        }}>
-                                            <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.notificationMetrics?.unread || 0} /></span>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* Received Section - No Separator */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', paddingTop: '0.5rem', width: '100%', justifyContent: 'center' }}>
-                                    <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
-                                            <CountUp end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
+                                    {/* Received Section */}
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
+                                                <CountUp end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
+                                            <div className="text-muted text-sm">Received</div>
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
-                                        <div className="text-muted text-sm">Received</div>
-                                    </div>
-                                    {/* Received Badges - Vertical Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '140px' }}>
-                                        <div style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                            background: '#22c55e20', border: '1px solid #22c55e40',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
-                                        }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.feedbackMetrics?.pending || 0} /></span>
-                                        </div>
-                                        <div style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                            background: '#3b82f620', border: '1px solid #3b82f640',
-                                            borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
-                                        }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.feedbackMetrics?.read || 0} /></span>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.feedbackMetrics?.pending || 0} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.feedbackMetrics?.read || 0} /></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Development Block (Right) - Removed Vertical Separator */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', position: 'relative', left: '-60px' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem', marginBottom: 'auto', paddingBottom: '1rem' }}>🛠️ Development</div>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem', marginTop: '1.5rem' }}>
-                                    {/* Main Count: LOC */}
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                            <CountUp end={stats.devMetrics?.loc || 0} />
+                            {/* Broadcasts Block (Center) */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
+                                    {/* Active Section */}
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22d3ee', lineHeight: 1 }}>
+                                                <CountUp end={stats.broadcastMetrics?.active || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Active</div>
+                                            <div className="text-muted text-sm">Banners</div>
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>LOC</div>
-                                        <div className="text-muted text-sm">Lines of Code</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.broadcastMetrics?.delivered || 0} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.broadcastMetrics?.read || 0} /></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    {/* Badges Row */}
-                                    {/* Badges Column - Vertical Stack */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', maxWidth: '340px' }}>
-                                        {/* Top: Commit ID (Full Width) */}
-                                        <div style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                            background: '#1e3a8a40', border: '1px solid #1e3a8a',
-                                            borderRadius: '8px', padding: '0.4rem 0.75rem',
-                                            width: '100%'
-                                        }}>
-                                            <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
-                                                <div className="text-muted text-sm">Latest</div>
+                                    {/* Total Section */}
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4ade80', lineHeight: 1 }}>
+                                                <CountUp end={stats.broadcastMetrics?.total || 0} />
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#4ade80', fontSize: '1.4rem', fontFamily: '"JetBrains Mono", monospace' }}><CommitReveal text={stats.devMetrics?.lastCommit} /></span>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
+                                            <div className="text-muted text-sm">Created</div>
                                         </div>
-
-                                        {/* Bottom: Commits + Components (Row) */}
-                                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
-                                            <div style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                                background: '#8b5cf620', border: '1px solid #8b5cf640',
-                                                borderRadius: '8px', padding: '0.4rem 0.75rem',
-                                                flex: 1
-                                            }}>
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
-                                                    <div className="text-muted text-sm">Git History</div>
-                                                </div>
-                                                <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.8rem', lineHeight: 1 }}><RollingBarrelCounter end={stats.devMetrics?.commits || 0} /></span>
+                                        {/* Status badge */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#64748b20', border: '1px solid #64748b40', borderRadius: '8px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#94a3b8', fontWeight: 600 }}>Archive Ready ✅</span>
                                             </div>
-                                            <div style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                                background: '#0ea5e920', border: '1px solid #0ea5e940',
-                                                borderRadius: '8px', padding: '0.4rem 0.75rem',
-                                                flex: 1
-                                            }}>
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
-                                                    <div className="text-muted text-sm">React/JSX</div>
-                                                </div>
-                                                <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '1.8rem' }}><CountUp end={stats.devMetrics?.components || 0} /></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Development Block (Right) */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
+                                    {/* Codebase Section */}
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
+                                                <CountUp end={stats.devMetrics?.loc || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>LOC</div>
+                                            <div className="text-muted text-sm">Lines</div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1e3a8a40', border: '1px solid #1e3a8a', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem', width: '100%' }}>
+                                                <span style={{ fontWeight: 700, color: '#4ade80', fontSize: '1.1rem', fontFamily: '"JetBrains Mono", monospace' }}><CommitReveal text={stats.devMetrics?.lastCommit} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#0ea5e920', border: '1px solid #0ea5e940', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>
+                                                <span style={{ color: '#0ea5e9', fontWeight: 600 }}>{stats.devMetrics?.components || 0} Components</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* History Section */}
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
+                                                <CountUp end={stats.devMetrics?.commits || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Commits</div>
+                                            <div className="text-muted text-sm">History</div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#8b5cf620', border: '1px solid #8b5cf640', borderRadius: '8px', padding: '0.5rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#8b5cf6', fontWeight: 600 }}>Git Sync ✅</span>
                                             </div>
                                         </div>
                                     </div>
