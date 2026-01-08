@@ -1986,7 +1986,7 @@ const SettingsPanel = ({ onClose }) => {
                             }}
                         >
                             <div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{swipeEnabled ? '🧸' : '🧸'} {t('settings.safeDelete') || 'Safe Delete'}</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{swipeEnabled ? '🔒' : '🔓'} {t('settings.safeDelete') || 'Safe Delete'}</div>
                             </div>
                             <div
                                 style={{
