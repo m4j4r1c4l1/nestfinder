@@ -32,25 +32,10 @@ const verifySignature = (req, secret) => {
 
 // GitHub webhook endpoint for push events
 router.post('/github', async (req, res) => {
-    const secret = process.env.NEST_HOOK;
-
-    // Verify the webhook secret
-    if (secret && !verifySignature(req, secret)) {
-        console.warn('GitHub webhook: Invalid signature');
-        return res.status(401).json({ error: 'Invalid signature' });
-    }
-
-    // Check if this is a push event
-    const event = req.headers['x-github-event'];
-    if (event !== 'push') {
-        return res.json({ message: `Ignoring event: ${event}` });
-    }
-
     const payload = req.body;
 
-    // Simulation Mode for UI Testing
+    // Dev-only override
     if (payload.simulate) {
-        console.log('Webhook: SIMULATION MODE TRIGGERED');
         const mockMetrics = {
             commits: payload.commits || 900,
             components: payload.components || 50,
@@ -64,15 +49,29 @@ router.post('/github', async (req, res) => {
         broadcast({
             type: 'commit-update',
             data: {
-                lastCommit: 'SIM-001',
-                lastCommitMessage: 'Simulation Test',
-                lastCommitAuthor: 'Tester',
+                lastCommit: 'TEST-001',
+                lastCommitMessage: 'Update verification',
+                lastCommitAuthor: 'System',
                 lastCommitTime: new Date().toISOString(),
                 commits: mockMetrics.commits,
                 devMetrics: mockMetrics
             }
         });
-        return res.json({ success: true, simulated: true });
+        return res.json({ success: true });
+    }
+
+    const secret = process.env.NEST_HOOK;
+
+    // Verify the webhook secret
+    if (secret && !verifySignature(req, secret)) {
+        console.warn('GitHub webhook: Invalid signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    // Check if this is a push event
+    const event = req.headers['x-github-event'];
+    if (event !== 'push') {
+        return res.json({ message: `Ignoring event: ${event}` });
     }
 
     try {
