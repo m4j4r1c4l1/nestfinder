@@ -35,17 +35,19 @@ const AppContent = () => {
 
 const App = () => {
     return (
-        <GlobalErrorBoundary>
+        <>
             <ScreenLogger />
-            <LanguageProvider>
-                <ToastProvider>
-                    <OfflineIndicator />
-                    <WelcomeMessage />
-                    <LanguagePicker />
-                    <AppContent />
-                </ToastProvider>
-            </LanguageProvider>
-        </GlobalErrorBoundary>
+            <GlobalErrorBoundary>
+                <LanguageProvider>
+                    <ToastProvider>
+                        <OfflineIndicator />
+                        <WelcomeMessage />
+                        <LanguagePicker />
+                        <AppContent />
+                    </ToastProvider>
+                </LanguageProvider>
+            </GlobalErrorBoundary>
+        </>
     );
 };
 
