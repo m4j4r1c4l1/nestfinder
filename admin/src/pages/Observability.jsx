@@ -129,7 +129,7 @@ const BarrelDigit = ({ value }) => {
             verticalAlign: 'bottom',
             fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
         }}>
-            <div style={{
+            <div key={display} style={{
                 position: 'absolute',
                 top: 0, left: 0,
                 width: '100%', // Ensure full width for centering
@@ -818,9 +818,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             }
         };
 
-        animationFrame = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(animationFrame);
-    }, [isVisible, metrics, seriesConfig]);
+    }, [isVisible, metrics]);
 
     const displayData = animatedMetrics.length > 0 ? animatedMetrics : [];
 
