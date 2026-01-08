@@ -126,14 +126,15 @@ export default {
         multiple: 'مجموعة',
         children: 'أطفال',
         animals: 'حيوانات'
-    ,
+        ,
         voiceMode: 'صوتي',
         needsLabel: 'ماذا يحتاجون؟ (اختياري)',
         needFood: 'طعام',
         needWater: 'ماء',
         needClothes: 'ملابس',
         needMedicine: 'دواء',
-        needShelter: 'مأوى'},
+        needShelter: 'مأوى'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
@@ -266,9 +267,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'اسحب إلى **اليسار** فوق رسالة لحذفها',
-            right: 'اسحب إلى **اليمين** فوق رسالة لحذفها',
-            both: 'اسحب إلى **اليسار** أو **اليمين** فوق رسالة لحذفها'
+            left: 'يمكنك الآن السحب إلى <b>اليسار</b> فوق رسالة لحذفها',
+            right: 'يمكنك الآن السحب إلى <b>اليمين</b> فوق رسالة لحذفها',
+            both: 'يمكنك الآن السحب إلى <b>اليسار</b> أو <b>اليمين</b> فوق رسالة لحذفها'
         },
         safeDeleteHelp: {
             enabled: 'سيظهر زر <delete>حذف</delete> عند التمرير فوق رسالة لحذفها.',

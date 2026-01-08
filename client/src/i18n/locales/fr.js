@@ -124,14 +124,15 @@ export default {
         multiple: 'Groupe',
         children: 'Enfants',
         animals: 'Animaux'
-    ,
+        ,
         voiceMode: 'Voix',
         needsLabel: 'De quoi ont-ils besoin ? (Optionnel)',
         needFood: 'Nourriture',
         needWater: 'Eau',
         needClothes: 'Vêtements',
         needMedicine: 'Médicaments',
-        needShelter: 'Abri'},
+        needShelter: 'Abri'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
@@ -264,9 +265,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Glissez vers la **gauche** sur un message pour le supprimer',
-            right: 'Glissez vers la **droite** sur un message pour le supprimer',
-            both: 'Glissez vers la **gauche** ou la **droite** sur un message pour le supprimer'
+            left: 'Vous pouvez maintenant glisser vers la <b>gauche</b> sur un message pour le supprimer',
+            right: 'Vous pouvez maintenant glisser vers la <b>droite</b> sur un message pour le supprimer',
+            both: 'Vous pouvez maintenant glisser vers la <b>gauche</b> ou la <b>droite</b> sur un message pour le supprimer'
         },
         safeDeleteHelp: {
             enabled: 'Un bouton <delete>Supprimer</delete> apparaîtra en glissant sur un message.',

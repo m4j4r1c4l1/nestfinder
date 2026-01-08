@@ -125,14 +125,15 @@ export default {
         multiple: 'Grup',
         children: 'Xiquets',
         animals: 'Animals'
-    ,
+        ,
         voiceMode: 'Veu',
         needsLabel: 'Què necessiten? (Opcional)',
         needFood: 'Menjar',
         needWater: 'Aigua',
         needClothes: 'Roba',
         needMedicine: 'Medicina',
-        needShelter: 'Refugi'},
+        needShelter: 'Refugi'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
@@ -265,9 +266,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Llisca a l\'**esquerra** sobre un missatge per a eliminar-lo',
-            right: 'Llisca a la **dreta** sobre un missatge per a eliminar-lo',
-            both: 'Llisca a l\'**esquerra** o **dreta** sobre un missatge per a eliminar-lo'
+            left: 'Ara pots lliscar a l\'<b>esquerra</b> sobre un missatge per a eliminar-lo',
+            right: 'Ara pots lliscar a la <b>dreta</b> sobre un missatge per a eliminar-lo',
+            both: 'Ara pots lliscar a l\'<b>esquerra</b> o <b>dreta</b> sobre un missatge per a eliminar-lo'
         },
         safeDeleteHelp: {
             enabled: 'Apareixerà un botó d\'<delete>Eliminar</delete> en lliscar sobre un missatge.',

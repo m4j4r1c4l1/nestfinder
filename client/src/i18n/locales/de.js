@@ -125,14 +125,15 @@ export default {
         multiple: 'Gruppe',
         children: 'Kinder',
         animals: 'Tiere'
-    ,
+        ,
         voiceMode: 'Sprache',
         needsLabel: 'Was brauchen sie? (Optional)',
         needFood: 'Essen',
         needWater: 'Wasser',
         needClothes: 'Kleidung',
         needMedicine: 'Medizin',
-        needShelter: 'Unterkunft'},
+        needShelter: 'Unterkunft'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
@@ -265,9 +266,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Wische nach **links** über eine Nachricht, um sie zu löschen',
-            right: 'Wische nach **rechts** über eine Nachricht, um sie zu löschen',
-            both: 'Wische nach **links** oder **rechts** über eine Nachricht, um sie zu löschen'
+            left: 'Du kannst jetzt nach <b>links</b> über eine Nachricht wischen, um sie zu löschen',
+            right: 'Du kannst jetzt nach <b>rechts</b> über eine Nachricht wischen, um sie zu löschen',
+            both: 'Du kannst jetzt nach <b>links</b> oder <b>rechts</b> über eine Nachricht wischen, um sie zu löschen'
         },
         safeDeleteHelp: {
             enabled: 'Ein <delete>Löschen</delete>-Button erscheint beim Wischen über eine Nachricht.',
