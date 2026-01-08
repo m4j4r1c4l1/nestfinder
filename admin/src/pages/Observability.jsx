@@ -423,8 +423,8 @@ const Observability = () => {
                         <div style={{ height: '1px', background: '#334155', width: '100%' }} />
 
                         {/* Row 2: Messages | Broadcasts | Development */}
-                        {/* Using Grid to ensure exact spacing and alignment. Dev block gets 40% to fit 2-columns badges if needed, or just more space. */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 3fr) minmax(0, 3fr) minmax(0, 4fr)', gap: '0.5rem', width: '100%' }}>
+                        {/* Using Grid: 27.5% | 27.5% | 45%. Dev block gets 45% width to shift it left while keeping symmetry for others. */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2.75fr) minmax(0, 2.75fr) minmax(0, 4.5fr)', gap: '0.8rem', width: '100%' }}>
                             {/* Messages Block (Left) */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
@@ -519,7 +519,7 @@ const Observability = () => {
                                 </div>
                             </div>
 
-                            {/* Development Block (Right) */}
+                            {/* Development Block (Right) - Now gets 50% width */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
 
