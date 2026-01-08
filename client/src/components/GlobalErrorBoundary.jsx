@@ -87,9 +87,9 @@ export class GlobalErrorBoundary extends Component {
                     left: 0,
                     width: '100vw',
                     height: '100vh',
-                    background: 'rgba(15, 23, 42, 0.7)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
+                    background: 'rgba(15, 23, 42, 0.3)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -217,7 +217,14 @@ export class GlobalErrorBoundary extends Component {
                             fontSize: '1.3rem'
                         }}>
                             <span>🪹</span>
-                            <span style={{ fontWeight: 500 }}>Nestfinder</span>
+                            <span style={{
+                                fontWeight: 700,
+                                fontSize: '1.5rem',
+                                background: 'linear-gradient(135deg, var(--color-text-primary, #f1f5f9), var(--color-primary, #667eea))',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text'
+                            }}>Nestfinder</span>
                         </div>
                     </div>
                 </div>
