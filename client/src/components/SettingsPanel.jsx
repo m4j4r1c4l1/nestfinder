@@ -195,53 +195,55 @@ const RecoveryKeySection = ({ t }) => {
                     )}
 
                     {/* Usage Instructions - Explicit Options with Animation */}
-                    <div style={{
-                        marginTop: 'var(--space-3)',
-                        animation: 'fadeIn 0.5s ease-out',
-                        opacity: 1
-                    }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: 'var(--space-2)' }}>
-                            {t?.('settings.restoreOptionsTitle') || 'To restore your account you have 2 options:'}
-                        </div>
+                    {showKey && (
+                        <div style={{
+                            marginTop: 'var(--space-3)',
+                            animation: 'fadeIn 0.5s ease-out',
+                            opacity: 1
+                        }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: 'var(--space-2)' }}>
+                                {t?.('settings.restoreOptionsTitle') || 'To restore your account you have 2 options:'}
+                            </div>
 
-                        {[
-                            t?.('settings.restoreOption1') || '**Login:** Type your key in **Nickname** field.',
-                            t?.('settings.restoreOption2') || '**New:** Restore from section below.'
-                        ].map((part, i) => (
-                            <div key={i} style={{
-                                padding: 'var(--space-3)',
-                                background: 'var(--color-bg-secondary)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: 'var(--radius-md)',
-                                fontSize: '0.75rem',
-                                color: 'var(--color-text-secondary)',
-                                lineHeight: 1.4,
-                                marginBottom: 'var(--space-2)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 'var(--space-2)',
-                                animation: 'fadeIn 0.5s ease-out backwards',
-                                animationDelay: `${0.2 + (i * 0.1)}s`
-                            }}>
-                                <span style={{
-                                    minWidth: '20px',
-                                    height: '20px',
-                                    borderRadius: '50%',
-                                    background: 'var(--color-primary)',
-                                    color: 'white',
+                            {[
+                                t?.('settings.restoreOption1') || '**Login:** Type your key in **Nickname** field.',
+                                t?.('settings.restoreOption2') || '**New:** Restore from section below.'
+                            ].map((part, i) => (
+                                <div key={i} style={{
+                                    padding: 'var(--space-3)',
+                                    background: 'var(--color-bg-secondary)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: 'var(--radius-md)',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--color-text-secondary)',
+                                    lineHeight: 1.4,
+                                    marginBottom: 'var(--space-2)',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontWeight: 'bold',
-                                    fontSize: '0.7rem',
-                                    marginTop: '1px'
-                                }}>{i + 1}</span>
-                                <div>
-                                    {part.split('**').map((chunk, j) => j % 2 === 1 ? <strong key={j}>{chunk}</strong> : chunk)}
+                                    gap: 'var(--space-2)',
+                                    animation: 'fadeIn 0.5s ease-out backwards',
+                                    animationDelay: `${0.2 + (i * 0.1)}s`
+                                }}>
+                                    <span style={{
+                                        minWidth: '20px',
+                                        height: '20px',
+                                        borderRadius: '50%',
+                                        background: 'var(--color-primary)',
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.7rem',
+                                        marginTop: '1px'
+                                    }}>{i + 1}</span>
+                                    <div>
+                                        {part.split('**').map((chunk, j) => j % 2 === 1 ? <strong key={j}>{chunk}</strong> : chunk)}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             ) : (
                 <button
