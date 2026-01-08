@@ -126,7 +126,7 @@ const BarrelDigit = ({ value }) => {
             width: '0.6em',
             height: '1em',
             overflow: 'hidden',
-            verticalAlign: 'bottom',
+            verticalAlign: 'middle', // Align with text middle
             fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
         }}>
             <div key={display} style={{
@@ -138,8 +138,8 @@ const BarrelDigit = ({ value }) => {
                 // If animating: Stack is [New, Old]. Height 2em.
                 // Start -50% (Show Old). End 0 (Show New).
                 // If not animating: Just show New.
-                // Faster animation (0.4s) + Bouncy/Snap easing
-                animation: animating ? 'barrelDrop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
+                // Slower animation (~20% slower -> 0.5s) + Bouncy/Snap easing
+                animation: animating ? 'barrelDrop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
                 transform: 'translateY(0)' // Default resting state (showing New)
             }}>
                 {/* New Value (Top) */}
@@ -155,7 +155,7 @@ const BarrelDigit = ({ value }) => {
 // Barrel Counter Container
 const BarrelCounter = ({ value }) => {
     // Inject the keyframes here if not global (ensure it exists)
-    // Faster, snappier drop
+    // Slower, snappier drop (0.5s)
     const styles = `
         @keyframes barrelDrop {
             0% { transform: translateY(-150%); opacity: 0; filter: blur(8px); }
@@ -167,7 +167,7 @@ const BarrelCounter = ({ value }) => {
     // If value is already formatted string, use it. Otherwise round and stringify.
     const str = typeof value === 'string' ? value : Math.round(value || 0).toString();
     return (
-        <div style={{ display: 'inline-flex', overflow: 'hidden' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', overflow: 'hidden' }}>
             <style>{styles}</style>
             {str.split('').map((char, i) => (
                 <BarrelDigit key={i} value={char} />
@@ -422,9 +422,10 @@ const Observability = () => {
                         <div style={{ height: '1px', background: '#334155', width: '100%' }} />
 
                         {/* Row 2: Messages | Broadcasts | Development */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: '1.5rem', width: '100%' }}>
+                        {/* Using Grid to ensure exact 1/3 spacing and alignment */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', width: '100%' }}>
                             {/* Messages Block (Left) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
                                     {/* Sent Section */}
@@ -475,7 +476,7 @@ const Observability = () => {
                             </div>
 
                             {/* Broadcasts Block (Center) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
                                     {/* Active Section */}
@@ -518,7 +519,7 @@ const Observability = () => {
                             </div>
 
                             {/* Development Block (Right) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem', width: '100%' }}>
