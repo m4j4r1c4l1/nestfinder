@@ -1810,7 +1810,7 @@ const SettingsPanel = ({ onClose }) => {
                             }}
                         >
                             <div>
-                                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>🔔 {t('settings.popupMessages') || 'Real-time Popups'}</div>
+                                <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>🔔 {t('settings.popupMessages') || 'Real-time Popups'}</div>
                                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                                     {t('settings.popupDescription') || 'Show messages immediately as they arrive'}
                                 </div>
@@ -1862,7 +1862,7 @@ const SettingsPanel = ({ onClose }) => {
                         marginBottom: 'var(--space-2)'
                     }}>
                         <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>⏱️ {t('settings.messageRetention') || 'Retention Period'}</div>
+                            <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)' }}>⏱️ {t('settings.messageRetention') || 'Retention Period'}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                                 {t('settings.retention.desc') || 'Auto-delete messages older than selected period.'}
                             </div>
@@ -1913,26 +1913,19 @@ const SettingsPanel = ({ onClose }) => {
                         border: '1px solid var(--color-border)'
                     }}>
                         {/* Header converted to match other sections */}
-                        <div style={{ marginBottom: '0.5rem' }}> {/* Tagline margin container? No, Tagline is separate. */}
+                        <div style={{ marginBottom: '0.5rem' }}>
                             <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>🔥 {t('settings.deleteActions') || 'Delete Messages'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-                                {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
-                            </div>
                         </div>
 
-                        {/* Swipe Direction Block (Swapped UP) */}
-
-                        {/* Tap to Select Text (Performance Style) */}
+                        {/* Swipe Direction Block */}
                         <div style={{
                             fontSize: '0.75rem',
                             color: 'var(--color-text-secondary)',
-                            marginTop: '0', // Removed large margin as it is now top
                             marginBottom: '0.5rem'
                         }}>
                             {t('settings.tapToSelect') || 'Tap to select the swipe direction'}
                         </div>
 
-                        {/* Direction Toggle (Always visible, matched style NO PADDING) */}
                         <div style={{
                             transition: 'opacity 0.2s',
                             boxSizing: 'border-box'
@@ -1945,7 +1938,6 @@ const SettingsPanel = ({ onClose }) => {
                             </div>
                         </div>
 
-                        {/* Bottom Badge - Direction Info */}
                         <div style={{
                             padding: 'var(--space-2)',
                             background: 'rgba(59, 130, 246, 0.1)',
@@ -1966,9 +1958,17 @@ const SettingsPanel = ({ onClose }) => {
                             )}
                         </div>
 
-                        {/* Safe Delete Block (Swapped DOWN) */}
+                        {/* Tagline */}
+                        <div style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--color-text-secondary)',
+                            marginBottom: '0.5rem',
+                            marginTop: '1.5rem'
+                        }}>
+                            {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
+                        </div>
 
-                        {/* Swipe Enable Toggle */}
+                        {/* Safe Delete Toggle */}
                         <div
                             onClick={toggleSwipeEnabled}
                             style={{
@@ -1980,143 +1980,66 @@ const SettingsPanel = ({ onClose }) => {
                                 padding: '0.5rem',
                                 background: 'var(--color-bg-tertiary)',
                                 borderRadius: 'var(--radius-md)',
-                                border: '1px solid var(--color-border)'
+                                border: '1px solid var(--color-border)',
+                                height: '42px',
+                                boxSizing: 'border-box'
                             }}
                         >
-                            {/* Header converted to match other sections */}
-                            <div style={{ marginBottom: '0.5rem' }}>
-                                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>🔥 {t('settings.deleteActions') || 'Delete Messages'}</div>
+                            <div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t('settings.safeDelete') || 'Safe Delete'}</div>
                             </div>
-
-                            {/* Swipe Direction Block (Restored) */}
-
-                            {/* Tap to Select Text (Performance Style) */}
-                            <div style={{
-                                fontSize: '0.75rem',
-                                color: 'var(--color-text-secondary)',
-                                marginTop: '0',
-                                marginBottom: '0.5rem'
-                            }}>
-                                {t('settings.tapToSelect') || 'Tap to select the swipe direction'}
-                            </div>
-
-                            {/* Direction Toggle */}
-                            <div style={{
-                                transition: 'opacity 0.2s',
-                                boxSizing: 'border-box'
-                            }}>
-                                <div style={{ width: '100%' }}>
-                                    <DoveToggle
-                                        value={swipeDirection}
-                                        onChange={handleSwipeChange}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Bottom Badge for Swipe Direction */}
-                            <div style={{
-                                padding: 'var(--space-2)',
-                                background: 'rgba(59, 130, 246, 0.1)',
-                                border: '1px solid rgba(59, 130, 246, 0.3)',
-                                borderRadius: 'var(--radius-md)',
-                                color: 'var(--color-primary)',
-                                fontSize: '0.85rem',
-                                textAlign: 'center',
-                                marginTop: '0.75rem',
-                                animation: 'fadeIn 0.3s ease-out'
-                            }}>
-                                {swipeDirection === 'left' ? (
-                                    <span>Swipe <b>left</b> over a message to delete it</span>
-                                ) : swipeDirection === 'right' ? (
-                                    <span>Swipe <b>right</b> over a message to delete it</span>
-                                ) : (
-                                    <span>Swipe <b>left</b> or <b>right</b> over a message to delete it</span>
-                                )}
-                            </div>
-
-                            {/* Tagline Moved Here - Above Safe Delete */}
-                            <div style={{
-                                fontSize: '0.75rem',
-                                color: 'var(--color-text-secondary)',
-                                marginBottom: '0.5rem',
-                                marginTop: '1.5rem' // Separation from Swipe block above
-                            }}>
-                                {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
-                            </div>
-
-                            {/* Swipe Enable (Safe Delete) Toggle */}
                             <div
-                                onClick={toggleSwipeEnabled}
                                 style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    cursor: 'pointer',
-                                    marginBottom: '0.5rem',
-                                    padding: '0.5rem',
-                                    background: 'var(--color-bg-tertiary)',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: '1px solid var(--color-border)',
-                                    height: '42px', // Fixed height for matching
-                                    boxSizing: 'border-box'
+                                    width: '44px',
+                                    height: '24px',
+                                    borderRadius: '12px',
+                                    background: swipeEnabled ? 'var(--color-primary)' : 'var(--color-border)',
+                                    position: 'relative',
+                                    transition: 'background 0.2s'
                                 }}
                             >
-                                <div>
-                                    <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{t('settings.safeDelete') || 'Safe Delete'}</div>
-                                </div>
-                                <div
-                                    style={{
-                                        width: '44px',
-                                        height: '24px',
-                                        borderRadius: '12px',
-                                        background: swipeEnabled ? 'var(--color-primary)' : 'var(--color-border)',
-                                        position: 'relative',
-                                        transition: 'background 0.2s'
-                                    }}
-                                >
-                                    <div style={{
-                                        width: '20px',
-                                        height: '20px',
-                                        borderRadius: '50%',
-                                        background: 'white',
-                                        position: 'absolute',
-                                        top: '2px',
-                                        left: swipeEnabled ? '22px' : '2px',
-                                        transition: 'left 0.2s',
-                                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                                    }} />
-                                </div>
+                                <div style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    background: 'white',
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: swipeEnabled ? '22px' : '2px',
+                                    transition: 'left 0.2s',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                                }} />
                             </div>
+                        </div>
 
-                            <div style={{
-                                padding: 'var(--space-2)',
-                                background: 'rgba(59, 130, 246, 0.1)',
-                                border: '1px solid rgba(59, 130, 246, 0.3)',
-                                borderRadius: 'var(--radius-md)',
-                                color: 'var(--color-primary)',
-                                fontSize: '0.85rem',
-                                textAlign: 'center',
-                                marginTop: '0.75rem', // Changed from margin: '0.75rem 0' to align with style below
-                                animation: 'fadeIn 0.3s ease-out'
-                            }}>
-                                {swipeEnabled ? (
-                                    <span>A <span style={{
-                                        backgroundColor: '#ef4444', // Red 500
-                                        color: 'white',
-                                        padding: '2px 6px',
-                                        borderRadius: '4px',
-                                        fontWeight: 600,
-                                        fontSize: '0.75em',
-                                        verticalAlign: 'middle',
-                                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                                        display: 'inline-block',
-                                        lineHeight: '1.2',
-                                        margin: '0 2px'
-                                    }}>DELETE</span> button will appear upon swiping over a message to delete it.</span>
-                                ) : (
-                                    <span>You can now delete a message just by swiping over it.</span>
-                                )}
-                            </div>
+                        <div style={{
+                            padding: 'var(--space-2)',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--color-primary)',
+                            fontSize: '0.85rem',
+                            textAlign: 'center',
+                            marginTop: '0.75rem',
+                            animation: 'fadeIn 0.3s ease-out'
+                        }}>
+                            {swipeEnabled ? (
+                                <span>A <span style={{
+                                    backgroundColor: '#ef4444',
+                                    color: 'white',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontWeight: 600,
+                                    fontSize: '0.75em',
+                                    verticalAlign: 'middle',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                                    display: 'inline-block',
+                                    lineHeight: '1.2',
+                                    margin: '0 2px'
+                                }}>DELETE</span> button will appear upon swiping over a message to delete it.</span>
+                            ) : (
+                                <span>You can now delete a message just by swiping over it.</span>
+                            )}
                         </div>
                     </div>
 
