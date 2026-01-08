@@ -1987,6 +1987,54 @@ const SettingsPanel = ({ onClose }) => {
                             </div>
                         </div>
 
+                        {/* Swipe Direction Block (Swapped UP) */}
+
+                        {/* Tap to Select Text (Performance Style) */}
+                        <div style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--color-text-secondary)',
+                            marginTop: '0', // Removed large margin as it is now top
+                            marginBottom: '0.5rem'
+                        }}>
+                            {t('settings.tapToSelect') || 'Tap to select the swipe direction'}
+                        </div>
+
+                        {/* Direction Toggle (Always visible, matched style NO PADDING) */}
+                        <div style={{
+                            transition: 'opacity 0.2s',
+                            boxSizing: 'border-box'
+                        }}>
+                            <div style={{ width: '100%' }}>
+                                <DoveToggle
+                                    value={swipeDirection}
+                                    onChange={handleSwipeChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Bottom Badge - Direction Info */}
+                        <div style={{
+                            padding: 'var(--space-2)',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--color-primary)',
+                            fontSize: '0.85rem',
+                            textAlign: 'center',
+                            marginTop: '0.75rem',
+                            animation: 'fadeIn 0.3s ease-out'
+                        }}>
+                            {swipeDirection === 'left' ? (
+                                <span>Swipe <b>left</b> over a message to delete it</span>
+                            ) : swipeDirection === 'right' ? (
+                                <span>Swipe <b>right</b> over a message to delete it</span>
+                            ) : (
+                                <span>Swipe <b>left</b> or <b>right</b> over a message to delete it</span>
+                            )}
+                        </div>
+
+                        {/* Safe Delete Block (Swapped DOWN) */}
+
                         {/* Swipe Enable Toggle */}
                         <div
                             onClick={toggleSwipeEnabled}
@@ -2001,7 +2049,8 @@ const SettingsPanel = ({ onClose }) => {
                                 borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--color-border)',
                                 height: '42px', // Fixed height for matching
-                                boxSizing: 'border-box'
+                                boxSizing: 'border-box',
+                                marginTop: '1.5rem' // Added margin to separate from block above
                             }}
                         >
                             <div>
@@ -2040,57 +2089,13 @@ const SettingsPanel = ({ onClose }) => {
                             color: 'var(--color-primary)',
                             fontSize: '0.85rem',
                             textAlign: 'center',
-                            margin: '0.75rem 0', // Matched margin up and down
+                            marginTop: '0.75rem', // Changed from margin: '0.75rem 0' to align with style below
                             animation: 'fadeIn 0.3s ease-out'
                         }}>
                             {swipeEnabled ? (
                                 <span>A <b>Delete</b> button will appear upon swiping over a message to delete it.</span>
                             ) : (
                                 <span>You can now delete a message just by swiping over it.</span>
-                            )}
-                        </div>
-
-                        {/* Tap to Select Text (Double Margin, Performance Style) */}
-                        <div style={{
-                            fontSize: '0.75rem',
-                            color: 'var(--color-text-secondary)',
-                            marginTop: '1.5rem', // Twice the margin of badge
-                            marginBottom: '0.5rem'
-                        }}>
-                            {t('settings.tapToSelect') || 'Tap to select the swipe direction'}
-                        </div>
-
-                        {/* Direction Toggle (Always visible, matched style NO PADDING) */}
-                        <div style={{
-                            transition: 'opacity 0.2s',
-                            boxSizing: 'border-box'
-                        }}>
-                            <div style={{ width: '100%' }}>
-                                <DoveToggle
-                                    value={swipeDirection}
-                                    onChange={handleSwipeChange}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Bottom Badge - Direction Info */}
-                        <div style={{
-                            padding: 'var(--space-2)',
-                            background: 'rgba(59, 130, 246, 0.1)',
-                            border: '1px solid rgba(59, 130, 246, 0.3)',
-                            borderRadius: 'var(--radius-md)',
-                            color: 'var(--color-primary)',
-                            fontSize: '0.85rem',
-                            textAlign: 'center',
-                            marginTop: '0.75rem',
-                            animation: 'fadeIn 0.3s ease-out'
-                        }}>
-                            {swipeDirection === 'left' ? (
-                                <span>Swipe <b>left</b> over a message to delete it</span>
-                            ) : swipeDirection === 'right' ? (
-                                <span>Swipe <b>right</b> over a message to delete it</span>
-                            ) : (
-                                <span>Swipe <b>left</b> or <b>right</b> over a message to delete it</span>
                             )}
                         </div>
                     </div>
