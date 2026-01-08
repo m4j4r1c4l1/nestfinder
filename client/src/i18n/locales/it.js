@@ -120,7 +120,7 @@ export default {
         geocodeError: 'Errore di geocodifica.',
         addressRequired: 'Inserisci almeno città e via',
         locationRequired: 'Posizione richiesta. Usa GPS, mappa o indirizzo.',
-        tagsLabel: 'Chi c\'è? (Opzionale)',
+        tagsLabel: 'Chi c\\'è?(Opzionale)',
         onePerson: 'Una persona',
         multiple: 'Gruppo',
         children: 'Bambini',
@@ -266,9 +266,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Scorri a **sinistra** su un messaggio per eliminarlo',
-            right: 'Scorri a **destra** su un messaggio per eliminarlo',
-            both: 'Scorri a **sinistra** o **destra** su un messaggio per eliminarlo'
+            left: 'Ora puoi scorrere a <b>sinistra</b> su un messaggio per eliminarlo',
+            right: 'Ora puoi scorrere a <b>destra</b> su un messaggio per eliminarlo',
+            both: 'Ora puoi scorrere a <b>sinistra</b> o <b>destra</b> su un messaggio per eliminarlo'
         },
         safeDeleteHelp: {
             enabled: 'Un pulsante <delete>Elimina</delete> apparirà scorrendo su un messaggio.',

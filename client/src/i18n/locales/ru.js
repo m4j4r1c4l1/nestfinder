@@ -125,14 +125,15 @@ export default {
         multiple: 'Группа',
         children: 'Дети',
         animals: 'Животные'
-    ,
+        ,
         voiceMode: 'Голос',
         needsLabel: 'Что им нужно? (Опционально)',
         needFood: 'Еда',
         needWater: 'Вода',
         needClothes: 'Одежда',
         needMedicine: 'Лекарства',
-        needShelter: 'Убежище'},
+        needShelter: 'Убежище'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
@@ -265,9 +266,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Свайп **влево** по сообщению для удаления',
-            right: 'Свайп **вправо** по сообщению для удаления',
-            both: 'Свайп **влево** или **вправо** для удаления'
+            left: 'Теперь вы можете свайпнуть <b>влево</b> по сообщению для удаления',
+            right: 'Теперь вы можете свайпнуть <b>вправо</b> по сообщению для удаления',
+            both: 'Теперь вы можете свайпнуть <b>влево</b> или <b>вправо</b> для удаления'
         },
         safeDeleteHelp: {
             enabled: 'Кнопка <delete>Удалить</delete> появится при свайпе сообщения.',

@@ -125,14 +125,15 @@ export default {
         multiple: 'Groep',
         children: 'Kinderen',
         animals: 'Dieren'
-    ,
+        ,
         voiceMode: 'Stem',
         needsLabel: 'Wat hebben ze nodig? (Optioneel)',
         needFood: 'Eten',
         needWater: 'Water',
         needClothes: 'Kleding',
         needMedicine: 'Medicijnen',
-        needShelter: 'Onderdak'},
+        needShelter: 'Onderdak'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
@@ -265,9 +266,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Veeg naar **links** over een bericht om het te verwijderen',
-            right: 'Veeg naar **rechts** over een bericht om het te verwijderen',
-            both: 'Veeg naar **links** of **rechts** over een bericht om het te verwijderen'
+            left: 'Je kunt nu naar <b>links</b> vegen over een bericht om het te verwijderen',
+            right: 'Je kunt nu naar <b>rechts</b> vegen over een bericht om het te verwijderen',
+            both: 'Je kunt nu naar <b>links</b> of <b>rechts</b> vegen over een bericht om het te verwijderen'
         },
         safeDeleteHelp: {
             enabled: 'Een <delete>Verwijder</delete> knop verschijnt bij het vegen.',

@@ -21,7 +21,7 @@ const translations = {
             needFood: 'طعام',
             needWater: 'ماء',
             needClothes: 'ملابس',
-            needMedicine: 'دواء',Don't change a
+            needMedicine: 'دواء',
             needShelter: 'مأوى'
         }
     },

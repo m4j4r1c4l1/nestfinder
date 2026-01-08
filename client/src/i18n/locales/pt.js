@@ -125,14 +125,15 @@ export default {
         multiple: 'Grupo',
         children: 'Crianças',
         animals: 'Animais'
-    ,
+        ,
         voiceMode: 'Voz',
         needsLabel: 'O que eles precisam? (Opcional)',
         needFood: 'Comida',
         needWater: 'Água',
         needClothes: 'Roupas',
         needMedicine: 'Remédio',
-        needShelter: 'Abrigo'},
+        needShelter: 'Abrigo'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
@@ -265,9 +266,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Deslize para a **esquerda** sobre uma mensagem para apagar',
-            right: 'Deslize para a **direita** sobre uma mensagem para apagar',
-            both: 'Deslize para a **esquerda** ou **direita** sobre uma mensagem para apagar'
+            left: 'Agora pode deslizar para a <b>esquerda</b> sobre uma mensagem para apagar',
+            right: 'Agora pode deslizar para a <b>direita</b> sobre uma mensagem para apagar',
+            both: 'Agora pode deslizar para a <b>esquerda</b> ou <b>direita</b> sobre uma mensagem para apagar'
         },
         safeDeleteHelp: {
             enabled: 'Um botão <delete>Apagar</delete> aparecerá ao deslizar sobre uma mensagem.',

@@ -125,14 +125,15 @@ export default {
         multiple: '团体',
         children: '儿童',
         animals: '动物'
-    ,
+        ,
         voiceMode: '语音',
         needsLabel: '他们需要什么？ (可选)',
         needFood: '食物',
         needWater: '水',
         needClothes: '衣服',
         needMedicine: '药物',
-        needShelter: '避难所'},
+        needShelter: '避难所'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
@@ -265,9 +266,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: '向**左**滑动消息以将其删除',
-            right: '向**右**滑动消息以将其删除',
-            both: '向**左**或向**右**滑动消息以将其删除'
+            left: '现在你可以向<b>左</b>滑动消息以将其删除',
+            right: '现在你可以向<b>右</b>滑动消息以将其删除',
+            both: '现在你可以向<b>左</b>或向<b>右</b>滑动消息以将其删除'
         },
         safeDeleteHelp: {
             enabled: '滑动消息时会出现一个 <delete>删除</delete> 按钮。',

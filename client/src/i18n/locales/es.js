@@ -150,8 +150,9 @@ export default {
         needClothes: 'Ropa',
         needMedicine: 'Medicina',
         needShelter: 'Refugio'
-    ,
-        voiceMode: 'Voz'},
+        ,
+        voiceMode: 'Voz'
+    },
 
     // Route Panel
     route: {
@@ -294,9 +295,9 @@ export default {
             }
         },
         swipeHelp: {
-            left: 'Desliza a la **izquierda** sobre un mensaje para eliminarlo',
-            right: 'Desliza a la **derecha** sobre un mensaje para eliminarlo',
-            both: 'Desliza a la **izquierda** o **derecha** sobre un mensaje para eliminarlo'
+            left: 'Ya puedes deslizar a la <b>izquierda</b> sobre un mensaje para eliminarlo',
+            right: 'Ya puedes deslizar a la <b>derecha</b> sobre un mensaje para eliminarlo',
+            both: 'Ya puedes deslizar a la <b>izquierda</b> o <b>derecha</b> sobre un mensaje para eliminarlo'
         },
         safeDeleteHelp: {
             enabled: 'Aparecerá un botón de <delete>Eliminar</delete> al deslizar sobre un mensaje.',
