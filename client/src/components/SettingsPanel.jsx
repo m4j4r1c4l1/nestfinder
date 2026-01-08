@@ -1877,7 +1877,7 @@ const SettingsPanel = ({ onClose }) => {
                             }}
                         >
                             <div>
-                                <div style={{ fontWeight: 500 }}>🔔 {t('settings.popupMessages') || 'Real-time Popups'}</div>
+                                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>🔔 {t('settings.popupMessages') || 'Real-time Popups'}</div>
                                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                                     {t('settings.popupDescription') || 'Show messages immediately as they arrive'}
                                 </div>
@@ -1929,7 +1929,7 @@ const SettingsPanel = ({ onClose }) => {
                         marginBottom: 'var(--space-2)'
                     }}>
                         <div style={{ marginBottom: 'var(--space-2)' }}>
-                            <div style={{ fontWeight: 500 }}>⏱️ {t('settings.messageRetention') || 'Retention Period'}</div>
+                            <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>⏱️ {t('settings.messageRetention') || 'Retention Period'}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                                 {t('settings.retention.desc') || 'Auto-delete messages older than selected period.'}
                             </div>
@@ -1979,11 +1979,12 @@ const SettingsPanel = ({ onClose }) => {
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid var(--color-border)'
                     }}>
-                        <div className="card-header flex-between items-center" style={{ borderBottom: 'none', paddingBottom: '0.5rem' }}>
-                            <h3 className="card-title" style={{ fontSize: '1rem' }}>🔥 {t('settings.deleteActions') || 'Delete Messages'}</h3>
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                            {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
+                        {/* Header converted to match other sections */}
+                        <div style={{ marginBottom: '0.5rem' }}> {/* Tagline margin container? No, Tagline is separate. */}
+                            <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>🔥 {t('settings.deleteActions') || 'Delete Messages'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+                                {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
+                            </div>
                         </div>
 
                         {/* Swipe Enable Toggle */}
