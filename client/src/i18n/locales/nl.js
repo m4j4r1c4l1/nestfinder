@@ -8,6 +8,14 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        description: 'Meld fouten, stel functies voor of stuur feedback',
+        placeholder: 'Beschrijf uw feedback in detail...',
+        send: 'Feedback verzenden',
+        charLimit: 'tekens',
+        rateApp: 'Beoordeel de App',
+        bugReport: 'Foutrapport',
+        suggestion: 'Suggestie',
+        general: 'Algemeen',
         sentStatus: '✓ Verzonden!',
         sending: 'Verzenden...',
         types: {
@@ -178,6 +186,7 @@ export default {
         continue: 'Doorgaan'
     },
     settings: {
+        deleteActions: 'Berichten verwijderen',
         yourProfile: 'Jouw Profiel',
         notifications: 'Meldingen',
         popupMessages: 'Real-time Popups',

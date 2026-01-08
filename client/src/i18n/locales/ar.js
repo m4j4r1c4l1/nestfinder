@@ -9,6 +9,14 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        description: 'الإبلاغ عن أخطاء، اقتراح ميزات، أو إرسال ملاحظات',
+        placeholder: 'صف ملاحظاتك بالتفصيل...',
+        send: 'إرسال الملاحظات',
+        charLimit: 'أحرف',
+        rateApp: 'قيم التطبيق',
+        bugReport: 'تقرير خطأ',
+        suggestion: 'اقتراح',
+        general: 'ملاحظات',
         sentStatus: '✓ تم الإرسال!',
         sending: 'جاري الإرسال...',
         types: {
@@ -179,6 +187,7 @@ export default {
         continue: 'متابع'
     },
     settings: {
+        deleteActions: 'حذف الرسائل',
         yourProfile: 'ملفك الشخصي',
         notifications: 'إشعارات',
         popupMessages: 'نوافذ فورية',

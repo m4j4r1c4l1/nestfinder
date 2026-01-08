@@ -8,6 +8,14 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        description: 'Fehler melden, Funktionen vorschlagen oder Feedback senden',
+        placeholder: 'Beschreiben Sie Ihr Feedback im Detail...',
+        send: 'Feedback senden',
+        charLimit: 'Zeichen',
+        rateApp: 'App bewerten',
+        bugReport: 'Fehlerbericht',
+        suggestion: 'Vorschlag',
+        general: 'Feedback',
         sentStatus: '✓ Gesendet!',
         sending: 'Sende...',
         types: {
@@ -178,6 +186,7 @@ export default {
         continue: 'Weiter'
     },
     settings: {
+        deleteActions: 'Nachrichten löschen',
         yourProfile: 'Dein Profil',
         notifications: 'Benachrichtigungen',
         popupMessages: 'Echtzeit-Popups',
