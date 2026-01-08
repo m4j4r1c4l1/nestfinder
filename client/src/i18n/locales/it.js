@@ -258,10 +258,15 @@ export default {
             period: 'I messaggi più vecchi di <b>{time}</b> verranno eliminati.',
             unit: {
                 d: 'Giorno',
+                d_plural: 'Giorni',
                 w: 'Settimana',
+                w_plural: 'Settimane',
                 m: 'Mese',
+                m_plural: 'Mesi',
                 y: 'Anno',
-                h: 'Ora'
+                y_plural: 'Anni',
+                h: 'Ora',
+                h_plural: 'Ore'
             }
         },
         swipeHelp: {

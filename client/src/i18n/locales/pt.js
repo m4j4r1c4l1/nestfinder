@@ -259,10 +259,15 @@ export default {
             period: 'Mensagens mais antigas que <b>{time}</b> serão apagadas.',
             unit: {
                 d: 'Dia',
+                d_plural: 'Dias',
                 w: 'Semana',
+                w_plural: 'Semanas',
                 m: 'Mês',
+                m_plural: 'Meses',
                 y: 'Ano',
-                h: 'Hora'
+                y_plural: 'Anos',
+                h: 'Hora',
+                h_plural: 'Horas'
             }
         },
         swipeHelp: {
