@@ -41,7 +41,7 @@ export const ScreenLogger = () => {
                     position: 'fixed',
                     bottom: '10px',
                     left: '10px',
-                    zIndex: 99990,
+                    zIndex: 100000,
                     opacity: 0.3,
                     fontSize: '10px'
                 }}
