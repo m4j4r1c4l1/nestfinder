@@ -48,6 +48,33 @@ router.post('/github', async (req, res) => {
 
     const payload = req.body;
 
+    // Simulation Mode for UI Testing
+    if (payload.simulate) {
+        console.log('Webhook: SIMULATION MODE TRIGGERED');
+        const mockMetrics = {
+            commits: payload.commits || 900,
+            components: payload.components || 50,
+            loc: payload.loc || 25000,
+            files: payload.files || 100,
+            apiEndpoints: payload.apiEndpoints || 80,
+            socketEvents: payload.socketEvents || 20,
+            lastCommit: 'SIM-001'
+        };
+
+        broadcast({
+            type: 'commit-update',
+            data: {
+                lastCommit: 'SIM-001',
+                lastCommitMessage: 'Simulation Test',
+                lastCommitAuthor: 'Tester',
+                lastCommitTime: new Date().toISOString(),
+                commits: mockMetrics.commits,
+                devMetrics: mockMetrics
+            }
+        });
+        return res.json({ success: true, simulated: true });
+    }
+
     try {
         // Extract commit info from payload
         const commits = payload.commits?.length || 0;
