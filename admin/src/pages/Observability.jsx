@@ -479,8 +479,8 @@ const Observability = () => {
                                         </div>
                                         {/* Status badge */}
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#64748b20', border: '1px solid #64748b40', borderRadius: '8px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#94a3b8', fontWeight: 600 }}>Archive Ready ✅</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#c2410c20', border: '1px solid #c2410c40', borderRadius: '8px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#fb923c', fontWeight: 600 }}>Archive Ready ✅</span>
                                             </div>
                                         </div>
                                     </div>
@@ -514,7 +514,7 @@ const Observability = () => {
                                             },
                                             { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6' },
                                             { label: 'Components', sub: 'React/JSX', count: <CountUp end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
-                                            { label: 'Files', sub: 'Total Count', count: <CountUp end={stats.devMetrics?.files || 0} />, color: '#64748b' }
+                                            { label: 'Files', sub: 'Total Count', count: <CountUp end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
                                             <div key={i} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
@@ -524,13 +524,13 @@ const Observability = () => {
                                                 minHeight: '52px'
                                             }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.75rem', lineHeight: 1.2 }}>{badge.label}</div>
-                                                    <div className="text-muted" style={{ fontSize: '0.65rem', lineHeight: 1.2 }}>{badge.sub}</div>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
+                                                    <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
                                                 </div>
                                                 <span style={{
                                                     fontWeight: 700,
                                                     color: badge.color,
-                                                    fontSize: badge.mono ? '1rem' : '1.5rem',
+                                                    fontSize: badge.mono ? '1.1rem' : '1.8rem',
                                                     fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
                                                     lineHeight: 1
                                                 }}>
