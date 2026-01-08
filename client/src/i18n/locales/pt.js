@@ -220,7 +220,7 @@ export default {
         // Recovery Key Restore
         // recoveryKeyUsage: Deprecated
         restoreOptionsTitle: 'Para restaurar sua conta, você tem 2 opções:',
-        restoreOption1: '**Login:** Digite sua chave de 3 palavras **com hifens** no campo **apelido** ao entrar.',
+        restoreOption1: '**Login:** Digite sua chave de 3 palavras **com hifens** no campo **apelido** ao entrar no **Nestfinder**.',
         restoreOption2: '**Nova conta:** Faça login com uma nova conta e restaure-a na seção **Restaurar Conta** abaixo.',
         restoreAccount: 'Restaurar Conta',
         restoreAccountDescription: 'Insira uma chave de recuperação para restaurar a sua identidade.',

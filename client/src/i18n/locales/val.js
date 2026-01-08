@@ -220,7 +220,7 @@ export default {
         // Recovery Key Restore
         // recoveryKeyUsage: Deprecated
         restoreOptionsTitle: 'Per a restaurar el teu compte tens 2 opcions:',
-        restoreOption1: '**Iniciar sessió:** Escriu la teua clau de 3 paraules **amb guions** en el camp **Sobrenom** en entrar.',
+        restoreOption1: '**Iniciar sessió:** Escriu la teua clau de 3 paraules **amb guions** en el camp **Sobrenom** en entrar en **Nestfinder**.',
         restoreOption2: '**Compte nou:** Entra amb un compte nou i restaura\'l des de la secció **Restaurar Compte** baix.',
         restoreAccount: 'Restaurar Compte',
         restoreAccountDescription: 'Introdueix una clau de recuperació per a restaurar la teua identitat.',

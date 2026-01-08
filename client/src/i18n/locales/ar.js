@@ -221,7 +221,7 @@ export default {
         // Recovery Key Restore
         // recoveryKeyUsage: Deprecated
         restoreOptionsTitle: 'لاستعادة حسابك لديك خياران:',
-        restoreOption1: '**تسجيل الدخول:** اكتب مفتاحك المكون من 3 كلمات **مع الفواصل** في حقل **الاسم المستعار** عند تسجيل الدخول.',
+        restoreOption1: '**تسجيل الدخول:** اكتب مفتاحك المكون من 3 كلمات **مع الفواصل** في حقل **الاسم المستعار** عند تسجيل الدخول إلى **Nestfinder**.',
         restoreOption2: '**حساب جديد:** سجل الدخول بحساب جديد واستعد حسابك من قسم **استعادة الحساب** أدناه',
         restoreAccount: 'استعادة الحساب',
         restoreAccountDescription: 'أدخل مفتاح الاسترداد لاستعادة هويتك.',

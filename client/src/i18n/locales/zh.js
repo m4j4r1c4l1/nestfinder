@@ -220,7 +220,7 @@ export default {
         // Recovery Key Restore
         // recoveryKeyUsage: Deprecated
         restoreOptionsTitle: '恢复您的帐户有两个选项：',
-        restoreOption1: '**登录：** 登录时在**昵称**字段中输入您的 3 个单词的密钥（**带连字符**）。',
+        restoreOption1: '**登录：** 登录 **Nestfinder** 时，在**昵称**字段中输入您的 3 个单词的密钥（**带连字符**）。',
         restoreOption2: '**新帐户：** 使用新帐户登录，然后从下面的**恢复帐户**部分进行恢复。',
         restoreAccount: '恢复帐户',
         restoreAccountDescription: '输入恢复密钥以恢复您的身份。',
