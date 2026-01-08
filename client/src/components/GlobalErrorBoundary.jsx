@@ -16,6 +16,32 @@ export class GlobalErrorBoundary extends Component {
         console.error("Uncaught error:", error, errorInfo);
     }
 
+    componentDidMount() {
+        // Catch unhandled errors (async, event handlers, etc.)
+        window.onerror = (message, source, lineno, colno, error) => {
+            this.setState({
+                hasError: true,
+                error: error || new Error(message),
+                errorInfo: { componentStack: `at ${source}:${lineno}:${colno}` }
+            });
+            return true; // Prevent default browser error handling
+        };
+
+        // Catch unhandled promise rejections
+        window.onunhandledrejection = (event) => {
+            this.setState({
+                hasError: true,
+                error: event.reason || new Error('Unhandled Promise Rejection'),
+                errorInfo: { componentStack: 'Promise rejection - no stack available' }
+            });
+        };
+    }
+
+    componentWillUnmount() {
+        window.onerror = null;
+        window.onunhandledrejection = null;
+    }
+
     handleSendReport = async () => {
         if (this.state.sendingReport || this.state.reportSent) return;
 
@@ -78,35 +104,55 @@ export class GlobalErrorBoundary extends Component {
                         borderRadius: 'var(--radius-lg, 12px)',
                         padding: '2rem',
                         maxWidth: '400px',
-                        width: '100%'
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center'
                     }}>
+                        {/* Title - Single Line */}
                         <h2 style={{
                             color: '#ef4444',
-                            fontSize: '1.5rem',
-                            marginBottom: '0.5rem',
-                            fontFamily: 'inherit'
+                            fontSize: '1.3rem',
+                            marginBottom: '1rem',
+                            fontFamily: 'inherit',
+                            whiteSpace: 'nowrap'
                         }}>
                             ⚠️ Application Crashed
                         </h2>
-                        <p style={{
-                            color: 'var(--color-text-secondary, #94a3b8)',
-                            fontSize: '0.9rem',
-                            marginBottom: '1.5rem',
-                            wordBreak: 'break-word'
-                        }}>
-                            {errorMsg}
-                        </p>
 
+                        {/* Error Badge - Red Transparent */}
+                        <div style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            borderRadius: 'var(--radius-md, 8px)',
+                            padding: '0.75rem 1rem',
+                            marginBottom: '1.5rem',
+                            width: '100%',
+                            maxWidth: '100%'
+                        }}>
+                            <p style={{
+                                color: '#ef4444',
+                                fontSize: '0.85rem',
+                                margin: 0,
+                                wordBreak: 'break-word',
+                                fontWeight: 500
+                            }}>
+                                {errorMsg}
+                            </p>
+                        </div>
+
+                        {/* Buttons - Horizontal, Equal, Centered */}
                         <div style={{
                             display: 'flex',
                             gap: '0.75rem',
-                            justifyContent: 'center',
-                            flexWrap: 'wrap'
+                            justifyContent: 'space-between',
+                            width: '100%'
                         }}>
                             <button
                                 onClick={() => window.location.reload()}
                                 style={{
-                                    padding: '0.75rem 1rem',
+                                    flex: 1,
+                                    padding: '0.75rem 0.5rem',
                                     background: 'var(--color-bg-tertiary, #334155)',
                                     color: 'white',
                                     border: '1px solid rgba(148, 163, 184, 0.3)',
@@ -123,7 +169,8 @@ export class GlobalErrorBoundary extends Component {
                                 onClick={this.handleSendReport}
                                 disabled={this.state.sendingReport || this.state.reportSent}
                                 style={{
-                                    padding: '0.75rem 1rem',
+                                    flex: 1,
+                                    padding: '0.75rem 0.5rem',
                                     background: this.state.reportSent ? '#16a34a' : 'var(--color-primary, #3b82f6)',
                                     color: 'white',
                                     border: 'none',
@@ -134,7 +181,7 @@ export class GlobalErrorBoundary extends Component {
                                     fontWeight: 600
                                 }}
                             >
-                                {this.state.sendingReport ? 'Sending...' : this.state.reportSent ? 'Sent ✅' : 'Report'}
+                                {this.state.sendingReport ? 'Sending...' : this.state.reportSent ? '✓' : 'Send Report'}
                             </button>
 
                             <button
@@ -142,7 +189,8 @@ export class GlobalErrorBoundary extends Component {
                                     this.setState({ hasError: false, error: null });
                                 }}
                                 style={{
-                                    padding: '0.75rem 1rem',
+                                    flex: 1,
+                                    padding: '0.75rem 0.5rem',
                                     background: 'var(--color-bg-tertiary, #334155)',
                                     color: 'white',
                                     border: '1px solid rgba(148, 163, 184, 0.3)',
@@ -154,6 +202,20 @@ export class GlobalErrorBoundary extends Component {
                             >
                                 Dismiss
                             </button>
+                        </div>
+
+                        {/* Footer - Nest + Nestfinder */}
+                        <div style={{
+                            marginTop: '1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            color: 'var(--color-text-secondary, #64748b)',
+                            fontSize: '0.8rem'
+                        }}>
+                            <span>🪹</span>
+                            <span style={{ fontWeight: 500 }}>Nestfinder</span>
                         </div>
                     </div>
                 </div>
