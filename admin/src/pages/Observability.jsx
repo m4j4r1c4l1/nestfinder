@@ -13,7 +13,7 @@ const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder/';
 
 
 // Reusable CountUp Animation Component
-const CountUp = ({ end, duration = 2000, decimals = 0 }) => {
+const CountUp = ({ end, duration = 2000, decimals = 0, separator = null }) => {
     const [count, setCount] = useState(0);
     const endVal = parseFloat(end) || 0;
 
@@ -38,6 +38,13 @@ const CountUp = ({ end, duration = 2000, decimals = 0 }) => {
         animationFrame = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(animationFrame);
     }, [endVal, duration]);
+
+    if (separator) {
+        let fixed = count.toFixed(decimals);
+        let [int, dec] = fixed.split('.');
+        int = int.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+        return <>{dec ? `${int}.${dec}` : int}</>;
+    }
 
     return <>{count.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
 };
