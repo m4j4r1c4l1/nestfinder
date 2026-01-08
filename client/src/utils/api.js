@@ -69,10 +69,10 @@ class ApiClient {
         // Non-JSON response (likely HTML error page or plain text)
         const text = await response.text();
         console.error('Non-JSON response:', text.substring(0, 500));
-        throw new Error('The server returned an unexpected response. Please try again later.');
+        throw new Error('Server Error: The server returned an invalid response format.');
       }
     } catch (parseError) {
-      if (parseError.message.includes('Server error') || parseError.message.includes('The server returned')) {
+      if (parseError.message.includes('Server Error') || parseError.message.includes('The server returned')) {
         throw parseError;
       }
       // JSON parse failed
