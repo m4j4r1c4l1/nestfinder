@@ -112,19 +112,20 @@ export default {
         geocodeError: 'Errore di geocodifica.',
         addressRequired: 'Inserisci almeno città e via',
         locationRequired: 'Posizione richiesta. Usa GPS, mappa o indirizzo.',
-        tagsLabel: 'Chi c'è? (Opzionale)'è? (Opzionale)',
+        tagsLabel: 'Chi c\'è? (Opzionale)',
         onePerson: 'Una persona',
         multiple: 'Gruppo',
         children: 'Bambini',
         animals: 'Animali'
-    ,
+        ,
         voiceMode: 'Voce',
         needsLabel: 'Di cosa hanno bisogno? (Opzionale)',
         needFood: 'Cibo',
         needWater: 'Acqua',
         needClothes: 'Vestiti',
         needMedicine: 'Medicine',
-        needShelter: 'Rifugio'},
+        needShelter: 'Rifugio'
+    },
     route: {
         needPointsError: 'Need at least 2 points to calculate a route',
         failed: 'Could not calculate route',
