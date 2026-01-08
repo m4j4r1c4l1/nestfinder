@@ -1963,7 +1963,7 @@ const SettingsPanel = ({ onClose }) => {
                             fontSize: '0.75rem',
                             color: 'var(--color-text-secondary)',
                             marginBottom: '0.5rem',
-                            marginTop: '1.5rem'
+                            marginTop: '0.5rem'
                         }}>
                             {t('settings.deleteSettingDesc') || 'Select how you would like to delete a message'}
                         </div>
@@ -2036,7 +2036,7 @@ const SettingsPanel = ({ onClose }) => {
                                     display: 'inline-block',
                                     lineHeight: '1.2',
                                     margin: '0 2px'
-                                }}>DELETE</span> button will appear upon swiping over a message to delete it.</span>
+                                }}>Delete</span> button will appear upon swiping over a message to delete it.</span>
                             ) : (
                                 <span>You can now delete a message just by swiping over it.</span>
                             )}
