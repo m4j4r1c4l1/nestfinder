@@ -132,8 +132,8 @@ const BarrelDigit = ({ value }) => {
             verticalAlign: 'baseline',
             height: '1.2em', // Standard text height
             overflow: 'hidden',
-            width: /^[0-9]$/.test(display) ? '0.55em' : 'auto',
-            minWidth: /^[0-9]$/.test(display) ? '0.55em' : '0.15em',
+            width: /^[0-9]$/.test(display) ? '0.62em' : 'auto',
+            minWidth: /^[0-9]$/.test(display) ? '0.62em' : '0.15em',
             margin: 0,
             fontVariantNumeric: 'tabular-nums',
             textAlign: 'center'
