@@ -282,6 +282,8 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
             devMetrics.components = (clientStats.components || 0) + (adminStats.components || 0);
             devMetrics.loc = (clientStats.lines || 0) + (adminStats.lines || 0) + (serverStats.lines || 0);
             devMetrics.files = (clientStats.files || 0) + (adminStats.files || 0) + (serverStats.files || 0);
+            devMetrics.apiEndpoints = (clientStats.apiEndpoints || 0) + (adminStats.apiEndpoints || 0) + (serverStats.apiEndpoints || 0);
+            devMetrics.socketEvents = (clientStats.socketEvents || 0) + (adminStats.socketEvents || 0) + (serverStats.socketEvents || 0);
 
         } catch (err) {
             console.error('Dev metrics calculation failed:', err);
@@ -342,7 +344,7 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
 
 // Helper to count code stats recursively
 const countCodeStats = (dirPath) => {
-    let stats = { files: 0, lines: 0, components: 0 };
+    let stats = { files: 0, lines: 0, components: 0, apiEndpoints: 0, socketEvents: 0 };
 
     if (!fs.existsSync(dirPath)) return stats;
 
@@ -360,6 +362,8 @@ const countCodeStats = (dirPath) => {
             stats.files += subStats.files;
             stats.lines += subStats.lines;
             stats.components += subStats.components;
+            stats.apiEndpoints += subStats.apiEndpoints;
+            stats.socketEvents += subStats.socketEvents;
         } else if (stat.isFile()) {
             // Check extensions for LOC
             if (/\.(js|jsx|ts|tsx|css|scss|html)$/.test(file)) {
@@ -367,6 +371,16 @@ const countCodeStats = (dirPath) => {
                 try {
                     const content = fs.readFileSync(fullPath, 'utf8');
                     stats.lines += content.split('\n').length;
+
+                    // Count API Endpoints (in server files mainly)
+                    if (/\.js$/.test(file)) {
+                        const apiMatches = content.match(/router\.(get|post|put|delete|patch)/g);
+                        if (apiMatches) stats.apiEndpoints += apiMatches.length;
+
+                        const socketMatches = content.match(/socket\.on\(/g) || content.match(/io\.on\(/g);
+                        if (socketMatches) stats.socketEvents += socketMatches.length;
+                    }
+
                 } catch (e) { /* ignore read errors */ }
             }
             // Check for Components (.jsx/.tsx)
