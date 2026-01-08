@@ -598,9 +598,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
     };
 
     // Helper: Get title based on feedback type
-    const getFeedbackTitle = (type) => {
-        console.log(`[SDK] getFeedbackTitle called for type: ${type}`);
-        // This will crash if t is not in scope
+    const getFeedbackTitle = (type, t) => {
         switch (type) {
             case 'bug': return t('feedback.bugReport') || 'Bug Report';
             case 'suggestion': return t('feedback.suggestion') || 'Suggestion';
@@ -946,18 +944,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                                 {msg.type === 'bug' ? '🐛' : msg.type === 'suggestion' ? '💡' : '💭'}
                                                             </span>
                                                             <span className="notification-title" style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--color-text)' }}>
-                                                                {/* CHECKPOINT: Rendering title for sent message - INTENTIONAL CRASH */}
-                                                                {(() => {
-                                                                    try {
-                                                                        console.log(`[SDK] Rendering title for msg ${msg.id}`);
-                                                                        // INTENTIONAL: Passing only one argument to trigger crash inside getFeedbackTitle if it expects t
-                                                                        // OR if getFeedbackTitle itself uses t from closure which is undefined
-                                                                        return getFeedbackTitle(msg.type);
-                                                                    } catch (err) {
-                                                                        console.error('[SDK] Error rendering title', err);
-                                                                        throw err; // Re-throw to ensure global error boundary catches it for user to see
-                                                                    }
-                                                                })()}
+                                                                {getFeedbackTitle(msg.type, t)}
                                                             </span>
                                                         </div>
 
