@@ -510,7 +510,7 @@ const Observability = () => {
                                                 color: '#4ade80',
                                                 mono: true,
                                                 // Specific styling for Commit ID: Blue Box, Green Text
-                                                boxStyle: { background: '#1d4ed840', border: '1px solid #1d4ed8' }
+                                                boxStyle: { background: '#1e3a8a40', border: '1px solid #1e3a8a' }
                                             },
                                             { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6' },
                                             { label: 'Components', sub: 'React/JSX', count: <CountUp end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
