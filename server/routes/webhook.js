@@ -9,6 +9,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../');
 
+const router = express.Router();
+
 // Broadcast function (injected from index.js for real-time updates)
 let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
