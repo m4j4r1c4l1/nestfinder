@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { adminApi } from '../api';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -10,6 +10,37 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder/';
 
 
+
+
+// Reusable CountUp Animation Component
+const CountUp = ({ end, duration = 2000, decimals = 0 }) => {
+    const [count, setCount] = useState(0);
+    const endVal = parseFloat(end) || 0;
+
+    useEffect(() => {
+        let startTime;
+        let animationFrame;
+
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+
+            // Ease Out Quart for smooth deceleration
+            const ease = 1 - Math.pow(1 - progress, 4);
+
+            setCount(ease * endVal);
+
+            if (progress < 1) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        };
+
+        animationFrame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(animationFrame);
+    }, [endVal, duration]);
+
+    return <>{count.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
+};
 
 const Observability = () => {
     const [loading, setLoading] = useState(true);
@@ -92,7 +123,7 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🦚 Users</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)', lineHeight: 1 }}>
-                                        {stats.totalSubscribers}
+                                        <CountUp end={stats.totalSubscribers} />
                                     </div>
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                     <div className="text-muted text-sm">Registered</div>
@@ -112,7 +143,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '1rem' }}>{badge.icon}</span>
                                             <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
-                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{badge.count || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={badge.count || 0} /></span>
                                         </div>
                                     ))}
                                 </div>
@@ -125,7 +156,7 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>📍 Points</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', lineHeight: 1 }}>
-                                        {(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)}
+                                        <CountUp end={(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)} />
                                     </div>
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                     <div className="text-muted text-sm">Locations</div>
@@ -140,7 +171,7 @@ const Observability = () => {
                                     }}>
                                         <span style={{ fontSize: '0.9rem' }}>🟠</span>
                                         <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Pending</span>
-                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{stats.mapPoints?.pending || 0}</span>
+                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={stats.mapPoints?.pending || 0} /></span>
                                     </div>
                                     {/* Confirmed + Inactive row */}
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -151,7 +182,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '0.9rem' }}>🟢</span>
                                             <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Confirmed</span>
-                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{stats.mapPoints?.confirmed || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={stats.mapPoints?.confirmed || 0} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.4rem',
@@ -160,7 +191,7 @@ const Observability = () => {
                                         }}>
                                             <span style={{ fontSize: '0.9rem' }}>🔴</span>
                                             <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Inactive</span>
-                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{stats.mapPoints?.deactivated || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={stats.mapPoints?.deactivated || 0} /></span>
                                         </div>
                                     </div>
                                 </div>
@@ -173,7 +204,7 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>⭐ Rating</div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#facc15', lineHeight: 1 }}>
-                                        {stats.avgRating ? stats.avgRating.toFixed(1) : '-'}
+                                        {stats.avgRating !== undefined ? <CountUp end={stats.avgRating} decimals={1} /> : '-'}
                                     </div>
                                     <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Average</div>
                                     <div className="text-muted text-sm">All time</div>
@@ -187,7 +218,7 @@ const Observability = () => {
                                     }}>
                                         <span style={{ fontSize: '0.9rem' }}>⭐</span>
                                         <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Votes</span>
-                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}>{stats.totalRatings || 0}</span>
+                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><CountUp end={stats.totalRatings || 0} /></span>
                                     </div>
                                 </div>
                             </div>
@@ -206,7 +237,7 @@ const Observability = () => {
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                     <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
-                                            {stats.notificationMetrics?.total || 0}
+                                            <CountUp end={stats.notificationMetrics?.total || 0} />
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                         <div className="text-muted text-sm">Sent</div>
@@ -219,7 +250,7 @@ const Observability = () => {
                                             borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
                                             <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
@@ -227,7 +258,7 @@ const Observability = () => {
                                             borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
                                             <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
@@ -235,7 +266,7 @@ const Observability = () => {
                                             borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
                                             <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.notificationMetrics?.unread || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.notificationMetrics?.unread || 0} /></span>
                                         </div>
                                     </div>
                                 </div>
@@ -244,7 +275,7 @@ const Observability = () => {
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', paddingTop: '0.5rem', width: '100%', justifyContent: 'center' }}>
                                     <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
-                                            {stats.feedbackMetrics?.total || stats.totalReceived || 0}
+                                            <CountUp end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Total</div>
                                         <div className="text-muted text-sm">Received</div>
@@ -257,7 +288,7 @@ const Observability = () => {
                                             borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
                                             <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.feedbackMetrics?.pending || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.feedbackMetrics?.pending || 0} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
@@ -265,7 +296,7 @@ const Observability = () => {
                                             borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem'
                                         }}>
                                             <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.feedbackMetrics?.read || 0}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}><CountUp end={stats.feedbackMetrics?.read || 0} /></span>
                                         </div>
                                     </div>
                                 </div>
@@ -279,7 +310,7 @@ const Observability = () => {
                                     {/* Main Count: LOC */}
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                            {(stats.devMetrics?.loc || 0).toLocaleString()}
+                                            <CountUp end={stats.devMetrics?.loc || 0} />
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>LOC</div>
                                         <div className="text-muted text-sm">Lines of Code</div>
@@ -295,7 +326,7 @@ const Observability = () => {
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
                                                 <div className="text-muted text-sm">Git History</div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.2rem' }}>{(stats.devMetrics?.commits || 0).toLocaleString()}</span>
+                                            <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.2rem' }}><CountUp end={stats.devMetrics?.commits || 0} /></span>
                                         </div>
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '0.5rem',
@@ -317,7 +348,7 @@ const Observability = () => {
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
                                                 <div className="text-muted text-sm">React/JSX</div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '1.2rem' }}>{(stats.devMetrics?.components || 0).toLocaleString()}</span>
+                                            <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '1.2rem' }}><CountUp end={stats.devMetrics?.components || 0} /></span>
                                         </div>
                                     </div>
                                 </div>
