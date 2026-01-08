@@ -351,7 +351,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         <div style={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(4, 1fr)',
-                            gap: 'var(--space-2)',
+                            gap: 'var(--space-1)',
                             marginTop: 'var(--space-2)'
                         }}>
                             {tagOptions.map(tag => (
@@ -363,8 +363,8 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
-                                        gap: 'var(--space-1)',
-                                        padding: 'var(--space-3) var(--space-2)',
+                                        gap: '2px',
+                                        padding: 'var(--space-2) 4px',
                                         background: tags.includes(tag.id)
                                             ? 'var(--color-primary-light)'
                                             : 'var(--color-bg-secondary)',
@@ -373,15 +373,22 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                             : '1px solid var(--color-border)',
                                         borderRadius: 'var(--radius-lg)',
                                         cursor: 'pointer',
-                                        transition: 'all var(--transition-fast)'
+                                        transition: 'all var(--transition-fast)',
+                                        minWidth: 0 // Allow shrinking
                                     }}
                                 >
-                                    <span style={{ fontSize: '1.5rem' }}>{tag.emoji}</span>
+                                    <span style={{ fontSize: '1.4rem', lineHeight: 1, marginBottom: '2px' }}>{tag.emoji}</span>
                                     <span style={{
-                                        fontSize: 'var(--font-size-xs)',
+                                        fontSize: '0.65rem',
                                         color: tags.includes(tag.id)
                                             ? 'var(--color-primary)'
-                                            : 'var(--color-text-secondary)'
+                                            : 'var(--color-text-secondary)',
+                                        textAlign: 'center',
+                                        lineHeight: 1.1,
+                                        width: '100%',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
                                     }}>
                                         {tag.label}
                                     </span>
@@ -394,8 +401,8 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         <label className="form-label">{t('submit.needsLabel')}</label>
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(5, 1fr)',
-                            gap: 'var(--space-2)',
+                            gridTemplateColumns: 'repeat(4, 1fr)',
+                            gap: 'var(--space-1)',
                             marginTop: 'var(--space-2)'
                         }}>
                             {needOptions.map(need => (
@@ -407,8 +414,8 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
-                                        gap: 'var(--space-1)',
-                                        padding: 'var(--space-3) var(--space-1)',
+                                        gap: '2px',
+                                        padding: 'var(--space-2) 4px',
                                         background: needs.includes(need.id)
                                             ? 'var(--color-primary-light)'
                                             : 'var(--color-bg-secondary)',
@@ -417,16 +424,22 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                                             : '1px solid var(--color-border)',
                                         borderRadius: 'var(--radius-lg)',
                                         cursor: 'pointer',
-                                        transition: 'all var(--transition-fast)'
+                                        transition: 'all var(--transition-fast)',
+                                        minWidth: 0 // Allow shrinking
                                     }}
                                 >
-                                    <span style={{ fontSize: '1.4rem' }}>{need.emoji}</span>
+                                    <span style={{ fontSize: '1.4rem', lineHeight: 1, marginBottom: '2px' }}>{need.emoji}</span>
                                     <span style={{
-                                        fontSize: '0.7rem',
+                                        fontSize: '0.65rem',
                                         textAlign: 'center',
                                         color: needs.includes(need.id)
                                             ? 'var(--color-primary)'
-                                            : 'var(--color-text-secondary)'
+                                            : 'var(--color-text-secondary)',
+                                        lineHeight: 1.1,
+                                        width: '100%',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
                                     }}>
                                         {need.label}
                                     </span>
