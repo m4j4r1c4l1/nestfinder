@@ -479,22 +479,14 @@ const Observability = () => {
                                         <div className="text-muted text-sm">Lines of Code</div>
                                     </div>
                                     {/* Badges Row */}
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
+                                    {/* Badges Column - Vertical Stack */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', maxWidth: '340px' }}>
+                                        {/* Top: Commit ID (Full Width) */}
                                         <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                            background: '#8b5cf620', border: '1px solid #8b5cf640',
-                                            borderRadius: '8px', padding: '0.4rem 0.75rem'
-                                        }}>
-                                            <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
-                                                <div className="text-muted text-sm">Git History</div>
-                                            </div>
-                                            <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.8rem', lineHeight: 1 }}><RollingBarrelCounter end={stats.devMetrics?.commits || 0} /></span>
-                                        </div>
-                                        <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                                             background: '#1e3a8a40', border: '1px solid #1e3a8a',
-                                            borderRadius: '8px', padding: '0.4rem 0.75rem'
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem',
+                                            width: '100%'
                                         }}>
                                             <div style={{ textAlign: 'center' }}>
                                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commit ID</div>
@@ -502,16 +494,33 @@ const Observability = () => {
                                             </div>
                                             <span style={{ fontWeight: 700, color: '#4ade80', fontSize: '1.4rem', fontFamily: '"JetBrains Mono", monospace' }}><CommitReveal text={stats.devMetrics?.lastCommit} /></span>
                                         </div>
-                                        <div style={{
-                                            display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                            background: '#0ea5e920', border: '1px solid #0ea5e940',
-                                            borderRadius: '8px', padding: '0.4rem 0.75rem'
-                                        }}>
-                                            <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
-                                                <div className="text-muted text-sm">React/JSX</div>
+
+                                        {/* Bottom: Commits + Components (Row) */}
+                                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                                            <div style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                                background: '#8b5cf620', border: '1px solid #8b5cf640',
+                                                borderRadius: '8px', padding: '0.4rem 0.75rem',
+                                                flex: 1
+                                            }}>
+                                                <div style={{ textAlign: 'center' }}>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Commits</div>
+                                                    <div className="text-muted text-sm">Git History</div>
+                                                </div>
+                                                <span style={{ fontWeight: 700, color: '#8b5cf6', fontSize: '1.8rem', lineHeight: 1 }}><RollingBarrelCounter end={stats.devMetrics?.commits || 0} /></span>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '1.8rem' }}><CountUp end={stats.devMetrics?.components || 0} /></span>
+                                            <div style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                                background: '#0ea5e920', border: '1px solid #0ea5e940',
+                                                borderRadius: '8px', padding: '0.4rem 0.75rem',
+                                                flex: 1
+                                            }}>
+                                                <div style={{ textAlign: 'center' }}>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem' }}>Components</div>
+                                                    <div className="text-muted text-sm">React/JSX</div>
+                                                </div>
+                                                <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '1.8rem' }}><CountUp end={stats.devMetrics?.components || 0} /></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
