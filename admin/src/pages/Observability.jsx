@@ -93,7 +93,7 @@ const BarrelDigit = ({ value }) => {
             setPrev(display);
             setDisplay(value);
             setAnimating(true);
-            const timer = setTimeout(() => setAnimating(false), 600); // slightly longer than CSS transition
+            const timer = setTimeout(() => setAnimating(false), 600);
             return () => clearTimeout(timer);
         }
     }, [value, display]);
@@ -102,25 +102,36 @@ const BarrelDigit = ({ value }) => {
         <div style={{
             position: 'relative',
             display: 'inline-block',
-            width: '0.6em', // Fixed width for monospaced look
+            width: '0.6em',
             height: '1em',
             overflow: 'hidden',
             verticalAlign: 'bottom'
         }}>
-            {/* New Value (Enters from Top) */}
+            {/* Inject Keyframes uniquely once or per usage (idempotent style block) */}
+            <style>{`
+                @keyframes barrelDrop {
+                    from { transform: translateY(-50%); }
+                    to { transform: translateY(0); }
+                }
+            `}</style>
+
             <div style={{
                 position: 'absolute',
                 top: 0, left: 0,
-                transform: animating ? 'translateY(0%)' : 'translateY(0%)',
-                transition: animating ? 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none', // overshoot "bounce" effect
-                marginTop: animating ? '-100%' : '0'
+                display: 'flex',
+                flexDirection: 'column',
+                // If animating: Stack is [New, Old]. Height 2em.
+                // Start -50% (Show Old). End 0 (Show New).
+                // If not animating: Just show New.
+                animation: animating ? 'barrelDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
+                transform: 'translateY(0)' // Default resting state (showing New)
             }}>
-                {animating && <div style={{ height: '1em' }}>{prev}</div>}
-                <div style={{ height: '1em' }}>{display}</div>
-            </div>
+                {/* New Value (Top) */}
+                <div style={{ height: '1em', lineHeight: 1 }}>{display}</div>
 
-            {/* Simple static render if not animating to ensure baseline consistency */}
-            {!animating && <div style={{ visibility: 'hidden' }}>{display}</div>}
+                {/* Old Value (Bottom) - Only rendered during animation */}
+                {animating && <div style={{ height: '1em', lineHeight: 1 }}>{prev}</div>}
+            </div>
         </div>
     );
 };
