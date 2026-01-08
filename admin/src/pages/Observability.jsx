@@ -138,7 +138,8 @@ const BarrelDigit = ({ value }) => {
                 // If animating: Stack is [New, Old]. Height 2em.
                 // Start -50% (Show Old). End 0 (Show New).
                 // If not animating: Just show New.
-                animation: animating ? 'barrelDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
+                // Faster animation (0.4s) + Bouncy/Snap easing
+                animation: animating ? 'barrelDrop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
                 transform: 'translateY(0)' // Default resting state (showing New)
             }}>
                 {/* New Value (Top) */}
@@ -153,10 +154,21 @@ const BarrelDigit = ({ value }) => {
 
 // Barrel Counter Container
 const BarrelCounter = ({ value }) => {
+    // Inject the keyframes here if not global (ensure it exists)
+    // Faster, snappier drop
+    const styles = `
+        @keyframes barrelDrop {
+            0% { transform: translateY(-150%); opacity: 0; filter: blur(8px); }
+            50% { opacity: 1; filter: blur(2px); }
+            100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+        }
+    `;
+
     // If value is already formatted string, use it. Otherwise round and stringify.
     const str = typeof value === 'string' ? value : Math.round(value || 0).toString();
     return (
         <div style={{ display: 'inline-flex', overflow: 'hidden' }}>
+            <style>{styles}</style>
             {str.split('').map((char, i) => (
                 <BarrelDigit key={i} value={char} />
             ))}
@@ -186,8 +198,8 @@ const RollingBarrelCounter = ({ end, duration = 2000, separator = null }) => {
             if (!startTime) startTime = timestamp;
             const progress = Math.min((timestamp - startTime) / duration, 1);
 
-            // Ease Out Quart
-            const ease = 1 - Math.pow(1 - progress, 4);
+            // Ease Out Quint (Faster start)
+            const ease = 1 - Math.pow(1 - progress, 5);
             setCount(ease * endVal);
 
             if (progress < 1) {
@@ -540,35 +552,28 @@ const Observability = () => {
                                             { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 12} />, color: '#eab308' },
                                             // 6. Files
                                             { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
-                                                mono: true,
-                                        // Specific styling for Commit ID: Blue Box, Green Text
-                                        boxStyle: {background: '#1e3a8a40', border: '1px solid #1e3a8a' }
-                                            },
-                                        {label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6' },
-                                        {label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
-                                        {label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: {background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
-                                        <div key={i} style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                            background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
-                                            border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
-                                            borderRadius: '8px', padding: '0.5rem 0.75rem',
-                                            minHeight: '52px'
-                                        }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
-                                                <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
-                                            </div>
-                                            <span style={{
-                                                fontWeight: 700,
-                                                color: badge.color,
-                                                fontSize: badge.mono ? '1.1rem' : '1.8rem',
-                                                fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
-                                                lineHeight: 1
+                                            <div key={i} style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
+                                                background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
+                                                border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
+                                                borderRadius: '8px', padding: '0.5rem 0.75rem',
+                                                minHeight: '52px'
                                             }}>
-                                                {badge.count}
-                                            </span>
-                                        </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
+                                                    <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
+                                                </div>
+                                                <span style={{
+                                                    fontWeight: 700,
+                                                    color: badge.color,
+                                                    fontSize: badge.mono ? '1.1rem' : '1.8rem',
+                                                    fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
+                                                    lineHeight: 1
+                                                }}>
+                                                    {badge.count}
+                                                </span>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
