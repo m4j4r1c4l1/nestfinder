@@ -218,9 +218,9 @@ export default {
         sameKeyError: 'Esta é a chave de recuperação da sua conta atual. Já está conectado com esta conta.',
         // Swipe Direction
         swipeDirection: 'Apagar Mensagens',
-        deleteSettingDesc: 'Select how you would like to delete a message',
-        safeDelete: 'Safe Delete',
-        tapToSelect: 'Tap to select the swipe direction',
+        deleteSettingDesc: 'Selecione como deseja apagar uma mensagem',
+        safeDelete: 'Apagar com segurança',
+        tapToSelect: 'Toque para selecionar a direção do deslizamento',
         swipe: {
             controlLabel: 'Swipe',
             right: '→ Deslizar para a direita',
