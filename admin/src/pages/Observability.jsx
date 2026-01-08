@@ -503,14 +503,23 @@ const Observability = () => {
                                     {/* 2x2 Badges Grid */}
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', width: '100%', maxWidth: '300px' }}>
                                         {[
-                                            { label: 'Commit ID', sub: 'Latest', count: <CommitReveal text={stats.devMetrics?.lastCommit} />, color: '#4ade80', mono: true },
+                                            {
+                                                label: 'Commit ID',
+                                                sub: 'Latest',
+                                                count: <CommitReveal text={stats.devMetrics?.lastCommit} />,
+                                                color: '#4ade80',
+                                                mono: true,
+                                                // Specific styling for Commit ID: Blue Box, Green Text
+                                                boxStyle: { background: '#1d4ed840', border: '1px solid #1d4ed8' }
+                                            },
                                             { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6' },
                                             { label: 'Components', sub: 'React/JSX', count: <CountUp end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
                                             { label: 'Files', sub: 'Total Count', count: <CountUp end={stats.devMetrics?.files || 0} />, color: '#64748b' }
                                         ].map((badge, i) => (
                                             <div key={i} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                                background: `${badge.color}15`, border: `1px solid ${badge.color}30`,
+                                                background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
+                                                border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
                                                 borderRadius: '8px', padding: '0.5rem 0.75rem',
                                                 minHeight: '52px'
                                             }}>
