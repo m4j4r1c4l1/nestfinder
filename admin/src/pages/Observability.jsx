@@ -768,7 +768,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                 setIsVisible(true);
                 observer.disconnect();
             }
-        }, { threshold: 0.5 });
+        }, { threshold: 0.7, rootMargin: '0px 0px -50px 0px' });
         if (cardRef.current) observer.observe(cardRef.current);
         return () => observer.disconnect();
     }, [loading, metrics.length, isVisible]);
