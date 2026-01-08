@@ -140,8 +140,9 @@ const BarrelDigit = ({ value }) => {
                 // If animating: Stack is [New, Old]. Height 2em.
                 // Start -50% (Show Old). End 0 (Show New).
                 // If not animating: Just show New.
-                // Slower animation (~20% slower -> 0.5s) + Bouncy/Snap easing
-                animation: animating ? 'barrelDrop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
+                // Slower animation (~20% slower -> 0.5s) + Snappy "Ease Out Back" effect
+                animation: animating ? 'barrelDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
+                filter: animating ? 'blur(1.5px)' : 'none', // Add motion blur during transition
                 transform: 'translateY(0)' // Default resting state (showing New)
             }}>
                 {/* New Value (Top) */}
