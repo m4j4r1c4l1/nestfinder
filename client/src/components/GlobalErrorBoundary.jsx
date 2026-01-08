@@ -153,13 +153,14 @@ export class GlobalErrorBoundary extends Component {
                                 style={{
                                     flex: 1,
                                     padding: '0.75rem 0.5rem',
-                                    background: 'var(--color-bg-tertiary, #334155)',
+                                    background: 'linear-gradient(135deg, #14b8a6 0%, #22d3d3 100%)',
                                     color: 'white',
-                                    border: '1px solid rgba(148, 163, 184, 0.3)',
+                                    border: 'none',
                                     borderRadius: 'var(--radius-md, 8px)',
                                     cursor: 'pointer',
                                     fontSize: '0.85rem',
-                                    fontWeight: 500
+                                    fontWeight: 600,
+                                    boxShadow: '0 2px 8px rgba(20, 184, 166, 0.3)'
                                 }}
                             >
                                 Reload
@@ -191,13 +192,14 @@ export class GlobalErrorBoundary extends Component {
                                 style={{
                                     flex: 1,
                                     padding: '0.75rem 0.5rem',
-                                    background: 'var(--color-bg-tertiary, #334155)',
+                                    background: 'linear-gradient(135deg, #475569 0%, #64748b 100%)',
                                     color: 'white',
-                                    border: '1px solid rgba(148, 163, 184, 0.3)',
+                                    border: 'none',
                                     borderRadius: 'var(--radius-md, 8px)',
                                     cursor: 'pointer',
                                     fontSize: '0.85rem',
-                                    fontWeight: 500
+                                    fontWeight: 500,
+                                    boxShadow: '0 2px 8px rgba(71, 85, 105, 0.3)'
                                 }}
                             >
                                 Dismiss
