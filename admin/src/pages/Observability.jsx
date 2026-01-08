@@ -60,27 +60,44 @@ const CommitReveal = ({ text, duration = 2000 }) => {
 
         const animate = (timestamp) => {
             if (!startTime) startTime = timestamp;
-            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const elapsed = timestamp - startTime;
 
-            if (progress < 1) {
-                // Throttle updates to ~40ms (25fps) to slow down the scramble effect
-                if (timestamp - lastUpdate > 40) {
-                    let str = '';
-                    for (let i = 0; i < len; i++) {
-                        str += chars[Math.floor(Math.random() * 16)];
+            // Sequential Logic: First char locks at 0s, next at 0.5s, etc.
+            // Wait, request is: "begins stopping... with 1/2 second of delay".
+            // Let's say we scramble for 1s globally, THEN start locking.
+            // Char i locks at: 1000ms + (i * 500ms).
+
+            // Build the string frame
+            if (timestamp - lastUpdate > 50) { // Throttle scramble speed ~20fps
+                let str = '';
+                for (let i = 0; i < len; i++) {
+                    // Start locking sequence after 1s of initial chaos
+                    const lockTime = 1000 + (i * 500);
+
+                    if (elapsed > lockTime) {
+                        str += text[i]; // Locked
+                    } else {
+                        str += chars[Math.floor(Math.random() * 16)]; // Scrambling
                     }
-                    setDisplay(str);
-                    lastUpdate = timestamp;
                 }
+                setDisplay(str);
+                lastUpdate = timestamp;
+            }
+
+            // Continue until all chars are locked
+            // Last char locks at 1000 + (len-1)*500
+            const totalDuration = 1000 + (len * 500) + 100;
+
+            if (elapsed < totalDuration) {
                 animationFrame = requestAnimationFrame(animate);
             } else {
-                setDisplay(text);
+                setDisplay(text); // Ensure final consistency
             }
         };
 
         animationFrame = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(animationFrame);
-    }, [text, duration]);
+    }, [text]);
 
     return <>{display}</>;
 
@@ -157,8 +174,17 @@ const BarrelCounter = ({ value }) => {
 const RollingBarrelCounter = ({ end, duration = 2000 }) => {
     const [count, setCount] = useState(0);
     const endVal = parseFloat(end) || 0;
+    const isInitial = React.useRef(true);
 
     useEffect(() => {
+        // If it's an update (not initial load), don't roll everything!
+        // Just set the value directly so BarrelDigit can handle the specific digit transition.
+        if (!isInitial.current) {
+            setCount(endVal); // Direct update -> BarrelDigit handles the "slot" drop
+            return;
+        }
+
+        // Initial Load: Roll from 0 to Target
         let startTime;
         let animationFrame;
 
@@ -172,6 +198,9 @@ const RollingBarrelCounter = ({ end, duration = 2000 }) => {
 
             if (progress < 1) {
                 animationFrame = requestAnimationFrame(animate);
+            } else {
+                isInitial.current = false; // Mark initial animation complete
+                setCount(endVal); // Ensure exact final value
             }
         };
 
