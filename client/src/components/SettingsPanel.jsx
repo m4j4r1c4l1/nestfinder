@@ -2025,14 +2025,14 @@ const SettingsPanel = ({ onClose }) => {
                         }}>
                             {swipeEnabled ? (
                                 <span>A <span style={{
-                                    backgroundColor: '#ef4444',
-                                    color: 'white',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    color: '#ef4444',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
                                     padding: '2px 6px',
                                     borderRadius: '4px',
                                     fontWeight: 600,
                                     fontSize: '0.75em',
                                     verticalAlign: 'middle',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                                     display: 'inline-block',
                                     lineHeight: '1.2',
                                     margin: '0 2px'
