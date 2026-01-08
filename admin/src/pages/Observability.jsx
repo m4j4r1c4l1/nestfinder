@@ -125,6 +125,8 @@ const BarrelDigit = ({ value }) => {
             display: 'inline-block',
             width: /^[0-9]$/.test(display) ? '0.6em' : 'auto', // Fixed width for nums, auto for others (like . or ,)
             minWidth: /^[0-9]$/.test(display) ? '0.6em' : '0.2em', // Ensure separator has some width
+            height: '1em', // Restored: Required because children are absolute
+            overflow: 'hidden', // Restored: Clip sliding animation
             margin: /^[0-9]$/.test(display) ? 0 : '0 1px', // Tiny margin for separator if needed
             verticalAlign: 'middle', // Align with text middle
             fontVariantNumeric: 'tabular-nums', // Enforce equal width for numbers
@@ -421,8 +423,8 @@ const Observability = () => {
                         <div style={{ height: '1px', background: '#334155', width: '100%' }} />
 
                         {/* Row 2: Messages | Broadcasts | Development */}
-                        {/* Using Grid to ensure exact 1/3 spacing and alignment */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', width: '100%' }}>
+                        {/* Using Grid to ensure exact spacing and alignment. Dev block gets 40% to fit 2-columns badges if needed, or just more space. */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 3fr) minmax(0, 3fr) minmax(0, 4fr)', gap: '0.5rem', width: '100%' }}>
                             {/* Messages Block (Left) */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
@@ -554,24 +556,22 @@ const Observability = () => {
                                             { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
                                             <div key={i} style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.2rem',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                                 background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
                                                 border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
-                                                borderRadius: '6px', padding: '0.4rem 0.3rem', // Tighter padding
-                                                minHeight: '48px',
-                                                overflow: 'hidden' // Safety
+                                                borderRadius: '8px', padding: '0.5rem 0.75rem',
+                                                minHeight: '52px'
                                             }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flexShrink: 1 }}>
-                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{badge.label}</div>
-                                                    <div className="text-muted" style={{ fontSize: '0.65rem', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{badge.sub}</div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
+                                                    <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
                                                 </div>
                                                 <span style={{
                                                     fontWeight: 700,
                                                     color: badge.color,
-                                                    fontSize: badge.mono ? '0.9rem' : '1.4rem', // Smaller fonts to fit
+                                                    fontSize: badge.mono ? '1.1rem' : '1.8rem',
                                                     fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
-                                                    lineHeight: 1,
-                                                    flexShrink: 0
+                                                    lineHeight: 1
                                                 }}>
                                                     {badge.count}
                                                 </span>
