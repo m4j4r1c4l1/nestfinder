@@ -33,11 +33,14 @@ const countCodeStats = (dirPath) => {
                     const content = fs.readFileSync(fullPath, 'utf8');
                     stats.lines += content.split('\n').length;
 
-                    if (/\.js$/.test(file)) {
+                    if (/\.(js|jsx|ts|tsx)$/.test(file)) {
                         const apiMatches = content.match(/router\.(get|post|put|delete|patch)/g);
                         if (apiMatches) stats.apiEndpoints += apiMatches.length;
 
-                        const socketMatches = content.match(/socket\.on\(/g) || content.match(/io\.on\(/g);
+                        const socketMatches = content.match(/socket\.(on|emit)\(/g) ||
+                            content.match(/io\.on\(/g) ||
+                            content.match(/useWebSocket\(/g) ||
+                            content.match(/ws\.on\(/g);
                         if (socketMatches) stats.socketEvents += socketMatches.length;
                     }
                 } catch (e) { /* ignore */ }
@@ -53,27 +56,31 @@ const countCodeStats = (dirPath) => {
 export const calculateDevMetrics = async (rootDir) => {
     let devMetrics = { commits: 0, components: 0, loc: 0, files: 0, apiEndpoints: 0, socketEvents: 0 };
 
+    // Attempt to get live git data first (most accurate for local/non-shallow)
+    let gitSucceeded = false;
     try {
-        // 1. Commits & Last Commit Hash
-        const storedMetrics = get('SELECT * FROM dev_metrics WHERE id = 1');
-        if (storedMetrics && storedMetrics.total_commits > 0) {
-            devMetrics.commits = storedMetrics.total_commits;
-            devMetrics.lastCommit = storedMetrics.last_commit_hash || '-';
+        const { stdout: isShallowRaw } = await execAsync('git rev-parse --is-shallow-repository', { cwd: rootDir });
+        const isShallow = isShallowRaw.trim() === 'true';
+
+        if (!isShallow) {
+            const { stdout: count } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
+            devMetrics.commits = parseInt(count.trim(), 10);
+            const { stdout: hash } = await execAsync('git rev-parse --short HEAD', { cwd: rootDir });
+            devMetrics.lastCommit = hash.trim();
+            gitSucceeded = true;
         }
+    } catch (e) {
+        // Git failed or not available
+    }
 
-        // Try local git first
-        try {
-            const { stdout: isShallowRaw } = await execAsync('git rev-parse --is-shallow-repository', { cwd: rootDir });
-            const isShallow = isShallowRaw.trim() === 'true';
-
-            if (!isShallow) {
-                const { stdout: count } = await execAsync('git rev-list --count HEAD', { cwd: rootDir });
-                devMetrics.commits = parseInt(count.trim(), 10);
-                const { stdout: hash } = await execAsync('git rev-parse --short HEAD', { cwd: rootDir });
-                devMetrics.lastCommit = hash.trim();
+    try {
+        // 1. If Git failed, fallback to stored metrics
+        if (!gitSucceeded) {
+            const storedMetrics = get('SELECT * FROM dev_metrics WHERE id = 1');
+            if (storedMetrics && storedMetrics.total_commits > 0) {
+                devMetrics.commits = storedMetrics.total_commits;
+                devMetrics.lastCommit = storedMetrics.last_commit_hash || '-';
             }
-        } catch (e) {
-            // If git fails, we rely on storedMetrics or GitHub API (handled in high-level caller if needed)
         }
 
         // 2. Code Stats
