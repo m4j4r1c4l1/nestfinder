@@ -1034,35 +1034,51 @@ const RetentionSlider = ({ value, onChange, t }) => {
         // User requested localized units.
 
         const getUnit = (key) => t(`settings.retentionHelp.unit.${key}`) || key;
+        const getShortUnit = (key) => {
+            const unit = getUnit(key);
+            // Valid for languages with simplified characters (Chinese, Japanese) -> use full character
+            // Valid for Alphabet languages -> use first letter
+            // If length is 1, use it. If longer, take charAt(0).
+            // Actually, for Chinese 'Week' is '周', 'Month' is '月', 'Day' is '天'. 1 char is perfect.
+            // For English 'Day' -> 'd'.
+            // For French 'Jour' -> 'j'.
+            // For Spanish 'Día' -> 'd'.
+            // For German 'Tag' -> 't'.
+            return unit.charAt(0).toLowerCase();
+        };
+
         const pluralize = (val, unitKey) => {
             const unit = getUnit(unitKey);
             // Very basic pluralization: add 's' if > 1 and not Chinese/Japanese typically
-            // Checking if unit ends in vowel? No.
-            // Let's just use the unit for now. 
-            // Better: "1 Day", "2 Days" -> "1 " + unit + (val > 1 ? "s" : "")
-            // This is imperfect for many langs but better than English only.
             const suffix = (val > 1 && ['en', 'es', 'fr', 'pt', 'nl', 'it'].includes(i18n.language?.substring(0, 2))) ? 's' : '';
             return `${val} ${unit}${suffix}`;
         };
+
+        // Use localized suffix for ticks
+        const hShort = getShortUnit('h');
+        const dShort = getShortUnit('d');
+        const wShort = getShortUnit('w');
+        const mShort = getShortUnit('m');
+        const yShort = getShortUnit('y');
 
         const s = [{ val: '0d', label: '0 ' + (t('settings.retentionHelp.unit.h') || 'Hours'), short: '0' }];
 
         // Hours (1-23)
         for (let i = 1; i < 24; i++) {
             const label = `${i} ${t('settings.retentionHelp.unit.h') || 'Hour'}${i > 1 ? 's' : ''}`;
-            s.push({ val: `${i}h`, label, short: `${i}h` });
+            s.push({ val: `${i}h`, label, short: `${i}${hShort}` });
         }
 
         // Days (1-6)
         for (let i = 1; i < 7; i++) {
             const label = `${i} ${t('settings.retentionHelp.unit.d') || 'Day'}${i > 1 ? 's' : ''}`;
-            s.push({ val: `${i}d`, label, short: `${i}d` });
+            s.push({ val: `${i}d`, label, short: `${i}${dShort}` });
         }
 
         // Weeks (1-3)
         for (let i = 1; i < 4; i++) {
             const label = `${i} ${t('settings.retentionHelp.unit.w') || 'Week'}${i > 1 ? 's' : ''}`;
-            s.push({ val: `${i}w`, label, short: `${i}w` });
+            s.push({ val: `${i}w`, label, short: `${i}${wShort}` });
         }
 
         // Months (1-12)
@@ -1073,7 +1089,7 @@ const RetentionSlider = ({ value, onChange, t }) => {
             } else {
                 label = `${i} ${t('settings.retentionHelp.unit.m') || 'Month'}${i > 1 ? 's' : ''}`;
             }
-            s.push({ val: `${i}m`, label: label, short: i === 12 ? '1y' : `${i}m` });
+            s.push({ val: `${i}m`, label: label, short: i === 12 ? `1${yShort}` : `${i}${mShort}` });
         }
 
         s.push({ val: 'forever', label: '∞', short: '∞' });

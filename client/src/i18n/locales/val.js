@@ -218,9 +218,9 @@ export default {
         sameKeyError: 'Aquesta és la clau de recuperació del teu compte actual. Ja estàs connectat amb aquest compte.',
         // Swipe Direction
         swipeDirection: 'Esborrar Missatges',
-        deleteSettingDesc: 'Select how you would like to delete a message',
-        safeDelete: 'Safe Delete',
-        tapToSelect: 'Tap to select the swipe direction',
+        deleteSettingDesc: 'Selecciona com vols eliminar un missatge',
+        safeDelete: 'Esborrat Segur',
+        tapToSelect: 'Toca per seleccionar la direcció de lliscament',
         swipe: {
             controlLabel: 'Swipe',
             right: '→ Lliscar a la dreta',

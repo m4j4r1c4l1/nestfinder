@@ -218,9 +218,9 @@ export default {
         sameKeyError: 'Dit is de herstelsleutel van je huidige account. Je bent al ingelogd met dit account.',
         // Swipe Direction
         swipeDirection: 'Berichten verwijderen',
-        deleteSettingDesc: 'Select how you would like to delete a message',
-        safeDelete: 'Safe Delete',
-        tapToSelect: 'Tap to select the swipe direction',
+        deleteSettingDesc: 'Selecteer hoe je een bericht wilt verwijderen',
+        safeDelete: 'Veilig verwijderen',
+        tapToSelect: 'Tik om de veegrichting te selecteren',
         swipe: {
             controlLabel: 'Swipe',
             right: '→ Veeg naar rechts',

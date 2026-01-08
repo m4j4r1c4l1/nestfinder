@@ -218,9 +218,9 @@ export default {
         sameKeyError: 'Questa è la chiave di recupero del tuo account attuale. Sei già connesso con questo account.',
         // Swipe Direction
         swipeDirection: 'Elimina messaggi',
-        deleteSettingDesc: 'Select how you would like to delete a message',
-        safeDelete: 'Safe Delete',
-        tapToSelect: 'Tap to select the swipe direction',
+        deleteSettingDesc: 'Seleziona come vuoi eliminare un messaggio',
+        safeDelete: 'Eliminazione sicura',
+        tapToSelect: 'Tocca per selezionare la direzione dello scorrimento',
         swipe: {
             controlLabel: 'Swipe',
             right: '→ Scorri a destra',
