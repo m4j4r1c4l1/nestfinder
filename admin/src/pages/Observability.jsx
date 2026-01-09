@@ -110,20 +110,23 @@ const CommitReveal = ({ text, duration = 2000 }) => {
 };
 
 // Barrel/Slot Machine Digit Component
-const BarrelDigit = ({ value }) => {
+// Barrel/Slot Machine Digit Component
+const BarrelDigit = ({ value, trigger }) => {
     const [display, setDisplay] = useState(value);
     const [prev, setPrev] = useState(null);
     const [animating, setAnimating] = useState(false);
 
     useEffect(() => {
-        if (value !== display) {
+        // If value changed OR trigger fired (even if value is same), animate!
+        // For forced trigger with same value: setPrev to current, setDisplay to current, force re-render/animate
+        if (value !== display || trigger) {
             setPrev(display);
             setDisplay(value);
             setAnimating(true);
             const timer = setTimeout(() => setAnimating(false), 600);
             return () => clearTimeout(timer);
         }
-    }, [value, display]);
+    }, [value, trigger]); // removed display from deps to avoid loop, though logic handles it
 
     return (
         <div style={{
@@ -138,28 +141,22 @@ const BarrelDigit = ({ value }) => {
             fontVariantNumeric: 'tabular-nums',
             textAlign: 'center'
         }}>
-            <div key={display} style={{
+            <div key={`${display}-${trigger || 'init'}`} style={{
                 display: 'flex',
                 flexDirection: 'column',
                 flexShrink: 0,
                 animation: animating ? 'barrelDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'none',
                 transform: 'translateY(0)'
             }}>
-                {/* 
-                  The first div's baseline determines the baseline of the entire inline-flex container.
-                  Using 1.2 line-height for a natural text feel.
-                */}
                 <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{display}</div>
-
-                {/* Old Value (Bottom) - Only rendered during animation */}
-                {animating && <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{prev}</div>}
+                {animating && <div style={{ height: '1.2em', lineHeight: '1.2em' }}>{prev || display}</div>}
             </div>
         </div>
     );
 };
 
 // Barrel Counter Container
-const BarrelCounter = ({ value }) => {
+const BarrelCounter = ({ value, trigger }) => {
     const styles = `
         @keyframes barrelDrop {
             0% { transform: translateY(-50%); filter: blur(0); }
@@ -176,14 +173,14 @@ const BarrelCounter = ({ value }) => {
         <div style={{ display: 'inline-flex', alignItems: 'baseline' }}>
             <style>{styles}</style>
             {str.split('').map((char, i) => (
-                <BarrelDigit key={i} value={char} />
+                <BarrelDigit key={i} value={char} trigger={trigger} />
             ))}
         </div>
     );
 };
 
 // Rolling Barrel Counter (CountUp + Barrel)
-const RollingBarrelCounter = ({ end, duration = 2000, separator = null }) => {
+const RollingBarrelCounter = ({ end, duration = 2000, separator = null, trigger = null }) => {
     const [count, setCount] = useState(0);
     const endVal = parseFloat(end) || 0;
     const isInitial = React.useRef(true);
@@ -218,7 +215,7 @@ const RollingBarrelCounter = ({ end, duration = 2000, separator = null }) => {
 
         animationFrame = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(animationFrame);
-    }, [endVal, duration]);
+    }, [endVal, duration, trigger]);
 
     // Format the count for display
     let displayValue = Math.round(count).toString();
@@ -227,7 +224,7 @@ const RollingBarrelCounter = ({ end, duration = 2000, separator = null }) => {
         displayValue = displayValue.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
     }
 
-    return <BarrelCounter value={displayValue} />;
+    return <BarrelCounter value={displayValue} trigger={trigger} />;
 };
 
 // Randomly chooses between Barrel and CountUp for variety
@@ -550,7 +547,8 @@ const Observability = () => {
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem', width: '100%', maxWidth: '450px' }}>
                                         {[
                                             // 1. Commits
-                                            { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} />, color: '#8b5cf6' },
+                                            // 1. Commits
+                                            { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#8b5cf6' },
                                             // 2. Commit ID
                                             {
                                                 label: 'Commit ID',
@@ -561,13 +559,13 @@ const Observability = () => {
                                                 boxStyle: { background: '#1e3a8a40', border: '1px solid #1e3a8a' }
                                             },
                                             // 3. Components
-                                            { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} />, color: '#0ea5e9' },
+                                            { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#0ea5e9' },
                                             // 4. API (New)
-                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
+                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
                                             // 5. Websockets (New)
-                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} />, color: '#eab308' },
+                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#eab308' },
                                             // 6. Files
-                                            { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
+                                            { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
                                             <div key={i} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
