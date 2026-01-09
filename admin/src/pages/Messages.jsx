@@ -959,7 +959,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Timeline Visualization - Wrapped to prevent overlap */}
-                <div style={{ position: 'relative', zIndex: 5, margin: '0.75rem 2rem 0.75rem 1rem' }}>
+                <div style={{ position: 'relative', zIndex: 5, margin: '0.75rem 2rem 0.75rem 1rem', overflow: 'hidden' }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
                         onBroadcastClick={setSelectedBroadcast}
