@@ -995,8 +995,17 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                             {/* Bottom Line: Professional Layout */}
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
 
-                                                {/* Left: Priority, Max Views, Status, Attachment */}
+                                                {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <span style={{
+                                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                                        fontSize: '0.7rem', fontWeight: 700,
+                                                        background: `${statusColor}20`, color: statusColor,
+                                                        border: `1px solid ${statusColor}40`,
+                                                        textTransform: 'uppercase', letterSpacing: '0.5px'
+                                                    }}>
+                                                        {statusText}
+                                                    </span>
                                                     <span style={{
                                                         padding: '0.2rem 0.5rem', borderRadius: '4px',
                                                         fontSize: '0.7rem', fontWeight: 600,
@@ -1013,15 +1022,6 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                             👁 {b.max_views}
                                                         </span>
                                                     )}
-                                                    <span style={{
-                                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
-                                                        fontSize: '0.7rem', fontWeight: 700,
-                                                        background: `${statusColor}20`, color: statusColor,
-                                                        border: `1px solid ${statusColor}40`,
-                                                        textTransform: 'uppercase', letterSpacing: '0.5px'
-                                                    }}>
-                                                        {statusText}
-                                                    </span>
                                                     {b.image_url && (
                                                         <span title="Has Attachment" style={{ fontSize: '0.9rem' }}>📎</span>
                                                     )}
@@ -1045,7 +1045,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{b.delivered_count || 0}</span>
                                                         </span>
                                                         <span title="Read" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#3b82f6' }}>
-                                                            👁 <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
+                                                            ✓✓ <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
                                                         </span>
                                                     </div>
                                                 </div>
