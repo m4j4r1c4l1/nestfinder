@@ -132,3 +132,34 @@ Capacidades "NestFinder en Cualquier Lugar" mejoradas.
 - **Modo Lite**: Actívalo en Ajustes para desactivar animaciones y mejor rendimiento.
 - **Cola Offline**: Acciones en cola cuando está offline y sincronizadas al reconectar.
 
+### 14. Reporte de Errores y Recuperación 🚨
+Manejo automático de errores con opciones de recuperación amigables.
+- **GlobalErrorBoundary**: Captura errores de React, excepciones no manejadas y rechazos de promesas.
+- **Modal de Error**: Muestra mensaje de error con botones Recargar, Enviar Reporte y Descartar.
+- **Reportes Automáticos**: Envía detalles del error (error, traza, info del dispositivo, marca de tiempo) como feedback de bug.
+- **Recuperación Elegante**: Los usuarios pueden recargar o descartar para intentar continuar usando la app.
+
+### 15. Sistema de Buzón Mejorado 📬
+Interfaz de mensajería completa con navegación por pestañas.
+- **Tres Pestañas**: 🪺 Recibidos | 🪹 Enviados | 🪶 Redactar para gestión organizada de mensajes.
+- **Deslizar para Eliminar**: Gesto táctil para eliminar mensajes con animación de desenfoque progresivo.
+- **Seguimiento de Estado**: Marcas visuales (✓ enviado, ✓✓ verde entregado, ✓✓ azul leído).
+- **Filtros de Estado**: Filtra mensajes por Total, Pendiente o Leído.
+- **Calificación con Estrellas**: Sistema de calificación de 1-5 estrellas en el envío de retroalimentación.
+
+### 16. Ajustes de Mensajes ⚙️
+Control granular sobre el comportamiento de notificaciones.
+- **Toggle de Popups en Tiempo Real**: Activar/desactivar banners de notificación emergentes.
+- **Slider de Retención de Mensajes**: Configura auto-eliminación (Eliminar al leer → 1 día → 1 semana → 1 mes → 1 año → Siempre).
+- **Dirección de Deslizamiento**: Elige izquierda, derecha o ambas direcciones para deslizar-eliminar.
+- **Modo de Eliminación Segura**: Requiere botón de confirmación en lugar de eliminación instantánea con deslizamiento.
+- **Carrusel de Idiomas**: UI de rueda con física de momento para selección de idioma.
+
+### 17. Panel de Admin y Monitoreo 📊
+Herramientas administrativas completas (solo acceso admin).
+- **Mapa de Actividad Global**: Visualización en vivo de todos los puntos reportados con filtrado.
+- **Métricas de Actividad**: Puntos totales, usuarios activos, reportes diarios y acciones.
+- **Estado del Sistema**: Memoria, disco, heap y monitoreo de uptime del servidor.
+- **Panel de Observabilidad**: Contadores animados, métricas de desarrollo (LOC, commits, componentes), gráficos de tendencias.
+- **Gestión de Mensajes**: Compositor, historial de envíos, buzón de retroalimentación, creación de difusiones.
+- **Webhooks de GitHub**: Actualizaciones de commits en tiempo real vía integración de webhook.

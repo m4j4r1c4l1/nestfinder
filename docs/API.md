@@ -14,6 +14,8 @@
 | **[⚙️ Settings Routes](#-settings-routes-api-settings)** | App Configuration & Admin Settings |
 | **[🔔 Notification Routes](#-notification-routes-api-push)** | Push Notifications & Admin Messaging |
 | **[👨‍💼 Admin Routes](#-admin-routes-api-admin)** | Dashboard Stats, Logs, User Management |
+| **[🪝 Webhook Routes](#-webhook-routes-api-webhook)** | GitHub Integration & Dev Metrics |
+| **[🐛 Debug Routes](#-debug-routes-api-debug)** | Client Logging & Diagnostics |
 | **[🏥 Health Check](#-health-check)** | Server Status Monitor |
 | **[🔌 WebSocket](#-websocket)** | Real-time Updates |
 
@@ -425,6 +427,75 @@ POST /api/admin/reset
   "target": "logs|points|users|all"
 }
 ```
+
+---
+
+## 🪝 Webhook Routes (`/api/webhook`)
+
+### GitHub Push Webhook
+```
+POST /api/webhook/github
+Headers: X-Hub-Signature-256: sha256=<signature>
+```
+Receives push events from GitHub. Verifies HMAC-SHA256 signature.
+
+**Request Body:** GitHub push event payload
+
+**Response:**
+```json
+{
+  "success": true,
+  "commits_received": 3,
+  "last_commit": "a1b2c3d",
+  "actual_total": 150
+}
+```
+
+---
+
+### Get Dev Metrics
+```
+GET /api/webhook/dev-metrics
+```
+Returns stored development metrics.
+
+**Response:**
+```json
+{
+  "total_commits": 150,
+  "last_commit_hash": "a1b2c3d",
+  "last_commit_message": "Fix bug",
+  "last_commit_author": "Developer",
+  "updated_at": "ISO timestamp"
+}
+```
+
+---
+
+## 🐛 Debug Routes (`/api/debug`)
+
+### Submit Debug Logs
+```
+POST /api/debug/logs
+```
+Receives client-side debug logs for troubleshooting.
+
+**Request Body:**
+```json
+{
+  "logs": ["log entry 1", "log entry 2"],
+  "platform": "iOS",
+  "userAgent": "Mozilla/5.0..."
+}
+```
+
+---
+
+### Download Debug Logs
+```
+GET /api/debug/download
+```
+Downloads collected debug logs as `swipe_debug_logs.txt`.
 
 ---
 
