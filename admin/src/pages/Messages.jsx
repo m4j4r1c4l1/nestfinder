@@ -396,18 +396,19 @@ const Messages = () => {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
-            minHeight: (activeTab === 'outbox' || activeTab === 'feedback') ? '100%' : 'auto'
+            overflow: (activeTab === 'composer') ? 'visible' : 'hidden', // Broadcasts now hidden to allow card scroll
+            height: 'calc(100vh - 20px)', // Fixed height for internal scrolling
+            minHeight: '0'
         }}>
             <style>{datePickerStyles}</style>
-            {/* Sticky Header Container for page-scroll tabs */}
             <div style={{
-                position: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'sticky' : 'static',
-                top: 0,
+                // Header is always static now as the page doesn't scroll, the content does
                 background: 'var(--color-bg-primary, #0f172a)',
                 zIndex: 100,
-                padding: '1.5rem 1.5rem 0 1.5rem'
+                padding: '1.5rem 1.5rem 0 1.5rem',
+                borderBottom: '1px solid #334155'
             }}>
+
                 <div style={{ marginBottom: '1.5rem' }}>
                     <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                         🔔 Messages
@@ -481,11 +482,12 @@ const Messages = () => {
             ) : (
                 <div className="tab-content" style={{
                     animation: 'fadeIn 0.3s ease',
-                    flex: (activeTab === 'outbox' || activeTab === 'feedback') ? 1 : 'none',
+                    flex: 1, // Always take remaining space
                     display: 'flex',
                     flexDirection: 'column',
-                    overflow: (activeTab === 'composer' || activeTab === 'broadcasts') ? 'visible' : 'hidden',
-                    padding: '0.5rem 1rem 1.25rem 1rem'
+                    overflow: (activeTab === 'composer') ? 'visible' : 'hidden',
+                    padding: '0.5rem 1rem 1.25rem 1rem',
+                    minHeight: 0 // Critical for flex scrolling
                 }}>
 
                     {/* COMPOSER TAB */}
@@ -933,6 +935,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                     )}
                 </div>
 
+                {/* Timeline Visualization */}
+                <Timeline broadcasts={filteredBroadcasts} />
+
                 {/* Scrollable Broadcasts List */}
                 <div className="card-body" style={{ flex: 1, overflowY: 'auto', padding: 0, background: '#1e293b' }}>
                     <div style={{ padding: '1rem' }}>
@@ -957,7 +962,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                         if (val === 2) return '#f97316'; // 2: Orange (High)
                                         if (val === 3) return '#eab308'; // 3: Yellow (Medium)
                                         if (val === 4) return '#3b82f6'; // 4: Blue (Normal)
-                                        return '#64748b'; // 5+: Slate (Low)
+                                        return '#22c55e'; // 5: Green (Low) - CHANGED P5
                                     };
                                     const priorityColor = getPriorityColor(b.priority);
 
@@ -1007,9 +1012,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        if (confirm('Are you sure you want to delete this broadcast?')) {
-                                                            onDelete(b.id);
-                                                        }
+                                                        onDelete(b.id);
                                                     }}
                                                     className="btn-icon danger"
                                                     title="Delete"
@@ -1059,13 +1062,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                 {/* Right: Time Range & Stats */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                     {/* Time Range */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem' }}>
-                                                        <span style={{ color: '#64748b' }}>🕐</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem', fontWeight: isActive ? 'bold' : 'normal' }}>
+                                                        <span style={{ color: isActive ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ color: '#475569' }}>{formatTimeCET(start)}</span>
-                                                        <span style={{ color: '#475569' }}>→</span>
+                                                        <span style={{ color: isActive ? '#f8fafc' : '#475569' }}>{formatTimeCET(start)}</span>
+                                                        <span style={{ color: isActive ? '#f8fafc' : '#475569' }}>→</span>
                                                         <span>{end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ color: '#475569' }}>{formatTimeCET(end)}</span>
+                                                        <span style={{ color: isActive ? '#f8fafc' : '#475569' }}>{formatTimeCET(end)}</span>
                                                     </div>
 
                                                     {/* Delivery Stats */}
@@ -2885,3 +2888,188 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
         document.body
     );
 }
+
+// --- Timeline Component ---
+function Timeline({ broadcasts }) {
+    // 1. Determine Range
+    const [minTime, maxTime] = React.useMemo(() => {
+        if (!broadcasts.length) return [0, 0];
+        let min = new Date(broadcasts[0].start_time).getTime();
+        let max = new Date(broadcasts[0].end_time).getTime();
+        broadcasts.forEach(b => {
+            const s = new Date(b.start_time).getTime();
+            const e = new Date(b.end_time).getTime();
+            if (s < min) min = s;
+            if (e > max) max = e;
+        });
+        // Add minimal padding (1 hour)
+        const pad = 3600000;
+        return [min - pad, max + pad];
+    }, [broadcasts]);
+
+    const totalDuration = maxTime - minTime;
+
+    // 2. Swimlane Logic (Stacking)
+    const { lanes, laneCount } = React.useMemo(() => {
+        if (!broadcasts.length) return { lanes: [], laneCount: 0 };
+
+        // Sort by start time asc, then duration desc (longer first to establish lanes)
+        const sorted = [...broadcasts].sort((a, b) => {
+            const sA = new Date(a.start_time).getTime();
+            const sB = new Date(b.start_time).getTime();
+            if (sA !== sB) return sA - sB;
+            return (new Date(b.end_time).getTime() - sB) - (new Date(a.end_time).getTime() - sA);
+        });
+
+        const lanes = []; // Array of arrays of items: [ [item1, item3], [item2] ]
+        const laneEnds = []; // Array of end times for each lane
+
+        sorted.forEach(b => {
+            const start = new Date(b.start_time).getTime();
+            const end = new Date(b.end_time).getTime();
+
+            let placed = false;
+            for (let i = 0; i < laneEnds.length; i++) {
+                // If this lane is free at start time (with slight gap padding of 15 mins)
+                if (laneEnds[i] + 900000 < start) {
+                    lanes[i].push(b);
+                    laneEnds[i] = end;
+                    placed = true;
+                    break;
+                }
+            }
+
+            if (!placed) {
+                // New lane
+                lanes.push([b]);
+                laneEnds.push(end);
+            }
+        });
+
+        return { lanes, laneCount: lanes.length };
+    }, [broadcasts]);
+
+    // Hover State
+    const [hoveredItem, setHoveredItem] = useState(null);
+    const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+
+    if (!broadcasts.length) return null;
+
+    const rowHeight = 24;
+    const gap = 4;
+    const totalHeight = laneCount * (rowHeight + gap) + 24; // + padding
+
+    const formatTooltipTime = (d) => new Date(d).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+    return (
+        <div style={{
+            background: '#0f172a',
+            borderBottom: '1px solid var(--color-border)',
+            padding: '12px 1rem',
+            position: 'relative',
+            height: `${totalHeight}px`,
+            overflow: 'hidden', // Prevent scrollbars from tooltips ? No, allow tooltip overflow? Tooltip is fixed/absolute.
+            transition: 'height 0.3s ease'
+        }}
+            onMouseMove={(e) => {
+                // Track mouse for tooltip if needed, but easier to position relative to bar or viewport
+                // Timeline hover logic: update tooltip pos to follow mouse?
+                if (hoveredItem) {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    // Relative to container
+                    // setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                    // Global for fixed:
+                    setTooltipPos({ x: e.clientX, y: e.clientY });
+                }
+            }}
+            onMouseLeave={() => setHoveredItem(null)}
+        >
+            {/* Grid Lines (Days?) - Optional, keep simple first */}
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                {/* Lanes */}
+                {lanes.map((laneItems, laneIndex) => (
+                    laneItems.map(b => {
+                        const start = new Date(b.start_time).getTime();
+                        const end = new Date(b.end_time).getTime();
+                        const left = ((start - minTime) / totalDuration) * 100;
+                        const width = ((end - start) / totalDuration) * 100;
+
+                        // Style Logic
+                        const isActive = new Date() >= new Date(b.start_time) && new Date() <= new Date(b.end_time);
+                        const isEnded = new Date() > new Date(b.end_time);
+
+                        let color = '#3b82f6';
+                        if (b.priority <= 1) color = '#ef4444';
+                        else if (b.priority === 2) color = '#f97316';
+                        else if (b.priority === 3) color = '#eab308';
+                        else if (b.priority === 5) color = '#22c55e'; // Green P5
+
+                        return (
+                            <div
+                                key={b.id}
+                                style={{
+                                    position: 'absolute',
+                                    left: `${left}%`,
+                                    width: `${Math.max(width, 0.5)}%`, // Min width slightly
+                                    top: `${laneIndex * (rowHeight + gap)}px`,
+                                    height: `${rowHeight}px`,
+                                    background: isActive ? color : `${color}80`, // Dim if not active
+                                    border: isActive ? '1px solid white' : `1px solid ${color}`,
+                                    borderRadius: '4px',
+                                    opacity: isEnded ? 0.4 : 1,
+                                    cursor: 'pointer',
+                                    zIndex: 10
+                                }}
+                                onMouseEnter={(e) => {
+                                    setHoveredItem(b);
+                                    setTooltipPos({ x: e.clientX, y: e.clientY });
+                                }}
+                            />
+                        );
+                    })
+                ))}
+            </div>
+
+            {/* Tooltip */}
+            {hoveredItem && ReactDOM.createPortal(
+                <div style={{
+                    position: 'fixed',
+                    top: tooltipPos.y + 15,
+                    left: tooltipPos.x + 15,
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '8px',
+                    zIndex: 9999,
+                    pointerEvents: 'none',
+                    backdropFilter: 'blur(4px)',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                    minWidth: '200px',
+                    maxWidth: '300px'
+                }}>
+                    <div style={{ fontWeight: 700, color: '#f8fafc', marginBottom: '4px', fontSize: '0.9rem' }}>
+                        {hoveredItem.title || 'Untitled'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>
+                        {formatTooltipTime(hoveredItem.start_time)} - {formatTooltipTime(hoveredItem.end_time)}
+                    </div>
+
+                    {/* Stats */}
+                    <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', marginBottom: hoveredItem.image_url ? '8px' : '0' }}>
+                        <div style={{ color: '#22c55e' }}>✓ {hoveredItem.delivered_count || 0} Delivered</div>
+                        <div style={{ color: '#3b82f6' }}>✓✓ {hoveredItem.read_count || 0} Read</div>
+                    </div>
+
+                    {/* Image Miniature */}
+                    {hoveredItem.image_url && (
+                        <div style={{ width: '100%', height: '100px', background: '#000', borderRadius: '4px', overflow: 'hidden' }}>
+                            <img src={hoveredItem.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
+                    )}
+                </div>,
+                document.body
+            )}
+        </div>
+    );
+};
+
