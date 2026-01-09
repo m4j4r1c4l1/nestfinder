@@ -22,39 +22,23 @@ export const initDatabase = async () => {
     db = new SQL.Database();
   }
 
-  // Create tables
+  // ==========================================
+  // SCHEMA DEFINITIONS (Complete Tables)
+  // ==========================================
+
+  // Users table (anonymous users with optional nicknames)
   db.run(`
-    -- Users table (anonymous users with optional nicknames)
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       nickname TEXT,
       device_id TEXT UNIQUE NOT NULL,
       trust_score INTEGER DEFAULT 0,
+      recovery_key TEXT,
+      blocked BOOLEAN DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       last_active DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
-
-  // Migration: Add trust_score if missing
-  try {
-    db.run("ALTER TABLE users ADD COLUMN trust_score INTEGER DEFAULT 0");
-  } catch (error) {
-    // Column likely already exists
-  }
-
-  // Migration: Add recovery_key if missing
-  try {
-    db.run("ALTER TABLE users ADD COLUMN recovery_key TEXT");
-  } catch (error) {
-    // Column likely already exists
-  }
-
-  // Migration: Add blocked column if missing
-  try {
-    db.run("ALTER TABLE users ADD COLUMN blocked BOOLEAN DEFAULT 0");
-  } catch (error) {
-    // Column likely already exists
-  }
 
   // Dev metrics table for GitHub webhook data
   db.run(`
@@ -69,8 +53,8 @@ export const initDatabase = async () => {
     )
   `);
 
+  // Points table (locations submitted by users)
   db.run(`
-    -- Points table (locations submitted by users)
     CREATE TABLE IF NOT EXISTS points (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT NOT NULL,
@@ -86,8 +70,8 @@ export const initDatabase = async () => {
     );
   `);
 
+  // Confirmations table (user votes on points)
   db.run(`
-    -- Confirmations table (user votes on points)
     CREATE TABLE IF NOT EXISTS confirmations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       point_id INTEGER NOT NULL,
@@ -100,8 +84,8 @@ export const initDatabase = async () => {
     );
   `);
 
+  // Logs table (all user actions for audit)
   db.run(`
-    -- Logs table (all user actions for audit)
     CREATE TABLE IF NOT EXISTS logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT,
@@ -113,8 +97,8 @@ export const initDatabase = async () => {
     );
   `);
 
+  // Settings table (admin-configurable settings)
   db.run(`
-    -- Settings table (admin-configurable settings)
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
@@ -122,8 +106,8 @@ export const initDatabase = async () => {
     );
   `);
 
+  // Admins table
   db.run(`
-    -- Admins table
     CREATE TABLE IF NOT EXISTS admins (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
@@ -132,8 +116,8 @@ export const initDatabase = async () => {
     );
   `);
 
+  // Push subscriptions for Web Push notifications
   db.run(`
-    -- Push subscriptions for Web Push notifications
     CREATE TABLE IF NOT EXISTS push_subscriptions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT NOT NULL,
@@ -145,103 +129,53 @@ export const initDatabase = async () => {
     );
   `);
 
+  // Broadcasts table (admin announcements)
   db.run(`
-    -- Broadcasts table (admin announcements)
     CREATE TABLE IF NOT EXISTS broadcasts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
       message TEXT NOT NULL,
       image_url TEXT,
       start_time DATETIME NOT NULL,
       end_time DATETIME NOT NULL,
+      max_views INTEGER DEFAULT NULL,
+      priority INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
+  // User Feedback table
   db.run(`
-    -- User Feedback table
     CREATE TABLE IF NOT EXISTS feedback (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT,
       type TEXT DEFAULT 'general',
       message TEXT NOT NULL,
-      status TEXT DEFAULT 'new',
+      status TEXT DEFAULT 'sent',
+      rating INTEGER,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
   `);
 
+  // In-App Notifications table
   db.run(`
-    -- In-App Notifications table
     CREATE TABLE IF NOT EXISTS notifications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT NOT NULL,
       title TEXT NOT NULL,
       body TEXT,
       type TEXT DEFAULT 'info',
+      image_url TEXT,
+      batch_id TEXT,
       read BOOLEAN DEFAULT 0,
+      delivered BOOLEAN DEFAULT 0,
+      delivered_at DATETIME,
+      read_at DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
   `);
-
-  db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);`);
-
-  // Migration: Add image_url to notifications if not exists
-  try {
-    db.run("ALTER TABLE notifications ADD COLUMN image_url TEXT");
-  } catch (e) { /* Column exists */ }
-
-  // Migration: Add batch_id to notifications (for grouping broadcasts)
-  try {
-    db.run("ALTER TABLE notifications ADD COLUMN batch_id TEXT");
-    db.run("CREATE INDEX IF NOT EXISTS idx_notifications_batch ON notifications(batch_id)");
-  } catch (e) { /* Column exists */ }
-
-  // Migration: Add delivered to notifications (for tracking receipt)
-  try {
-    db.run("ALTER TABLE notifications ADD COLUMN delivered BOOLEAN DEFAULT 0");
-  } catch (e) { /* Column exists */ }
-
-  // Migration: Add timestamps for delivery/read
-  try {
-    db.run("ALTER TABLE notifications ADD COLUMN delivered_at DATETIME");
-  } catch (e) { /* Column exists */ }
-  // Backfill existing (safe to run always)
-  db.run("UPDATE notifications SET delivered_at = created_at WHERE delivered = 1 AND delivered_at IS NULL");
-
-  try {
-    db.run("ALTER TABLE notifications ADD COLUMN read_at DATETIME");
-  } catch (e) { /* Column exists */ }
-  // Backfill existing (safe to run always)
-  db.run("UPDATE notifications SET read_at = created_at WHERE read = 1 AND read_at IS NULL");
-
-  // Create indexes
-  db.run(`CREATE INDEX IF NOT EXISTS idx_points_status ON points(status);`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_points_user ON points(user_id);`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_confirmations_point ON confirmations(point_id);`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_logs_user ON logs(user_id);`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_logs_action ON logs(action);`);
-
-  // Migration: Add image_url to broadcasts
-  try {
-    db.run("ALTER TABLE broadcasts ADD COLUMN image_url TEXT");
-  } catch (e) { /* Column exists */ }
-
-  // Migration: Add max_views to broadcasts (limit how many times a user sees it)
-  try {
-    db.run("ALTER TABLE broadcasts ADD COLUMN max_views INTEGER DEFAULT NULL");
-  } catch (e) { /* Column exists */ }
-
-  // Migration: Add priority to broadcasts (higher shows first)
-  try {
-    db.run("ALTER TABLE broadcasts ADD COLUMN priority INTEGER DEFAULT 0");
-  } catch (e) { /* Column exists */ }
-
-  // Migration: Add title to broadcasts
-  try {
-    db.run("ALTER TABLE broadcasts ADD COLUMN title TEXT");
-  } catch (e) { /* Column exists */ }
 
   // Broadcast Views table (tracks per-user broadcast delivery status)
   db.run(`
@@ -261,9 +195,6 @@ export const initDatabase = async () => {
       UNIQUE(broadcast_id, user_id)
     );
   `);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_broadcast ON broadcast_views(broadcast_id);`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_user ON broadcast_views(user_id);`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_status ON broadcast_views(status);`);
 
   // Daily ratings aggregation table
   db.run(`
@@ -279,64 +210,54 @@ export const initDatabase = async () => {
       rating_5 INTEGER DEFAULT 0
     );
   `);
+
+  // ==========================================
+  // INDEXES
+  // ==========================================
+
+  db.run(`CREATE INDEX IF NOT EXISTS idx_points_status ON points(status);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_points_user ON points(user_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_confirmations_point ON confirmations(point_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_logs_user ON logs(user_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_logs_action ON logs(action);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_notifications_batch ON notifications(batch_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_broadcast ON broadcast_views(broadcast_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_user ON broadcast_views(user_id);`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_broadcast_views_status ON broadcast_views(status);`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_daily_ratings_date ON daily_ratings(date);`);
 
-  // Migration: Add rating column to feedback
-  try {
-    db.run("ALTER TABLE feedback ADD COLUMN rating INTEGER");
-  } catch (e) { /* Column exists */ }
+  // ==========================================
+  // MIGRATIONS (For existing databases only)
+  // These add columns that may be missing from older schemas
+  // ==========================================
 
-  // Migration: Add status column to feedback (Fixes missing column issue)
-  try {
-    db.run("ALTER TABLE feedback ADD COLUMN status TEXT DEFAULT 'new'");
-  } catch (e) { /* Column exists */ }
+  // Users table migrations
+  try { db.run("ALTER TABLE users ADD COLUMN trust_score INTEGER DEFAULT 0"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE users ADD COLUMN recovery_key TEXT"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE users ADD COLUMN blocked BOOLEAN DEFAULT 0"); } catch (e) { /* Exists */ }
 
-  // Migration: Refactor Feedback Statuses (new->sent, reviewed->read)
-  try {
-    // 1. Convert 'new' to 'sent'
-    db.run("UPDATE feedback SET status = 'sent' WHERE status = 'new'");
-    // 2. Convert 'reviewed' or 'resolved' to 'read'
-    db.run("UPDATE feedback SET status = 'read' WHERE status IN ('reviewed', 'resolved')");
-    // Note: 'delivered' stays 'delivered'
-  } catch (e) { console.error('Migration failed:', e); }
+  // Notifications table migrations
+  try { db.run("ALTER TABLE notifications ADD COLUMN image_url TEXT"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE notifications ADD COLUMN batch_id TEXT"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE notifications ADD COLUMN delivered BOOLEAN DEFAULT 0"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE notifications ADD COLUMN delivered_at DATETIME"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE notifications ADD COLUMN read_at DATETIME"); } catch (e) { /* Exists */ }
 
-  // Migration: Extract ratings from existing feedback messages and populate daily_ratings
-  // This runs safely multiple times (only processes messages without rating set)
-  const feedbackWithRatings = db.exec(`
-    SELECT id, message, created_at FROM feedback 
-    WHERE rating IS NULL AND message LIKE '%[Rating:%'
-  `);
+  // Broadcasts table migrations
+  try { db.run("ALTER TABLE broadcasts ADD COLUMN title TEXT"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE broadcasts ADD COLUMN image_url TEXT"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE broadcasts ADD COLUMN max_views INTEGER DEFAULT NULL"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE broadcasts ADD COLUMN priority INTEGER DEFAULT 0"); } catch (e) { /* Exists */ }
 
-  if (feedbackWithRatings.length > 0 && feedbackWithRatings[0].values) {
-    feedbackWithRatings[0].values.forEach(row => {
-      const [id, message, createdAt] = row;
-      // Extract rating from message like "[Rating: 5/5 ⭐]"
-      const match = message.match(/\[Rating:\s*(\d)\/5/);
-      if (match) {
-        const rating = parseInt(match[1]);
-        if (rating >= 1 && rating <= 5) {
-          // Update the feedback record
-          db.run("UPDATE feedback SET rating = ? WHERE id = ?", [rating, id]);
+  // Feedback table migrations
+  try { db.run("ALTER TABLE feedback ADD COLUMN rating INTEGER"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE feedback ADD COLUMN status TEXT DEFAULT 'sent'"); } catch (e) { /* Exists */ }
 
-          // Extract date from created_at (YYYY-MM-DD)
-          const dateStr = createdAt.split(' ')[0].split('T')[0];
-          const ratingCol = `rating_${rating}`;
-
-          // Upsert into daily_ratings
-          db.run(`
-            INSERT INTO daily_ratings (date, total_ratings, rating_sum, ${ratingCol})
-            VALUES (?, 1, ?, 1)
-            ON CONFLICT(date) DO UPDATE SET
-              total_ratings = total_ratings + 1,
-              rating_sum = rating_sum + ?,
-              ${ratingCol} = ${ratingCol} + 1
-          `, [dateStr, rating, rating]);
-        }
-      }
-    });
-    saveDatabase();
-    console.log('Migrated existing ratings from feedback messages');
-  }
+  // ==========================================
+  // DEFAULT DATA
+  // ==========================================
 
   // Insert default settings if not exists
   const defaultSettings = [
@@ -365,9 +286,6 @@ export const initDatabase = async () => {
 
   // Create system user for internal logging
   db.run(`INSERT OR IGNORE INTO users (id, nickname, device_id) VALUES (?, ?, ?)`, ['system', 'System 🛡️', 'system_internal']);
-
-  // Clean up legacy VAPID keys if they exist (Run on every start to ensure production is cleaned)
-  db.run(`DELETE FROM settings WHERE key IN ('vapid_public_key', 'vapid_private_key')`);
 
   // Save to file
   saveDatabase();
