@@ -706,13 +706,19 @@ const Messages = () => {
                                                 />
                                             </div>
                                             <div style={{ flex: 1 }}>
-                                                <label className="form-label">Priority (Higher = First)</label>
-                                                <input
-                                                    type="number"
-                                                    value={newBroadcast.priority || 0}
-                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, priority: parseInt(e.target.value) || 0 })}
+                                                <label className="form-label">Priority (1 = Highest)</label>
+                                                <select
+                                                    value={newBroadcast.priority || 3}
+                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, priority: parseInt(e.target.value) })}
                                                     className="form-input"
-                                                />
+                                                    style={{ background: '#1e293b', color: '#e2e8f0', cursor: 'pointer' }}
+                                                >
+                                                    <option value={1}>1 - Critical (Red)</option>
+                                                    <option value={2}>2 - High (Orange)</option>
+                                                    <option value={3}>3 - Medium (Yellow)</option>
+                                                    <option value={4}>4 - Normal (Blue)</option>
+                                                    <option value={5}>5 - Low (Slate)</option>
+                                                </select>
                                             </div>
                                         </div>
                                         <button
@@ -828,18 +834,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                             />
                         </div>
 
-                        {/* Status */}
-                        <select
-                            className="form-input"
-                            style={{ padding: '0.5rem', fontSize: '0.9rem', width: 'auto', minWidth: '120px' }}
-                            value={searchFilters.status}
-                            onChange={e => setSearchFilters(prev => ({ ...prev, status: e.target.value }))}
-                        >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="scheduled">Scheduled</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
+
 
                         {/* Clear */}
                         {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViews || searchFilters.priority) && (
@@ -893,6 +888,22 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                 />
                             </div>
 
+                            {/* Status Filter */}
+                            <div style={{ flex: '0 1 140px' }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Status</label>
+                                <select
+                                    className="form-input"
+                                    style={{ padding: '0.4rem', fontSize: '0.9rem', width: '100%' }}
+                                    value={searchFilters.status}
+                                    onChange={e => setSearchFilters(prev => ({ ...prev, status: e.target.value }))}
+                                >
+                                    <option value="all">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="scheduled">Scheduled</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+
                             {/* Max Views */}
                             <div style={{ flex: '0 1 100px' }}>
                                 <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Max Views</label>
@@ -936,13 +947,28 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                     const start = new Date(b.start_time);
                                     const end = new Date(b.end_time);
                                     const isActive = now >= start && now <= end;
-                                    const isPast = now > end;
+                                    const isEnded = now > end;
+
+                                    // Priority Logic (Heat Map 1=Highest)
+                                    const getPriorityColor = (p) => {
+                                        // Default to 3 if 0/undefined
+                                        const val = p || 3;
+                                        if (val <= 1) return '#ef4444'; // 1: Red (Critical)
+                                        if (val === 2) return '#f97316'; // 2: Orange (High)
+                                        if (val === 3) return '#eab308'; // 3: Yellow (Medium)
+                                        if (val === 4) return '#3b82f6'; // 4: Blue (Normal)
+                                        return '#64748b'; // 5+: Slate (Low)
+                                    };
+                                    const priorityColor = getPriorityColor(b.priority);
 
                                     // Status Logic
                                     let statusColor = '#eab308'; // Scheduled
                                     let statusText = 'SCHEDULED';
                                     if (isActive) { statusColor = '#22c55e'; statusText = 'ACTIVE'; }
-                                    else if (isPast) { statusColor = '#94a3b8'; statusText = 'ENDED'; }
+                                    else if (isEnded) { statusColor = '#94a3b8'; statusText = 'ENDED'; }
+
+                                    // Border Color: Grey if ended, otherwise match priority
+                                    const borderColor = isEnded ? '#334155' : priorityColor;
 
                                     return (
                                         <div
@@ -950,13 +976,14 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                             className="broadcast-card"
                                             onClick={() => setSelectedBroadcast(b)}
                                             style={{
-                                                borderLeft: `4px solid ${statusColor}`,
                                                 background: '#0f172a',
                                                 borderRadius: '8px',
                                                 padding: '0.75rem 1rem',
                                                 cursor: 'pointer',
-                                                border: '1px solid #334155',
-                                                borderLeftWidth: '4px',
+                                                borderTop: '1px solid #334155',
+                                                borderRight: '1px solid #334155',
+                                                borderBottom: '1px solid #334155',
+                                                borderLeft: `4px solid ${borderColor}`,
                                                 transition: 'all 0.2s ease',
                                                 position: 'relative',
                                                 display: 'flex',
@@ -1009,7 +1036,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                     <span style={{
                                                         padding: '0.2rem 0.5rem', borderRadius: '4px',
                                                         fontSize: '0.7rem', fontWeight: 600,
-                                                        background: '#334155', color: '#e2e8f0'
+                                                        background: `${priorityColor}20`,
+                                                        color: priorityColor,
+                                                        border: `1px solid ${priorityColor}40`
                                                     }}>
                                                         P{b.priority || 0}
                                                     </span>

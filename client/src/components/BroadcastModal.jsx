@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { api } from '../utils/api';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const SEEN_BROADCASTS_KEY = 'nestfinder_seen_broadcasts';
 
 const BroadcastModal = ({ isSettled = false }) => {
+    const { t } = useLanguage();
     const [broadcast, setBroadcast] = useState(null);
     const [visible, setVisible] = useState(false);
     const hasFetched = useRef(false);
@@ -32,7 +35,6 @@ const BroadcastModal = ({ isSettled = false }) => {
         if (!isSettled) return;
 
         const checkForBroadcast = async () => {
-            // Don't poll if tab is hidden to save resources
             if (document.hidden) return;
 
             try {
@@ -42,9 +44,6 @@ const BroadcastModal = ({ isSettled = false }) => {
                     if (!seenIds.includes(response.broadcast.id)) {
                         setBroadcast(response.broadcast);
                         setVisible(true);
-                        // Once we find one, we can stop or keep polling? 
-                        // Usually good to keep polling for *new* ones, but maybe pause *while* one is visible?
-                        // For simplicity, we just set state. If visible is true, modal shows.
                     }
                 }
             } catch (error) {
@@ -52,13 +51,9 @@ const BroadcastModal = ({ isSettled = false }) => {
             }
         };
 
-        // Initial check
         const initialTimer = setTimeout(checkForBroadcast, 1000);
-
-        // Polling interval (1 minute)
         const interval = setInterval(checkForBroadcast, 60 * 1000);
 
-        // Check immediately when user returns to tab
         const handleVisibilityChange = () => {
             if (!document.hidden) {
                 checkForBroadcast();
@@ -77,11 +72,9 @@ const BroadcastModal = ({ isSettled = false }) => {
     const handleDismiss = async () => {
         if (broadcast) {
             markSeen(broadcast.id);
-            // Notify server that user has read/dismissed the broadcast
             try {
                 await api.post(`/points/broadcast/${broadcast.id}/read`);
             } catch (e) {
-                // Non-critical, log and continue
                 console.warn('Failed to mark broadcast as read:', e);
             }
         }
@@ -90,63 +83,112 @@ const BroadcastModal = ({ isSettled = false }) => {
 
     if (!visible || !broadcast) return null;
 
-    return (
-        <div style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 10001,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(4px)'
-        }}>
-            <div style={{
-                background: 'linear-gradient(135deg, #1e293b, #0f172a)',
-                borderRadius: 'var(--radius-xl)',
-                padding: 'var(--space-6)',
-                maxWidth: '90vw',
-                width: '400px',
-                border: '1px solid var(--color-border)',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-                animation: 'slideUp 0.3s ease-out'
-            }}>
-                <div style={{
-                    textAlign: 'center',
-                    marginBottom: 'var(--space-4)'
-                }}>
-                    <span style={{ fontSize: '3rem' }}>📢</span>
+    // Format timestamp like NotificationPopup
+    const formatTimestamp = (dateStr) => {
+        try {
+            const utcTime = dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T') + 'Z';
+            return new Date(utcTime).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+        } catch (e) {
+            return '';
+        }
+    };
+
+    return ReactDOM.createPortal(
+        <div
+            className="notification-popup-overlay"
+            onClick={handleDismiss}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 10001,
+                background: 'rgba(0, 0, 0, 0.7)',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}
+        >
+            <div
+                className="notification-popup"
+                onClick={e => e.stopPropagation()}
+                style={{
+                    background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+                    borderRadius: 'var(--radius-xl, 16px)',
+                    padding: 'var(--space-6, 24px)',
+                    maxWidth: '90vw',
+                    width: '400px',
+                    border: '1px solid var(--color-border, #334155)',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                    animation: 'slideUp 0.3s ease-out'
+                }}
+            >
+                {/* Icon */}
+                <span style={{ fontSize: '3rem', display: 'block', marginBottom: '16px', textAlign: 'center' }}>📢</span>
+
+                {/* Title */}
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', textAlign: 'center', color: 'var(--color-text, #f8fafc)' }}>
+                    {broadcast.title || t('broadcast.announcement') || 'Announcement'}
+                </h3>
+
+                {/* Timestamp */}
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #94a3b8)', marginBottom: '12px', textAlign: 'center' }}>
+                    {formatTimestamp(broadcast.created_at || broadcast.start_time)}
                 </div>
 
-                <div style={{
-                    fontSize: 'var(--font-size-md)',
-                    color: 'var(--color-text)',
-                    lineHeight: 1.6,
-                    marginBottom: 'var(--space-6)',
+                {/* Image */}
+                {broadcast.image_url && (
+                    <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                        <img
+                            src={broadcast.image_url}
+                            alt="Broadcast"
+                            style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px' }}
+                        />
+                    </div>
+                )}
+
+                {/* Message */}
+                <p style={{
+                    margin: '0 0 24px 0',
+                    color: 'var(--color-text-muted, #cbd5e1)',
+                    lineHeight: '1.6',
                     textAlign: 'center',
                     whiteSpace: 'pre-wrap'
                 }}>
                     {broadcast.message}
-                </div>
+                </p>
 
+                {/* Button */}
                 <button
+                    className="btn btn-primary btn-block"
                     onClick={handleDismiss}
                     style={{
                         width: '100%',
-                        padding: 'var(--space-3)',
-                        background: 'var(--color-primary)',
+                        padding: '12px',
+                        background: 'var(--color-primary, #3b82f6)',
                         color: 'white',
                         border: 'none',
-                        borderRadius: 'var(--radius-md)',
-                        fontSize: 'var(--font-size-md)',
+                        borderRadius: 'var(--radius-md, 8px)',
+                        fontSize: 'var(--font-size-md, 1rem)',
                         fontWeight: 600,
                         cursor: 'pointer'
                     }}
                 >
-                    Got it!
+                    {t('common.gotIt') || 'Got it!'}
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
