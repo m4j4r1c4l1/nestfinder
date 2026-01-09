@@ -46,7 +46,13 @@ const CountUp = ({ end, duration = 2000, decimals = 0, separator = null }) => {
         return <>{dec ? `${int}.${dec}` : int}</>;
     }
 
-    return <>{count.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
+    if (decimals > 0) {
+        // For floats (Rating), use Dot decimal (standard JS toFixed)
+        return <>{count.toFixed(decimals)}</>;
+    }
+
+    // For integers (Messages), use Dot thousands (German locale)
+    return <>{count.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>;
 };
 
 // Reusable Commit ID Reveal Component
@@ -223,6 +229,9 @@ const RollingBarrelCounter = ({ end, duration = 2000, separator = null, trigger 
         const [int, dec] = displayValue.split('.');
         const intFormatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
         displayValue = dec ? `${intFormatted}.${dec}` : intFormatted;
+    } else if (decimals === 0) {
+        // Default to dot separator for integers (Messages)
+        displayValue = displayValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
     return <BarrelCounter value={displayValue} trigger={trigger} />;
