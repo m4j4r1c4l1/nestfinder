@@ -1,7 +1,11 @@
 # NestFinder API Documentation
 
 **Base URL:** `/api`  
-**Authentication:** JWT Bearer token (Admin endpoints) or `x-user-id` header (User endpoints)
+**Authentication:**
+- **Admin endpoints:** JWT Bearer token (`Authorization: Bearer <token>`)
+- **User endpoints:** JWT Bearer token (`Authorization: Bearer <token>`)
+
+> **Note:** User tokens are issued upon registration and auto-refresh when expired via Device ID.
 
 ---
 
@@ -50,7 +54,7 @@ Creates new user or returns existing user by device ID.
 ### Update Nickname
 ```
 PUT /api/auth/nickname
-Headers: x-user-id: <user_id>
+Headers: Authorization: Bearer <user_token>
 ```
 
 **Request Body:**
@@ -104,7 +108,7 @@ GET /api/points
 ### Submit Point
 ```
 POST /api/points
-Headers: x-user-id: <user_id>
+Headers: Authorization: Bearer <user_token>
 ```
 
 **Request Body:**
@@ -122,7 +126,7 @@ Headers: x-user-id: <user_id>
 ### Confirm Point
 ```
 POST /api/points/:id/confirm
-Headers: x-user-id: <user_id>
+Headers: Authorization: Bearer <user_token>
 ```
 
 ---
@@ -130,7 +134,7 @@ Headers: x-user-id: <user_id>
 ### Deactivate Point
 ```
 POST /api/points/:id/deactivate
-Headers: x-user-id: <user_id>
+Headers: Authorization: Bearer <user_token>
 ```
 
 ---
@@ -138,7 +142,7 @@ Headers: x-user-id: <user_id>
 ### Reactivate Point
 ```
 POST /api/points/:id/reactivate
-Headers: x-user-id: <user_id>
+Headers: Authorization: Bearer <user_token>
 ```
 
 ---
@@ -207,7 +211,8 @@ Headers: Authorization: Bearer <token>
 
 ### Get User Notifications
 ```
-GET /api/push/notifications?userId=<user_id>
+GET /api/push/notifications
+Headers: Authorization: Bearer <user_token>
 ```
 
 ---
