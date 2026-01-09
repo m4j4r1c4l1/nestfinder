@@ -49,4 +49,6 @@ temp/
 
 # Local-only documentation
 docs/DEPLOY.md
+docs/LAYOUT_ARCHITECTURE.md
+docs/es/LAYOUT_ARCHITECTURE.md
 .agent/

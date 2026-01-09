@@ -79,7 +79,6 @@ No installation required! Just visit the web app.
 ### 📚 Documentation & Architecture
 
 *   **[API Reference](docs/API.md)** — Complete endpoints and usage.
-*   **[Layout Architecture](docs/LAYOUT_ARCHITECTURE.md)** — Layout workaround.
 
 ---
 
@@ -96,14 +95,12 @@ nestfinder/
     ├── FEATURES.md          # 🛠️ Technical deep-dive
     ├── GEOLOCATION.md       # 📍 Location troubleshooting
     ├── ROUTE.md             # 🚶 Route planner details
-    ├── LAYOUT_ARCHITECTURE.md
     ├── API.md               # 🔌 REST API documentation
     └── es/                  # 🇪🇸 Spanish translations
         ├── USER_GUIDE.md
         ├── FEATURES.md
         ├── GEOLOCATION.md
-        ├── ROUTE.md
-        └── LAYOUT_ARCHITECTURE.md
+        └── ROUTE.md
 ```
 
 ---

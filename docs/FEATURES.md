@@ -130,3 +130,34 @@ Improved "NestFinder Anywhere" capabilities.
 - **Lite Mode**: Toggle in Settings to disable animations for better performance.
 - **Offline Queue**: Actions queued when offline and synced when reconnected.
 
+### 14. Crash Reporting & Recovery 🚨
+Automatic error handling with user-friendly recovery options.
+- **GlobalErrorBoundary**: Catches React errors, unhandled exceptions, and promise rejections.
+- **Crash Modal**: Displays error message with Reload, Send Report, and Dismiss buttons.
+- **Automatic Reports**: Sends crash details (error, stack trace, device info, timestamp) as bug feedback.
+- **Graceful Recovery**: Users can reload or dismiss to attempt continued use.
+
+### 15. Enhanced Inbox System 📬
+Full-featured messaging interface with tabbed navigation.
+- **Three Tabs**: 🪺 Received | 🪹 Sent | 🪶 Compose for organized message management.
+- **Swipe-to-Delete**: Touch gesture to remove messages with progressive blur animation.
+- **Status Tracking**: Visual tick marks (✓ sent, ✓✓ green delivered, ✓✓ blue read).
+- **Status Filters**: Filter messages by Total, Pending, or Read status.
+- **Star Ratings**: 1-5 star rating system in feedback submission.
+
+### 16. Message Settings ⚙️
+Granular control over notification behavior.
+- **Real-time Popups Toggle**: Enable/disable notification popup banners.
+- **Message Retention Slider**: Configure auto-delete timing (Delete on read → 1 day → 1 week → 1 month → 1 year → Forever).
+- **Swipe Direction**: Choose left, right, or both directions for swipe-to-delete.
+- **Safe Delete Mode**: Require confirmation button instead of instant swipe deletion.
+- **Language Carousel**: Barrel-wheel UI with momentum physics for language selection.
+
+### 17. Admin Dashboard & Monitoring 📊
+Comprehensive administrative tools (admin-only access).
+- **Global Activity Map**: Live visualization of all reported points with filtering.
+- **Activity Metrics**: Total points, active users, daily reports, and actions.
+- **System Status**: Memory, disk, heap usage, and server uptime monitoring.
+- **Observability Panel**: Animated counters, dev metrics (LOC, commits, components), trend graphs.
+- **Messages Management**: Composer, sent history, feedback inbox, broadcast creation.
+- **GitHub Webhooks**: Real-time commit updates via webhook integration.
