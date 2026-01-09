@@ -46,7 +46,7 @@ const CountUp = ({ end, duration = 2000, decimals = 0, separator = null }) => {
         return <>{dec ? `${int}.${dec}` : int}</>;
     }
 
-    return <>{count.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
+    return <>{count.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
 };
 
 // Reusable Commit ID Reveal Component
@@ -1100,7 +1100,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                             return (
                                 <g key={i}>
                                     <line x1={0} y1={y} x2={graphWidth} y2={y} stroke="#334155" strokeWidth="1" strokeDasharray="4,4" />
-                                    <text x={-10} y={y + 4} textAnchor="end" fill="#64748b" fontSize="10">{val.toLocaleString()}</text>
+                                    <text x={-10} y={y + 4} textAnchor="end" fill="#64748b" fontSize="10">{val.toLocaleString('de-DE')}</text>
                                 </g>
                             );
                         })}
@@ -1183,7 +1183,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                                             {s.label}
                                         </span>
                                         <span style={{ color: '#fff', fontWeight: 500 }}>
-                                            {(metrics[hoveredPoint.index][s.key] || 0).toLocaleString()}
+                                            {(metrics[hoveredPoint.index][s.key] || 0).toLocaleString('de-DE')}
                                         </span>
                                     </div>
                                 );
