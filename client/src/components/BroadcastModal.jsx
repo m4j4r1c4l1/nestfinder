@@ -27,30 +27,51 @@ const BroadcastModal = ({ isSettled = false }) => {
         }
     };
 
-    // Fetch active broadcast when user is settled
+    // Poll for broadcasts
     useEffect(() => {
-        if (!isSettled || hasFetched.current) return;
+        if (!isSettled) return;
 
-        // Delay 1 second after settling per user requirement
-        const timer = setTimeout(async () => {
+        const checkForBroadcast = async () => {
+            // Don't poll if tab is hidden to save resources
+            if (document.hidden) return;
+
             try {
-                hasFetched.current = true;
                 const response = await api.fetch('/points/broadcast/active');
-
                 if (response.broadcast) {
                     const seenIds = getSeenIds();
-
                     if (!seenIds.includes(response.broadcast.id)) {
                         setBroadcast(response.broadcast);
                         setVisible(true);
+                        // Once we find one, we can stop or keep polling? 
+                        // Usually good to keep polling for *new* ones, but maybe pause *while* one is visible?
+                        // For simplicity, we just set state. If visible is true, modal shows.
                     }
                 }
             } catch (error) {
-                console.error('Failed to fetch broadcast:', error);
+                console.error('Failed to poll broadcast:', error);
             }
-        }, 1000);
+        };
 
-        return () => clearTimeout(timer);
+        // Initial check
+        const initialTimer = setTimeout(checkForBroadcast, 1000);
+
+        // Polling interval (1 minute)
+        const interval = setInterval(checkForBroadcast, 60 * 1000);
+
+        // Check immediately when user returns to tab
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                checkForBroadcast();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearTimeout(initialTimer);
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [isSettled]);
 
     const handleDismiss = async () => {

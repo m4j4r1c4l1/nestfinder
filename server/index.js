@@ -76,7 +76,13 @@ app.use(cors(allowedOrigins === true ? {} : { origin: allowedOrigins }));
 app.use(express.json({ limit: '10mb' }));
 
 // Global API rate limiter - 60 requests/min per IP
-app.use('/api', apiLimiter);
+app.use('/api', (req, res, next) => {
+    // Exempt polling endpoint from rate limiting
+    if (req.path === '/points/broadcast/active') {
+        return next();
+    }
+    apiLimiter(req, res, next);
+});
 
 // Request logging
 app.use((req, res, next) => {
