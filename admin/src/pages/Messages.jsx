@@ -3098,6 +3098,19 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         }
     };
 
+    // Fix for passive event listener issue (Scrolljacking)
+    const latestHandleWheel = React.useRef(handleWheel);
+    latestHandleWheel.current = handleWheel;
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const handler = (e) => latestHandleWheel.current(e);
+        // Important: passive: false is required to allow preventDefault()
+        el.addEventListener('wheel', handler, { passive: false });
+        return () => el.removeEventListener('wheel', handler);
+    }, []);
+
     // Edge Scrolling Loop
     const checkEdgeScroll = (clientX) => {
         if (!containerRef.current || !dragging) {
@@ -3297,11 +3310,9 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 borderRadius: '8px',
                 position: 'relative',
                 height: `${totalHeight}px`,
-                overflow: 'hidden',
                 userSelect: 'none',
                 cursor: dragging ? 'grabbing' : 'auto'
             }}
-            onWheel={handleWheel}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
