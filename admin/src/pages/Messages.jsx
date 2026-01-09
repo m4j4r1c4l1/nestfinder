@@ -3070,6 +3070,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const handleWheel = (e) => {
         if (!containerRef.current) return;
         e.preventDefault();
+        e.stopPropagation();
 
         const rect = containerRef.current.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
@@ -3314,21 +3315,28 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             }}>
                 {ticks.map((tick, i) => {
                     const { t, date } = formatTimePill(tick.time);
+                    // Show date only if different from previous tick (or first tick)
+                    const prevTick = ticks[i - 1];
+                    const prevDate = prevTick ? formatTimePill(prevTick.time).date : null;
+                    const showDate = i === 0 || date !== prevDate;
+
                     return (
                         <div key={i} style={{ position: 'absolute', left: `${tick.left}%`, top: 0, height: '100%', pointerEvents: 'none' }}>
                             <div style={{ width: 1, height: 6, background: '#64748b', position: 'absolute', bottom: 0 }} />
                             <div style={{
                                 position: 'absolute', bottom: 8, left: 4,
-                                fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace', lineHeight: 1
+                                fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace', lineHeight: 1,
+                                whiteSpace: 'nowrap'
                             }}>
-                                <span style={{ fontWeight: 600 }}>{t}</span> <span style={{ opacity: 0.7 }}>{date}</span>
+                                <span style={{ fontWeight: 600 }}>{t}</span>
+                                {showDate && <span style={{ opacity: 0.7, marginLeft: 4 }}>{date}</span>}
                             </div>
                         </div>
                     );
                 })}
 
                 {/* Resize Interaction Guide - Timestamp Highlight */}
-                {dragging && dragging.type.startsWith('resize') && (
+                {dragging && dragging.type && dragging.type.startsWith('resize') && (
                     <div style={{
                         position: 'absolute',
                         left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
@@ -3360,7 +3368,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 )}
 
                 {/* Resize Guide Line (Vertical) */}
-                {dragging && dragging.type.startsWith('resize') && (
+                {dragging && dragging.type && dragging.type.startsWith('resize') && (
                     <div style={{
                         position: 'absolute',
                         left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
