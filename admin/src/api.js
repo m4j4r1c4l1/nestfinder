@@ -159,5 +159,45 @@ export const adminApi = {
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
+    },
+
+    checkCorruptDB() {
+        return this.fetch('/admin/db/corrupt-check');
+    },
+
+    async downloadCorruptDB() {
+        const response = await fetch(`${API_URL}/admin/db/download-corrupt`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        if (!response.ok) throw new Error('Download failed');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nestfinder_corrupt_${new Date().toISOString().split('T')[0]}.db`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    },
+
+    async restoreDB(file) {
+        const headers = {
+            'Authorization': `Bearer ${this.token}`
+        };
+        // Use raw body for file
+        const response = await fetch(`${API_URL}/admin/db/restore`, {
+            method: 'POST',
+            headers,
+            body: file
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || 'Restore failed');
+        }
+        return await response.json();
     }
 };
