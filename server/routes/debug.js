@@ -40,14 +40,6 @@ router.get('/download', (req, res) => {
 });
 
 // GET /api/debug/simulate-update - Force a broadcast with incremented stats to prove UI animation
-import { calculateDevMetrics } from '../utils/devMetrics.js'; // Ensure import
-// We need the broadcast function. But debug.js doesn't have it injected.
-// We can't easily broadcast from here without refactoring.
-// Alternative: Use the webhook logic but "fake" the calculation result?
-// No, webhook.js has `broadcast`. 
-// Let's modify webhook.js to accept a "simulate" flag?
-// Or better: Modify notifications.js -> /admin/stats to return mock data? No, that's not a broadcast.
-
-// FASTEST PATH: Modify webhook.js to allow a "test" payload that forces specific metrics.
+// (Removed after verifying animation logic)
 
 export default router;
