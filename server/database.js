@@ -1,7 +1,7 @@
 import initSqlJs from 'sql.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import bcrypt from 'bcryptjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -297,6 +297,11 @@ export const initDatabase = async () => {
 // Save database to file
 export const saveDatabase = () => {
   if (db) {
+    // Ensure directory exists
+    const dbDir = dirname(DB_PATH);
+    if (!existsSync(dbDir)) {
+      mkdirSync(dbDir, { recursive: true });
+    }
     const data = db.export();
     const buffer = Buffer.from(data);
     writeFileSync(DB_PATH, buffer);
