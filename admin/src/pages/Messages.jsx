@@ -3423,18 +3423,29 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 )}
 
                 {/* Resize Guide Line (Vertical) */}
-                {dragging && dragging.type && dragging.type.startsWith('resize') && (
-                    <div style={{
-                        position: 'absolute',
-                        left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
-                        top: -rulerHeight, // Extend up into ruler
-                        bottom: 0,
-                        width: 0,
-                        borderLeft: '2px dotted white',
-                        zIndex: 25,
-                        pointerEvents: 'none'
-                    }} />
-                )}
+                {dragging && dragging.type && (dragging.type === 'resize-left' || dragging.type === 'resize-right') && (() => {
+                    const draggedLaneIndex = lanes.findIndex(l => l.some(b => b.id === dragging.id));
+                    const barTop = draggedLaneIndex * (rowHeight + gap) + gap;
+                    // Connect Ruler Bottom to Bar Bottom:
+                    // Ruler is at y < 0 relative to this container (which starts at 0).
+                    // This container = Body/Bars.
+                    // top: -rulerHeight  -> Starts at Ruler Top.
+                    // height: rulerHeight + barTop + rowHeight -> Ends at Bar Bottom.
+                    const guideHeight = rulerHeight + barTop + rowHeight;
+
+                    return (
+                        <div style={{
+                            position: 'absolute',
+                            left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
+                            top: -rulerHeight, // Extend up into ruler
+                            height: `${guideHeight}px`,
+                            width: 0,
+                            borderLeft: '2px dotted white',
+                            zIndex: 25,
+                            pointerEvents: 'none'
+                        }} />
+                    );
+                })()}
 
                 {/* Bars */}
                 {lanes.map((laneItems, laneIndex) => (
