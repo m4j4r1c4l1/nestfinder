@@ -3038,35 +3038,44 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return { lanes, laneCount: lanes.length };
     }, [broadcasts, viewportDuration]);
 
-    // Generate ticks based on current viewport (Moved up to avoid conditional hook call)
+    // Generate ticks based on current viewport
     const ticks = React.useMemo(() => {
         const t = [];
-        // Aim for ~10 ticks
-        const targetTicks = 10;
-        let interval = viewportDuration / targetTicks;
 
-        // Round to nice intervals
-        const niceIntervals = [
-            900000, // 15m
-            1800000, // 30m
-            3600000, // 1h
-            10800000, // 3h
-            21600000, // 6h
-            43200000, // 12h
-            86400000, // 1d
-            172800000, // 2d
-            604800000 // 1w
-        ];
+        // Granular Tick Logic
+        let interval;
+        const durationHours = viewportDuration / 3600000;
 
-        const bestInterval = niceIntervals.reduce((prev, curr) =>
-            Math.abs(curr - interval) < Math.abs(prev - interval) ? curr : prev
-        );
+        if (durationHours <= 1.1) { // Max Zoom (~1h) -> 15m ticks
+            interval = 900000;
+        } else if (durationHours <= 2.1) { // <= 2h -> 30m ticks
+            interval = 1800000;
+        } else {
+            // Auto-scale (aim for ~8-10 ticks)
+            const targetTicks = 10;
+            const approx = viewportDuration / targetTicks;
+            const niceIntervals = [
+                3600000, 10800000, 21600000, 43200000,
+                86400000, 172800000, 604800000
+            ];
+            interval = niceIntervals.reduce((prev, curr) =>
+                Math.abs(curr - approx) < Math.abs(prev - approx) ? curr : prev
+            );
+        }
 
-        if (bestInterval > 0 && viewportDuration > 0) {
-            const startTick = Math.ceil(viewportStart / bestInterval) * bestInterval;
-            for (let time = startTick; time < viewportStart + viewportDuration; time += bestInterval) {
+        if (interval > 0 && viewportDuration > 0) {
+            const startTick = Math.ceil(viewportStart / interval) * interval;
+            for (let time = startTick; time < viewportStart + viewportDuration; time += interval) {
                 const left = ((time - viewportStart) / viewportDuration) * 100;
-                t.push({ time, left });
+
+                // Determine Type
+                const d = new Date(time);
+                const m = d.getMinutes();
+                let type = 'quarter'; // 15, 45
+                if (m === 0) type = 'hour';
+                else if (m === 30) type = 'half';
+
+                t.push({ time, left, type });
             }
         }
         return t;
@@ -3078,8 +3087,8 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const rowHeight = 12;
     const gap = 4;
     const rulerHeight = 28;
-    const totalHeight = Math.max(manualHeight || 0, rulerHeight + laneCount * (rowHeight + gap));
-    const contentHeight = rulerHeight + laneCount * (rowHeight + gap);
+    const totalHeight = Math.max(manualHeight || 0, rulerHeight + laneCount * (rowHeight + gap) + gap);
+    const contentHeight = rulerHeight + laneCount * (rowHeight + gap) + gap;
 
     // --- Interaction Handlers ---
 
@@ -3375,13 +3384,28 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                     const prevDate = prevTick ? formatTimePill(prevTick.time).date : null;
                     const showDate = i === 0 || date !== prevDate;
 
+                    // Determine style based on tick type
+                    let tickColor = '#94a3b8'; // Hour (Brightest)
+                    let tickHeight = 8;
+                    let labelOpacity = 1;
+
+                    if (tick.type === 'half') {
+                        tickColor = '#64748b'; // Half (Mid)
+                        tickHeight = 6;
+                        labelOpacity = 0.8;
+                    } else if (tick.type === 'quarter') {
+                        tickColor = '#475569'; // Quarter (Darkest/Faintest)
+                        tickHeight = 4;
+                        labelOpacity = 0.6;
+                    }
+
                     return (
                         <div key={i} style={{ position: 'absolute', left: `${tick.left}%`, top: 0, height: '100%', pointerEvents: 'none' }}>
-                            <div style={{ width: 1, height: 6, background: '#64748b', position: 'absolute', bottom: 0 }} />
+                            <div style={{ width: 1, height: tickHeight, background: tickColor, position: 'absolute', bottom: 0 }} />
                             <div style={{
                                 position: 'absolute', bottom: 8, left: 0, transform: 'translateX(-50%)',
-                                fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace', lineHeight: 1,
-                                whiteSpace: 'nowrap'
+                                fontSize: '10px', color: tickColor, fontFamily: 'monospace', lineHeight: 1,
+                                whiteSpace: 'nowrap', opacity: labelOpacity
                             }}>
                                 <span style={{ fontWeight: 600 }}>{t}</span>
                                 {showDate && <span style={{ opacity: 0.7, marginLeft: 4 }}>{date}</span>}
