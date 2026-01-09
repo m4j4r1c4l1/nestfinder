@@ -2893,28 +2893,43 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 function Timeline({ broadcasts }) {
     // 1. Determine Range
     const [minTime, maxTime] = React.useMemo(() => {
-        if (!broadcasts.length) return [0, 0];
-        let min = new Date(broadcasts[0].start_time).getTime();
-        let max = new Date(broadcasts[0].end_time).getTime();
-        broadcasts.forEach(b => {
+        // Filter out invalid dates first
+        const validBroadcasts = broadcasts.filter(b => {
+            const s = new Date(b.start_time).getTime();
+            const e = new Date(b.end_time).getTime();
+            return !isNaN(s) && !isNaN(e) && s > 0 && e > 0;
+        });
+
+        if (!validBroadcasts.length) return [0, 0];
+
+        let min = new Date(validBroadcasts[0].start_time).getTime();
+        let max = new Date(validBroadcasts[0].end_time).getTime();
+
+        validBroadcasts.forEach(b => {
             const s = new Date(b.start_time).getTime();
             const e = new Date(b.end_time).getTime();
             if (s < min) min = s;
             if (e > max) max = e;
         });
+
         // Add minimal padding (1 hour)
         const pad = 3600000;
         return [min - pad, max + pad];
     }, [broadcasts]);
 
-    const totalDuration = maxTime - minTime;
+    const totalDuration = (maxTime && minTime) ? (maxTime - minTime) : 0;
 
     // 2. Swimlane Logic (Stacking)
     const { lanes, laneCount } = React.useMemo(() => {
-        if (!broadcasts.length) return { lanes: [], laneCount: 0 };
+        // If no duration or valid broadcasts, return empty
+        if (!broadcasts.length || !totalDuration) return { lanes: [], laneCount: 0 };
 
         // Sort by start time asc, then duration desc (longer first to establish lanes)
-        const sorted = [...broadcasts].sort((a, b) => {
+        const sorted = [...broadcasts].filter(b => {
+            const s = new Date(b.start_time).getTime();
+            const e = new Date(b.end_time).getTime();
+            return !isNaN(s) && !isNaN(e);
+        }).sort((a, b) => {
             const sA = new Date(a.start_time).getTime();
             const sB = new Date(b.start_time).getTime();
             if (sA !== sB) return sA - sB;
@@ -2947,7 +2962,7 @@ function Timeline({ broadcasts }) {
         });
 
         return { lanes, laneCount: lanes.length };
-    }, [broadcasts]);
+    }, [broadcasts, totalDuration]);
 
     // Hover State
     const [hoveredItem, setHoveredItem] = useState(null);
