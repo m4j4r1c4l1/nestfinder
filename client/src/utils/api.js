@@ -31,7 +31,7 @@ class ApiClient {
     localStorage.removeItem('nestfinder_admin_token');
   }
 
-  async fetch(endpoint, options = {}) {
+  async fetch(endpoint, options = {}, isRetry = false) {
     const headers = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -40,11 +40,6 @@ class ApiClient {
     // Use user token for authentication (preferred)
     if (this.userToken) {
       headers['Authorization'] = `Bearer ${this.userToken}`;
-    }
-
-    // Always include user ID if available (some endpoints require it explicitly)
-    if (this.userId) {
-      headers['x-user-id'] = this.userId;
     }
 
     // Admin token overrides for admin endpoints
@@ -79,6 +74,41 @@ class ApiClient {
       const text = await response.text();
       console.error('JSON parse error. Response text:', text.substring(0, 500));
       throw new Error('Invalid response from server. Please try again or contact support.');
+    }
+
+    // Handle 401: Attempt token refresh if not already retrying
+    if (response.status === 401 && !isRetry) {
+      const deviceId = localStorage.getItem('nestfinder_device_id');
+
+      if (deviceId) {
+        console.log('[API] Token expired or invalid. Attempting silent refresh...');
+        try {
+          // Attempt to get a fresh token via register (using existing deviceId)
+          const refreshResponse = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deviceId }),
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            if (refreshData.token) {
+              this.setUserToken(refreshData.token);
+              if (refreshData.user) {
+                this.setUserId(refreshData.user.id);
+              }
+              console.log('[API] Token refreshed successfully. Retrying original request...');
+              // Retry original request with new token
+              return this.fetch(endpoint, options, true);
+            }
+          }
+        } catch (refreshError) {
+          console.error('[API] Token refresh failed:', refreshError);
+        }
+      }
+
+      // Refresh failed or not possible - propagate 401
+      throw new Error(data.error || 'Session expired. Please login again.');
     }
 
     if (!response.ok) {

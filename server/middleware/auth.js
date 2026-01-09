@@ -37,25 +37,8 @@ export const requireUser = (req, res, next) => {
         }
     }
 
-    // Fallback to x-user-id header for backward compatibility (deprecated)
-    const userId = req.headers['x-user-id'];
-
-    if (!userId) {
-        return res.status(401).json({ error: 'Authorization required' });
-    }
-
-    const user = get('SELECT * FROM users WHERE id = ?', [userId]);
-
-    if (!user) {
-        return res.status(401).json({ error: 'Invalid user' });
-    }
-
-    // Update last active
-    run('UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
-
-    req.user = user;
-    req._usingDeprecatedAuth = true; // Flag for logging
-    next();
+    // No valid JWT provided - reject request
+    return res.status(401).json({ error: 'Authorization required. Please login.' });
 };
 
 // Middleware to verify admin with JWT
