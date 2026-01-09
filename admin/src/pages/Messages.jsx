@@ -396,7 +396,8 @@ const Messages = () => {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            overflow: (activeTab === 'composer') ? 'visible' : 'hidden', // Broadcasts now hidden to allow card scroll
+            overflowY: 'auto', // Enable main page scroll
+            overflowX: 'hidden',
             height: 'calc(100vh - 20px)', // Fixed height for internal scrolling
             minHeight: '0'
         }}>
