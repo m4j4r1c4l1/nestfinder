@@ -2625,111 +2625,96 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
                 </div>
 
-                <div style={{
-                    background: '#1e293b', borderRadius: '12px', padding: '0',
-                    width: 'min(800px, 95vw)', maxHeight: '90vh', // Wider modal
-                    display: 'flex', flexDirection: 'column',
-                    border: '1px solid #334155',
-                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', overflow: 'hidden'
-                }} onClick={e => e.stopPropagation()}>
+                {/* Content Body - Landscape Layout */}
+                <div style={{ padding: '0', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'row' }}>
 
-                    {/* Header */}
-                    <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>📢 Broadcast Details</h3>
-                        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
-                    </div>
-
-                    {/* Content Body - Landscape Layout */}
-                    <div style={{ padding: '0', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'row' }}>
-
-                        {/* Left Column: Image (if present) */}
-                        {broadcast.image_url && (
+                    {/* Left Column: Image (if present) */}
+                    {broadcast.image_url && (
+                        <div style={{
+                            width: '300px', flexShrink: 0, background: '#0f172a',
+                            borderRight: '1px solid #334155', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center', padding: '1rem'
+                        }}>
                             <div style={{
-                                width: '300px', flexShrink: 0, background: '#0f172a',
-                                borderRight: '1px solid #334155', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center', padding: '1rem'
+                                width: '100%', height: '200px', borderRadius: '8px', overflow: 'hidden',
+                                border: '1px solid #334155', background: '#000'
                             }}>
-                                <div style={{
-                                    width: '100%', height: '200px', borderRadius: '8px', overflow: 'hidden',
-                                    border: '1px solid #334155', background: '#000'
-                                }}>
-                                    <img
-                                        src={broadcast.image_url}
-                                        alt="Broadcast"
-                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                    />
-                                </div>
+                                <img
+                                    src={broadcast.image_url}
+                                    alt="Broadcast"
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                />
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* Right Column: Details */}
-                        <div style={{ flex: 1, padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-                            <h4 style={{ margin: '0 0 1rem 0', color: '#f8fafc', fontSize: '1.2rem' }}>{broadcast.title || 'Untitled Broadcast'}</h4>
+                    {/* Right Column: Details */}
+                    <div style={{ flex: 1, padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+                        <h4 style={{ margin: '0 0 1rem 0', color: '#f8fafc', fontSize: '1.2rem' }}>{broadcast.title || 'Untitled Broadcast'}</h4>
 
-                            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #334155', color: '#cbd5e1', whiteSpace: 'pre-wrap', marginBottom: '1.5rem', flex: 1 }}>
-                                {broadcast.message}
+                        <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #334155', color: '#cbd5e1', whiteSpace: 'pre-wrap', marginBottom: '1.5rem', flex: 1 }}>
+                            {broadcast.message}
+                        </div>
+
+                        {/* Metadata Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                            <div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Start Time</div>
+                                <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.start_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.start_time))}</div>
                             </div>
-
-                            {/* Metadata Grid */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                                <div>
-                                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Start Time</div>
-                                    <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.start_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.start_time))}</div>
-                                </div>
-                                <div>
-                                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>End Time</div>
-                                    <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.end_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.end_time))}</div>
-                                </div>
-                                <div>
-                                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Max Views</div>
-                                    <div style={{ color: '#e2e8f0' }}>{broadcast.max_views || 'Unlimited'}</div>
-                                </div>
-                                <div>
-                                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Priority</div>
-                                    <div style={{ color: '#e2e8f0' }}>{broadcast.priority}</div>
-                                </div>
+                            <div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>End Time</div>
+                                <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.end_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.end_time))}</div>
                             </div>
+                            <div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Max Views</div>
+                                <div style={{ color: '#e2e8f0' }}>{broadcast.max_views || 'Unlimited'}</div>
+                            </div>
+                            <div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Priority</div>
+                                <div style={{ color: '#e2e8f0' }}>{broadcast.priority}</div>
+                            </div>
+                        </div>
 
-                            {/* Stats */}
-                            <div style={{ display: 'flex', justifyContent: 'space-around', background: '#334155', padding: '1rem', borderRadius: '8px' }}>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Total</div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#4ade80' }}>{broadcast.delivered_count || 0}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Received</div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{broadcast.read_count || 0}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Read</div>
-                                </div>
+                        {/* Stats */}
+                        <div style={{ display: 'flex', justifyContent: 'space-around', background: '#334155', padding: '1rem', borderRadius: '8px' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Total</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#4ade80' }}>{broadcast.delivered_count || 0}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Received</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{broadcast.read_count || 0}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Read</div>
                             </div>
                         </div>
                     </div>
-
-                    {/* Actions - Sticky Footer */}
-                    <div style={{
-                        padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155',
-                        display: 'flex', gap: '1rem'
-                    }}>
-                        <button
-                            onClick={onViewRecipients}
-                            className="btn btn-primary"
-                            style={{ flex: 1, justifyContent: 'center' }}
-                        >
-                            📊 View Recipient Details
-                        </button>
-                        <button
-                            onClick={onDelete}
-                            className="btn btn-danger"
-                            style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
-                        >
-                            🗑️ Delete
-                        </button>
-                    </div>
-
                 </div>
+
+                {/* Actions - Sticky Footer */}
+                <div style={{
+                    padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155',
+                    display: 'flex', gap: '1rem'
+                }}>
+                    <button
+                        onClick={onViewRecipients}
+                        className="btn btn-primary"
+                        style={{ flex: 1, justifyContent: 'center' }}
+                    >
+                        📊 View Recipient Details
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="btn btn-danger"
+                        style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
+                    >
+                        🗑️ Delete
+                    </button>
+                </div>
+
             </div>
         </div>,
         document.body
