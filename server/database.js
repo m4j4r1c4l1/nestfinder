@@ -238,6 +238,11 @@ export const initDatabase = async () => {
     db.run("ALTER TABLE broadcasts ADD COLUMN priority INTEGER DEFAULT 0");
   } catch (e) { /* Column exists */ }
 
+  // Migration: Add title to broadcasts
+  try {
+    db.run("ALTER TABLE broadcasts ADD COLUMN title TEXT");
+  } catch (e) { /* Column exists */ }
+
   // Broadcast Views table (tracks per-user broadcast delivery status)
   db.run(`
     CREATE TABLE IF NOT EXISTS broadcast_views (

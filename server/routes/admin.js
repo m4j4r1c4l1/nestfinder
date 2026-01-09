@@ -773,19 +773,19 @@ router.get('/broadcasts/:id/views', (req, res) => {
 
 // Create a new broadcast (with max_views support)
 router.post('/broadcasts', (req, res) => {
-    const { message, imageUrl, startTime, endTime, maxViews, priority } = req.body;
+    const { title, message, imageUrl, startTime, endTime, maxViews, priority } = req.body;
 
     if (!message || !startTime || !endTime) {
         return res.status(400).json({ error: 'Message, start time, and end time are required' });
     }
 
     run(`
-        INSERT INTO broadcasts (message, image_url, start_time, end_time, max_views, priority)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `, [message, imageUrl, startTime, endTime, maxViews || null, priority || 0]);
+        INSERT INTO broadcasts (title, message, image_url, start_time, end_time, max_views, priority)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [title || null, message, imageUrl, startTime, endTime, maxViews || null, priority || 0]);
 
     const broadcast = get('SELECT * FROM broadcasts ORDER BY id DESC LIMIT 1');
-    log('admin', 'broadcast_created', broadcast.id.toString(), { message: message.substring(0, 50), maxViews });
+    log('admin', 'broadcast_created', broadcast.id.toString(), { title, message: message.substring(0, 50), maxViews });
 
     res.json({ broadcast });
 });
