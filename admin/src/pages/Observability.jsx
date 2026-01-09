@@ -451,8 +451,8 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
                                     {/* Sent Section */}
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.notificationMetrics?.total || 0} />
                                             </div>
@@ -475,8 +475,8 @@ const Observability = () => {
                                         </div>
                                     </div>
                                     {/* Received Section */}
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
                                             </div>
@@ -502,8 +502,8 @@ const Observability = () => {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
                                     {/* Active Section */}
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22d3ee', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.broadcastMetrics?.active || 0} />
                                             </div>
@@ -522,8 +522,8 @@ const Observability = () => {
                                         </div>
                                     </div>
                                     {/* Total Section */}
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '90px', flexShrink: 0 }}>
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4ade80', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.broadcastMetrics?.total || 0} />
                                             </div>
