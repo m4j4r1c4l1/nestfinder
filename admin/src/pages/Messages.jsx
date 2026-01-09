@@ -746,6 +746,7 @@ const Messages = () => {
 function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
     // Search State
     const [searchFilters, setSearchFilters] = useState({
+        searchText: '',
         status: 'all', // all, active, inactive, scheduled
         priority: '',
         maxViews: '',
@@ -756,12 +757,21 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
     // Interaction State
     const [selectedBroadcast, setSelectedBroadcast] = useState(null); // For Detail Popup
     const [viewRecipientsId, setViewRecipientsId] = useState(null); // For Recipients Modal
+    const [showAdvanced, setShowAdvanced] = useState(false); // For Advanced Filters
 
     // Filter Logic
     const filteredBroadcasts = broadcasts.filter(b => {
         const now = new Date();
         const start = new Date(b.start_time);
         const end = new Date(b.end_time);
+
+        // Text Search Filter (title or message)
+        if (searchFilters.searchText) {
+            const searchLower = searchFilters.searchText.toLowerCase();
+            const titleMatch = (b.title || '').toLowerCase().includes(searchLower);
+            const messageMatch = (b.message || '').toLowerCase().includes(searchLower);
+            if (!titleMatch && !messageMatch) return false;
+        }
 
         // Status Filter
         if (searchFilters.status !== 'all') {
@@ -787,17 +797,40 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
     const totalPages = Math.ceil(filteredBroadcasts.length / pageSize);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Multisearch Form */}
-            <div className="card" style={{ padding: '1.25rem', marginBottom: 0 }}>
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%' }}>
+            {/* Broadcasts List Card */}
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: 0 }}>
+                <div className="card-header">
+                    <h3>🎬 Manage Broadcasts</h3>
+                </div>
 
-                    {/* Status */}
-                    <div style={{ flex: '1 1 150px' }}>
-                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Status</label>
+                {/* Sticky Search Form - Below Header */}
+                <div style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                    background: '#1e293b',
+                    borderBottom: '1px solid var(--color-border)',
+                    padding: '0.75rem 1rem'
+                }}>
+                    {/* Row 1: Search + Status + Clear */}
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                        {/* Text Search */}
+                        <div style={{ flex: 1 }}>
+                            <input
+                                type="text"
+                                className="form-input"
+                                style={{ padding: '0.5rem 0.75rem', fontSize: '0.9rem', width: '100%' }}
+                                placeholder="🔍 Search title or message..."
+                                value={searchFilters.searchText}
+                                onChange={e => setSearchFilters(prev => ({ ...prev, searchText: e.target.value }))}
+                            />
+                        </div>
+
+                        {/* Status */}
                         <select
                             className="form-input"
-                            style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                            style={{ padding: '0.5rem', fontSize: '0.9rem', width: 'auto', minWidth: '120px' }}
                             value={searchFilters.status}
                             onChange={e => setSearchFilters(prev => ({ ...prev, status: e.target.value }))}
                         >
@@ -806,78 +839,89 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                             <option value="scheduled">Scheduled</option>
                             <option value="inactive">Inactive</option>
                         </select>
+
+                        {/* Clear */}
+                        {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViews || searchFilters.priority) && (
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: '', maxViews: '', startDate: null, endDate: null })}
+                                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+                            >
+                                ✕ Clear
+                            </button>
+                        )}
+
+                        {/* Toggle Advanced */}
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => setShowAdvanced(!showAdvanced)}
+                            style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+                        >
+                            {showAdvanced ? '▲' : '▼'} Filters
+                        </button>
                     </div>
 
-                    {/* Start Time Filter */}
-                    <div style={{ flex: '1 1 200px' }}>
-                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Start After</label>
-                        <DatePicker
-                            selected={searchFilters.startDate}
-                            onChange={(date) => setSearchFilters(prev => ({ ...prev, startDate: date }))}
-                            showTimeSelect
-                            dateFormat="MMM d, yyyy HH:mm"
-                            className="custom-datepicker-input"
-                            placeholderText="Filter by start time"
-                            calendarClassName="dark-theme-calendar"
-                        />
-                    </div>
+                    {/* Row 2: Advanced Filters (Collapsible) */}
+                    {showAdvanced && (
+                        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)' }}>
+                            {/* Start Time Filter */}
+                            <div style={{ flex: '1 1 180px' }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Start After</label>
+                                <DatePicker
+                                    selected={searchFilters.startDate}
+                                    onChange={(date) => setSearchFilters(prev => ({ ...prev, startDate: date }))}
+                                    showTimeSelect
+                                    dateFormat="MMM d, yyyy HH:mm"
+                                    className="custom-datepicker-input"
+                                    placeholderText="Filter by start time"
+                                    calendarClassName="dark-theme-calendar"
+                                />
+                            </div>
 
-                    {/* End Time Filter */}
-                    <div style={{ flex: '1 1 200px' }}>
-                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>End Before</label>
-                        <DatePicker
-                            selected={searchFilters.endDate}
-                            onChange={(date) => setSearchFilters(prev => ({ ...prev, endDate: date }))}
-                            showTimeSelect
-                            dateFormat="MMM d, yyyy HH:mm"
-                            className="custom-datepicker-input"
-                            placeholderText="Filter by end time"
-                            calendarClassName="dark-theme-calendar"
-                        />
-                    </div>
+                            {/* End Time Filter */}
+                            <div style={{ flex: '1 1 180px' }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>End Before</label>
+                                <DatePicker
+                                    selected={searchFilters.endDate}
+                                    onChange={(date) => setSearchFilters(prev => ({ ...prev, endDate: date }))}
+                                    showTimeSelect
+                                    dateFormat="MMM d, yyyy HH:mm"
+                                    className="custom-datepicker-input"
+                                    placeholderText="Filter by end time"
+                                    calendarClassName="dark-theme-calendar"
+                                />
+                            </div>
 
-                    {/* Max Views */}
-                    <div style={{ flex: '0 1 100px' }}>
-                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Max Views</label>
-                        <input
-                            type="number"
-                            className="form-input"
-                            style={{ padding: '0.4rem', fontSize: '0.9rem' }}
-                            placeholder="Any"
-                            value={searchFilters.maxViews}
-                            onChange={e => setSearchFilters(prev => ({ ...prev, maxViews: e.target.value }))}
-                        />
-                    </div>
+                            {/* Max Views */}
+                            <div style={{ flex: '0 1 100px' }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Max Views</label>
+                                <input
+                                    type="number"
+                                    className="form-input"
+                                    style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                                    placeholder="Any"
+                                    value={searchFilters.maxViews}
+                                    onChange={e => setSearchFilters(prev => ({ ...prev, maxViews: e.target.value }))}
+                                />
+                            </div>
 
-                    {/* Priority */}
-                    <div style={{ flex: '0 1 80px' }}>
-                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Priority</label>
-                        <input
-                            type="number"
-                            className="form-input"
-                            style={{ padding: '0.4rem', fontSize: '0.9rem' }}
-                            placeholder="Any"
-                            value={searchFilters.priority}
-                            onChange={e => setSearchFilters(prev => ({ ...prev, priority: e.target.value }))}
-                        />
-                    </div>
-
-                    {/* Clear Filters */}
-                    <button
-                        className="btn btn-secondary"
-                        onClick={() => setSearchFilters({ status: 'all', priority: '', maxViews: '', startDate: null, endDate: null })}
-                        style={{ height: '36px', padding: '0 1rem' }}
-                    >
-                        Clear
-                    </button>
+                            {/* Priority */}
+                            <div style={{ flex: '0 1 80px' }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Priority</label>
+                                <input
+                                    type="number"
+                                    className="form-input"
+                                    style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                                    placeholder="Any"
+                                    value={searchFilters.priority}
+                                    onChange={e => setSearchFilters(prev => ({ ...prev, priority: e.target.value }))}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
-            </div>
 
-            {/* Broadcasts List Card */}
-            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: 0 }}>
-                <div className="card-header">
-                    <h3>🎬 Manage Broadcasts</h3>
-                </div>
+                {/* Scrollable Broadcasts List */}
                 <div className="card-body" style={{ flex: 1, overflowY: 'auto', padding: 0, background: '#1e293b' }}>
                     <div style={{ padding: '1rem' }}>
                         {filteredBroadcasts.length === 0 ? (
