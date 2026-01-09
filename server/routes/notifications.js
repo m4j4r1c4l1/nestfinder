@@ -451,4 +451,31 @@ router.delete('/:id', (req, res) => {
     res.json({ success: true });
 });
 
+// Get broadcast interaction details
+router.get('/admin/broadcasts/:id/views', requireAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        const views = all(`
+            SELECT 
+                bv.*,
+                u.nickname as user_nickname
+            FROM broadcast_views bv
+            LEFT JOIN users u ON bv.user_id = u.id
+            WHERE bv.broadcast_id = ?
+            ORDER BY 
+                CASE 
+                    WHEN bv.status = 'read' THEN 1 
+                    WHEN bv.status = 'delivered' THEN 2 
+                    ELSE 3 
+                END ASC,
+                bv.read_at DESC, bv.delivered_at DESC
+        `, [id]);
+
+        res.json({ views });
+    } catch (error) {
+        console.error('Broadcast views error:', error);
+        res.status(500).json({ error: 'Failed to get broadcast views' });
+    }
+});
+
 export default router;

@@ -103,6 +103,12 @@ const getTemplateInfo = (key) => {
     return map[key] || { icon: '❓', name: key };
 };
 
+
+// Helper for CET time
+const formatTimeCET = (dateObj) => {
+    return dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
+};
+
 const Messages = () => {
     // Custom styles for DatePicker
     const datePickerStyles = `
@@ -907,7 +913,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                 border: '1px solid #334155',
                                                 borderLeftWidth: '4px',
                                                 transition: 'all 0.2s ease',
-                                                position: 'relative'
+                                                position: 'relative',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '0.5rem'
                                             }}
                                             onMouseEnter={e => {
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -918,55 +927,88 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                 e.currentTarget.style.boxShadow = 'none';
                                             }}
                                         >
-                                            {/* Line 1: Title */}
-                                            <div style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {b.title || b.message}
+                                            {/* Top Line: Title & Delete */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem' }}>
+                                                    {b.title || 'Untitled Broadcast'}
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (confirm('Are you sure you want to delete this broadcast?')) {
+                                                            onDelete(b.id);
+                                                        }
+                                                    }}
+                                                    className="btn-icon danger"
+                                                    title="Delete"
+                                                    style={{ padding: '2px', fontSize: '1rem', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.8 }}
+                                                >
+                                                    🗑️
+                                                </button>
                                             </div>
 
-                                            {/* Line 2: Stats & Meta */}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.85rem', color: '#94a3b8', flexWrap: 'wrap' }}>
-
-                                                {/* Date Range */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span>📅 {start.toLocaleDateString()}</span>
-                                                    <span>→</span>
-                                                    <span>{end.toLocaleDateString()}</span>
-                                                </div>
+                                            {/* Bottom Line: Badges & Info */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: '#94a3b8', flexWrap: 'wrap' }}>
 
                                                 {/* Status Badge */}
                                                 <span style={{
-                                                    padding: '0.1rem 0.5rem', borderRadius: '4px',
+                                                    padding: '0.15rem 0.5rem', borderRadius: '4px',
                                                     fontSize: '0.7rem', fontWeight: 700,
                                                     background: `${statusColor}20`, color: statusColor,
-                                                    border: `1px solid ${statusColor}40`
+                                                    border: `1px solid ${statusColor}40`,
+                                                    textTransform: 'uppercase'
                                                 }}>
                                                     {statusText}
                                                 </span>
 
-                                                {/* Max Views */}
-                                                {b.max_views && (
-                                                    <span style={{ color: '#cbd5e1' }}>Max: {b.max_views}</span>
-                                                )}
+                                                {/* Priority Badge */}
+                                                <span style={{
+                                                    padding: '0.15rem 0.5rem', borderRadius: '4px',
+                                                    fontSize: '0.7rem', fontWeight: 600,
+                                                    background: '#334155', color: '#cbd5e1',
+                                                    border: '1px solid #475569'
+                                                }}>
+                                                    Priority: {b.priority || 0}
+                                                </span>
 
-                                                {/* Counts (Green/Blue Ticks Style) */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' }}>
-                                                    {/* Received */}
-                                                    <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <span style={{ color: '#22c55e' }}>✓✓</span>
-                                                        <span style={{ color: '#94a3b8' }}>{b.delivered_count || 0}</span>
-                                                    </span>
-                                                    {/* Read */}
-                                                    <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <span style={{ color: '#3b82f6' }}>✓✓</span>
-                                                        <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
-                                                    </span>
+                                                {/* Start Date & Time (CET) */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span>📅 {start.toLocaleDateString()}</span>
+                                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{formatTimeCET(start)}</span>
+                                                    <span>→</span>
+                                                    <span>{end.toLocaleDateString()}</span>
+                                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{formatTimeCET(end)}</span>
                                                 </div>
 
-                                                {/* Image Icon */}
-                                                {b.image_url && (
-                                                    <span title="Has Attachment" style={{ fontSize: '1rem' }}>📎</span>
+                                                {/* Max Views Badge */}
+                                                {b.max_views && (
+                                                    <span style={{
+                                                        padding: '0.15rem 0.5rem', borderRadius: '4px',
+                                                        fontSize: '0.7rem', background: '#1e293b', color: '#94a3b8', border: '1px solid #334155'
+                                                    }}>
+                                                        Max: {b.max_views}
+                                                    </span>
                                                 )}
 
+                                                <div style={{ flex: 1 }}></div>
+
+                                                {/* Stats Icons */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    {/* Image Icon */}
+                                                    {b.image_url && (
+                                                        <span title="Has Attachment" style={{ fontSize: '1rem' }}>📎</span>
+                                                    )}
+
+                                                    {/* Counts */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+                                                        <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                                            <span style={{ color: '#22c55e' }}>✓✓</span> {b.delivered_count || 0}
+                                                        </span>
+                                                        <span title="Read" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                                            <span style={{ color: '#3b82f6' }}>✓✓</span> {b.read_count || 0}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     );
@@ -1005,7 +1047,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                 />
             )}
 
-            {/* Broadcast Recipients Modal */}
+            {/* Recipients Modal */}
             {viewRecipientsId && (
                 <BroadcastRecipientsModal
                     broadcastId={viewRecipientsId}
@@ -2530,7 +2572,9 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
         }} onClick={onClose}>
             <div style={{
                 background: '#1e293b', borderRadius: '12px', padding: '0',
-                width: 'min(600px, 90vw)', border: '1px solid #334155',
+                width: 'min(600px, 90vw)', maxHeight: '90vh', // Constrain height
+                display: 'flex', flexDirection: 'column', // Flex layout
+                border: '1px solid #334155',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', overflow: 'hidden'
             }} onClick={e => e.stopPropagation()}>
 
@@ -2540,7 +2584,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
                 </div>
 
-                <div style={{ padding: '1.5rem' }}>
+                {/* Content - Scrollable */}
+                <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1 }}>
                     {/* Content */}
                     <h4 style={{ margin: '0 0 1rem 0', color: '#f8fafc', fontSize: '1.2rem' }}>{broadcast.title || 'Untitled Broadcast'}</h4>
 
@@ -2559,11 +2604,11 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                         <div>
                             <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Start Time</div>
-                            <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.start_time).toLocaleString()}</div>
+                            <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.start_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.start_time))}</div>
                         </div>
                         <div>
                             <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>End Time</div>
-                            <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.end_time).toLocaleString()}</div>
+                            <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.end_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.end_time))}</div>
                         </div>
                         <div>
                             <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Max Views</div>
@@ -2576,7 +2621,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                     </div>
 
                     {/* Stats */}
-                    <div style={{ display: 'flex', justifyContent: 'space-around', background: '#334155', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-around', background: '#334155', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
                         <div style={{ textAlign: 'center' }}>
                             <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</div>
                             <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Total</div>
@@ -2590,26 +2635,29 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Read</div>
                         </div>
                     </div>
-
-                    {/* Actions */}
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button
-                            onClick={onViewRecipients}
-                            className="btn btn-primary"
-                            style={{ flex: 1, justifyContent: 'center' }}
-                        >
-                            📊 View Recipient Details
-                        </button>
-                        <button
-                            onClick={onDelete}
-                            className="btn btn-danger"
-                            style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
-                        >
-                            🗑️ Delete
-                        </button>
-                    </div>
-
                 </div>
+
+                {/* Actions - Sticky Footer */}
+                <div style={{
+                    padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155',
+                    display: 'flex', gap: '1rem'
+                }}>
+                    <button
+                        onClick={onViewRecipients}
+                        className="btn btn-primary"
+                        style={{ flex: 1, justifyContent: 'center' }}
+                    >
+                        📊 View Recipient Details
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="btn btn-danger"
+                        style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
+                    >
+                        🗑️ Delete
+                    </button>
+                </div>
+
             </div>
         </div>,
         document.body
