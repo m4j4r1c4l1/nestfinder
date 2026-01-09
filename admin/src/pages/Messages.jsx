@@ -738,204 +738,278 @@ const Messages = () => {
 
 // --- Broadcast Component ---
 function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
-    const [expandedId, setExpandedId] = useState(null);
-    const [views, setViews] = useState([]);
-    const [loadingViews, setLoadingViews] = useState(false);
+    // Search State
+    const [searchFilters, setSearchFilters] = useState({
+        status: 'all', // all, active, inactive, scheduled
+        priority: '',
+        maxViews: '',
+        startDate: null,
+        endDate: null
+    });
 
-    // Fetch views when expanding
-    const handleExpand = async (id) => {
-        if (expandedId === id) {
-            setExpandedId(null);
-            return;
+    // Interaction State
+    const [selectedBroadcast, setSelectedBroadcast] = useState(null); // For Detail Popup
+    const [viewRecipientsId, setViewRecipientsId] = useState(null); // For Recipients Modal
+
+    // Filter Logic
+    const filteredBroadcasts = broadcasts.filter(b => {
+        const now = new Date();
+        const start = new Date(b.start_time);
+        const end = new Date(b.end_time);
+
+        // Status Filter
+        if (searchFilters.status !== 'all') {
+            const isActive = now >= start && now <= end;
+            const isPast = now > end;
+            const isScheduled = now < start;
+
+            if (searchFilters.status === 'active' && !isActive) return false;
+            if (searchFilters.status === 'inactive' && !isPast) return false;
+            if (searchFilters.status === 'scheduled' && !isScheduled) return false;
         }
 
-        setExpandedId(id);
-        setLoadingViews(true);
-        try {
-            const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/push/admin/broadcasts/${id}/views`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setViews(data.views || []);
-            }
-        } catch (e) {
-            console.error('Failed to load views:', e);
-        } finally {
-            setLoadingViews(false);
-        }
-    };
+        if (searchFilters.priority && b.priority != searchFilters.priority) return false;
+        if (searchFilters.maxViews && b.max_views != searchFilters.maxViews) return false;
 
-    const paginatedBroadcasts = broadcasts.slice((page - 1) * pageSize, page * pageSize);
-    const totalPages = Math.ceil(broadcasts.length / pageSize);
+        if (searchFilters.startDate && new Date(b.start_time) < searchFilters.startDate) return false;
+        if (searchFilters.endDate && new Date(b.end_time) > searchFilters.endDate) return false;
+
+        return true;
+    });
+
+    const paginatedBroadcasts = filteredBroadcasts.slice((page - 1) * pageSize, page * pageSize);
+    const totalPages = Math.ceil(filteredBroadcasts.length / pageSize);
 
     return (
-        <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: 0 }}>
-            <div className="card-header">
-                <h3>🎬 Manage Broadcasts</h3>
-            </div>
-            <div className="card-body" style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
-                <div style={{ padding: '1.5rem' }}>
-                    {broadcasts.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-                            No broadcasts found
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {paginatedBroadcasts.map(b => {
-                                const now = new Date();
-                                const start = new Date(b.start_time);
-                                const end = new Date(b.end_time);
-                                const isActive = now >= start && now <= end;
-                                const isPast = now > end;
-                                const isExpanded = expandedId === b.id;
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Multisearch Form */}
+            <div className="card" style={{ padding: '1.25rem', marginBottom: 0 }}>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
 
-                                return (
-                                    <div key={b.id} className="card" style={{
-                                        borderLeft: isActive ? '4px solid #22c55e' : '1px solid #334155',
-                                        opacity: isPast ? 0.8 : 1,
-                                        marginBottom: 0,
-                                        background: '#1e293b'
-                                    }}>
-                                        <div className="card-body">
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 500, color: '#f8fafc' }}>
-                                                        {b.message}
-                                                    </div>
+                    {/* Status */}
+                    <div style={{ flex: '1 1 150px' }}>
+                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Status</label>
+                        <select
+                            className="form-input"
+                            style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                            value={searchFilters.status}
+                            onChange={e => setSearchFilters(prev => ({ ...prev, status: e.target.value }))}
+                        >
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
 
-                                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem' }}>
-                                                        <span title="Start Time">📅 {start.toLocaleString()}</span>
-                                                        <span>→</span>
-                                                        <span title="End Time">{end.toLocaleString()}</span>
-                                                        <span style={{
-                                                            padding: '0.1rem 0.6rem',
-                                                            borderRadius: '12px',
-                                                            fontSize: '0.7rem',
-                                                            fontWeight: 600,
-                                                            background: isActive ? '#22c55e' : isPast ? '#475569' : '#eab308',
-                                                            color: 'white'
-                                                        }}>
-                                                            {isActive ? 'ACTIVE' : isPast ? 'ENDED' : 'SCHEDULED'}
-                                                        </span>
-                                                        {b.max_views && (
-                                                            <span style={{ background: '#334155', padding: '0.1rem 0.6rem', borderRadius: '12px', color: '#cbd5e1' }}>
-                                                                Max Views: {b.max_views}
-                                                            </span>
-                                                        )}
-                                                    </div>
+                    {/* Start Time Filter */}
+                    <div style={{ flex: '1 1 200px' }}>
+                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Start After</label>
+                        <DatePicker
+                            selected={searchFilters.startDate}
+                            onChange={(date) => setSearchFilters(prev => ({ ...prev, startDate: date }))}
+                            showTimeSelect
+                            dateFormat="MMM d, yyyy HH:mm"
+                            className="custom-datepicker-input"
+                            placeholderText="Filter by start time"
+                            calendarClassName="dark-theme-calendar"
+                        />
+                    </div>
 
-                                                    {b.image_url && (
-                                                        <div style={{ marginBottom: '1rem' }}>
-                                                            <img src={b.image_url} alt="Broadcast" style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '8px', border: '1px solid #334155' }} />
-                                                        </div>
-                                                    )}
+                    {/* End Time Filter */}
+                    <div style={{ flex: '1 1 200px' }}>
+                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>End Before</label>
+                        <DatePicker
+                            selected={searchFilters.endDate}
+                            onChange={(date) => setSearchFilters(prev => ({ ...prev, endDate: date }))}
+                            showTimeSelect
+                            dateFormat="MMM d, yyyy HH:mm"
+                            className="custom-datepicker-input"
+                            placeholderText="Filter by end time"
+                            calendarClassName="dark-theme-calendar"
+                        />
+                    </div>
 
-                                                    {/* Stats Row */}
-                                                    <div style={{ display: 'flex', gap: '2rem', padding: '0.75rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155' }}>
-                                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                                            <span style={{ fontSize: '1.2rem' }}>👥</span>
-                                                            <div>
-                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Reach</div>
-                                                                <div style={{ fontWeight: 600, color: '#f8fafc' }}>{b.total_users || 0}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div style={{ width: '1px', background: '#334155' }}></div>
-                                                        <div style={{ display: 'flex', gap: '1.5rem' }}>
-                                                            <div>
-                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Sent</div>
-                                                                <div style={{ fontWeight: 600, color: '#94a3b8' }}>{b.sent_count || 0}</div>
-                                                            </div>
-                                                            <div>
-                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Received</div>
-                                                                <div style={{ fontWeight: 600, color: '#f8fafc' }}>{b.delivered_count || 0}</div>
-                                                            </div>
-                                                            <div>
-                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Read</div>
-                                                                <div style={{ fontWeight: 600, color: '#3b82f6' }}>{b.read_count || 0}</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                    {/* Max Views */}
+                    <div style={{ flex: '0 1 100px' }}>
+                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Max Views</label>
+                        <input
+                            type="number"
+                            className="form-input"
+                            style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                            placeholder="Any"
+                            value={searchFilters.maxViews}
+                            onChange={e => setSearchFilters(prev => ({ ...prev, maxViews: e.target.value }))}
+                        />
+                    </div>
 
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginLeft: '1rem' }}>
-                                                    <button
-                                                        onClick={() => onDelete(b.id)}
-                                                        className="btn btn-secondary btn-sm"
-                                                        style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)', width: '100px' }}
-                                                    >
-                                                        🗑️ Delete
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleExpand(b.id)}
-                                                        className="btn btn-primary btn-sm"
-                                                        style={{ width: '100px' }}
-                                                    >
-                                                        {isExpanded ? '⬆️ Hide' : '⬇️ Details'}
-                                                    </button>
-                                                </div>
-                                            </div>
+                    {/* Priority */}
+                    <div style={{ flex: '0 1 80px' }}>
+                        <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Priority</label>
+                        <input
+                            type="number"
+                            className="form-input"
+                            style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                            placeholder="Any"
+                            value={searchFilters.priority}
+                            onChange={e => setSearchFilters(prev => ({ ...prev, priority: e.target.value }))}
+                        />
+                    </div>
 
-                                            {/* Expanded User List */}
-                                            {isExpanded && (
-                                                <div style={{ marginTop: '1rem', borderTop: '1px solid #334155', paddingTop: '1rem', animation: 'fadeIn 0.2s' }}>
-                                                    <h4 style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '0.5rem' }}>User Status</h4>
-                                                    {loadingViews ? (
-                                                        <div style={{ color: '#94a3b8', fontStyle: 'italic', padding: '1rem', textAlign: 'center' }}>Loading views...</div>
-                                                    ) : views.length === 0 ? (
-                                                        <div style={{ color: '#64748b', fontStyle: 'italic', padding: '0.5rem' }}>No views recorded yet.</div>
-                                                    ) : (
-                                                        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                                                                <thead style={{ background: '#0f172a', position: 'sticky', top: 0 }}>
-                                                                    <tr>
-                                                                        <th style={{ padding: '0.5rem', textAlign: 'left', color: '#94a3b8' }}>User</th>
-                                                                        <th style={{ padding: '0.5rem', textAlign: 'center', color: '#94a3b8' }}>Status</th>
-                                                                        <th style={{ padding: '0.5rem', textAlign: 'right', color: '#94a3b8' }}>Last Upd.</th>
-                                                                        <th style={{ padding: '0.5rem', textAlign: 'center', color: '#94a3b8' }}>Views</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {views.map(v => (
-                                                                        <tr key={v.id} style={{ borderBottom: '1px solid #334155' }}>
-                                                                            <td style={{ padding: '0.5rem', color: '#e2e8f0' }}>
-                                                                                <div style={{ fontWeight: 500 }}>{v.user_nickname || 'Anonymous'}</div>
-                                                                                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{v.user_id}</div>
-                                                                            </td>
-                                                                            <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                                                                                {v.status === 'sent' && <span style={{ color: '#94a3b8' }}>✓ Sent</span>}
-                                                                                {v.status === 'delivered' && <span style={{ color: '#e2e8f0' }}>✓✓ Received</span>}
-                                                                                {v.status === 'read' && <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ Read</span>}
-                                                                            </td>
-                                                                            <td style={{ padding: '0.5rem', textAlign: 'right', color: '#94a3b8' }}>
-                                                                                {new Date(v.read_at || v.delivered_at || v.created_at).toLocaleString()}
-                                                                            </td>
-                                                                            <td style={{ padding: '0.5rem', textAlign: 'center', color: '#cbd5e1' }}>
-                                                                                {v.view_count}
-                                                                            </td>
-                                                                        </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
+                    {/* Clear Filters */}
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => setSearchFilters({ status: 'all', priority: '', maxViews: '', startDate: null, endDate: null })}
+                        style={{ height: '36px', padding: '0 1rem' }}
+                    >
+                        Clear
+                    </button>
                 </div>
             </div>
-            {totalPages > 1 && (
-                <PaginationControls
-                    page={page}
-                    totalPages={totalPages}
-                    setPage={setPage}
-                    pageSize={pageSize}
+
+            {/* Broadcasts List Card */}
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: 0 }}>
+                <div className="card-header">
+                    <h3>🎬 Manage Broadcasts</h3>
+                </div>
+                <div className="card-body" style={{ flex: 1, overflowY: 'auto', padding: 0, background: '#1e293b' }}>
+                    <div style={{ padding: '1rem' }}>
+                        {filteredBroadcasts.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
+                                No broadcasts found matching filters.
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {paginatedBroadcasts.map(b => {
+                                    const now = new Date();
+                                    const start = new Date(b.start_time);
+                                    const end = new Date(b.end_time);
+                                    const isActive = now >= start && now <= end;
+                                    const isPast = now > end;
+
+                                    // Status Logic
+                                    let statusColor = '#eab308'; // Scheduled
+                                    let statusText = 'SCHEDULED';
+                                    if (isActive) { statusColor = '#22c55e'; statusText = 'ACTIVE'; }
+                                    else if (isPast) { statusColor = '#94a3b8'; statusText = 'ENDED'; }
+
+                                    return (
+                                        <div
+                                            key={b.id}
+                                            className="broadcast-card"
+                                            onClick={() => setSelectedBroadcast(b)}
+                                            style={{
+                                                borderLeft: `4px solid ${statusColor}`,
+                                                background: '#0f172a',
+                                                borderRadius: '8px',
+                                                padding: '0.75rem 1rem',
+                                                cursor: 'pointer',
+                                                border: '1px solid #334155',
+                                                borderLeftWidth: '4px',
+                                                transition: 'all 0.2s ease',
+                                                position: 'relative'
+                                            }}
+                                            onMouseEnter={e => {
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                                            }}
+                                            onMouseLeave={e => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            {/* Line 1: Title */}
+                                            <div style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {b.title || b.message}
+                                            </div>
+
+                                            {/* Line 2: Stats & Meta */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.85rem', color: '#94a3b8', flexWrap: 'wrap' }}>
+
+                                                {/* Date Range */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span>📅 {start.toLocaleDateString()}</span>
+                                                    <span>→</span>
+                                                    <span>{end.toLocaleDateString()}</span>
+                                                </div>
+
+                                                {/* Status Badge */}
+                                                <span style={{
+                                                    padding: '0.1rem 0.5rem', borderRadius: '4px',
+                                                    fontSize: '0.7rem', fontWeight: 700,
+                                                    background: `${statusColor}20`, color: statusColor,
+                                                    border: `1px solid ${statusColor}40`
+                                                }}>
+                                                    {statusText}
+                                                </span>
+
+                                                {/* Max Views */}
+                                                {b.max_views && (
+                                                    <span style={{ color: '#cbd5e1' }}>Max: {b.max_views}</span>
+                                                )}
+
+                                                {/* Counts (Green/Blue Ticks Style) */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' }}>
+                                                    {/* Received */}
+                                                    <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span style={{ color: '#22c55e' }}>✓✓</span>
+                                                        <span style={{ color: '#94a3b8' }}>{b.delivered_count || 0}</span>
+                                                    </span>
+                                                    {/* Read */}
+                                                    <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span style={{ color: '#3b82f6' }}>✓✓</span>
+                                                        <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
+                                                    </span>
+                                                </div>
+
+                                                {/* Image Icon */}
+                                                {b.image_url && (
+                                                    <span title="Has Attachment" style={{ fontSize: '1rem' }}>📎</span>
+                                                )}
+
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {totalPages > 1 && (
+                    <PaginationControls
+                        page={page}
+                        totalPages={totalPages}
+                        setPage={setPage}
+                        pageSize={pageSize}
+                        totalItems={filteredBroadcasts.length}
+                        currentCount={paginatedBroadcasts.length}
+                    />
+                )}
+            </div>
+
+            {/* Broadcast Detail Popup */}
+            {selectedBroadcast && (
+                <BroadcastDetailPopup
+                    broadcast={selectedBroadcast}
+                    onClose={() => setSelectedBroadcast(null)}
+                    onViewRecipients={() => {
+                        setViewRecipientsId(selectedBroadcast.id);
+                        setSelectedBroadcast(null);
+                    }}
+                    onDelete={() => {
+                        if (confirm('Delete broadcast?')) {
+                            onDelete(selectedBroadcast.id);
+                            setSelectedBroadcast(null);
+                        }
+                    }}
+                />
+            )}
+
+            {/* Broadcast Recipients Modal */}
+            {viewRecipientsId && (
+                <BroadcastRecipientsModal
+                    broadcastId={viewRecipientsId}
+                    onClose={() => setViewRecipientsId(null)}
                 />
             )}
         </div>
@@ -2444,3 +2518,235 @@ const MessagePreviewModal = ({ message, onClose }) => {
 };
 
 export default Messages;
+
+function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }) {
+    if (!broadcast) return null;
+    return ReactDOM.createPortal(
+        <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
+            animation: 'fadeIn 0.2s ease'
+        }} onClick={onClose}>
+            <div style={{
+                background: '#1e293b', borderRadius: '12px', padding: '0',
+                width: 'min(600px, 90vw)', border: '1px solid #334155',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', overflow: 'hidden'
+            }} onClick={e => e.stopPropagation()}>
+
+                {/* Header */}
+                <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>📢 Broadcast Details</h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                </div>
+
+                <div style={{ padding: '1.5rem' }}>
+                    {/* Content */}
+                    <h4 style={{ margin: '0 0 1rem 0', color: '#f8fafc', fontSize: '1.2rem' }}>{broadcast.title || 'Untitled Broadcast'}</h4>
+
+                    {/* Image */}
+                    {broadcast.image_url && (
+                        <div style={{ marginBottom: '1.5rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155' }}>
+                            <img src={broadcast.image_url} alt="Broadcast" style={{ maxWidth: '100%', display: 'block' }} />
+                        </div>
+                    )}
+
+                    <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #334155', color: '#cbd5e1', whiteSpace: 'pre-wrap', marginBottom: '1.5rem' }}>
+                        {broadcast.message}
+                    </div>
+
+                    {/* Metadata Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                        <div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Start Time</div>
+                            <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.start_time).toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>End Time</div>
+                            <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.end_time).toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Max Views</div>
+                            <div style={{ color: '#e2e8f0' }}>{broadcast.max_views || 'Unlimited'}</div>
+                        </div>
+                        <div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Priority</div>
+                            <div style={{ color: '#e2e8f0' }}>{broadcast.priority}</div>
+                        </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div style={{ display: 'flex', justifyContent: 'space-around', background: '#334155', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Total</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#4ade80' }}>{broadcast.delivered_count || 0}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Received</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{broadcast.read_count || 0}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Read</div>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            onClick={onViewRecipients}
+                            className="btn btn-primary"
+                            style={{ flex: 1, justifyContent: 'center' }}
+                        >
+                            📊 View Recipient Details
+                        </button>
+                        <button
+                            onClick={onDelete}
+                            className="btn btn-danger"
+                            style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
+                        >
+                            🗑️ Delete
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+function BroadcastRecipientsModal({ broadcastId, onClose }) {
+    const [views, setViews] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchViews = async () => {
+            try {
+                const token = localStorage.getItem('nestfinder_admin_token');
+                const res = await fetch(`${API_URL}/api/push/admin/broadcasts/${broadcastId}/views`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setViews(data.views || []);
+                }
+            } catch (e) { console.error(e); }
+            finally { setLoading(false); }
+        };
+        fetchViews();
+    }, [broadcastId]);
+
+    const total = views.length;
+    const readCount = views.filter(v => v.status === 'read').length;
+    const deliveredCount = views.filter(v => v.status === 'delivered' || v.status === 'read').length;
+    const pendingCount = views.filter(v => v.status === 'sent').length;
+
+    const DateTimeCell = ({ isoString }) => {
+        if (!isoString) return <span style={{ color: '#64748b' }}>-</span>;
+        const date = new Date(isoString);
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+            </div>
+        );
+    };
+
+    return ReactDOM.createPortal(
+        <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
+            animation: 'fadeIn 0.2s ease'
+        }} onClick={onClose}>
+            <div style={{
+                background: '#1e293b', borderRadius: '16px', width: '100%', maxWidth: '900px',
+                maxHeight: '85vh', display: 'flex', flexDirection: 'column',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid #334155'
+            }} onClick={e => e.stopPropagation()}>
+
+                {/* Header */}
+                <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>Broadcast Recipients</h3>
+                    <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                </div>
+
+                {/* Stats */}
+                <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{total}</div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase' }}>Recorded Views</div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{pendingCount}</div>
+                            <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase' }}>Sent</div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{deliveredCount}</div>
+                            <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase' }}>Delivered</div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{readCount}</div>
+                            <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase' }}>Read</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Table */}
+                <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {loading ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Loading views...</div>
+                    ) : views.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>No interaction checks recorded.</div>
+                    ) : (
+                        <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'auto', flex: 1 }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
+                                    <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Last Update</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>View Count</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {views.map(v => (
+                                        <tr key={v.id} style={{ borderBottom: '1px solid #334155' }}>
+                                            <td style={{ padding: '0.6rem 0.75rem', verticalAlign: 'middle' }}>
+                                                <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    {v.user_nickname || 'Anonymous'}
+                                                </div>
+                                                <code style={{ fontSize: '0.65rem', color: '#64748b' }}>{v.user_id}</code>
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
+                                                <DateTimeCell isoString={v.read_at || v.delivered_at || v.created_at} />
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', textAlign: 'center', color: '#cbd5e1' }}>
+                                                {v.view_count}
+                                            </td>
+                                            <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '120px', margin: '0 auto' }}>
+                                                    <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1 }}>
+                                                        {v.status === 'read' ? <span style={{ color: '#3b82f6' }}>✓✓</span> :
+                                                            v.status === 'delivered' ? <span style={{ color: '#22c55e' }}>✓✓</span> :
+                                                                <span style={{ color: '#94a3b8' }}>✓</span>}
+                                                    </div>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', marginLeft: '8px' }}>
+                                                        {v.status === 'read' ? 'Read' : v.status === 'delivered' ? 'Received' : 'Sent'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+}
