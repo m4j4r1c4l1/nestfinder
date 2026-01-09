@@ -1,7 +1,7 @@
 import initSqlJs from 'sql.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from 'fs';
 import bcrypt from 'bcryptjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,9 +15,22 @@ export const initDatabase = async () => {
   const SQL = await initSqlJs();
 
   // Load existing database or create new one
+  // Load existing database or create new one
   if (existsSync(DB_PATH)) {
-    const fileBuffer = readFileSync(DB_PATH);
-    db = new SQL.Database(fileBuffer);
+    try {
+      const fileBuffer = readFileSync(DB_PATH);
+      db = new SQL.Database(fileBuffer);
+    } catch (err) {
+      console.error('CRITICAL: Database file is malformed or corrupted.', err);
+      const backupPath = `${DB_PATH}.corrupt.${Date.now()}`;
+      console.log(`Renaming corrupted database to: ${backupPath} and starting fresh.`);
+      try {
+        renameSync(DB_PATH, backupPath);
+      } catch (renameErr) {
+        console.error('Failed to rename corrupted DB:', renameErr);
+      }
+      db = new SQL.Database();
+    }
   } else {
     db = new SQL.Database();
   }
