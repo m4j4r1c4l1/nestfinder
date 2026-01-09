@@ -808,7 +808,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {/* Broadcasts List Card */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', marginBottom: 0, maxHeight: '800px', overflowY: 'auto' }}>
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', marginBottom: 0 }}>
                 <div className="card-header">
                     <h3>🎬 Manage Broadcasts</h3>
                 </div>
@@ -836,6 +836,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                 onChange={e => setSearchFilters(prev => ({ ...prev, searchText: e.target.value }))}
                             />
                         </div>
+
 
                         {/* Clear */}
                         {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViews || searchFilters.priority) && (
@@ -938,7 +939,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                 <Timeline broadcasts={filteredBroadcasts} />
 
                 {/* Scrollable Broadcasts List */}
-                <div className="card-body" style={{ padding: 0, background: '#1e293b' }}>
+                <div className="card-body" style={{ maxHeight: '400px', overflowY: 'auto', padding: 0, background: '#1e293b' }}>
                     <div style={{ padding: '1rem' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
@@ -971,8 +972,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                     if (isActive) { statusColor = '#22c55e'; statusText = 'ACTIVE'; }
                                     else if (isEnded) { statusColor = '#94a3b8'; statusText = 'ENDED'; }
 
-                                    // Border Color: Always priority color, but 50% transparent if not active
-                                    const borderColor = isActive ? priorityColor : `${priorityColor}80`;
+                                    // Border Color: Always priority color, but 75% transparent (25% opacity) if not active
+                                    const borderColor = isActive ? priorityColor : `${priorityColor}40`;
 
                                     return (
                                         <div
@@ -1061,7 +1062,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                 {/* Right: Time Range & Stats */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                     {/* Time Range */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem', fontWeight: isActive ? 'bold' : 'normal' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem', fontWeight: isActive ? '700' : '400' }}>
                                                         <span style={{ color: isActive ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                                                         <span style={{ color: isActive ? '#f8fafc' : '#475569' }}>{formatTimeCET(start)}</span>
