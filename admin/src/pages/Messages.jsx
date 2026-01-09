@@ -106,7 +106,8 @@ const getTemplateInfo = (key) => {
 
 // Helper for CET time
 const formatTimeCET = (dateObj) => {
-    return dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
+    const time = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris' });
+    return `${time} CET`;
 };
 
 const Messages = () => {
@@ -991,65 +992,60 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                 </button>
                                             </div>
 
-                                            {/* Bottom Line: Badges & Info */}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: '#94a3b8', flexWrap: 'wrap' }}>
+                                            {/* Bottom Line: Professional Layout */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
 
-                                                {/* Status Badge */}
-                                                <span style={{
-                                                    padding: '0.15rem 0.5rem', borderRadius: '4px',
-                                                    fontSize: '0.7rem', fontWeight: 700,
-                                                    background: `${statusColor}20`, color: statusColor,
-                                                    border: `1px solid ${statusColor}40`,
-                                                    textTransform: 'uppercase'
-                                                }}>
-                                                    {statusText}
-                                                </span>
-
-                                                {/* Priority Badge */}
-                                                <span style={{
-                                                    padding: '0.15rem 0.5rem', borderRadius: '4px',
-                                                    fontSize: '0.7rem', fontWeight: 600,
-                                                    background: '#334155', color: '#cbd5e1',
-                                                    border: '1px solid #475569'
-                                                }}>
-                                                    Priority: {b.priority || 0}
-                                                </span>
-
-                                                {/* Start Date & Time (CET) */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span>📅 {start.toLocaleDateString()}</span>
-                                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{formatTimeCET(start)}</span>
-                                                    <span>→</span>
-                                                    <span>{end.toLocaleDateString()}</span>
-                                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{formatTimeCET(end)}</span>
+                                                {/* Left: Status & Priority Badges */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <span style={{
+                                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                                        fontSize: '0.7rem', fontWeight: 700,
+                                                        background: `${statusColor}20`, color: statusColor,
+                                                        border: `1px solid ${statusColor}40`,
+                                                        textTransform: 'uppercase', letterSpacing: '0.5px'
+                                                    }}>
+                                                        {statusText}
+                                                    </span>
+                                                    <span style={{
+                                                        padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                                        fontSize: '0.7rem', fontWeight: 600,
+                                                        background: '#334155', color: '#e2e8f0'
+                                                    }}>
+                                                        P{b.priority || 0}
+                                                    </span>
+                                                    {b.max_views && (
+                                                        <span style={{
+                                                            padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                                            fontSize: '0.7rem',
+                                                            background: '#1e293b', color: '#94a3b8', border: '1px solid #334155'
+                                                        }}>
+                                                            👁 {b.max_views}
+                                                        </span>
+                                                    )}
+                                                    {b.image_url && (
+                                                        <span title="Has Attachment" style={{ fontSize: '0.9rem' }}>📎</span>
+                                                    )}
                                                 </div>
 
-                                                {/* Max Views Badge */}
-                                                {b.max_views && (
-                                                    <span style={{
-                                                        padding: '0.15rem 0.5rem', borderRadius: '4px',
-                                                        fontSize: '0.7rem', background: '#1e293b', color: '#94a3b8', border: '1px solid #334155'
-                                                    }}>
-                                                        Max: {b.max_views}
-                                                    </span>
-                                                )}
+                                                {/* Right: Time Range & Stats */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                    {/* Time Range */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem' }}>
+                                                        <span style={{ color: '#64748b' }}>🕐</span>
+                                                        <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                                                        <span style={{ color: '#475569' }}>{formatTimeCET(start)}</span>
+                                                        <span style={{ color: '#475569' }}>→</span>
+                                                        <span>{end.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                                                        <span style={{ color: '#475569' }}>{formatTimeCET(end)}</span>
+                                                    </div>
 
-                                                <div style={{ flex: 1 }}></div>
-
-                                                {/* Stats Icons */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                    {/* Image Icon */}
-                                                    {b.image_url && (
-                                                        <span title="Has Attachment" style={{ fontSize: '1rem' }}>📎</span>
-                                                    )}
-
-                                                    {/* Counts */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
-                                                        <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                                                            <span style={{ color: '#22c55e' }}>✓✓</span> {b.delivered_count || 0}
+                                                    {/* Delivery Stats */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
+                                                        <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
+                                                            ✓✓ <span style={{ color: '#94a3b8' }}>{b.delivered_count || 0}</span>
                                                         </span>
-                                                        <span title="Read" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                                                            <span style={{ color: '#3b82f6' }}>✓✓</span> {b.read_count || 0}
+                                                        <span title="Read" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#3b82f6' }}>
+                                                            👁 <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -1061,6 +1057,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                         )}
                     </div>
                 </div>
+
                 {totalPages > 1 && (
                     <PaginationControls
                         page={page}
