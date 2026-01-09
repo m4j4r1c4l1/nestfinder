@@ -2937,6 +2937,8 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const [viewportDuration, setViewportDuration] = useState(0);
     const [isInitialized, setIsInitialized] = useState(false);
 
+    const [manualHeight, setManualHeight] = useState(null);
+
     // Interaction State
     const [hoveredBarId, setHoveredBarId] = useState(null);
     const [hoveredItem, setHoveredItem] = useState(null);
@@ -2945,6 +2947,9 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
 
     // Drag State
     const [dragging, setDragging] = useState(null); // { id, type, startX, originalStart, originalEnd, newStart, newEnd }
+
+
+
 
     // 0. Scroll Lock Effect (Must be top-level)
     useEffect(() => {
@@ -3073,7 +3078,8 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const rowHeight = 12;
     const gap = 4;
     const rulerHeight = 28;
-    const totalHeight = rulerHeight + laneCount * (rowHeight + gap);
+    const totalHeight = Math.max(manualHeight || 0, rulerHeight + laneCount * (rowHeight + gap));
+    const contentHeight = rulerHeight + laneCount * (rowHeight + gap);
 
     // --- Interaction Handlers ---
 
@@ -3188,6 +3194,12 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
 
         // Edge Scrolling (Nudge)
         if (dragging) {
+            if (dragging.type === 'resize-height') {
+                const newH = Math.max(mouseY, contentHeight);
+                setManualHeight(newH);
+                return;
+            }
+
             const edgeDist = 50;
             if (mouseX < edgeDist) {
                 // Exponential Scale Speed
@@ -3238,6 +3250,14 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         if (e.button !== 0 || dragging) return;
 
         e.preventDefault();
+
+        const rect = containerRef.current.getBoundingClientRect();
+        // Detect Resize Handle Click
+        if (rect.bottom - e.clientY <= 12) {
+            setDragging({ type: 'resize-height' });
+            return;
+        }
+
         // Don't stop propagation? Or do we? 
         // If we clicked a bar, bar handler ran and stopped propagation.
         // So if we are here, we hit background.
@@ -3617,6 +3637,28 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 })(),
                 document.body
             )}
+            {/* 3. Resize Handle (Bottom) */}
+            <div
+                style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '12px',
+                    cursor: 'ns-resize',
+                    zIndex: 50,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: 0, // Hidden until hover
+                    transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                onMouseLeave={e => e.currentTarget.style.opacity = 0}
+            >
+                {/* Visual Handle Line */}
+                <div style={{ width: '40px', height: '4px', background: '#94a3b8', borderRadius: '2px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }}></div>
+            </div>
         </div >
     );
 };
