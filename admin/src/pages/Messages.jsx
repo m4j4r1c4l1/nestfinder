@@ -3198,25 +3198,27 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 setViewportStart(s => s + (viewportDuration * factor));
             }
 
-            // Update Drag Time
+            if (dragging.type === 'pan') {
+                // Drag-to-Pan Logic
+                // Mouse moves X pixels. We want to move map X pixels.
+                // If I drag mouse Left (negative delta), I want to see content that was to the right?
+                // "standard" drag: I put finger on paper and pull Left. Paper moves Left. I see data to the Right.
+                // Mouse X decreases. Viewport Start should Increase.
+
+                const pixelDelta = e.clientX - dragging.startX;
+                const timeDelta = pixelDelta * (viewportDuration / width);
+
+                setViewportStart(dragging.initialViewportStart - timeDelta);
+                return;
+            }
+
+            // Update Drag Time (For Bars)
             let newStart = dragging.originalStart;
             let newEnd = dragging.originalEnd;
 
-            // Calculate time delta based on initial CURSOR time vs current CURSOR time?
-            // Easier: Calculate *target time* under cursor now
-            const timeDelta = cursorTime - dragging.cursorStartTime; // This is naive if we scrolled.
-
-            // Better: 
-            // We know the original broadcast times.
-
-            // For dragging bar: preserve duration, move center to mouse? 
-            // No, standard is delta.
-            // visualDelta = mouseX - dragStartX.
-            // But we might have scrolled.
-
-            // Absolute approach:
-            // Calculate time at mouse cursor. Difference from initial mouse click time is the delta.
-            const absDelta = cursorTime - dragging.initialCursorTime;
+            // Calculate time delta based on initial CURSOR time vs current CURSOR time
+            const cursorTimeNow = viewportStart + (viewportDuration * (mouseX / width));
+            const absDelta = cursorTimeNow - dragging.initialCursorTime;
 
             if (dragging.type === 'move') {
                 newStart = dragging.originalStart + absDelta;
@@ -3228,17 +3230,6 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             }
 
             setDragging(prev => ({ ...prev, newStart, newEnd }));
-        } else if (dragging && dragging.type === 'pan') {
-            // Drag-to-Pan Logic
-            // Mouse moves X pixels. We want to move map X pixels.
-            // If I drag mouse Left (negative delta), I want to see content that was to the right?
-            // "standard" drag: I put finger on paper and pull Left. Paper moves Left. I see data to the Right.
-            // Mouse X decreases. Viewport Start should Increase.
-
-            const pixelDelta = e.clientX - dragging.startX;
-            const timeDelta = pixelDelta * (viewportDuration / width);
-
-            setViewportStart(dragging.initialViewportStart - timeDelta);
         }
     };
 
