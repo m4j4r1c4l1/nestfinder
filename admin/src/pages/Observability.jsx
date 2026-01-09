@@ -537,7 +537,7 @@ const Observability = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', flex: 1, paddingBottom: '0.5rem', width: '100%' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                            <RandomCounter end={stats.devMetrics?.loc || 0} />
+                                            <RandomCounter end={stats.devMetrics?.loc || 0} separator="." />
                                         </div>
                                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Lines of Code</div>
                                         <div className="text-muted text-sm">Total</div>
@@ -548,7 +548,7 @@ const Observability = () => {
                                         {[
                                             // 1. Commits
                                             // 1. Commits
-                                            { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#8b5cf6' },
+                                            { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#8b5cf6' },
                                             // 2. Commit ID
                                             {
                                                 label: 'Commit ID',
@@ -559,13 +559,13 @@ const Observability = () => {
                                                 boxStyle: { background: '#1e3a8a40', border: '1px solid #1e3a8a' }
                                             },
                                             // 3. Components
-                                            { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#0ea5e9' },
+                                            { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9' },
                                             // 4. API (New)
-                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
+                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
                                             // 5. Websockets (New)
-                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#eab308' },
+                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#eab308' },
                                             // 6. Files
-                                            { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
+                                            { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
                                             <div key={i} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
