@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-// Dummy comment to test webhook integration and real-time metrics sync
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { get } from '../database.js';
