@@ -2930,6 +2930,7 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const containerRef = React.useRef(null);
     const scrollInterval = React.useRef(null);
+    const latestHandleWheel = React.useRef(null);
 
     // Viewport State (Time Window)
     const [viewportStart, setViewportStart] = useState(0);
@@ -2944,6 +2945,15 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
 
     // Drag State
     const [dragging, setDragging] = useState(null); // { id, type, startX, originalStart, originalEnd, newStart, newEnd }
+
+    // 0. Scroll Lock Effect (Must be top-level)
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const handler = (e) => latestHandleWheel.current && latestHandleWheel.current(e);
+        el.addEventListener('wheel', handler, { passive: false });
+        return () => el.removeEventListener('wheel', handler);
+    }, []);
 
     // 1. Initial Auto-Scale (Run once when broadcasts load)
     useEffect(() => {
@@ -3081,7 +3091,10 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         // Mouse time position
         const mouseTime = viewportStart + (viewportDuration * mouseRatio);
 
-        if (e.ctrlKey || e.metaKey) {
+        // Standard Interaction: Vertical Scroll = Zoom, Horizontal = Pan
+        const isVertical = Math.abs(e.deltaY) > Math.abs(e.deltaX);
+
+        if (isVertical) {
             // Zoom
             const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
             const newDuration = Math.max(3600000, viewportDuration * zoomFactor); // Min 1 hour window
@@ -3093,23 +3106,13 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             setViewportStart(newStart);
         } else {
             // Pan
-            const panAmount = (e.deltaX + e.deltaY) * (viewportDuration / width);
+            const panAmount = (e.deltaX) * (viewportDuration / width);
             setViewportStart(prev => prev + panAmount);
         }
     };
 
-    // Fix for passive event listener issue (Scrolljacking)
-    const latestHandleWheel = React.useRef(handleWheel);
+    // Sync Ref for Event Listener
     latestHandleWheel.current = handleWheel;
-
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-        const handler = (e) => latestHandleWheel.current(e);
-        // Important: passive: false is required to allow preventDefault()
-        el.addEventListener('wheel', handler, { passive: false });
-        return () => el.removeEventListener('wheel', handler);
-    }, []);
 
     // Edge Scrolling Loop
     const checkEdgeScroll = (clientX) => {
@@ -3335,7 +3338,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                         <div key={i} style={{ position: 'absolute', left: `${tick.left}%`, top: 0, height: '100%', pointerEvents: 'none' }}>
                             <div style={{ width: 1, height: 6, background: '#64748b', position: 'absolute', bottom: 0 }} />
                             <div style={{
-                                position: 'absolute', bottom: 8, left: 4,
+                                position: 'absolute', bottom: 8, left: 0, transform: 'translateX(-50%)',
                                 fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace', lineHeight: 1,
                                 whiteSpace: 'nowrap'
                             }}>
