@@ -2975,14 +2975,15 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         });
 
         if (validCount > 0) {
-            // Add 5% padding on each side
+            // Exact fit: Start at min, End at max
+            // Ensure at least 1 hour window if range is tiny
             const range = max - min;
-            const padding = range > 0 ? range * 0.05 : 3600000;
+            const minDuration = 3600000; // 1 hr
 
-            // Only set if significantly different or not initialized (debouncing mostly)
+            // Only set if significantly different or not initialized
             if (!isInitialized) {
-                setViewportStart(min - padding);
-                setViewportDuration(range + padding * 2);
+                setViewportStart(min);
+                setViewportDuration(Math.max(range, minDuration));
                 setIsInitialized(true);
             }
         }
