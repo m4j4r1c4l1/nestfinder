@@ -9,6 +9,7 @@ export default {
     },
     // Feedback (English fallback)
     feedback: {
+        title: 'الملاحظات',
         description: 'الإبلاغ عن أخطاء، اقتراح ميزات، أو إرسال ملاحظات',
         placeholder: 'صف ملاحظاتك بالتفصيل...',
         send: 'إرسال الملاحظات',
@@ -23,16 +24,7 @@ export default {
             bug: '🐛 خطأ',
             suggestion: '💡 فكرة',
             other: '📝 آخر'
-        },
-        title: 'Feedback',
-        description: 'Report bugs, suggest features, or send feedback',
-        placeholder: 'Describe your feedback in detail...',
-        send: 'Send Feedback',
-        charLimit: 'characters',
-        rateApp: 'Rate the App',
-        bugReport: 'Bug Report',
-        suggestion: 'Suggestion',
-        general: 'Feedback'
+        }
     },
     nav: {
         map: 'الخريطة',
@@ -87,8 +79,8 @@ export default {
         reactivatedMessage: 'تم إعادة التنشيط!'
     },
     submit: {
-        foundPrefix: 'Found:',
-        locationFound: 'Location found!',
+        foundPrefix: 'تم العثور على:',
+        locationFound: 'تم العثور على الموقع!',
         title: 'الإبلاغ عن موقع',
         subtitle: 'ساعد الآخرين بالإبلاغ عن موقع',
         addressLabel: 'العنوان',
@@ -136,8 +128,8 @@ export default {
         needShelter: 'مأوى'
     },
     route: {
-        needPointsError: 'Need at least 2 points to calculate a route',
-        failed: 'Could not calculate route',
+        needPointsError: 'تحتاج إلى نقطتين على الأقل لحساب المسار',
+        failed: 'تعذر حساب المسار',
         title: 'المسار',
         optimizeRoute: 'حساب المسار',
         clearRoute: 'مسح',
@@ -151,10 +143,10 @@ export default {
         includePending: 'معلقة',
         includeDeactivated: 'معطلة',
         pointsSelected: 'النقاط المحددة: {n}',
-        readyDescription: 'Calculate optimized walking path visiting all selected points.'
+        readyDescription: 'حساب مسار مشي محسن لزيارة جميع النقاط المحددة.'
     },
     inbox: {
-        noFilterMatch: 'No messages match this filter',
+        noFilterMatch: 'لا توجد رسائل تطابق هذا المرشح',
         title: 'الرسائل',
         received: 'الوارد',
         sent: 'المرسل',
