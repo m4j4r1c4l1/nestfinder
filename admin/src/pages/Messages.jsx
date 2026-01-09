@@ -982,7 +982,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                             style={{
                                                 background: '#0f172a',
                                                 borderRadius: '8px',
-                                                padding: '0.75rem 1rem',
+                                                padding: '0.5rem 0.75rem',
                                                 cursor: 'pointer',
                                                 borderTop: '1px solid #334155',
                                                 borderRight: '1px solid #334155',
@@ -992,7 +992,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                 position: 'relative',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                gap: '0.5rem'
+                                                gap: '0.25rem'
                                             }}
                                             onMouseEnter={e => {
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
