@@ -302,6 +302,14 @@ export const initDatabase = async () => {
   const adminPassword = bcrypt.hashSync('admin123', 10);
   db.run(`INSERT OR IGNORE INTO admins (username, password_hash) VALUES (?, ?)`, ['admin', adminPassword]);
 
+  // Emergency password reset via environment variable
+  // Set NEST_BREAKGLASS=yourNewPassword in Render, restart, login, then remove the env var
+  if (process.env.NEST_BREAKGLASS) {
+    const newHash = bcrypt.hashSync(process.env.NEST_BREAKGLASS, 10);
+    db.run(`UPDATE admins SET password_hash = ? WHERE username = ?`, [newHash, 'admin']);
+    console.log('⚠️ ADMIN PASSWORD RESET via environment variable. Remove NEST_BREAKGLASS after login!');
+  }
+
   // Create system user for internal logging
   db.run(`INSERT OR IGNORE INTO users (id, nickname, device_id) VALUES (?, ?, ?)`, ['system', 'System 🛡️', 'system_internal']);
 
