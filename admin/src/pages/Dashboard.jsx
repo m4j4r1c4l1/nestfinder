@@ -11,6 +11,11 @@ const Dashboard = ({ onNavigate }) => {
     const [showBackup, setShowBackup] = useState(false);
     const [corruptDBFound, setCorruptDBFound] = useState(false);
     const [isRestoring, setIsRestoring] = useState(false);
+    const [toast, setToast] = useState(null); // { type: 'success'|'error'|'info', message: string }
+    const [confirmModal, setConfirmModal] = useState(null); // { message, onConfirm }
+
+    const showToast = (type, message) => setToast({ type, message });
+    const closeToast = () => setToast(null);
 
     useEffect(() => {
         // Check for corrupt DB existence once on mount
@@ -375,8 +380,12 @@ const Dashboard = ({ onNavigate }) => {
                                         style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.35rem', fontSize: '0.8rem' }}
                                         title="Download Active DB"
                                         onClick={async () => {
-                                            try { await adminApi.downloadBackup(); }
-                                            catch (err) { alert('Failed: ' + err.message); }
+                                            try {
+                                                await adminApi.downloadBackup();
+                                                showToast('success', 'Active database download started.');
+                                            } catch (err) {
+                                                showToast('error', 'Failed: ' + err.message);
+                                            }
                                         }}
                                     >
                                         📥 Active
@@ -396,8 +405,12 @@ const Dashboard = ({ onNavigate }) => {
                                         title="Download Corrupted DB (if valid)"
                                         disabled={!corruptDBFound}
                                         onClick={async () => {
-                                            try { await adminApi.downloadCorruptDB(); }
-                                            catch (err) { alert('Failed: ' + err.message); }
+                                            try {
+                                                await adminApi.downloadCorruptDB();
+                                                showToast('success', 'Corrupt database download started.');
+                                            } catch (err) {
+                                                showToast('error', 'Failed: ' + err.message);
+                                            }
                                         }}
                                     >
                                         ☣️ Corrupt
@@ -426,25 +439,30 @@ const Dashboard = ({ onNavigate }) => {
                                         accept=".db,.sqlite,.sqlite3"
                                         style={{ display: 'none' }}
                                         disabled={isRestoring}
-                                        onChange={async (e) => {
+                                        onChange={(e) => {
                                             const file = e.target.files[0];
                                             if (!file) return;
-                                            if (!window.confirm(`⚠️ WARNING: This will OVERWRITE the current database with '${file.name}'.\n\nThe server will restart.\nAre you sure?`)) {
-                                                e.target.value = '';
-                                                return;
-                                            }
-
-                                            setIsRestoring(true);
-                                            try {
-                                                const res = await adminApi.restoreDB(file);
-                                                alert(res.message);
-                                                window.location.reload();
-                                            } catch (err) {
-                                                alert('Restore Failed: ' + err.message);
-                                                setIsRestoring(false);
-                                            } finally {
-                                                e.target.value = '';
-                                            }
+                                            setConfirmModal({
+                                                message: `⚠️ WARNING: This will OVERWRITE the current database with '${file.name}'.\n\nThe server will restart.\nAre you sure?`,
+                                                onConfirm: async () => {
+                                                    setConfirmModal(null);
+                                                    setIsRestoring(true);
+                                                    try {
+                                                        const res = await adminApi.restoreDB(file);
+                                                        showToast('success', res.message || 'Database restored successfully!');
+                                                        setTimeout(() => window.location.reload(), 1500);
+                                                    } catch (err) {
+                                                        showToast('error', 'Restore Failed: ' + err.message);
+                                                        setIsRestoring(false);
+                                                    } finally {
+                                                        e.target.value = '';
+                                                    }
+                                                },
+                                                onCancel: () => {
+                                                    setConfirmModal(null);
+                                                    e.target.value = '';
+                                                }
+                                            });
                                         }}
                                     />
                                 </div>
@@ -621,6 +639,20 @@ const Dashboard = ({ onNavigate }) => {
                     </Modal>
                 )
             }
+
+            {/* Toast notification for DB operations */}
+            {toast && (
+                <Toast type={toast.type} message={toast.message} onClose={closeToast} />
+            )}
+
+            {/* Confirmation modal for dangerous actions */}
+            {confirmModal && (
+                <ConfirmModal
+                    message={confirmModal.message}
+                    onConfirm={confirmModal.onConfirm}
+                    onCancel={confirmModal.onCancel}
+                />
+            )}
         </div >
     );
 };
@@ -717,4 +749,127 @@ const Modal = ({ title, onClose, children }) => (
     </div>
 );
 
+// Toast notification for feedback messages
+const Toast = ({ type, message, onClose }) => {
+    const colors = {
+        success: { bg: 'rgba(16, 185, 129, 0.95)', icon: '✅' },
+        error: { bg: 'rgba(239, 68, 68, 0.95)', icon: '❌' },
+        info: { bg: 'rgba(59, 130, 246, 0.95)', icon: 'ℹ️' }
+    };
+    const { bg, icon } = colors[type] || colors.info;
+
+    // Auto-dismiss after 4 seconds
+    React.useEffect(() => {
+        const timer = setTimeout(onClose, 4000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                bottom: '2rem',
+                right: '2rem',
+                background: bg,
+                color: 'white',
+                padding: '1rem 1.5rem',
+                borderRadius: 'var(--radius-lg)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                zIndex: 2000,
+                animation: 'slideIn 0.3s ease',
+                maxWidth: '400px'
+            }}
+        >
+            <span style={{ fontSize: '1.25rem' }}>{icon}</span>
+            <span style={{ flex: 1, fontSize: '0.9rem' }}>{message}</span>
+            <button
+                onClick={onClose}
+                style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '4px',
+                    fontSize: '1rem'
+                }}
+            >
+                ×
+            </button>
+        </div>
+    );
+};
+
+// Confirmation modal for dangerous actions
+const ConfirmModal = ({ message, onConfirm, onCancel }) => (
+    <div
+        style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1500,
+            backdropFilter: 'blur(6px)'
+        }}
+        onClick={onCancel}
+    >
+        <div
+            className="card"
+            style={{
+                width: '90%',
+                maxWidth: '450px',
+                overflow: 'hidden'
+            }}
+            onClick={e => e.stopPropagation()}
+        >
+            <div className="card-header" style={{ borderBottom: '1px solid var(--color-border)' }}>
+                <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>⚠️</span> Confirm Action
+                </h3>
+            </div>
+            <div className="card-body" style={{ padding: '1.5rem' }}>
+                <p style={{ margin: 0, whiteSpace: 'pre-line', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
+                    {message}
+                </p>
+            </div>
+            <div style={{
+                padding: '1rem 1.5rem',
+                borderTop: '1px solid var(--color-border)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '0.75rem'
+            }}>
+                <button
+                    className="btn"
+                    onClick={onCancel}
+                    style={{
+                        background: 'var(--color-bg-tertiary)',
+                        color: 'var(--color-text-primary)',
+                        padding: '0.5rem 1rem'
+                    }}
+                >
+                    Cancel
+                </button>
+                <button
+                    className="btn"
+                    onClick={onConfirm}
+                    style={{
+                        background: '#ef4444',
+                        color: 'white',
+                        padding: '0.5rem 1rem'
+                    }}
+                >
+                    Yes, Proceed
+                </button>
+            </div>
+        </div>
+    </div>
+);
+
 export default Dashboard;
+
