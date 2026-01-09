@@ -86,8 +86,8 @@ export default {
         reactivatedMessage: 'Punt reactivat!'
     },
     submit: {
-        foundPrefix: 'Found:',
-        locationFound: 'Location found!',
+        foundPrefix: 'Trobat:',
+        locationFound: 'Ubicació trobada!',
         title: 'Reportar Ubicació',
         subtitle: 'Ajuda als altres reportant un lloc',
         addressLabel: 'Adreça',

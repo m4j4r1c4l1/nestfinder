@@ -86,8 +86,8 @@ export default {
         reactivatedMessage: 'Punkt reaktiviert!'
     },
     submit: {
-        foundPrefix: 'Found:',
-        locationFound: 'Location found!',
+        foundPrefix: 'Gefunden:',
+        locationFound: 'Standort gefunden!',
         title: 'Ort melden',
         subtitle: 'Helfen Sie anderen, indem Sie einen Ort melden',
         addressLabel: 'Adresse',

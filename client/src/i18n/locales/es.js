@@ -100,8 +100,8 @@ export default {
 
     // Submit/Report Form
     submit: {
-        foundPrefix: 'Found:',
-        locationFound: 'Location found!',
+        foundPrefix: 'Encontrado:',
+        locationFound: '¡Ubicación encontrada!',
         title: 'Reportar Ubicación',
         subtitle: 'Ayuda a otros reportando una ubicación',
         addressLabel: 'Dirección',

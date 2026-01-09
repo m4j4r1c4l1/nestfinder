@@ -7,21 +7,6 @@ export default {
         flag: '🇫🇷'
     },
     feedback: {
-        description: 'Signaler des bugs, suggérer des fonctionnalités ou envoyer des commentaires',
-        placeholder: 'Décrivez vos commentaires en détail...',
-        send: 'Envoyer',
-        charLimit: 'caractères',
-        rateApp: 'Noter l\'application',
-        bugReport: 'Rapport de bug',
-        suggestion: 'Suggestion',
-        general: 'Général',
-        sentStatus: '✓ Envoyé !',
-        sending: 'Envoi...',
-        types: {
-            bug: '🐛 Bug',
-            suggestion: '💡 Idée',
-            other: '📝 Autre'
-        },
         title: 'Feedback',
         description: 'Signalez des bugs, suggérez des fonctionnalités ou envoyez des avis',
         placeholder: 'Décrivez votre retour en détail...',
@@ -30,7 +15,14 @@ export default {
         rateApp: "Noter l'application",
         bugReport: 'Signalement de Bug',
         suggestion: 'Suggestion',
-        general: 'Général'
+        general: 'Général',
+        sentStatus: '✓ Envoyé !',
+        sending: 'Envoi...',
+        types: {
+            bug: '🐛 Bug',
+            suggestion: '💡 Idée',
+            other: '📝 Autre'
+        }
     },
     nav: {
         map: 'Carte',
@@ -85,8 +77,8 @@ export default {
         reactivatedMessage: 'Point réactivé !'
     },
     submit: {
-        foundPrefix: 'Found:',
-        locationFound: 'Location found!',
+        foundPrefix: 'Trouvé :',
+        locationFound: 'Lieu trouvé !',
         title: 'Signaler un lieu',
         subtitle: 'Aidez les autres en signalant un lieu',
         addressLabel: 'Adresse',
