@@ -532,7 +532,7 @@ const Messages = () => {
 
                     {/* BROADCASTS TAB */}
                     {activeTab === 'broadcasts' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minHeight: 0 }}>
                             {/* Create New Broadcast */}
                             <div className="card" style={{ flexShrink: 0, marginBottom: 0 }}>
                                 <div className="card-header">
@@ -806,7 +806,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
     const totalPages = Math.ceil(filteredBroadcasts.length / pageSize);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minHeight: 0 }}>
             {/* Broadcasts List Card */}
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: 0 }}>
                 <div className="card-header">
