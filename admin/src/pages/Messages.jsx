@@ -405,8 +405,7 @@ const Messages = () => {
                 // Header is always static now as the page doesn't scroll, the content does
                 background: 'var(--color-bg-primary, #0f172a)',
                 zIndex: 100,
-                padding: '1.5rem 1.5rem 0 1.5rem',
-                borderBottom: '1px solid #334155'
+                padding: '1.5rem 1.5rem 0 1.5rem'
             }}>
 
                 <div style={{ marginBottom: '1.5rem' }}>
@@ -485,7 +484,7 @@ const Messages = () => {
                     flex: 1, // Always take remaining space
                     display: 'flex',
                     flexDirection: 'column',
-                    overflow: (activeTab === 'composer') ? 'visible' : 'hidden',
+                    overflow: 'visible',
                     padding: '0.5rem 1rem 1.25rem 1rem',
                     minHeight: 0 // Critical for flex scrolling
                 }}>
@@ -532,7 +531,7 @@ const Messages = () => {
 
                     {/* BROADCASTS TAB */}
                     {activeTab === 'broadcasts' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, overflowY: 'auto', paddingBottom: '2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '2rem' }}>
                             {/* Create New Broadcast */}
                             <div className="card" style={{ flexShrink: 0, marginBottom: 0 }}>
                                 <div className="card-header">
