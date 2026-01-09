@@ -1038,4 +1038,50 @@ router.get('/metrics/ratings', (req, res) => {
     res.json({ ratings });
 });
 
+// ================== DATABASE RECOVERY ==================
+
+// Check if a corrupt database file exists
+router.get('/db/corrupt-check', (req, res) => {
+    try {
+        const dbDir = path.dirname(DB_PATH);
+        const files = fs.readdirSync(dbDir);
+        // Look for files matching nestfinder.db.corrupt.*
+        const corruptFile = files.find(f => f.startsWith('nestfinder.db.corrupt.'));
+        if (corruptFile) {
+            res.json({ found: true, filename: corruptFile });
+        } else {
+            res.json({ found: false });
+        }
+    } catch (err) {
+        console.error('Corrupt check error:', err);
+        res.json({ found: false, error: err.message });
+    }
+});
+
+// Download the corrupt database file
+router.get('/db/download-corrupt', (req, res) => {
+    try {
+        const dbDir = path.dirname(DB_PATH);
+        const files = fs.readdirSync(dbDir);
+        const corruptFile = files.find(f => f.startsWith('nestfinder.db.corrupt.'));
+
+        if (!corruptFile) {
+            return res.status(404).json({ error: 'No corrupt database file found' });
+        }
+
+        const corruptPath = path.join(dbDir, corruptFile);
+        res.download(corruptPath, corruptFile, (err) => {
+            if (err) {
+                console.error('Download corrupt error:', err);
+                if (!res.headersSent) {
+                    res.status(500).json({ error: 'Failed to download corrupt file' });
+                }
+            }
+        });
+    } catch (err) {
+        console.error('Download corrupt error:', err);
+        res.status(500).json({ error: 'Failed to download corrupt file' });
+    }
+});
+
 export default router;
