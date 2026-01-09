@@ -391,362 +391,366 @@ const Messages = () => {
     return (
         <div style={{
             flex: 1,
-            maxWidth: '1200px',
-            margin: '0 auto',
             width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            overflowY: 'auto', // Enable main page scroll
+            overflowY: 'auto', // Scroll at page edge
             overflowX: 'hidden',
-            height: 'calc(100vh - 20px)', // Fixed height for internal scrolling
-            minHeight: '0'
+            height: 'calc(100vh - 20px)'
         }}>
-            <style>{datePickerStyles}</style>
             <div style={{
-                // Header is always static now as the page doesn't scroll, the content does
-                background: 'var(--color-bg-primary, #0f172a)',
-                zIndex: 100,
-                padding: '1.5rem 1.5rem 0 1.5rem'
+                maxWidth: '1200px',
+                margin: '0 auto',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '0'
             }}>
-
-                <div style={{ marginBottom: '1.5rem' }}>
-                    <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                        🔔 Messages
-                    </h1>
-                    <p style={{ color: 'var(--color-text-secondary)' }}>
-                        Manage communications, broadcasts, and user feedback
-                    </p>
-                </div>
-
-                {/* Tabs */}
+                <style>{datePickerStyles}</style>
                 <div style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    borderBottom: '1px solid #334155',
-                    paddingBottom: '1rem',
-                    overflowX: 'auto'
-                }}>
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            style={{
-                                padding: '0.75rem 1.25rem',
-                                background: activeTab === tab.id ? '#1e293b' : 'transparent',
-                                color: activeTab === tab.id ? '#f8fafc' : '#94a3b8',
-                                border: activeTab === tab.id ? '1px solid #334155' : '1px solid transparent',
-                                borderBottom: activeTab === tab.id ? 'none' : '1px solid transparent',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontWeight: 500,
-                                fontSize: '1.1rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                transition: 'all 0.2s',
-                                whiteSpace: 'nowrap',
-                                outline: 'none',
-                                position: 'relative',
-                                top: activeTab === tab.id ? '1px' : '0'
-                            }}
-                            onMouseEnter={e => {
-                                if (activeTab !== tab.id) e.currentTarget.style.color = '#e2e8f0';
-                            }}
-                            onMouseLeave={e => {
-                                if (activeTab !== tab.id) e.currentTarget.style.color = '#94a3b8';
-                            }}
-                        >
-                            {tab.label}
-                            {tab.count > 0 && (
-                                <span style={{
-                                    background: activeTab === tab.id ? '#3b82f6' : '#475569',
-                                    color: 'white',
-                                    padding: '0.1rem 0.5rem',
-                                    borderRadius: '10px',
-                                    fontSize: '0.75rem',
-                                    minWidth: '20px',
-                                    textAlign: 'center'
-                                }}>
-                                    {tab.count}
-                                </span>
-                            )}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {loading ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-secondary)' }}>
-                    Loading messaging data...
-                </div>
-            ) : (
-                <div className="tab-content" style={{
-                    animation: 'fadeIn 0.3s ease',
-                    flex: 1, // Always take remaining space
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'visible',
-                    padding: '0.5rem 1rem 1.25rem 1rem',
-                    minHeight: 0 // Critical for flex scrolling
+                    // Header is always static now as the page doesn't scroll, the content does
+                    background: 'var(--color-bg-primary, #0f172a)',
+                    zIndex: 100,
+                    padding: '1.5rem 1.5rem 0 1.5rem'
                 }}>
 
-                    {/* COMPOSER TAB */}
-                    {activeTab === 'composer' && (
-                        <div style={{ width: '100%' }}>
-                            <ComposeSection
-                                subscribers={subscribers}
-                                totalSubscribers={stats.totalSubscribers}
-                                onSent={fetchData}
-                            />
-                        </div>
-                    )}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                            🔔 Messages
+                        </h1>
+                        <p style={{ color: 'var(--color-text-secondary)' }}>
+                            Manage communications, broadcasts, and user feedback
+                        </p>
+                    </div>
 
-                    {/* OUTBOX TAB */}
-                    {/* SENT (OUTBOX) TAB */}
-                    {activeTab === 'outbox' && (
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <HistorySection users={subscribers} totalSent={stats.notificationMetrics?.total || 0} />
-                        </div>
-                    )}
+                    {/* Tabs */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '0.5rem',
+                        borderBottom: '1px solid #334155',
+                        paddingBottom: '1rem',
+                        overflowX: 'auto'
+                    }}>
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                style={{
+                                    padding: '0.75rem 1.25rem',
+                                    background: activeTab === tab.id ? '#1e293b' : 'transparent',
+                                    color: activeTab === tab.id ? '#f8fafc' : '#94a3b8',
+                                    border: activeTab === tab.id ? '1px solid #334155' : '1px solid transparent',
+                                    borderBottom: activeTab === tab.id ? 'none' : '1px solid transparent',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: 500,
+                                    fontSize: '1.1rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    transition: 'all 0.2s',
+                                    whiteSpace: 'nowrap',
+                                    outline: 'none',
+                                    position: 'relative',
+                                    top: activeTab === tab.id ? '1px' : '0'
+                                }}
+                                onMouseEnter={e => {
+                                    if (activeTab !== tab.id) e.currentTarget.style.color = '#e2e8f0';
+                                }}
+                                onMouseLeave={e => {
+                                    if (activeTab !== tab.id) e.currentTarget.style.color = '#94a3b8';
+                                }}
+                            >
+                                {tab.label}
+                                {tab.count > 0 && (
+                                    <span style={{
+                                        background: activeTab === tab.id ? '#3b82f6' : '#475569',
+                                        color: 'white',
+                                        padding: '0.1rem 0.5rem',
+                                        borderRadius: '10px',
+                                        fontSize: '0.75rem',
+                                        minWidth: '20px',
+                                        textAlign: 'center'
+                                    }}>
+                                        {tab.count}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-                    {/* RECEIVED (FEEDBACK) TAB */}
-                    {activeTab === 'feedback' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
-                            <FeedbackSection
-                                feedback={feedback}
-                                feedbackCounts={feedbackCounts}
-                                onUpdate={fetchData}
-                                onUpdateStatus={handleUpdateFeedbackStatus}
-                                onDelete={handleDeleteFeedback}
-                                page={feedbackPage}
-                                setPage={setFeedbackPage}
-                                pageSize={feedbackPageSize}
-                                totalItems={totalFeedback}
-                                sortColumn={feedbackSortCol}
-                                setSortColumn={setFeedbackSortCol}
-                                sortDirection={feedbackSortDir}
-                                setSortDirection={setFeedbackSortDir}
-                            />
-                        </div>
-                    )}
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-secondary)' }}>
+                        Loading messaging data...
+                    </div>
+                ) : (
+                    <div className="tab-content" style={{
+                        animation: 'fadeIn 0.3s ease',
+                        flex: 1, // Always take remaining space
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'visible',
+                        padding: '0.5rem 1rem 1.25rem 1rem',
+                        minHeight: 0 // Critical for flex scrolling
+                    }}>
 
-                    {/* BROADCASTS TAB */}
-                    {activeTab === 'broadcasts' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '2rem' }}>
-                            {/* Create New Broadcast */}
-                            <div className="card" style={{ flexShrink: 0, marginBottom: 0 }}>
-                                <div className="card-header">
-                                    <h3>🌈 Create Broadcasts</h3>
-                                </div>
-                                <div className="card-body">
-                                    <form onSubmit={handleCreateBroadcast}>
-                                        <div className="form-group">
-                                            <label className="form-label">Template</label>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', paddingBottom: '0.5rem' }}>
-                                                {Object.values(templates).map(tmpl => (
-                                                    <button
-                                                        key={tmpl.id}
-                                                        type="button"
-                                                        onClick={() => handleBroadcastTemplateChange(tmpl.id)}
-                                                        style={{
-                                                            padding: '0.5rem 0.2rem',
-                                                            border: activeBroadcastTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #334155',
-                                                            borderRadius: '8px',
-                                                            background: activeBroadcastTemplate === tmpl.id ? '#1e293b' : '#0f172a',
-                                                            color: activeBroadcastTemplate === tmpl.id ? '#60a5fa' : '#94a3b8',
-                                                            cursor: 'pointer',
-                                                            fontWeight: activeBroadcastTemplate === tmpl.id ? 600 : 400,
-                                                            fontSize: '0.85rem',
-                                                            whiteSpace: 'nowrap',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            textAlign: 'center'
-                                                        }}
-                                                        title={tmpl.name}
-                                                        onMouseEnter={e => {
-                                                            if (activeBroadcastTemplate !== tmpl.id) {
-                                                                e.currentTarget.style.color = '#e2e8f0';
-                                                                e.currentTarget.style.background = '#1e293b';
-                                                            }
-                                                        }}
-                                                        onMouseLeave={e => {
-                                                            if (activeBroadcastTemplate !== tmpl.id) {
-                                                                e.currentTarget.style.color = '#94a3b8';
-                                                                e.currentTarget.style.background = '#0f172a';
-                                                            }
-                                                        }}
-                                                    >
-                                                        {tmpl.name}
-                                                    </button>
-                                                ))}
+                        {/* COMPOSER TAB */}
+                        {activeTab === 'composer' && (
+                            <div style={{ width: '100%' }}>
+                                <ComposeSection
+                                    subscribers={subscribers}
+                                    totalSubscribers={stats.totalSubscribers}
+                                    onSent={fetchData}
+                                />
+                            </div>
+                        )}
+
+                        {/* OUTBOX TAB */}
+                        {/* SENT (OUTBOX) TAB */}
+                        {activeTab === 'outbox' && (
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <HistorySection users={subscribers} totalSent={stats.notificationMetrics?.total || 0} />
+                            </div>
+                        )}
+
+                        {/* RECEIVED (FEEDBACK) TAB */}
+                        {activeTab === 'feedback' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '2rem' }}>
+                                <FeedbackSection
+                                    feedback={feedback}
+                                    feedbackCounts={feedbackCounts}
+                                    onUpdate={fetchData}
+                                    onUpdateStatus={handleUpdateFeedbackStatus}
+                                    onDelete={handleDeleteFeedback}
+                                    page={feedbackPage}
+                                    setPage={setFeedbackPage}
+                                    pageSize={feedbackPageSize}
+                                    totalItems={totalFeedback}
+                                    sortColumn={feedbackSortCol}
+                                    setSortColumn={setFeedbackSortCol}
+                                    sortDirection={feedbackSortDir}
+                                    setSortDirection={setFeedbackSortDir}
+                                />
+                            </div>
+                        )}
+
+                        {/* BROADCASTS TAB */}
+                        {activeTab === 'broadcasts' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '2rem' }}>
+                                {/* Create New Broadcast */}
+                                <div className="card" style={{ flexShrink: 0, marginBottom: 0 }}>
+                                    <div className="card-header">
+                                        <h3>🌈 Create Broadcasts</h3>
+                                    </div>
+                                    <div className="card-body">
+                                        <form onSubmit={handleCreateBroadcast}>
+                                            <div className="form-group">
+                                                <label className="form-label">Template</label>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', paddingBottom: '0.5rem' }}>
+                                                    {Object.values(templates).map(tmpl => (
+                                                        <button
+                                                            key={tmpl.id}
+                                                            type="button"
+                                                            onClick={() => handleBroadcastTemplateChange(tmpl.id)}
+                                                            style={{
+                                                                padding: '0.5rem 0.2rem',
+                                                                border: activeBroadcastTemplate === tmpl.id ? '2px solid #3b82f6' : '1px solid #334155',
+                                                                borderRadius: '8px',
+                                                                background: activeBroadcastTemplate === tmpl.id ? '#1e293b' : '#0f172a',
+                                                                color: activeBroadcastTemplate === tmpl.id ? '#60a5fa' : '#94a3b8',
+                                                                cursor: 'pointer',
+                                                                fontWeight: activeBroadcastTemplate === tmpl.id ? 600 : 400,
+                                                                fontSize: '0.85rem',
+                                                                whiteSpace: 'nowrap',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                textAlign: 'center'
+                                                            }}
+                                                            title={tmpl.name}
+                                                            onMouseEnter={e => {
+                                                                if (activeBroadcastTemplate !== tmpl.id) {
+                                                                    e.currentTarget.style.color = '#e2e8f0';
+                                                                    e.currentTarget.style.background = '#1e293b';
+                                                                }
+                                                            }}
+                                                            onMouseLeave={e => {
+                                                                if (activeBroadcastTemplate !== tmpl.id) {
+                                                                    e.currentTarget.style.color = '#94a3b8';
+                                                                    e.currentTarget.style.background = '#0f172a';
+                                                                }
+                                                            }}
+                                                        >
+                                                            {tmpl.name}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div className="form-group" style={{ marginTop: '0.25rem' }}>
-                                            <label className="form-label" style={{ marginBottom: '0.25rem' }}>Title</label>
-                                            <input
-                                                type="text"
-                                                className="form-input"
-                                                value={newBroadcast.title || ''}
-                                                onChange={(e) => setNewBroadcast({ ...newBroadcast, title: e.target.value })}
-                                                placeholder="Broadcast title..."
-                                            />
-                                        </div>
-
-                                        <div className="form-group" style={{ marginTop: '0.25rem', marginBottom: '0.25rem' }}>
-                                            <label className="form-label" style={{ marginBottom: '0.25rem' }}>Image</label>
-                                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
+                                            <div className="form-group" style={{ marginTop: '0.25rem' }}>
+                                                <label className="form-label" style={{ marginBottom: '0.25rem' }}>Title</label>
                                                 <input
                                                     type="text"
                                                     className="form-input"
-                                                    value={newBroadcast.imageUrl}
-                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, imageUrl: e.target.value })}
-                                                    placeholder="Image URL..."
-                                                    style={{ flex: 1 }}
+                                                    value={newBroadcast.title || ''}
+                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, title: e.target.value })}
+                                                    placeholder="Broadcast title..."
                                                 />
-                                                <label className="btn btn-secondary" style={{
-                                                    cursor: 'pointer',
-                                                    padding: '0.4rem 1.5rem',
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    borderRadius: '8px'
-                                                }}>
-                                                    <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📂</span>
+                                            </div>
+
+                                            <div className="form-group" style={{ marginTop: '0.25rem', marginBottom: '0.25rem' }}>
+                                                <label className="form-label" style={{ marginBottom: '0.25rem' }}>Image</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
                                                     <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        style={{ display: 'none' }}
-                                                        onChange={(e) => {
-                                                            const file = e.target.files[0];
-                                                            if (file) {
-                                                                if (file.size > 8 * 1024 * 1024) {
-                                                                    alert('Image too large (>8MB)');
-                                                                    return;
-                                                                }
-                                                                const reader = new FileReader();
-                                                                reader.onloadend = () => setNewBroadcast({ ...newBroadcast, imageUrl: reader.result });
-                                                                reader.readAsDataURL(file);
-                                                            }
-                                                        }}
+                                                        type="text"
+                                                        className="form-input"
+                                                        value={newBroadcast.imageUrl}
+                                                        onChange={(e) => setNewBroadcast({ ...newBroadcast, imageUrl: e.target.value })}
+                                                        placeholder="Image URL..."
+                                                        style={{ flex: 1 }}
                                                     />
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group" style={{ marginTop: '0.25rem', position: 'relative' }}>
-                                            <label className="form-label" style={{ marginBottom: '0.25rem', display: 'block' }}>Message</label>
-                                            <textarea
-                                                className="form-input"
-                                                value={newBroadcast.message}
-                                                onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
-                                                rows={3}
-                                                style={{ width: '100%', resize: 'vertical' }}
-                                                placeholder="Enter broadcast message..."
-                                            />
-                                            <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowBroadcastEmojiPicker(true)}
-                                                    style={{
-                                                        background: 'none',
-                                                        border: 'none',
-                                                        fontSize: '1.2rem',
+                                                    <label className="btn btn-secondary" style={{
                                                         cursor: 'pointer',
-                                                        padding: '4px',
-                                                        opacity: 0.7,
-                                                        transition: 'opacity 0.2s'
-                                                    }}
-                                                    onMouseEnter={e => e.target.style.opacity = 1}
-                                                    onMouseLeave={e => e.target.style.opacity = 0.7}
-                                                    title="Insert Emoji"
-                                                >
-                                                    😀
-                                                </button>
+                                                        padding: '0.4rem 1.5rem',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        borderRadius: '8px'
+                                                    }}>
+                                                        <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📂</span>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            style={{ display: 'none' }}
+                                                            onChange={(e) => {
+                                                                const file = e.target.files[0];
+                                                                if (file) {
+                                                                    if (file.size > 8 * 1024 * 1024) {
+                                                                        alert('Image too large (>8MB)');
+                                                                        return;
+                                                                    }
+                                                                    const reader = new FileReader();
+                                                                    reader.onloadend = () => setNewBroadcast({ ...newBroadcast, imageUrl: reader.result });
+                                                                    reader.readAsDataURL(file);
+                                                                }
+                                                            }}
+                                                        />
+                                                    </label>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                                            <div style={{ flex: 1 }}>
-                                                <label className="form-label">Start Time</label>
-                                                <DatePicker
-                                                    selected={newBroadcast.startTime ? new Date(newBroadcast.startTime) : null}
-                                                    onChange={(date) => setNewBroadcast({ ...newBroadcast, startTime: date })}
-                                                    showTimeSelect
-                                                    timeFormat="HH:mm"
-                                                    timeIntervals={15}
-                                                    dateFormat="MMMM d, yyyy h:mm aa"
-                                                    className="custom-datepicker-input"
-                                                    placeholderText="Select start time"
-                                                    calendarClassName="dark-theme-calendar"
-                                                />
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <label className="form-label">End Time</label>
-                                                <DatePicker
-                                                    selected={newBroadcast.endTime ? new Date(newBroadcast.endTime) : null}
-                                                    onChange={(date) => setNewBroadcast({ ...newBroadcast, endTime: date })}
-                                                    showTimeSelect
-                                                    timeFormat="HH:mm"
-                                                    timeIntervals={15}
-                                                    dateFormat="MMMM d, yyyy h:mm aa"
-                                                    className="custom-datepicker-input"
-                                                    placeholderText="Select end time"
-                                                    minDate={newBroadcast.startTime ? new Date(newBroadcast.startTime) : null}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                                            <div style={{ flex: 1 }}>
-                                                <label className="form-label">Max Views (Optional)</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    placeholder="Unlimited"
-                                                    value={newBroadcast.maxViews || ''}
-                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, maxViews: e.target.value })}
+
+                                            <div className="form-group" style={{ marginTop: '0.25rem', position: 'relative' }}>
+                                                <label className="form-label" style={{ marginBottom: '0.25rem', display: 'block' }}>Message</label>
+                                                <textarea
                                                     className="form-input"
+                                                    value={newBroadcast.message}
+                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, message: e.target.value })}
+                                                    rows={3}
+                                                    style={{ width: '100%', resize: 'vertical' }}
+                                                    placeholder="Enter broadcast message..."
                                                 />
+                                                <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowBroadcastEmojiPicker(true)}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            fontSize: '1.2rem',
+                                                            cursor: 'pointer',
+                                                            padding: '4px',
+                                                            opacity: 0.7,
+                                                            transition: 'opacity 0.2s'
+                                                        }}
+                                                        onMouseEnter={e => e.target.style.opacity = 1}
+                                                        onMouseLeave={e => e.target.style.opacity = 0.7}
+                                                        title="Insert Emoji"
+                                                    >
+                                                        😀
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div style={{ flex: 1 }}>
-                                                <label className="form-label">Priority (1 = Highest)</label>
-                                                <select
-                                                    value={newBroadcast.priority || 3}
-                                                    onChange={(e) => setNewBroadcast({ ...newBroadcast, priority: parseInt(e.target.value) })}
-                                                    className="form-input"
-                                                    style={{ background: '#1e293b', color: '#e2e8f0', cursor: 'pointer' }}
-                                                >
-                                                    <option value={1}>1 - Critical (Red)</option>
-                                                    <option value={2}>2 - High (Orange)</option>
-                                                    <option value={3}>3 - Medium (Yellow)</option>
-                                                    <option value={4}>4 - Normal (Blue)</option>
-                                                    <option value={5}>5 - Low (Slate)</option>
-                                                </select>
+                                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <label className="form-label">Start Time</label>
+                                                    <DatePicker
+                                                        selected={newBroadcast.startTime ? new Date(newBroadcast.startTime) : null}
+                                                        onChange={(date) => setNewBroadcast({ ...newBroadcast, startTime: date })}
+                                                        showTimeSelect
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={15}
+                                                        dateFormat="MMMM d, yyyy h:mm aa"
+                                                        className="custom-datepicker-input"
+                                                        placeholderText="Select start time"
+                                                        calendarClassName="dark-theme-calendar"
+                                                    />
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <label className="form-label">End Time</label>
+                                                    <DatePicker
+                                                        selected={newBroadcast.endTime ? new Date(newBroadcast.endTime) : null}
+                                                        onChange={(date) => setNewBroadcast({ ...newBroadcast, endTime: date })}
+                                                        showTimeSelect
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={15}
+                                                        dateFormat="MMMM d, yyyy h:mm aa"
+                                                        className="custom-datepicker-input"
+                                                        placeholderText="Select end time"
+                                                        minDate={newBroadcast.startTime ? new Date(newBroadcast.startTime) : null}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={creatingBroadcast || !newBroadcast.message}
-                                            className="btn btn-primary btn-block"
-                                        >
-                                            {creatingBroadcast ? 'Creating...' : '📢 Publish Broadcast'}
-                                        </button>
-                                    </form>
-                                    {showBroadcastEmojiPicker && (
-                                        <EmojiPickerModal
-                                            onSelect={(emoji) => { setNewBroadcast(prev => ({ ...prev, message: prev.message + emoji })); setShowBroadcastEmojiPicker(false); }}
-                                            onClose={() => setShowBroadcastEmojiPicker(false)}
-                                        />
-                                    )}
+                                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <label className="form-label">Max Views (Optional)</label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        placeholder="Unlimited"
+                                                        value={newBroadcast.maxViews || ''}
+                                                        onChange={(e) => setNewBroadcast({ ...newBroadcast, maxViews: e.target.value })}
+                                                        className="form-input"
+                                                    />
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <label className="form-label">Priority (1 = Highest)</label>
+                                                    <select
+                                                        value={newBroadcast.priority || 3}
+                                                        onChange={(e) => setNewBroadcast({ ...newBroadcast, priority: parseInt(e.target.value) })}
+                                                        className="form-input"
+                                                        style={{ background: '#1e293b', color: '#e2e8f0', cursor: 'pointer' }}
+                                                    >
+                                                        <option value={1}>1 - Critical (Red)</option>
+                                                        <option value={2}>2 - High (Orange)</option>
+                                                        <option value={3}>3 - Medium (Yellow)</option>
+                                                        <option value={4}>4 - Normal (Blue)</option>
+                                                        <option value={5}>5 - Low (Slate)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                disabled={creatingBroadcast || !newBroadcast.message}
+                                                className="btn btn-primary btn-block"
+                                            >
+                                                {creatingBroadcast ? 'Creating...' : '📢 Publish Broadcast'}
+                                            </button>
+                                        </form>
+                                        {showBroadcastEmojiPicker && (
+                                            <EmojiPickerModal
+                                                onSelect={(emoji) => { setNewBroadcast(prev => ({ ...prev, message: prev.message + emoji })); setShowBroadcastEmojiPicker(false); }}
+                                                onClose={() => setShowBroadcastEmojiPicker(false)}
+                                            />
+                                        )}
+                                    </div>
                                 </div>
+
+                                {/* Manage Broadcasts */}
+                                <BroadcastsSection broadcasts={broadcasts} page={broadcastPage} setPage={setBroadcastPage} pageSize={broadcastPageSize} onDelete={handleDeleteBroadcast} />
                             </div>
+                        )}
 
-                            {/* Manage Broadcasts */}
-                            <BroadcastsSection broadcasts={broadcasts} page={broadcastPage} setPage={setBroadcastPage} pageSize={broadcastPageSize} onDelete={handleDeleteBroadcast} />
-                        </div>
-                    )}
-
-                </div>
-            )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
