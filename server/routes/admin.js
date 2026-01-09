@@ -731,16 +731,21 @@ router.get('/backup', (req, res) => {
 
 // List all broadcasts with view stats
 router.get('/broadcasts', (req, res) => {
-    const broadcasts = all(`
-        SELECT b.*,
-            (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id) as total_users,
-            (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'sent') as sent_count,
-            (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'delivered') as delivered_count,
-            (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'read') as read_count
-        FROM broadcasts b
-        ORDER BY b.created_at DESC
-    `);
-    res.json({ broadcasts });
+    try {
+        const broadcasts = all(`
+            SELECT b.*,
+                (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id) as total_users,
+                (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'sent') as sent_count,
+                (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'delivered') as delivered_count,
+                (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'read') as read_count
+            FROM broadcasts b
+            ORDER BY b.created_at DESC
+        `);
+        res.json({ broadcasts });
+    } catch (err) {
+        console.error('Failed to fetch broadcasts:', err);
+        res.status(500).json({ error: 'Failed to fetch broadcasts' });
+    }
 });
 
 // Get views for a specific broadcast (Sent History style)
