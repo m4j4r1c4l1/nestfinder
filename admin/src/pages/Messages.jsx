@@ -2572,8 +2572,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
         }} onClick={onClose}>
             <div style={{
                 background: '#1e293b', borderRadius: '12px', padding: '0',
-                width: 'min(600px, 90vw)', maxHeight: '90vh', // Constrain height
-                display: 'flex', flexDirection: 'column', // Flex layout
+                width: 'min(800px, 95vw)', maxHeight: '90vh', // Wider modal
+                display: 'flex', flexDirection: 'column',
                 border: '1px solid #334155',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', overflow: 'hidden'
             }} onClick={e => e.stopPropagation()}>
@@ -2584,217 +2584,247 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
                 </div>
 
-                {/* Content - Scrollable */}
-                <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1 }}>
-                    {/* Content */}
-                    <h4 style={{ margin: '0 0 1rem 0', color: '#f8fafc', fontSize: '1.2rem' }}>{broadcast.title || 'Untitled Broadcast'}</h4>
-
-                    {/* Image */}
-                    {broadcast.image_url && (
-                        <div style={{ marginBottom: '1.5rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155' }}>
-                            <img src={broadcast.image_url} alt="Broadcast" style={{ maxWidth: '100%', display: 'block' }} />
-                        </div>
-                    )}
-
-                    <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #334155', color: '#cbd5e1', whiteSpace: 'pre-wrap', marginBottom: '1.5rem' }}>
-                        {broadcast.message}
-                    </div>
-
-                    {/* Metadata Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                        <div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Start Time</div>
-                            <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.start_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.start_time))}</div>
-                        </div>
-                        <div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>End Time</div>
-                            <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.end_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.end_time))}</div>
-                        </div>
-                        <div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Max Views</div>
-                            <div style={{ color: '#e2e8f0' }}>{broadcast.max_views || 'Unlimited'}</div>
-                        </div>
-                        <div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Priority</div>
-                            <div style={{ color: '#e2e8f0' }}>{broadcast.priority}</div>
-                        </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div style={{ display: 'flex', justifyContent: 'space-around', background: '#334155', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Total</div>
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#4ade80' }}>{broadcast.delivered_count || 0}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Received</div>
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{broadcast.read_count || 0}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Read</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Actions - Sticky Footer */}
                 <div style={{
-                    padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155',
-                    display: 'flex', gap: '1rem'
-                }}>
-                    <button
-                        onClick={onViewRecipients}
-                        className="btn btn-primary"
-                        style={{ flex: 1, justifyContent: 'center' }}
-                    >
-                        📊 View Recipient Details
-                    </button>
-                    <button
-                        onClick={onDelete}
-                        className="btn btn-danger"
-                        style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
-                    >
-                        🗑️ Delete
-                    </button>
-                </div>
+                    background: '#1e293b', borderRadius: '12px', padding: '0',
+                    width: 'min(800px, 95vw)', maxHeight: '90vh', // Wider modal
+                    display: 'flex', flexDirection: 'column',
+                    border: '1px solid #334155',
+                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', overflow: 'hidden'
+                }} onClick={e => e.stopPropagation()}>
 
-            </div>
-        </div>,
-        document.body
-    );
+                    {/* Header */}
+                    <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>📢 Broadcast Details</h3>
+                        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                    </div>
+
+                    {/* Content Body - Landscape Layout */}
+                    <div style={{ padding: '0', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'row' }}>
+
+                        {/* Left Column: Image (if present) */}
+                        {broadcast.image_url && (
+                            <div style={{
+                                width: '300px', flexShrink: 0, background: '#0f172a',
+                                borderRight: '1px solid #334155', display: 'flex',
+                                alignItems: 'center', justifyContent: 'center', padding: '1rem'
+                            }}>
+                                <div style={{
+                                    width: '100%', height: '200px', borderRadius: '8px', overflow: 'hidden',
+                                    border: '1px solid #334155', background: '#000'
+                                }}>
+                                    <img
+                                        src={broadcast.image_url}
+                                        alt="Broadcast"
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Right Column: Details */}
+                        <div style={{ flex: 1, padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+                            <h4 style={{ margin: '0 0 1rem 0', color: '#f8fafc', fontSize: '1.2rem' }}>{broadcast.title || 'Untitled Broadcast'}</h4>
+
+                            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #334155', color: '#cbd5e1', whiteSpace: 'pre-wrap', marginBottom: '1.5rem', flex: 1 }}>
+                                {broadcast.message}
+                            </div>
+
+                            {/* Metadata Grid */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                                <div>
+                                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Start Time</div>
+                                    <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.start_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.start_time))}</div>
+                                </div>
+                                <div>
+                                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>End Time</div>
+                                    <div style={{ color: '#e2e8f0' }}>{new Date(broadcast.end_time).toLocaleDateString()} {formatTimeCET(new Date(broadcast.end_time))}</div>
+                                </div>
+                                <div>
+                                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Max Views</div>
+                                    <div style={{ color: '#e2e8f0' }}>{broadcast.max_views || 'Unlimited'}</div>
+                                </div>
+                                <div>
+                                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Priority</div>
+                                    <div style={{ color: '#e2e8f0' }}>{broadcast.priority}</div>
+                                </div>
+                            </div>
+
+                            {/* Stats */}
+                            <div style={{ display: 'flex', justifyContent: 'space-around', background: '#334155', padding: '1rem', borderRadius: '8px' }}>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Total</div>
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#4ade80' }}>{broadcast.delivered_count || 0}</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Received</div>
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{broadcast.read_count || 0}</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Read</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Actions - Sticky Footer */}
+                    <div style={{
+                        padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155',
+                        display: 'flex', gap: '1rem'
+                    }}>
+                        <button
+                            onClick={onViewRecipients}
+                            className="btn btn-primary"
+                            style={{ flex: 1, justifyContent: 'center' }}
+                        >
+                            📊 View Recipient Details
+                        </button>
+                        <button
+                            onClick={onDelete}
+                            className="btn btn-danger"
+                            style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
+                        >
+                            🗑️ Delete
+                        </button>
+                    </div>
+
+                </div>
+            </div>,
+            document.body
+            );
 };
 
-function BroadcastRecipientsModal({ broadcastId, onClose }) {
+            function BroadcastRecipientsModal({broadcastId, onClose}) {
     const [views, setViews] = useState([]);
-    const [loading, setLoading] = useState(true);
+            const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchViews = async () => {
             try {
                 const token = localStorage.getItem('nestfinder_admin_token');
-                const res = await fetch(`${API_URL}/api/push/admin/broadcasts/${broadcastId}/views`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+            const res = await fetch(`${API_URL}/api/push/admin/broadcasts/${broadcastId}/views`, {
+                headers: {'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) {
+            if (res.ok) {
                     const data = await res.json();
-                    setViews(data.views || []);
+            setViews(data.views || []);
                 }
-            } catch (e) { console.error(e); }
-            finally { setLoading(false); }
+            } catch (e) {console.error(e); }
+            finally {setLoading(false); }
         };
-        fetchViews();
+            fetchViews();
     }, [broadcastId]);
 
-    const total = views.length;
+            const total = views.length;
     const readCount = views.filter(v => v.status === 'read').length;
     const deliveredCount = views.filter(v => v.status === 'delivered' || v.status === 'read').length;
     const pendingCount = views.filter(v => v.status === 'sent').length;
 
-    const DateTimeCell = ({ isoString }) => {
+            const DateTimeCell = ({isoString}) => {
         if (!isoString) return <span style={{ color: '#64748b' }}>-</span>;
-        const date = new Date(isoString);
-        return (
+            const date = new Date(isoString);
+            return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
             </div>
-        );
+            );
     };
 
-    return ReactDOM.createPortal(
-        <div style={{
-            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
-            animation: 'fadeIn 0.2s ease'
-        }} onClick={onClose}>
+            return ReactDOM.createPortal(
             <div style={{
-                background: '#1e293b', borderRadius: '16px', width: '100%', maxWidth: '900px',
-                maxHeight: '85vh', display: 'flex', flexDirection: 'column',
-                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid #334155'
-            }} onClick={e => e.stopPropagation()}>
+                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
+                animation: 'fadeIn 0.2s ease'
+            }} onClick={onClose}>
+                <div style={{
+                    background: '#1e293b', borderRadius: '16px', width: '100%', maxWidth: '900px',
+                    maxHeight: '85vh', display: 'flex', flexDirection: 'column',
+                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid #334155'
+                }} onClick={e => e.stopPropagation()}>
 
-                {/* Header */}
-                <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>Broadcast Recipients</h3>
-                    <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
-                </div>
+                    {/* Header */}
+                    <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>Broadcast Recipients</h3>
+                        <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                    </div>
 
-                {/* Stats */}
-                <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                        <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{total}</div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase' }}>Recorded Views</div>
-                        </div>
-                        <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{pendingCount}</div>
-                            <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase' }}>Sent</div>
-                        </div>
-                        <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{deliveredCount}</div>
-                            <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase' }}>Delivered</div>
-                        </div>
-                        <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{readCount}</div>
-                            <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase' }}>Read</div>
+                    {/* Stats */}
+                    <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{total}</div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase' }}>Recorded Views</div>
+                            </div>
+                            <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{pendingCount}</div>
+                                <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase' }}>Sent</div>
+                            </div>
+                            <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{deliveredCount}</div>
+                                <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase' }}>Delivered</div>
+                            </div>
+                            <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{readCount}</div>
+                                <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase' }}>Read</div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Table */}
-                <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                    {loading ? (
-                        <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Loading views...</div>
-                    ) : views.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>No interaction checks recorded.</div>
-                    ) : (
-                        <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'auto', flex: 1 }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
-                                    <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Last Update</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>View Count</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {views.map(v => (
-                                        <tr key={v.id} style={{ borderBottom: '1px solid #334155' }}>
-                                            <td style={{ padding: '0.6rem 0.75rem', verticalAlign: 'middle' }}>
-                                                <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    {v.user_nickname || 'Anonymous'}
-                                                </div>
-                                                <code style={{ fontSize: '0.65rem', color: '#64748b' }}>{v.user_id}</code>
-                                            </td>
-                                            <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
-                                                <DateTimeCell isoString={v.read_at || v.delivered_at || v.created_at} />
-                                            </td>
-                                            <td style={{ padding: '0.5rem 1rem', textAlign: 'center', color: '#cbd5e1' }}>
-                                                {v.view_count}
-                                            </td>
-                                            <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '120px', margin: '0 auto' }}>
-                                                    <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1 }}>
-                                                        {v.status === 'read' ? <span style={{ color: '#3b82f6' }}>✓✓</span> :
-                                                            v.status === 'delivered' ? <span style={{ color: '#22c55e' }}>✓✓</span> :
-                                                                <span style={{ color: '#94a3b8' }}>✓</span>}
-                                                    </div>
-                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', marginLeft: '8px' }}>
-                                                        {v.status === 'read' ? 'Read' : v.status === 'delivered' ? 'Received' : 'Sent'}
-                                                    </span>
-                                                </div>
-                                            </td>
+                    {/* Table */}
+                    <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                        {loading ? (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Loading views...</div>
+                        ) : views.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>No interaction checks recorded.</div>
+                        ) : (
+                            <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'auto', flex: 1 }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                    <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
+                                        <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
+                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Last Update</th>
+                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>View Count</th>
+                                            <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Status</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                                    </thead>
+                                    <tbody>
+                                        {views.map(v => (
+                                            <tr key={v.id} style={{ borderBottom: '1px solid #334155' }}>
+                                                <td style={{ padding: '0.6rem 0.75rem', verticalAlign: 'middle' }}>
+                                                    <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {v.user_nickname || 'Anonymous'}
+                                                    </div>
+                                                    <code style={{ fontSize: '0.65rem', color: '#64748b' }}>{v.user_id}</code>
+                                                </td>
+                                                <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
+                                                    <DateTimeCell isoString={v.read_at || v.delivered_at || v.created_at} />
+                                                </td>
+                                                <td style={{ padding: '0.5rem 1rem', textAlign: 'center', color: '#cbd5e1' }}>
+                                                    {v.view_count}
+                                                </td>
+                                                <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '120px', margin: '0 auto' }}>
+                                                        <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1 }}>
+                                                            {v.status === 'read' ? <span style={{ color: '#3b82f6' }}>✓✓</span> :
+                                                                v.status === 'delivered' ? <span style={{ color: '#22c55e' }}>✓✓</span> :
+                                                                    <span style={{ color: '#94a3b8' }}>✓</span>}
+                                                        </div>
+                                                        <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', marginLeft: '8px' }}>
+                                                            {v.status === 'read' ? 'Read' : v.status === 'delivered' ? 'Received' : 'Sent'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-        </div>,
-        document.body
-    );
+            </div>,
+            document.body
+            );
 }
