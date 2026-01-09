@@ -3292,8 +3292,8 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         <div
             ref={containerRef}
             style={{
-                background: '#1e293b', // Matches Search Form background
-                border: '1px solid #1e293b',
+                background: '#334155', // Matches Message input box background
+                border: '1px solid #334155',
                 borderRadius: '8px',
                 position: 'relative',
                 height: `${totalHeight}px`,
