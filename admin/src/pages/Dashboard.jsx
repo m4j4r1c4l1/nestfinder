@@ -13,6 +13,7 @@ const Dashboard = ({ onNavigate }) => {
     const [isRestoring, setIsRestoring] = useState(false);
     const [toast, setToast] = useState(null); // { type: 'success'|'error'|'info', message: string }
     const [confirmModal, setConfirmModal] = useState(null); // { message, onConfirm }
+    const [successModal, setSuccessModal] = useState(null); // { title, message, onOk }
 
     const showToast = (type, message) => setToast({ type, message });
     const closeToast = () => setToast(null);
@@ -450,8 +451,11 @@ const Dashboard = ({ onNavigate }) => {
                                                     setIsRestoring(true);
                                                     try {
                                                         const res = await adminApi.restoreDB(file);
-                                                        showToast('success', res.message || 'Database restored successfully!');
-                                                        setTimeout(() => window.location.reload(), 1500);
+                                                        setSuccessModal({
+                                                            title: 'Restore Complete',
+                                                            message: res.message || 'Database restored successfully! The application will now reload to apply changes.',
+                                                            onOk: () => window.location.reload()
+                                                        });
                                                     } catch (err) {
                                                         showToast('error', 'Restore Failed: ' + err.message);
                                                         setIsRestoring(false);
@@ -655,6 +659,15 @@ const Dashboard = ({ onNavigate }) => {
                     onCancel={confirmModal.onCancel}
                 />
             )}
+
+            {/* Success Modal (Calmful) */}
+            {successModal && (
+                <SuccessModal
+                    title={successModal.title}
+                    message={successModal.message}
+                    onOk={successModal.onOk}
+                />
+            )}
         </div >
     );
 };
@@ -835,9 +848,7 @@ const ConfirmModal = ({ title = "Confirm Action", message, onConfirm, onCancel }
                 </h3>
             </div>
             <div className="card-body" style={{ padding: '1.5rem' }}>
-                <p style={{ margin: 0, whiteSpace: 'pre-line', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
-                    {message}
-                </p>
+                <p>{message}</p>
             </div>
             <div style={{
                 padding: '1rem 1.5rem',
@@ -867,6 +878,68 @@ const ConfirmModal = ({ title = "Confirm Action", message, onConfirm, onCancel }
                     }}
                 >
                     Yes, Proceed
+                </button>
+            </div>
+        </div>
+    </div>
+);
+
+// Success Modal (Calmful aesthetic)
+const SuccessModal = ({ title, message, onOk }) => (
+    <div
+        style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1600,
+            backdropFilter: 'blur(8px)'
+        }}
+    >
+        <div
+            className="card"
+            style={{
+                width: '90%',
+                maxWidth: '420px',
+                textAlign: 'center',
+                overflow: 'hidden',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                animation: 'slideIn 0.3s ease-out'
+            }}
+        >
+            <div className="card-body" style={{ padding: '2.5rem 2rem' }}>
+                <div style={{
+                    width: '64px',
+                    height: '64px',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 1.5rem auto'
+                }}>
+                    <span style={{ fontSize: '2rem' }}>✨</span>
+                </div>
+
+                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: 600 }}>{title}</h3>
+                <p style={{ margin: '0 0 2rem 0', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>{message}</p>
+
+                <button
+                    className="btn btn-primary"
+                    onClick={onOk}
+                    style={{
+                        width: '100%',
+                        padding: '0.8rem',
+                        fontSize: '1rem',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        border: 'none',
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)'
+                    }}
+                >
+                    Excellent, Reload App
                 </button>
             </div>
         </div>
