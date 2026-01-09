@@ -2953,7 +2953,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         const handler = (e) => latestHandleWheel.current && latestHandleWheel.current(e);
         el.addEventListener('wheel', handler, { passive: false });
         return () => el.removeEventListener('wheel', handler);
-    }, []);
+    }, [isInitialized]);
 
     // 1. Initial Auto-Scale (Run once when broadcasts load)
     useEffect(() => {
