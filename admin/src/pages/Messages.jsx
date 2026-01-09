@@ -3023,6 +3023,40 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return { lanes, laneCount: lanes.length };
     }, [broadcasts, viewportDuration]);
 
+    // Generate ticks based on current viewport (Moved up to avoid conditional hook call)
+    const ticks = React.useMemo(() => {
+        const t = [];
+        // Aim for ~10 ticks
+        const targetTicks = 10;
+        let interval = viewportDuration / targetTicks;
+
+        // Round to nice intervals
+        const niceIntervals = [
+            900000, // 15m
+            1800000, // 30m
+            3600000, // 1h
+            10800000, // 3h
+            21600000, // 6h
+            43200000, // 12h
+            86400000, // 1d
+            172800000, // 2d
+            604800000 // 1w
+        ];
+
+        const bestInterval = niceIntervals.reduce((prev, curr) =>
+            Math.abs(curr - interval) < Math.abs(prev - interval) ? curr : prev
+        );
+
+        if (bestInterval > 0 && viewportDuration > 0) {
+            const startTick = Math.ceil(viewportStart / bestInterval) * bestInterval;
+            for (let time = startTick; time < viewportStart + viewportDuration; time += bestInterval) {
+                const left = ((time - viewportStart) / viewportDuration) * 100;
+                t.push({ time, left });
+            }
+        }
+        return t;
+    }, [viewportStart, viewportDuration]);
+
     if (!broadcasts.length || !isInitialized) return null;
 
     // Dimensions
@@ -3237,37 +3271,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return { t, date };
     };
 
-    // Generate ticks based on current viewport
-    const ticks = React.useMemo(() => {
-        const t = [];
-        // Aim for ~10 ticks
-        const targetTicks = 10;
-        let interval = viewportDuration / targetTicks;
 
-        // Round to nice intervals
-        const niceIntervals = [
-            900000, // 15m
-            1800000, // 30m
-            3600000, // 1h
-            10800000, // 3h
-            21600000, // 6h
-            43200000, // 12h
-            86400000, // 1d
-            172800000, // 2d
-            604800000 // 1w
-        ];
-
-        const bestInterval = niceIntervals.reduce((prev, curr) =>
-            Math.abs(curr - interval) < Math.abs(prev - interval) ? curr : prev
-        );
-
-        const startTick = Math.ceil(viewportStart / bestInterval) * bestInterval;
-        for (let time = startTick; time < viewportStart + viewportDuration; time += bestInterval) {
-            const left = ((time - viewportStart) / viewportDuration) * 100;
-            t.push({ time, left });
-        }
-        return t;
-    }, [viewportStart, viewportDuration]);
 
     return (
         <div
