@@ -543,24 +543,16 @@ const Observability = () => {
                                         <div className="text-muted text-sm">Total</div>
                                     </div>
 
-                                    {/* 2 columns Badge Grid (8 items) */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem', width: '100%', maxWidth: '450px' }}>
+                                    {/* 3 columns Badge Grid (9 items) */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem', width: '100%', maxWidth: '450px' }}>
                                         {[
-                                            // 1. Components (Moved from Slot 3 to Slot 1)
+                                            // Row 1
                                             { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9' },
-                                            // 2. Files (Moved from Slot 6 to Slot 2)
+                                            { isEmpty: true },
                                             { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } },
-                                            // 3. API (Moved from Slot 4 to Slot 3)
-                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
-                                            // 4. Listeners (New - Slot 4, where API was)
-                                            { label: 'Listeners', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.listeners || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#d946ef' },
-                                            // 5. Commits (Moved from Slot 1 to Slot 5)
+
+                                            // Row 2
                                             { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#8b5cf6' },
-                                            // 6. Hooks (New - Slot 6, where Files was)
-                                            { label: 'Hooks', sub: 'React Hooks', count: <RollingBarrelCounter end={stats.devMetrics?.hooks || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#6366f1' },
-                                            // 7. Websockets (Moved from Slot 5 to Slot 7)
-                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#eab308' },
-                                            // 8. Commit ID (Moved from Slot 2 to Slot 8)
                                             {
                                                 label: 'Commit ID',
                                                 sub: 'Latest',
@@ -569,29 +561,38 @@ const Observability = () => {
                                                 mono: true,
                                                 boxStyle: { background: '#1e3a8a40', border: '1px solid #1e3a8a' }
                                             },
-                                        ].map((badge, i) => (
-                                            <div key={i} style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                                background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
-                                                border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
-                                                borderRadius: '8px', padding: '0.5rem 0.75rem',
-                                                minHeight: '52px'
-                                            }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
-                                                    <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
-                                                </div>
-                                                <span style={{
-                                                    fontWeight: 700,
-                                                    color: badge.color,
-                                                    fontSize: badge.mono ? '1.1rem' : '1.8rem',
-                                                    fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
-                                                    lineHeight: 1
+                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
+
+                                            // Row 3
+                                            { label: 'Listeners', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.listeners || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#d946ef' },
+                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#eab308' },
+                                            { label: 'Hooks', sub: 'React Hooks', count: <RollingBarrelCounter end={stats.devMetrics?.hooks || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#6366f1' },
+                                        ].map((badge, i) => {
+                                            if (badge.isEmpty) return <div key={i}></div>;
+                                            return (
+                                                <div key={i} style={{
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
+                                                    background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
+                                                    border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
+                                                    borderRadius: '8px', padding: '0.5rem 0.75rem',
+                                                    minHeight: '52px'
                                                 }}>
-                                                    {badge.count}
-                                                </span>
-                                            </div>
-                                        ))}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
+                                                        <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
+                                                    </div>
+                                                    <span style={{
+                                                        fontWeight: 700,
+                                                        color: badge.color,
+                                                        fontSize: badge.mono ? '1.1rem' : '1.8rem',
+                                                        fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
+                                                        lineHeight: 1
+                                                    }}>
+                                                        {badge.count}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
