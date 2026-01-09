@@ -3271,6 +3271,21 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return { t, date };
     };
 
+    // Priority colors
+    const getPriorityColor = (p) => {
+        const val = p || 3;
+        if (val <= 1) return '#ef4444';
+        if (val === 2) return '#f97316';
+        if (val === 3) return '#eab308';
+        if (val === 4) return '#3b82f6';
+        return '#22c55e';
+    };
+
+    const getPriorityLabel = (p) => {
+        const val = p || 3;
+        return `P${val}`;
+    };
+
 
 
     return (
@@ -3378,11 +3393,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                         const isActive = now >= start && now <= end;
                         const isEnded = now > end;
 
-                        let color = '#3b82f6';
-                        if (b.priority <= 1) color = '#ef4444';
-                        else if (b.priority === 2) color = '#f97316';
-                        else if (b.priority === 3) color = '#eab308';
-                        else if (b.priority === 5) color = '#22c55e';
+                        const color = getPriorityColor(b.priority);
 
                         return (
                             <div
