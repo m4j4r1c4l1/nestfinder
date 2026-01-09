@@ -808,7 +808,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {/* Broadcasts List Card */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', marginBottom: 0 }}>
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', marginBottom: 0, height: '800px' }}>
                 <div className="card-header">
                     <h3>🎬 Manage Broadcasts</h3>
                 </div>
@@ -836,7 +836,6 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                 onChange={e => setSearchFilters(prev => ({ ...prev, searchText: e.target.value }))}
                             />
                         </div>
-
 
 
                         {/* Clear */}
@@ -940,7 +939,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                 <Timeline broadcasts={filteredBroadcasts} />
 
                 {/* Scrollable Broadcasts List */}
-                <div className="card-body" style={{ padding: 0, background: '#1e293b' }}>
+                <div className="card-body" style={{ flex: 1, overflowY: 'auto', padding: 0, background: '#1e293b' }}>
                     <div style={{ padding: '1rem' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
