@@ -86,8 +86,8 @@ export default {
         reactivatedMessage: 'Точка снова активна!'
     },
     submit: {
-        foundPrefix: 'Found:',
-        locationFound: 'Location found!',
+        foundPrefix: 'Найдено:',
+        locationFound: 'Местоположение найдено!',
         title: 'Сообщить о месте',
         subtitle: 'Помогите другим, сообщив о месте',
         addressLabel: 'Адрес',

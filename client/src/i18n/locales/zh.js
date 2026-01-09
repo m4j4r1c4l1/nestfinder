@@ -86,8 +86,8 @@ export default {
         reactivatedMessage: '地点已重新激活！'
     },
     submit: {
-        foundPrefix: 'Found:',
-        locationFound: 'Location found!',
+        foundPrefix: '找到:',
+        locationFound: '找到位置!',
         title: '报告地点',
         subtitle: '报告地点以帮助他人',
         addressLabel: '地址',

@@ -86,8 +86,8 @@ export default {
         reactivatedMessage: 'Ponto reativado!'
     },
     submit: {
-        foundPrefix: 'Found:',
-        locationFound: 'Location found!',
+        foundPrefix: 'Encontrado:',
+        locationFound: 'Localização encontrada!',
         title: 'Reportar Localização',
         subtitle: 'Ajude os outros reportando um local',
         addressLabel: 'Morada',
