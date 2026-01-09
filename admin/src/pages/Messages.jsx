@@ -3356,7 +3356,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         <div
             ref={containerRef}
             style={{
-                background: '#ffffff', // White background
+                background: '#94a3b8', // Light slate gray
                 border: '1px solid #334155',
                 borderRadius: '8px',
                 position: 'relative',
