@@ -971,8 +971,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                     if (isActive) { statusColor = '#22c55e'; statusText = 'ACTIVE'; }
                                     else if (isEnded) { statusColor = '#94a3b8'; statusText = 'ENDED'; }
 
-                                    // Border Color: Grey if ended, otherwise match priority
-                                    const borderColor = isEnded ? '#334155' : priorityColor;
+                                    // Border Color: Always priority color, but 50% transparent if not active
+                                    const borderColor = isActive ? priorityColor : `${priorityColor}80`;
 
                                     return (
                                         <div
