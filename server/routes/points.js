@@ -21,8 +21,8 @@ let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
 
 // Get currently active broadcast (with view tracking)
-router.get('/broadcast/active', (req, res) => {
-  const userId = req.headers['x-user-id'];
+router.get('/broadcast/active', requireUser, (req, res) => {
+  const userId = req.user.id;
   const now = new Date().toISOString();
 
   // Get all active broadcasts
@@ -41,12 +41,6 @@ router.get('/broadcast/active', (req, res) => {
   let selectedBroadcast = null;
 
   for (const broadcast of activeBroadcasts) {
-    if (!userId) {
-      // No user tracking possible, just return first
-      selectedBroadcast = broadcast;
-      break;
-    }
-
     // Check user's view record for this broadcast
     let viewRecord = get(`
       SELECT * FROM broadcast_views 
@@ -86,13 +80,9 @@ router.get('/broadcast/active', (req, res) => {
 });
 
 // Mark broadcast as read (when user dismisses/closes it)
-router.post('/broadcast/:id/read', (req, res) => {
-  const userId = req.headers['x-user-id'];
+router.post('/broadcast/:id/read', requireUser, (req, res) => {
+  const userId = req.user.id;
   const broadcastId = req.params.id;
-
-  if (!userId) {
-    return res.status(400).json({ error: 'User ID required' });
-  }
 
   // Ensure record exists and update to read status
   const view = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
@@ -601,11 +591,8 @@ router.post('/:id/validate', requireUser, (req, res) => {
 // ================== FEEDBACK ==================
 
 // Get feedback history for a user
-router.get('/feedback', (req, res) => {
-  const userId = req.headers['x-user-id'];
-  if (!userId) {
-    return res.status(400).json({ error: 'User ID required' });
-  }
+router.get('/feedback', requireUser, (req, res) => {
+  const userId = req.user.id;
 
   const feedback = all(`
     SELECT * FROM feedback
@@ -617,12 +604,11 @@ router.get('/feedback', (req, res) => {
 });
 
 // Prune old feedback
-router.delete('/feedback/prune', (req, res) => {
+router.delete('/feedback/prune', requireUser, (req, res) => {
   const { cutoff } = req.body;
   if (!cutoff) return res.status(400).json({ error: 'Cutoff date required' });
 
-  const userId = req.headers['x-user-id'];
-  if (!userId) return res.status(400).json({ error: 'User ID required' });
+  const userId = req.user.id;
 
   run(`
     DELETE FROM feedback
@@ -633,17 +619,16 @@ router.delete('/feedback/prune', (req, res) => {
 });
 
 // Delete individual feedback
-router.delete('/feedback/:id', (req, res) => {
-  const userId = req.headers['x-user-id'];
-  if (!userId) return res.status(400).json({ error: 'User ID required' });
+router.delete('/feedback/:id', requireUser, (req, res) => {
+  const userId = req.user.id;
 
   run('DELETE FROM feedback WHERE id = ? AND user_id = ?', [req.params.id, userId]);
   res.json({ success: true });
 });
 
 // Submit feedback (bugs, suggestions)
-router.post('/feedback', (req, res) => {
-  const userId = req.headers['x-user-id'];
+router.post('/feedback', requireUser, (req, res) => {
+  const userId = req.user.id;
   const { type, message, rating } = req.body;
 
   if (!message) {
@@ -654,7 +639,7 @@ router.post('/feedback', (req, res) => {
   run(`
     INSERT INTO feedback (user_id, type, message, rating, status)
     VALUES (?, ?, ?, ?, 'sent')
-  `, [userId || null, type || 'general', message, rating || null]);
+  `, [userId, type || 'general', message, rating || null]);
 
   // If rating provided, update daily_ratings aggregation
   if (rating && rating >= 1 && rating <= 5) {
@@ -672,7 +657,7 @@ router.post('/feedback', (req, res) => {
     `, [today, rating, rating]);
   }
 
-  log(userId || 'anonymous', 'feedback_submitted', null, { type, rating });
+  log(userId, 'feedback_submitted', null, { type, rating });
 
   res.json({ success: true, message: 'Thank you for your feedback!' });
 });

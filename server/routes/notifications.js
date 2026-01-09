@@ -1,6 +1,6 @@
 import express from 'express';
 import { getDb, run, get, all, log } from '../database.js';
-import { requireAdmin } from '../middleware/auth.js';
+import { requireAdmin, requireUser } from '../middleware/auth.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -108,14 +108,10 @@ router.post('/notifications/read-all', (req, res) => {
     }
 });
 // Delete a notification (user action)
-router.delete('/notifications/:id', (req, res) => {
+router.delete('/notifications/:id', requireUser, (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.headers['x-user-id'];
-
-        if (!userId) {
-            return res.status(401).json({ error: 'User ID required' });
-        }
+        const userId = req.user.id;
 
         // Only delete if it belongs to this user
         const notification = get('SELECT * FROM notifications WHERE id = ? AND user_id = ?', [id, userId]);
@@ -427,12 +423,11 @@ router.get('/admin/notifications/history', requireAdmin, (req, res) => {
 });
 
 // Prune old notifications
-router.delete('/prune', (req, res) => {
+router.delete('/prune', requireUser, (req, res) => {
     const { cutoff } = req.body;
     if (!cutoff) return res.status(400).json({ error: 'Cutoff date required' });
 
-    const userId = req.headers['x-user-id'];
-    if (!userId) return res.status(400).json({ error: 'User ID required' });
+    const userId = req.user.id;
 
     run(`
     DELETE FROM notifications 
@@ -443,9 +438,8 @@ router.delete('/prune', (req, res) => {
 });
 
 // Delete individual notification
-router.delete('/:id', (req, res) => {
-    const userId = req.headers['x-user-id'];
-    if (!userId) return res.status(400).json({ error: 'User ID required' });
+router.delete('/:id', requireUser, (req, res) => {
+    const userId = req.user.id;
 
     run('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, userId]);
     res.json({ success: true });
