@@ -1087,12 +1087,11 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     )}
                                                     {b.image_url && (
                                                         <span title="Has Attachment" style={{
-                                                            padding: '0.2rem 0.5rem', borderRadius: '4px',
-                                                            fontSize: '0.7rem',
-                                                            background: '#1e293b',
-                                                            border: '1px solid #334155',
+                                                            padding: '0.2rem 0.5rem',
+                                                            fontSize: '1rem',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            cursor: 'help'
+                                                            cursor: 'help',
+                                                            lineHeight: 1
                                                         }}>📎</span>
                                                     )}
                                                 </div>
@@ -3448,93 +3447,135 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
 
             {/* Dynamic Tooltip */}
             {hoveredItem && !dragging && ReactDOM.createPortal(
-                <div style={{
-                    position: 'fixed',
-                    top: tooltipPos.y + 15,
-                    left: tooltipPos.x + 15,
-                    background: 'rgba(15, 23, 42, 0.95)',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    zIndex: 9999,
-                    pointerEvents: 'none',
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '8px',
-                    maxWidth: '320px'
-                }}>
-                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.9rem' }}>
-                        {hoveredItem.title || 'Untitled'}
-                    </div>
+                (() => {
+                    // Logic for badges
+                    const now = new Date().getTime();
+                    const s = hoveredItem.currentStart;
+                    const e = hoveredItem.currentEnd;
+                    const isActive = now >= s && now <= e;
+                    const isEnded = now > e;
 
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                        {new Date(hoveredItem.currentStart).toLocaleString()}
-                        <br />↓<br />
-                        {new Date(hoveredItem.currentEnd).toLocaleString()}
-                    </div>
+                    let statusText = isActive ? 'Active' : (isEnded ? 'Ended' : 'Scheduled');
+                    let statusColor = isActive ? '#22c55e' : (isEnded ? '#94a3b8' : '#3b82f6');
+                    let priorityColor = getPriorityColor(hoveredItem.priority);
 
-                    {/* Stats */}
-                    <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem' }}>
-                        <span style={{ color: '#22c55e' }}>✓ {hoveredItem.delivered_count || 0}</span>
-                        <span style={{ color: '#3b82f6' }}>✓✓ {hoveredItem.read_count || 0}</span>
-                    </div>
+                    // Badge transparencies
+                    const badgeBg = (color) => `${color}20`; // 12% opacity roughly? 20 hex = 32/255 = ~12%
+                    const badgeBorder = (color) => `${color}40`;
 
-                    {/* Full Unclipped Image */}
-                    {hoveredItem.image_url && (
-                        <img
-                            src={hoveredItem.image_url}
-                            alt=""
-                            style={{
-                                maxWidth: '100%',
-                                maxHeight: '200px',
-                                borderRadius: '4px',
-                                objectFit: 'contain',
+                    return (
+                        <div style={{
+                            position: 'fixed',
+                            top: tooltipPos.y + 15,
+                            left: tooltipPos.x + 15,
+                            background: 'rgba(15, 23, 42, 0.95)',
+                            border: '1px solid #334155',
+                            borderRadius: '8px',
+                            padding: '12px',
+                            zIndex: 9999,
+                            pointerEvents: 'none', // Important so mouse doesn't get stuck on tooltip
+                            backdropFilter: 'blur(8px)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '10px',
+                            minWidth: '240px'
+                        }}>
+                            <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>
+                                {hoveredItem.title || 'Untitled'}
+                            </div>
+
+                            {/* Professional Time Display */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'min-content auto',
+                                gap: '4px 12px',
+                                fontSize: '0.8rem',
+                                color: '#cbd5e1',
+                                background: '#1e293b',
+                                padding: '8px',
+                                borderRadius: '6px',
                                 border: '1px solid #334155'
-                            }}
-                        />
-                    )}
-
-                    {/* Badges - New Color Policy */}
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        {/* Priority */}
-                        <span style={{ background: getPriorityColor(hoveredItem.priority), color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>
-                            {getPriorityLabel(hoveredItem.priority)}
-                        </span>
-
-                        {/* Max Views - Consumption Gradient */}
-                        {hoveredItem.max_views > 0 && (() => {
-                            const percent = (hoveredItem.delivered_count || 0) / hoveredItem.max_views;
-                            if (percent >= 1) return (
-                                <span style={{ background: '#64748b', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>MAX ✓</span>
-                            );
-
-                            // Cyan Fading Logic (#06b6d4 - 6, 182, 212)
-                            let opacity = 1;
-                            if (percent > 0.75) opacity = 0.4;
-                            else if (percent > 0.5) opacity = 0.7;
-
-                            return (
-                                <span style={{
-                                    background: `rgba(6, 182, 212, ${opacity})`,
-                                    color: 'white',
-                                    padding: '2px 8px',
-                                    borderRadius: '4px',
-                                    fontSize: '10px',
-                                    fontWeight: 600,
-                                    border: percent > 0.75 ? '1px solid rgba(6, 182, 212, 0.5)' : 'none'
-                                }}>
-                                    MAX {hoveredItem.max_views}
+                            }}>
+                                <span style={{ color: '#94a3b8', fontWeight: 600 }}>Start:</span>
+                                <span style={{ fontFamily: 'monospace' }}>
+                                    {new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
-                            );
-                        })()}
-                    </div>
-                </div>,
+
+                                <span style={{ color: '#94a3b8', fontWeight: 600 }}>End:</span>
+                                <span style={{ fontFamily: 'monospace' }}>
+                                    {new Date(e).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(e).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+
+                            {/* Footer Line: Stats, Badges, Icon */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
+
+                                {/* Delivery Stats */}
+                                <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ {hoveredItem.delivered_count || 0}</span>
+                                    <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ {hoveredItem.read_count || 0}</span>
+                                </div>
+
+                                {/* Badges & Icon */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+
+                                    {/* Status Badge */}
+                                    <span style={{
+                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                        fontSize: '0.7rem', fontWeight: 700,
+                                        background: badgeBg(statusColor),
+                                        color: statusColor,
+                                        border: `1px solid ${badgeBorder(statusColor)}`,
+                                        textTransform: 'uppercase', letterSpacing: '0.5px'
+                                    }}>
+                                        {statusText}
+                                    </span>
+
+                                    {/* Max Views Badge (Cyan) */}
+                                    {hoveredItem.max_views && (
+                                        (() => {
+                                            const percent = (hoveredItem.read_count || 0) / hoveredItem.max_views;
+                                            if (percent >= 1) return <span style={{ background: '#64748b', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>MAX ✓</span>;
+
+                                            // Cyan logic
+                                            let opacity = 1;
+                                            if (percent > 0.75) opacity = 0.4;
+                                            else if (percent > 0.5) opacity = 0.7;
+
+                                            return (
+                                                <span style={{
+                                                    background: `rgba(6, 182, 212, ${opacity})`,
+                                                    color: 'white',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px',
+                                                    fontSize: '10px',
+                                                    fontWeight: 600,
+                                                    border: percent > 0.75 ? '1px solid rgba(6, 182, 212, 0.5)' : 'none'
+                                                }}>
+                                                    MAX {hoveredItem.max_views}
+                                                </span>
+                                            );
+                                        })()
+                                    )}
+
+                                    {/* Attachment Icon (Matching List) */}
+                                    {hoveredItem.image_url && (
+                                        <span style={{
+                                            padding: '0.2rem 0.5rem',
+                                            fontSize: '1rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            lineHeight: 1
+                                        }}>📎</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })(),
                 document.body
             )}
-        </div>
+        </div >
     );
 };
 
