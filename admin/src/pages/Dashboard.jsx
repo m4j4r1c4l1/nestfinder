@@ -443,6 +443,7 @@ const Dashboard = ({ onNavigate }) => {
                                             const file = e.target.files[0];
                                             if (!file) return;
                                             setConfirmModal({
+                                                title: 'Database Restore',
                                                 message: `⚠️ WARNING: This will OVERWRITE the current database with '${file.name}'.\n\nThe server will restart.\nAre you sure?`,
                                                 onConfirm: async () => {
                                                     setConfirmModal(null);
@@ -648,6 +649,7 @@ const Dashboard = ({ onNavigate }) => {
             {/* Confirmation modal for dangerous actions */}
             {confirmModal && (
                 <ConfirmModal
+                    title={confirmModal.title}
                     message={confirmModal.message}
                     onConfirm={confirmModal.onConfirm}
                     onCancel={confirmModal.onCancel}
@@ -804,7 +806,7 @@ const Toast = ({ type, message, onClose }) => {
 };
 
 // Confirmation modal for dangerous actions
-const ConfirmModal = ({ message, onConfirm, onCancel }) => (
+const ConfirmModal = ({ title = "Confirm Action", message, onConfirm, onCancel }) => (
     <div
         style={{
             position: 'fixed',
@@ -829,7 +831,7 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => (
         >
             <div className="card-header" style={{ borderBottom: '1px solid var(--color-border)' }}>
                 <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span>⚠️</span> Confirm Action
+                    <span>⚠️</span> {title}
                 </h3>
             </div>
             <div className="card-body" style={{ padding: '1.5rem' }}>
