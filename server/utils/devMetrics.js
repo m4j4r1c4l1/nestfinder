@@ -7,7 +7,7 @@ import { get } from '../database.js';
 const execAsync = promisify(exec);
 
 const countCodeStats = (dirPath) => {
-    let stats = { files: 0, lines: 0, components: 0, apiEndpoints: 0, socketEvents: 0 };
+    let stats = { files: 0, lines: 0, components: 0, apiEndpoints: 0, socketEvents: 0, listeners: 0, hooks: 0 };
 
     if (!fs.existsSync(dirPath)) return stats;
 
@@ -26,6 +26,8 @@ const countCodeStats = (dirPath) => {
             stats.components += subStats.components;
             stats.apiEndpoints += subStats.apiEndpoints;
             stats.socketEvents += subStats.socketEvents;
+            stats.listeners += subStats.listeners;
+            stats.hooks += subStats.hooks;
         } else if (stat.isFile()) {
             if (/\.(js|jsx|ts|tsx|css|scss|html)$/.test(file)) {
                 stats.files++;
@@ -52,6 +54,26 @@ const countCodeStats = (dirPath) => {
                             const matches = content.match(p);
                             if (matches) stats.socketEvents += matches.length;
                         });
+
+                        // --- Listeners: Native + React events ---
+                        const listenerPatterns = [
+                            /\.addEventListener\(/g,
+                            // Matches onClick=, onChange=, etc.
+                            /\son[A-Z][a-zA-Z]*=/g
+                        ];
+                        listenerPatterns.forEach(p => {
+                            const matches = content.match(p);
+                            if (matches) stats.listeners += matches.length;
+                        });
+
+                        // --- Hooks: use[A-Z]... ---
+                        const hookPatterns = [
+                            /use[A-Z][a-zA-Z]*/g
+                        ];
+                        hookPatterns.forEach(p => {
+                            const matches = content.match(p);
+                            if (matches) stats.hooks += matches.length;
+                        });
                     }
                 } catch (e) { /* ignore */ }
             }
@@ -64,7 +86,7 @@ const countCodeStats = (dirPath) => {
 };
 
 export const calculateDevMetrics = async (rootDir) => {
-    let devMetrics = { commits: 0, components: 0, loc: 0, files: 0, apiEndpoints: 0, socketEvents: 0 };
+    let devMetrics = { commits: 0, components: 0, loc: 0, files: 0, apiEndpoints: 0, socketEvents: 0, listeners: 0, hooks: 0 };
 
     // Attempt to get live git data first (most accurate for local/non-shallow)
     let gitSucceeded = false;
@@ -134,6 +156,8 @@ export const calculateDevMetrics = async (rootDir) => {
         devMetrics.files = (clientStats.files || 0) + (adminStats.files || 0) + (serverStats.files || 0);
         devMetrics.apiEndpoints = (clientStats.apiEndpoints || 0) + (adminStats.apiEndpoints || 0) + (serverStats.apiEndpoints || 0);
         devMetrics.socketEvents = (clientStats.socketEvents || 0) + (adminStats.socketEvents || 0) + (serverStats.socketEvents || 0);
+        devMetrics.listeners = (clientStats.listeners || 0) + (adminStats.listeners || 0) + (serverStats.listeners || 0);
+        devMetrics.hooks = (clientStats.hooks || 0) + (adminStats.hooks || 0) + (serverStats.hooks || 0);
 
     } catch (err) {
         console.error('Dev metrics calculation failed:', err);

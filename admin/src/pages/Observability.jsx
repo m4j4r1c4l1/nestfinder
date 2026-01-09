@@ -251,7 +251,7 @@ const Observability = () => {
         mapPoints: { total: 0, confirmed: 0, pending: 0, rejected: 0 },
         notificationMetrics: { total: 0, sent: 0, delivered: 0, read: 0, unread: 0 },
         feedbackMetrics: { total: 0, pending: 0, read: 0 },
-        devMetrics: { loc: 0, components: 0, commits: 0, files: 0, apiEndpoints: 0, socketEvents: 0 },
+        devMetrics: { loc: 0, components: 0, commits: 0, files: 0, apiEndpoints: 0, socketEvents: 0, listeners: 0, hooks: 0 },
         broadcastMetrics: { total: 0, active: 0, delivered: 0, read: 0 }
     });
 
@@ -543,13 +543,24 @@ const Observability = () => {
                                         <div className="text-muted text-sm">Total</div>
                                     </div>
 
-                                    {/* 2x3 Badges Grid (6 items) */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem', width: '100%', maxWidth: '450px' }}>
+                                    {/* 2 columns Badge Grid (8 items) */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem', width: '100%', maxWidth: '450px' }}>
                                         {[
-                                            // 1. Commits
-                                            // 1. Commits
+                                            // 1. Components (Moved from Slot 3 to Slot 1)
+                                            { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9' },
+                                            // 2. Files (Moved from Slot 6 to Slot 2)
+                                            { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } },
+                                            // 3. API (Moved from Slot 4 to Slot 3)
+                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
+                                            // 4. Listeners (New - Slot 4, where API was)
+                                            { label: 'Listeners', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.listeners || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#d946ef' },
+                                            // 5. Commits (Moved from Slot 1 to Slot 5)
                                             { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#8b5cf6' },
-                                            // 2. Commit ID
+                                            // 6. Hooks (New - Slot 6, where Files was)
+                                            { label: 'Hooks', sub: 'React Hooks', count: <RollingBarrelCounter end={stats.devMetrics?.hooks || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#6366f1' },
+                                            // 7. Websockets (Moved from Slot 5 to Slot 7)
+                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#eab308' },
+                                            // 8. Commit ID (Moved from Slot 2 to Slot 8)
                                             {
                                                 label: 'Commit ID',
                                                 sub: 'Latest',
@@ -558,14 +569,6 @@ const Observability = () => {
                                                 mono: true,
                                                 boxStyle: { background: '#1e3a8a40', border: '1px solid #1e3a8a' }
                                             },
-                                            // 3. Components
-                                            { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9' },
-                                            // 4. API (New)
-                                            { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
-                                            // 5. Websockets (New)
-                                            { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#eab308' },
-                                            // 6. Files
-                                            { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } }
                                         ].map((badge, i) => (
                                             <div key={i} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
