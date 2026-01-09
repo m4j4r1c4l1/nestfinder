@@ -3073,7 +3073,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const rowHeight = 12;
     const gap = 4;
     const rulerHeight = 28;
-    const totalHeight = rulerHeight + laneCount * (rowHeight + gap) + 16;
+    const totalHeight = rulerHeight + laneCount * (rowHeight + gap);
 
     // --- Interaction Handlers ---
 
@@ -3424,7 +3424,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                                     position: 'absolute',
                                     left: `${left}%`,
                                     width: `${Math.max(width, 0.5)}%`,
-                                    top: `${laneIndex * (rowHeight + gap) + gap * 2}px`,
+                                    top: `${laneIndex * (rowHeight + gap) + gap}px`,
                                     height: `${rowHeight}px`,
                                     background: color,
                                     border: isActive ? '2px solid white' : `1px solid ${color}`,
