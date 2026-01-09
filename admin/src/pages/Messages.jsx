@@ -995,17 +995,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                             {/* Bottom Line: Professional Layout */}
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
 
-                                                {/* Left: Status & Priority Badges */}
+                                                {/* Left: Priority, Max Views, Status, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <span style={{
-                                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
-                                                        fontSize: '0.7rem', fontWeight: 700,
-                                                        background: `${statusColor}20`, color: statusColor,
-                                                        border: `1px solid ${statusColor}40`,
-                                                        textTransform: 'uppercase', letterSpacing: '0.5px'
-                                                    }}>
-                                                        {statusText}
-                                                    </span>
                                                     <span style={{
                                                         padding: '0.2rem 0.5rem', borderRadius: '4px',
                                                         fontSize: '0.7rem', fontWeight: 600,
@@ -1022,6 +1013,15 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                             👁 {b.max_views}
                                                         </span>
                                                     )}
+                                                    <span style={{
+                                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                                        fontSize: '0.7rem', fontWeight: 700,
+                                                        background: `${statusColor}20`, color: statusColor,
+                                                        border: `1px solid ${statusColor}40`,
+                                                        textTransform: 'uppercase', letterSpacing: '0.5px'
+                                                    }}>
+                                                        {statusText}
+                                                    </span>
                                                     {b.image_url && (
                                                         <span title="Has Attachment" style={{ fontSize: '0.9rem' }}>📎</span>
                                                     )}
@@ -1032,10 +1032,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete }) {
                                                     {/* Time Range */}
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem' }}>
                                                         <span style={{ color: '#64748b' }}>🕐</span>
-                                                        <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                                                        <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                                                         <span style={{ color: '#475569' }}>{formatTimeCET(start)}</span>
                                                         <span style={{ color: '#475569' }}>→</span>
-                                                        <span>{end.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                                                        <span>{end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                                                         <span style={{ color: '#475569' }}>{formatTimeCET(end)}</span>
                                                     </div>
 
