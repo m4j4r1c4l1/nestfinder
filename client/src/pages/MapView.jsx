@@ -484,8 +484,8 @@ const MapView = () => {
                 </button>
             </nav>
 
-            {/* Global Broadcast Modal - shows 1s after user settles (has location) */}
-            <BroadcastModal isSettled={!!userLocation} />
+            {/* Global Broadcast Modal - shows 1s after mount */}
+            <BroadcastModal isSettled={true} />
         </div>
     );
 };

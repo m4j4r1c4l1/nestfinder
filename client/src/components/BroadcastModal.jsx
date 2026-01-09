@@ -39,6 +39,7 @@ const BroadcastModal = ({ isSettled = false }) => {
 
                 if (response.broadcast) {
                     const seenIds = getSeenIds();
+
                     if (!seenIds.includes(response.broadcast.id)) {
                         setBroadcast(response.broadcast);
                         setVisible(true);
