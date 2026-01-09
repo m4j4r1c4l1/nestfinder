@@ -1077,14 +1077,23 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     {b.max_views && (
                                                         <span style={{
                                                             padding: '0.2rem 0.5rem', borderRadius: '4px',
-                                                            fontSize: '0.7rem',
-                                                            background: '#1e293b', color: '#94a3b8', border: '1px solid #334155'
+                                                            fontSize: '0.7rem', fontWeight: 600,
+                                                            background: 'rgba(6, 182, 212, 0.1)',
+                                                            color: '#06b6d4',
+                                                            border: '1px solid rgba(6, 182, 212, 0.3)'
                                                         }}>
                                                             👁 {b.max_views}
                                                         </span>
                                                     )}
                                                     {b.image_url && (
-                                                        <span title="Has Attachment" style={{ fontSize: '0.9rem' }}>📎</span>
+                                                        <span title="Has Attachment" style={{
+                                                            padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                                            fontSize: '0.7rem',
+                                                            background: '#1e293b',
+                                                            border: '1px solid #334155',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            cursor: 'help'
+                                                        }}>📎</span>
                                                     )}
                                                 </div>
 
@@ -3487,20 +3496,20 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                                 <span style={{ background: '#64748b', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>MAX ✓</span>
                             );
 
-                            // Violet Fading Logic
+                            // Cyan Fading Logic (#06b6d4 - 6, 182, 212)
                             let opacity = 1;
                             if (percent > 0.75) opacity = 0.4;
                             else if (percent > 0.5) opacity = 0.7;
 
                             return (
                                 <span style={{
-                                    background: `rgba(139, 92, 246, ${opacity})`,
+                                    background: `rgba(6, 182, 212, ${opacity})`,
                                     color: 'white',
                                     padding: '2px 8px',
                                     borderRadius: '4px',
                                     fontSize: '10px',
                                     fontWeight: 600,
-                                    border: percent > 0.75 ? '1px solid rgba(139, 92, 246, 0.5)' : 'none'
+                                    border: percent > 0.75 ? '1px solid rgba(6, 182, 212, 0.5)' : 'none'
                                 }}>
                                     MAX {hoveredItem.max_views}
                                 </span>
