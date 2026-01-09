@@ -94,22 +94,44 @@ router.post('/broadcast/:id/read', (req, res) => {
     return res.status(400).json({ error: 'User ID required' });
   }
 
-  // Update to read status
-  run(`
-    UPDATE broadcast_views 
-    SET status = 'read', read_at = CURRENT_TIMESTAMP, dismissed = 1
-    WHERE broadcast_id = ? AND user_id = ?
-  `, [broadcastId, userId]);
+  // Ensure record exists and update to read status
+  const view = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
+
+  if (view) {
+    run(`
+      UPDATE broadcast_views 
+      SET status = 'read', read_at = CURRENT_TIMESTAMP, dismissed = 1
+      WHERE broadcast_id = ? AND user_id = ?
+    `, [broadcastId, userId]);
+  } else {
+    run(`
+      INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
+      VALUES (?, ?, 'read', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
+    `, [broadcastId, userId]);
+  }
 
   // Persist to Inbox (Notifications table) so user can see it later
   const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [broadcastId]);
   if (broadcast) {
-    // Check if already exists in notifications to prevent duplicates (optional but good)
-    // Actually, we usually want to just insert it.
-    run(`
-        INSERT INTO notifications (user_id, title, body, type, created_at)
-        VALUES (?, ?, ?, 'info', ?)
-      `, [userId, '📢 Announcement', broadcast.message, broadcast.created_at]);
+    // Check if already exists to prevent duplicates
+    const existing = get(
+      'SELECT id FROM notifications WHERE user_id = ? AND batch_id = ?',
+      [userId, `broadcast_${broadcastId}`]
+    );
+
+    if (!existing) {
+      run(`
+        INSERT INTO notifications (user_id, title, body, type, image_url, batch_id, read, read_at, created_at)
+        VALUES (?, ?, ?, 'broadcast', ?, ?, 1, CURRENT_TIMESTAMP, ?)
+      `, [
+        userId,
+        broadcast.title || '📢 Announcement',
+        broadcast.message,
+        broadcast.image_url || null,
+        `broadcast_${broadcastId}`,
+        broadcast.created_at
+      ]);
+    }
   }
 
   res.json({ success: true });
