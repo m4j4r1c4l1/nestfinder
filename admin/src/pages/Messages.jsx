@@ -959,7 +959,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Timeline Visualization - Wrapped to prevent overlap */}
-                <div style={{ position: 'relative', zIndex: 5, margin: '4px 2rem 0 1rem' }}>
+                <div style={{ position: 'relative', zIndex: 5, margin: '0.75rem 2rem 0.75rem 1rem' }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
                         onBroadcastClick={setSelectedBroadcast}
@@ -3353,7 +3353,8 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 position: 'relative',
                 height: `${totalHeight}px`,
                 userSelect: 'none',
-                cursor: dragging ? 'grabbing' : 'auto'
+                cursor: dragging ? 'grabbing' : 'auto',
+                overflow: 'hidden' // Prevent edge overload
             }}
             onMouseMove={handleMouseMove}
             onMouseDown={handleContainerMouseDown}
@@ -3363,7 +3364,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             {/* 1. Ruler */}
             <div style={{
                 height: rulerHeight,
-                background: '#1e293b', // Lighter ruler (Slate-800)
+                background: '#0f172a', // Matches Broadcast Card Background
                 borderBottom: '1px solid #334155',
                 position: 'relative'
             }}>
