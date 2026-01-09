@@ -609,8 +609,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
     // Helper: Determine CSS class based on notification type
 
-    // Helper: Render Status Badge (Tick marks)
     const renderStatusBadge = (item, type) => {
+        // Broadcasts: No ticks (Issue 1)
+        if (item.type === 'broadcast') return null;
+
         let ticks = '✓';
         let tickColor = '#16a34a'; // green
 

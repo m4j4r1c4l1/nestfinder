@@ -110,28 +110,34 @@ router.post('/broadcast/:id/read', (req, res) => {
     `, [broadcastId, userId]);
   }
 
-  // Persist to Inbox (Notifications table) so user can see it later
-  const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [broadcastId]);
-  if (broadcast) {
-    // Check if already exists to prevent duplicates
-    const existing = get(
-      'SELECT id FROM notifications WHERE user_id = ? AND batch_id = ?',
-      [userId, `broadcast_${broadcastId}`]
-    );
+  // Persist to Inbox (Notifications table)
+  try {
+    const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [broadcastId]);
+    if (broadcast) {
+      const existing = get(
+        'SELECT id FROM notifications WHERE user_id = ? AND batch_id = ?',
+        [userId, `broadcast_${broadcastId}`]
+      );
 
-    if (!existing) {
-      run(`
-        INSERT INTO notifications (user_id, title, body, type, image_url, batch_id, read, read_at, created_at)
-        VALUES (?, ?, ?, 'broadcast', ?, ?, 1, CURRENT_TIMESTAMP, ?)
-      `, [
-        userId,
-        broadcast.title || '📢 Announcement',
-        broadcast.message,
-        broadcast.image_url || null,
-        `broadcast_${broadcastId}`,
-        broadcast.created_at
-      ]);
+      console.log(`[Broadcast Read] ID: ${broadcastId}, User: ${userId}, Existing Notif: ${existing ? 'Yes' : 'No'}`);
+
+      if (!existing) {
+        run(`
+          INSERT INTO notifications (user_id, title, body, type, image_url, batch_id, read, read_at, created_at)
+          VALUES (?, ?, ?, 'broadcast', ?, ?, 1, CURRENT_TIMESTAMP, ?)
+        `, [
+          userId,
+          broadcast.title || '📢 Announcement',
+          broadcast.message,
+          broadcast.image_url || null,
+          `broadcast_${broadcastId}`,
+          broadcast.created_at
+        ]);
+        console.log(`[Broadcast Read] Inserted notification for broadcast ${broadcastId}`);
+      }
     }
+  } catch (err) {
+    console.error('[Broadcast Read] Failed to insert notification:', err);
   }
 
   res.json({ success: true });
