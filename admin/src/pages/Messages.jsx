@@ -3228,7 +3228,34 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             }
 
             setDragging(prev => ({ ...prev, newStart, newEnd }));
+        } else if (dragging && dragging.type === 'pan') {
+            // Drag-to-Pan Logic
+            // Mouse moves X pixels. We want to move map X pixels.
+            // If I drag mouse Left (negative delta), I want to see content that was to the right?
+            // "standard" drag: I put finger on paper and pull Left. Paper moves Left. I see data to the Right.
+            // Mouse X decreases. Viewport Start should Increase.
+
+            const pixelDelta = e.clientX - dragging.startX;
+            const timeDelta = pixelDelta * (viewportDuration / width);
+
+            setViewportStart(dragging.initialViewportStart - timeDelta);
         }
+    };
+
+    const handleContainerMouseDown = (e) => {
+        // Only trigger if left click and not already dragging (e.g. from a bar)
+        if (e.button !== 0 || dragging) return;
+
+        e.preventDefault();
+        // Don't stop propagation? Or do we? 
+        // If we clicked a bar, bar handler ran and stopped propagation.
+        // So if we are here, we hit background.
+
+        setDragging({
+            type: 'pan',
+            startX: e.clientX,
+            initialViewportStart: viewportStart
+        });
     };
 
     const handleMouseDown = (e, b, type) => {
@@ -3318,6 +3345,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 cursor: dragging ? 'grabbing' : 'auto'
             }}
             onMouseMove={handleMouseMove}
+            onMouseDown={handleContainerMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
         >
