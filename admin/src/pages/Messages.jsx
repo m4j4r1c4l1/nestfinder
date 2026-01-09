@@ -532,7 +532,7 @@ const Messages = () => {
 
                     {/* BROADCASTS TAB */}
                     {activeTab === 'broadcasts' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, overflowY: 'auto', paddingBottom: '2rem' }}>
                             {/* Create New Broadcast */}
                             <div className="card" style={{ flexShrink: 0, marginBottom: 0 }}>
                                 <div className="card-header">
