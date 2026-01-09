@@ -180,7 +180,7 @@ const BarrelCounter = ({ value, trigger }) => {
 };
 
 // Rolling Barrel Counter (CountUp + Barrel)
-const RollingBarrelCounter = ({ end, duration = 2000, separator = null, trigger = null }) => {
+const RollingBarrelCounter = ({ end, duration = 2000, separator = null, trigger = null, decimals = 0 }) => {
     const [count, setCount] = useState(0);
     const endVal = parseFloat(end) || 0;
     const isInitial = React.useRef(true);
@@ -218,10 +218,11 @@ const RollingBarrelCounter = ({ end, duration = 2000, separator = null, trigger 
     }, [endVal, duration, trigger]);
 
     // Format the count for display
-    let displayValue = Math.round(count).toString();
+    let displayValue = count.toFixed(decimals);
     if (separator) {
-        // Simple regex to add separator every 3 digits
-        displayValue = displayValue.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+        const [int, dec] = displayValue.split('.');
+        const intFormatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+        displayValue = dec ? `${intFormatted}.${dec}` : intFormatted;
     }
 
     return <BarrelCounter value={displayValue} trigger={trigger} />;
