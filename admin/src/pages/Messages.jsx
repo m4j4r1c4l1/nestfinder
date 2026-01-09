@@ -128,6 +128,11 @@ const Messages = () => {
         .react-datepicker__day:hover {
             background-color: #334155;
         }
+        .react-datepicker__day--today {
+            background-color: #334155;
+            color: #f8fafc;
+            border-radius: 0.3rem;
+        }
         .react-datepicker__day--selected, .react-datepicker__time-list-item--selected {
             background-color: #3b82f6 !important;
             color: white !important;
