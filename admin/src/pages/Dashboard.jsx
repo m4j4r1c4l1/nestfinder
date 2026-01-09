@@ -9,6 +9,15 @@ const Dashboard = ({ onNavigate }) => {
     const [loading, setLoading] = useState(true);
     const [modalData, setModalData] = useState(null);
     const [showBackup, setShowBackup] = useState(false);
+    const [corruptDBFound, setCorruptDBFound] = useState(false);
+    const [isRestoring, setIsRestoring] = useState(false);
+
+    useEffect(() => {
+        // Check for corrupt DB existence once on mount
+        adminApi.checkCorruptDB()
+            .then(res => setCorruptDBFound(res.found))
+            .catch(() => setCorruptDBFound(false));
+    }, []);
     const clickCountRef = useRef(0);
     const clickTimeoutRef = useRef(null);
 
@@ -359,19 +368,86 @@ const Dashboard = ({ onNavigate }) => {
                             <MetricRow label="DB Size" value={stats.dbSizeBytes ? (stats.dbSizeBytes >= 1048576 ? (stats.dbSizeBytes / 1048576).toFixed(2) + ' MB' : (stats.dbSizeBytes / 1024).toFixed(1) + ' KB') : '-'} onClick={handleDBSizeClick} color="#94a3b8" />
 
                             {showBackup && (
-                                <button
-                                    className="btn btn-primary"
-                                    style={{ marginTop: '0.25rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', padding: '0.35rem', fontSize: '0.8rem' }}
-                                    onClick={async () => {
-                                        try {
-                                            await adminApi.downloadBackup();
-                                        } catch (err) {
-                                            alert('Failed to download backup: ' + err.message);
-                                        }
-                                    }}
-                                >
-                                    📥 Download DB Backup
-                                </button>
+                                <div style={{ marginTop: '0.25rem', width: '100%', display: 'flex', gap: '0.25rem' }}>
+                                    {/* 1. Download Active */}
+                                    <button
+                                        className="btn btn-primary"
+                                        style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.35rem', fontSize: '0.8rem' }}
+                                        title="Download Active DB"
+                                        onClick={async () => {
+                                            try { await adminApi.downloadBackup(); }
+                                            catch (err) { alert('Failed: ' + err.message); }
+                                        }}
+                                    >
+                                        📥 Active
+                                    </button>
+
+                                    {/* 2. Download Corrupt (Red if exists, else Gray/Disabled) */}
+                                    <button
+                                        className="btn"
+                                        style={{
+                                            flex: 1,
+                                            display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.35rem', fontSize: '0.8rem',
+                                            background: corruptDBFound ? '#ef4444' : '#334155',
+                                            color: 'white',
+                                            opacity: corruptDBFound ? 1 : 0.5,
+                                            cursor: corruptDBFound ? 'pointer' : 'not-allowed'
+                                        }}
+                                        title="Download Corrupted DB (if valid)"
+                                        disabled={!corruptDBFound}
+                                        onClick={async () => {
+                                            try { await adminApi.downloadCorruptDB(); }
+                                            catch (err) { alert('Failed: ' + err.message); }
+                                        }}
+                                    >
+                                        ☣️ Corrupt
+                                    </button>
+
+                                    {/* 3. Restore (Upload) */}
+                                    <button
+                                        className="btn"
+                                        style={{
+                                            flex: 1,
+                                            display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.35rem', fontSize: '0.8rem',
+                                            background: isRestoring ? '#94a3b8' : '#f59e0b',
+                                            color: 'white',
+                                            opacity: isRestoring ? 0.7 : 1,
+                                            cursor: isRestoring ? 'wait' : 'pointer'
+                                        }}
+                                        title="Restore Database from File"
+                                        disabled={isRestoring}
+                                        onClick={() => document.getElementById('restore-db-input').click()}
+                                    >
+                                        {isRestoring ? 'Wait...' : '♻️ Restore'}
+                                    </button>
+                                    <input
+                                        type="file"
+                                        id="restore-db-input"
+                                        accept=".db,.sqlite,.sqlite3"
+                                        style={{ display: 'none' }}
+                                        disabled={isRestoring}
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+                                            if (!window.confirm(`⚠️ WARNING: This will OVERWRITE the current database with '${file.name}'.\n\nThe server will restart.\nAre you sure?`)) {
+                                                e.target.value = '';
+                                                return;
+                                            }
+
+                                            setIsRestoring(true);
+                                            try {
+                                                const res = await adminApi.restoreDB(file);
+                                                alert(res.message);
+                                                window.location.reload();
+                                            } catch (err) {
+                                                alert('Restore Failed: ' + err.message);
+                                                setIsRestoring(false);
+                                            } finally {
+                                                e.target.value = '';
+                                            }
+                                        }}
+                                    />
+                                </div>
                             )}
                         </div>
                     </div>
