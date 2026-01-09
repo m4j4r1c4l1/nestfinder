@@ -958,8 +958,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     )}
                 </div>
 
-                {/* Timeline Visualization - Wrapped to prevent overlap */}
-                <div style={{ position: 'relative', zIndex: 5, margin: '0.75rem 2rem 0.75rem 1rem', overflow: 'hidden' }}>
+                {/* Timeline Visualization */}
+                <div style={{ position: 'relative', zIndex: 1, margin: '0.75rem 2rem 0.75rem 1rem' }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
                         onBroadcastClick={setSelectedBroadcast}
@@ -968,7 +968,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Scrollable Broadcasts List */}
-                <div className="card-body" style={{ overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', zIndex: 4 }}>
+                <div className="card-body" style={{ overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', zIndex: 2 }}>
                     <div style={{ padding: '1rem' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
