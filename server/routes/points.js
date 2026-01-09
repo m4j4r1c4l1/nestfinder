@@ -101,6 +101,17 @@ router.post('/broadcast/:id/read', (req, res) => {
     WHERE broadcast_id = ? AND user_id = ?
   `, [broadcastId, userId]);
 
+  // Persist to Inbox (Notifications table) so user can see it later
+  const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [broadcastId]);
+  if (broadcast) {
+    // Check if already exists in notifications to prevent duplicates (optional but good)
+    // Actually, we usually want to just insert it.
+    run(`
+        INSERT INTO notifications (user_id, title, body, type, created_at)
+        VALUES (?, ?, ?, 'info', ?)
+      `, [userId, '📢 Announcement', broadcast.message, broadcast.created_at]);
+  }
+
   res.json({ success: true });
 });
 
