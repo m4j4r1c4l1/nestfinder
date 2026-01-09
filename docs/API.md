@@ -479,7 +479,7 @@ Returns stored development metrics.
 
 ## 🐛 Debug Routes (`/api/debug`)
 
-> ⚠️ **Development/Testing Only:** These endpoints are intended solely for debugging during development and testing phases. They should be disabled or restricted in production environments.
+> ⚠️ **Development/Testing Only:** These endpoints are intended solely for debugging during development and testing phases. They should be disabled or restricted in production environments. **No personal information is collected or stored** — only technical debug data (e.g., browser type, error logs) is captured for troubleshooting purposes.
 
 ### Submit Debug Logs
 ```
