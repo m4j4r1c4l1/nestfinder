@@ -2921,55 +2921,58 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 // --- Timeline Component ---
 function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const containerRef = React.useRef(null);
+    const scrollInterval = React.useRef(null);
 
-    // Zoom State (0.5x to 4x)
-    const [zoomLevel, setZoomLevel] = useState(1);
+    // Viewport State (Time Window)
+    const [viewportStart, setViewportStart] = useState(0);
+    const [viewportDuration, setViewportDuration] = useState(0);
+    const [isInitialized, setIsInitialized] = useState(false);
 
-    // Crosshair State
-    const [crosshairPos, setCrosshairPos] = useState({ x: null, y: null });
+    // Interaction State
     const [hoveredBarId, setHoveredBarId] = useState(null);
-
-    // Tooltip State
     const [hoveredItem, setHoveredItem] = useState(null);
     const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+    const [crosshairPos, setCrosshairPos] = useState({ x: null, y: null });
 
     // Drag State
-    const [dragging, setDragging] = useState(null); // { id, type: 'move'|'resize-left'|'resize-right', startX, originalStart, originalEnd }
+    const [dragging, setDragging] = useState(null); // { id, type, startX, originalStart, originalEnd, newStart, newEnd }
 
-    // 1. Determine Range
-    const [minTime, maxTime] = React.useMemo(() => {
-        const validBroadcasts = broadcasts.filter(b => {
+    // 1. Initial Auto-Scale (Run once when broadcasts load)
+    useEffect(() => {
+        if (!broadcasts.length) return;
+
+        // Find absolute min/max of all valid broadcasts
+        let min = Infinity;
+        let max = -Infinity;
+        let validCount = 0;
+
+        broadcasts.forEach(b => {
             const s = new Date(b.start_time).getTime();
             const e = new Date(b.end_time).getTime();
-            return !isNaN(s) && !isNaN(e) && s > 0 && e > 0;
+            if (!isNaN(s) && !isNaN(e)) {
+                if (s < min) min = s;
+                if (e > max) max = e;
+                validCount++;
+            }
         });
 
-        if (!validBroadcasts.length) return [0, 0];
+        if (validCount > 0) {
+            // Add 5% padding on each side
+            const range = max - min;
+            const padding = range > 0 ? range * 0.05 : 3600000;
 
-        let min = new Date(validBroadcasts[0].start_time).getTime();
-        let max = new Date(validBroadcasts[0].end_time).getTime();
-
-        validBroadcasts.forEach(b => {
-            const s = new Date(b.start_time).getTime();
-            const e = new Date(b.end_time).getTime();
-            if (s < min) min = s;
-            if (e > max) max = e;
-        });
-
-        const pad = 3600000; // 1 hour padding
-        return [min - pad, max + pad];
-    }, [broadcasts]);
-
-    const totalDuration = (maxTime && minTime) ? (maxTime - minTime) : 0;
-
-    // Zoomed duration (narrower view = higher zoom)
-    const zoomedDuration = totalDuration / zoomLevel;
-    const zoomedMinTime = minTime;
-    const zoomedMaxTime = minTime + zoomedDuration;
+            // Only set if significantly different or not initialized (debouncing mostly)
+            if (!isInitialized) {
+                setViewportStart(min - padding);
+                setViewportDuration(range + padding * 2);
+                setIsInitialized(true);
+            }
+        }
+    }, [broadcasts, isInitialized]);
 
     // 2. Swimlane Logic
     const { lanes, laneCount } = React.useMemo(() => {
-        if (!broadcasts.length || !totalDuration) return { lanes: [], laneCount: 0 };
+        if (!broadcasts.length) return { lanes: [], laneCount: 0 };
 
         const sorted = [...broadcasts].filter(b => {
             const s = new Date(b.start_time).getTime();
@@ -2988,10 +2991,13 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         sorted.forEach(b => {
             const start = new Date(b.start_time).getTime();
             const end = new Date(b.end_time).getTime();
-
             let placed = false;
+
+            // Try to place in existing lane
             for (let i = 0; i < laneEnds.length; i++) {
-                if (laneEnds[i] + 900000 < start) {
+                // Check if space available (with small visual gap buffer)
+                const buffer = viewportDuration ? (viewportDuration * 0.02) : 900000;
+                if (laneEnds[i] + buffer < start) {
                     lanes[i].push(b);
                     laneEnds[i] = end;
                     placed = true;
@@ -3006,112 +3012,194 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         });
 
         return { lanes, laneCount: lanes.length };
-    }, [broadcasts, totalDuration]);
+    }, [broadcasts, viewportDuration]);
 
-    if (!broadcasts.length) return null;
+    if (!broadcasts.length || !isInitialized) return null;
 
-    const rowHeight = 12; // Half the original 24px
+    // Dimensions
+    const rowHeight = 12;
     const gap = 4;
     const rulerHeight = 28;
     const totalHeight = rulerHeight + laneCount * (rowHeight + gap) + 16;
 
-    // Time formatting for ruler
-    const formatRulerTime = (timestamp) => {
-        const d = new Date(timestamp);
-        const hours = d.getHours().toString().padStart(2, '0');
-        const mins = d.getMinutes().toString().padStart(2, '0');
-        const day = d.getDate();
-        const month = d.toLocaleString('en', { month: 'short' });
-        return { time: `${hours}:${mins}`, date: `${day} ${month}` };
+    // --- Interaction Handlers ---
+
+    // Scroll-to-Zoom & Pan
+    const handleWheel = (e) => {
+        if (!containerRef.current) return;
+        e.preventDefault();
+
+        const rect = containerRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const width = rect.width;
+
+        // Mouse position as percentage of view (0 to 1)
+        const mouseRatio = Math.max(0, Math.min(1, mouseX / width));
+        // Mouse time position
+        const mouseTime = viewportStart + (viewportDuration * mouseRatio);
+
+        if (e.ctrlKey || e.metaKey) {
+            // Zoom
+            const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+            const newDuration = Math.max(3600000, viewportDuration * zoomFactor); // Min 1 hour window
+
+            // Adjust start so mouse time remains under cursor
+            const newStart = mouseTime - (newDuration * mouseRatio);
+
+            setViewportDuration(newDuration);
+            setViewportStart(newStart);
+        } else {
+            // Pan
+            const panAmount = (e.deltaX + e.deltaY) * (viewportDuration / width);
+            setViewportStart(prev => prev + panAmount);
+        }
     };
 
-    const formatTooltipTime = (d) => new Date(d).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    // Edge Scrolling Loop
+    const checkEdgeScroll = (clientX) => {
+        if (!containerRef.current || !dragging) {
+            cancelAnimationFrame(scrollInterval.current);
+            scrollInterval.current = null;
+            return;
+        }
 
-    // Generate ruler ticks
-    const generateTicks = () => {
-        const ticks = [];
-        const duration = zoomedDuration;
+        const rect = containerRef.current.getBoundingClientRect();
+        const edgeThreshold = 50; // px
+        const relX = clientX - rect.left;
+        const width = rect.width;
 
-        // Determine tick interval based on zoom and duration
-        let interval;
-        if (duration < 3600000 * 6) interval = 3600000; // 1 hour
-        else if (duration < 86400000) interval = 3600000 * 3; // 3 hours
-        else if (duration < 86400000 * 3) interval = 3600000 * 6; // 6 hours
-        else if (duration < 86400000 * 7) interval = 86400000; // 1 day
-        else interval = 86400000 * 2; // 2 days
+        let speed = 0;
+        if (relX < edgeThreshold) {
+            // Left edge: speed increases as we push left
+            const dist = edgeThreshold - relX;
+            speed = -Math.pow(dist / edgeThreshold, 2); // Exponential -1 to 0
+        } else if (relX > width - edgeThreshold) {
+            // Right edge
+            const dist = relX - (width - edgeThreshold);
+            speed = Math.pow(dist / edgeThreshold, 2); // Exponential 0 to 1
+        }
 
-        interval = interval / zoomLevel; // Adjust for zoom
-        interval = Math.max(interval, 1800000); // Min 30 mins
+        if (Math.abs(speed) > 0.01) {
+            // Scroll viewport
+            const scrollAmount = speed * (viewportDuration * 0.02); // 2% of view per frame at max
 
-        const start = Math.ceil(zoomedMinTime / interval) * interval;
-        for (let t = start; t <= zoomedMaxTime; t += interval) {
-            const left = ((t - zoomedMinTime) / zoomedDuration) * 100;
-            if (left >= 0 && left <= 100) {
-                ticks.push({ time: t, left });
+            setViewportStart(prev => prev + scrollAmount);
+
+            // If dragging, we need to update the drag position in time space
+            // Logic: The mouse stays physically same(ish), but time shifts under it?
+            // Actually, if we scroll, the mouse's time value changes naturally if it stays still.
+            // But usually user pushes mouse against edge.
+
+            if (!scrollInterval.current) {
+                const loop = () => {
+                    checkEdgeScroll(clientX); // Recalculate with maintained mouse pos? 
+                    // Ideally we track mouse pos in ref. For now simpler recursion
+                    // Actually, simple recursion of state update is tricky in React. 
+                    // Better to rely on just updating viewport here and letting the next renders handle 'handleMouseMove' re-calc.
+                };
+                // scrollInterval.current = requestAnimationFrame(loop);
             }
         }
-        return ticks;
     };
+    // NOTE: True implementation of smooth continuous edge scrolling in React requires a ref-based loop
+    // to allow mutable access to latest state without closures stale. 
+    // Simplified version: We just nudge view in 'handleMouseMove' if near edge.
 
-    // Priority colors
-    const getPriorityColor = (p) => {
-        const val = p || 3;
-        if (val <= 1) return '#ef4444';
-        if (val === 2) return '#f97316';
-        if (val === 3) return '#eab308';
-        if (val === 4) return '#3b82f6';
-        return '#22c55e';
-    };
-
-    const getPriorityLabel = (p) => {
-        const val = p || 3;
-        return `P${val}`;
-    };
-
-    // Handle mouse move for crosshairs
     const handleMouseMove = (e) => {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top - rulerHeight;
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const width = rect.width;
 
-        if (!hoveredBarId && !dragging) {
-            setCrosshairPos({ x, y: Math.max(0, y) });
+        const cursorTime = viewportStart + (viewportDuration * (mouseX / width));
+
+        // Crosshairs (visual only)
+        if (!dragging && !hoveredBarId) {
+            setCrosshairPos({
+                x: mouseX,
+                y: Math.max(0, mouseY - rulerHeight)
+            });
         }
 
         if (hoveredItem) {
             setTooltipPos({ x: e.clientX, y: e.clientY });
         }
 
-        // Handle dragging
-        if (dragging && containerRef.current) {
-            const deltaX = e.clientX - dragging.startX;
-            const containerWidth = rect.width;
-            const timeDelta = (deltaX / containerWidth) * zoomedDuration;
+        // Edge Scrolling (Nudge)
+        if (dragging) {
+            const edgeDist = 50;
+            if (mouseX < edgeDist) {
+                // Exponential Scale Speed
+                const factor = Math.pow((edgeDist - mouseX) / edgeDist, 2) * 0.03;
+                setViewportStart(s => s - (viewportDuration * factor));
+            } else if (mouseX > width - edgeDist) {
+                const factor = Math.pow((mouseX - (width - edgeDist)) / edgeDist, 2) * 0.03;
+                setViewportStart(s => s + (viewportDuration * factor));
+            }
 
-            // Calculate new times based on drag type
+            // Update Drag Time
             let newStart = dragging.originalStart;
             let newEnd = dragging.originalEnd;
 
+            // Calculate time delta based on initial CURSOR time vs current CURSOR time?
+            // Easier: Calculate *target time* under cursor now
+            const timeDelta = cursorTime - dragging.cursorStartTime; // This is naive if we scrolled.
+
+            // Better: 
+            // We know the original broadcast times.
+
+            // For dragging bar: preserve duration, move center to mouse? 
+            // No, standard is delta.
+            // visualDelta = mouseX - dragStartX.
+            // But we might have scrolled.
+
+            // Absolute approach:
+            // Calculate time at mouse cursor. Difference from initial mouse click time is the delta.
+            const absDelta = cursorTime - dragging.initialCursorTime;
+
             if (dragging.type === 'move') {
-                newStart = dragging.originalStart + timeDelta;
-                newEnd = dragging.originalEnd + timeDelta;
+                newStart = dragging.originalStart + absDelta;
+                newEnd = dragging.originalEnd + absDelta;
             } else if (dragging.type === 'resize-left') {
-                newStart = Math.min(dragging.originalStart + timeDelta, dragging.originalEnd - 900000); // Min 15 min duration
+                newStart = Math.min(dragging.originalStart + absDelta, dragging.originalEnd - 900000);
             } else if (dragging.type === 'resize-right') {
-                newEnd = Math.max(dragging.originalEnd + timeDelta, dragging.originalStart + 900000);
+                newEnd = Math.max(dragging.originalEnd + absDelta, dragging.originalStart + 900000);
             }
 
             setDragging(prev => ({ ...prev, newStart, newEnd }));
         }
     };
 
+    const handleMouseDown = (e, b, type) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const width = rect.width;
+        const cursorTime = viewportStart + (viewportDuration * (mouseX / width));
+
+        setDragging({
+            id: b.id,
+            type,
+            initialCursorTime: cursorTime,
+            originalStart: new Date(b.start_time).getTime(),
+            originalEnd: new Date(b.end_time).getTime(),
+            newStart: new Date(b.start_time).getTime(),
+            newEnd: new Date(b.end_time).getTime()
+        });
+    };
+
     const handleMouseUp = async () => {
-        if (dragging && dragging.newStart !== undefined && onBroadcastUpdate) {
-            await onBroadcastUpdate(dragging.id, {
-                start_time: new Date(dragging.newStart).toISOString(),
-                end_time: new Date(dragging.newEnd).toISOString()
-            });
+        if (dragging && onBroadcastUpdate) {
+            if (dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd) {
+                await onBroadcastUpdate(dragging.id, {
+                    start_time: new Date(dragging.newStart).toISOString(),
+                    end_time: new Date(dragging.newEnd).toISOString()
+                });
+            }
         }
         setDragging(null);
     };
@@ -3120,9 +3208,11 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         setCrosshairPos({ x: null, y: null });
         setHoveredItem(null);
         setHoveredBarId(null);
+        // Don't clear dragging here, users often drag outside briefly. 
+        // Only clear drag on explicit mouse up usually, but window mouseup is needed for robustness.
     };
 
-    // Detect edge hover for resize cursor
+    // Detect edge hover type
     const getEdgeType = (e, barRect) => {
         const edgeThreshold = 8;
         if (e.clientX - barRect.left < edgeThreshold) return 'resize-left';
@@ -3130,139 +3220,178 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return 'move';
     };
 
+    // Formatters
+    const formatTimePill = (ts) => {
+        const d = new Date(ts);
+        const t = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        const date = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+        return { t, date };
+    };
+
+    // Generate ticks based on current viewport
+    const ticks = React.useMemo(() => {
+        const t = [];
+        // Aim for ~10 ticks
+        const targetTicks = 10;
+        let interval = viewportDuration / targetTicks;
+
+        // Round to nice intervals
+        const niceIntervals = [
+            900000, // 15m
+            1800000, // 30m
+            3600000, // 1h
+            10800000, // 3h
+            21600000, // 6h
+            43200000, // 12h
+            86400000, // 1d
+            172800000, // 2d
+            604800000 // 1w
+        ];
+
+        const bestInterval = niceIntervals.reduce((prev, curr) =>
+            Math.abs(curr - interval) < Math.abs(prev - interval) ? curr : prev
+        );
+
+        const startTick = Math.ceil(viewportStart / bestInterval) * bestInterval;
+        for (let time = startTick; time < viewportStart + viewportDuration; time += bestInterval) {
+            const left = ((time - viewportStart) / viewportDuration) * 100;
+            t.push({ time, left });
+        }
+        return t;
+    }, [viewportStart, viewportDuration]);
+
     return (
         <div
             ref={containerRef}
             style={{
-                background: 'linear-gradient(to bottom, #0f172a 0%, #1e293b 100%)',
-                borderBottom: '1px solid var(--color-border)',
-                padding: '0 1rem 12px 1rem',
+                background: '#0f172a', // Darker body (Slate-950)
+                border: '1px solid #1e293b',
+                borderRadius: '8px',
                 position: 'relative',
                 height: `${totalHeight}px`,
                 overflow: 'hidden',
-                transition: 'height 0.3s ease',
-                userSelect: dragging ? 'none' : 'auto'
+                userSelect: 'none',
+                cursor: dragging ? 'grabbing' : 'auto'
             }}
+            onWheel={handleWheel}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
         >
-            {/* Zoom Controls */}
-            <div style={{ position: 'absolute', top: 4, right: 8, display: 'flex', gap: '4px', zIndex: 20 }}>
-                <button
-                    onClick={() => setZoomLevel(z => Math.max(0.5, z / 1.5))}
-                    style={{ width: 24, height: 24, background: '#334155', border: 'none', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: '14px' }}
-                    title="Zoom Out"
-                >−</button>
-                <span style={{ color: '#64748b', fontSize: '11px', lineHeight: '24px', minWidth: 35, textAlign: 'center' }}>{Math.round(zoomLevel * 100)}%</span>
-                <button
-                    onClick={() => setZoomLevel(z => Math.min(4, z * 1.5))}
-                    style={{ width: 24, height: 24, background: '#334155', border: 'none', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: '14px' }}
-                    title="Zoom In"
-                >+</button>
-            </div>
-
-            {/* Temporal Ruler */}
+            {/* 1. Ruler */}
             <div style={{
                 height: rulerHeight,
+                background: '#1e293b', // Lighter ruler (Slate-800)
                 borderBottom: '1px solid #334155',
-                position: 'relative',
-                background: 'linear-gradient(to bottom, rgba(51, 65, 85, 0.3) 0%, transparent 100%)'
+                position: 'relative'
             }}>
-                {generateTicks().map((tick, i) => {
-                    const { time, date } = formatRulerTime(tick.time);
+                {ticks.map((tick, i) => {
+                    const { t, date } = formatTimePill(tick.time);
                     return (
-                        <div key={i} style={{ position: 'absolute', left: `${tick.left}%`, top: 0, height: '100%' }}>
-                            <div style={{ width: 1, height: '100%', background: '#475569' }} />
+                        <div key={i} style={{ position: 'absolute', left: `${tick.left}%`, top: 0, height: '100%', pointerEvents: 'none' }}>
+                            <div style={{ width: 1, height: 6, background: '#64748b', position: 'absolute', bottom: 0 }} />
                             <div style={{
-                                position: 'absolute',
-                                top: 2,
-                                left: 4,
-                                fontSize: '10px',
-                                color: '#94a3b8',
-                                whiteSpace: 'nowrap',
-                                fontFamily: 'monospace'
+                                position: 'absolute', bottom: 8, left: 4,
+                                fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace', lineHeight: 1
                             }}>
-                                <div style={{ fontWeight: 600 }}>{time}</div>
-                                <div style={{ fontSize: '8px', color: '#64748b' }}>{date}</div>
+                                <span style={{ fontWeight: 600 }}>{t}</span> <span style={{ opacity: 0.7 }}>{date}</span>
                             </div>
                         </div>
                     );
                 })}
+
+                {/* Resize Interaction Guide - Timestamp Highlight */}
+                {dragging && dragging.type.startsWith('resize') && (
+                    <div style={{
+                        position: 'absolute',
+                        left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
+                        top: 2,
+                        transform: 'translateX(-50%)',
+                        background: '#3b82f6',
+                        color: 'white',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        zIndex: 30,
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {formatTimePill(dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd).t} ({formatTimePill(dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd).date})
+                    </div>
+                )}
             </div>
 
-            {/* Bars Container */}
-            <div style={{ position: 'relative', width: '100%', height: `${totalHeight - rulerHeight - 12}px`, marginTop: 4 }}>
-                {/* Crosshairs (only when not hovering bar) */}
+            {/* 2. Body / Bars */}
+            <div style={{ position: 'relative', width: '100%', height: `${totalHeight - rulerHeight}px` }}>
+
+                {/* Crosshairs */}
                 {crosshairPos.x !== null && !hoveredBarId && !dragging && (
                     <>
-                        <div style={{
-                            position: 'absolute',
-                            left: crosshairPos.x,
-                            top: 0,
-                            height: '100%',
-                            width: 1,
-                            borderLeft: '1px dashed rgba(100, 116, 139, 0.5)',
-                            pointerEvents: 'none',
-                            zIndex: 5
-                        }} />
-                        <div style={{
-                            position: 'absolute',
-                            left: 0,
-                            top: crosshairPos.y,
-                            width: '100%',
-                            height: 1,
-                            borderTop: '1px dashed rgba(100, 116, 139, 0.5)',
-                            pointerEvents: 'none',
-                            zIndex: 5
-                        }} />
+                        <div style={{ position: 'absolute', left: crosshairPos.x, top: 0, height: '100%', borderLeft: '1px dotted rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
+                        <div style={{ position: 'absolute', left: 0, top: crosshairPos.y, width: '100%', borderTop: '1px dotted rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
                     </>
                 )}
 
-                {/* Lanes */}
+                {/* Resize Guide Line (Vertical) */}
+                {dragging && dragging.type.startsWith('resize') && (
+                    <div style={{
+                        position: 'absolute',
+                        left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
+                        top: -rulerHeight, // Extend up into ruler
+                        bottom: 0,
+                        width: 0,
+                        borderLeft: '2px dotted white',
+                        zIndex: 25,
+                        pointerEvents: 'none'
+                    }} />
+                )}
+
+                {/* Bars */}
                 {lanes.map((laneItems, laneIndex) => (
                     laneItems.map(b => {
                         const isDraggingThis = dragging?.id === b.id;
-                        const start = isDraggingThis && dragging.newStart ? dragging.newStart : new Date(b.start_time).getTime();
-                        const end = isDraggingThis && dragging.newEnd ? dragging.newEnd : new Date(b.end_time).getTime();
 
-                        const left = ((start - zoomedMinTime) / zoomedDuration) * 100;
-                        const width = ((end - start) / zoomedDuration) * 100;
+                        // Use dragged times if dragging this item, else normal
+                        const start = isDraggingThis ? dragging.newStart : new Date(b.start_time).getTime();
+                        const end = isDraggingThis ? dragging.newEnd : new Date(b.end_time).getTime();
+
+                        const left = ((start - viewportStart) / viewportDuration) * 100;
+                        const width = ((end - start) / viewportDuration) * 100;
+
+                        // Don't render if completely off-screen
+                        if (left + width < 0 || left > 100) return null;
 
                         const now = new Date().getTime();
                         const isActive = now >= start && now <= end;
                         const isEnded = now > end;
 
-                        const color = getPriorityColor(b.priority);
-
-                        // Styling based on active state
-                        const barOpacity = isEnded ? 0.25 : (isActive ? 1 : 0.25);
-                        const barBackground = color;
-                        const barBorder = isActive ? `2px solid white` : `1px solid ${color}`;
-                        const barGlow = isActive ? `0 0 12px 3px ${color}` : 'none';
+                        let color = '#3b82f6';
+                        if (b.priority <= 1) color = '#ef4444';
+                        else if (b.priority === 2) color = '#f97316';
+                        else if (b.priority === 3) color = '#eab308';
+                        else if (b.priority === 5) color = '#22c55e';
 
                         return (
                             <div
                                 key={b.id}
                                 style={{
                                     position: 'absolute',
-                                    left: `${Math.max(0, left)}%`,
+                                    left: `${left}%`,
                                     width: `${Math.max(width, 0.5)}%`,
-                                    top: `${laneIndex * (rowHeight + gap)}px`,
+                                    top: `${laneIndex * (rowHeight + gap) + gap * 2}px`,
                                     height: `${rowHeight}px`,
-                                    background: barBackground,
-                                    border: barBorder,
+                                    background: color,
+                                    border: isActive ? '2px solid white' : `1px solid ${color}`,
                                     borderRadius: '3px',
-                                    opacity: barOpacity,
-                                    cursor: dragging?.id === b.id ? 'grabbing' : 'grab',
-                                    zIndex: hoveredBarId === b.id || isDraggingThis ? 15 : 10,
-                                    boxShadow: barGlow,
-                                    transition: isDraggingThis ? 'none' : 'box-shadow 0.2s ease, opacity 0.2s ease'
+                                    opacity: isEnded ? 0.25 : (isActive ? 1 : 0.6),
+                                    boxShadow: isActive ? `0 0 10px ${color}` : 'none',
+                                    cursor: isDraggingThis ? 'grabbing' : 'grab',
+                                    zIndex: hoveredBarId === b.id || isDraggingThis ? 20 : 10,
+                                    transition: isDraggingThis ? 'none' : 'opacity 0.2s, box-shadow 0.2s'
                                 }}
                                 onMouseEnter={(e) => {
                                     setHoveredBarId(b.id);
-                                    setHoveredItem(b);
-                                    setTooltipPos({ x: e.clientX, y: e.clientY });
+                                    setHoveredItem({ ...b, currentStart: start, currentEnd: end });
                                     setCrosshairPos({ x: null, y: null });
                                 }}
                                 onMouseLeave={() => {
@@ -3272,27 +3401,19 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                                     }
                                 }}
                                 onMouseDown={(e) => {
-                                    e.preventDefault();
                                     const barRect = e.currentTarget.getBoundingClientRect();
                                     const type = getEdgeType(e, barRect);
-                                    setDragging({
-                                        id: b.id,
-                                        type,
-                                        startX: e.clientX,
-                                        originalStart: new Date(b.start_time).getTime(),
-                                        originalEnd: new Date(b.end_time).getTime()
-                                    });
+                                    handleMouseDown(e, b, type);
                                 }}
                                 onClick={(e) => {
-                                    if (!dragging && onBroadcastClick) {
-                                        onBroadcastClick(b);
-                                    }
+                                    if (!dragging && onBroadcastClick) onBroadcastClick(b);
                                 }}
                                 onMouseMove={(e) => {
                                     if (!dragging) {
                                         const barRect = e.currentTarget.getBoundingClientRect();
                                         const type = getEdgeType(e, barRect);
                                         e.currentTarget.style.cursor = type.includes('resize') ? 'ew-resize' : 'grab';
+                                        setTooltipPos({ x: e.clientX, y: e.clientY });
                                     }
                                 }}
                             />
@@ -3301,7 +3422,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 ))}
             </div>
 
-            {/* Enhanced Tooltip */}
+            {/* Dynamic Tooltip */}
             {hoveredItem && !dragging && ReactDOM.createPortal(
                 <div style={{
                     position: 'fixed',
@@ -3310,75 +3431,81 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                     background: 'rgba(15, 23, 42, 0.95)',
                     border: '1px solid #334155',
                     borderRadius: '8px',
-                    padding: '10px 12px',
+                    padding: '12px',
                     zIndex: 9999,
                     pointerEvents: 'none',
                     backdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                    minWidth: '220px',
-                    maxWidth: '320px',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    textAlign: 'center'
+                    gap: '8px',
+                    maxWidth: '320px'
                 }}>
-                    {/* Title */}
-                    <div style={{ fontWeight: 700, color: '#f8fafc', marginBottom: '6px', fontSize: '0.95rem' }}>
+                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.9rem' }}>
                         {hoveredItem.title || 'Untitled'}
                     </div>
 
-                    {/* Time Range */}
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>
-                        {formatTooltipTime(hoveredItem.start_time)} → {formatTooltipTime(hoveredItem.end_time)}
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                        {new Date(hoveredItem.currentStart).toLocaleString()}
+                        <br />↓<br />
+                        {new Date(hoveredItem.currentEnd).toLocaleString()}
                     </div>
 
-                    {/* Stats Row */}
-                    <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', marginBottom: '10px' }}>
-                        <div style={{ color: '#22c55e' }}>✓ {hoveredItem.delivered_count || 0}</div>
-                        <div style={{ color: '#3b82f6' }}>✓✓ {hoveredItem.read_count || 0}</div>
+                    {/* Stats */}
+                    <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem' }}>
+                        <span style={{ color: '#22c55e' }}>✓ {hoveredItem.delivered_count || 0}</span>
+                        <span style={{ color: '#3b82f6' }}>✓✓ {hoveredItem.read_count || 0}</span>
                     </div>
 
-                    {/* Image Miniature */}
+                    {/* Full Unclipped Image */}
                     {hoveredItem.image_url && (
-                        <div style={{ width: '100%', height: '80px', background: '#000', borderRadius: '4px', overflow: 'hidden', marginBottom: '10px' }}>
-                            <img src={hoveredItem.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
+                        <img
+                            src={hoveredItem.image_url}
+                            alt=""
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '200px',
+                                borderRadius: '4px',
+                                objectFit: 'contain',
+                                border: '1px solid #334155'
+                            }}
+                        />
                     )}
 
-                    {/* Badges Row */}
-                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        {/* Active/Ended Badge */}
-                        {(() => {
-                            const now = new Date();
-                            const start = new Date(hoveredItem.start_time);
-                            const end = new Date(hoveredItem.end_time);
-                            const isActive = now >= start && now <= end;
-                            const isEnded = now > end;
-                            const isScheduled = now < start;
-
-                            if (isActive) return <span style={{ background: '#22c55e', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 600 }}>ACTIVE</span>;
-                            if (isEnded) return <span style={{ background: '#475569', color: '#94a3b8', padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 600 }}>ENDED</span>;
-                            if (isScheduled) return <span style={{ background: '#3b82f6', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 600 }}>SCHEDULED</span>;
-                        })()}
-
-                        {/* Priority Badge */}
-                        <span style={{
-                            background: getPriorityColor(hoveredItem.priority),
-                            color: 'white',
-                            padding: '2px 8px',
-                            borderRadius: '10px',
-                            fontSize: '10px',
-                            fontWeight: 600
-                        }}>
+                    {/* Badges - New Color Policy */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        {/* Priority */}
+                        <span style={{ background: getPriorityColor(hoveredItem.priority), color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>
                             {getPriorityLabel(hoveredItem.priority)}
                         </span>
 
-                        {/* Max Views Badge */}
-                        {hoveredItem.max_views && (
-                            <span style={{ background: '#6366f1', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 600 }}>
-                                MAX {hoveredItem.max_views}
-                            </span>
-                        )}
+                        {/* Max Views - Consumption Gradient */}
+                        {hoveredItem.max_views > 0 && (() => {
+                            const percent = (hoveredItem.delivered_count || 0) / hoveredItem.max_views;
+                            if (percent >= 1) return (
+                                <span style={{ background: '#64748b', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>MAX ✓</span>
+                            );
+
+                            // Violet Fading Logic
+                            let opacity = 1;
+                            if (percent > 0.75) opacity = 0.4;
+                            else if (percent > 0.5) opacity = 0.7;
+
+                            return (
+                                <span style={{
+                                    background: `rgba(139, 92, 246, ${opacity})`,
+                                    color: 'white',
+                                    padding: '2px 8px',
+                                    borderRadius: '4px',
+                                    fontSize: '10px',
+                                    fontWeight: 600,
+                                    border: percent > 0.75 ? '1px solid rgba(139, 92, 246, 0.5)' : 'none'
+                                }}>
+                                    MAX {hoveredItem.max_views}
+                                </span>
+                            );
+                        })()}
                     </div>
                 </div>,
                 document.body
