@@ -3292,7 +3292,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         <div
             ref={containerRef}
             style={{
-                background: '#0f172a', // Darker body (Slate-950)
+                background: '#1e293b', // Matches Search Form background
                 border: '1px solid #1e293b',
                 borderRadius: '8px',
                 position: 'relative',
