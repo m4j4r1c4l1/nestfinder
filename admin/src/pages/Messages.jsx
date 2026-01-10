@@ -1123,7 +1123,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             style={{
                                                 background: '#0f172a',
                                                 borderRadius: '8px',
-                                                padding: '0.5rem 0.75rem',
+                                                padding: '0.25rem 0.75rem',
                                                 cursor: 'pointer',
                                                 borderTop: '1px solid #334155',
                                                 borderRight: '1px solid #334155',
