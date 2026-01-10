@@ -968,8 +968,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 </div>
 
-                <div className="card-body" style={{ maxHeight: '680px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', border: '3px solid magenta' }}>
-                    <div style={{ padding: '2rem 1rem 1rem 1rem', border: '3px solid cyan' }}>
+                <div className="card-body" style={{ maxHeight: '680px', overflowY: 'auto', paddingTop: '2rem', paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem', background: '#1e293b', position: 'relative', border: '3px solid magenta' }}>
+                    <div style={{ border: '3px solid cyan' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
@@ -3425,7 +3425,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             {/* 1. Ruler */}
             <div style={{
                 height: rulerHeight,
-                background: '#0f172a', // Matches Broadcast Card Background
+                background: 'transparent', // DEBUG: Was #0f172a
                 borderBottom: '1px solid #334155',
                 position: 'relative'
             }}>
