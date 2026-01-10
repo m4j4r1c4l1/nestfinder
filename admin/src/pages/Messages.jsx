@@ -967,12 +967,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 </div>
 
-                {/* Spacer to prevent overlap */}
-                <div style={{ height: '20px', minHeight: '20px' }}></div>
-
-                {/* Scrollable Broadcasts List */}
-                <div className="card-body" style={{ maxHeight: '520px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', zIndex: 2, marginTop: '1rem' }}>
-                    <div style={{ padding: '1rem' }}>
+                <div className="card-body" style={{ maxHeight: '520px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', zIndex: 2 }}>
+                    <div style={{ padding: '2rem 1rem 1rem 1rem' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
