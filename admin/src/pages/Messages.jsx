@@ -829,6 +829,30 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     const paginatedBroadcasts = filteredBroadcasts.slice((page - 1) * pageSize, page * pageSize);
     const totalPages = Math.ceil(filteredBroadcasts.length / pageSize);
 
+    // Calculate broadcast stats from ALL broadcasts (not filtered)
+    const broadcastStats = React.useMemo(() => {
+        const now = new Date();
+        let active = 0, scheduled = 0, inactive = 0;
+        const priorityCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        let withMaxViews = 0, withoutMaxViews = 0;
+
+        broadcasts.forEach(b => {
+            const start = new Date(b.start_time);
+            const end = new Date(b.end_time);
+            if (now >= start && now <= end) active++;
+            else if (now < start) scheduled++;
+            else inactive++;
+
+            const p = b.priority || 3;
+            if (priorityCounts[p] !== undefined) priorityCounts[p]++;
+
+            if (b.max_views) withMaxViews++;
+            else withoutMaxViews++;
+        });
+
+        return { active, scheduled, inactive, priorityCounts, withMaxViews, withoutMaxViews };
+    }, [broadcasts]);
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {/* Broadcasts List Card */}
@@ -914,19 +938,28 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 />
                             </div>
 
-                            {/* Status Filter */}
-                            <div style={{ flex: '0 1 140px' }}>
+                            {/* Status Filter - Badge Style */}
+                            <div style={{ flex: '0 1 160px' }}>
                                 <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Status</label>
                                 <select
                                     className="form-input"
-                                    style={{ padding: '0.4rem', fontSize: '0.9rem', width: '100%' }}
+                                    style={{
+                                        padding: '0.4rem',
+                                        fontSize: '0.9rem',
+                                        width: '100%',
+                                        background: '#0f172a',
+                                        color: searchFilters.status === 'active' ? '#22c55e' :
+                                            searchFilters.status === 'scheduled' ? '#eab308' :
+                                                searchFilters.status === 'inactive' ? '#94a3b8' : '#f8fafc',
+                                        fontWeight: searchFilters.status !== 'all' ? 600 : 400
+                                    }}
                                     value={searchFilters.status}
                                     onChange={e => setSearchFilters(prev => ({ ...prev, status: e.target.value }))}
                                 >
-                                    <option value="all">All Status</option>
-                                    <option value="active">Active</option>
-                                    <option value="scheduled">Scheduled</option>
-                                    <option value="inactive">Inactive</option>
+                                    <option value="all" style={{ color: '#f8fafc' }}>All Status</option>
+                                    <option value="active" style={{ color: '#22c55e' }}>● ACTIVE</option>
+                                    <option value="scheduled" style={{ color: '#eab308' }}>● SCHEDULED</option>
+                                    <option value="inactive" style={{ color: '#94a3b8' }}>● INACTIVE</option>
                                 </select>
                             </div>
 
@@ -943,20 +976,94 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 />
                             </div>
 
-                            {/* Priority */}
-                            <div style={{ flex: '0 1 80px' }}>
+                            {/* Priority - Badge Style */}
+                            <div style={{ flex: '0 1 120px' }}>
                                 <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Priority</label>
-                                <input
-                                    type="number"
+                                <select
                                     className="form-input"
-                                    style={{ padding: '0.4rem', fontSize: '0.9rem' }}
-                                    placeholder="Any"
+                                    style={{
+                                        padding: '0.4rem',
+                                        fontSize: '0.9rem',
+                                        width: '100%',
+                                        background: '#0f172a',
+                                        color: searchFilters.priority === '1' ? '#ef4444' :
+                                            searchFilters.priority === '2' ? '#f97316' :
+                                                searchFilters.priority === '3' ? '#eab308' :
+                                                    searchFilters.priority === '4' ? '#3b82f6' :
+                                                        searchFilters.priority === '5' ? '#22c55e' : '#f8fafc',
+                                        fontWeight: searchFilters.priority ? 600 : 400
+                                    }}
                                     value={searchFilters.priority}
                                     onChange={e => setSearchFilters(prev => ({ ...prev, priority: e.target.value }))}
-                                />
+                                >
+                                    <option value="" style={{ color: '#f8fafc' }}>All Priority</option>
+                                    <option value="1" style={{ color: '#ef4444' }}>● P1 Critical</option>
+                                    <option value="2" style={{ color: '#f97316' }}>● P2 High</option>
+                                    <option value="3" style={{ color: '#eab308' }}>● P3 Medium</option>
+                                    <option value="4" style={{ color: '#3b82f6' }}>● P4 Normal</option>
+                                    <option value="5" style={{ color: '#22c55e' }}>● P5 Low</option>
+                                </select>
                             </div>
                         </div>
                     )}
+                </div>
+
+                {/* Statistics Section */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '1.5rem',
+                    padding: '0.5rem 1rem',
+                    background: '#0f172a',
+                    margin: '0 1rem',
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    flexWrap: 'wrap'
+                }}>
+                    {/* Status Group */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span style={{ background: '#22c55e', width: 8, height: 8, borderRadius: '50%', display: 'inline-block' }}></span>
+                            <span style={{ color: '#22c55e', fontWeight: 600 }}>ACTIVE</span>
+                            <span style={{ color: '#64748b' }}>{broadcastStats.active}</span>
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span style={{ background: '#eab308', width: 8, height: 8, borderRadius: '50%', display: 'inline-block' }}></span>
+                            <span style={{ color: '#eab308', fontWeight: 600 }}>SCHEDULED</span>
+                            <span style={{ color: '#64748b' }}>{broadcastStats.scheduled}</span>
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span style={{ background: '#94a3b8', width: 8, height: 8, borderRadius: '50%', display: 'inline-block' }}></span>
+                            <span style={{ color: '#94a3b8', fontWeight: 600 }}>INACTIVE</span>
+                            <span style={{ color: '#64748b' }}>{broadcastStats.inactive}</span>
+                        </span>
+                    </div>
+
+                    {/* Vertical Separator */}
+                    <div style={{ width: 1, height: 20, background: '#334155' }}></div>
+
+                    {/* Priority Group */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ color: '#ef4444', fontWeight: 600 }}>P1 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[1]}</span></span>
+                        <span style={{ color: '#f97316', fontWeight: 600 }}>P2 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[2]}</span></span>
+                        <span style={{ color: '#eab308', fontWeight: 600 }}>P3 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[3]}</span></span>
+                        <span style={{ color: '#3b82f6', fontWeight: 600 }}>P4 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[4]}</span></span>
+                        <span style={{ color: '#22c55e', fontWeight: 600 }}>P5 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[5]}</span></span>
+                    </div>
+
+                    {/* Vertical Separator */}
+                    <div style={{ width: 1, height: 20, background: '#334155' }}></div>
+
+                    {/* Max Views Group */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ color: '#94a3b8' }}>
+                            <span style={{ fontWeight: 600 }}>Limited:</span> {broadcastStats.withMaxViews}
+                        </span>
+                        <span style={{ color: '#64748b' }}>
+                            <span style={{ fontWeight: 600 }}>Unlimited:</span> {broadcastStats.withoutMaxViews}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Timeline Visualization */}
@@ -3639,6 +3746,9 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                             ? dragging.newLane
                             : laneIndex;
 
+                        // Check if this bar is hovered
+                        const isHovered = hoveredBarId === b.id;
+
                         return (
                             <div
                                 key={b.id}
@@ -3651,11 +3761,12 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                     background: color,
                                     border: isActive ? '2px solid white' : `1px solid ${color}`,
                                     borderRadius: '3px',
-                                    opacity: isEnded ? 0.25 : (isActive ? 1 : 0.6),
-                                    boxShadow: isActive ? `0 0 10px ${color}` : 'none',
+                                    opacity: isEnded ? 0.25 : (isActive ? 1 : (isHovered ? 0.9 : 0.6)),
+                                    boxShadow: isActive ? `0 0 10px ${color}` : (isHovered ? `0 0 15px ${color}, 0 0 25px ${color}60` : 'none'),
                                     cursor: isDraggingThis ? 'grabbing' : 'grab',
-                                    zIndex: hoveredBarId === b.id || isDraggingThis ? 20 : 10,
-                                    transition: isDraggingThis ? 'none' : 'opacity 0.2s, box-shadow 0.2s'
+                                    zIndex: isHovered || isDraggingThis ? 20 : 10,
+                                    transition: isDraggingThis ? 'none' : 'opacity 0.2s, box-shadow 0.2s, transform 0.15s',
+                                    transform: isHovered && !isDraggingThis ? 'scale(1.1)' : 'none'
                                 }}
                                 onMouseEnter={(e) => {
                                     setHoveredBarId(b.id);
