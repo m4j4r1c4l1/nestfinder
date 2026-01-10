@@ -3025,8 +3025,8 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     }, [dragging]);
 
 
-    const { lanes, laneCount } = React.useMemo(() => {
-        if (!broadcasts.length) return { lanes: [], laneCount: 0 };
+    const { lanes, laneCount, broadcastLaneMap } = React.useMemo(() => {
+        if (!broadcasts.length) return { lanes: [], laneCount: 0, broadcastLaneMap: {} };
 
         const sorted = [...broadcasts].filter(b => {
             const s = new Date(b.start_time).getTime();
@@ -3039,17 +3039,43 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             return (new Date(b.end_time).getTime() - sB) - (new Date(a.end_time).getTime() - sA);
         });
 
+        // Step 1: Find max lane needed for manually assigned broadcasts
+        let maxManualLane = -1;
+        sorted.forEach(b => {
+            if (b.lane !== null && b.lane !== undefined && b.lane >= 0) {
+                maxManualLane = Math.max(maxManualLane, b.lane);
+            }
+        });
+
+        // Step 2: Initialize lanes array
         const lanes = [];
         const laneEnds = [];
+        for (let i = 0; i <= maxManualLane; i++) {
+            lanes.push([]);
+            laneEnds.push(-Infinity);
+        }
 
+        // Step 3: Place broadcasts with manual lane assignment first
+        const autoPlaceBroadcasts = [];
         sorted.forEach(b => {
+            if (b.lane !== null && b.lane !== undefined && b.lane >= 0) {
+                const start = new Date(b.start_time).getTime();
+                const end = new Date(b.end_time).getTime();
+                lanes[b.lane].push(b);
+                laneEnds[b.lane] = Math.max(laneEnds[b.lane], end);
+            } else {
+                autoPlaceBroadcasts.push(b);
+            }
+        });
+
+        // Step 4: Auto-place remaining broadcasts (no manual lane)
+        autoPlaceBroadcasts.forEach(b => {
             const start = new Date(b.start_time).getTime();
             const end = new Date(b.end_time).getTime();
             let placed = false;
 
             // Try to place in existing lane
             for (let i = 0; i < laneEnds.length; i++) {
-                // Check if space available (with small visual gap buffer)
                 const buffer = viewportDuration ? (viewportDuration * 0.02) : 900000;
                 if (laneEnds[i] + buffer < start) {
                     lanes[i].push(b);
@@ -3065,7 +3091,15 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             }
         });
 
-        return { lanes, laneCount: lanes.length };
+        // Step 5: Build broadcast -> lane map for quick lookup
+        const broadcastLaneMap = {};
+        lanes.forEach((lane, laneIndex) => {
+            lane.forEach(b => {
+                broadcastLaneMap[b.id] = laneIndex;
+            });
+        });
+
+        return { lanes, laneCount: lanes.length, broadcastLaneMap };
     }, [broadcasts, viewportDuration]);
 
 
@@ -3295,6 +3329,12 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             if (dragging.type === 'move') {
                 newStart = dragging.originalStart + absDelta;
                 newEnd = dragging.originalEnd + absDelta;
+
+                // Calculate new lane based on Y position
+                const yOffsetFromRuler = mouseY - rulerHeight - gap;
+                const newLane = Math.max(0, Math.floor(yOffsetFromRuler / (rowHeight + gap)));
+                setDragging(prev => ({ ...prev, newStart, newEnd, newLane }));
+                return;
             } else if (dragging.type === 'resize-left') {
                 newStart = Math.min(dragging.originalStart + absDelta, dragging.originalEnd - 900000);
             } else if (dragging.type === 'resize-right') {
@@ -3336,27 +3376,42 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
         const width = rect.width;
         const cursorTime = viewportStart + (viewportDuration * (mouseX / width));
+
+        // Get current lane from broadcastLaneMap
+        const currentLane = broadcastLaneMap[b.id] ?? 0;
 
         setDragging({
             id: b.id,
             type,
             initialCursorTime: cursorTime,
+            initialCursorY: mouseY,
             originalStart: new Date(b.start_time).getTime(),
             originalEnd: new Date(b.end_time).getTime(),
             newStart: new Date(b.start_time).getTime(),
-            newEnd: new Date(b.end_time).getTime()
+            newEnd: new Date(b.end_time).getTime(),
+            originalLane: currentLane,
+            newLane: currentLane
         });
     };
 
     const handleMouseUp = async () => {
         if (dragging && onBroadcastUpdate) {
-            if (dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd) {
-                await onBroadcastUpdate(dragging.id, {
-                    start_time: new Date(dragging.newStart).toISOString(),
-                    end_time: new Date(dragging.newEnd).toISOString()
-                });
+            const timeChanged = dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd;
+            const laneChanged = dragging.newLane !== undefined && dragging.newLane !== dragging.originalLane;
+
+            if (timeChanged || laneChanged) {
+                const updates = {};
+                if (timeChanged) {
+                    updates.start_time = new Date(dragging.newStart).toISOString();
+                    updates.end_time = new Date(dragging.newEnd).toISOString();
+                }
+                if (laneChanged) {
+                    updates.lane = dragging.newLane;
+                }
+                await onBroadcastUpdate(dragging.id, updates);
             }
         }
         setDragging(null);
@@ -3543,6 +3598,11 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
 
                         const color = getPriorityColor(b.priority);
 
+                        // Use dragged lane if dragging this item, else use lane from layout
+                        const displayLane = isDraggingThis && dragging.newLane !== undefined
+                            ? dragging.newLane
+                            : laneIndex;
+
                         return (
                             <div
                                 key={b.id}
@@ -3550,7 +3610,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                                     position: 'absolute',
                                     left: `${left}%`,
                                     width: `${Math.max(width, 0.5)}%`,
-                                    top: `${laneIndex * (rowHeight + gap) + gap}px`,
+                                    top: `${displayLane * (rowHeight + gap) + gap}px`,
                                     height: `${rowHeight}px`,
                                     background: color,
                                     border: isActive ? '2px solid white' : `1px solid ${color}`,

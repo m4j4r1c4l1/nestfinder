@@ -894,10 +894,10 @@ router.post('/broadcasts', (req, res) => {
     res.json({ broadcast });
 });
 
-// Update broadcast max_views
+// Update broadcast (max_views, priority, times, lane)
 router.put('/broadcasts/:id', (req, res) => {
     const { id } = req.params;
-    const { maxViews, priority, start_time, end_time } = req.body;
+    const { maxViews, priority, start_time, end_time, lane } = req.body;
 
     if (maxViews !== undefined) {
         run('UPDATE broadcasts SET max_views = ? WHERE id = ?', [maxViews || null, id]);
@@ -910,6 +910,9 @@ router.put('/broadcasts/:id', (req, res) => {
     }
     if (end_time !== undefined) {
         run('UPDATE broadcasts SET end_time = ? WHERE id = ?', [end_time, id]);
+    }
+    if (lane !== undefined) {
+        run('UPDATE broadcasts SET lane = ? WHERE id = ?', [lane, id]);
     }
 
     const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [id]);
