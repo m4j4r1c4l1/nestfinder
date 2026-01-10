@@ -1009,34 +1009,61 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Statistics Section */}
+                {/* Statistics Section */}
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '1.5rem',
-                    padding: '0.5rem 1rem',
+                    padding: '0.75rem 1rem', // Equal padding top/bottom
                     background: '#0f172a',
-                    margin: '0 1rem',
+                    margin: '0.75rem 1rem', // Equal margin top/bottom for separator spacing
                     borderRadius: '6px',
                     fontSize: '0.8rem',
                     flexWrap: 'wrap'
                 }}>
+                    {/* Total Count */}
+                    <span style={{
+                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                        fontSize: '0.75rem', fontWeight: 700,
+                        background: '#334155', color: '#f8fafc',
+                        border: '1px solid #475569',
+                        display: 'flex', alignItems: 'center', gap: '0.4rem'
+                    }}>
+                        TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px' }}>{broadcasts.length}</span>
+                    </span>
+
+                    {/* Vertical Separator */}
+                    <div style={{ width: 1, height: 20, background: '#334155' }}></div>
+
                     {/* Status Group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <span style={{ background: '#22c55e', width: 8, height: 8, borderRadius: '50%', display: 'inline-block' }}></span>
-                            <span style={{ color: '#22c55e', fontWeight: 600 }}>ACTIVE</span>
-                            <span style={{ color: '#64748b' }}>{broadcastStats.active}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{
+                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                            fontSize: '0.7rem', fontWeight: 700,
+                            background: '#22c55e20', color: '#22c55e',
+                            border: '1px solid #22c55e40',
+                            textTransform: 'uppercase', letterSpacing: '0.5px'
+                        }}>
+                            ACTIVE <span style={{ marginLeft: '0.3rem', opacity: 0.8 }}>{broadcastStats.active}</span>
                         </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <span style={{ background: '#eab308', width: 8, height: 8, borderRadius: '50%', display: 'inline-block' }}></span>
-                            <span style={{ color: '#eab308', fontWeight: 600 }}>SCHEDULED</span>
-                            <span style={{ color: '#64748b' }}>{broadcastStats.scheduled}</span>
+                        <span style={{
+                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                            fontSize: '0.7rem', fontWeight: 700,
+                            background: '#eab30820', color: '#eab308',
+                            border: '1px solid #eab30840',
+                            textTransform: 'uppercase', letterSpacing: '0.5px'
+                        }}>
+                            SCHEDULED <span style={{ marginLeft: '0.3rem', opacity: 0.8 }}>{broadcastStats.scheduled}</span>
                         </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <span style={{ background: '#94a3b8', width: 8, height: 8, borderRadius: '50%', display: 'inline-block' }}></span>
-                            <span style={{ color: '#94a3b8', fontWeight: 600 }}>INACTIVE</span>
-                            <span style={{ color: '#64748b' }}>{broadcastStats.inactive}</span>
+                        <span style={{
+                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                            fontSize: '0.7rem', fontWeight: 700,
+                            background: '#94a3b820', color: '#94a3b8',
+                            border: '1px solid #94a3b840',
+                            textTransform: 'uppercase', letterSpacing: '0.5px'
+                        }}>
+                            INACTIVE <span style={{ marginLeft: '0.3rem', opacity: 0.8 }}>{broadcastStats.inactive}</span>
                         </span>
                     </div>
 
@@ -1044,12 +1071,25 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <div style={{ width: 1, height: 20, background: '#334155' }}></div>
 
                     {/* Priority Group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{ color: '#ef4444', fontWeight: 600 }}>P1 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[1]}</span></span>
-                        <span style={{ color: '#f97316', fontWeight: 600 }}>P2 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[2]}</span></span>
-                        <span style={{ color: '#eab308', fontWeight: 600 }}>P3 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[3]}</span></span>
-                        <span style={{ color: '#3b82f6', fontWeight: 600 }}>P4 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[4]}</span></span>
-                        <span style={{ color: '#22c55e', fontWeight: 600 }}>P5 <span style={{ color: '#64748b', fontWeight: 400 }}>{broadcastStats.priorityCounts[5]}</span></span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {[1, 2, 3, 4, 5].map(p => {
+                            let color = '#22c55e';
+                            if (p === 1) color = '#ef4444';
+                            if (p === 2) color = '#f97316';
+                            if (p === 3) color = '#eab308';
+                            if (p === 4) color = '#3b82f6';
+
+                            return (
+                                <span key={p} style={{
+                                    padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                    fontSize: '0.7rem', fontWeight: 600,
+                                    background: `${color}20`, color: color,
+                                    border: `1px solid ${color}40`
+                                }}>
+                                    P{p} <span style={{ marginLeft: '0.2rem', opacity: 0.8 }}>{broadcastStats.priorityCounts[p]}</span>
+                                </span>
+                            );
+                        })}
                     </div>
 
                     {/* Vertical Separator */}
@@ -1057,11 +1097,23 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
                     {/* Max Views Group */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{ color: '#94a3b8' }}>
-                            <span style={{ fontWeight: 600 }}>Limited:</span> {broadcastStats.withMaxViews}
+                        <span style={{
+                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                            fontSize: '0.7rem', fontWeight: 700,
+                            background: '#33415520', color: '#94a3b8',
+                            border: '1px solid #33415540',
+                            display: 'flex', alignItems: 'center', gap: '0.3rem'
+                        }}>
+                            👀 {broadcastStats.withMaxViews}
                         </span>
-                        <span style={{ color: '#64748b' }}>
-                            <span style={{ fontWeight: 600 }}>Unlimited:</span> {broadcastStats.withoutMaxViews}
+                        <span style={{
+                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                            fontSize: '0.7rem', fontWeight: 700,
+                            background: '#33415520', color: '#94a3b8',
+                            border: '1px solid #33415540',
+                            display: 'flex', alignItems: 'center', gap: '0.3rem'
+                        }}>
+                            ✖️👀 {broadcastStats.withoutMaxViews}
                         </span>
                     </div>
                 </div>
@@ -1185,7 +1237,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         color: priorityColor,
                                                         border: `1px solid ${priorityColor}40`
                                                     }}>
-                                                        P{b.priority || 0}
+                                                        P{b.priority || 3}
                                                     </span>
                                                     {b.max_views && (
                                                         <span style={{
@@ -3762,7 +3814,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                     border: isActive ? '2px solid white' : `1px solid ${color}`,
                                     borderRadius: '3px',
                                     opacity: isEnded ? 0.25 : (isActive ? 1 : (isHovered ? 0.9 : 0.6)),
-                                    boxShadow: isActive ? `0 0 10px ${color}` : (isHovered ? `0 0 15px ${color}, 0 0 25px ${color}60` : 'none'),
+                                    boxShadow: isActive ? `0 0 10px ${color}` : (isHovered ? `0 0 10px ${color}, 0 0 20px ${color}` : 'none'),
                                     cursor: isDraggingThis ? 'grabbing' : 'grab',
                                     zIndex: isHovered || isDraggingThis ? 20 : 10,
                                     transition: isDraggingThis ? 'none' : 'opacity 0.2s, box-shadow 0.2s, transform 0.15s',
@@ -3876,6 +3928,16 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                 {/* Badges & Icon */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
 
+                                    {/* Priority Badge */}
+                                    <span style={{
+                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                        fontSize: '0.7rem', fontWeight: 700,
+                                        background: badgeBg(priorityColor), color: priorityColor,
+                                        border: `1px solid ${badgeBorder(priorityColor)}`
+                                    }}>
+                                        P{hoveredItem.priority || 3}
+                                    </span>
+
                                     {/* Status Badge */}
                                     <span style={{
                                         padding: '0.2rem 0.6rem', borderRadius: '4px',
@@ -3888,31 +3950,41 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                         {statusText}
                                     </span>
 
-                                    {/* Max Views Badge (Cyan) */}
-                                    {hoveredItem.max_views && (
+                                    {/* Max Views Badge */}
+                                    {hoveredItem.max_views ? (
                                         (() => {
                                             const percent = (hoveredItem.read_count || 0) / hoveredItem.max_views;
                                             if (percent >= 1) return <span style={{ background: '#64748b', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>MAX ✓</span>;
 
-                                            // Cyan logic
+                                            // Cyan logic for limited views
                                             let opacity = 1;
                                             if (percent > 0.75) opacity = 0.4;
                                             else if (percent > 0.5) opacity = 0.7;
 
                                             return (
                                                 <span style={{
-                                                    background: `rgba(6, 182, 212, ${opacity})`,
-                                                    color: 'white',
+                                                    background: `rgba(6, 182, 212, ${opacity * 0.2})`,
+                                                    color: '#06b6d4',
+                                                    border: `1px solid rgba(6, 182, 212, ${opacity * 0.4})`,
                                                     padding: '2px 8px',
                                                     borderRadius: '4px',
                                                     fontSize: '10px',
-                                                    fontWeight: 600,
-                                                    border: percent > 0.75 ? '1px solid rgba(6, 182, 212, 0.5)' : 'none'
+                                                    fontWeight: 700
                                                 }}>
-                                                    MAX {hoveredItem.max_views}
+                                                    👀 {hoveredItem.max_views}
                                                 </span>
                                             );
                                         })()
+                                    ) : (
+                                        <span style={{
+                                            background: '#334155',
+                                            color: '#94a3b8',
+                                            border: '1px solid #475569',
+                                            padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600,
+                                            display: 'flex', alignItems: 'center', gap: '4px'
+                                        }}>
+                                            ✖️👀
+                                        </span>
                                     )}
 
                                     {/* Attachment Icon (Matching List) */}
