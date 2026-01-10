@@ -3086,8 +3086,9 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const rowHeight = 12;
     const gap = 4;
     const rulerHeight = 28;
-    const totalHeight = Math.max(manualHeight || 0, rulerHeight + laneCount * (rowHeight + gap) + gap);
-    const contentHeight = rulerHeight + laneCount * (rowHeight + gap) + gap;
+    const paddingBottom = 20; // Symmetric spacing for bottom edge
+    const totalHeight = Math.max(manualHeight || 0, rulerHeight + laneCount * (rowHeight + gap) + gap + paddingBottom);
+    const contentHeight = rulerHeight + laneCount * (rowHeight + gap) + gap + paddingBottom;
 
     // --- Interaction Handlers ---
 
