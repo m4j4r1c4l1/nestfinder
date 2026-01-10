@@ -968,7 +968,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Scrollable Broadcasts List */}
-                <div className="card-body" style={{ maxHeight: '520px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', zIndex: 2 }}>
+                <div className="card-body" style={{ maxHeight: '520px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', zIndex: 2, marginTop: '1rem' }}>
                     <div style={{ padding: '1rem' }}>
                         <div style={{ marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.8rem', textAlign: 'right' }}>
                             Showing {paginatedBroadcasts.length} of {filteredBroadcasts.length}
