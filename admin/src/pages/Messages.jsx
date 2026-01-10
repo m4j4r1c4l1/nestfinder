@@ -970,9 +970,6 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 {/* Scrollable Broadcasts List */}
                 <div className="card-body" style={{ maxHeight: '520px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', zIndex: 2, marginTop: '1rem' }}>
                     <div style={{ padding: '1rem' }}>
-                        <div style={{ marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.8rem', textAlign: 'right' }}>
-                            Showing {paginatedBroadcasts.length} of {filteredBroadcasts.length}
-                        </div>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
@@ -3359,7 +3356,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         <div
             ref={containerRef}
             style={{
-                background: '#64748b', // Slate 500 (Midpoint)
+                background: '#475569', // Slate 600 (Midpoint between 500 and 700)
                 border: '1px solid #334155',
                 borderRadius: '8px',
                 position: 'relative',
