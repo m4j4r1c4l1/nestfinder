@@ -3382,378 +3382,356 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return `P${val}`;
     };
 
-    // REF to latest handlers for global listener
-    const latestHandlers = React.useRef({ move: null, up: null });
-
-    // Update ref on every render
-    React.useEffect(() => {
-        latestHandlers.current.move = handleMouseMove;
-        latestHandlers.current.up = handleMouseUp;
-    });
 
 
-    const onMove = (e) => {
-        latestHandlers.current.move && latestHandlers.current.move(e);
-    };
-    const onUp = (e) => {
-        console.log('[Timeline] Global Up');
-        latestHandlers.current.up && latestHandlers.current.up(e);
-    };
-
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    return () => {
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-    };
-}
-    }, [dragging]);
 
 
-return (
-    <div
-        ref={containerRef}
-        style={{
-            background: '#475569', // Slate 600 (Midpoint between 500 and 700)
-            border: '1px solid #334155',
-            borderRadius: '8px',
-            position: 'relative',
-            height: `${totalHeight}px`,
-            userSelect: 'none',
-            cursor: dragging ? 'grabbing' : 'auto',
-            overflow: 'hidden' // Prevent edge overload
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseDown={handleContainerMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-    >
-        {/* 1. Ruler */}
-        <div style={{
-            height: rulerHeight,
-            background: '#0f172a', // Matches Broadcast Card Background
-            borderBottom: '1px solid #334155',
-            position: 'relative'
-        }}>
-            {ticks.map((tick, i) => {
-                const { t, date } = formatTimePill(tick.time);
-                // Show date only if different from previous tick (or first tick)
-                const prevTick = ticks[i - 1];
-                const prevDate = prevTick ? formatTimePill(prevTick.time).date : null;
-                const showDate = i === 0 || date !== prevDate;
 
-                // Determine style based on tick type
-                let tickColor = '#94a3b8'; // Hour (Brightest)
-                let tickHeight = 8;
-                let labelOpacity = 1;
 
-                if (tick.type === 'half') {
-                    tickColor = '#64748b'; // Half (Mid)
-                    tickHeight = 6;
-                    labelOpacity = 0.8;
-                } else if (tick.type === 'quarter') {
-                    tickColor = '#475569'; // Quarter (Darkest/Faintest)
-                    tickHeight = 4;
-                    labelOpacity = 0.6;
-                }
+    return (
+        <div
+            ref={containerRef}
+            style={{
+                background: '#475569', // Slate 600 (Midpoint between 500 and 700)
+                border: '1px solid #334155',
+                borderRadius: '8px',
+                position: 'relative',
+                height: `${totalHeight}px`,
+                userSelect: 'none',
+                cursor: dragging ? 'grabbing' : 'auto',
+                overflow: 'hidden' // Prevent edge overload
+            }}
+            onMouseMove={handleMouseMove}
+            onMouseDown={handleContainerMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+        >
+            {/* 1. Ruler */}
+            <div style={{
+                height: rulerHeight,
+                background: '#0f172a', // Matches Broadcast Card Background
+                borderBottom: '1px solid #334155',
+                position: 'relative'
+            }}>
+                {ticks.map((tick, i) => {
+                    const { t, date } = formatTimePill(tick.time);
+                    // Show date only if different from previous tick (or first tick)
+                    const prevTick = ticks[i - 1];
+                    const prevDate = prevTick ? formatTimePill(prevTick.time).date : null;
+                    const showDate = i === 0 || date !== prevDate;
 
-                return (
-                    <div key={i} style={{ position: 'absolute', left: `${tick.left}%`, top: 0, height: '100%', pointerEvents: 'none' }}>
-                        <div style={{ width: 1, height: tickHeight, background: tickColor, position: 'absolute', bottom: 0 }} />
-                        <div style={{
-                            position: 'absolute', bottom: 8, left: 0, transform: 'translateX(-50%)',
-                            fontSize: '10px', color: tickColor, fontFamily: 'monospace', lineHeight: 1,
-                            whiteSpace: 'nowrap', opacity: labelOpacity
-                        }}>
-                            <span style={{ fontWeight: 600 }}>{t}</span>
-                            {showDate && <span style={{ opacity: 0.7, marginLeft: 4 }}>{date}</span>}
+                    // Determine style based on tick type
+                    let tickColor = '#94a3b8'; // Hour (Brightest)
+                    let tickHeight = 8;
+                    let labelOpacity = 1;
+
+                    if (tick.type === 'half') {
+                        tickColor = '#64748b'; // Half (Mid)
+                        tickHeight = 6;
+                        labelOpacity = 0.8;
+                    } else if (tick.type === 'quarter') {
+                        tickColor = '#475569'; // Quarter (Darkest/Faintest)
+                        tickHeight = 4;
+                        labelOpacity = 0.6;
+                    }
+
+                    return (
+                        <div key={i} style={{ position: 'absolute', left: `${tick.left}%`, top: 0, height: '100%', pointerEvents: 'none' }}>
+                            <div style={{ width: 1, height: tickHeight, background: tickColor, position: 'absolute', bottom: 0 }} />
+                            <div style={{
+                                position: 'absolute', bottom: 8, left: 0, transform: 'translateX(-50%)',
+                                fontSize: '10px', color: tickColor, fontFamily: 'monospace', lineHeight: 1,
+                                whiteSpace: 'nowrap', opacity: labelOpacity
+                            }}>
+                                <span style={{ fontWeight: 600 }}>{t}</span>
+                                {showDate && <span style={{ opacity: 0.7, marginLeft: 4 }}>{date}</span>}
+                            </div>
                         </div>
-                    </div>
-                );
-            })}
+                    );
+                })}
 
-            {/* Resize Interaction Guide - Timestamp Highlight */}
-            {dragging && dragging.type && dragging.type.startsWith('resize') && (
-                <div style={{
-                    position: 'absolute',
-                    left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
-                    top: 2,
-                    transform: 'translateX(-50%)',
-                    background: '#3b82f6',
-                    color: 'white',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    zIndex: 30,
-                    whiteSpace: 'nowrap'
-                }}>
-                    {formatTimePill(dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd).t} ({formatTimePill(dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd).date})
-                </div>
-            )}
-        </div>
-
-        {/* 2. Body / Bars */}
-        <div style={{ position: 'relative', width: '100%', height: `${totalHeight - rulerHeight}px` }}>
-
-            {/* Crosshairs */}
-            {crosshairPos.x !== null && !hoveredBarId && !dragging && (
-                <>
-                    <div style={{ position: 'absolute', left: crosshairPos.x, top: 0, height: '100%', borderLeft: '1px dotted rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
-                    <div style={{ position: 'absolute', left: 0, top: crosshairPos.y, width: '100%', borderTop: '1px dotted rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
-                </>
-            )}
-
-            {/* Resize Guide Line (Vertical) */}
-            {dragging && dragging.type && (dragging.type === 'resize-left' || dragging.type === 'resize-right') && (() => {
-                const draggedLaneIndex = lanes.findIndex(l => l.some(b => b.id === dragging.id));
-                const barTop = draggedLaneIndex * (rowHeight + gap) + gap;
-                // Connect Ruler Bottom to Bar Bottom:
-                // Ruler is at y < 0 relative to this container (which starts at 0).
-                // This container = Body/Bars.
-                // top: -rulerHeight  -> Starts at Ruler Top.
-                // height: rulerHeight + barTop + rowHeight -> Ends at Bar Bottom.
-                const guideHeight = rulerHeight + barTop + rowHeight;
-
-                return (
+                {/* Resize Interaction Guide - Timestamp Highlight */}
+                {dragging && dragging.type && dragging.type.startsWith('resize') && (
                     <div style={{
                         position: 'absolute',
                         left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
-                        top: -rulerHeight, // Extend up into ruler
-                        height: `${guideHeight}px`,
-                        width: 0,
-                        borderLeft: '2px dotted white',
-                        zIndex: 25,
-                        pointerEvents: 'none'
-                    }} />
-                );
-            })()}
+                        top: 2,
+                        transform: 'translateX(-50%)',
+                        background: '#3b82f6',
+                        color: 'white',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        zIndex: 30,
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {formatTimePill(dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd).t} ({formatTimePill(dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd).date})
+                    </div>
+                )}
+            </div>
 
-            {/* Bars */}
-            {lanes.map((laneItems, laneIndex) => (
-                laneItems.map(b => {
-                    const isDraggingThis = dragging?.id === b.id;
+            {/* 2. Body / Bars */}
+            <div style={{ position: 'relative', width: '100%', height: `${totalHeight - rulerHeight}px` }}>
 
-                    // Use dragged times if dragging this item, else normal
-                    const start = isDraggingThis ? dragging.newStart : new Date(b.start_time).getTime();
-                    const end = isDraggingThis ? dragging.newEnd : new Date(b.end_time).getTime();
+                {/* Crosshairs */}
+                {crosshairPos.x !== null && !hoveredBarId && !dragging && (
+                    <>
+                        <div style={{ position: 'absolute', left: crosshairPos.x, top: 0, height: '100%', borderLeft: '1px dotted rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
+                        <div style={{ position: 'absolute', left: 0, top: crosshairPos.y, width: '100%', borderTop: '1px dotted rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
+                    </>
+                )}
 
-                    const left = ((start - viewportStart) / viewportDuration) * 100;
-                    const width = ((end - start) / viewportDuration) * 100;
-
-                    // Don't render if completely off-screen
-                    if (left + width < 0 || left > 100) return null;
-
-                    const now = new Date().getTime();
-                    const isActive = now >= start && now <= end;
-                    const isEnded = now > end;
-
-                    const color = getPriorityColor(b.priority);
+                {/* Resize Guide Line (Vertical) */}
+                {dragging && dragging.type && (dragging.type === 'resize-left' || dragging.type === 'resize-right') && (() => {
+                    const draggedLaneIndex = lanes.findIndex(l => l.some(b => b.id === dragging.id));
+                    const barTop = draggedLaneIndex * (rowHeight + gap) + gap;
+                    // Connect Ruler Bottom to Bar Bottom:
+                    // Ruler is at y < 0 relative to this container (which starts at 0).
+                    // This container = Body/Bars.
+                    // top: -rulerHeight  -> Starts at Ruler Top.
+                    // height: rulerHeight + barTop + rowHeight -> Ends at Bar Bottom.
+                    const guideHeight = rulerHeight + barTop + rowHeight;
 
                     return (
-                        <div
-                            key={b.id}
-                            style={{
-                                position: 'absolute',
-                                left: `${left}%`,
-                                width: `${Math.max(width, 0.5)}%`,
-                                top: `${laneIndex * (rowHeight + gap) + gap}px`,
-                                height: `${rowHeight}px`,
-                                background: color,
-                                border: isActive ? '2px solid white' : `1px solid ${color}`,
-                                borderRadius: '3px',
-                                opacity: isEnded ? 0.25 : (isActive ? 1 : 0.6),
-                                boxShadow: isActive ? `0 0 10px ${color}` : 'none',
-                                cursor: isDraggingThis ? 'grabbing' : 'grab',
-                                zIndex: hoveredBarId === b.id || isDraggingThis ? 20 : 10,
-                                transition: isDraggingThis ? 'none' : 'opacity 0.2s, box-shadow 0.2s'
-                            }}
-                            onMouseEnter={(e) => {
-                                setHoveredBarId(b.id);
-                                setHoveredItem({ ...b, currentStart: start, currentEnd: end });
-                                setCrosshairPos({ x: null, y: null });
-                            }}
-                            onMouseLeave={() => {
-                                if (!dragging) {
-                                    setHoveredBarId(null);
-                                    setHoveredItem(null);
-                                }
-                            }}
-                            onMouseDown={(e) => {
-                                const barRect = e.currentTarget.getBoundingClientRect();
-                                const type = getEdgeType(e, barRect);
-                                handleMouseDown(e, b, type);
-                            }}
-                            onClick={(e) => {
-                                if (!dragging && onBroadcastClick) onBroadcastClick(b);
-                            }}
-                            onMouseMove={(e) => {
-                                if (!dragging) {
+                        <div style={{
+                            position: 'absolute',
+                            left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
+                            top: -rulerHeight, // Extend up into ruler
+                            height: `${guideHeight}px`,
+                            width: 0,
+                            borderLeft: '2px dotted white',
+                            zIndex: 25,
+                            pointerEvents: 'none'
+                        }} />
+                    );
+                })()}
+
+                {/* Bars */}
+                {lanes.map((laneItems, laneIndex) => (
+                    laneItems.map(b => {
+                        const isDraggingThis = dragging?.id === b.id;
+
+                        // Use dragged times if dragging this item, else normal
+                        const start = isDraggingThis ? dragging.newStart : new Date(b.start_time).getTime();
+                        const end = isDraggingThis ? dragging.newEnd : new Date(b.end_time).getTime();
+
+                        const left = ((start - viewportStart) / viewportDuration) * 100;
+                        const width = ((end - start) / viewportDuration) * 100;
+
+                        // Don't render if completely off-screen
+                        if (left + width < 0 || left > 100) return null;
+
+                        const now = new Date().getTime();
+                        const isActive = now >= start && now <= end;
+                        const isEnded = now > end;
+
+                        const color = getPriorityColor(b.priority);
+
+                        return (
+                            <div
+                                key={b.id}
+                                style={{
+                                    position: 'absolute',
+                                    left: `${left}%`,
+                                    width: `${Math.max(width, 0.5)}%`,
+                                    top: `${laneIndex * (rowHeight + gap) + gap}px`,
+                                    height: `${rowHeight}px`,
+                                    background: color,
+                                    border: isActive ? '2px solid white' : `1px solid ${color}`,
+                                    borderRadius: '3px',
+                                    opacity: isEnded ? 0.25 : (isActive ? 1 : 0.6),
+                                    boxShadow: isActive ? `0 0 10px ${color}` : 'none',
+                                    cursor: isDraggingThis ? 'grabbing' : 'grab',
+                                    zIndex: hoveredBarId === b.id || isDraggingThis ? 20 : 10,
+                                    transition: isDraggingThis ? 'none' : 'opacity 0.2s, box-shadow 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    setHoveredBarId(b.id);
+                                    setHoveredItem({ ...b, currentStart: start, currentEnd: end });
+                                    setCrosshairPos({ x: null, y: null });
+                                }}
+                                onMouseLeave={() => {
+                                    if (!dragging) {
+                                        setHoveredBarId(null);
+                                        setHoveredItem(null);
+                                    }
+                                }}
+                                onMouseDown={(e) => {
                                     const barRect = e.currentTarget.getBoundingClientRect();
                                     const type = getEdgeType(e, barRect);
-                                    e.currentTarget.style.cursor = type.includes('resize') ? 'ew-resize' : 'grab';
-                                    setTooltipPos({ x: e.clientX, y: e.clientY });
-                                }
-                            }}
-                        />
-                    );
-                })
-            ))}
-        </div>
+                                    handleMouseDown(e, b, type);
+                                }}
+                                onClick={(e) => {
+                                    if (!dragging && onBroadcastClick) onBroadcastClick(b);
+                                }}
+                                onMouseMove={(e) => {
+                                    if (!dragging) {
+                                        const barRect = e.currentTarget.getBoundingClientRect();
+                                        const type = getEdgeType(e, barRect);
+                                        e.currentTarget.style.cursor = type.includes('resize') ? 'ew-resize' : 'grab';
+                                        setTooltipPos({ x: e.clientX, y: e.clientY });
+                                    }
+                                }}
+                            />
+                        );
+                    })
+                ))}
+            </div>
 
-        {/* Dynamic Tooltip */}
-        {hoveredItem && !dragging && ReactDOM.createPortal(
-            (() => {
-                // Logic for badges
-                const now = new Date().getTime();
-                const s = hoveredItem.currentStart;
-                const e = hoveredItem.currentEnd;
-                const isActive = now >= s && now <= e;
-                const isEnded = now > e;
+            {/* Dynamic Tooltip */}
+            {hoveredItem && !dragging && ReactDOM.createPortal(
+                (() => {
+                    // Logic for badges
+                    const now = new Date().getTime();
+                    const s = hoveredItem.currentStart;
+                    const e = hoveredItem.currentEnd;
+                    const isActive = now >= s && now <= e;
+                    const isEnded = now > e;
 
-                let statusText = isActive ? 'Active' : (isEnded ? 'Ended' : 'Scheduled');
-                let statusColor = isActive ? '#22c55e' : (isEnded ? '#94a3b8' : '#3b82f6');
-                let priorityColor = getPriorityColor(hoveredItem.priority);
+                    let statusText = isActive ? 'Active' : (isEnded ? 'Ended' : 'Scheduled');
+                    let statusColor = isActive ? '#22c55e' : (isEnded ? '#94a3b8' : '#3b82f6');
+                    let priorityColor = getPriorityColor(hoveredItem.priority);
 
-                // Badge transparencies
-                const badgeBg = (color) => `${color}20`; // 12% opacity roughly? 20 hex = 32/255 = ~12%
-                const badgeBorder = (color) => `${color}40`;
+                    // Badge transparencies
+                    const badgeBg = (color) => `${color}20`; // 12% opacity roughly? 20 hex = 32/255 = ~12%
+                    const badgeBorder = (color) => `${color}40`;
 
-                return (
-                    <div style={{
-                        position: 'fixed',
-                        top: tooltipPos.y + 15,
-                        left: tooltipPos.x + 15,
-                        background: 'rgba(15, 23, 42, 0.95)',
-                        border: '1px solid #334155',
-                        borderRadius: '8px',
-                        padding: '12px',
-                        zIndex: 9999,
-                        pointerEvents: 'none', // Important so mouse doesn't get stuck on tooltip
-                        backdropFilter: 'blur(8px)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px',
-                        minWidth: '240px'
-                    }}>
-                        <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>
-                            {hoveredItem.title || 'Untitled'}
-                        </div>
-
-                        {/* Professional Time Display */}
+                    return (
                         <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'min-content auto',
-                            gap: '4px 12px',
-                            fontSize: '0.8rem',
-                            color: '#cbd5e1',
-                            background: '#1e293b',
-                            padding: '8px',
-                            borderRadius: '6px',
-                            border: '1px solid #334155'
+                            position: 'fixed',
+                            top: tooltipPos.y + 15,
+                            left: tooltipPos.x + 15,
+                            background: 'rgba(15, 23, 42, 0.95)',
+                            border: '1px solid #334155',
+                            borderRadius: '8px',
+                            padding: '12px',
+                            zIndex: 9999,
+                            pointerEvents: 'none', // Important so mouse doesn't get stuck on tooltip
+                            backdropFilter: 'blur(8px)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '10px',
+                            minWidth: '240px'
                         }}>
-                            <span style={{ color: '#94a3b8', fontWeight: 600 }}>Start:</span>
-                            <span style={{ fontFamily: 'monospace' }}>
-                                {new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-
-                            <span style={{ color: '#94a3b8', fontWeight: 600 }}>End:</span>
-                            <span style={{ fontFamily: 'monospace' }}>
-                                {new Date(e).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(e).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                        </div>
-
-                        {/* Footer Line: Stats, Badges, Icon */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-
-                            {/* Delivery Stats */}
-                            <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem' }}>
-                                <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ {hoveredItem.delivered_count || 0}</span>
-                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ {hoveredItem.read_count || 0}</span>
+                            <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>
+                                {hoveredItem.title || 'Untitled'}
                             </div>
 
-                            {/* Badges & Icon */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-
-                                {/* Status Badge */}
-                                <span style={{
-                                    padding: '0.2rem 0.6rem', borderRadius: '4px',
-                                    fontSize: '0.7rem', fontWeight: 700,
-                                    background: badgeBg(statusColor),
-                                    color: statusColor,
-                                    border: `1px solid ${badgeBorder(statusColor)}`,
-                                    textTransform: 'uppercase', letterSpacing: '0.5px'
-                                }}>
-                                    {statusText}
+                            {/* Professional Time Display */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'min-content auto',
+                                gap: '4px 12px',
+                                fontSize: '0.8rem',
+                                color: '#cbd5e1',
+                                background: '#1e293b',
+                                padding: '8px',
+                                borderRadius: '6px',
+                                border: '1px solid #334155'
+                            }}>
+                                <span style={{ color: '#94a3b8', fontWeight: 600 }}>Start:</span>
+                                <span style={{ fontFamily: 'monospace' }}>
+                                    {new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
 
-                                {/* Max Views Badge (Cyan) */}
-                                {hoveredItem.max_views && (
-                                    (() => {
-                                        const percent = (hoveredItem.read_count || 0) / hoveredItem.max_views;
-                                        if (percent >= 1) return <span style={{ background: '#64748b', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>MAX ✓</span>;
+                                <span style={{ color: '#94a3b8', fontWeight: 600 }}>End:</span>
+                                <span style={{ fontFamily: 'monospace' }}>
+                                    {new Date(e).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(e).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
 
-                                        // Cyan logic
-                                        let opacity = 1;
-                                        if (percent > 0.75) opacity = 0.4;
-                                        else if (percent > 0.5) opacity = 0.7;
+                            {/* Footer Line: Stats, Badges, Icon */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
 
-                                        return (
-                                            <span style={{
-                                                background: `rgba(6, 182, 212, ${opacity})`,
-                                                color: 'white',
-                                                padding: '2px 8px',
-                                                borderRadius: '4px',
-                                                fontSize: '10px',
-                                                fontWeight: 600,
-                                                border: percent > 0.75 ? '1px solid rgba(6, 182, 212, 0.5)' : 'none'
-                                            }}>
-                                                MAX {hoveredItem.max_views}
-                                            </span>
-                                        );
-                                    })()
-                                )}
+                                {/* Delivery Stats */}
+                                <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ {hoveredItem.delivered_count || 0}</span>
+                                    <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ {hoveredItem.read_count || 0}</span>
+                                </div>
 
-                                {/* Attachment Icon (Matching List) */}
-                                {hoveredItem.image_url && (
+                                {/* Badges & Icon */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+
+                                    {/* Status Badge */}
                                     <span style={{
-                                        padding: '0.2rem 0.5rem',
-                                        fontSize: '1rem',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        lineHeight: 1
-                                    }}>📎</span>
-                                )}
+                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                        fontSize: '0.7rem', fontWeight: 700,
+                                        background: badgeBg(statusColor),
+                                        color: statusColor,
+                                        border: `1px solid ${badgeBorder(statusColor)}`,
+                                        textTransform: 'uppercase', letterSpacing: '0.5px'
+                                    }}>
+                                        {statusText}
+                                    </span>
+
+                                    {/* Max Views Badge (Cyan) */}
+                                    {hoveredItem.max_views && (
+                                        (() => {
+                                            const percent = (hoveredItem.read_count || 0) / hoveredItem.max_views;
+                                            if (percent >= 1) return <span style={{ background: '#64748b', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>MAX ✓</span>;
+
+                                            // Cyan logic
+                                            let opacity = 1;
+                                            if (percent > 0.75) opacity = 0.4;
+                                            else if (percent > 0.5) opacity = 0.7;
+
+                                            return (
+                                                <span style={{
+                                                    background: `rgba(6, 182, 212, ${opacity})`,
+                                                    color: 'white',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px',
+                                                    fontSize: '10px',
+                                                    fontWeight: 600,
+                                                    border: percent > 0.75 ? '1px solid rgba(6, 182, 212, 0.5)' : 'none'
+                                                }}>
+                                                    MAX {hoveredItem.max_views}
+                                                </span>
+                                            );
+                                        })()
+                                    )}
+
+                                    {/* Attachment Icon (Matching List) */}
+                                    {hoveredItem.image_url && (
+                                        <span style={{
+                                            padding: '0.2rem 0.5rem',
+                                            fontSize: '1rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            lineHeight: 1
+                                        }}>📎</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                );
-            })(),
-            document.body
-        )}
-        {/* 3. Resize Handle (Bottom) */}
-        <div
-            style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '100%',
-                height: '12px',
-                cursor: 'ns-resize',
-                zIndex: 50,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: 0, // Hidden until hover
-                transition: 'opacity 0.2s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = 1}
-            onMouseLeave={e => e.currentTarget.style.opacity = 0}
-        >
-            {/* Visual Handle Line */}
-            <div style={{ width: '40px', height: '4px', background: '#94a3b8', borderRadius: '2px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }}></div>
-        </div>
-    </div >
-);
+                    );
+                })(),
+                document.body
+            )}
+            {/* 3. Resize Handle (Bottom) */}
+            <div
+                style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '12px',
+                    cursor: 'ns-resize',
+                    zIndex: 50,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: 0, // Hidden until hover
+                    transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                onMouseLeave={e => e.currentTarget.style.opacity = 0}
+            >
+                {/* Visual Handle Line */}
+                <div style={{ width: '40px', height: '4px', background: '#94a3b8', borderRadius: '2px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }}></div>
+            </div>
+        </div >
+    );
 };
 
