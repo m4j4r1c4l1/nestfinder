@@ -3408,7 +3408,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         <div
             ref={containerRef}
             style={{
-                background: 'transparent', // DEBUG: Was Slate 600
+                background: '#475569', // Slate 600
                 border: '1px solid #334155',
                 borderRadius: '8px',
                 position: 'relative',
@@ -3425,7 +3425,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
             {/* 1. Ruler */}
             <div style={{
                 height: rulerHeight,
-                background: 'transparent', // DEBUG: Was #0f172a
+                background: '#0f172a', // Matches Broadcast Card Background
                 borderBottom: '1px solid #334155',
                 position: 'relative'
             }}>
