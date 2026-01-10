@@ -3369,6 +3369,11 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return '#22c55e';
     };
 
+    const getPriorityLabel = (p) => {
+        const val = p || 3;
+        return `P${val}`;
+    };
+
     // REF to latest handlers for global listener
     const latestHandlers = React.useRef({ move: null, up: null });
 
@@ -3381,8 +3386,14 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     // Global Event Listeners for Dragging
     React.useEffect(() => {
         if (dragging) {
-            const onMove = (e) => latestHandlers.current.move && latestHandlers.current.move(e);
-            const onUp = (e) => latestHandlers.current.up && latestHandlers.current.up(e);
+            console.log('[Timeline] Dragging Active', dragging);
+            const onMove = (e) => {
+                latestHandlers.current.move && latestHandlers.current.move(e);
+            };
+            const onUp = (e) => {
+                console.log('[Timeline] Global Up');
+                latestHandlers.current.up && latestHandlers.current.up(e);
+            };
 
             window.addEventListener('mousemove', onMove);
             window.addEventListener('mouseup', onUp);
