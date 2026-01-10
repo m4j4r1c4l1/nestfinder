@@ -3112,11 +3112,32 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return t;
     }, [viewportStart, viewportDuration]);
 
-    // Dimensions
-    const rowHeight = 12;
-    const gap = 4;
+    // Dimensions - Scale bars when container is resized
     const rulerHeight = 28;
-    const paddingBottom = 4; // Gap size (4px)
+    const paddingBottom = 4;
+    const baseRowHeight = 12;
+    const baseGap = 4;
+
+    // Calculate available space for lanes (excluding ruler and padding)
+    const baseContentHeight = rulerHeight + laneCount * (baseRowHeight + baseGap) + baseGap + paddingBottom;
+
+    // If manualHeight is set and larger than base, scale rows proportionally
+    let rowHeight = baseRowHeight;
+    let gap = baseGap;
+
+    if (manualHeight && manualHeight > baseContentHeight && laneCount > 0) {
+        const availableForLanes = manualHeight - rulerHeight - paddingBottom - baseGap;
+        // Each lane takes rowHeight + gap, except last which is just rowHeight (plus trailing gap)
+        // Total = laneCount * (rowHeight + gap) + gap at top
+        // availableForLanes = rowHeight * laneCount + gap * (laneCount + 1)
+        // Let gap scale proportionally: gap = rowHeight / 3
+        // availableForLanes = rowHeight * laneCount + (rowHeight/3) * (laneCount + 1)
+        // Solve for rowHeight:
+        const scaleFactor = availableForLanes / (laneCount * (baseRowHeight + baseGap) + baseGap);
+        rowHeight = Math.min(baseRowHeight * scaleFactor, 40); // Cap at 40px
+        gap = Math.min(baseGap * scaleFactor, 12); // Cap gap at 12px
+    }
+
     const totalHeight = Math.max(manualHeight || 0, rulerHeight + laneCount * (rowHeight + gap) + gap + paddingBottom);
     const contentHeight = rulerHeight + laneCount * (rowHeight + gap) + gap + paddingBottom;
 
