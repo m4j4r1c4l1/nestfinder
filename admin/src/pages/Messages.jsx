@@ -968,7 +968,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 <div className="card-body" style={{ maxHeight: '580px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', zIndex: 2 }}>
-                    <div style={{ padding: '3.5rem 1rem 1rem 1rem' }}>
+                    <div style={{ padding: '2.5rem 1rem 1rem 1rem' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
@@ -3036,6 +3036,30 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
 
         return { lanes, laneCount: lanes.length };
     }, [broadcasts, viewportDuration]);
+
+    // REF to latest handlers for global listener
+    const latestHandlers = React.useRef({ move: null, up: null });
+
+    // Update ref on every render
+    React.useEffect(() => {
+        latestHandlers.current.move = handleMouseMove;
+        latestHandlers.current.up = handleMouseUp;
+    });
+
+    // Global Event Listeners for Dragging
+    React.useEffect(() => {
+        if (dragging) {
+            const onMove = (e) => latestHandlers.current.move && latestHandlers.current.move(e);
+            const onUp = (e) => latestHandlers.current.up && latestHandlers.current.up(e);
+
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onUp);
+            return () => {
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onUp);
+            };
+        }
+    }, [dragging]);
 
     // Generate ticks based on current viewport
     const ticks = React.useMemo(() => {
