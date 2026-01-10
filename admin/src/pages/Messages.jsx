@@ -829,9 +829,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     const totalPages = Math.ceil(filteredBroadcasts.length / pageSize);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', border: '3px solid red' }}>
             {/* Broadcasts List Card */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', marginBottom: 0 }}>
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', marginBottom: 0, border: '3px solid blue' }}>
                 <div className="card-header">
                     <h3>🎬 Manage Broadcasts</h3>
                 </div>
@@ -843,7 +843,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     zIndex: 10,
                     background: '#1e293b',
                     borderBottom: '1px solid var(--color-border)',
-                    padding: '0.75rem 1rem'
+                    padding: '0.75rem 1rem',
+                    border: '3px solid lime'
                 }}>
                     {/* ... content ... */}
                     {/* Row 1: Search + Status + Clear */}
@@ -959,7 +960,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Timeline Visualization */}
-                <div style={{ position: 'relative', zIndex: 1, margin: '0.75rem 2rem 0.75rem 1rem' }}>
+                <div style={{ position: 'relative', zIndex: 1, margin: '0.75rem 2rem 0.75rem 1rem', border: '3px solid orange' }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
                         onBroadcastClick={setSelectedBroadcast}
@@ -967,14 +968,14 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 </div>
 
-                <div className="card-body" style={{ maxHeight: '680px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative' }}>
-                    <div style={{ padding: '2rem 1rem 1rem 1rem' }}>
+                <div className="card-body" style={{ maxHeight: '680px', overflowY: 'auto', padding: 0, background: '#1e293b', position: 'relative', border: '3px solid magenta' }}>
+                    <div style={{ padding: '2rem 1rem 1rem 1rem', border: '3px solid cyan' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', border: '3px solid yellow' }}>
                                 {paginatedBroadcasts.map(b => {
                                     const now = new Date();
                                     const start = new Date(b.start_time);
@@ -3407,7 +3408,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         <div
             ref={containerRef}
             style={{
-                background: '#475569', // Slate 600 (Midpoint between 500 and 700)
+                background: 'transparent', // DEBUG: Was Slate 600
                 border: '1px solid #334155',
                 borderRadius: '8px',
                 position: 'relative',
