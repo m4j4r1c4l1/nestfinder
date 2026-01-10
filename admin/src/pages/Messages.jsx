@@ -969,7 +969,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 <div className="card-body" style={{ maxHeight: '680px', overflowY: 'auto', paddingTop: '2rem', paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem', background: '#1e293b', position: 'relative', border: '3px solid magenta' }}>
-                    <div style={{ marginTop: '3rem', border: '3px solid cyan' }}>
+                    <div style={{ marginTop: '2rem', border: '3px solid cyan' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
