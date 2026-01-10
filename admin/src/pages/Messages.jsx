@@ -1020,7 +1020,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     margin: '0.75rem 1rem', // Equal margin top/bottom for separator spacing
                     borderRadius: '6px',
                     fontSize: '0.8rem',
-                    flexWrap: 'wrap'
+                    flexWrap: 'wrap',
+                    border: '1px solid cyan' // DEBUG
                 }}>
                     {/* Total Count */}
                     <span style={{
@@ -1119,7 +1120,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Timeline Visualization */}
-                <div style={{ position: 'relative', zIndex: 1, margin: '0.75rem 2rem 0.75rem 1rem' }}>
+                <div style={{ position: 'relative', zIndex: 1, margin: '0.75rem 2rem 0.75rem 1rem', border: '1px solid magenta' }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
                         onBroadcastClick={setSelectedBroadcast}
@@ -1128,7 +1129,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 </div>
 
-                <div className="card-body" style={{ maxHeight: '680px', overflowY: 'auto', paddingTop: '2rem', paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem', background: '#1e293b', position: 'relative' }}>
+                {/* DEBUG: Added border and padding to check clipping */}
+                <div className="card-body" style={{ maxHeight: '680px', overflowY: 'auto', paddingTop: '2rem', paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem', background: '#1e293b', position: 'relative', border: '1px solid yellow' }}>
                     <div style={{ marginTop: '2rem' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
@@ -1187,7 +1189,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 flexDirection: 'column',
                                                 gap: '0.25rem',
                                                 boxShadow: isHighlighted ? `0 0 20px ${priorityColor}80, 0 0 40px ${priorityColor}40` : 'none',
-                                                transform: isHighlighted ? 'scale(1.02)' : 'none'
+                                                transform: isHighlighted ? 'scale(1.02)' : 'none',
+                                                border: '1px solid lime' // DEBUG
                                             }}
                                             onMouseEnter={e => {
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
