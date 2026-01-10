@@ -790,6 +790,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     const [selectedBroadcast, setSelectedBroadcast] = useState(null); // For Detail Popup
     const [viewRecipientsId, setViewRecipientsId] = useState(null); // For Recipients Modal
     const [showAdvanced, setShowAdvanced] = useState(false); // For Advanced Filters
+    const [hoveredTimelineBarId, setHoveredTimelineBarId] = useState(null); // For broadcast card highlighting
 
     // Filter Logic
     const filteredBroadcasts = broadcasts.filter(b => {
@@ -964,6 +965,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         broadcasts={filteredBroadcasts}
                         onBroadcastClick={setSelectedBroadcast}
                         onBroadcastUpdate={onBroadcastUpdate}
+                        onHoveredBarChange={setHoveredTimelineBarId}
                     />
                 </div>
 
@@ -1003,6 +1005,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     // Border Color: Always priority color, but 75% transparent (25% opacity) if not active
                                     const borderColor = isActive ? priorityColor : `${priorityColor}40`;
 
+                                    // Check if this card should be highlighted (from Timeline hover)
+                                    const isHighlighted = hoveredTimelineBarId === b.id;
+
                                     return (
                                         <div
                                             key={b.id}
@@ -1021,7 +1026,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 position: 'relative',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                gap: '0.25rem'
+                                                gap: '0.25rem',
+                                                boxShadow: isHighlighted ? `0 0 20px ${priorityColor}80, 0 0 40px ${priorityColor}40` : 'none',
+                                                transform: isHighlighted ? 'scale(1.02)' : 'none'
                                             }}
                                             onMouseEnter={e => {
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -2926,7 +2933,7 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 }
 
 // --- Timeline Component ---
-function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
+function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBarChange }) {
     const containerRef = React.useRef(null);
     const scrollInterval = React.useRef(null);
     const latestHandleWheel = React.useRef(null);
@@ -2943,6 +2950,13 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     const [hoveredItem, setHoveredItem] = useState(null);
     const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
     const [crosshairPos, setCrosshairPos] = useState({ x: null, y: null });
+
+    // Notify parent when hovered bar changes
+    useEffect(() => {
+        if (onHoveredBarChange) {
+            onHoveredBarChange(hoveredBarId);
+        }
+    }, [hoveredBarId, onHoveredBarChange]);
 
     // Drag State
     const [dragging, setDragging] = useState(null); // { id, type, startX, originalStart, originalEnd, newStart, newEnd }
@@ -3106,39 +3120,36 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
     // Generate ticks based on current viewport
     const ticks = React.useMemo(() => {
         const t = [];
-
-        // Granular Tick Logic
-        let interval;
         const durationHours = viewportDuration / 3600000;
 
-        if (durationHours <= 1.1) { // Max Zoom (~1h) -> 15m ticks
-            interval = 900000;
-        } else if (durationHours <= 2.1) { // <= 2h -> 30m ticks
-            interval = 1800000;
-        } else {
-            // Auto-scale (aim for ~8-10 ticks)
-            const targetTicks = 10;
-            const approx = viewportDuration / targetTicks;
-            const niceIntervals = [
-                3600000, 10800000, 21600000, 43200000,
-                86400000, 172800000, 604800000
-            ];
-            interval = niceIntervals.reduce((prev, curr) =>
-                Math.abs(curr - approx) < Math.abs(prev - approx) ? curr : prev
-            );
-        }
+        // Always generate all tick levels, but show/hide based on zoom
+        const showQuarters = durationHours <= 3; // Show quarter ticks when < 3 hours
+        const showHalves = durationHours <= 12; // Show half-hour ticks when < 12 hours
 
-        if (interval > 0 && viewportDuration > 0) {
-            const startTick = Math.ceil(viewportStart / interval) * interval;
-            for (let time = startTick; time < viewportStart + viewportDuration; time += interval) {
+        // Use 15-minute base interval for quarter-hour precision
+        const baseInterval = showQuarters ? 900000 : (showHalves ? 1800000 : 3600000);
+
+        if (viewportDuration > 0) {
+            const startTick = Math.ceil(viewportStart / baseInterval) * baseInterval;
+            const endTime = viewportStart + viewportDuration;
+
+            for (let time = startTick; time < endTime; time += baseInterval) {
                 const left = ((time - viewportStart) / viewportDuration) * 100;
 
-                // Determine Type
+                // Skip if off-screen
+                if (left < -5 || left > 105) continue;
+
+                // Determine Type based on time
                 const d = new Date(time);
                 const m = d.getMinutes();
                 let type = 'quarter'; // 15, 45
                 if (m === 0) type = 'hour';
                 else if (m === 30) type = 'half';
+
+                // Skip quarter ticks if not showing them
+                if (type === 'quarter' && !showQuarters) continue;
+                // Skip half ticks if not showing them
+                if (type === 'half' && !showHalves) continue;
 
                 t.push({ time, left, type });
             }
@@ -3456,7 +3467,10 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return `P${val}`;
     };
 
-    if (!broadcasts.length || !isInitialized) return null;
+    // Show empty state message if no broadcasts after filtering
+    const showEmptyState = broadcasts.length === 0;
+
+    if (!isInitialized) return null;
 
     return (
         <div
@@ -3578,7 +3592,29 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
                 })()}
 
                 {/* Bars */}
-                {lanes.map((laneItems, laneIndex) => (
+                {showEmptyState ? (
+                    <div style={{
+                        position: 'absolute',
+                        top: rulerHeight,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <div style={{
+                            background: '#1e293b',
+                            color: '#94a3b8',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '9999px',
+                            fontSize: '0.85rem',
+                            border: '1px solid #334155'
+                        }}>
+                            No broadcasts match filters
+                        </div>
+                    </div>
+                ) : lanes.map((laneItems, laneIndex) => (
                     laneItems.map(b => {
                         const isDraggingThis = dragging?.id === b.id;
 
