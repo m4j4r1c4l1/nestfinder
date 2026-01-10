@@ -156,9 +156,17 @@ export const initDatabase = async () => {
       end_time DATETIME NOT NULL,
       max_views INTEGER DEFAULT NULL,
       priority INTEGER DEFAULT 0,
+      lane INTEGER DEFAULT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Migration: Add lane column to existing broadcasts tables
+  try {
+    db.run(`ALTER TABLE broadcasts ADD COLUMN lane INTEGER DEFAULT NULL`);
+  } catch (e) {
+    // Column already exists - ignore
+  }
 
   // User Feedback table
   db.run(`
