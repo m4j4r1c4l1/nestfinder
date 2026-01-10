@@ -3037,29 +3037,6 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return { lanes, laneCount: lanes.length };
     }, [broadcasts, viewportDuration]);
 
-    // REF to latest handlers for global listener
-    const latestHandlers = React.useRef({ move: null, up: null });
-
-    // Update ref on every render
-    React.useEffect(() => {
-        latestHandlers.current.move = handleMouseMove;
-        latestHandlers.current.up = handleMouseUp;
-    });
-
-    // Global Event Listeners for Dragging
-    React.useEffect(() => {
-        if (dragging) {
-            const onMove = (e) => latestHandlers.current.move && latestHandlers.current.move(e);
-            const onUp = (e) => latestHandlers.current.up && latestHandlers.current.up(e);
-
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup', onUp);
-            return () => {
-                window.removeEventListener('mousemove', onMove);
-                window.removeEventListener('mouseup', onUp);
-            };
-        }
-    }, [dragging]);
 
     // Generate ticks based on current viewport
     const ticks = React.useMemo(() => {
