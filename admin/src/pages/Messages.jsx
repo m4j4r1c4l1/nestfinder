@@ -3112,8 +3112,6 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return t;
     }, [viewportStart, viewportDuration]);
 
-    if (!broadcasts.length || !isInitialized) return null;
-
     // Dimensions
     const rowHeight = 12;
     const gap = 4;
@@ -3382,11 +3380,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate }) {
         return `P${val}`;
     };
 
-
-
-
-
-
+    if (!broadcasts.length || !isInitialized) return null;
 
     return (
         <div
