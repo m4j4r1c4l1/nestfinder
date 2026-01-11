@@ -96,7 +96,7 @@ const BadgeSelect = ({ value, onChange, options, placeholder, type = 'status' })
                     {options.map(opt => (
                         <div
                             key={opt.value}
-                            onClick={() => { onChange({ target: { value: opt.value } }); setIsOpen(false); }}
+                            onClick={() => { onChange(opt.value); setIsOpen(false); }}
                             style={{
                                 padding: '0.5rem',
                                 cursor: 'pointer',
@@ -855,19 +855,19 @@ const Messages = () => {
                                                     />
                                                 </div>
                                                 <div style={{ flex: 1 }}>
-                                                    <label className="form-label">Priority (1 = Highest)</label>
-                                                    <select
-                                                        value={newBroadcast.priority || 3}
-                                                        onChange={(e) => setNewBroadcast({ ...newBroadcast, priority: parseInt(e.target.value) })}
-                                                        className="form-input"
-                                                        style={{ background: '#1e293b', color: '#e2e8f0', cursor: 'pointer' }}
-                                                    >
-                                                        <option value={1}>1 - Critical (Red)</option>
-                                                        <option value={2}>2 - High (Orange)</option>
-                                                        <option value={3}>3 - Medium (Yellow)</option>
-                                                        <option value={4}>4 - Normal (Blue)</option>
-                                                        <option value={5}>5 - Low (Slate)</option>
-                                                    </select>
+                                                    <label className="form-label">Priority</label>
+                                                    <BadgeSelect
+                                                        value={String(newBroadcast.priority || 3)}
+                                                        onChange={(val) => setNewBroadcast({ ...newBroadcast, priority: parseInt(val) })}
+                                                        options={[
+                                                            { value: '1', label: 'P1 - Critical', color: '#ef4444' },
+                                                            { value: '2', label: 'P2 - High', color: '#f97316' },
+                                                            { value: '3', label: 'P3 - Medium', color: '#eab308' },
+                                                            { value: '4', label: 'P4 - Low', color: '#3b82f6' },
+                                                            { value: '5', label: 'P5 - Minimal', color: '#22c55e' }
+                                                        ]}
+                                                        placeholder="Select Priority"
+                                                    />
                                                 </div>
                                             </div>
                                             <button
