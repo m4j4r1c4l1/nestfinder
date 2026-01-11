@@ -3178,6 +3178,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
     const [viewportStart, setViewportStart] = useState(0);
     const [viewportDuration, setViewportDuration] = useState(0);
     const [isInitialized, setIsInitialized] = useState(false);
+    const [initialViewportDuration, setInitialViewportDuration] = useState(3600000);
 
     const [manualHeight, setManualHeight] = useState(null);
 
@@ -3237,7 +3238,9 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
             // Only set if significantly different or not initialized
             if (!isInitialized) {
                 setViewportStart(min);
-                setViewportDuration(Math.max(range, minDuration));
+                const initDur = Math.max(range, minDuration);
+                setViewportDuration(initDur);
+                setInitialViewportDuration(initDur);
                 setIsInitialized(true);
             }
         }
@@ -3592,6 +3595,18 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
         }
     };
 
+
+
+    const handleContainerDoubleClick = (e) => {
+        if (dragging) return;
+        // Reset to initial zoom and center on current time
+        const now = new Date().getTime();
+        const newStart = now - (initialViewportDuration / 2);
+
+        setViewportDuration(initialViewportDuration);
+        setViewportStart(newStart);
+    };
+
     const handleContainerMouseDown = (e) => {
         // Only trigger if left click and not already dragging (e.g. from a bar)
         if (e.button !== 0 || dragging) return;
@@ -3724,7 +3739,9 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
             onMouseMove={handleMouseMove}
             onMouseDown={handleContainerMouseDown}
             onMouseUp={handleMouseUp}
+
             onMouseLeave={handleMouseLeave}
+            onDoubleClick={handleContainerDoubleClick}
         >
             {/* 1. Ruler */}
             <div style={{
