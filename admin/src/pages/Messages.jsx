@@ -904,7 +904,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // Interaction State
     const [selectedBroadcast, setSelectedBroadcast] = useState(null); // For Detail Popup
     const [viewRecipientsId, setViewRecipientsId] = useState(null); // For Recipients Modal
-    const [showAdvanced, setShowAdvanced] = useState(false); // For Advanced Filters
+    // const [showAdvanced, setShowAdvanced] = useState(false); // REMOVED: Filters now always visible
     const [hoveredTimelineBarId, setHoveredTimelineBarId] = useState(null); // For broadcast card highlighting
     const [hoveredFilterGroup, setHoveredFilterGroup] = useState(null); // For stats badge highlighting
 
@@ -1022,120 +1022,112 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             </button>
                         )}
 
-                        {/* Toggle Advanced */}
-                        <button
-                            className="btn btn-secondary"
-                            onClick={() => setShowAdvanced(!showAdvanced)}
-                            style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
-                        >
-                            {showAdvanced ? '▲' : '▼'} Filters
-                        </button>
+                        {/* Toggle Advanced - REMOVED: Filters always visible */}
+
                     </div>
 
-                    {/* Row 2: Advanced Filters (Collapsible) */}
-                    {showAdvanced && (
-                        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)' }}>
-                            {/* Start Time Filter */}
-                            <div style={{ flex: '1 1 180px' }}>
-                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Start After</label>
-                                <DatePicker
-                                    selected={searchFilters.startDate}
-                                    onChange={(date) => setSearchFilters(prev => ({ ...prev, startDate: date }))}
-                                    showTimeSelect
-                                    dateFormat="MMM d, yyyy HH:mm"
-                                    className="custom-datepicker-input"
-                                    placeholderText="Filter by start time"
-                                    calendarClassName="dark-theme-calendar"
-                                />
-                            </div>
+                    {/* Row 2: Advanced Filters (Always Visible) */}
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)' }}>
+                        {/* Start Time Filter */}
+                        <div style={{ flex: '1 1 180px' }}>
+                            <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Start After</label>
+                            <DatePicker
+                                selected={searchFilters.startDate}
+                                onChange={(date) => setSearchFilters(prev => ({ ...prev, startDate: date }))}
+                                showTimeSelect
+                                dateFormat="MMM d, yyyy HH:mm"
+                                className="custom-datepicker-input"
+                                placeholderText="Filter by start time"
+                                calendarClassName="dark-theme-calendar"
+                            />
+                        </div>
 
-                            {/* End Time Filter */}
-                            <div style={{ flex: '1 1 180px' }}>
-                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>End Before</label>
-                                <DatePicker
-                                    selected={searchFilters.endDate}
-                                    onChange={(date) => setSearchFilters(prev => ({ ...prev, endDate: date }))}
-                                    showTimeSelect
-                                    dateFormat="MMM d, yyyy HH:mm"
-                                    className="custom-datepicker-input"
-                                    placeholderText="Filter by end time"
-                                    calendarClassName="dark-theme-calendar"
-                                />
-                            </div>
+                        {/* End Time Filter */}
+                        <div style={{ flex: '1 1 180px' }}>
+                            <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>End Before</label>
+                            <DatePicker
+                                selected={searchFilters.endDate}
+                                onChange={(date) => setSearchFilters(prev => ({ ...prev, endDate: date }))}
+                                showTimeSelect
+                                dateFormat="MMM d, yyyy HH:mm"
+                                className="custom-datepicker-input"
+                                placeholderText="Filter by end time"
+                                calendarClassName="dark-theme-calendar"
+                            />
+                        </div>
 
-                            {/* Status Filter - Badge Style */}
-                            <div style={{ flex: '0 0 140px' }}> {/* Fixed width for consistent layout */}
-                                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
-                                    Status
-                                </label>
-                                <BadgeSelect
-                                    value={searchFilters.status}
-                                    onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val }))}
-                                    options={[
-                                        // 'All' removed; default state handles filter
-                                        { value: 'active', label: 'Active', color: '#22c55e' },
-                                        { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' }, // Fixed: Matches Stats Blue (was Yellow)
-                                        { value: 'inactive', label: 'Inactive', color: '#94a3b8' }
-                                    ]}
-                                    placeholder="Filter by Status"
-                                />
-                            </div>
+                        {/* Status Filter - Badge Style */}
+                        <div style={{ flex: '0 0 140px' }}> {/* Fixed width for consistent layout */}
+                            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
+                                Status
+                            </label>
+                            <BadgeSelect
+                                value={searchFilters.status}
+                                onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val }))}
+                                options={[
+                                    // 'All' removed; default state handles filter
+                                    { value: 'active', label: 'Active', color: '#22c55e' },
+                                    { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' }, // Fixed: Matches Stats Blue (was Yellow)
+                                    { value: 'inactive', label: 'Inactive', color: '#94a3b8' }
+                                ]}
+                                placeholder="Filter by Status"
+                            />
+                        </div>
 
-                            {/* Priority Filter */}
-                            <div style={{ flex: '0 0 140px' }}> {/* Fixed width */}
-                                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
-                                    Priority
-                                </label>
-                                <BadgeSelect
-                                    value={searchFilters.priority}
-                                    onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val }))}
-                                    options={[
-                                        { value: '1', label: 'P1 - Critical', color: '#ef4444' },
-                                        { value: '2', label: 'P2 - High', color: '#f97316' },
-                                        { value: '3', label: 'P3 - Medium', color: '#eab308' },
-                                        { value: '4', label: 'P4 - Low', color: '#3b82f6' },
-                                        { value: '5', label: 'P5 - Minimal', color: '#22c55e' }
-                                    ]}
-                                    placeholder="Filter by Priority"
-                                />
-                            </div>
+                        {/* Priority Filter */}
+                        <div style={{ flex: '0 0 140px' }}> {/* Fixed width */}
+                            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
+                                Priority
+                            </label>
+                            <BadgeSelect
+                                value={searchFilters.priority}
+                                onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val }))}
+                                options={[
+                                    { value: '1', label: 'P1 - Critical', color: '#ef4444' },
+                                    { value: '2', label: 'P2 - High', color: '#f97316' },
+                                    { value: '3', label: 'P3 - Medium', color: '#eab308' },
+                                    { value: '4', label: 'P4 - Low', color: '#3b82f6' },
+                                    { value: '5', label: 'P5 - Minimal', color: '#22c55e' }
+                                ]}
+                                placeholder="Filter by Priority"
+                            />
+                        </div>
 
-                            {/* Max Views Filter */}
-                            <div style={{ flex: 1, minWidth: '100px' }}>
-                                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
-                                    Max Views
-                                </label>
-                                <div style={{ position: 'relative' }}>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        placeholder="Max Views..."
-                                        value={searchFilters.maxViewsNum}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value);
-                                            if (val < 0) return; // Prevent negative input
-                                            setSearchFilters(prev => ({
-                                                ...prev,
-                                                maxViewsNum: e.target.value,
-                                                // If typing a number, we probably mean 'limited' context, but keeping 'all' creates less friction unless we want to force it.
-                                                // Let's keep type as is, or switch to 'limited' if not unlimited?
-                                                // User requested toggle logic for badges. Typing here acts as a sub-filter.
-                                            }));
-                                        }}
-                                        style={{
-                                            background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.5rem',
-                                            fontSize: '0.9rem', color: '#f8fafc', width: '100%', outline: 'none', height: '38px' // Consistent height
-                                        }}
-                                    />
-                                    {searchFilters.maxViewsNum && (
-                                        <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#64748b' }}>
-                                            views
-                                        </span>
-                                    )}
-                                </div>
+                        {/* Max Views Filter */}
+                        <div style={{ flex: 1, minWidth: '100px' }}>
+                            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
+                                Max Views
+                            </label>
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="Max Views..."
+                                    value={searchFilters.maxViewsNum}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        if (val < 0) return; // Prevent negative input
+                                        setSearchFilters(prev => ({
+                                            ...prev,
+                                            maxViewsNum: e.target.value,
+                                            // If typing a number, we probably mean 'limited' context, but keeping 'all' creates less friction unless we want to force it.
+                                            // Let's keep type as is, or switch to 'limited' if not unlimited?
+                                            // User requested toggle logic for badges. Typing here acts as a sub-filter.
+                                        }));
+                                    }}
+                                    style={{
+                                        background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.5rem',
+                                        fontSize: '0.9rem', color: '#f8fafc', width: '100%', outline: 'none', height: '38px' // Consistent height
+                                    }}
+                                />
+                                {searchFilters.maxViewsNum && (
+                                    <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#64748b' }}>
+                                        views
+                                    </span>
+                                )}
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
 
                 {/* Statistics Section */}
@@ -1285,6 +1277,33 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             👁 ∞ <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withoutMaxViews}</span>
                         </span>
                     </div>
+
+                    {/* Bulk Delete Badge */}
+                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
+                        <span style={{
+                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                            fontSize: '0.7rem', fontWeight: 700,
+                            background: '#a855f720', // Purple
+                            color: '#a855f7',
+                            border: '1px solid #a855f740',
+                            textTransform: 'uppercase', letterSpacing: '0.5px',
+                            cursor: 'pointer', transition: 'all 0.2s',
+                            display: 'flex', alignItems: 'center', gap: '0.4rem'
+                        }}
+                            onClick={() => {
+                                if (filteredBroadcasts.length === 0) return;
+                                if (window.confirm(`Are you sure you want to delete ALL ${filteredBroadcasts.length} visible broadcasts? This action cannot be undone.`)) {
+                                    filteredBroadcasts.forEach(b => onDelete(b.id));
+                                }
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#a855f740'; e.currentTarget.style.color = '#c084fc'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = '#a855f720'; e.currentTarget.style.color = '#a855f7'; }}
+                        >
+                            🗑️ DELETE VISIBLE
+                        </span>
+                    </div>
+
+
                 </div>
 
                 {/* Timeline Visualization */}
@@ -1405,8 +1424,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             </div>
 
                                             {/* Bottom Line: Professional Layout */}
-                                            {/* User requested lime border for the element containing the bin */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid lime', height: '26px', boxSizing: 'border-box' }}>
+                                            {/* User requested lime border REMOVED. Added background to bin area. */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: 'none', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -1491,11 +1510,26 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            onDelete(b.id);
+                                                            if (window.confirm('Are you sure you want to delete this broadcast?')) {
+                                                                onDelete(b.id);
+                                                            }
                                                         }}
                                                         className="btn-icon danger"
                                                         title="Delete"
-                                                        style={{ padding: '0', fontSize: '1rem', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.8, display: 'flex', alignItems: 'center', lineHeight: 1 }}
+                                                        style={{
+                                                            padding: '0.2rem 0.4rem', // create the "area"
+                                                            fontSize: '1rem',
+                                                            background: '#ef444420', // Red background
+                                                            border: '1px solid #ef444440',
+                                                            color: '#ef4444',
+                                                            cursor: 'pointer',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            lineHeight: 1,
+                                                            borderRadius: '4px',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        onMouseEnter={e => { e.currentTarget.style.background = '#ef444440'; e.currentTarget.style.transform = 'scale(1.1)'; }}
+                                                        onMouseLeave={e => { e.currentTarget.style.background = '#ef444420'; e.currentTarget.style.transform = 'scale(1)'; }}
                                                     >
                                                         🗑️
                                                     </button>
@@ -1522,31 +1556,35 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
             </div>
 
             {/* Broadcast Detail Popup */}
-            {selectedBroadcast && (
-                <BroadcastDetailPopup
-                    broadcast={selectedBroadcast}
-                    onClose={() => setSelectedBroadcast(null)}
-                    onViewRecipients={() => {
-                        setViewRecipientsId(selectedBroadcast.id);
-                        setSelectedBroadcast(null);
-                    }}
-                    onDelete={() => {
-                        if (confirm('Delete broadcast?')) {
-                            onDelete(selectedBroadcast.id);
+            {
+                selectedBroadcast && (
+                    <BroadcastDetailPopup
+                        broadcast={selectedBroadcast}
+                        onClose={() => setSelectedBroadcast(null)}
+                        onViewRecipients={() => {
+                            setViewRecipientsId(selectedBroadcast.id);
                             setSelectedBroadcast(null);
-                        }
-                    }}
-                />
-            )}
+                        }}
+                        onDelete={() => {
+                            if (confirm('Delete broadcast?')) {
+                                onDelete(selectedBroadcast.id);
+                                setSelectedBroadcast(null);
+                            }
+                        }}
+                    />
+                )
+            }
 
             {/* Recipients Modal */}
-            {viewRecipientsId && (
-                <BroadcastRecipientsModal
-                    broadcastId={viewRecipientsId}
-                    onClose={() => setViewRecipientsId(null)}
-                />
-            )}
-        </div>
+            {
+                viewRecipientsId && (
+                    <BroadcastRecipientsModal
+                        broadcastId={viewRecipientsId}
+                        onClose={() => setViewRecipientsId(null)}
+                    />
+                )
+            }
+        </div >
     );
 }
 
