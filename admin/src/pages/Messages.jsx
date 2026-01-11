@@ -818,7 +818,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
             if (searchFilters.status === 'scheduled' && !isScheduled) return false;
         }
 
-        if (searchFilters.priority && b.priority != searchFilters.priority) return false;
+        if (searchFilters.priority && (b.priority || 3) != searchFilters.priority) return false;
         if (searchFilters.maxViews && b.max_views != searchFilters.maxViews) return false;
 
         if (searchFilters.startDate && new Date(b.start_time) < searchFilters.startDate) return false;
