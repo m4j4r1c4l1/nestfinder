@@ -1036,7 +1036,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     borderRadius: '6px',
                     fontSize: '0.8rem',
                     flexWrap: 'wrap',
-                    border: '1px solid cyan' // DEBUG
+                    flexWrap: 'wrap'
                 }}>
                     {/* Total Count */}
                     <span style={{
@@ -1174,7 +1174,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Timeline Visualization */}
-                <div style={{ position: 'relative', zIndex: 1, margin: '0.375rem 2rem 0.75rem 1rem', border: '1px solid magenta' }}>
+                <div style={{ position: 'relative', zIndex: 1, margin: '0.375rem 2rem 0.75rem 1rem' }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
                         onBroadcastClick={setSelectedBroadcast}
@@ -1183,7 +1183,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 </div>
 
-                <div style={{ height: '600px', overflowY: 'auto', background: '#1e293b', position: 'relative', border: '1px solid yellow', boxSizing: 'border-box' }}>
+                <div style={{ height: '600px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', boxSizing: 'border-box' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
@@ -3210,41 +3210,22 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
         return () => el.removeEventListener('wheel', handler);
     }, [isInitialized]);
 
-    // 1. Initial Auto-Scale (Run once when broadcasts load)
+    // 1. Initial Scale (Fixed 9-hour window centered on NOW)
     useEffect(() => {
-        if (!broadcasts.length) return;
+        if (isInitialized) return;
 
-        // Find absolute min/max of all valid broadcasts
-        let min = Infinity;
-        let max = -Infinity;
-        let validCount = 0;
+        // 9 hours total span
+        const duration = 9 * 60 * 60 * 1000;
+        const now = new Date().getTime();
 
-        broadcasts.forEach(b => {
-            const s = new Date(b.start_time).getTime();
-            const e = new Date(b.end_time).getTime();
-            if (!isNaN(s) && !isNaN(e)) {
-                if (s < min) min = s;
-                if (e > max) max = e;
-                validCount++;
-            }
-        });
+        // Center: Start = Now - 4.5 hours
+        const start = now - (duration / 2);
 
-        if (validCount > 0) {
-            // Exact fit: Start at min, End at max
-            // Ensure at least 1 hour window if range is tiny
-            const range = max - min;
-            const minDuration = 3600000; // 1 hr
-
-            // Only set if significantly different or not initialized
-            if (!isInitialized) {
-                setViewportStart(min);
-                const initDur = Math.max(range, minDuration);
-                setViewportDuration(initDur);
-                setInitialViewportDuration(initDur);
-                setIsInitialized(true);
-            }
-        }
-    }, [broadcasts, isInitialized]);
+        setViewportStart(start);
+        setViewportDuration(duration);
+        setInitialViewportDuration(duration);
+        setIsInitialized(true);
+    }, [isInitialized]);
 
     // 2. Swimlane Logic
     // REF to latest handlers for global listener
