@@ -2527,7 +2527,7 @@ const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setLogs(data.logs || []);
+                setHistory(data.logs || []);
                 setTotalLogs(data.total || 0);
             }
         } catch (err) {
@@ -2574,8 +2574,8 @@ const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
     };
 
     // Server-side pagination is now used
-    const sortedLogs = logs;
-    const paginatedLogs = logs;
+    const sortedLogs = history;
+    const paginatedLogs = history;
     const totalPages = Math.ceil(totalLogs / pageSize);
 
     const handleSort = (column) => {
@@ -2756,7 +2756,7 @@ const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
                                 })}
                             </tbody>
                         </table>
-                        {logs.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
+                        {history.length === 0 && !loading && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No history found</div>}
                     </div>
                 </div>
             </div>
