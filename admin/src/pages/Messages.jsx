@@ -3351,15 +3351,9 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
     useEffect(() => {
         const fetchViews = async () => {
             try {
-                const token = localStorage.getItem('nestfinder_admin_token');
-                // Correct endpoint as implemented in backend
-                const res = await fetch(`${API_URL}/admin/broadcasts/${broadcastId}/views`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setViews(data.views || []);
-                }
+                // Use adminApi to ensure correct base URL (/api) and headers
+                const data = await adminApi.fetch(`/admin/broadcasts/${broadcastId}/views`);
+                setViews(data.views || []);
             } catch (e) { console.error(e); }
             finally { setLoading(false); }
         };
