@@ -4333,16 +4333,34 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                 background: '#1e293b',
                                 padding: '8px',
                                 borderRadius: '6px',
-                                border: '1px solid #334155'
+                                border: '1px solid #334155',
+                                position: 'relative',
+                                marginTop: '12px' // Space for icon
                             }}>
+                                {/* Clock Icon */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-10px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    background: '#1e293b',
+                                    border: '1px solid #334155',
+                                    borderRadius: '50%',
+                                    width: '20px', height: '20px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '12px'
+                                }}>
+                                    🕒
+                                </div>
+
                                 <span style={{ color: '#94a3b8', fontWeight: 600 }}>Start:</span>
                                 <span style={{ fontFamily: 'monospace' }}>
-                                    {new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {formatDateTimeCET(new Date(s).toISOString())}
                                 </span>
 
                                 <span style={{ color: '#94a3b8', fontWeight: 600 }}>End:</span>
                                 <span style={{ fontFamily: 'monospace' }}>
-                                    {new Date(e).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(e).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {formatDateTimeCET(new Date(e).toISOString())}
                                 </span>
                             </div>
 
@@ -4350,17 +4368,17 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                             {hoveredItem.image_url && (
                                 <div style={{
                                     width: '100%',
-                                    height: '140px', // Slightly larger for better view
+                                    // Height adjusts to content but with max limit to prevent huge popups
+                                    maxHeight: '200px',
                                     borderRadius: '6px',
                                     overflow: 'hidden',
-                                    border: '1px solid #334155',
                                     background: '#0f172a',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                                 }}>
                                     <img
                                         src={hoveredItem.image_url}
                                         alt="Broadcast"
-                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                        style={{ width: '100%', height: 'auto', maxHeight: '200px', objectFit: 'contain' }}
                                     />
                                 </div>
                             )}
