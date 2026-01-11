@@ -1074,7 +1074,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     options={[
                                         // 'All' removed; default state handles filter
                                         { value: 'active', label: 'Active', color: '#22c55e' },
-                                        { value: 'scheduled', label: 'Scheduled', color: '#eab308' },
+                                        { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' }, // Fixed: Matches Stats Blue (was Yellow)
                                         { value: 'inactive', label: 'Inactive', color: '#94a3b8' }
                                     ]}
                                     placeholder="Filter by Status"
@@ -1405,8 +1405,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             </div>
 
                                             {/* Bottom Line: Professional Layout */}
-                                            {/* Removed borderTop to remove horizontal separator */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid #334155', borderTop: 'none', borderTopColor: 'transparent', height: '26px', boxSizing: 'border-box' }}>
+                                            {/* Removed all internal borders for a clean look */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: 'none', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
