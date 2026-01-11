@@ -3651,7 +3651,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
         });
     };
 
-    const handleMouseUp = async () => {
+    const handleMouseUp = () => {
         if (dragging && onBroadcastUpdate) {
             const timeChanged = dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd;
             const laneChanged = dragging.newLane !== undefined && dragging.newLane !== dragging.originalLane;
@@ -3665,7 +3665,8 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                 if (laneChanged) {
                     updates.lane = dragging.newLane;
                 }
-                await onBroadcastUpdate(dragging.id, updates);
+                // Don't await here, so the dragging state clears immediately
+                onBroadcastUpdate(dragging.id, updates);
             }
         }
         setDragging(null);

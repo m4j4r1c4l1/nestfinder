@@ -554,7 +554,7 @@ const Observability = () => {
                                     </div>
 
                                     {/* 3 columns Badge Grid (9 items) */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '0.4rem', width: '100%', maxWidth: '550px', marginTop: '-65px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem', width: '100%', maxWidth: '450px', marginTop: '-65px', marginLeft: '-27px' }}>
                                         {[
                                             // Row 1
                                             { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9' },
@@ -585,7 +585,7 @@ const Observability = () => {
                                                     background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
                                                     border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
                                                     borderRadius: '8px', padding: '0.5rem 0.75rem',
-                                                    minHeight: '52px', overflow: 'hidden'
+                                                    minHeight: '52px'
                                                 }}>
                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                                         <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
