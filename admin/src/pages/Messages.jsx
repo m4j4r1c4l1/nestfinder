@@ -8,6 +8,118 @@ import { adminApi } from '../api';
 const APP_URL = 'https://m4j4r1c4l1.github.io/nestfinder/';
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+// --- Custom Badge Dropdown Component ---
+const BadgeSelect = ({ value, onChange, options, placeholder, type = 'status' }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = React.useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(opt => opt.value === value);
+
+    const getBadgeStyle = (optValue, isSelected) => {
+        let bg, color, border;
+
+        if (type === 'status') {
+            if (optValue === 'all') { bg = '#334155'; color = '#94a3b8'; border = '#475569'; }
+            else if (optValue === 'active') { bg = 'rgba(34, 197, 94, 0.2)'; color = '#22c55e'; border = 'rgba(34, 197, 94, 0.3)'; }
+            else if (optValue === 'scheduled') { bg = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; border = 'rgba(59, 130, 246, 0.3)'; }
+            else if (optValue === 'inactive') { bg = 'rgba(148, 163, 184, 0.2)'; color = '#94a3b8'; border = 'rgba(148, 163, 184, 0.3)'; }
+        } else if (type === 'priority') {
+            if (optValue === 'all') { bg = '#334155'; color = '#94a3b8'; border = '#475569'; }
+            else {
+                const pColor = optValue <= 1 ? '#ef4444' : optValue === 2 ? '#f97316' : optValue === 3 ? '#eab308' : optValue === 4 ? '#3b82f6' : '#22c55e';
+                bg = `${pColor}20`; color = pColor; border = `${pColor}40`;
+            }
+        }
+
+        return {
+            padding: '0.2rem 0.6rem',
+            borderRadius: '4px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            background: bg,
+            color: color,
+            border: `1px solid ${border}`,
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+            display: 'inline-block',
+            textAlign: 'center',
+            minWidth: '80px'
+        };
+    };
+
+    return (
+        <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
+            <div
+                onClick={() => setIsOpen(!isOpen)}
+                style={{
+                    background: '#0f172a',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    padding: '0.5rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    minHeight: '38px',
+                    boxSizing: 'border-box'
+                }}
+            >
+                {selectedOption ? (
+                    <span style={getBadgeStyle(selectedOption.value, true)}>{selectedOption.label}</span>
+                ) : (
+                    <span style={{ color: '#94a3b8' }}>{placeholder}</span>
+                )}
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>▼</span>
+            </div>
+
+            {isOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: '#0f172a',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    marginTop: '4px',
+                    zIndex: 50,
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                    overflow: 'hidden'
+                }}>
+                    {options.map(opt => (
+                        <div
+                            key={opt.value}
+                            onClick={() => { onChange({ target: { value: opt.value } }); setIsOpen(false); }}
+                            style={{
+                                padding: '0.5rem',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid #1e293b',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                            <span style={getBadgeStyle(opt.value, false)}>{opt.label}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 // Notification templates
 const templates = {
     share_app: {
@@ -583,7 +695,6 @@ const Messages = () => {
                                                                 textOverflow: 'ellipsis',
                                                                 textAlign: 'center'
                                                             }}
-                                                            title={tmpl.name}
                                                             onMouseEnter={e => {
                                                                 if (activeBroadcastTemplate !== tmpl.id) {
                                                                     e.currentTarget.style.color = '#e2e8f0';
@@ -786,8 +897,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     const [searchFilters, setSearchFilters] = useState({
         searchText: '',
         status: 'all', // all, active, inactive, scheduled
-        priority: '',
-        maxViews: '',
+        priority: 'all',
+        maxViewsNum: '', // Changed to maxViewsNum for number input
         startDate: null,
         endDate: null
     });
@@ -824,15 +935,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
             if (searchFilters.status === 'scheduled' && !isScheduled) return false;
         }
 
-        if (searchFilters.priority && (b.priority || 3) != searchFilters.priority) return false;
-        if (searchFilters.maxViews) {
-            if (searchFilters.maxViews === 'limited') {
-                if (!b.max_views) return false;
-            } else if (searchFilters.maxViews === 'unlimited') {
-                if (b.max_views) return false;
-            } else {
-                if (b.max_views != searchFilters.maxViews) return false;
-            }
+        if (searchFilters.priority !== 'all' && (b.priority || 3) != searchFilters.priority) return false;
+        if (searchFilters.maxViewsNum) {
+            if (!b.max_views || b.max_views != parseInt(searchFilters.maxViewsNum)) return false;
         }
 
         if (searchFilters.startDate && new Date(b.start_time) < searchFilters.startDate) return false;
@@ -902,10 +1007,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
 
                         {/* Clear */}
-                        {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViews || searchFilters.priority) && (
+                        {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViewsNum || searchFilters.priority !== 'all') && (
                             <button
                                 className="btn btn-secondary"
-                                onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: '', maxViews: '', startDate: null, endDate: null })}
+                                onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', startDate: null, endDate: null })}
                                 style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
                             >
                                 ✕ Clear
@@ -954,70 +1059,72 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             </div>
 
                             {/* Status Filter - Badge Style */}
-                            <div style={{ flex: '0 1 160px' }}>
-                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Status</label>
-                                <select
-                                    className="form-input"
-                                    style={{
-                                        padding: '0.4rem',
-                                        fontSize: '0.9rem',
-                                        width: '100%',
-                                        background: '#0f172a',
-                                        color: searchFilters.status === 'active' ? '#22c55e' :
-                                            searchFilters.status === 'scheduled' ? '#eab308' :
-                                                searchFilters.status === 'inactive' ? '#94a3b8' : '#f8fafc',
-                                        fontWeight: searchFilters.status !== 'all' ? 600 : 400
-                                    }}
+                            <div style={{ flex: '1 1 180px' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
+                                    Status
+                                </label>
+                                <BadgeSelect
                                     value={searchFilters.status}
-                                    onChange={e => setSearchFilters(prev => ({ ...prev, status: e.target.value }))}
-                                >
-                                    <option value="all" style={{ color: '#f8fafc' }}>All Status</option>
-                                    <option value="active" style={{ color: '#22c55e' }}>● ACTIVE</option>
-                                    <option value="scheduled" style={{ color: '#3b82f6' }}>● SCHEDULED</option>
-                                    <option value="inactive" style={{ color: '#94a3b8' }}>● INACTIVE</option>
-                                </select>
-                            </div>
-
-                            {/* Max Views */}
-                            <div style={{ flex: '0 1 100px' }}>
-                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Max Views</label>
-                                <input
-                                    type="number"
-                                    className="form-input"
-                                    style={{ padding: '0.4rem', fontSize: '0.9rem' }}
-                                    placeholder="Any"
-                                    value={searchFilters.maxViews}
-                                    onChange={e => setSearchFilters(prev => ({ ...prev, maxViews: e.target.value }))}
+                                    onChange={(e) => setSearchFilters(prev => ({ ...prev, status: e.target.value }))}
+                                    type="status"
+                                    options={[
+                                        { value: 'all', label: 'All Status' },
+                                        { value: 'active', label: 'Active' },
+                                        { value: 'scheduled', label: 'Scheduled' },
+                                        { value: 'inactive', label: 'Inactive' }
+                                    ]}
+                                    placeholder="Status"
                                 />
                             </div>
 
-                            {/* Priority - Badge Style */}
-                            <div style={{ flex: '0 1 120px' }}>
-                                <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Priority</label>
-                                <select
-                                    className="form-input"
-                                    style={{
-                                        padding: '0.4rem',
-                                        fontSize: '0.9rem',
-                                        width: '100%',
-                                        background: '#0f172a',
-                                        color: searchFilters.priority === '1' ? '#ef4444' :
-                                            searchFilters.priority === '2' ? '#f97316' :
-                                                searchFilters.priority === '3' ? '#eab308' :
-                                                    searchFilters.priority === '4' ? '#3b82f6' :
-                                                        searchFilters.priority === '5' ? '#22c55e' : '#f8fafc',
-                                        fontWeight: searchFilters.priority ? 600 : 400
-                                    }}
+                            {/* Priority Filter */}
+                            <div style={{ flex: 1, minWidth: '140px' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
+                                    Priority
+                                </label>
+                                <BadgeSelect
                                     value={searchFilters.priority}
-                                    onChange={e => setSearchFilters(prev => ({ ...prev, priority: e.target.value }))}
-                                >
-                                    <option value="" style={{ color: '#f8fafc' }}>All Priority</option>
-                                    <option value="1" style={{ color: '#ef4444' }}>● P1 Critical</option>
-                                    <option value="2" style={{ color: '#f97316' }}>● P2 High</option>
-                                    <option value="3" style={{ color: '#eab308' }}>● P3 Medium</option>
-                                    <option value="4" style={{ color: '#3b82f6' }}>● P4 Normal</option>
-                                    <option value="5" style={{ color: '#22c55e' }}>● P5 Low</option>
-                                </select>
+                                    onChange={(e) => setSearchFilters(prev => ({ ...prev, priority: e.target.value }))}
+                                    type="priority"
+                                    options={[
+                                        { value: 'all', label: 'All Priorities' },
+                                        { value: 1, label: 'P1 - Critical' },
+                                        { value: 2, label: 'P2 - High' },
+                                        { value: 3, label: 'P3 - Medium' },
+                                        { value: 4, label: 'P4 - Low' },
+                                        { value: 5, label: 'P5 - Minimal' }
+                                    ]}
+                                    placeholder="Priority"
+                                />
+                            </div>
+
+                            {/* Max Views Filter */}
+                            <div style={{ flex: 1, minWidth: '100px' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
+                                    Max Views
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="Filter by Max Views..."
+                                        value={searchFilters.maxViewsNum}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            if (val < 0) return; // Prevent negative input
+                                            setSearchFilters(prev => ({ ...prev, maxViewsNum: e.target.value }));
+                                        }}
+                                        style={{
+                                            background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.5rem',
+                                            fontSize: '0.9rem', color: '#f8fafc', width: '100%', outline: 'none', height: '38px' // Consistent height
+                                        }}
+                                    />
+                                    {searchFilters.maxViewsNum && (
+                                        <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#64748b' }}>
+                                            views
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -1047,7 +1154,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         display: 'flex', alignItems: 'center', gap: '0.4rem',
                         cursor: 'pointer'
                     }}
-                        onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: '', maxViews: '', startDate: null, endDate: null })}
+                        onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', startDate: null, endDate: null })}
                     >
                         TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px' }}>{broadcasts.length}</span>
                     </span>
@@ -1125,7 +1232,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     border: searchFilters.priority === String(p) ? `1px solid ${color}` : `1px solid ${color}40`,
                                     cursor: 'pointer', transition: 'filter 0.1s'
                                 }}
-                                    onClick={() => setSearchFilters(prev => ({ ...prev, priority: prev.priority === String(p) ? '' : String(p) }))}
+                                    onClick={() => setSearchFilters(prev => ({ ...prev, priority: prev.priority === String(p) ? 'all' : String(p) }))}
                                     onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'priority', value: p }); }}
                                     onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                                 >
@@ -1143,13 +1250,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.maxViews === 'limited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
+                            background: searchFilters.maxViewsNum && broadcastStats.withMaxViews > 0 ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
                             color: '#06b6d4',
-                            border: searchFilters.maxViews === 'limited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
+                            border: searchFilters.maxViewsNum && broadcastStats.withMaxViews > 0 ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
                             display: 'flex', alignItems: 'center', gap: '0.3rem',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViews: prev.maxViews === 'limited' ? '' : 'limited' }))}
+                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsNum: prev.maxViewsNum ? '' : '1' }))} // Toggle to show limited
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'limited' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1158,13 +1265,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.maxViews === 'unlimited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
+                            background: !searchFilters.maxViewsNum && broadcastStats.withoutMaxViews > 0 ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
                             color: '#06b6d4',
-                            border: searchFilters.maxViews === 'unlimited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
+                            border: !searchFilters.maxViewsNum && broadcastStats.withoutMaxViews > 0 ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
                             display: 'flex', alignItems: 'center', gap: '0.3rem',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViews: prev.maxViews === 'unlimited' ? '' : 'unlimited' }))}
+                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsNum: prev.maxViewsNum ? '' : '0' }))} // Toggle to show unlimited (0 for filter logic)
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'unlimited' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1275,7 +1382,14 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             }}
                                         >
                                             {/* Top Line: Title & Delete */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #ff00ff', lineHeight: 1 }}>
+                                            {/* Matches logic and spacing of Bottom Line */}
+                                            <div style={{
+                                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                                border: '1px solid #ff00ff',
+                                                paddingTop: '0.2rem', paddingBottom: '0.3rem', // Equal padding to Bottom Line
+                                                lineHeight: 1,
+                                                minHeight: '26px' // Force expected height
+                                            }}>
                                                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem' }}>
                                                     {b.title || 'Untitled Broadcast'}
                                                 </div>
