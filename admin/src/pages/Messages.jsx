@@ -1153,7 +1153,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; }}
                         >
-                            👀 {broadcastStats.withMaxViews}
+                            👀 <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withMaxViews}</span>
                         </span>
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
@@ -1168,7 +1168,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; }}
                         >
-                            👁 ∞ {broadcastStats.withoutMaxViews}
+                            👁 ∞ <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withoutMaxViews}</span>
                         </span>
                     </div>
                 </div>
