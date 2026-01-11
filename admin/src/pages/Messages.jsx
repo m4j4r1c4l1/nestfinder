@@ -27,18 +27,15 @@ const BadgeSelect = ({ value, onChange, options, placeholder, type = 'status' })
 
     const getBadgeStyle = (optValue, isSelected) => {
         let bg, color, border;
+        const option = options.find(o => o.value === optValue);
 
-        if (type === 'status') {
-            if (optValue === 'all') { bg = '#334155'; color = '#94a3b8'; border = '#475569'; }
-            else if (optValue === 'active') { bg = 'rgba(34, 197, 94, 0.2)'; color = '#22c55e'; border = 'rgba(34, 197, 94, 0.3)'; }
-            else if (optValue === 'scheduled') { bg = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; border = 'rgba(59, 130, 246, 0.3)'; }
-            else if (optValue === 'inactive') { bg = 'rgba(148, 163, 184, 0.2)'; color = '#94a3b8'; border = 'rgba(148, 163, 184, 0.3)'; }
-        } else if (type === 'priority') {
-            if (optValue === 'all') { bg = '#334155'; color = '#94a3b8'; border = '#475569'; }
-            else {
-                const pColor = optValue <= 1 ? '#ef4444' : optValue === 2 ? '#f97316' : optValue === 3 ? '#eab308' : optValue === 4 ? '#3b82f6' : '#22c55e';
-                bg = `${pColor}20`; color = pColor; border = `${pColor}40`;
-            }
+        if (option && option.color) {
+            color = option.color;
+            bg = `${color}20`; // 12% opacity
+            border = `${color}40`; // 25% opacity
+        } else {
+            // Fallback / Default
+            bg = '#334155'; color = '#94a3b8'; border = '#475569';
         }
 
         return {
@@ -1067,26 +1064,25 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             </div>
 
                             {/* Status Filter - Badge Style */}
-                            <div style={{ flex: '1 1 180px' }}>
+                            <div style={{ flex: '0 0 140px' }}> {/* Fixed width for consistent layout */}
                                 <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
                                     Status
                                 </label>
                                 <BadgeSelect
                                     value={searchFilters.status}
-                                    onChange={(e) => setSearchFilters(prev => ({ ...prev, status: e.target.value }))}
-                                    type="status"
+                                    onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val }))}
                                     options={[
-                                        { value: 'all', label: 'All Status' },
-                                        { value: 'active', label: 'Active' },
-                                        { value: 'scheduled', label: 'Scheduled' },
-                                        { value: 'inactive', label: 'Inactive' }
+                                        // 'All' removed; default state handles filter
+                                        { value: 'active', label: 'Active', color: '#22c55e' },
+                                        { value: 'scheduled', label: 'Scheduled', color: '#eab308' },
+                                        { value: 'inactive', label: 'Inactive', color: '#94a3b8' }
                                     ]}
                                     placeholder="Filter by Status"
                                 />
                             </div>
 
                             {/* Priority Filter */}
-                            <div style={{ flex: 1, minWidth: '140px' }}>
+                            <div style={{ flex: '0 0 140px' }}> {/* Fixed width */}
                                 <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem', display: 'block' }}>
                                     Priority
                                 </label>
@@ -1094,12 +1090,11 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     value={searchFilters.priority}
                                     onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val }))}
                                     options={[
-                                        { value: 'all', label: 'All Priority' },
-                                        { value: 1, label: 'P1 - Critical' },
-                                        { value: 2, label: 'P2 - High' },
-                                        { value: 3, label: 'P3 - Medium' },
-                                        { value: 4, label: 'P4 - Low' },
-                                        { value: 5, label: 'P5 - Minimal' }
+                                        { value: '1', label: 'P1 - Critical', color: '#ef4444' },
+                                        { value: '2', label: 'P2 - High', color: '#f97316' },
+                                        { value: '3', label: 'P3 - Medium', color: '#eab308' },
+                                        { value: '4', label: 'P4 - Low', color: '#3b82f6' },
+                                        { value: '5', label: 'P5 - Minimal', color: '#22c55e' }
                                     ]}
                                     placeholder="Filter by Priority"
                                 />
