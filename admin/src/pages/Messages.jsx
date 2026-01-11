@@ -1568,66 +1568,66 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                             borderRadius: '4px',
                                                             transition: 'all 0.2s',
                                                             opacity: 0.7
-                                                        title="Delete"
-                                                            >
+                                                        }}
+                                                    >
                                                         🗑️
-                                                </button>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                        </div>
-                        );
+                                    );
                                 })}
-                    </div>
+                            </div>
                         )}
+                    </div>
                 </div>
+
+                {totalPages > 1 && (
+                    <PaginationControls
+                        page={page}
+                        totalPages={totalPages}
+                        setPage={setPage}
+                        pageSize={pageSize}
+                        totalItems={filteredBroadcasts.length}
+                        currentCount={paginatedBroadcasts.length}
+                    />
+                )}
             </div>
 
-            {totalPages > 1 && (
-                <PaginationControls
-                    page={page}
-                    totalPages={totalPages}
-                    setPage={setPage}
-                    pageSize={pageSize}
-                    totalItems={filteredBroadcasts.length}
-                    currentCount={paginatedBroadcasts.length}
-                />
-            )}
-        </div>
-
-            {/* Broadcast Detail Popup */ }
-    {
-        selectedBroadcast && (
-            <BroadcastDetailPopup
-                broadcast={selectedBroadcast}
-                onClose={() => setSelectedBroadcast(null)}
-                onViewRecipients={() => {
-                    setViewRecipientsId(selectedBroadcast.id);
-                    setSelectedBroadcast(null);
-                }}
-                onDelete={() => {
-                    setConfirmModal({
-                        show: true,
-                        title: 'Delete Broadcast',
-                        message: 'Are you sure you want to delete this broadcast?',
-                        onConfirm: () => {
-                            onDelete(selectedBroadcast.id);
+            {/* Broadcast Detail Popup */}
+            {
+                selectedBroadcast && (
+                    <BroadcastDetailPopup
+                        broadcast={selectedBroadcast}
+                        onClose={() => setSelectedBroadcast(null)}
+                        onViewRecipients={() => {
+                            setViewRecipientsId(selectedBroadcast.id);
                             setSelectedBroadcast(null);
-                        }
-                    });
-                }}
-            />
-        )
-    }
+                        }}
+                        onDelete={() => {
+                            setConfirmModal({
+                                show: true,
+                                title: 'Delete Broadcast',
+                                message: 'Are you sure you want to delete this broadcast?',
+                                onConfirm: () => {
+                                    onDelete(selectedBroadcast.id);
+                                    setSelectedBroadcast(null);
+                                }
+                            });
+                        }}
+                    />
+                )
+            }
 
-    {/* Recipients Modal */ }
-    {
-        viewRecipientsId && (
-            <BroadcastRecipientsModal
-                broadcastId={viewRecipientsId}
-                onClose={() => setViewRecipientsId(null)}
-            />
-        )
-    }
+            {/* Recipients Modal */}
+            {
+                viewRecipientsId && (
+                    <BroadcastRecipientsModal
+                        broadcastId={viewRecipientsId}
+                        onClose={() => setViewRecipientsId(null)}
+                    />
+                )
+            }
         </div >
     );
 }
