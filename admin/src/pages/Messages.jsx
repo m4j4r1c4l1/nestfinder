@@ -1385,9 +1385,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             <div style={{
                                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                                 border: '1px solid #ff00ff',
-                                                paddingTop: '0.2rem', paddingBottom: '0.3rem', // Equal padding to Bottom Line
+                                                paddingTop: '0.15rem', paddingBottom: '0.15rem', // Reduced padding to match Blue Box height
                                                 lineHeight: 1,
-                                                minHeight: '26px' // Force expected height
+                                                // Removed minHeight to let content determine height like Blue Box
                                             }}>
                                                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem' }}>
                                                     {b.title || 'Untitled Broadcast'}
