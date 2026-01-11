@@ -1398,9 +1398,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             <div style={{
                                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                                 border: '1px solid #ff00ff',
-                                                paddingTop: '0.1rem', paddingBottom: '0.1rem', // Reduced padding to match Blue Box height
+                                                height: '26px', // Fixed height to match Blue Box
+                                                padding: '0', // content centered by flex
                                                 lineHeight: 1,
-                                                // Removed minHeight to let content determine height like Blue Box
+                                                boxSizing: 'border-box'
                                             }}>
                                                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem' }}>
                                                     {b.title || 'Untitled Broadcast'}
@@ -1419,7 +1420,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             </div>
 
                                             {/* Bottom Line: Professional Layout */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid #00ffff' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid #00ffff', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
