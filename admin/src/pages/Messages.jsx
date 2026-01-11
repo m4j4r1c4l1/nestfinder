@@ -1251,7 +1251,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             style={{
                                                 background: '#0f172a',
                                                 borderRadius: '8px',
-                                                padding: '0.1rem 0.5rem 0.2rem 0.5rem',
+                                                padding: '0.6rem 0.75rem',
                                                 cursor: 'pointer',
                                                 borderTop: '1px solid #334155',
                                                 borderRight: '1px solid #334155',
@@ -1261,7 +1261,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 position: 'relative',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                gap: '0',
+                                                gap: '0.4rem',
                                                 boxShadow: isHighlighted ? `0 0 20px ${priorityColor}80, 0 0 40px ${priorityColor}40` : 'none',
                                                 transform: isHighlighted ? 'scale(1.02)' : 'none'
                                             }}
@@ -1275,7 +1275,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             }}
                                         >
                                             {/* Top Line: Title & Delete */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', border: '1px solid #ff00ff' }}>
                                                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem', lineHeight: '1.2' }}>
                                                     {b.title || 'Untitled Broadcast'}
                                                 </div>
@@ -1293,7 +1293,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             </div>
 
                                             {/* Bottom Line: Professional Layout */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid #00ffff' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
