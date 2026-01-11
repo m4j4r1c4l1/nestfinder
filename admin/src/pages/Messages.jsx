@@ -1183,6 +1183,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 </div>
 
+                {/* Horizontal Separator */}
+                <div style={{
+                    height: '1px',
+                    background: '#334155',
+                    margin: '0 2rem 0.75rem 1rem' // Matches left/right margins of timeline/list
+                }} />
+
                 <div style={{ height: '600px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', boxSizing: 'border-box' }}>
                         {filteredBroadcasts.length === 0 ? (
