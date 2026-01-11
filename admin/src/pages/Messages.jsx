@@ -1401,21 +1401,12 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem' }}>
                                                     {b.title || 'Untitled Broadcast'}
                                                 </div>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onDelete(b.id);
-                                                    }}
-                                                    className="btn-icon danger"
-                                                    title="Delete"
-                                                    style={{ padding: '0', fontSize: '1rem', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.8, display: 'flex', alignItems: 'center' }}
-                                                >
-                                                    🗑️
-                                                </button>
+                                                {/* Delete button moved to bottom row */}
                                             </div>
 
                                             {/* Bottom Line: Professional Layout */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid #334155', borderTop: 'none', height: '26px', boxSizing: 'border-box' }}>
+                                            {/* Removed borderTop to remove horizontal separator */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid #334155', borderTop: 'none', borderTopColor: 'transparent', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -1492,6 +1483,22 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
                                                         </span>
                                                     </div>
+
+                                                    {/* Vertical Separator for Delete Icon */}
+                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0 0.2rem' }}></div>
+
+                                                    {/* Delete Button (Moved from top) */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onDelete(b.id);
+                                                        }}
+                                                        className="btn-icon danger"
+                                                        title="Delete"
+                                                        style={{ padding: '0', fontSize: '1rem', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.8, display: 'flex', alignItems: 'center', lineHeight: 1 }}
+                                                    >
+                                                        🗑️
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
