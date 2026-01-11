@@ -82,55 +82,69 @@ router.get('/broadcast/active', requireUser, (req, res) => {
 // Mark broadcast as read (when user dismisses/closes it)
 router.post('/broadcast/:id/read', requireUser, (req, res) => {
   const userId = req.user.id;
-  const broadcastId = req.params.id;
+  const broadcastId = parseInt(req.params.id); // Valid integer
 
-  // Ensure record exists and update to read status
-  const view = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
-
-  if (view) {
-    run(`
-      UPDATE broadcast_views 
-      SET status = 'read', read_at = CURRENT_TIMESTAMP, dismissed = 1
-      WHERE broadcast_id = ? AND user_id = ?
-    `, [broadcastId, userId]);
-  } else {
-    run(`
-      INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
-      VALUES (?, ?, 'read', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
-    `, [broadcastId, userId]);
+  if (isNaN(broadcastId)) {
+    return res.status(400).json({ error: 'Invalid broadcast ID' });
   }
 
-  // Persist to Inbox (Notifications table)
   try {
+    // Ensure record exists and update to read status
+    const view = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
+
+    if (view) {
+      run(`
+        UPDATE broadcast_views 
+        SET status = 'read', read_at = CURRENT_TIMESTAMP, dismissed = 1
+        WHERE broadcast_id = ? AND user_id = ?
+      `, [broadcastId, userId]);
+    } else {
+      run(`
+        INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
+        VALUES (?, ?, 'read', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
+      `, [broadcastId, userId]);
+    }
+
+    // Persist to Inbox (Notifications table)
     const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [broadcastId]);
     if (broadcast) {
+      const batchId = `broadcast_${broadcastId}`;
       const existing = get(
         'SELECT id FROM notifications WHERE user_id = ? AND batch_id = ?',
-        [userId, `broadcast_${broadcastId}`]
+        [userId, batchId]
       );
 
       console.log(`[Broadcast Read] ID: ${broadcastId}, User: ${userId}, Existing Notif: ${existing ? 'Yes' : 'No'}`);
 
       if (!existing) {
-        run(`
-          INSERT INTO notifications (user_id, title, body, type, image_url, batch_id, read, read_at, created_at)
-          VALUES (?, ?, ?, 'broadcast', ?, ?, 1, CURRENT_TIMESTAMP, ?)
-        `, [
-          userId,
-          broadcast.title || '📢 Announcement',
-          broadcast.message,
-          broadcast.image_url || null,
-          `broadcast_${broadcastId}`,
-          broadcast.created_at
-        ]);
-        console.log(`[Broadcast Read] Inserted notification for broadcast ${broadcastId}`);
+        // We insert it as READ (since they just dismissed it)
+        try {
+          // Check for image_url, ensure it's not undefined
+          const imageUrl = broadcast.image_url || null;
+
+          run(`
+            INSERT INTO notifications (user_id, title, body, type, image_url, batch_id, read, read_at, created_at, delivered, delivered_at)
+            VALUES (?, ?, ?, 'broadcast', ?, ?, 1, CURRENT_TIMESTAMP, ?, 1, CURRENT_TIMESTAMP)
+          `, [
+            userId,
+            broadcast.title || '📢 Announcement', // Ensure title fallback
+            broadcast.message,
+            imageUrl,
+            batchId,
+            broadcast.created_at || new Date().toISOString() // Fallback time
+          ]);
+          console.log(`[Broadcast Read] Inserted notification for broadcast ${broadcastId}`);
+        } catch (insertErr) {
+          console.error(`[Broadcast Read] Insert failed:`, insertErr);
+        }
       }
     }
-  } catch (err) {
-    console.error('[Broadcast Read] Failed to insert notification:', err);
-  }
 
-  res.json({ success: true });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[Broadcast Read] Error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // Get all points (with optional filters)
