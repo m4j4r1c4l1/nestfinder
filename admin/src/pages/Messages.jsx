@@ -3484,14 +3484,10 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 
                 {/* Stats */}
                 <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
                         <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
                             <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{total}</div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase' }}>Recorded Views</div>
-                        </div>
-                        <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{pendingCount}</div>
-                            <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase' }}>Sent</div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase' }}>Total</div>
                         </div>
                         <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                             <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{deliveredCount}</div>
