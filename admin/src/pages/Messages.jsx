@@ -1240,7 +1240,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             style={{
                                                 background: '#0f172a',
                                                 borderRadius: '8px',
-                                                padding: '0.25rem 0.75rem',
+                                                padding: '0.2rem 0.75rem',
                                                 cursor: 'pointer',
                                                 borderTop: '1px solid #334155',
                                                 borderRight: '1px solid #334155',
@@ -1265,7 +1265,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                         >
                                             {/* Top Line: Title & Delete */}
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem' }}>
+                                                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem', lineHeight: '1.2' }}>
                                                     {b.title || 'Untitled Broadcast'}
                                                 </div>
                                                 <button
@@ -1282,7 +1282,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             </div>
 
                                             {/* Bottom Line: Professional Layout */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', marginTop: '-2px' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
