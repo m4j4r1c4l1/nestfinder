@@ -2596,7 +2596,7 @@ const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
                         userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
                     }}>
-                        Total: {totalSent}
+                        Total: {totalLogs}
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button
