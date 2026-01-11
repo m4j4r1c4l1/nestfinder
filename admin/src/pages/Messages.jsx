@@ -74,10 +74,10 @@ const BadgeSelect = ({ value, onChange, options, placeholder, type = 'status' })
                     boxSizing: 'border-box'
                 }}
             >
-                {selectedOption ? (
+                {selectedOption && selectedOption.value !== 'all' ? (
                     <span style={getBadgeStyle(selectedOption.value, true)}>{selectedOption.label}</span>
                 ) : (
-                    <span style={{ color: '#94a3b8' }}>{placeholder}</span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{placeholder}</span>
                 )}
                 <span style={{ fontSize: '0.8rem', color: '#64748b' }}>▼</span>
             </div>
@@ -106,7 +106,7 @@ const BadgeSelect = ({ value, onChange, options, placeholder, type = 'status' })
                                 borderBottom: '1px solid #1e293b',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'flex-start'
                             }}
                             onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
                             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -1081,7 +1081,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                         { value: 'scheduled', label: 'Scheduled' },
                                         { value: 'inactive', label: 'Inactive' }
                                     ]}
-                                    placeholder="Status"
+                                    placeholder="Filter by Status"
                                 />
                             </div>
 
@@ -1092,17 +1092,16 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 </label>
                                 <BadgeSelect
                                     value={searchFilters.priority}
-                                    onChange={(e) => setSearchFilters(prev => ({ ...prev, priority: e.target.value }))}
-                                    type="priority"
+                                    onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val }))}
                                     options={[
-                                        { value: 'all', label: 'All Priorities' },
+                                        { value: 'all', label: 'All Priority' },
                                         { value: 1, label: 'P1 - Critical' },
                                         { value: 2, label: 'P2 - High' },
                                         { value: 3, label: 'P3 - Medium' },
                                         { value: 4, label: 'P4 - Low' },
                                         { value: 5, label: 'P5 - Minimal' }
                                     ]}
-                                    placeholder="Priority"
+                                    placeholder="Filter by Priority"
                                 />
                             </div>
 
@@ -1115,7 +1114,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     <input
                                         type="number"
                                         min="0"
-                                        placeholder="Filter by Max Views..."
+                                        placeholder="Max Views..."
                                         value={searchFilters.maxViewsNum}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value);
@@ -1399,7 +1398,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             <div style={{
                                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                                 border: '1px solid #ff00ff',
-                                                paddingTop: '0.15rem', paddingBottom: '0.15rem', // Reduced padding to match Blue Box height
+                                                paddingTop: '0.1rem', paddingBottom: '0.1rem', // Reduced padding to match Blue Box height
                                                 lineHeight: 1,
                                                 // Removed minHeight to let content determine height like Blue Box
                                             }}>
