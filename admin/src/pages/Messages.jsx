@@ -360,6 +360,11 @@ const Messages = () => {
     };
 
     const handleUpdateBroadcast = async (id, updates) => {
+        // Optimistic Update
+        setBroadcasts(prev => prev.map(b =>
+            b.id === id ? { ...b, ...updates } : b
+        ));
+
         try {
             await adminApi.fetch(`/admin/broadcasts/${id}`, {
                 method: 'PUT',
@@ -368,6 +373,7 @@ const Messages = () => {
             fetchData(); // Refresh data after update
         } catch (err) {
             console.error('Failed to update broadcast:', err);
+            fetchData(); // Revert on error
         }
     };
 
@@ -1137,9 +1143,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.maxViews === 'limited' ? '#33415540' : '#33415520',
-                            color: '#94a3b8',
-                            border: searchFilters.maxViews === 'limited' ? '1px solid #94a3b8' : '1px solid #33415540',
+                            background: searchFilters.maxViews === 'limited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
+                            color: '#06b6d4',
+                            border: searchFilters.maxViews === 'limited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
                             display: 'flex', alignItems: 'center', gap: '0.3rem',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
@@ -1152,9 +1158,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.maxViews === 'unlimited' ? '#33415540' : '#33415520',
-                            color: '#94a3b8',
-                            border: searchFilters.maxViews === 'unlimited' ? '1px solid #94a3b8' : '1px solid #33415540',
+                            background: searchFilters.maxViews === 'unlimited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
+                            color: '#06b6d4',
+                            border: searchFilters.maxViews === 'unlimited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
                             display: 'flex', alignItems: 'center', gap: '0.3rem',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
@@ -1162,7 +1168,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; }}
                         >
-                            ✖️👀 {broadcastStats.withoutMaxViews}
+                            👁 ∞ {broadcastStats.withoutMaxViews}
                         </span>
                     </div>
                 </div>
@@ -1320,12 +1326,6 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                             overflow: 'hidden'
                                                         }}>
                                                             👁 ∞
-                                                            <div style={{
-                                                                position: 'absolute',
-                                                                top: 0, right: 0, bottom: 0, left: 0,
-                                                                background: 'linear-gradient(to bottom left, transparent calc(50% - 1px), #06b6d4 calc(50% - 1px), #06b6d4 calc(50% + 1px), transparent calc(50% + 1px))',
-                                                                pointerEvents: 'none'
-                                                            }} />
                                                         </span>
                                                     )}
                                                     {b.image_url && (
