@@ -1397,7 +1397,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             {/* Matches logic and spacing of Bottom Line */}
                                             <div style={{
                                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                                border: '1px solid #ff00ff',
+                                                // border: '1px solid #ff00ff', // REMOVED DEBUG BORDER
                                                 height: '26px', // Fixed height to match Blue Box
                                                 padding: '0', // content centered by flex
                                                 lineHeight: 1,
@@ -1420,7 +1420,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             </div>
 
                                             {/* Bottom Line: Professional Layout */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid #00ffff', height: '26px', boxSizing: 'border-box' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid #334155', borderTop: 'none', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -4184,16 +4184,28 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                 </span>
                             </div>
 
-                            {/* Footer Line: Stats, Badges, Icon */}
+                            {/* Image Preview */}
+                            {hoveredItem.image_url && (
+                                <div style={{
+                                    width: '100%',
+                                    height: '120px',
+                                    borderRadius: '6px',
+                                    overflow: 'hidden',
+                                    border: '1px solid #334155',
+                                    background: '#0f172a'
+                                }}>
+                                    <img
+                                        src={hoveredItem.image_url}
+                                        alt="Broadcast"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Footer Line: Badges (Left) & Stats (Right) */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
 
-                                {/* Delivery Stats */}
-                                <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem' }}>
-                                    <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ {hoveredItem.delivered_count || 0}</span>
-                                    <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ {hoveredItem.read_count || 0}</span>
-                                </div>
-
-                                {/* Badges & Icon */}
+                                {/* Badges (Left) */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
 
                                     {/* Priority Badge */}
@@ -4220,50 +4232,32 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
 
                                     {/* Max Views Badge */}
                                     {hoveredItem.max_views ? (
-                                        (() => {
-                                            const percent = (hoveredItem.read_count || 0) / hoveredItem.max_views;
-                                            if (percent >= 1) return <span style={{ background: '#64748b', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>MAX ✓</span>;
-
-                                            // Cyan logic for limited views
-                                            let opacity = 1;
-                                            if (percent > 0.75) opacity = 0.4;
-                                            else if (percent > 0.5) opacity = 0.7;
-
-                                            return (
-                                                <span style={{
-                                                    background: `rgba(6, 182, 212, ${opacity * 0.2})`,
-                                                    color: '#06b6d4',
-                                                    border: `1px solid rgba(6, 182, 212, ${opacity * 0.4})`,
-                                                    padding: '2px 8px',
-                                                    borderRadius: '4px',
-                                                    fontSize: '10px',
-                                                    fontWeight: 700
-                                                }}>
-                                                    👀 {hoveredItem.max_views}
-                                                </span>
-                                            );
-                                        })()
+                                        <span style={{
+                                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                            fontSize: '0.7rem', fontWeight: 700,
+                                            background: 'rgba(6, 182, 212, 0.1)',
+                                            color: '#06b6d4',
+                                            border: '1px solid rgba(6, 182, 212, 0.3)'
+                                        }}>
+                                            👁 {hoveredItem.max_views}
+                                        </span>
                                     ) : (
                                         <span style={{
-                                            background: '#334155',
-                                            color: '#94a3b8',
-                                            border: '1px solid #475569',
-                                            padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600,
-                                            display: 'flex', alignItems: 'center', gap: '4px'
+                                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                            fontSize: '0.7rem', fontWeight: 700,
+                                            background: 'rgba(6, 182, 212, 0.1)',
+                                            color: '#06b6d4',
+                                            border: '1px solid rgba(6, 182, 212, 0.3)'
                                         }}>
-                                            ✖️👀
+                                            👁 ∞
                                         </span>
                                     )}
+                                </div>
 
-                                    {/* Attachment Icon (Matching List) */}
-                                    {hoveredItem.image_url && (
-                                        <span style={{
-                                            padding: '0.2rem 0.5rem',
-                                            fontSize: '1rem',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            lineHeight: 1
-                                        }}>📎</span>
-                                    )}
+                                {/* Delivery Stats (Right) */}
+                                <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ {hoveredItem.delivered_count || 0}</span>
+                                    <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ {hoveredItem.read_count || 0}</span>
                                 </div>
                             </div>
                         </div>
