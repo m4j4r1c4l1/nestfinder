@@ -314,7 +314,7 @@ const Messages = () => {
     const [feedbackCounts, setFeedbackCounts] = useState({ pending: 0, read: 0 });
 
     // Broadcast Form State
-    const [newBroadcast, setNewBroadcast] = useState({ title: '', message: '', imageUrl: '', startTime: '', endTime: '', maxViews: '', priority: 0 });
+    const [newBroadcast, setNewBroadcast] = useState({ title: '', message: '', imageUrl: '', startTime: '', endTime: '', maxViews: '', priority: null });
     const [creatingBroadcast, setCreatingBroadcast] = useState(false);
     const [activeBroadcastTemplate, setActiveBroadcastTemplate] = useState('custom');
     const [showBroadcastEmojiPicker, setShowBroadcastEmojiPicker] = useState(false);
@@ -682,7 +682,7 @@ const Messages = () => {
                         {activeTab === 'broadcasts' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '2rem' }}>
                                 {/* Create New Broadcast */}
-                                <div className="card" style={{ flexShrink: 0, marginBottom: 0, overflow: 'visible' }}>
+                                <div className="card" style={{ flexShrink: 0, marginBottom: 0, overflow: 'visible', zIndex: 20 }}>
                                     <div className="card-header">
                                         <h3>🌈 Create Broadcasts</h3>
                                     </div>
@@ -857,7 +857,7 @@ const Messages = () => {
                                                 <div style={{ flex: 1 }}>
                                                     <label className="form-label">Priority</label>
                                                     <BadgeSelect
-                                                        value={String(newBroadcast.priority || 3)}
+                                                        value={newBroadcast.priority ? String(newBroadcast.priority) : ''}
                                                         onChange={(val) => setNewBroadcast({ ...newBroadcast, priority: parseInt(val) })}
                                                         options={[
                                                             { value: '1', label: 'P1 - Critical', color: '#ef4444' },
