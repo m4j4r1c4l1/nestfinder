@@ -1150,10 +1150,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
                             onClick={() => setSearchFilters(prev => ({ ...prev, maxViews: prev.maxViews === 'limited' ? '' : 'limited' }))}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'limited' }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
-                            👀 <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withMaxViews}</span>
+                            👁 <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withMaxViews}</span>
                         </span>
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
@@ -1165,8 +1165,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
                             onClick={() => setSearchFilters(prev => ({ ...prev, maxViews: prev.maxViews === 'unlimited' ? '' : 'unlimited' }))}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'unlimited' }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
                             👁 ∞ <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withoutMaxViews}</span>
                         </span>
@@ -1186,8 +1186,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 {/* Horizontal Separator */}
                 <div style={{
                     height: '1px',
-                    background: '#334155',
-                    margin: '0 2rem 0.75rem 1rem' // Matches left/right margins of timeline/list
+                    background: '#334155', // Match border color
+                    width: '100%',
+                    marginBottom: '0.75rem'
                 }} />
 
                 <div style={{ height: '600px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
