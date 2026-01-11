@@ -1032,7 +1032,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     gap: '1.5rem',
                     padding: '0.75rem 1rem', // Equal padding top/bottom
                     background: '#0f172a',
-                    margin: '0.75rem 2rem 0.75rem 1rem', // Match Timeline margins for width alignment
+                    margin: '0.75rem 2rem 0.375rem 1rem', // Match Timeline margins for width alignment
                     borderRadius: '6px',
                     fontSize: '0.8rem',
                     flexWrap: 'wrap',
@@ -1174,7 +1174,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Timeline Visualization */}
-                <div style={{ position: 'relative', zIndex: 1, margin: '0.75rem 2rem 0.75rem 1rem', border: '1px solid magenta' }}>
+                <div style={{ position: 'relative', zIndex: 1, margin: '0.375rem 2rem 0.75rem 1rem', border: '1px solid magenta' }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
                         onBroadcastClick={setSelectedBroadcast}
@@ -1250,9 +1250,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 position: 'relative',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                gap: '0.125rem',
+                                                gap: '0',
                                                 boxShadow: isHighlighted ? `0 0 20px ${priorityColor}80, 0 0 40px ${priorityColor}40` : 'none',
-                                                transform: isHighlighted ? 'scale(1.02)' : 'none',
                                                 transform: isHighlighted ? 'scale(1.02)' : 'none'
                                             }}
                                             onMouseEnter={e => {
@@ -1288,7 +1287,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                     <span style={{
-                                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                                        padding: '0.2rem 0.6rem 0.3rem 0.6rem', borderRadius: '4px',
                                                         fontSize: '0.7rem', fontWeight: 700,
                                                         background: `${statusColor}20`, color: statusColor,
                                                         border: `1px solid ${statusColor}40`,
@@ -1297,7 +1296,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         {statusText}
                                                     </span>
                                                     <span style={{
-                                                        padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                                        padding: '0.2rem 0.5rem 0.3rem 0.5rem', borderRadius: '4px',
                                                         fontSize: '0.7rem', fontWeight: 600,
                                                         background: `${priorityColor}20`,
                                                         color: priorityColor,
@@ -1307,7 +1306,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     </span>
                                                     {b.max_views ? (
                                                         <span style={{
-                                                            padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                                            padding: '0.2rem 0.5rem 0.3rem 0.5rem', borderRadius: '4px',
                                                             fontSize: '0.7rem', fontWeight: 600,
                                                             background: 'rgba(6, 182, 212, 0.1)',
                                                             color: '#06b6d4',
@@ -1317,7 +1316,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         </span>
                                                     ) : (
                                                         <span style={{
-                                                            padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                                            padding: '0.2rem 0.5rem 0.3rem 0.5rem', borderRadius: '4px',
                                                             fontSize: '0.7rem', fontWeight: 600,
                                                             background: 'rgba(6, 182, 212, 0.1)',
                                                             color: '#06b6d4',
@@ -1330,7 +1329,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     )}
                                                     {b.image_url && (
                                                         <span title="Has Attachment" style={{
-                                                            padding: '0.2rem 0.5rem',
+                                                            padding: '0.2rem 0.5rem 0.3rem 0.5rem',
                                                             fontSize: '1rem',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                             cursor: 'help',
