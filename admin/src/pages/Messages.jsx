@@ -1146,9 +1146,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 </div>
 
-                {/* DEBUG: Added border and padding to check clipping */}
-                <div className="card-body" style={{ height: '600px', overflowY: 'auto', paddingTop: '2rem', paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem', background: '#1e293b', position: 'relative', border: '1px solid yellow' }}>
-                    <div style={{ marginTop: '2rem' }}>
+                <div className="card-body" style={{ height: '600px', overflowY: 'auto', padding: '1rem', background: '#1e293b', position: 'relative', border: '1px solid yellow' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
