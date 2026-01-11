@@ -3781,7 +3781,38 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
 
             if (onBroadcastUpdate) {
                 const timeChanged = dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd;
-                const laneChanged = dragging.newLane !== undefined && dragging.newLane !== dragging.originalLane;
+                let finalLane = dragging.newLane;
+
+                // Collision Detection for 'move' operations (where newLane is defined)
+                if (finalLane !== undefined) {
+                    const isOverlapping = (startA, endA, startB, endB) => {
+                        return Math.max(startA, startB) < Math.min(endA, endB);
+                    };
+
+                    let laneFound = false;
+                    let safetyCounter = 0;
+
+                    while (!laneFound && safetyCounter < 100) {
+                        const broadcastsInLane = lanes[finalLane] || [];
+                        const hasCollision = broadcastsInLane.some(b => {
+                            if (b.id === dragging.id) return false; // Ignore self
+
+                            const bStart = new Date(b.start_time).getTime();
+                            const bEnd = new Date(b.end_time).getTime();
+
+                            return isOverlapping(dragging.newStart, dragging.newEnd, bStart, bEnd);
+                        });
+
+                        if (hasCollision) {
+                            finalLane++; // Try next lane
+                        } else {
+                            laneFound = true;
+                        }
+                        safetyCounter++;
+                    }
+                }
+
+                const laneChanged = finalLane !== undefined && finalLane !== dragging.originalLane;
 
                 if (timeChanged || laneChanged) {
                     const updates = {};
@@ -3790,7 +3821,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                         updates.end_time = new Date(dragging.newEnd).toISOString();
                     }
                     if (laneChanged) {
-                        updates.lane = dragging.newLane;
+                        updates.lane = finalLane;
                     }
                     // Don't await here, so the dragging state clears immediately
                     onBroadcastUpdate(dragging.id, updates);
