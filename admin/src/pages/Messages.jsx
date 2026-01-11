@@ -896,9 +896,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // Search State
     const [searchFilters, setSearchFilters] = useState({
         searchText: '',
-        status: 'all', // all, active, inactive, scheduled
-        priority: 'all',
-        maxViewsNum: '', // Changed to maxViewsNum for number input
+        status: 'all', // all, active, scheduled, inactive
+        priority: 'all', // all, 1, 2, 3, 4, 5
+        maxViewsNum: '',
+        maxViewsType: 'all', // all, limited, unlimited
         startDate: null,
         endDate: null
     });
@@ -936,8 +937,15 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
         }
 
         if (searchFilters.priority !== 'all' && (b.priority || 3) != searchFilters.priority) return false;
+        // Max Views Filter
+        if (searchFilters.maxViewsType === 'limited') {
+            if (!b.max_views || b.max_views <= 0) return false;
+        } else if (searchFilters.maxViewsType === 'unlimited') {
+            if (b.max_views && b.max_views > 0) return false;
+        }
+        // Also respect specific number if typed
         if (searchFilters.maxViewsNum) {
-            if (!b.max_views || b.max_views != parseInt(searchFilters.maxViewsNum)) return false;
+            if (!b.max_views || b.max_views > parseInt(searchFilters.maxViewsNum)) return false;
         }
 
         if (searchFilters.startDate && new Date(b.start_time) < searchFilters.startDate) return false;
@@ -1007,10 +1015,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
 
                         {/* Clear */}
-                        {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViewsNum || searchFilters.priority !== 'all') && (
+                        {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViewsNum || searchFilters.priority !== 'all' || searchFilters.maxViewsType !== 'all') && (
                             <button
                                 className="btn btn-secondary"
-                                onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', startDate: null, endDate: null })}
+                                onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
                                 style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
                             >
                                 ✕ Clear
@@ -1112,7 +1120,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value);
                                             if (val < 0) return; // Prevent negative input
-                                            setSearchFilters(prev => ({ ...prev, maxViewsNum: e.target.value }));
+                                            setSearchFilters(prev => ({
+                                                ...prev,
+                                                maxViewsNum: e.target.value,
+                                                // If typing a number, we probably mean 'limited' context, but keeping 'all' creates less friction unless we want to force it.
+                                                // Let's keep type as is, or switch to 'limited' if not unlimited?
+                                                // User requested toggle logic for badges. Typing here acts as a sub-filter.
+                                            }));
                                         }}
                                         style={{
                                             background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.5rem',
@@ -1153,7 +1167,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         display: 'flex', alignItems: 'center', gap: '0.4rem',
                         cursor: 'pointer'
                     }}
-                        onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', startDate: null, endDate: null })}
+                        onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
                     >
                         TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px' }}>{broadcasts.length}</span>
                     </span>
@@ -1249,13 +1263,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.maxViewsNum && broadcastStats.withMaxViews > 0 ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
+                            background: searchFilters.maxViewsType === 'limited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
                             color: '#06b6d4',
-                            border: searchFilters.maxViewsNum && broadcastStats.withMaxViews > 0 ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
+                            border: searchFilters.maxViewsType === 'limited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
                             display: 'flex', alignItems: 'center', gap: '0.3rem',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsNum: prev.maxViewsNum ? '' : '1' }))} // Toggle to show limited
+                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsType: prev.maxViewsType === 'limited' ? 'all' : 'limited', maxViewsNum: '' }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'limited' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1264,13 +1278,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: !searchFilters.maxViewsNum && broadcastStats.withoutMaxViews > 0 ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
+                            background: searchFilters.maxViewsType === 'unlimited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
                             color: '#06b6d4',
-                            border: !searchFilters.maxViewsNum && broadcastStats.withoutMaxViews > 0 ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
+                            border: searchFilters.maxViewsType === 'unlimited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
                             display: 'flex', alignItems: 'center', gap: '0.3rem',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsNum: prev.maxViewsNum ? '' : '0' }))} // Toggle to show unlimited (0 for filter logic)
+                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsType: prev.maxViewsType === 'unlimited' ? 'all' : 'unlimited', maxViewsNum: '' }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'unlimited' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
