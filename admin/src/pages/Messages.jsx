@@ -1157,8 +1157,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 </div>
 
-                <div className="card-body" style={{ height: '600px', overflowY: 'auto', background: '#1e293b', position: 'relative', border: '1px solid yellow' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem' }}>
+                <div style={{ height: '600px', overflowY: 'auto', background: '#1e293b', position: 'relative', border: '1px solid yellow', boxSizing: 'border-box' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', boxSizing: 'border-box' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
