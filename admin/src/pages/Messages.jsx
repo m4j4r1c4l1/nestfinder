@@ -1275,8 +1275,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             }}
                                         >
                                             {/* Top Line: Title & Delete */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', border: '1px solid #ff00ff' }}>
-                                                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem', lineHeight: '1.2' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #ff00ff', lineHeight: 1 }}>
+                                                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '1rem' }}>
                                                     {b.title || 'Untitled Broadcast'}
                                                 </div>
                                                 <button
@@ -1286,7 +1286,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     }}
                                                     className="btn-icon danger"
                                                     title="Delete"
-                                                    style={{ padding: '2px', fontSize: '1rem', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.8 }}
+                                                    style={{ padding: '0', fontSize: '1rem', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.8, display: 'flex', alignItems: 'center' }}
                                                 >
                                                     🗑️
                                                 </button>
@@ -3184,6 +3184,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
     const containerRef = React.useRef(null);
     const scrollInterval = React.useRef(null);
     const latestHandleWheel = React.useRef(null);
+    const lastDragTimeRef = React.useRef(0); // For click suppression
 
     // Viewport State (Time Window)
     const [viewportStart, setViewportStart] = useState(0);
@@ -3572,6 +3573,11 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                 newStart = dragging.originalStart + absDelta;
                 newEnd = dragging.originalEnd + absDelta;
 
+                // Mark as moved if it exceeds threshold
+                if (!dragging.hasMoved && Math.abs(absDelta) > 100000) { // Tiny movement threshold (~1min)
+                    setDragging(prev => ({ ...prev, hasMoved: true }));
+                }
+
                 // Calculate new lane based on Y position
                 const yOffsetFromRuler = mouseY - rulerHeight - gap;
                 const newLane = Math.max(0, Math.floor(yOffsetFromRuler / (rowHeight + gap)));
@@ -3579,8 +3585,10 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                 return;
             } else if (dragging.type === 'resize-left') {
                 newStart = Math.min(dragging.originalStart + absDelta, dragging.originalEnd - 900000);
+                if (!dragging.hasMoved) setDragging(prev => ({ ...prev, hasMoved: true }));
             } else if (dragging.type === 'resize-right') {
                 newEnd = Math.max(dragging.originalEnd + absDelta, dragging.originalStart + 900000);
+                if (!dragging.hasMoved) setDragging(prev => ({ ...prev, hasMoved: true }));
             }
 
             setDragging(prev => ({ ...prev, newStart, newEnd }));
@@ -3652,21 +3660,27 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
     };
 
     const handleMouseUp = () => {
-        if (dragging && onBroadcastUpdate) {
-            const timeChanged = dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd;
-            const laneChanged = dragging.newLane !== undefined && dragging.newLane !== dragging.originalLane;
+        if (dragging) {
+            if (dragging.hasMoved) {
+                lastDragTimeRef.current = Date.now();
+            }
 
-            if (timeChanged || laneChanged) {
-                const updates = {};
-                if (timeChanged) {
-                    updates.start_time = new Date(dragging.newStart).toISOString();
-                    updates.end_time = new Date(dragging.newEnd).toISOString();
+            if (onBroadcastUpdate) {
+                const timeChanged = dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd;
+                const laneChanged = dragging.newLane !== undefined && dragging.newLane !== dragging.originalLane;
+
+                if (timeChanged || laneChanged) {
+                    const updates = {};
+                    if (timeChanged) {
+                        updates.start_time = new Date(dragging.newStart).toISOString();
+                        updates.end_time = new Date(dragging.newEnd).toISOString();
+                    }
+                    if (laneChanged) {
+                        updates.lane = dragging.newLane;
+                    }
+                    // Don't await here, so the dragging state clears immediately
+                    onBroadcastUpdate(dragging.id, updates);
                 }
-                if (laneChanged) {
-                    updates.lane = dragging.newLane;
-                }
-                // Don't await here, so the dragging state clears immediately
-                onBroadcastUpdate(dragging.id, updates);
             }
         }
         setDragging(null);
@@ -3924,6 +3938,10 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                     handleMouseDown(e, b, type);
                                 }}
                                 onClick={(e) => {
+                                    // Suppress click if we just finished a drag
+                                    const timeSinceDrag = Date.now() - lastDragTimeRef.current;
+                                    if (timeSinceDrag < 100) return;
+
                                     if (!dragging && onBroadcastClick) onBroadcastClick(b);
                                 }}
                                 onMouseMove={(e) => {
