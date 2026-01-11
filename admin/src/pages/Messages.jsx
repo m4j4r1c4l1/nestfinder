@@ -1568,78 +1568,66 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                             borderRadius: '4px',
                                                             transition: 'all 0.2s',
                                                             opacity: 0.7
-                                                        }}
-                                                        onMouseEnter={e => {
-                                                            e.currentTarget.style.background = '#ef444420';
-                                                            e.currentTarget.style.border = '1px solid #ef444440';
-                                                            e.currentTarget.style.opacity = '1';
-                                                            e.currentTarget.style.transform = 'scale(1.1)';
-                                                        }}
-                                                        onMouseLeave={e => {
-                                                            e.currentTarget.style.background = 'transparent';
-                                                            e.currentTarget.style.border = 'none';
-                                                            e.currentTarget.style.opacity = '0.7';
-                                                            e.currentTarget.style.transform = 'scale(1)';
-                                                        }}
-                                                    >
+                                                        title="Delete"
+                                                            >
                                                         🗑️
-                                                    </button>
-                                                </div>
+                                                </button>
                                             </div>
                                         </div>
-                                    );
+                                        </div>
+                        );
                                 })}
-                            </div>
-                        )}
                     </div>
+                        )}
                 </div>
-
-                {totalPages > 1 && (
-                    <PaginationControls
-                        page={page}
-                        totalPages={totalPages}
-                        setPage={setPage}
-                        pageSize={pageSize}
-                        totalItems={filteredBroadcasts.length}
-                        currentCount={paginatedBroadcasts.length}
-                    />
-                )}
             </div>
 
-            {/* Broadcast Detail Popup */}
-            {
-                selectedBroadcast && (
-                    <BroadcastDetailPopup
-                        broadcast={selectedBroadcast}
-                        onClose={() => setSelectedBroadcast(null)}
-                        onViewRecipients={() => {
-                            setViewRecipientsId(selectedBroadcast.id);
-                            setSelectedBroadcast(null);
-                        }}
-                        onDelete={() => {
-                            setConfirmModal({
-                                show: true,
-                                title: 'Delete Broadcast',
-                                message: 'Are you sure you want to delete this broadcast?',
-                                onConfirm: () => {
-                                    onDelete(selectedBroadcast.id);
-                                    setSelectedBroadcast(null);
-                                }
-                            });
-                        }}
-                    />
-                )
-            }
+            {totalPages > 1 && (
+                <PaginationControls
+                    page={page}
+                    totalPages={totalPages}
+                    setPage={setPage}
+                    pageSize={pageSize}
+                    totalItems={filteredBroadcasts.length}
+                    currentCount={paginatedBroadcasts.length}
+                />
+            )}
+        </div>
 
-            {/* Recipients Modal */}
-            {
-                viewRecipientsId && (
-                    <BroadcastRecipientsModal
-                        broadcastId={viewRecipientsId}
-                        onClose={() => setViewRecipientsId(null)}
-                    />
-                )
-            }
+            {/* Broadcast Detail Popup */ }
+    {
+        selectedBroadcast && (
+            <BroadcastDetailPopup
+                broadcast={selectedBroadcast}
+                onClose={() => setSelectedBroadcast(null)}
+                onViewRecipients={() => {
+                    setViewRecipientsId(selectedBroadcast.id);
+                    setSelectedBroadcast(null);
+                }}
+                onDelete={() => {
+                    setConfirmModal({
+                        show: true,
+                        title: 'Delete Broadcast',
+                        message: 'Are you sure you want to delete this broadcast?',
+                        onConfirm: () => {
+                            onDelete(selectedBroadcast.id);
+                            setSelectedBroadcast(null);
+                        }
+                    });
+                }}
+            />
+        )
+    }
+
+    {/* Recipients Modal */ }
+    {
+        viewRecipientsId && (
+            <BroadcastRecipientsModal
+                broadcastId={viewRecipientsId}
+                onClose={() => setViewRecipientsId(null)}
+            />
+        )
+    }
         </div >
     );
 }
