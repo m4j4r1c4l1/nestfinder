@@ -3299,6 +3299,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
     const scrollInterval = React.useRef(null);
     const latestHandleWheel = React.useRef(null);
     const lastDragTimeRef = React.useRef(0); // For click suppression
+    const hoverTimeoutRef = React.useRef(null); // For tooltip delay
 
     // Viewport State (Time Window)
     const [viewportStart, setViewportStart] = useState(0);
@@ -4068,10 +4069,14 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                 }}
                                 onMouseEnter={(e) => {
                                     setHoveredBarId(b.id);
-                                    setHoveredItem({ ...b, currentStart: start, currentEnd: end });
+                                    // Delay tooltip appearance by 1.5s
+                                    hoverTimeoutRef.current = setTimeout(() => {
+                                        setHoveredItem({ ...b, currentStart: start, currentEnd: end });
+                                    }, 1500);
                                     setCrosshairPos({ x: null, y: null });
                                 }}
                                 onMouseLeave={() => {
+                                    clearTimeout(hoverTimeoutRef.current);
                                     if (!dragging) {
                                         setHoveredBarId(null);
                                         setHoveredItem(null);
