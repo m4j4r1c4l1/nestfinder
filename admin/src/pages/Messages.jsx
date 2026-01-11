@@ -319,6 +319,9 @@ const Messages = () => {
     const [activeBroadcastTemplate, setActiveBroadcastTemplate] = useState('custom');
     const [showBroadcastEmojiPicker, setShowBroadcastEmojiPicker] = useState(false);
 
+    // Custom Confirmation Modal State
+    const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
+
     // Watch for Feedback Pagination Changes
     useEffect(() => {
         fetchFeedbackOnly();
@@ -645,7 +648,11 @@ const Messages = () => {
                         {/* SENT (OUTBOX) TAB */}
                         {activeTab === 'outbox' && (
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <HistorySection users={subscribers} totalSent={stats.notificationMetrics?.total || 0} />
+                                <HistorySection
+                                    users={subscribers}
+                                    totalSent={stats.notificationMetrics?.total || 0}
+                                    setConfirmModal={setConfirmModal}
+                                />
                             </div>
                         )}
 
@@ -666,6 +673,7 @@ const Messages = () => {
                                     setSortColumn={setFeedbackSortCol}
                                     sortDirection={feedbackSortDir}
                                     setSortDirection={setFeedbackSortDir}
+                                    setConfirmModal={setConfirmModal}
                                 />
                             </div>
                         )}
@@ -1302,9 +1310,14 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         }}
                             onClick={() => {
                                 if (filteredBroadcasts.length === 0) return;
-                                if (window.confirm(`Are you sure you want to delete ALL ${filteredBroadcasts.length} visible broadcasts? This action cannot be undone.`)) {
-                                    filteredBroadcasts.forEach(b => onDelete(b.id));
-                                }
+                                setConfirmModal({
+                                    show: true,
+                                    title: 'Bulk Delete Broadcasts',
+                                    message: `Are you sure you want to delete ALL ${filteredBroadcasts.length} visible broadcasts? This action cannot be undone.`,
+                                    onConfirm: () => {
+                                        filteredBroadcasts.forEach(b => onDelete(b.id));
+                                    }
+                                });
                             }}
                             onMouseEnter={(e) => { e.currentTarget.style.background = '#a855f740'; e.currentTarget.style.color = '#c084fc'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = '#a855f720'; e.currentTarget.style.color = '#a855f7'; }}
@@ -1520,9 +1533,12 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            if (window.confirm('Are you sure you want to delete this broadcast?')) {
-                                                                onDelete(b.id);
-                                                            }
+                                                            setConfirmModal({
+                                                                show: true,
+                                                                title: 'Delete Broadcast',
+                                                                message: 'Are you sure you want to delete this broadcast?',
+                                                                onConfirm: () => onDelete(b.id)
+                                                            });
                                                         }}
                                                         className="btn-icon danger"
                                                         title="Delete"
@@ -1587,10 +1603,15 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             setSelectedBroadcast(null);
                         }}
                         onDelete={() => {
-                            if (confirm('Delete broadcast?')) {
-                                onDelete(selectedBroadcast.id);
-                                setSelectedBroadcast(null);
-                            }
+                            setConfirmModal({
+                                show: true,
+                                title: 'Delete Broadcast',
+                                message: 'Are you sure you want to delete this broadcast?',
+                                onConfirm: () => {
+                                    onDelete(selectedBroadcast.id);
+                                    setSelectedBroadcast(null);
+                                }
+                            });
                         }}
                     />
                 )
@@ -1605,11 +1626,104 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     />
                 )
             }
+            {/* Confirmation Modal */}
+            {confirmModal.show && (
+                <ConfirmationModal
+                    title={confirmModal.title}
+                    message={confirmModal.message}
+                    onConfirm={() => {
+                        if (confirmModal.onConfirm) confirmModal.onConfirm();
+                        setConfirmModal({ ...confirmModal, show: false });
+                    }}
+                    onCancel={() => setConfirmModal({ ...confirmModal, show: false })}
+                />
+            )}
         </div >
     );
 }
 
 // --- Sub-components ---
+
+const ConfirmationModal = ({ title, message, onConfirm, onCancel }) => {
+    return ReactDOM.createPortal(
+        <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(2, 6, 23, 0.5)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20000,
+            animation: 'fadeIn 0.2s ease-out'
+        }} onClick={onCancel}>
+            <div style={{
+                background: '#1e293b',
+                borderRadius: '16px',
+                width: '100%',
+                maxWidth: '420px',
+                padding: '2rem',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.2)',
+                border: '1px solid #334155',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.5rem',
+                animation: 'scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+            }} onClick={e => e.stopPropagation()}>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '1.5rem' }}>⚠️</span> {title}
+                    </h3>
+                    <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                        {message}
+                    </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                    <button
+                        onClick={onCancel}
+                        style={{
+                            padding: '0.6rem 1.2rem',
+                            borderRadius: '8px',
+                            background: 'transparent',
+                            color: '#e2e8f0',
+                            border: '1px solid #334155',
+                            fontSize: '0.9rem',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#334155'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        style={{
+                            padding: '0.6rem 1.2rem',
+                            borderRadius: '8px',
+                            background: '#ef4444',
+                            color: '#fff',
+                            border: 'none',
+                            fontSize: '0.9rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2)',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+            <style>{`
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+            `}</style>
+        </div>,
+        document.body
+    );
+};
 
 const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [selectedTemplate, setSelectedTemplate] = useState('share_app');
@@ -1926,12 +2040,11 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 const FeedbackSection = ({
     feedback, feedbackCounts, onUpdate, onUpdateStatus, onDelete,
     page, setPage, pageSize, totalItems,
-    sortColumn, setSortColumn, sortDirection, setSortDirection
+    sortColumn, setSortColumn, sortDirection, setSortDirection,
+    setConfirmModal
 }) => {
     const [selectedIds, setSelectedIds] = useState([]);
     const [previewItem, setPreviewItem] = useState(null);
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [confirmAction, setConfirmAction] = useState(null);
 
     // Resizable columns state
     // Resizable columns state
@@ -2024,17 +2137,30 @@ const FeedbackSection = ({
 
     const confirmMarkRead = () => {
         if (selectedIds.length === 0) return;
-        setConfirmAction(() => handleBulkMarkRead);
-        setShowConfirmModal(true);
+        setConfirmModal({
+            show: true,
+            title: 'Confirm Action',
+            message: `Are you sure you want to mark ${selectedIds.length} items as read?`,
+            onConfirm: () => {
+                handleBulkMarkRead();
+            }
+        });
     };
 
     const handleBulkDelete = async () => {
-        if (!confirm(`Delete ${selectedIds.length} items? This cannot be undone.`)) return;
-        for (const id of selectedIds) {
-            await onDelete(id);
-        }
-        setSelectedIds([]);
-        onUpdate && onUpdate();
+        if (selectedIds.length === 0) return;
+        setConfirmModal({
+            show: true,
+            title: 'Delete Feedback',
+            message: `Are you sure you want to delete ${selectedIds.length} items? This action cannot be undone.`,
+            onConfirm: async () => {
+                for (const id of selectedIds) {
+                    await onDelete(id);
+                }
+                setSelectedIds([]);
+                onUpdate && onUpdate();
+            }
+        });
     };
     // Handle row click: open preview AND mark as read if sent/delivered
     const handleRowClick = async (item) => {
@@ -2114,14 +2240,20 @@ const FeedbackSection = ({
                             )}
                             <button
                                 onClick={async () => {
-                                    if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Received History?\nThis will remove all feedback messages from this list.')) return;
-                                    try {
-                                        // Delete all feedback
-                                        for (const item of feedback) {
-                                            await onDelete(item.id);
+                                    setConfirmModal({
+                                        show: true,
+                                        title: 'Clear Received History',
+                                        message: 'Are you sure you want to CLEAR ALL Received History? This will remove all feedback messages from this list.',
+                                        onConfirm: async () => {
+                                            try {
+                                                // Delete all feedback
+                                                for (const item of feedback) {
+                                                    await onDelete(item.id);
+                                                }
+                                                onUpdate && onUpdate();
+                                            } catch (err) { console.error('Cleanup failed:', err); }
                                         }
-                                        onUpdate && onUpdate();
-                                    } catch (err) { alert('Cleanup failed: ' + err.message); }
+                                    });
                                 }}
                                 className="btn btn-sm"
                                 style={{ marginRight: '0.5rem', background: '#6366f1', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px', border: 'none', borderRadius: '6px' }}
@@ -2134,17 +2266,6 @@ const FeedbackSection = ({
                     </div>
                 </div>
 
-                {showConfirmModal && (
-                    <ConfirmationModal
-                        title="Confirm Action"
-                        message={`Are you sure you want to mark ${selectedIds.length} items as read?`}
-                        onConfirm={() => {
-                            confirmAction && confirmAction();
-                            setShowConfirmModal(false);
-                        }}
-                        onCancel={() => setShowConfirmModal(false)}
-                    />
-                )}
                 <div className="card-body" style={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
                     <div style={{ maxHeight: 'calc(100vh - 330px)', overflowY: 'auto', background: '#1e293b', borderRadius: '0 0 8px 8px' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
@@ -2317,8 +2438,8 @@ const FeedbackSection = ({
     );
 };
 
-const HistorySection = ({ users = [], totalSent = 0 }) => {
-    const [logs, setLogs] = useState([]);
+const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
+    const [history, setHistory] = useState([]);
     const [totalLogs, setTotalLogs] = useState(0);
     const [loading, setLoading] = useState(false);
     const [selectedBatchId, setSelectedBatchId] = useState(null);
@@ -2490,19 +2611,24 @@ const HistorySection = ({ users = [], totalSent = 0 }) => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button
                             onClick={async () => {
-                                if (!window.confirm('⚠️ Are you sure you want to CLEAR ALL Sent History?\nThis will remove all records of sent notifications from this list.')) return;
-                                try {
-                                    const token = localStorage.getItem('nestfinder_admin_token');
-                                    const res = await fetch(`${API_URL}/api/push/admin/notifications/cleanup`, {
-                                        method: 'POST',
-                                        headers: { 'Authorization': `Bearer ${token}` }
-                                    });
-                                    const data = await res.json();
-                                    if (data.success) {
-                                        alert(data.message);
-                                        loadHistory();
+                                setConfirmModal({
+                                    show: true,
+                                    title: 'Clear Sent History',
+                                    message: 'Are you sure you want to CLEAR ALL Sent History? This will remove all records of sent notifications from this list.',
+                                    onConfirm: async () => {
+                                        try {
+                                            const token = localStorage.getItem('nestfinder_admin_token');
+                                            const res = await fetch(`${API_URL}/api/push/admin/notifications/cleanup`, {
+                                                method: 'POST',
+                                                headers: { 'Authorization': `Bearer ${token}` }
+                                            });
+                                            const data = await res.json();
+                                            if (data.success) {
+                                                loadHistory();
+                                            }
+                                        } catch (err) { console.error('Cleanup failed:', err); }
                                     }
-                                } catch (err) { alert('Cleanup failed: ' + err.message); }
+                                });
                             }}
                             className="btn btn-sm"
                             style={{ marginRight: '0.5rem', background: '#6366f1', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px', border: 'none', borderRadius: '6px' }}
@@ -2693,35 +2819,6 @@ const PaginationControls = ({ page, totalPages, setPage, totalItems, currentCoun
     );
 };
 
-const ConfirmationModal = ({ title, message, onConfirm, onCancel }) => {
-    return ReactDOM.createPortal(
-        <div style={{
-            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
-        }}>
-            <div style={{
-                background: '#1e293b', borderRadius: '12px', padding: '1.5rem',
-                width: 'min(400px, 90vw)', border: '1px solid #334155',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-            }}>
-                <h3 style={{ margin: '0 0 1rem 0', color: '#f1f5f9', fontSize: '1.2rem' }}>{title}</h3>
-                <p style={{ color: '#cbd5e1', marginBottom: '1.5rem', lineHeight: 1.5 }}>{message}</p>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                    <button onClick={onCancel} style={{
-                        padding: '0.5rem 1rem', background: 'transparent', color: '#cbd5e1',
-                        border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer'
-                    }}>Cancel</button>
-                    <button onClick={onConfirm} style={{
-                        padding: '0.5rem 1rem', background: '#3b82f6', color: 'white',
-                        border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 500
-                    }}>Confirm</button>
-                </div>
-            </div>
-        </div>,
-        document.body
-    );
-};
 
 const EmojiPickerModal = ({ onSelect, onClose }) => {
     const categories = {
