@@ -1519,17 +1519,28 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         style={{
                                                             padding: '0.2rem 0.4rem', // create the "area"
                                                             fontSize: '1rem',
-                                                            background: '#ef444420', // Red background
-                                                            border: '1px solid #ef444440',
+                                                            background: 'transparent',
+                                                            border: 'none',
                                                             color: '#ef4444',
                                                             cursor: 'pointer',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                             lineHeight: 1,
                                                             borderRadius: '4px',
-                                                            transition: 'all 0.2s'
+                                                            transition: 'all 0.2s',
+                                                            opacity: 0.7
                                                         }}
-                                                        onMouseEnter={e => { e.currentTarget.style.background = '#ef444440'; e.currentTarget.style.transform = 'scale(1.1)'; }}
-                                                        onMouseLeave={e => { e.currentTarget.style.background = '#ef444420'; e.currentTarget.style.transform = 'scale(1)'; }}
+                                                        onMouseEnter={e => {
+                                                            e.currentTarget.style.background = '#ef444420';
+                                                            e.currentTarget.style.border = '1px solid #ef444440';
+                                                            e.currentTarget.style.opacity = '1';
+                                                            e.currentTarget.style.transform = 'scale(1.1)';
+                                                        }}
+                                                        onMouseLeave={e => {
+                                                            e.currentTarget.style.background = 'transparent';
+                                                            e.currentTarget.style.border = 'none';
+                                                            e.currentTarget.style.opacity = '0.7';
+                                                            e.currentTarget.style.transform = 'scale(1)';
+                                                        }}
                                                     >
                                                         🗑️
                                                     </button>
