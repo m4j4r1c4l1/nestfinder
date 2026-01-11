@@ -1237,6 +1237,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             else if (hoveredFilterGroup.value === 'scheduled' && !isActive && !isEnded) isHighlighted = true;
                                         } else if (hoveredFilterGroup.type === 'priority') {
                                             if ((b.priority || 3) === hoveredFilterGroup.value) isHighlighted = true;
+                                        } else if (hoveredFilterGroup.type === 'maxViews') {
+                                            if (hoveredFilterGroup.value === 'limited' && b.max_views) isHighlighted = true;
+                                            else if (hoveredFilterGroup.value === 'unlimited' && !b.max_views) isHighlighted = true;
                                         }
                                     }
 
