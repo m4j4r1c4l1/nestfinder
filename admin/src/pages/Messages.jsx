@@ -4068,10 +4068,10 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                 }}
                                 onMouseEnter={(e) => {
                                     setHoveredBarId(b.id);
-                                    // Delay tooltip appearance by 1.5s
+                                    // Delay tooltip appearance by 1s
                                     hoverTimeoutRef.current = setTimeout(() => {
                                         setHoveredItem({ ...b, currentStart: start, currentEnd: end });
-                                    }, 1500);
+                                    }, 1000);
                                     setCrosshairPos({ x: null, y: null });
                                 }}
                                 onMouseLeave={() => {
