@@ -1247,7 +1247,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 gap: '0.125rem',
                                                 boxShadow: isHighlighted ? `0 0 20px ${priorityColor}80, 0 0 40px ${priorityColor}40` : 'none',
                                                 transform: isHighlighted ? 'scale(1.02)' : 'none',
-                                                border: '1px solid lime' // DEBUG
+                                                transform: isHighlighted ? 'scale(1.02)' : 'none'
                                             }}
                                             onMouseEnter={e => {
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
