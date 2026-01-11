@@ -959,7 +959,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 >
                                     <option value="all" style={{ color: '#f8fafc' }}>All Status</option>
                                     <option value="active" style={{ color: '#22c55e' }}>● ACTIVE</option>
-                                    <option value="scheduled" style={{ color: '#eab308' }}>● SCHEDULED</option>
+                                    <option value="scheduled" style={{ color: '#3b82f6' }}>● SCHEDULED</option>
                                     <option value="inactive" style={{ color: '#94a3b8' }}>● INACTIVE</option>
                                 </select>
                             </div>
@@ -1030,8 +1030,11 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         fontSize: '0.75rem', fontWeight: 700,
                         background: '#334155', color: '#f8fafc',
                         border: '1px solid #475569',
-                        display: 'flex', alignItems: 'center', gap: '0.4rem'
-                    }}>
+                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                        cursor: 'pointer'
+                    }}
+                        onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: '', maxViews: '', startDate: null, endDate: null })}
+                    >
                         TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px' }}>{broadcasts.length}</span>
                     </span>
 
@@ -1043,11 +1046,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: '#22c55e20', color: '#22c55e',
-                            border: '1px solid #22c55e40',
+                            background: searchFilters.status === 'active' ? '#22c55e40' : '#22c55e20', // Highlight if selected
+                            color: '#22c55e',
+                            border: searchFilters.status === 'active' ? '1px solid #22c55e' : '1px solid #22c55e40',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
+                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'active' ? 'all' : 'active' }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'active' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1056,11 +1061,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: '#eab30820', color: '#eab308',
-                            border: '1px solid #eab30840',
+                            background: searchFilters.status === 'scheduled' ? '#3b82f640' : '#3b82f620',
+                            color: '#3b82f6',
+                            border: searchFilters.status === 'scheduled' ? '1px solid #3b82f6' : '1px solid #3b82f640',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
+                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'scheduled' ? 'all' : 'scheduled' }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'scheduled' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1069,11 +1076,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: '#94a3b820', color: '#94a3b8',
-                            border: '1px solid #94a3b840',
+                            background: searchFilters.status === 'inactive' ? '#94a3b840' : '#94a3b820',
+                            color: '#94a3b8',
+                            border: searchFilters.status === 'inactive' ? '1px solid #94a3b8' : '1px solid #94a3b840',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s'
                         }}
+                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'inactive' ? 'all' : 'inactive' }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'inactive' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1097,10 +1106,12 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 <span key={p} style={{
                                     padding: '0.2rem 0.5rem', borderRadius: '4px',
                                     fontSize: '0.7rem', fontWeight: 600,
-                                    background: `${color}20`, color: color,
-                                    border: `1px solid ${color}40`,
+                                    background: searchFilters.priority === String(p) ? `${color}40` : `${color}20`,
+                                    color: color,
+                                    border: searchFilters.priority === String(p) ? `1px solid ${color}` : `1px solid ${color}40`,
                                     cursor: 'pointer', transition: 'filter 0.1s'
                                 }}
+                                    onClick={() => setSearchFilters(prev => ({ ...prev, priority: prev.priority === String(p) ? '' : String(p) }))}
                                     onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'priority', value: p }); }}
                                     onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                                 >
@@ -1174,7 +1185,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     const priorityColor = getPriorityColor(b.priority);
 
                                     // Status Logic
-                                    let statusColor = '#eab308'; // Scheduled
+                                    let statusColor = '#3b82f6'; // Scheduled (Blue)
                                     let statusText = 'SCHEDULED';
                                     if (isActive) { statusColor = '#22c55e'; statusText = 'ACTIVE'; }
                                     else if (isEnded) { statusColor = '#94a3b8'; statusText = 'ENDED'; }
