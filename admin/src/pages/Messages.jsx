@@ -1143,7 +1143,6 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     borderRadius: '6px',
                     fontSize: '0.8rem',
                     flexWrap: 'wrap',
-                    flexWrap: 'wrap'
                 }}>
                     {/* Total Count */}
                     <span style={{
