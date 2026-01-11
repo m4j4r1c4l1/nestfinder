@@ -791,6 +791,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     const [viewRecipientsId, setViewRecipientsId] = useState(null); // For Recipients Modal
     const [showAdvanced, setShowAdvanced] = useState(false); // For Advanced Filters
     const [hoveredTimelineBarId, setHoveredTimelineBarId] = useState(null); // For broadcast card highlighting
+    const [hoveredFilterGroup, setHoveredFilterGroup] = useState(null); // For stats badge highlighting
 
     // Filter Logic
     const filteredBroadcasts = broadcasts.filter(b => {
@@ -1017,7 +1018,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     gap: '1.5rem',
                     padding: '0.75rem 1rem', // Equal padding top/bottom
                     background: '#0f172a',
-                    margin: '0.75rem 1rem', // Equal margin top/bottom for separator spacing
+                    margin: '0.75rem 2rem 0.75rem 1rem', // Match Timeline margins for width alignment
                     borderRadius: '6px',
                     fontSize: '0.8rem',
                     flexWrap: 'wrap',
@@ -1044,27 +1045,39 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             fontSize: '0.7rem', fontWeight: 700,
                             background: '#22c55e20', color: '#22c55e',
                             border: '1px solid #22c55e40',
-                            textTransform: 'uppercase', letterSpacing: '0.5px'
-                        }}>
-                            ACTIVE <span style={{ marginLeft: '0.3rem', opacity: 0.8 }}>{broadcastStats.active}</span>
+                            textTransform: 'uppercase', letterSpacing: '0.5px',
+                            cursor: 'pointer', transition: 'filter 0.1s'
+                        }}
+                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'active' }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                        >
+                            ACTIVE <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.active}</span>
                         </span>
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
                             background: '#eab30820', color: '#eab308',
                             border: '1px solid #eab30840',
-                            textTransform: 'uppercase', letterSpacing: '0.5px'
-                        }}>
-                            SCHEDULED <span style={{ marginLeft: '0.3rem', opacity: 0.8 }}>{broadcastStats.scheduled}</span>
+                            textTransform: 'uppercase', letterSpacing: '0.5px',
+                            cursor: 'pointer', transition: 'filter 0.1s'
+                        }}
+                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'scheduled' }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                        >
+                            SCHEDULED <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.scheduled}</span>
                         </span>
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
                             background: '#94a3b820', color: '#94a3b8',
                             border: '1px solid #94a3b840',
-                            textTransform: 'uppercase', letterSpacing: '0.5px'
-                        }}>
-                            INACTIVE <span style={{ marginLeft: '0.3rem', opacity: 0.8 }}>{broadcastStats.inactive}</span>
+                            textTransform: 'uppercase', letterSpacing: '0.5px',
+                            cursor: 'pointer', transition: 'filter 0.1s'
+                        }}
+                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'inactive' }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                        >
+                            INACTIVE <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.inactive}</span>
                         </span>
                     </div>
 
@@ -1085,9 +1098,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     padding: '0.2rem 0.5rem', borderRadius: '4px',
                                     fontSize: '0.7rem', fontWeight: 600,
                                     background: `${color}20`, color: color,
-                                    border: `1px solid ${color}40`
-                                }}>
-                                    P{p} <span style={{ marginLeft: '0.2rem', opacity: 0.8 }}>{broadcastStats.priorityCounts[p]}</span>
+                                    border: `1px solid ${color}40`,
+                                    cursor: 'pointer', transition: 'filter 0.1s'
+                                }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'priority', value: p }); }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                                >
+                                    P{p} <span style={{ marginLeft: '0.2rem', color: '#fff', opacity: 1 }}>{broadcastStats.priorityCounts[p]}</span>
                                 </span>
                             );
                         })}
@@ -1166,8 +1183,18 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     // Border Color: Always priority color, but 75% transparent (25% opacity) if not active
                                     const borderColor = isActive ? priorityColor : `${priorityColor}40`;
 
-                                    // Check if this card should be highlighted (from Timeline hover)
-                                    const isHighlighted = hoveredTimelineBarId === b.id;
+                                    // Check if this card should be highlighted (from Timeline hover OR Stats Badge hover)
+                                    let isHighlighted = hoveredTimelineBarId === b.id;
+
+                                    if (!isHighlighted && hoveredFilterGroup) {
+                                        if (hoveredFilterGroup.type === 'status') {
+                                            if (hoveredFilterGroup.value === 'active' && isActive) isHighlighted = true;
+                                            else if (hoveredFilterGroup.value === 'inactive' && isEnded) isHighlighted = true;
+                                            else if (hoveredFilterGroup.value === 'scheduled' && !isActive && !isEnded) isHighlighted = true;
+                                        } else if (hoveredFilterGroup.type === 'priority') {
+                                            if ((b.priority || 3) === hoveredFilterGroup.value) isHighlighted = true;
+                                        }
+                                    }
 
                                     return (
                                         <div
@@ -1187,7 +1214,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 position: 'relative',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                gap: '0.25rem',
+                                                gap: '0.125rem',
                                                 boxShadow: isHighlighted ? `0 0 20px ${priorityColor}80, 0 0 40px ${priorityColor}40` : 'none',
                                                 transform: isHighlighted ? 'scale(1.02)' : 'none',
                                                 border: '1px solid lime' // DEBUG

@@ -554,7 +554,7 @@ const Observability = () => {
                                     </div>
 
                                     {/* 3 columns Badge Grid (9 items) */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem', width: '100%', maxWidth: '450px', marginTop: '-65px', marginLeft: '-27px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '0.4rem', width: '100%', maxWidth: '500px', marginTop: '-65px' }}>
                                         {[
                                             // Row 1
                                             { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9' },
