@@ -1852,7 +1852,8 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     body,
                     imageUrl,
                     target,
-                    userIds: target === 'all' ? [] : selectedUsers
+                    userIds: target === 'all' ? [] : selectedUsers,
+                    maxViews: newBroadcast.maxViews ? parseInt(newBroadcast.maxViews) : null
                 })
             });
             const data = await response.json();

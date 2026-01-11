@@ -253,7 +253,7 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
 // Send notification (In-App only)
 router.post('/admin/send', requireAdmin, async (req, res) => {
     try {
-        const { template, title, body, target, userIds } = req.body;
+        const { template, title, body, target, userIds, maxViews } = req.body;
 
         // Build notification payload
         let notificationTitle, notificationBody;
@@ -281,6 +281,19 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
 
         if (targetUserIds.length === 0) {
             return res.status(404).json({ error: 'No users found for target' });
+        }
+
+        // Enforce Max Views Limit (if specified)
+        if (maxViews && !isNaN(maxViews) && parseInt(maxViews) > 0) {
+            const limit = parseInt(maxViews);
+            if (targetUserIds.length > limit) {
+                // Shuffle array to ensure random distribution for fairness
+                for (let i = targetUserIds.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [targetUserIds[i], targetUserIds[j]] = [targetUserIds[j], targetUserIds[i]];
+                }
+                targetUserIds = targetUserIds.slice(0, limit);
+            }
         }
 
         // Generate a batch ID for this broadcast
@@ -406,8 +419,11 @@ router.get('/admin/notifications/history', requireAdmin, (req, res) => {
         else if (sort === 'image') orderBy = "json_extract(metadata, '$.image')";
 
         const logs = all(
-            `SELECT * FROM logs 
-             WHERE action = 'notification_sent' 
+            `SELECT l.*, 
+                (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.entity_id AND n.read = 1) as read_count, 
+                (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.entity_id AND n.delivered = 1) as delivered_count
+             FROM logs l
+             WHERE l.action = 'notification_sent' 
              ORDER BY ${orderBy} ${direction} 
              LIMIT ? OFFSET ?`,
             [limit, offset]
