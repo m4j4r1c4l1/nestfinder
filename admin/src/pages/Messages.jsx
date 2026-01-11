@@ -1148,14 +1148,14 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <span style={{
                         padding: '0.2rem 0.6rem', borderRadius: '4px',
                         fontSize: '0.75rem', fontWeight: 700,
-                        background: '#334155', color: '#f8fafc',
-                        border: '1px solid #475569',
+                        background: '#eab30820', color: '#eab308',
+                        border: '1px solid #eab30840',
                         display: 'flex', alignItems: 'center', gap: '0.4rem',
                         cursor: 'pointer'
                     }}
                         onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
                     >
-                        TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px' }}>{broadcasts.length}</span>
+                        TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px', color: '#eab308' }}>{broadcasts.length}</span>
                     </span>
 
                     {/* Vertical Separator */}
@@ -1482,7 +1482,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 </div>
 
                                                 {/* Right: Time Range & Stats */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                                     {/* Time Range */}
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem', fontWeight: isActive ? '700' : '400' }}>
                                                         <span style={{ color: isActive ? '#f8fafc' : '#64748b' }}>🕐</span>
@@ -1504,7 +1504,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     </div>
 
                                                     {/* Vertical Separator for Delete Icon */}
-                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0 0.2rem' }}></div>
+                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0' }}></div>
 
                                                     {/* Delete Button (Moved from top) */}
                                                     <button
@@ -4228,35 +4228,26 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                             {hoveredItem.image_url && (
                                 <div style={{
                                     width: '100%',
-                                    height: '120px',
+                                    height: '140px', // Slightly larger for better view
                                     borderRadius: '6px',
                                     overflow: 'hidden',
                                     border: '1px solid #334155',
-                                    background: '#0f172a'
+                                    background: '#0f172a',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
                                 }}>
                                     <img
                                         src={hoveredItem.image_url}
                                         alt="Broadcast"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                     />
                                 </div>
                             )}
 
                             {/* Footer Line: Badges (Left) & Stats (Right) */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', gap: '1rem' }}>
 
-                                {/* Badges (Left) */}
+                                {/* Badges (Left) - Order: Status, Priority, MaxViews */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-
-                                    {/* Priority Badge */}
-                                    <span style={{
-                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
-                                        fontSize: '0.7rem', fontWeight: 700,
-                                        background: badgeBg(priorityColor), color: priorityColor,
-                                        border: `1px solid ${badgeBorder(priorityColor)}`
-                                    }}>
-                                        P{hoveredItem.priority || 3}
-                                    </span>
 
                                     {/* Status Badge */}
                                     <span style={{
@@ -4268,6 +4259,16 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                         textTransform: 'uppercase', letterSpacing: '0.5px'
                                     }}>
                                         {statusText}
+                                    </span>
+
+                                    {/* Priority Badge */}
+                                    <span style={{
+                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                        fontSize: '0.7rem', fontWeight: 700,
+                                        background: badgeBg(priorityColor), color: priorityColor,
+                                        border: `1px solid ${badgeBorder(priorityColor)}`
+                                    }}>
+                                        P{hoveredItem.priority || 3}
                                     </span>
 
                                     {/* Max Views Badge */}
@@ -4295,7 +4296,7 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                                 </div>
 
                                 {/* Delivery Stats (Right) */}
-                                <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem' }}>
+                                <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', paddingLeft: '12px', borderLeft: '1px solid #334155' }}>
                                     <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ {hoveredItem.delivered_count || 0}</span>
                                     <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ {hoveredItem.read_count || 0}</span>
                                 </div>
