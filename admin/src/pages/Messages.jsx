@@ -983,6 +983,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     const [viewRecipientsId, setViewRecipientsId] = useState(null); // For Recipients Modal
     // const [showAdvanced, setShowAdvanced] = useState(false); // REMOVED: Filters now always visible
     const [hoveredTimelineBarId, setHoveredTimelineBarId] = useState(null); // For broadcast card highlighting
+    const [hoveredCardId, setHoveredCardId] = useState(null); // For timeline bar highlighting (reverse sync)
     const [hoveredFilterGroup, setHoveredFilterGroup] = useState(null); // For stats badge highlighting
 
     // Layout Alignment State
@@ -1165,7 +1166,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 value={searchFilters.status}
                                 onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val }))}
                                 options={[
-                                    // 'All' removed; default state handles filter
+                                    { value: 'all', label: 'Any Status' },
                                     { value: 'active', label: 'Active', color: '#22c55e' },
                                     { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' },
                                     { value: 'inactive', label: 'Past', color: '#94a3b8' }
@@ -1183,6 +1184,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 value={searchFilters.priority}
                                 onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val }))}
                                 options={[
+                                    { value: 'all', label: 'Any Priority' },
                                     { value: '1', label: 'P1 - Critical', color: '#ef4444' },
                                     { value: '2', label: 'P2 - High', color: '#f97316' },
                                     { value: '3', label: 'P3 - Medium', color: '#eab308' },
@@ -1422,6 +1424,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         onBroadcastClick={setSelectedBroadcast}
                         onBroadcastUpdate={onBroadcastUpdate}
                         onHoveredBarChange={setHoveredTimelineBarId}
+                        externalHoverId={hoveredCardId}
                     />
                 </div>
 
@@ -1525,10 +1528,12 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             onMouseEnter={e => {
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
                                                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                                                setHoveredCardId(b.id);
                                             }}
                                             onMouseLeave={e => {
                                                 e.currentTarget.style.transform = 'translateY(0)';
                                                 e.currentTarget.style.boxShadow = 'none';
+                                                setHoveredCardId(null);
                                             }}
                                         >
                                             {/* Top Line: Title & Delete */}
@@ -3436,16 +3441,18 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                     <span style={{
                                         padding: '0.2rem 0.6rem', borderRadius: '4px',
                                         fontSize: '0.75rem', fontWeight: 700,
-                                        background: 'rgba(6, 182, 212, 0.1)', color: '#06b6d4',
-                                        border: '1px solid rgba(6, 182, 212, 0.3)'
+                                        background: (broadcast.total_users || 0) >= broadcast.max_views ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
+                                        color: (broadcast.total_users || 0) >= broadcast.max_views ? '#ef4444' : '#06b6d4',
+                                        border: (broadcast.total_users || 0) >= broadcast.max_views ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)'
                                     }}>
-                                        👁 {broadcast.max_views}
+                                        👁 {broadcast.total_users || 0} / {broadcast.max_views}
                                     </span>
                                 ) : (
                                     <span style={{
                                         padding: '0.2rem 0.6rem', borderRadius: '4px',
                                         fontSize: '0.75rem', fontWeight: 700,
-                                        background: 'rgba(6, 182, 212, 0.1)', color: '#06b6d4',
+                                        background: 'rgba(6, 182, 212, 0.1)',
+                                        color: '#06b6d4',
                                         border: '1px solid rgba(6, 182, 212, 0.3)'
                                     }}>
                                         👁 ∞
@@ -3763,7 +3770,7 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 }
 
 // --- Timeline Component ---
-function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcastUpdate, onHoveredBarChange }) {
+function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcastUpdate, onHoveredBarChange, externalHoverId }) {
     const containerRef = React.useRef(null);
     const scrollInterval = React.useRef(null);
     const latestHandleWheel = React.useRef(null);
@@ -4466,28 +4473,54 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     </>
                 )}
 
-                {/* Resize Guide Line (Vertical) */}
-                {dragging && dragging.type && (dragging.type === 'resize-left' || dragging.type === 'resize-right') && (() => {
+                {/* Resize/Move Guide Lines (Vertical) */}
+                {dragging && dragging.type && (dragging.type === 'move' || dragging.type === 'resize-left' || dragging.type === 'resize-right') && (() => {
                     const draggedLaneIndex = lanes.findIndex(l => l.some(b => b.id === dragging.id));
                     const barTop = draggedLaneIndex * (rowHeight + gap) + gap;
-                    // Connect Ruler Bottom to Bar Bottom:
-                    // Ruler is at y < 0 relative to this container (which starts at 0).
-                    // This container = Body/Bars.
-                    // top: -rulerHeight  -> Starts at Ruler Top.
-                    // height: rulerHeight + barTop + rowHeight -> Ends at Bar Bottom.
-                    const guideHeight = rulerHeight + barTop + rowHeight;
+                    // Connect Ruler Height (Timeline Top) to Bar Top
+                    // Line drawn relative to Bars container (top: 0).
+                    // Ruler is separate div above. We want line from "edges of bar until the bottom of the rule".
+                    // The "Bottom of Rule" is effectively y=0 in this container? No, ruler is in separate div.
+                    // Wait, looking at structure:
+                    // <div ref={containerRef}>
+                    //    <div Ruler ... height: rulerHeight />
+                    //    <div Body ... height: total - ruler />
+                    //       <GuideLine ... top: -rulerHeight />
+                    // The guide line top: -rulerHeight extends into the ruler area.
+                    // If we want to connect to "Bottom of Rule", that is line's top should be 0 (relative to Body).
+                    // But previous code was `top: -rulerHeight`, implying it went ALL THE WAY TO TOP of ruler?
+                    // User said: "until the bottom of the rule".
+                    // Bottom of rule is y=0 in Body context.
+                    // So line should be from y=0 to y=barTop.
 
-                    return (
+                    // Also "two vertical dotted lines... from edges of bar".
+                    // We need lines for Start and End.
+
+                    const leftPct = ((dragging.newStart - viewportStart) / viewportDuration) * 100;
+                    const rightPct = ((dragging.newEnd - viewportStart) / viewportDuration) * 100;
+
+                    // Get bar color for the dotted line
+                    const color = getPriorityColor(dragging.broadcast.priority);
+
+                    const renderGuide = (leftPos) => (
                         <div style={{
                             position: 'absolute',
-                            left: `${(((dragging.type === 'resize-left' ? dragging.newStart : dragging.newEnd) - viewportStart) / viewportDuration) * 100}%`,
-                            top: -rulerHeight, // Extend up into ruler
-                            height: `${guideHeight}px`,
+                            left: `${leftPos}%`,
+                            top: 0, // Bottom of Ruler
+                            height: `${barTop}px`, // Down to Bar Top
                             width: 0,
-                            borderLeft: '2px dotted white',
+                            borderLeft: `2px dotted ${color}`,
                             zIndex: 25,
                             pointerEvents: 'none'
                         }} />
+                    );
+
+                    return (
+                        <>
+                            {renderGuide(leftPct)}
+                            {/* Only show right guide if not infinite or wildly offscreen */}
+                            {dragging.newEnd && dragging.newEnd < 4102444800000 && renderGuide(rightPct)}
+                        </>
                     );
                 })()}
 
@@ -4535,7 +4568,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         if (left > 105 || (left + widthPct) < -5) return null;
 
                         const isSelected = selectedBroadcast?.id === b.id;
-                        const isHovered = hoveredBarId === b.id;
+                        const isHovered = hoveredBarId === b.id || externalHoverId === b.id;
                         const isInteractionActive = isDragging || isSelected || isHovered;
                         const now = new Date().getTime();
                         // Active = currently happening. Scheduled = future. Past = ended.
@@ -4776,11 +4809,11 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         <span style={{
                                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                                             fontSize: '0.7rem', fontWeight: 700,
-                                            background: 'rgba(6, 182, 212, 0.1)',
-                                            color: '#06b6d4',
-                                            border: '1px solid rgba(6, 182, 212, 0.3)'
+                                            background: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
+                                            color: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? '#ef4444' : '#06b6d4',
+                                            border: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)'
                                         }}>
-                                            👁 {hoveredItem.max_views}
+                                            👁 {hoveredItem.total_users || 0} / {hoveredItem.max_views}
                                         </span>
                                     ) : (
                                         <span style={{
