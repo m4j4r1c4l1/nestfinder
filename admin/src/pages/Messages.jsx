@@ -4115,6 +4115,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
     }
 
     const handleMouseUp = async () => {
+        // Fix: If committing, ignore mouse up to prevent potential race conditions
+        if (dragging?.isCommitting) return;
+
         if (dragging) {
             // Click Handler: If not moved, trigger selection
             if (dragging.id && !dragging.hasMoved && (dragging.type === 'move' || dragging.type === 'resize-left' || dragging.type === 'resize-right')) {
@@ -4244,9 +4247,10 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                 cursor: dragging ? 'grabbing' : 'auto',
                 overflow: 'hidden' // Prevent edge overload
             }}
-            onMouseMove={handleMouseMove}
+            onMouseMove={!dragging ? handleMouseMove : undefined}
             onMouseDown={handleContainerMouseDown}
-            onMouseUp={handleMouseUp}
+            // onMouseUp removed: Rely on global listener when dragging
+
 
             onMouseLeave={handleMouseLeave}
             onDoubleClick={handleContainerDoubleClick}
