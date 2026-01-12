@@ -594,7 +594,7 @@ const Observability = () => {
                                                 border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
                                                 borderRadius: '8px', padding: '0.5rem 0.75rem',
                                                 minHeight: '52px',
-                                                height: '100%', // Match height
+                                                // Removed height: '100%' to prevent stretching
                                                 boxSizing: 'border-box'
                                             }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
