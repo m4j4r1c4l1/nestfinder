@@ -869,12 +869,13 @@ const Messages = () => {
                                                             className="form-input"
                                                             style={{
                                                                 background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.5rem',
-                                                                fontSize: '0.9rem', color: '#f8fafc', width: '100%', outline: 'none', height: '38px', // Match filter style
+                                                                paddingRight: '50px', // Make room for suffix
+                                                                fontSize: '0.9rem', color: '#f8fafc', width: '100%', outline: 'none', height: '38px',
                                                                 boxSizing: 'border-box'
                                                             }}
                                                         />
                                                         {newBroadcast.maxViews && (
-                                                            <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#64748b' }}>
+                                                            <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#64748b', pointerEvents: 'none' }}>
                                                                 views
                                                             </span>
                                                         )}
