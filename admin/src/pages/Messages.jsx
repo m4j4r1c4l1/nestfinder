@@ -3709,6 +3709,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
     const latestHandleWheel = React.useRef(null);
     const lastDragTimeRef = React.useRef(0); // For click suppression
     const hoverTimeoutRef = React.useRef(null); // For tooltip delay
+    const lastMousePosRef = React.useRef({ x: 0, y: 0 }); // Track mouse for tooltip placement
 
     // Viewport State (Time Window)
     const [viewportStart, setViewportStart] = useState(0);
@@ -4006,6 +4007,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         setHoveredBarId(b.id);
         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
         hoverTimeoutRef.current = setTimeout(() => {
+            // FIX: Use ref for position to prevent 0,0 jump if mouse stopped moving
+            setTooltipPos(lastMousePosRef.current);
             setHoveredItem({ ...b, currentStart: rawStart, currentEnd: rawEnd });
         }, 750);
     }
@@ -4017,6 +4020,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
     }
 
     function handleMouseMove(e) {
+        // Always track mouse position
+        lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
