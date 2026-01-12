@@ -596,7 +596,10 @@ const Observability = () => {
                                                         color: badge.color,
                                                         fontSize: badge.mono ? '1.1rem' : '1.8rem',
                                                         fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
-                                                        lineHeight: 1
+                                                        lineHeight: 1,
+                                                        minWidth: badge.mono ? '100px' : '65px', // Stable width for 5+ digits
+                                                        display: 'flex',
+                                                        justifyContent: 'flex-end'
                                                     }}>
                                                         {badge.count}
                                                     </span>

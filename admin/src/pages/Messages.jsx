@@ -4220,7 +4220,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         <div
             ref={containerRef}
             style={{
-                background: '#a3aab4', // Midpoint between Slate 600 (#475569) and White (#ffffff)
+                background: '#ffffff', // User requested white
                 border: '1px solid #334155',
                 borderRadius: '8px',
                 position: 'relative',
@@ -4251,16 +4251,16 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     const showDate = i === 0 || date !== prevDate;
 
                     // Determine style based on tick type
-                    let tickColor = '#0f172a'; // Hour (Darkest - Slate 900)
+                    let tickColor = '#94a3b8'; // Hour (Brightest)
                     let tickHeight = 8;
                     let labelOpacity = 1;
 
                     if (tick.type === 'half') {
-                        tickColor = '#1e293b'; // Half (Slate 800)
+                        tickColor = '#64748b'; // Half (Mid)
                         tickHeight = 6;
                         labelOpacity = 0.8;
                     } else if (tick.type === 'quarter') {
-                        tickColor = '#334155'; // Quarter (Slate 700)
+                        tickColor = '#475569'; // Quarter (Darkest/Faintest)
                         tickHeight = 4;
                         labelOpacity = 0.6;
                     }
