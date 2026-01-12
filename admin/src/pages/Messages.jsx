@@ -4635,7 +4635,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     overflow: 'hidden',
                                     background: '#0f172a',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    marginBottom: '12px' // Add spacing below image
+                                    // marginBottom removed to balance spacing
                                 }}>
                                     <img
                                         src={hoveredItem.image_url}
@@ -4657,7 +4657,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 borderRadius: '6px',
                                 border: '1px solid #334155',
                                 position: 'relative',
-                                marginTop: '12px' // Space for icon
+                                marginTop: '6px' // Reduced from 12px to balance with top gap
                             }}>
                                 {/* Clock Icon */}
                                 <div style={{
