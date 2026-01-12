@@ -7,9 +7,9 @@ const SEEN_BROADCASTS_KEY = 'nestfinder_seen_broadcasts';
 
 const BroadcastModal = ({ isSettled = false }) => {
     const { t } = useLanguage();
-    const [broadcast, setBroadcast] = useState(null);
+    const [broadcasts, setBroadcasts] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [visible, setVisible] = useState(false);
-    const hasFetched = useRef(false);
 
     // Get seen broadcast IDs from localStorage
     const getSeenIds = () => {
@@ -19,6 +19,18 @@ const BroadcastModal = ({ isSettled = false }) => {
         } catch (e) {
             return [];
         }
+    };
+
+    // Check settings - default to TRUE if missing
+    const isRealTimeEnabled = () => {
+        try {
+            const saved = localStorage.getItem('nestfinder_notify_settings');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                return parsed.realTime !== false;
+            }
+            return true;
+        } catch (e) { return true; }
     };
 
     // Mark broadcast as seen
@@ -34,15 +46,23 @@ const BroadcastModal = ({ isSettled = false }) => {
     useEffect(() => {
         if (!isSettled) return;
 
-        const checkForBroadcast = async () => {
-            if (document.hidden) return;
+        const checkForBroadcasts = async () => {
+            // STOP if tab hidden or Real-Time disabled
+            if (document.hidden || !isRealTimeEnabled()) return;
 
             try {
+                // Fetch ALL active broadcasts (modified endpoint needed or we check persistence)
+                // For now, we rely on the single active logic but loop it on client? 
+                // Actually, the server only returns ONE active broadcast at a time based on priority.
+                // To support sequential, we need to fetch -> dismiss -> fetch next.
+
                 const response = await api.fetch('/points/broadcast/active');
                 if (response.broadcast) {
                     const seenIds = getSeenIds();
                     if (!seenIds.includes(response.broadcast.id)) {
-                        setBroadcast(response.broadcast);
+                        // Found a new one!
+                        setBroadcasts([response.broadcast]); // Currently server only gives one
+                        setCurrentIndex(0);
                         setVisible(true);
                     }
                 }
@@ -51,12 +71,12 @@ const BroadcastModal = ({ isSettled = false }) => {
             }
         };
 
-        const initialTimer = setTimeout(checkForBroadcast, 1000);
-        const interval = setInterval(checkForBroadcast, 60 * 1000);
+        const initialTimer = setTimeout(checkForBroadcasts, 2000); // Wait a bit longer for app to settle
+        const interval = setInterval(checkForBroadcasts, 60 * 1000); // Check every minute
 
         const handleVisibilityChange = () => {
             if (!document.hidden) {
-                checkForBroadcast();
+                checkForBroadcasts();
             }
         };
 
@@ -70,18 +90,40 @@ const BroadcastModal = ({ isSettled = false }) => {
     }, [isSettled]);
 
     const handleDismiss = async () => {
-        if (broadcast) {
-            markSeen(broadcast.id);
+        const currentBroadcast = broadcasts[currentIndex];
+        if (currentBroadcast) {
+            markSeen(currentBroadcast.id);
             try {
-                await api.post(`/points/broadcast/${broadcast.id}/read`);
+                // Tell server we read it (so it serves the next priority one next time)
+                await api.post(`/points/broadcast/${currentBroadcast.id}/read`);
             } catch (e) {
                 console.warn('Failed to mark broadcast as read:', e);
             }
         }
+
+        // If we had a list, we would go to next. 
+        // Since server serves 1 by 1, we close and let the next poll (or immediate check) find the next one.
         setVisible(false);
+        setBroadcasts([]);
+
+        // Immediate check for next priority item
+        setTimeout(async () => {
+            if (document.hidden || !isRealTimeEnabled()) return;
+            try {
+                const response = await api.fetch('/points/broadcast/active');
+                if (response.broadcast) {
+                    const seenIds = getSeenIds();
+                    if (!seenIds.includes(response.broadcast.id)) {
+                        setBroadcasts([response.broadcast]);
+                        setVisible(true);
+                    }
+                }
+            } catch (e) { }
+        }, 500);
     };
 
-    if (!visible || !broadcast) return null;
+    if (!visible || broadcasts.length === 0) return null;
+    const broadcast = broadcasts[0];
 
     return (
         <NotificationPopup

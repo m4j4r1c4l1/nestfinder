@@ -1395,6 +1395,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 <div style={{ position: 'relative', zIndex: 1, margin: '0.375rem 2rem 0.75rem 1rem' }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
+                        selectedBroadcast={selectedBroadcast}
                         onBroadcastClick={setSelectedBroadcast}
                         onBroadcastUpdate={onBroadcastUpdate}
                         onHoveredBarChange={setHoveredTimelineBarId}
@@ -3632,7 +3633,7 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 }
 
 // --- Timeline Component ---
-function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBarChange }) {
+function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcastUpdate, onHoveredBarChange }) {
     const containerRef = React.useRef(null);
     const scrollInterval = React.useRef(null);
     const latestHandleWheel = React.useRef(null);

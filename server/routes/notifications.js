@@ -58,9 +58,8 @@ router.get('/notifications', (req, res) => {
             [userId]
         );
 
-        // 2. Get broadcasts seen by this user
-        // We join broadcast_views to get the status for THIS user
-        const broadcastRows = all(`
+        // 2. Get broadcasts seen by this user (joined with view record)
+        const seenBroadcasts = all(`
             SELECT b.id, b.title, b.message as body, b.image_url, b.created_at,
                    v.status, v.delivered_at, v.read_at,
                    CASE WHEN v.status = 'read' THEN 1 ELSE 0 END as read,
@@ -72,11 +71,26 @@ router.get('/notifications', (req, res) => {
             LIMIT 50
         `, [userId]);
 
-        // 3. Merge and Sort
-        // We map broadcast fields to match notification schema if needed, but the SELECT above does most of it
-        const unified = [...notifications, ...broadcastRows].sort((a, b) => {
+        // 3. Get ACTIVE broadcasts NOT seen by this user (Brand new ones)
+        // These effectively act as "Unread/New" notifications in the inbox
+        const now = new Date().toISOString();
+        const unseenBroadcasts = all(`
+            SELECT b.id, b.title, b.message as body, b.image_url, b.created_at,
+                   'sent' as status, NULL as delivered_at, NULL as read_at,
+                   0 as read,
+                   'broadcast' as type
+            FROM broadcasts b
+            WHERE datetime(b.start_time) <= datetime(?)
+            AND datetime(b.end_time) >= datetime(?)
+            AND b.id NOT IN (SELECT broadcast_id FROM broadcast_views WHERE user_id = ?)
+            ORDER BY b.priority DESC, b.created_at DESC
+            LIMIT 10
+        `, [now, now, userId]);
+
+        // 4. Merge and Sort
+        const unified = [...notifications, ...seenBroadcasts, ...unseenBroadcasts].sort((a, b) => {
             return new Date(b.created_at) - new Date(a.created_at);
-        }).slice(0, 50); // Hard limit total inbox size
+        }).slice(0, 50);
 
         // Mark fetched *standard* notifications as delivered (if not already)
         // (Broadcasts handle their own delivery status in points.js)
