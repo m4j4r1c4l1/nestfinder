@@ -1381,27 +1381,36 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
                 </div>
 
-                {/* Timeline Visualization */}
-                <div style={{ position: 'relative', zIndex: 1, margin: '0.375rem 2rem 0.75rem 1rem' }}>
-                    <Timeline
-                        broadcasts={filteredBroadcasts}
-                        selectedBroadcast={selectedBroadcast}
-                        onBroadcastClick={setSelectedBroadcast}
-                        onBroadcastUpdate={onBroadcastUpdate}
-                        onHoveredBarChange={setHoveredTimelineBarId}
-                    />
-                </div>
-
-                {/* Horizontal Separator */}
                 <div style={{
-                    height: '1px',
-                    background: '#334155', // Match border color
-                    width: '100%',
-                    marginBottom: '0.75rem'
-                }} />
+                    maxHeight: '660px', // Increased slightly to account for included timeline
+                    height: 'auto',
+                    minHeight: '200px',
+                    overflowY: 'auto',
+                    background: '#1e293b',
+                    position: 'relative',
+                    boxSizing: 'border-box',
+                    borderRadius: '8px', // Added radius for polish
+                    border: '1px solid #334155' // Border moves to container
+                }}>
+                    {/* Sticky Timeline Header */}
+                    <div style={{
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 10,
+                        background: '#1e293b',
+                        padding: '1rem 1rem 0.75rem 1rem', // Unified padding
+                        borderBottom: '1px solid #334155'
+                    }}>
+                        <Timeline
+                            broadcasts={filteredBroadcasts}
+                            selectedBroadcast={selectedBroadcast}
+                            onBroadcastClick={setSelectedBroadcast}
+                            onBroadcastUpdate={onBroadcastUpdate}
+                            onHoveredBarChange={setHoveredTimelineBarId}
+                        />
+                    </div>
 
-                <div style={{ maxHeight: '560px', height: 'auto', minHeight: '200px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0 1rem 1rem 1rem', boxSizing: 'border-box' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', boxSizing: 'border-box' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
                                 No broadcasts found matching filters.
