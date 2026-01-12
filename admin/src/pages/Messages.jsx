@@ -1632,10 +1632,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         marginRight: '1rem' // Restored standard margin
                                                     }}>
                                                         <span style={{ opacity: statusText === 'ACTIVE' ? 1 : 0.7 }}>🕐</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{formatTimeCET(start)}</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>→</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>→</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
@@ -4086,86 +4086,110 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         setHoveredItem(null);
     }
 
+    // Use RAF loop for mouse move to prevent lag/jitter
+    const rafRef = useRef(null);
+
     function handleMouseMove(e) {
-        // Always track mouse position
-        lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+        // Persist event values needed
+        const clientX = e.clientX;
+        const clientY = e.clientY;
+
+        // Always track mouse position immediately for refs
+        lastMousePosRef.current = { x: clientX, y: clientY };
 
         if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        const width = rect.width;
 
-        const cursorTime = viewportStart + (viewportDuration * (mouseX / width));
-
-        if (!dragging && !hoveredBarId) {
-            setCrosshairPos({
-                x: mouseX,
-                y: Math.max(0, mouseY - rulerHeight)
-            });
+        // Cancel previous frame if still pending to avoid stacking
+        if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
         }
 
-        if (hoveredItem) {
-            setTooltipPos({ x: e.clientX, y: e.clientY });
-        }
+        rafRef.current = requestAnimationFrame(() => {
+            if (!containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const mouseX = clientX - rect.left;
+            const mouseY = clientY - rect.top;
+            const width = rect.width;
 
-        if (dragging) {
-            // Fix: If committing, ignore mouse moves to prevent "sticking"
-            if (dragging.isCommitting) return;
+            const cursorTime = viewportStart + (viewportDuration * (mouseX / width));
 
-            if (dragging.type === 'resize-height') {
-                const newH = Math.max(mouseY, contentHeight);
-                setManualHeight(newH);
-                return;
+            if (!dragging && !hoveredBarId) {
+                setCrosshairPos({
+                    x: mouseX,
+                    y: Math.max(0, mouseY - rulerHeight)
+                });
             }
 
-            const edgeDist = 50;
-            if (mouseX < edgeDist) {
-                const factor = Math.pow((edgeDist - mouseX) / edgeDist, 2) * 0.03;
-                setViewportStart(s => s - (viewportDuration * factor));
-            } else if (mouseX > width - edgeDist) {
-                const factor = Math.pow((mouseX - (width - edgeDist)) / edgeDist, 2) * 0.03;
-                setViewportStart(s => s + (viewportDuration * factor));
+            if (hoveredItem) {
+                setTooltipPos({ x: clientX, y: clientY });
             }
 
-            if (dragging.type === 'pan') {
-                const pixelDelta = e.clientX - dragging.startX;
-                const timeDelta = pixelDelta * (viewportDuration / width);
-                setViewportStart(dragging.initialViewportStart - timeDelta);
-                return;
-            }
+            if (dragging) {
+                // Fix: If committing, ignore mouse moves to prevent "sticking"
+                if (dragging.isCommitting) return;
 
-            let newStart = dragging.originalStart;
-            let newEnd = dragging.originalEnd;
-            const cursorTimeNow = viewportStart + (viewportDuration * (mouseX / width));
-            const absDelta = cursorTimeNow - dragging.initialCursorTime;
-
-            if (dragging.type === 'move') {
-                newStart = dragging.originalStart + absDelta;
-                newEnd = dragging.originalEnd + absDelta;
-
-                const yOffsetFromRuler = mouseY - rulerHeight - gap;
-                const newLane = Math.max(0, Math.floor(yOffsetFromRuler / (rowHeight + gap)));
-
-                if (!dragging.hasMoved) {
-                    const absXDelta = Math.abs(mouseX - dragging.initialCursorX);
-                    const absYDelta = Math.abs(mouseY - dragging.initialCursorY);
-                    if (absXDelta > 5 || absYDelta > 5) {
-                        setDragging(prev => ({ ...prev, hasMoved: true }));
-                    }
+                if (dragging.type === 'resize-height') {
+                    const newH = Math.max(mouseY, contentHeight);
+                    setManualHeight(newH);
+                    return;
                 }
 
-                setDragging(prev => ({ ...prev, newStart, newEnd, newLane }));
-                return;
-            } else if (dragging.type === 'resize-left') {
-                newStart = Math.min(dragging.originalStart + absDelta, dragging.originalEnd - 900000);
-                if (!dragging.hasMoved) setDragging(prev => ({ ...prev, hasMoved: true }));
-            } else if (dragging.type === 'resize-right') {
-                newEnd = Math.max(dragging.originalEnd + absDelta, dragging.originalStart + 900000);
-                if (!dragging.hasMoved) setDragging(prev => ({ ...prev, hasMoved: true }));
+                const edgeDist = 50;
+                if (mouseX < edgeDist) {
+                    const factor = Math.pow((edgeDist - mouseX) / edgeDist, 2) * 0.03;
+                    setViewportStart(s => s - (viewportDuration * factor));
+                } else if (mouseX > width - edgeDist) {
+                    const factor = Math.pow((mouseX - (width - edgeDist)) / edgeDist, 2) * 0.03;
+                    setViewportStart(s => s + (viewportDuration * factor));
+                }
+
+                if (dragging.type === 'pan') {
+                    const pixelDelta = clientX - dragging.startX;
+                    const timeDelta = pixelDelta * (viewportDuration / width);
+                    setViewportStart(dragging.initialViewportStart - timeDelta);
+                    return;
+                }
+
+                let newStart = dragging.originalStart;
+                let newEnd = dragging.originalEnd;
+                // const cursorTimeNow = viewportStart + (viewportDuration * (mouseX / width)); // redundant
+                const absDelta = cursorTime - dragging.initialCursorTime;
+
+                if (dragging.type === 'move') {
+                    newStart = dragging.originalStart + absDelta;
+                    newEnd = dragging.originalEnd + absDelta;
+
+                    const yOffsetFromRuler = mouseY - rulerHeight - gap;
+                    const newLane = Math.max(0, Math.floor(yOffsetFromRuler / (rowHeight + gap)));
+
+                    let hasMoved = dragging.hasMoved;
+                    if (!hasMoved) {
+                        const absXDelta = Math.abs(mouseX - dragging.initialCursorX);
+                        const absYDelta = Math.abs(mouseY - dragging.initialCursorY);
+                        if (absXDelta > 5 || absYDelta > 5) {
+                            hasMoved = true;
+                        }
+                    }
+
+                    // Only update if changed to avoid renders
+                    setDragging(prev => {
+                        if (prev.newStart === newStart && prev.newEnd === newEnd && prev.newLane === newLane && prev.hasMoved === hasMoved) return prev;
+                        return { ...prev, newStart, newEnd, newLane, hasMoved };
+                    });
+                    return;
+                } else if (dragging.type === 'resize-left') {
+                    newStart = Math.min(dragging.originalStart + absDelta, dragging.originalEnd - 900000);
+                    let hasMoved = dragging.hasMoved;
+                    if (!hasMoved) hasMoved = true;
+                    setDragging(prev => ({ ...prev, newStart, newEnd, hasMoved }));
+                } else if (dragging.type === 'resize-right') {
+                    newEnd = Math.max(dragging.originalEnd + absDelta, dragging.originalStart + 900000);
+                    let hasMoved = dragging.hasMoved;
+                    if (!hasMoved) hasMoved = true;
+                    setDragging(prev => ({ ...prev, newStart, newEnd, hasMoved }));
+                }
             }
-            setDragging(prev => ({ ...prev, newStart, newEnd }));
-        }
+        });
     }
 
     function handleContainerDoubleClick(e) {
@@ -4475,26 +4499,13 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
                 {/* Resize/Move Guide Lines (Vertical) */}
                 {dragging && dragging.type && (dragging.type === 'move' || dragging.type === 'resize-left' || dragging.type === 'resize-right') && (() => {
-                    const draggedLaneIndex = lanes.findIndex(l => l.some(b => b.id === dragging.id));
-                    const barTop = draggedLaneIndex * (rowHeight + gap) + gap;
-                    // Connect Ruler Height (Timeline Top) to Bar Top
-                    // Line drawn relative to Bars container (top: 0).
-                    // Ruler is separate div above. We want line from "edges of bar until the bottom of the rule".
-                    // The "Bottom of Rule" is effectively y=0 in this container? No, ruler is in separate div.
-                    // Wait, looking at structure:
-                    // <div ref={containerRef}>
-                    //    <div Ruler ... height: rulerHeight />
-                    //    <div Body ... height: total - ruler />
-                    //       <GuideLine ... top: -rulerHeight />
-                    // The guide line top: -rulerHeight extends into the ruler area.
-                    // If we want to connect to "Bottom of Rule", that is line's top should be 0 (relative to Body).
-                    // But previous code was `top: -rulerHeight`, implying it went ALL THE WAY TO TOP of ruler?
-                    // User said: "until the bottom of the rule".
-                    // Bottom of rule is y=0 in Body context.
-                    // So line should be from y=0 to y=barTop.
-
-                    // Also "two vertical dotted lines... from edges of bar".
-                    // We need lines for Start and End.
+                    // FIX: Use newLane if available to tracking visual position during drag
+                    const activeLaneIndex = (dragging.newLane !== undefined) ? dragging.newLane : lanes.findIndex(l => l.some(b => b.id === dragging.id));
+                    
+                    // Clamp lane index to valid range for visual sanity
+                    const safeLaneIndex = Math.max(0, Math.min(activeLaneIndex, laneCount - 1));
+                    
+                    const barTop = safeLaneIndex * (rowHeight + gap) + gap;
 
                     const leftPct = ((dragging.newStart - viewportStart) / viewportDuration) * 100;
                     const rightPct = ((dragging.newEnd - viewportStart) / viewportDuration) * 100;

@@ -15,6 +15,7 @@ const Settings = () => {
     // Reset state
     const [resetting, setResetting] = useState(null); // 'logs' | 'points' | 'users' | 'all' | null
     const [confirmReset, setConfirmReset] = useState(null);
+    const [resultModal, setResultModal] = useState(null); // { title, message, type, onClose }
 
     useEffect(() => {
         adminApi.getSettings().then(data => {
@@ -63,11 +64,25 @@ const Settings = () => {
         setMessage({ text: '', type: '' });
         try {
             await adminApi.changePassword(passwords.current, passwords.new);
-            setMessage({ text: 'Password changed successfully!', type: 'success' });
+            // SUCCESS MODAL
+            setResultModal({
+                title: 'Password Changed',
+                message: 'Your admin password has been successfully updated.',
+                type: 'success',
+                onClose: () => {
+                    setResultModal(null);
+                    setShowPasswordChange(false);
+                }
+            });
             setPasswords({ current: '', new: '', confirm: '' });
-            setShowPasswordChange(false);
         } catch (err) {
-            setMessage({ text: err.message || 'Failed to change password', type: 'error' });
+            // ERROR MODAL
+            setResultModal({
+                title: 'Change Failed',
+                message: err.message || 'Failed to change password',
+                type: 'error',
+                onClose: () => setResultModal(null)
+            });
         } finally {
             setChangingPassword(false);
         }
@@ -365,6 +380,95 @@ const Settings = () => {
                             </div>
                         ))}
                     </div>
+                </div>
+            </div>
+            {/* Result Modal */}
+            {resultModal && (
+                <ResultModal
+                    title={resultModal.title}
+                    message={resultModal.message}
+                    type={resultModal.type}
+                    onClose={resultModal.onClose}
+                />
+            )}
+        </div>
+    );
+};
+
+// Result Modal (Generic for Success/Error)
+const ResultModal = ({ title, message, type = 'success', onClose }) => {
+    const isSuccess = type === 'success';
+    const config = isSuccess ? {
+        bg: 'rgba(16, 185, 129, 0.1)',
+        icon: '✨',
+        btnBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        btnShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)',
+        btnText: 'Excellent'
+    } : {
+        bg: 'rgba(239, 68, 68, 0.1)',
+        icon: '⚠️',
+        btnBg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+        btnShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2)',
+        btnText: 'Close'
+    };
+
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1600,
+                backdropFilter: 'blur(8px)'
+            }}
+        >
+            <div
+                className="card"
+                style={{
+                    width: '90%',
+                    maxWidth: '420px',
+                    textAlign: 'center',
+                    overflow: 'hidden',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    animation: 'slideIn 0.3s ease-out'
+                }}
+            >
+                <div className="card-body" style={{ padding: '2.5rem 2rem' }}>
+                    <div style={{
+                        width: '64px',
+                        height: '64px',
+                        background: config.bg,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 1.5rem auto'
+                    }}>
+                        <span style={{ fontSize: '2rem' }}>{config.icon}</span>
+                    </div>
+
+                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: 600 }}>{title}</h3>
+                    <p style={{ margin: '0 0 2rem 0', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>{message}</p>
+
+                    <button
+                        className="btn btn-primary"
+                        onClick={onClose}
+                        style={{
+                            width: '100%',
+                            padding: '0.8rem',
+                            fontSize: '1rem',
+                            background: config.btnBg,
+                            border: 'none',
+                            borderRadius: 'var(--radius-md)',
+                            boxShadow: config.btnShadow,
+                            color: 'white'
+                        }}
+                    >
+                        {config.btnText}
+                    </button>
                 </div>
             </div>
         </div>
