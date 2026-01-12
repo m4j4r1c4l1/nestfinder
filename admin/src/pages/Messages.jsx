@@ -4383,6 +4383,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         // Skip if way off screen (but keep infinite bars starting offscreen-left visible)
                         if (left > 105 || (left + widthPct) < -5) return null;
 
+                        const isSelected = selectedBroadcast?.id === b.id;
+                        const isHovered = hoveredBarId === b.id;
                         const isInteractionActive = isDragging || isSelected || isHovered;
                         const now = new Date().getTime();
                         const isTimeActive = now >= rawStart && (isInfinite || now <= rawEnd);
