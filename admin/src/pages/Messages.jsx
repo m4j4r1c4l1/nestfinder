@@ -1236,7 +1236,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.5rem', // Reduced gap significantly to fit all
+                    gap: '1rem', // Increased gap to fill more space but stay safe
                     padding: '0.75rem 1rem', // Equal padding top/bottom
                     background: '#0f172a',
                     margin: `0.75rem calc(1rem + ${scrollbarWidth}px) 0.375rem 1rem`, // Dynamic Alignment
@@ -1263,7 +1263,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <div style={{ width: 1, height: 20, background: '#334155', flexShrink: 0 }}></div>
 
                     {/* Status Group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
@@ -1315,7 +1315,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <div style={{ width: 1, height: 20, background: '#334155', flexShrink: 0 }}></div>
 
                     {/* Priority Group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                         {[1, 2, 3, 4, 5].map(p => {
                             let color = '#22c55e';
                             if (p === 1) color = '#ef4444';
@@ -1346,7 +1346,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <div style={{ width: 1, height: 20, background: '#334155', flexShrink: 0 }}></div>
 
                     {/* Max Views Group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
