@@ -118,6 +118,57 @@ class ApiClient {
     return data;
   }
 
+  // HTTP Helpers
+  get(endpoint, options = {}) {
+    return this.fetch(endpoint, { ...options, method: 'GET' });
+  }
+
+  post(endpoint, body = {}, options = {}) {
+    return this.fetch(endpoint, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  put(endpoint, body = {}, options = {}) {
+    return this.fetch(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+
+  delete(endpoint, options = {}) {
+    return this.fetch(endpoint, { ...options, method: 'DELETE' });
+  }
+
+
+  // HTTP Helpers
+  get(endpoint, options = {}) {
+    return this.fetch(endpoint, { ...options, method: 'GET' });
+  }
+
+  post(endpoint, body = {}, options = {}) {
+    return this.fetch(endpoint, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  put(endpoint, body = {}, options = {}) {
+    return this.fetch(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+
+  delete(endpoint, options = {}) {
+    return this.fetch(endpoint, { ...options, method: 'DELETE' });
+  }
+
   // Auth
   async register(deviceId, nickname) {
     const data = await this.fetch('/auth/register', {
