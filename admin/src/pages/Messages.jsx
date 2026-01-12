@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import QRCode from 'qrcode';
 import DatePicker from 'react-datepicker';
@@ -4501,10 +4501,10 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                 {dragging && dragging.type && (dragging.type === 'move' || dragging.type === 'resize-left' || dragging.type === 'resize-right') && (() => {
                     // FIX: Use newLane if available to tracking visual position during drag
                     const activeLaneIndex = (dragging.newLane !== undefined) ? dragging.newLane : lanes.findIndex(l => l.some(b => b.id === dragging.id));
-                    
+
                     // Clamp lane index to valid range for visual sanity
                     const safeLaneIndex = Math.max(0, Math.min(activeLaneIndex, laneCount - 1));
-                    
+
                     const barTop = safeLaneIndex * (rowHeight + gap) + gap;
 
                     const leftPct = ((dragging.newStart - viewportStart) / viewportDuration) * 100;
