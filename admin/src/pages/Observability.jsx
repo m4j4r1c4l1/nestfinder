@@ -548,7 +548,7 @@ const Observability = () => {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: '0.6rem', width: '100%' }}>
                                     {[
                                         // Row 1
-                                        { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9' },
+                                        { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9', alignBottom: true },
                                         // Center: Lines of Code (Custom Render)
                                         {
                                             isLoc: true,
@@ -556,7 +556,7 @@ const Observability = () => {
                                             label: 'Lines of Code',
                                             sub: 'Total'
                                         },
-                                        { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' } },
+                                        { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' }, alignBottom: true },
 
                                         // Row 2
                                         { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#8b5cf6' },
@@ -594,7 +594,8 @@ const Observability = () => {
                                                 border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
                                                 borderRadius: '8px', padding: '0.5rem 0.75rem',
                                                 minHeight: '52px',
-                                                height: '100%', // Restore height to align rows
+                                                height: badge.alignBottom ? 'auto' : '100%', // Use auto height for bottom aligned items
+                                                alignSelf: badge.alignBottom ? 'end' : 'auto', // Align to bottom of grid cell
                                                 boxSizing: 'border-box'
                                             }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
@@ -604,7 +605,7 @@ const Observability = () => {
                                                 <span style={{
                                                     fontWeight: 700,
                                                     color: badge.color,
-                                                    fontSize: badge.mono ? '1.1rem' : '1.8rem',
+                                                    fontSize: badge.mono ? '1.35rem' : '1.8rem',
                                                     fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
                                                     lineHeight: 1,
                                                     minWidth: badge.mono ? '100px' : '65px',

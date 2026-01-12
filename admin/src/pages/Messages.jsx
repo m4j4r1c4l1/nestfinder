@@ -859,14 +859,26 @@ const Messages = () => {
                                             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                                                 <div style={{ flex: 1 }}>
                                                     <label className="form-label">Max Views (Optional)</label>
-                                                    <input
-                                                        type="number"
-                                                        min="1"
-                                                        placeholder="Unlimited"
-                                                        value={newBroadcast.maxViews || ''}
-                                                        onChange={(e) => setNewBroadcast({ ...newBroadcast, maxViews: e.target.value })}
-                                                        className="form-input"
-                                                    />
+                                                    <div style={{ position: 'relative' }}>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            placeholder="Unlimited"
+                                                            value={newBroadcast.maxViews || ''}
+                                                            onChange={(e) => setNewBroadcast({ ...newBroadcast, maxViews: e.target.value })}
+                                                            className="form-input"
+                                                            style={{
+                                                                background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.5rem',
+                                                                fontSize: '0.9rem', color: '#f8fafc', width: '100%', outline: 'none', height: '38px', // Match filter style
+                                                                boxSizing: 'border-box'
+                                                            }}
+                                                        />
+                                                        {newBroadcast.maxViews && (
+                                                            <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#64748b' }}>
+                                                                views
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div style={{ flex: 1 }}>
                                                     <label className="form-label">Priority</label>
@@ -1607,7 +1619,6 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         width: '360px', // Reduced by ~5% (was 380px)
                                                         paddingLeft: '1rem',
                                                         boxSizing: 'border-box',
-                                                        border: '1px solid #f97316',
                                                         marginLeft: 'auto',
                                                         marginRight: '1rem' // Restored standard margin
                                                     }}>
@@ -4505,7 +4516,6 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     WebkitMaskImage: isInfinite ? 'linear-gradient(to right, black 0%, black 150px, rgba(0,0,0,0.5) 300px, transparent 600px)' : 'none',
                                     maskImage: isInfinite ? 'linear-gradient(to right, black 0%, black 150px, rgba(0,0,0,0.5) 300px, transparent 600px)' : 'none'
                                 }}
-                                title={`${b.title} (${isInfinite ? 'Infinite' : new Date(rawEnd).toLocaleString()})`}
                             >
                                 {/* Left Handle */}
                                 <div
@@ -4587,6 +4597,26 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 {hoveredItem.title || 'Untitled'}
                             </div>
 
+                            {/* Image Preview */}
+                            {hoveredItem.image_url && (
+                                <div style={{
+                                    width: '100%',
+                                    // Height adjusts to content but with max limit to prevent huge popups
+                                    maxHeight: '200px',
+                                    borderRadius: '6px',
+                                    overflow: 'hidden',
+                                    background: '#0f172a',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    marginBottom: '12px' // Add spacing below image
+                                }}>
+                                    <img
+                                        src={hoveredItem.image_url}
+                                        alt="Broadcast"
+                                        style={{ width: '100%', height: 'auto', maxHeight: '200px', objectFit: 'contain' }}
+                                    />
+                                </div>
+                            )}
+
                             {/* Professional Time Display */}
                             <div style={{
                                 display: 'grid',
@@ -4627,25 +4657,6 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     {formatDateTimeCET(new Date(e).toISOString())}
                                 </span>
                             </div>
-
-                            {/* Image Preview */}
-                            {hoveredItem.image_url && (
-                                <div style={{
-                                    width: '100%',
-                                    // Height adjusts to content but with max limit to prevent huge popups
-                                    maxHeight: '200px',
-                                    borderRadius: '6px',
-                                    overflow: 'hidden',
-                                    background: '#0f172a',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                }}>
-                                    <img
-                                        src={hoveredItem.image_url}
-                                        alt="Broadcast"
-                                        style={{ width: '100%', height: 'auto', maxHeight: '200px', objectFit: 'contain' }}
-                                    />
-                                </div>
-                            )}
 
                             {/* Footer Line: Badges (Left) & Stats (Right) */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', gap: '1rem' }}>
