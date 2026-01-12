@@ -47,10 +47,21 @@ router.get('/broadcast/active', requireUser, (req, res) => {
       WHERE broadcast_id = ? AND user_id = ?
     `, [broadcast.id, userId]);
 
-    // Check if max_views is exceeded OR if user has already dismissed/read it
-    if ((broadcast.max_views !== null && viewRecord && viewRecord.view_count >= broadcast.max_views) ||
-      (viewRecord && viewRecord.status === 'read')) {
-      continue; // Skip this broadcast, user has seen/dismissed it
+    // Check User Status (Dismissed/Read) - Universal Rule
+    if (viewRecord && viewRecord.status === 'read') {
+      continue; // User explicitly dismissed it
+    }
+
+    // Global Max Views Enforcement
+    if (broadcast.max_views !== null) {
+      // If user ALREADY has a view record, they "own" a slot, so they can keep seeing it until they dismiss it.
+      // If they DON'T have a record, we must check if there are slots available.
+      if (!viewRecord) {
+        const globalCount = get('SELECT COUNT(*) as count FROM broadcast_views WHERE broadcast_id = ?', [broadcast.id]).count;
+        if (globalCount >= broadcast.max_views) {
+          continue; // Global cap met, no new slots available
+        }
+      }
     }
 
     // This is a valid broadcast for this user

@@ -1437,6 +1437,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     } else if (now < start) {
                                         statusText = 'SCHEDULED';
                                         statusColor = '#3b82f6';
+                                    } else if (b.max_views && (b.total_users || 0) >= b.max_views) {
+                                        // Global Cap Met
+                                        statusText = 'FILLED';
+                                        statusColor = '#94a3b8'; // Grey like Ended, but distinct text
                                     } else {
                                         statusText = 'ACTIVE';
                                         statusColor = '#22c55e';
@@ -1532,7 +1536,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         background: `${statusColor}20`, color: statusColor,
                                                         border: `1px solid ${statusColor}40`,
                                                         textTransform: 'uppercase', letterSpacing: '0.5px'
-                                                    }}>
+                                                    }}
+                                                        title={statusText === 'FILLED' ? 'Inactive: Global Max Views reached' : ''}
+                                                    >
                                                         {statusText}
                                                     </span>
                                                     <span style={{
@@ -1548,11 +1554,14 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         <span style={{
                                                             padding: '0.2rem 0.5rem 0.3rem 0.5rem', borderRadius: '4px',
                                                             fontSize: '0.7rem', fontWeight: 600,
-                                                            background: 'rgba(6, 182, 212, 0.1)',
-                                                            color: '#06b6d4',
-                                                            border: '1px solid rgba(6, 182, 212, 0.3)'
-                                                        }}>
-                                                            👁 {b.max_views}
+                                                            background: b.total_users >= b.max_views ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
+                                                            color: b.total_users >= b.max_views ? '#ef4444' : '#06b6d4',
+                                                            border: b.total_users >= b.max_views ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)',
+                                                            cursor: 'help'
+                                                        }}
+                                                            title={`Global Limit: ${b.total_users} / ${b.max_views} users viewed`}
+                                                        >
+                                                            👁 {b.total_users || 0} / {b.max_views}
                                                         </span>
                                                     ) : (
                                                         <span style={{
