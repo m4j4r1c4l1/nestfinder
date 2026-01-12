@@ -1235,147 +1235,150 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between', // Changed from center to spread out, allowing ml-auto to work cleanly
                     gap: '1.5rem',
                     padding: '0.75rem 1rem', // Equal padding top/bottom
                     background: '#0f172a',
                     margin: `0.75rem calc(1rem + ${scrollbarWidth}px) 0.375rem 1rem`, // Dynamic Alignment
                     borderRadius: '6px',
                     fontSize: '0.8rem',
-                    flexWrap: 'wrap',
+                    flexWrap: 'nowrap', // Force single row
+                    minWidth: 'fit-content' // Ensure it takes necessary width
                 }}>
-                    {/* Total Count */}
-                    <span style={{
-                        padding: '0.2rem 0.6rem', borderRadius: '4px',
-                        fontSize: '0.75rem', fontWeight: 700,
-                        background: '#eab30820', color: '#eab308',
-                        border: '1px solid #eab30840',
-                        display: 'flex', alignItems: 'center', gap: '0.4rem',
-                        cursor: 'pointer'
-                    }}
-                        onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
-                    >
-                        TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px', color: '#eab308' }}>{broadcasts.length}</span>
-                    </span>
-
-                    {/* Vertical Separator */}
-                    <div style={{ width: 1, height: 20, background: '#334155' }}></div>
-
-                    {/* Status Group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}> {/* Group stats together */}
+                        {/* Total Count */}
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
-                            fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'active' ? '#22c55e40' : '#22c55e20', // Highlight if selected
-                            color: '#22c55e',
-                            border: searchFilters.status === 'active' ? '1px solid #22c55e' : '1px solid #22c55e40',
-                            textTransform: 'uppercase', letterSpacing: '0.5px',
-                            cursor: 'pointer', transition: 'filter 0.1s'
+                            fontSize: '0.75rem', fontWeight: 700,
+                            background: '#eab30820', color: '#eab308',
+                            border: '1px solid #eab30840',
+                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                            cursor: 'pointer'
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'active' ? 'all' : 'active' }))}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'active' }); }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                            onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
                         >
-                            ACTIVE <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.active}</span>
+                            TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px', color: '#eab308' }}>{broadcasts.length}</span>
                         </span>
-                        <span style={{
-                            padding: '0.2rem 0.6rem', borderRadius: '4px',
-                            fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'scheduled' ? '#3b82f640' : '#3b82f620',
-                            color: '#3b82f6',
-                            border: searchFilters.status === 'scheduled' ? '1px solid #3b82f6' : '1px solid #3b82f640',
-                            textTransform: 'uppercase', letterSpacing: '0.5px',
-                            cursor: 'pointer', transition: 'filter 0.1s'
-                        }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'scheduled' ? 'all' : 'scheduled' }))}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'scheduled' }); }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
-                        >
-                            SCHEDULED <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.scheduled}</span>
-                        </span>
-                        <span style={{
-                            padding: '0.2rem 0.6rem', borderRadius: '4px',
-                            fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'inactive' ? '#94a3b840' : '#94a3b820',
-                            color: '#94a3b8',
-                            border: searchFilters.status === 'inactive' ? '1px solid #94a3b8' : '1px solid #94a3b840',
-                            textTransform: 'uppercase', letterSpacing: '0.5px',
-                            cursor: 'pointer', transition: 'filter 0.1s'
-                        }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'inactive' ? 'all' : 'inactive' }))}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'inactive' }); }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
-                        >
-                            INACTIVE <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.inactive}</span>
-                        </span>
-                    </div>
 
-                    {/* Vertical Separator */}
-                    <div style={{ width: 1, height: 20, background: '#334155' }}></div>
+                        {/* Vertical Separator */}
+                        <div style={{ width: 1, height: 20, background: '#334155' }}></div>
 
-                    {/* Priority Group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        {[1, 2, 3, 4, 5].map(p => {
-                            let color = '#22c55e';
-                            if (p === 1) color = '#ef4444';
-                            if (p === 2) color = '#f97316';
-                            if (p === 3) color = '#eab308';
-                            if (p === 4) color = '#3b82f6';
+                        {/* Status Group */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <span style={{
+                                padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                fontSize: '0.7rem', fontWeight: 700,
+                                background: searchFilters.status === 'active' ? '#22c55e40' : '#22c55e20', // Highlight if selected
+                                color: '#22c55e',
+                                border: searchFilters.status === 'active' ? '1px solid #22c55e' : '1px solid #22c55e40',
+                                textTransform: 'uppercase', letterSpacing: '0.5px',
+                                cursor: 'pointer', transition: 'filter 0.1s'
+                            }}
+                                onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'active' ? 'all' : 'active' }))}
+                                onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'active' }); }}
+                                onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                            >
+                                ACTIVE <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.active}</span>
+                            </span>
+                            <span style={{
+                                padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                fontSize: '0.7rem', fontWeight: 700,
+                                background: searchFilters.status === 'scheduled' ? '#3b82f640' : '#3b82f620',
+                                color: '#3b82f6',
+                                border: searchFilters.status === 'scheduled' ? '1px solid #3b82f6' : '1px solid #3b82f640',
+                                textTransform: 'uppercase', letterSpacing: '0.5px',
+                                cursor: 'pointer', transition: 'filter 0.1s'
+                            }}
+                                onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'scheduled' ? 'all' : 'scheduled' }))}
+                                onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'scheduled' }); }}
+                                onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                            >
+                                SCHEDULED <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.scheduled}</span>
+                            </span>
+                            <span style={{
+                                padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                fontSize: '0.7rem', fontWeight: 700,
+                                background: searchFilters.status === 'inactive' ? '#94a3b840' : '#94a3b820',
+                                color: '#94a3b8',
+                                border: searchFilters.status === 'inactive' ? '1px solid #94a3b8' : '1px solid #94a3b840',
+                                textTransform: 'uppercase', letterSpacing: '0.5px',
+                                cursor: 'pointer', transition: 'filter 0.1s'
+                            }}
+                                onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'inactive' ? 'all' : 'inactive' }))}
+                                onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'inactive' }); }}
+                                onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                            >
+                                INACTIVE <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.inactive}</span>
+                            </span>
+                        </div>
 
-                            return (
-                                <span key={p} style={{
-                                    padding: '0.2rem 0.5rem', borderRadius: '4px',
-                                    fontSize: '0.7rem', fontWeight: 600,
-                                    background: searchFilters.priority === String(p) ? `${color}40` : `${color}20`,
-                                    color: color,
-                                    border: searchFilters.priority === String(p) ? `1px solid ${color}` : `1px solid ${color}40`,
-                                    cursor: 'pointer', transition: 'filter 0.1s'
-                                }}
-                                    onClick={() => setSearchFilters(prev => ({ ...prev, priority: prev.priority === String(p) ? 'all' : String(p) }))}
-                                    onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'priority', value: p }); }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
-                                >
-                                    P{p} <span style={{ marginLeft: '0.2rem', color: '#fff', opacity: 1 }}>{broadcastStats.priorityCounts[p]}</span>
-                                </span>
-                            );
-                        })}
-                    </div>
+                        {/* Vertical Separator */}
+                        <div style={{ width: 1, height: 20, background: '#334155' }}></div>
 
-                    {/* Vertical Separator */}
-                    <div style={{ width: 1, height: 20, background: '#334155' }}></div>
+                        {/* Priority Group */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {[1, 2, 3, 4, 5].map(p => {
+                                let color = '#22c55e';
+                                if (p === 1) color = '#ef4444';
+                                if (p === 2) color = '#f97316';
+                                if (p === 3) color = '#eab308';
+                                if (p === 4) color = '#3b82f6';
 
-                    {/* Max Views Group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{
-                            padding: '0.2rem 0.6rem', borderRadius: '4px',
-                            fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.maxViewsType === 'limited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
-                            color: '#06b6d4',
-                            border: searchFilters.maxViewsType === 'limited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
-                            display: 'flex', alignItems: 'center', gap: '0.3rem',
-                            cursor: 'pointer', transition: 'filter 0.1s'
-                        }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsType: prev.maxViewsType === 'limited' ? 'all' : 'limited', maxViewsNum: '' }))}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'limited' }); }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
-                        >
-                            👁 <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withMaxViews}</span>
-                        </span>
-                        <span style={{
-                            padding: '0.2rem 0.6rem', borderRadius: '4px',
-                            fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.maxViewsType === 'unlimited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
-                            color: '#06b6d4',
-                            border: searchFilters.maxViewsType === 'unlimited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
-                            display: 'flex', alignItems: 'center', gap: '0.3rem',
-                            cursor: 'pointer', transition: 'filter 0.1s'
-                        }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsType: prev.maxViewsType === 'unlimited' ? 'all' : 'unlimited', maxViewsNum: '' }))}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'unlimited' }); }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
-                        >
-                            👁 ∞ <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withoutMaxViews}</span>
-                        </span>
+                                return (
+                                    <span key={p} style={{
+                                        padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                        fontSize: '0.7rem', fontWeight: 600,
+                                        background: searchFilters.priority === String(p) ? `${color}40` : `${color}20`,
+                                        color: color,
+                                        border: searchFilters.priority === String(p) ? `1px solid ${color}` : `1px solid ${color}40`,
+                                        cursor: 'pointer', transition: 'filter 0.1s'
+                                    }}
+                                        onClick={() => setSearchFilters(prev => ({ ...prev, priority: prev.priority === String(p) ? 'all' : String(p) }))}
+                                        onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'priority', value: p }); }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                                    >
+                                        P{p} <span style={{ marginLeft: '0.2rem', color: '#fff', opacity: 1 }}>{broadcastStats.priorityCounts[p]}</span>
+                                    </span>
+                                );
+                            })}
+                        </div>
+
+                        {/* Vertical Separator */}
+                        <div style={{ width: 1, height: 20, background: '#334155' }}></div>
+
+                        {/* Max Views Group */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <span style={{
+                                padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                fontSize: '0.7rem', fontWeight: 700,
+                                background: searchFilters.maxViewsType === 'limited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
+                                color: '#06b6d4',
+                                border: searchFilters.maxViewsType === 'limited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
+                                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                                cursor: 'pointer', transition: 'filter 0.1s'
+                            }}
+                                onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsType: prev.maxViewsType === 'limited' ? 'all' : 'limited', maxViewsNum: '' }))}
+                                onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'limited' }); }}
+                                onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                            >
+                                👁 <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withMaxViews}</span>
+                            </span>
+                            <span style={{
+                                padding: '0.2rem 0.6rem', borderRadius: '4px',
+                                fontSize: '0.7rem', fontWeight: 700,
+                                background: searchFilters.maxViewsType === 'unlimited' ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.1)',
+                                color: '#06b6d4',
+                                border: searchFilters.maxViewsType === 'unlimited' ? '1px solid #06b6d4' : '1px solid rgba(6, 182, 212, 0.3)',
+                                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                                cursor: 'pointer', transition: 'filter 0.1s'
+                            }}
+                                onClick={() => setSearchFilters(prev => ({ ...prev, maxViewsType: prev.maxViewsType === 'unlimited' ? 'all' : 'unlimited', maxViewsNum: '' }))}
+                                onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'maxViews', value: 'unlimited' }); }}
+                                onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                            >
+                                👁 ∞ <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.withoutMaxViews}</span>
+                            </span>
+                        </div>
                     </div>
 
                     {/* Bulk Delete Badge */}
