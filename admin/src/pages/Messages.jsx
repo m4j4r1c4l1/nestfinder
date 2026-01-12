@@ -1596,7 +1596,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         color: '#94a3b8',
                                                         fontSize: '0.75rem',
                                                         fontWeight: statusText === 'ACTIVE' ? '700' : '400',
-                                                        width: '420px', // Wider to prevent wrapping
+                                                        width: '380px', // Reduced by 10% (was 420px)
                                                         paddingLeft: '1rem', // Initial offset from tags
                                                         boxSizing: 'border-box',
                                                         border: '1px solid #f97316', // Orange border restored
