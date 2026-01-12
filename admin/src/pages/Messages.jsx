@@ -4151,6 +4151,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
             if (onBroadcastUpdate) {
                 const timeChanged = dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd;
                 let finalLane = dragging.newLane;
+                const laneChanged = finalLane !== undefined && finalLane !== dragging.originalLane;
 
                 // Unified Collision Detection & Snap-back (Move & Resize)
                 const targetLaneIndex = finalLane !== undefined ? finalLane : dragging.originalLane;
