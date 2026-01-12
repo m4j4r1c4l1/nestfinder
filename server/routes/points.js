@@ -21,10 +21,8 @@ let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
 
 // Get currently active broadcast (with view tracking)
-router.get('/broadcast/active', requireUser, async (req, res) => {
-  console.log('[Broadcast Debug] HIT /active endpoint for user:', req.user.id);
+router.get('/broadcast/active', requireUser, (req, res) => {
   const userId = req.user.id;
-  let selectedBroadcast = null;
   const now = new Date().toISOString();
 
   // Get all active broadcasts
@@ -40,7 +38,7 @@ router.get('/broadcast/active', requireUser, async (req, res) => {
   }
 
   // Find a broadcast the user hasn't exceeded max_views for
-  // selectedBroadcast already initialized above
+  let selectedBroadcast = null;
 
   for (const broadcast of activeBroadcasts) {
     // Check user's view record for this broadcast
@@ -70,44 +68,24 @@ router.get('/broadcast/active', requireUser, async (req, res) => {
     selectedBroadcast = broadcast;
 
     // Create or update view record
-    try {
-      if (!viewRecord) {
-        // First time seeing - create record with 'delivered' status
-        console.log(`[Broadcast Debug] Creating NEW view record: Broadcast ${broadcast.id}, User ${userId}`);
-        run(`
-          INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at)
-          VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `, [broadcast.id, userId]);
-
-        // VERIFICATION DEBUG
-        const check = get('SELECT * FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcast.id, userId]);
-        if (check) {
-          console.log('[Broadcast Debug] VERIFIED: Insert successful.', check);
-        } else {
-          console.log('[Broadcast Debug] CRITICAL: Insert reported success but record NOT found immediately after.');
-        }
-      } else {
-        // Increment view count and ensure delivered
-        console.log(`[Broadcast Debug] Updating EXISTING view record: Broadcast ${broadcast.id}, User ${userId}`);
-        run(`
-          UPDATE broadcast_views 
-          SET view_count = view_count + 1, 
-              status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
-              delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
-          WHERE broadcast_id = ? AND user_id = ?
-        `, [broadcast.id, userId]);
-      }
-    } catch (dbErr) {
-      console.log(`[Broadcast Debug] DB Write Failed:`, dbErr);
+    if (!viewRecord) {
+      // First time seeing - create record with 'delivered' status
+      run(`
+        INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at)
+        VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `, [broadcast.id, userId]);
+    } else {
+      // Increment view count and ensure delivered
+      run(`
+        UPDATE broadcast_views 
+        SET view_count = view_count + 1, 
+            status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
+            delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
+        WHERE broadcast_id = ? AND user_id = ?
+      `, [broadcast.id, userId]);
     }
 
     break;
-  }
-
-  if (selectedBroadcast) {
-    console.log(`[Broadcast Debug] Serving broadcast ${selectedBroadcast.id} to user ${userId}`);
-  } else {
-    console.log(`[Broadcast Debug] No eligible broadcast for user ${userId}`);
   }
 
   res.json({ broadcast: selectedBroadcast });
@@ -127,54 +105,21 @@ router.post('/broadcast/:id/read', requireUser, (req, res) => {
     const view = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
 
     if (view) {
-      console.log(`[Broadcast Read Debug] Updating status to READ for Broadcast ${broadcastId}, User ${userId}`);
       run(`
         UPDATE broadcast_views 
         SET status = 'read', read_at = CURRENT_TIMESTAMP, dismissed = 1
         WHERE broadcast_id = ? AND user_id = ?
       `, [broadcastId, userId]);
     } else {
-      console.log(`[Broadcast Read Debug] Creating READ record (unexpected) for Broadcast ${broadcastId}, User ${userId}`);
       run(`
         INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
         VALUES (?, ?, 'read', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
       `, [broadcastId, userId]);
     }
 
-    // Persist to Inbox (Notifications table)
-    const broadcast = get('SELECT * FROM broadcasts WHERE id = ?', [broadcastId]);
-    if (broadcast) {
-      const batchId = `broadcast_${broadcastId}`;
-      const existing = get(
-        'SELECT id FROM notifications WHERE user_id = ? AND batch_id = ?',
-        [userId, batchId]
-      );
-
-      console.log(`[Broadcast Read] ID: ${broadcastId}, User: ${userId}, Existing Notif: ${existing ? 'Yes' : 'No'}`);
-
-      if (!existing) {
-        // We insert it as READ (since they just dismissed it)
-        try {
-          // Check for image_url, ensure it's not undefined
-          const imageUrl = broadcast.image_url || null;
-
-          run(`
-            INSERT INTO notifications (user_id, title, body, type, image_url, batch_id, read, read_at, created_at, delivered, delivered_at)
-            VALUES (?, ?, ?, 'broadcast', ?, ?, 1, CURRENT_TIMESTAMP, ?, 1, CURRENT_TIMESTAMP)
-          `, [
-            userId,
-            broadcast.title || '📢 Announcement', // Ensure title fallback
-            broadcast.message,
-            imageUrl,
-            batchId,
-            broadcast.created_at || new Date().toISOString() // Fallback time
-          ]);
-          console.log(`[Broadcast Read] Inserted notification for broadcast ${broadcastId}`);
-        } catch (insertErr) {
-          console.error(`[Broadcast Read] Insert failed:`, insertErr);
-        }
-      }
-    }
+    // We rely on broadcast_views for history, no need to duplicate into notifications table
+    // creating duplicates causes UI issues (flickering status) and ID collisions.
+    console.log(`[Broadcast Read] Updated view status for Broadcast ${broadcastId}, User ${userId}`);
 
     res.json({ success: true });
   } catch (err) {
