@@ -3898,8 +3898,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
     // --- Interaction Handlers ---
 
-    // Scroll-to-Zoom & Pan
-    const handleWheel = (e) => {
+    function handleWheel(e) {
         if (!containerRef.current) return;
         e.preventDefault();
         e.stopPropagation();
@@ -3908,99 +3907,40 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         const mouseX = e.clientX - rect.left;
         const width = rect.width;
 
-        // Mouse position as percentage of view (0 to 1)
         const mouseRatio = Math.max(0, Math.min(1, mouseX / width));
-        // Mouse time position
         const mouseTime = viewportStart + (viewportDuration * mouseRatio);
 
-        // Standard Interaction: Vertical Scroll = Zoom, Horizontal = Pan
         const isVertical = Math.abs(e.deltaY) > Math.abs(e.deltaX);
 
         if (isVertical) {
-            // Zoom
             const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
-            const newDuration = Math.max(3600000, viewportDuration * zoomFactor); // Min 1 hour window
-
-            // Adjust start so mouse time remains under cursor
+            const newDuration = Math.max(3600000, viewportDuration * zoomFactor);
             const newStart = mouseTime - (newDuration * mouseRatio);
-
             setViewportDuration(newDuration);
             setViewportStart(newStart);
         } else {
-            // Pan
             const panAmount = (e.deltaX) * (viewportDuration / width);
             setViewportStart(prev => prev + panAmount);
         }
-    };
+    }
 
-    // Sync Ref for Event Listener
     latestHandleWheel.current = handleWheel;
 
-    // Edge Scrolling Loop
-    const checkEdgeScroll = (clientX) => {
-        if (!containerRef.current || !dragging) {
-            cancelAnimationFrame(scrollInterval.current);
-            scrollInterval.current = null;
-            return;
-        }
-
-        const rect = containerRef.current.getBoundingClientRect();
-        const edgeThreshold = 50; // px
-        const relX = clientX - rect.left;
-        const width = rect.width;
-
-        let speed = 0;
-        if (relX < edgeThreshold) {
-            // Left edge: speed increases as we push left
-            const dist = edgeThreshold - relX;
-            speed = -Math.pow(dist / edgeThreshold, 2); // Exponential -1 to 0
-        } else if (relX > width - edgeThreshold) {
-            // Right edge
-            const dist = relX - (width - edgeThreshold);
-            speed = Math.pow(dist / edgeThreshold, 2); // Exponential 0 to 1
-        }
-
-        if (Math.abs(speed) > 0.01) {
-            // Scroll viewport
-            const scrollAmount = speed * (viewportDuration * 0.02); // 2% of view per frame at max
-
-            setViewportStart(prev => prev + scrollAmount);
-
-            // If dragging, we need to update the drag position in time space
-            // Logic: The mouse stays physically same(ish), but time shifts under it?
-            // Actually, if we scroll, the mouse's time value changes naturally if it stays still.
-            // But usually user pushes mouse against edge.
-
-            if (!scrollInterval.current) {
-                const loop = () => {
-                    checkEdgeScroll(clientX); // Recalculate with maintained mouse pos? 
-                    // Ideally we track mouse pos in ref. For now simpler recursion
-                    // Actually, simple recursion of state update is tricky in React. 
-                    // Better to rely on just updating viewport here and letting the next renders handle 'handleMouseMove' re-calc.
-                };
-                // scrollInterval.current = requestAnimationFrame(loop);
-            }
-        }
-    };
-    // NOTE: True implementation of smooth continuous edge scrolling in React requires a ref-based loop
-    // to allow mutable access to latest state without closures stale. 
-    // Simplified version: We just nudge view in 'handleMouseMove' if near edge.
-
-    const handleBarMouseEnter = (b, rawStart, rawEnd) => {
+    function handleBarMouseEnter(b, rawStart, rawEnd) {
         setHoveredBarId(b.id);
         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
         hoverTimeoutRef.current = setTimeout(() => {
             setHoveredItem({ ...b, currentStart: rawStart, currentEnd: rawEnd });
         }, 500);
-    };
+    }
 
-    const handleBarMouseLeave = () => {
+    function handleBarMouseLeave() {
         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
         setHoveredBarId(null);
         setHoveredItem(null);
-    };
+    }
 
-    const handleMouseMove = (e) => {
+    function handleMouseMove(e) {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
@@ -4009,7 +3949,6 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
         const cursorTime = viewportStart + (viewportDuration * (mouseX / width));
 
-        // Crosshairs (visual only)
         if (!dragging && !hoveredBarId) {
             setCrosshairPos({
                 x: mouseX,
@@ -4021,7 +3960,6 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
             setTooltipPos({ x: e.clientX, y: e.clientY });
         }
 
-        // Edge Scrolling (Nudge)
         if (dragging) {
             if (dragging.type === 'resize-height') {
                 const newH = Math.max(mouseY, contentHeight);
@@ -4031,7 +3969,6 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
             const edgeDist = 50;
             if (mouseX < edgeDist) {
-                // Exponential Scale Speed
                 const factor = Math.pow((edgeDist - mouseX) / edgeDist, 2) * 0.03;
                 setViewportStart(s => s - (viewportDuration * factor));
             } else if (mouseX > width - edgeDist) {
@@ -4040,37 +3977,23 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
             }
 
             if (dragging.type === 'pan') {
-                // Drag-to-Pan Logic
-                // Mouse moves X pixels. We want to move map X pixels.
-                // If I drag mouse Left (negative delta), I want to see content that was to the right?
-                // "standard" drag: I put finger on paper and pull Left. Paper moves Left. I see data to the Right.
-                // Mouse X decreases. Viewport Start should Increase.
-
                 const pixelDelta = e.clientX - dragging.startX;
                 const timeDelta = pixelDelta * (viewportDuration / width);
-
                 setViewportStart(dragging.initialViewportStart - timeDelta);
                 return;
             }
 
-            // Update Drag Time (For Bars)
             let newStart = dragging.originalStart;
             let newEnd = dragging.originalEnd;
-
-            // Calculate time delta based on initial CURSOR time vs current CURSOR time
             const cursorTimeNow = viewportStart + (viewportDuration * (mouseX / width));
             const absDelta = cursorTimeNow - dragging.initialCursorTime;
 
             if (dragging.type === 'move') {
                 newStart = dragging.originalStart + absDelta;
                 newEnd = dragging.originalEnd + absDelta;
-
-                // Mark as moved if it exceeds threshold
-                if (!dragging.hasMoved && Math.abs(absDelta) > 100000) { // Tiny movement threshold (~1min)
+                if (!dragging.hasMoved && Math.abs(absDelta) > 100000) {
                     setDragging(prev => ({ ...prev, hasMoved: true }));
                 }
-
-                // Calculate new lane based on Y position
                 const yOffsetFromRuler = mouseY - rulerHeight - gap;
                 const newLane = Math.max(0, Math.floor(yOffsetFromRuler / (rowHeight + gap)));
                 setDragging(prev => ({ ...prev, newStart, newEnd, newLane }));
@@ -4082,56 +4005,19 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                 newEnd = Math.max(dragging.originalEnd + absDelta, dragging.originalStart + 900000);
                 if (!dragging.hasMoved) setDragging(prev => ({ ...prev, hasMoved: true }));
             }
-
             setDragging(prev => ({ ...prev, newStart, newEnd }));
         }
-    };
+    }
 
-
-
-    const handleContainerDoubleClick = (e) => {
+    function handleContainerDoubleClick(e) {
         if (dragging) return;
-        // Reset to initial zoom and center on current time
         const now = new Date().getTime();
         const newStart = now - (initialViewportDuration / 2);
-
         setViewportDuration(initialViewportDuration);
         setViewportStart(newStart);
-    };
+    }
 
-    const handleContainerMouseDown = (e) => {
-        // Only trigger if left click and not already dragging (e.g. from a bar)
-        if (e.button !== 0 || dragging) return;
-
-        e.preventDefault();
-
-        const rect = containerRef.current.getBoundingClientRect();
-        // Detect Resize Handle Click
-        if (rect.bottom - e.clientY <= 12) {
-            setDragging({ type: 'resize-height' });
-            return;
-        }
-
-        // Don't stop propagation? Or do we? 
-        // If we clicked a bar, bar handler ran and stopped propagation.
-        // So if we are here, we hit background.
-
-        setDragging({
-            type: 'pan',
-            startX: e.clientX,
-            initialViewportStart: viewportStart
-        });
-    };
-
-    const handleBarMouseDown = (e, b) => {
-        handleMouseDown(e, b, 'move');
-    };
-
-    const handleResizeMouseDown = (e, b, type) => {
-        handleMouseDown(e, b, type);
-    };
-
-    const handleMouseDown = (e, b, type) => {
+    function handleMouseDown(e, b, type) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -4159,7 +4045,35 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
             newLane: currentLane,
             hasMoved: false
         });
-    };
+    }
+
+    function handleBarMouseDown(e, b) {
+        handleMouseDown(e, b, 'move');
+    }
+
+    function handleResizeMouseDown(e, b, type) {
+        handleMouseDown(e, b, type);
+    }
+
+    function handleContainerMouseDown(e) {
+        // Only trigger if left click and not already dragging (e.g. from a bar)
+        if (e.button !== 0 || dragging) return;
+
+        e.preventDefault();
+
+        const rect = containerRef.current.getBoundingClientRect();
+        // Detect Resize Handle Click
+        if (rect.bottom - e.clientY <= 12) {
+            setDragging({ type: 'resize-height' });
+            return;
+        }
+
+        setDragging({
+            type: 'pan',
+            startX: e.clientX,
+            initialViewportStart: viewportStart
+        });
+    }
 
     const handleMouseUp = () => {
         if (dragging) {
