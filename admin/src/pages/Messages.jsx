@@ -3017,11 +3017,20 @@ const DetailModal = ({ batchId, onClose }) => {
         }
 
         const date = new Date(safeIso);
+
+        // Format Time with CET/CEST
+        const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+        // Reliable Summer Time Calculation for Europe/Paris
+        const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
+        const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
+        const parisOffset = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+        const isDST = Math.max(jan, jul) !== parisOffset;
+        const timeString = `${hours} ${isDST ? 'CEST' : 'CET'}`;
+
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString()}</span>
-                {/* Restored seconds */}
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{timeString}</span>
             </div>
         );
     };
@@ -3561,10 +3570,19 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
     const DateTimeCell = ({ isoString }) => {
         if (!isoString) return <span style={{ color: '#64748b' }}>-</span>;
         const date = new Date(isoString);
+
+        // Format Time with CET/CEST
+        const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+        const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
+        const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
+        const parisOffset = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+        const isDST = Math.max(jan, jul) !== parisOffset;
+        const timeString = `${hours} ${isDST ? 'CEST' : 'CET'}`;
+
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{timeString}</span>
             </div>
         );
     };
