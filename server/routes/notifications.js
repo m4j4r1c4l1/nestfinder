@@ -139,6 +139,12 @@ router.post('/notifications/read-all', (req, res) => {
             [userId]
         );
 
+        // Also mark all seen broadcasts as read
+        run(
+            "UPDATE broadcast_views SET status = 'read', read_at = CURRENT_TIMESTAMP WHERE user_id = ? AND status != 'read'",
+            [userId]
+        );
+
         res.json({ success: true });
     } catch (error) {
         console.error('Mark all read error:', error);

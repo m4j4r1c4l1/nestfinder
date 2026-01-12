@@ -105,12 +105,16 @@ router.post('/broadcast/:id/read', requireUser, (req, res) => {
     const view = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
 
     if (view) {
+      console.log(`[Broadcast Read] Updating existing view for user ${userId}, broadcast ${broadcastId}`);
       run(`
         UPDATE broadcast_views 
         SET status = 'read', read_at = CURRENT_TIMESTAMP, dismissed = 1
         WHERE broadcast_id = ? AND user_id = ?
       `, [broadcastId, userId]);
+      console.log(`[Broadcast Read] Update complete.`);
     } else {
+      console.log(`[Broadcast Read] Creating new read view for user ${userId}, broadcast ${broadcastId}`);
+      // ... same logic for insert ...
       run(`
         INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
         VALUES (?, ?, 'read', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
