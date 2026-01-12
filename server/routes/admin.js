@@ -831,15 +831,20 @@ router.get('/backup', (req, res) => {
 // List all broadcasts with view stats
 router.get('/broadcasts', (req, res) => {
     try {
+        console.log('[Admin Stats] Fetching all broadcasts with aggregated stats...');
         const broadcasts = all(`
             SELECT b.*,
                 (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id) as total_users,
                 (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'sent') as sent_count,
-                (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'delivered') as delivered_count,
+                (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status IN ('delivered', 'read')) as delivered_count,
                 (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = b.id AND status = 'read') as read_count
             FROM broadcasts b
             ORDER BY b.created_at DESC
         `);
+        console.log(`[Admin Stats] Returns ${broadcasts.length} broadcasts.`);
+        if (broadcasts.length > 0) {
+            console.log(`[Admin Stats] Top broadcast stats: ID=${broadcasts[0].id}, Sent=${broadcasts[0].sent_count}, Delivered=${broadcasts[0].delivered_count}, Read=${broadcasts[0].read_count}`);
+        }
         res.json({ broadcasts });
     } catch (err) {
         console.error('Failed to fetch broadcasts:', err);
@@ -868,9 +873,11 @@ router.get('/broadcasts/:id/views', (req, res) => {
     const stats = {
         total: views.length,
         sent: views.filter(v => v.status === 'sent').length,
-        delivered: views.filter(v => v.status === 'delivered').length,
+        delivered: views.filter(v => v.status === 'delivered' || v.status === 'read').length, // Read implies delivered
         read: views.filter(v => v.status === 'read').length
     };
+
+    console.log(`[Admin Stats] Broadcast ${id} detail views: Total=${stats.total}, Delivered=${stats.delivered}, Read=${stats.read}`);
 
     res.json({ broadcast, views, stats });
 });
