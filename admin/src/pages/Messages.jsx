@@ -505,7 +505,7 @@ const Messages = () => {
                 method: 'PUT',
                 body: JSON.stringify(updates)
             });
-            fetchData(); // Refresh data after update
+            await fetchData(); // Refresh data after update (AWAIT to sync with UI)
         } catch (err) {
             console.error('Failed to update broadcast:', err);
             fetchData(); // Revert on error
@@ -884,40 +884,31 @@ const Messages = () => {
                                                     />
                                                 </div>
                                             </div>
-                                            <button
-                                                type="submit"
-                                                disabled={creatingBroadcast || justPublished}
-                                                style={{
-                                                    background: justPublished ? '#22c55e' : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '8px',
-                                                    padding: '0.75rem 1.5rem',
-                                                    fontSize: '0.95rem',
-                                                    fontWeight: 600,
-                                                    cursor: creatingBroadcast || justPublished ? 'default' : 'pointer',
-                                                    boxShadow: justPublished ? '0 0 15px rgba(34, 197, 94, 0.4)' : '0 4px 6px -1px rgba(59, 130, 246, 0.5)',
-                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                    opacity: creatingBroadcast ? 0.7 : 1,
-                                                    transform: justPublished ? 'scale(1.02)' : 'scale(1)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '0.5rem',
-                                                    width: '100%',
-                                                    justifyContent: 'center'
-                                                }}
-                                            >
-                                                {justPublished ? (
-                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        ✓ Broadcast successfully published
-                                                    </span>
-                                                ) : (
-                                                    <>
-                                                        <span>🚀</span>
-                                                        <span>Publish Broadcast</span>
-                                                    </>
-                                                )}
-                                            </button>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                                                <button
+                                                    type="submit"
+                                                    disabled={creatingBroadcast || justPublished}
+                                                    className="btn btn-primary"
+                                                    style={{
+                                                        padding: '0.75rem 2rem',
+                                                        minWidth: '220px',
+                                                        // Maintain feedback styles
+                                                        boxShadow: justPublished ? '0 0 15px rgba(34, 197, 94, 0.4)' : undefined,
+                                                        background: justPublished ? '#22c55e' : undefined,
+                                                        borderColor: justPublished ? '#22c55e' : undefined,
+                                                    }}
+                                                >
+                                                    {justPublished ? (
+                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            ✓ Published
+                                                        </span>
+                                                    ) : (
+                                                        <>
+                                                            <span>🚀</span> Publish Broadcast
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
                                         </form>
                                         {showBroadcastEmojiPicker && (
                                             <EmojiPickerModal
@@ -1146,8 +1137,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 options={[
                                     // 'All' removed; default state handles filter
                                     { value: 'active', label: 'Active', color: '#22c55e' },
-                                    { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' }, // Fixed: Matches Stats Blue (was Yellow)
-                                    { value: 'inactive', label: 'Inactive', color: '#94a3b8' }
+                                    { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' },
+                                    { value: 'inactive', label: 'Past', color: '#94a3b8' }
                                 ]}
                                 placeholder="Filter by Status"
                             />
@@ -4137,8 +4128,11 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                 const timeChanged = dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd;
                 let finalLane = dragging.newLane;
 
-                // Collision Detection for 'move' operations
-                if (finalLane !== undefined) {
+                // Unified Collision Detection & Snap-back (Move & Resize)
+                const targetLaneIndex = finalLane !== undefined ? finalLane : dragging.originalLane;
+
+                // Check collision if time or lane changed
+                if (timeChanged || laneChanged) {
                     const isOverlapping = (startA, endA, startB, endB) => {
                         const sA = startA;
                         const eA = (endA === null || endA === undefined || endA > 4102444800000) ? Infinity : endA;
@@ -4147,32 +4141,23 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         return Math.max(sA, sB) < Math.min(eA, eB);
                     };
 
-                    let laneFound = false;
-                    let safetyCounter = 0;
+                    const broadcastsInLane = lanes[targetLaneIndex] || [];
+                    const hasCollision = broadcastsInLane.some(b => {
+                        // Ignore self
+                        if (String(b.id) === String(dragging.id)) return false;
+                        const bStart = new Date(b.start_time).getTime();
+                        const bEnd = b.end_time ? new Date(b.end_time).getTime() : Infinity;
 
-                    // Search for a free lane starting from the specific one dropped on
-                    // This logic seems fine for "finding a spot", but the UI feedback 
-                    // should ideally prevent dropping on a collision or show it turning red.
-                    // For now, this auto-bump logic preserves the "find next free" behavior.
-                    while (!laneFound && safetyCounter < 100) {
-                        const broadcastsInLane = lanes[finalLane] || [];
-                        const hasCollision = broadcastsInLane.some(b => {
-                            if (String(b.id) === String(dragging.id)) return false;
-                            const bStart = new Date(b.start_time).getTime();
-                            const bEnd = b.end_time ? new Date(b.end_time).getTime() : Infinity;
-                            return isOverlapping(dragging.newStart, dragging.newEnd, bStart, bEnd);
-                        });
+                        // Use dragging state times (populated by move/resize)
+                        return isOverlapping(dragging.newStart, dragging.newEnd, bStart, bEnd);
+                    });
 
-                        if (hasCollision) {
-                            finalLane++;
-                        } else {
-                            laneFound = true;
-                        }
-                        safetyCounter++;
+                    if (hasCollision) {
+                        // COLLISION DETECTED: Abort update, snap back to initial position.
+                        setDragging(null);
+                        return;
                     }
                 }
-
-                const laneChanged = finalLane !== undefined && finalLane !== dragging.originalLane;
 
                 if (timeChanged || laneChanged) {
                     const updates = {};
@@ -4183,11 +4168,13 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     if (laneChanged) {
                         updates.lane = finalLane;
                     }
-                    // Fix: Await the update so we don't clear dragging state early (causing rubber-banding)
+
+                    // Await update to prevent rubber-banding on success
                     try {
                         await onBroadcastUpdate(dragging.id, updates);
                     } catch (e) {
                         console.error('Drag update failed', e);
+                        // If failed, we might want to alert, but snapping back is default on error since proper re-render won't happen.
                     }
                 }
             }
