@@ -94,42 +94,43 @@ router.get('/broadcast/active', requireUser, (req, res) => {
 // Mark broadcast as read (when user dismisses/closes it)
 router.post('/broadcast/:id/read', requireUser, (req, res) => {
   const userId = req.user.id;
-  const broadcastId = parseInt(req.params.id); // Valid integer
+  const broadcastId = parseInt(req.params.id);
 
   if (isNaN(broadcastId)) {
     return res.status(400).json({ error: 'Invalid broadcast ID' });
   }
 
   try {
-    // Ensure record exists and update to read status
-    const view = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
+    const nowStr = new Date().toISOString();
 
-    if (view) {
-      console.log(`[Broadcast Read] Updating existing view for user ${userId}, broadcast ${broadcastId}`);
+    // Check if view exists
+    const existing = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
+
+    if (existing) {
+      // Update existing
       run(`
         UPDATE broadcast_views 
-        SET status = 'read', read_at = CURRENT_TIMESTAMP, dismissed = 1
+        SET status = 'read', 
+            view_count = view_count + 1, 
+            read_at = ?,
+            dismissed = 1
         WHERE broadcast_id = ? AND user_id = ?
-      `, [broadcastId, userId]);
-      console.log(`[Broadcast Read] Update complete.`);
+      `, [nowStr, broadcastId, userId]);
+      console.log(`[Broadcast Read] Updated existing view: User ${userId}, Broadcast ${broadcastId}`);
     } else {
-      console.log(`[Broadcast Read] Creating new read view for user ${userId}, broadcast ${broadcastId}`);
-      // ... same logic for insert ...
+      // Create new with read status
       run(`
         INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
-        VALUES (?, ?, 'read', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
-      `, [broadcastId, userId]);
+        VALUES (?, ?, 'read', 1, ?, ?, ?, 1)
+      `, [broadcastId, userId, nowStr, nowStr, nowStr]);
+      console.log(`[Broadcast Read] Created new read view: User ${userId}, Broadcast ${broadcastId}`);
     }
 
-    // We rely on broadcast_views for history, BUT we must update the notifications table 
-    // if a record exists there (e.g. from legacy or other processes) so the client UI updates.
-    // We do NOT insert if missing (to avoid duplicates), only update.
-    const batchId = `broadcast_${broadcastId}`;
-    run(`UPDATE notifications SET read = 1 WHERE user_id = ? AND batch_id = ?`, [userId, batchId]);
+    // NOTE: We successfully updated the view.
+    // We removed the legacy 'notifications' table update to avoid potential errors or confusion,
+    // as modern broadcasts rely solely on broadcast_views.
 
-    console.log(`[Broadcast Read] Updated view status (and notifications if present) for Broadcast ${broadcastId}, User ${userId}`);
-
-    res.json({ success: true });
+    res.json({ success: true, status: 'read' });
   } catch (err) {
     console.error('[Broadcast Read] Error:', err);
     res.status(500).json({ error: 'Internal Server Error' });
