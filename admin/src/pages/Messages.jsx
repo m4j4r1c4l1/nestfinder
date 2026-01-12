@@ -1525,7 +1525,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
                                             {/* Bottom Line: Professional Layout */}
                                             {/* User requested lime border REMOVED. Added background to bin area. */}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: 'none', height: '26px', boxSizing: 'border-box' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: 'none', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '280px', flexShrink: 0 }}>
@@ -1586,16 +1586,19 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     )}
                                                 </div>
 
-                                                {/* Right: Time Range & Stats */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                    {/* Time Range */}
+                                                {/* Center/Right Group: Time, Stats, Bin */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                                                    {/* Time Range - Fixed Width for Vertical Alignment */}
                                                     <div style={{
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         gap: '0.4rem',
                                                         color: '#94a3b8',
                                                         fontSize: '0.75rem',
-                                                        fontWeight: statusText === 'ACTIVE' ? '700' : '400'
+                                                        fontWeight: statusText === 'ACTIVE' ? '700' : '400',
+                                                        width: '350px', // Estimated fixed width to align separators
+                                                        paddingLeft: '1rem', // Initial offset from tags
+                                                        boxSizing: 'border-box'
                                                     }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
@@ -1605,7 +1608,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
-                                                    {/* Delivery Stats */}
+                                                    {/* Delivery Stats - Separator Line included in border */}
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
@@ -1615,8 +1618,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         </span>
                                                     </div>
 
-                                                    {/* Vertical Separator for Delete Icon */}
-                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0' }}></div>
+                                                    {/* Vertical Separator for Delete Icon - Pushed to right */}
+                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0', marginLeft: 'auto' }}></div>
 
                                                     {/* Delete Button (Moved from top) */}
                                                     <button
@@ -4220,7 +4223,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         <div
             ref={containerRef}
             style={{
-                background: '#ffffff', // User requested white
+                background: '#334155', // User requested #334155
                 border: '1px solid #334155',
                 borderRadius: '8px',
                 position: 'relative',

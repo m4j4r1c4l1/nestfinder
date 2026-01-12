@@ -185,6 +185,7 @@ export const useNotifications = (userId) => {
         markAsRead,
         markAllAsRead,
         toggleSettings,
-        dismissPopup
+        dismissPopup,
+        refresh: fetchNotifications
     };
 };

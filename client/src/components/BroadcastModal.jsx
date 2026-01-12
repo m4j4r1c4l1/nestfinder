@@ -5,7 +5,7 @@ import NotificationPopup from './NotificationPopup';
 
 const SEEN_BROADCASTS_KEY = 'nestfinder_seen_broadcasts';
 
-const BroadcastModal = ({ isSettled = false }) => {
+const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
     const { t } = useLanguage();
     const [broadcasts, setBroadcasts] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -96,6 +96,7 @@ const BroadcastModal = ({ isSettled = false }) => {
             try {
                 // Tell server we read it (so it serves the next priority one next time)
                 await api.post(`/points/broadcast/${currentBroadcast.id}/read`);
+                if (onBroadcastRead) onBroadcastRead();
             } catch (e) {
                 console.warn('Failed to mark broadcast as read:', e);
             }

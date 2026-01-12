@@ -27,7 +27,8 @@ const MapView = () => {
         markAllAsRead,
         settings,
         toggleSettings,
-        dismissPopup
+        dismissPopup,
+        refresh
     } = useNotifications(user?.id);
 
     const {
@@ -485,7 +486,7 @@ const MapView = () => {
             </nav>
 
             {/* Global Broadcast Modal - shows 1s after mount */}
-            <BroadcastModal isSettled={true} />
+            <BroadcastModal isSettled={true} onBroadcastRead={refresh} />
         </div>
     );
 };
