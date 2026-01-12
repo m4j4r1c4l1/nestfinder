@@ -4375,7 +4375,10 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         let rawEnd = isDragging ? dragging.newEnd : (b.end_time ? new Date(b.end_time).getTime() : null);
 
                         const isInfinite = rawEnd === null || rawEnd > 4102444800000; // Null or > 2099
-                        if (isInfinite) rawEnd = viewportStart + viewportDuration * 2; // Render way past view
+                        // If infinite and started, make sure it covers the visible area, otherwise just a reasonable chunk
+                        if (isInfinite) {
+                            rawEnd = Math.max(rawStart + viewportDuration, viewportStart + viewportDuration * 2);
+                        }
 
                         const left = ((rawStart - viewportStart) / viewportDuration) * 100;
                         const widthPct = ((rawEnd - rawStart) / viewportDuration) * 100;
@@ -4387,15 +4390,17 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         const isHovered = hoveredBarId === b.id;
                         const isInteractionActive = isDragging || isSelected || isHovered;
                         const now = new Date().getTime();
+                        // Active = currently happening. Scheduled = future. Past = ended.
                         const isTimeActive = now >= rawStart && (isInfinite || now <= rawEnd);
+                        const isScheduled = now < rawStart;
+                        const isPast = !isInfinite && now > rawEnd;
 
                         // Priority Color
                         const color = getPriorityColor(b.priority);
 
                         // Opacity for inactive/past
                         // Note: Infinite bars track "Active" status differently (handled by rendering style)
-                        const isPast = !isInfinite && now > rawEnd;
-                        const opacity = (isInteractionActive || (!isPast)) ? 1 : 0.5;
+                        const opacity = (isInteractionActive || isTimeActive || isScheduled) ? 1 : 0.5;
 
                         return (
                             <div
@@ -4423,7 +4428,10 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     boxShadow: isInteractionActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)',
                                     filter: isInteractionActive ? 'brightness(1.5) saturate(1.2)' : (isPast ? 'brightness(0.6) grayscale(0.5)' : 'brightness(1.1)'),
                                     transition: isDragging ? 'none' : 'all 0.2s',
-                                    pointerEvents: 'auto'
+                                    pointerEvents: 'auto',
+                                    // Mask infinite bars so their glow doesn't fill the whole lane
+                                    WebkitMaskImage: isInfinite ? 'linear-gradient(to right, black 0%, black 150px, rgba(0,0,0,0.5) 300px, transparent 600px)' : 'none',
+                                    maskImage: isInfinite ? 'linear-gradient(to right, black 0%, black 150px, rgba(0,0,0,0.5) 300px, transparent 600px)' : 'none'
                                 }}
                                 title={`${b.title} (${isInfinite ? 'Infinite' : new Date(rawEnd).toLocaleString()})`}
                             >
