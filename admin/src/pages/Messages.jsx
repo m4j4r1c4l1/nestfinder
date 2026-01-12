@@ -1528,7 +1528,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: 'none', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '280px', flexShrink: 0 }}>
                                                     <span style={{
                                                         padding: '0.2rem 0.6rem 0.3rem 0.6rem', borderRadius: '4px',
                                                         fontSize: '0.7rem', fontWeight: 700,
@@ -1589,13 +1589,20 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 {/* Right: Time Range & Stats */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                                     {/* Time Range */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.4rem',
+                                                        color: '#94a3b8',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: statusText === 'ACTIVE' ? '700' : '400'
+                                                    }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
-                                                        <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{formatTimeCET(start)}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{formatTimeCET(start)}</span>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>→</span>
-                                                        <span>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{end ? formatTimeCET(end) : ''}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
                                                     {/* Delivery Stats */}
@@ -4116,7 +4123,11 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                 // Collision Detection for 'move' operations (where newLane is defined)
                 if (finalLane !== undefined) {
                     const isOverlapping = (startA, endA, startB, endB) => {
-                        return Math.max(startA, startB) < Math.min(endA, endB);
+                        const sA = startA;
+                        const eA = (endA === null || endA === undefined || endA > 4102444800000) ? Infinity : endA;
+                        const sB = startB;
+                        const eB = (endB === null || endB === undefined || endB > 4102444800000) ? Infinity : endB;
+                        return Math.max(sA, sB) < Math.min(eA, eB);
                     };
 
                     let laneFound = false;
@@ -4128,7 +4139,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                             if (String(b.id) === String(dragging.id)) return false; // Ignore self with robust ID check
 
                             const bStart = new Date(b.start_time).getTime();
-                            const bEnd = new Date(b.end_time).getTime();
+                            const bEnd = b.end_time ? new Date(b.end_time).getTime() : Infinity;
 
                             return isOverlapping(dragging.newStart, dragging.newEnd, bStart, bEnd);
                         });
@@ -4209,7 +4220,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         <div
             ref={containerRef}
             style={{
-                background: '#475569', // Slate 600
+                background: '#a3aab4', // Midpoint between Slate 600 (#475569) and White (#ffffff)
                 border: '1px solid #334155',
                 borderRadius: '8px',
                 position: 'relative',
@@ -4240,16 +4251,16 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     const showDate = i === 0 || date !== prevDate;
 
                     // Determine style based on tick type
-                    let tickColor = '#94a3b8'; // Hour (Brightest)
+                    let tickColor = '#0f172a'; // Hour (Darkest - Slate 900)
                     let tickHeight = 8;
                     let labelOpacity = 1;
 
                     if (tick.type === 'half') {
-                        tickColor = '#64748b'; // Half (Mid)
+                        tickColor = '#1e293b'; // Half (Slate 800)
                         tickHeight = 6;
                         labelOpacity = 0.8;
                     } else if (tick.type === 'quarter') {
-                        tickColor = '#475569'; // Quarter (Darkest/Faintest)
+                        tickColor = '#334155'; // Quarter (Slate 700)
                         tickHeight = 4;
                         labelOpacity = 0.6;
                     }
@@ -4304,7 +4315,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 top: 0,
                                 height: '100%',
                                 width: '1px',
-                                background: 'rgba(255, 255, 255, 0.4)',
+                                background: 'rgba(0, 0, 0, 0.5)',
                                 zIndex: 1, // Behind bars (10+)
                                 pointerEvents: 'none'
                             }} />
