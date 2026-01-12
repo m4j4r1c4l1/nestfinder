@@ -3814,19 +3814,31 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         });
 
         // Step 4: Auto-place remaining broadcasts (no manual lane)
+        // REFACTOR: Use gap-filling logic instead of append-only to prevent unnecessary lane shifting
         autoPlaceBroadcasts.forEach(b => {
             const start = new Date(b.start_time).getTime();
-            let end = b.end_time ? new Date(b.end_time).getTime() : Number.MAX_SAFE_INTEGER; // Infinite
+            let end = b.end_time ? new Date(b.end_time).getTime() : Number.MAX_SAFE_INTEGER;
             if (end > 4102444800000) end = Number.MAX_SAFE_INTEGER;
 
             let placed = false;
 
-            // Try to place in existing lane
-            for (let i = 0; i < laneEnds.length; i++) {
-                const buffer = viewportDuration ? (viewportDuration * 0.02) : 900000;
-                if (laneEnds[i] + buffer < start) {
+            // Helper to check collision with specific range
+            const checkCollision = (msg, s, e) => {
+                const msgStart = new Date(msg.start_time).getTime();
+                let msgEnd = msg.end_time ? new Date(msg.end_time).getTime() : Number.MAX_SAFE_INTEGER;
+                if (msgEnd > 4102444800000) msgEnd = Number.MAX_SAFE_INTEGER;
+
+                // Simple overlap check
+                return Math.max(s, msgStart) < Math.min(e, msgEnd);
+            };
+
+            // Try to place in existing lane (fill gaps)
+            for (let i = 0; i < lanes.length; i++) {
+                // Check if this new message overlaps with ANYTHING currently in this lane
+                const hasCollision = lanes[i].some(existingMsg => checkCollision(existingMsg, start, end));
+
+                if (!hasCollision) {
                     lanes[i].push(b);
-                    laneEnds[i] = end;
                     placed = true;
                     break;
                 }
@@ -3834,7 +3846,6 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
             if (!placed) {
                 lanes.push([b]);
-                laneEnds.push(end);
             }
         });
 
@@ -4109,7 +4120,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         });
     }
 
-    const handleMouseUp = () => {
+    const handleMouseUp = async () => {
         if (dragging) {
             // Click Handler: If not moved, trigger selection
             if (dragging.id && !dragging.hasMoved && (dragging.type === 'move' || dragging.type === 'resize-left' || dragging.type === 'resize-right')) {
@@ -4126,7 +4137,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                 const timeChanged = dragging.newStart !== dragging.originalStart || dragging.newEnd !== dragging.originalEnd;
                 let finalLane = dragging.newLane;
 
-                // Collision Detection for 'move' operations (where newLane is defined)
+                // Collision Detection for 'move' operations
                 if (finalLane !== undefined) {
                     const isOverlapping = (startA, endA, startB, endB) => {
                         const sA = startA;
@@ -4139,19 +4150,21 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     let laneFound = false;
                     let safetyCounter = 0;
 
+                    // Search for a free lane starting from the specific one dropped on
+                    // This logic seems fine for "finding a spot", but the UI feedback 
+                    // should ideally prevent dropping on a collision or show it turning red.
+                    // For now, this auto-bump logic preserves the "find next free" behavior.
                     while (!laneFound && safetyCounter < 100) {
                         const broadcastsInLane = lanes[finalLane] || [];
                         const hasCollision = broadcastsInLane.some(b => {
-                            if (String(b.id) === String(dragging.id)) return false; // Ignore self with robust ID check
-
+                            if (String(b.id) === String(dragging.id)) return false;
                             const bStart = new Date(b.start_time).getTime();
                             const bEnd = b.end_time ? new Date(b.end_time).getTime() : Infinity;
-
                             return isOverlapping(dragging.newStart, dragging.newEnd, bStart, bEnd);
                         });
 
                         if (hasCollision) {
-                            finalLane++; // Try next lane
+                            finalLane++;
                         } else {
                             laneFound = true;
                         }
@@ -4170,8 +4183,12 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     if (laneChanged) {
                         updates.lane = finalLane;
                     }
-                    // Don't await here, so the dragging state clears immediately
-                    onBroadcastUpdate(dragging.id, updates);
+                    // Fix: Await the update so we don't clear dragging state early (causing rubber-banding)
+                    try {
+                        await onBroadcastUpdate(dragging.id, updates);
+                    } catch (e) {
+                        console.error('Drag update failed', e);
+                    }
                 }
             }
         }
