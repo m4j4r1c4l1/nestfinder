@@ -1592,7 +1592,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         boxSizing: 'border-box',
                                                         border: '1px solid #f97316',
                                                         marginLeft: 'auto',
-                                                        marginRight: '0' // Sticks to the separator
+                                                        marginRight: '1rem' // Restored standard margin
                                                     }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
@@ -3989,6 +3989,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         }
 
         if (dragging) {
+            // Fix: If committing, ignore mouse moves to prevent "sticking"
+            if (dragging.isCommitting) return;
+
             if (dragging.type === 'resize-height') {
                 const newH = Math.max(mouseY, contentHeight);
                 setManualHeight(newH);
@@ -4171,6 +4174,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
                     // Await update to prevent rubber-banding on success
                     try {
+                        // Flag as committing so mouse moves don't update visual position
+                        setDragging(prev => ({ ...prev, isCommitting: true }));
                         await onBroadcastUpdate(dragging.id, updates);
                     } catch (e) {
                         console.error('Drag update failed', e);
