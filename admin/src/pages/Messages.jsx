@@ -1628,10 +1628,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{formatTimeCET(start)}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>→</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{formatTimeCET(start)}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>→</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{end ? formatTimeCET(end) : ''}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
                                                     {/* Delivery Stats - Separator Line included in border */}
