@@ -1409,7 +1409,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     marginBottom: '0.75rem'
                 }} />
 
-                <div style={{ height: '542px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
+                <div style={{ maxHeight: '542px', height: 'auto', minHeight: '200px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0 1rem 1rem 1rem', boxSizing: 'border-box' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
@@ -1596,12 +1596,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         color: '#94a3b8',
                                                         fontSize: '0.75rem',
                                                         fontWeight: statusText === 'ACTIVE' ? '700' : '400',
-                                                        width: '350px', // Estimated fixed width to align separators
+                                                        width: '350px', // Revert to fixed width as requested
                                                         paddingLeft: '1rem', // Initial offset from tags
-                                                        width: '350px', // Estimated fixed width to align separators
-                                                        paddingLeft: '1rem', // Initial offset from tags
-                                                        boxSizing: 'border-box',
-                                                        border: '1px solid orange'
+                                                        boxSizing: 'border-box'
                                                     }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
@@ -1611,8 +1608,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
-                                                    {/* Delivery Stats - Separator Line included in border */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
+                                                    {/* Delivery Stats - Separator Line included in border - Pushed to Right */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem', marginLeft: 'auto' }}>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
@@ -4418,9 +4415,27 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         // Priority Color
                         const color = getPriorityColor(b.priority);
 
-                        // Opacity for inactive/past
-                        // Note: Infinite bars track "Active" status differently (handled by rendering style)
-                        const opacity = (isInteractionActive || isTimeActive || isScheduled) ? 1 : 0.8;
+                        // Visual State Logic
+                        // Inactive = Past AND Not interacting.
+                        const isInactive = isPast && !isInteractionActive;
+
+                        // Background & Border Setup
+                        let bgStyle = color;
+                        let borderStyle = isTimeActive ? '1px solid white' : (isScheduled ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.2)');
+
+                        if (isInfinite) {
+                            bgStyle = `linear-gradient(to right, ${color}, ${color}00)`;
+                            // Keep default border for infinite or specific logic? 
+                            // Usually infinite is active or scheduled.
+                        } else if (isInactive) {
+                            // Badge Style requested for inactive
+                            bgStyle = `${color}20`;
+                            borderStyle = `1px solid ${color}40`;
+                        }
+
+                        // Opacity: Always 1 now, because we control alpha in the color itself for inactive.
+                        // (Previously 0.6 for inactive)
+                        const opacity = 1;
 
                         return (
                             <div
@@ -4438,19 +4453,17 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     height: `${rowHeight}px`,
                                     top: `${((isDragging && dragging.newLane !== undefined) ? dragging.newLane : laneIndex) * (rowHeight + gap) + gap}px`, // Dynamic top for dragging
                                     borderRadius: '2px', // Less rounded as requested
-                                    background: isInfinite
-                                        ? `linear-gradient(to right, ${color}, ${color}00)`
-                                        : color,
+                                    background: bgStyle,
                                     opacity: opacity,
-                                    border: isTimeActive ? '1px solid white' : (isScheduled ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.2)'),
+                                    border: borderStyle,
                                     cursor: 'grab',
                                     zIndex: isInteractionActive ? 20 : 10,
                                     boxShadow: isTimeActive
                                         ? (isInteractionActive ? `0 0 20px ${color}, 0 0 8px white` : `0 0 10px ${color}60`)
-                                        : (isInteractionActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)'),
+                                        : (isInteractionActive ? `0 0 15px ${color}80, 0 0 5px white` : (isInactive ? 'none' : '0 2px 4px rgba(0,0,0,0.3)')), // Remove shadow if inactive unless hovered? "Hover: Ensure glow effect on all states" -> Hover isInteractionActive=true.
                                     filter: isInteractionActive
                                         ? (isTimeActive ? 'brightness(1.5) saturate(1.2)' : 'brightness(1.2) saturate(1.1)')
-                                        : (isPast ? 'brightness(0.9) grayscale(0.2)' : 'brightness(1.1)'),
+                                        : (isInactive ? 'none' : 'brightness(1.1)'), // Remove grayscale for inactive, just pure badge style
                                     transition: isDragging ? 'none' : 'all 0.2s',
                                     pointerEvents: 'auto',
                                     // Mask infinite bars so their glow doesn't fill the whole lane
