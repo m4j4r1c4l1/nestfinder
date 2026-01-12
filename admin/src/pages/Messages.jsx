@@ -3825,15 +3825,18 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
             }
         });
 
-        // Step 5: Build broadcast -> lane map for quick lookup
+        // Step 6: Compact lanes (Remove gaps)
+        const compactedLanes = lanes.filter(lane => lane.length > 0);
+
+        // Step 7: Build broadcast -> lane map for quick lookup
         const broadcastLaneMap = {};
-        lanes.forEach((lane, laneIndex) => {
+        compactedLanes.forEach((lane, laneIndex) => {
             lane.forEach(b => {
                 broadcastLaneMap[b.id] = laneIndex;
             });
         });
 
-        return { lanes, laneCount: lanes.length, broadcastLaneMap };
+        return { lanes: compactedLanes, laneCount: compactedLanes.length, broadcastLaneMap };
     }, [broadcasts, viewportDuration]);
 
 
@@ -4298,8 +4301,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                             <div style={{
                                 position: 'absolute',
                                 left: `${left}%`,
-                                top: -rulerHeight,
-                                height: `${totalHeight}px`,
+                                top: 0,
+                                height: '100%',
                                 width: '1px',
                                 background: 'rgba(255, 255, 255, 0.4)',
                                 zIndex: 1, // Behind bars (10+)
@@ -4425,8 +4428,12 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     border: isTimeActive ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
                                     cursor: 'grab',
                                     zIndex: isInteractionActive ? 20 : 10,
-                                    boxShadow: isInteractionActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)',
-                                    filter: isInteractionActive ? 'brightness(1.5) saturate(1.2)' : (isPast ? 'brightness(0.6) grayscale(0.5)' : 'brightness(1.1)'),
+                                    boxShadow: isTimeActive
+                                        ? (isInteractionActive ? `0 0 20px ${color}, 0 0 8px white` : `0 0 10px ${color}60`)
+                                        : (isInteractionActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)'),
+                                    filter: isInteractionActive
+                                        ? (isTimeActive ? 'brightness(1.5) saturate(1.2)' : 'brightness(1.2) saturate(1.1)')
+                                        : (isPast ? 'brightness(0.6) grayscale(0.5)' : 'brightness(1.1)'),
                                     transition: isDragging ? 'none' : 'all 0.2s',
                                     pointerEvents: 'auto',
                                     // Mask infinite bars so their glow doesn't fill the whole lane
