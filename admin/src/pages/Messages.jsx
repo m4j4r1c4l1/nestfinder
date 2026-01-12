@@ -399,11 +399,10 @@ const Messages = () => {
             });
 
             // Set success feedback
-            setResult({ success: true });
             setJustPublished(true);
-            setTimeout(() => setJustPublished(false), 1000);
+            setTimeout(() => setJustPublished(false), 2000); // 2s is better for reading
 
-            setNewBroadcast({ title: '', message: '', imageUrl: '', startTime: '', endTime: '', maxViews: '', priority: 0 });
+            setNewBroadcast({ title: '', message: '', imageUrl: '', startTime: '', endTime: '', maxViews: '', priority: null });
             setActiveBroadcastTemplate('custom');
             fetchData();
         } catch (err) {
@@ -3557,82 +3556,93 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
                     <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                 </div>
 
-                {/* Stats */}
-                <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                        <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{total}</div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase' }}>Total</div>
-                        </div>
-                        <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{deliveredCount}</div>
-                            <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase' }}>Delivered</div>
-                        </div>
-                        <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{readCount}</div>
-                            <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase' }}>Read</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Table */}
-                {/* Table - Aligned with badges above */}
-                <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                    {!loading && views.length === 0 ? (
-                        <div style={{ padding: '3rem', border: '1px solid #334155', borderRadius: '12px', textAlign: 'center', color: '#64748b', background: '#0f172a' }}>
-                            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📭</div>
-                            <div style={{ fontWeight: 500, color: '#94a3b8' }}>No interaction records found</div>
-                            <div style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>Recipients have not received or viewed this broadcast yet.</div>
+                {/* Content Area */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+                    {loading ? (
+                        <div style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
+                            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem', opacity: 0.5 }}>⌛</div>
+                            <div style={{ fontWeight: 500 }}>Loading interactions...</div>
                         </div>
                     ) : (
-                        <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'auto', flex: 1, background: '#1e293b' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
-                                    <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Received</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Read</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {views.map(view => (
-                                        <tr key={view.id} style={{ borderBottom: '1px solid #334155' }}>
-                                            <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                                    <span style={{ fontWeight: 500, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                        {view.user_nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>}
-                                                    </span>
-                                                    <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', whiteSpace: 'nowrap' }}>{view.user_id}</code>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                <DateTimeCell isoString={view.delivered_at || view.created_at} />
-                                            </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                <DateTimeCell isoString={view.status === 'read' ? view.updated_at : null} />
-                                            </td>
-                                            <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
-                                                    <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
-                                                        {view.status === 'read' ? (
-                                                            <span style={{ color: '#3b82f6' }}>✓✓</span>
-                                                        ) : view.status === 'delivered' ? (
-                                                            <span style={{ color: '#22c55e' }}>✓✓</span>
-                                                        ) : (
-                                                            <span style={{ color: '#22c55e' }}>✓</span>
-                                                        )}
-                                                    </div>
-                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
-                                                        {view.status === 'read' ? 'Read' : (view.status === 'delivered' ? 'Delivered' : 'Sent')}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <>
+                            {/* Stats */}
+                            <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{total}</div>
+                                        <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase' }}>Total</div>
+                                    </div>
+                                    <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{deliveredCount}</div>
+                                        <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase' }}>Delivered</div>
+                                    </div>
+                                    <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{readCount}</div>
+                                        <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase' }}>Read</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Table area */}
+                            <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                                {views.length === 0 ? (
+                                    <div style={{ padding: '3rem', border: '1px solid #334155', borderRadius: '12px', textAlign: 'center', color: '#64748b', background: '#0f172a' }}>
+                                        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📭</div>
+                                        <div style={{ fontWeight: 500, color: '#94a3b8' }}>No interaction records found</div>
+                                        <div style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>Recipients have not received or viewed this broadcast yet.</div>
+                                    </div>
+                                ) : (
+                                    <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'auto', flex: 1, background: '#1e293b' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                            <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
+                                                <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
+                                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Received</th>
+                                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Read</th>
+                                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {views.map(view => (
+                                                    <tr key={view.id} style={{ borderBottom: '1px solid #334155' }}>
+                                                        <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                                                <span style={{ fontWeight: 500, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                    {view.user_nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>}
+                                                                </span>
+                                                                <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', whiteSpace: 'nowrap' }}>{view.user_id}</code>
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                            <DateTimeCell isoString={view.delivered_at || view.created_at} />
+                                                        </td>
+                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                            <DateTimeCell isoString={view.status === 'read' ? view.updated_at : null} />
+                                                        </td>
+                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
+                                                                <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
+                                                                    {view.status === 'read' ? (
+                                                                        <span style={{ color: '#3b82f6' }}>✓✓</span>
+                                                                    ) : view.status === 'delivered' ? (
+                                                                        <span style={{ color: '#22c55e' }}>✓✓</span>
+                                                                    ) : (
+                                                                        <span style={{ color: '#22c55e' }}>✓</span>
+                                                                    )}
+                                                                </div>
+                                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
+                                                                    {view.status === 'read' ? 'Read' : (view.status === 'delivered' ? 'Delivered' : 'Sent')}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </>
                     )}
                 </div>
             </div>
