@@ -1525,10 +1525,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
                                             {/* Bottom Line: Professional Layout */}
                                             {/* User requested lime border REMOVED. Added background to bin area. */}
-                                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: 'none', height: '26px', boxSizing: 'border-box' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid red', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '280px', flexShrink: 0 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '280px', flexShrink: 0, border: '1px solid blue' }}>
                                                     <span style={{
                                                         padding: '0.2rem 0.6rem 0.3rem 0.6rem', borderRadius: '4px',
                                                         fontSize: '0.7rem', fontWeight: 700,
@@ -1587,7 +1587,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 </div>
 
                                                 {/* Center/Right Group: Time, Stats, Bin */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, border: '1px solid green' }}>
                                                     {/* Time Range - Fixed Width for Vertical Alignment */}
                                                     <div style={{
                                                         display: 'flex',
@@ -1598,7 +1598,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         fontWeight: statusText === 'ACTIVE' ? '700' : '400',
                                                         width: '350px', // Estimated fixed width to align separators
                                                         paddingLeft: '1rem', // Initial offset from tags
-                                                        boxSizing: 'border-box'
+                                                        width: '350px', // Estimated fixed width to align separators
+                                                        paddingLeft: '1rem', // Initial offset from tags
+                                                        boxSizing: 'border-box',
+                                                        border: '1px solid orange'
                                                     }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
@@ -1609,7 +1612,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     </div>
 
                                                     {/* Delivery Stats - Separator Line included in border */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem', border: '1px solid magenta' }}>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
