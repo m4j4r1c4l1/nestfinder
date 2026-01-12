@@ -121,9 +121,13 @@ router.post('/broadcast/:id/read', requireUser, (req, res) => {
       `, [broadcastId, userId]);
     }
 
-    // We rely on broadcast_views for history, no need to duplicate into notifications table
-    // creating duplicates causes UI issues (flickering status) and ID collisions.
-    console.log(`[Broadcast Read] Updated view status for Broadcast ${broadcastId}, User ${userId}`);
+    // We rely on broadcast_views for history, BUT we must update the notifications table 
+    // if a record exists there (e.g. from legacy or other processes) so the client UI updates.
+    // We do NOT insert if missing (to avoid duplicates), only update.
+    const batchId = `broadcast_${broadcastId}`;
+    run(`UPDATE notifications SET read = 1 WHERE user_id = ? AND batch_id = ?`, [userId, batchId]);
+
+    console.log(`[Broadcast Read] Updated view status (and notifications if present) for Broadcast ${broadcastId}, User ${userId}`);
 
     res.json({ success: true });
   } catch (err) {

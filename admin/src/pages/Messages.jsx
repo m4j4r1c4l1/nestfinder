@@ -1608,7 +1608,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     {/* Delivery Stats */}
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
-                                                            ✓✓ <span style={{ color: '#94a3b8' }}>{b.delivered_count || 0}</span>
+                                                            ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
                                                         <span title="Read" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#3b82f6' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
@@ -3463,7 +3463,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.2rem', fontWeight: 600, color: '#f8fafc' }}>
                                     <span style={{ color: '#22c55e', fontSize: '1.1rem' }}>✓✓</span>
-                                    {broadcast.delivered_count || 0}
+                                    {Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}
                                 </div>
                                 <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Delivered</span>
                             </div>
@@ -3530,7 +3530,7 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 
     const total = views.length;
     const readCount = views.filter(v => v.status === 'read').length;
-    const deliveredCount = views.filter(v => v.status === 'delivered' || v.status === 'read').length;
+    const deliveredCount = views.filter(v => v.status === 'delivered').length;
     const pendingCount = views.filter(v => v.status === 'sent').length;
 
     const DateTimeCell = ({ isoString }) => {
@@ -4640,7 +4640,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
                                 {/* Delivery Stats (Right) */}
                                 <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', paddingLeft: '12px', borderLeft: '1px solid #334155' }}>
-                                    <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ {hoveredItem.delivered_count || 0}</span>
+                                    <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ {Math.max(0, (hoveredItem.delivered_count || 0) - (hoveredItem.read_count || 0))}</span>
                                     <span style={{ color: '#3b82f6', fontWeight: 600 }}>✓✓ {hoveredItem.read_count || 0}</span>
                                 </div>
                             </div>
