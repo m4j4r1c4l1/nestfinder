@@ -877,11 +877,16 @@ router.get('/broadcasts/:id/views', (req, res) => {
 
 // Create a new broadcast (with max_views support)
 router.post('/broadcasts', (req, res) => {
-    const { title, message, imageUrl, startTime, endTime, maxViews, priority } = req.body;
+    let { title, message, imageUrl, startTime, endTime, maxViews, priority } = req.body;
 
-    if (!message || !startTime || !endTime) {
-        return res.status(400).json({ error: 'Message, start time, and end time are required' });
+    if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
     }
+
+    // Defaults
+    if (!startTime) startTime = new Date().toISOString();
+    // Infinite duration fallback (Magic Date: 2099-12-31)
+    if (!endTime) endTime = '2099-12-31T23:59:59.999Z';
 
     run(`
         INSERT INTO broadcasts (title, message, image_url, start_time, end_time, max_views, priority)

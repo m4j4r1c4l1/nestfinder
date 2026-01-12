@@ -374,21 +374,34 @@ const Messages = () => {
     // --- Broadcast Handlers ---
     const handleCreateBroadcast = async (e) => {
         e.preventDefault();
-        if (!newBroadcast.message || !newBroadcast.startTime || !newBroadcast.endTime) return;
-
         setCreatingBroadcast(true);
+
         try {
             // Helper to convert local input time to UTC ISO string
-            const toISO = (dateStr) => new Date(dateStr).toISOString();
+            const toISO = (dateStr) => {
+                if (!dateStr) return null;
+                return new Date(dateStr).toISOString();
+            };
+
+            // Default startTime to NOW if not provided
+            const finalStartTime = newBroadcast.startTime ? toISO(newBroadcast.startTime) : new Date().toISOString();
+            // Allow endTime to be null (Infinite Duration)
+            const finalEndTime = newBroadcast.endTime ? toISO(newBroadcast.endTime) : null;
 
             await adminApi.fetch('/admin/broadcasts', {
                 method: 'POST',
                 body: JSON.stringify({
                     ...newBroadcast,
-                    startTime: toISO(newBroadcast.startTime),
-                    endTime: toISO(newBroadcast.endTime)
+                    startTime: finalStartTime,
+                    endTime: finalEndTime
                 })
             });
+
+            // Set success feedback
+            setResult({ success: true });
+            setJustPublished(true);
+            setTimeout(() => setJustPublished(false), 1000);
+
             setNewBroadcast({ title: '', message: '', imageUrl: '', startTime: '', endTime: '', maxViews: '', priority: 0 });
             setActiveBroadcastTemplate('custom');
             fetchData();
@@ -828,7 +841,7 @@ const Messages = () => {
                                                     />
                                                 </div>
                                                 <div style={{ flex: 1 }}>
-                                                    <label className="form-label">End Time</label>
+                                                    <label className="form-label">End Time (Optional)</label>
                                                     <DatePicker
                                                         selected={newBroadcast.endTime ? new Date(newBroadcast.endTime) : null}
                                                         onChange={(date) => setNewBroadcast({ ...newBroadcast, endTime: date })}
@@ -839,6 +852,7 @@ const Messages = () => {
                                                         className="custom-datepicker-input"
                                                         placeholderText="Select end time"
                                                         minDate={newBroadcast.startTime ? new Date(newBroadcast.startTime) : null}
+                                                        isClearable // Allow clearing the end time
                                                     />
                                                 </div>
                                             </div>
@@ -872,10 +886,37 @@ const Messages = () => {
                                             </div>
                                             <button
                                                 type="submit"
-                                                disabled={creatingBroadcast || !newBroadcast.message}
-                                                className="btn btn-primary btn-block"
+                                                disabled={creatingBroadcast || justPublished}
+                                                style={{
+                                                    background: justPublished ? '#22c55e' : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    padding: '0.75rem 1.5rem',
+                                                    fontSize: '0.95rem',
+                                                    fontWeight: 600,
+                                                    cursor: creatingBroadcast || justPublished ? 'default' : 'pointer',
+                                                    boxShadow: justPublished ? '0 0 15px rgba(34, 197, 94, 0.4)' : '0 4px 6px -1px rgba(59, 130, 246, 0.5)',
+                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                    opacity: creatingBroadcast ? 0.7 : 1,
+                                                    transform: justPublished ? 'scale(1.02)' : 'scale(1)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                    width: '100%',
+                                                    justifyContent: 'center'
+                                                }}
                                             >
-                                                {creatingBroadcast ? 'Creating...' : '📢 Publish Broadcast'}
+                                                {justPublished ? (
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        ✓ Broadcast successfully published
+                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        <span>🚀</span>
+                                                        <span>Publish Broadcast</span>
+                                                    </>
+                                                )}
                                             </button>
                                         </form>
                                         {showBroadcastEmojiPicker && (
@@ -939,12 +980,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // const [showAdvanced, setShowAdvanced] = useState(false); // REMOVED: Filters now always visible
     const [hoveredTimelineBarId, setHoveredTimelineBarId] = useState(null); // For broadcast card highlighting
     const [hoveredFilterGroup, setHoveredFilterGroup] = useState(null); // For stats badge highlighting
+    const [justPublished, setJustPublished] = useState(false); // Feedback state
 
     // Filter Logic
     const filteredBroadcasts = broadcasts.filter(b => {
         const now = new Date();
         const start = new Date(b.start_time);
-        const end = new Date(b.end_time);
+        const end = b.end_time ? new Date(b.end_time) : null; // Handle null end_time
 
         // Text Search Filter (title or message)
         if (searchFilters.searchText) {
@@ -956,9 +998,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
         // Status Filter
         if (searchFilters.status !== 'all') {
-            const isActive = now >= start && now <= end;
-            const isPast = now > end;
-            const isScheduled = now < start;
+            const isActive = now >= start && (!end || now <= end); // Active if now >= start AND (no end OR now <= end)
+            const isPast = end && now > end; // Past only if end exists and now > end
+            const isScheduled = now < start; // Scheduled if now < start
 
             if (searchFilters.status === 'active' && !isActive) return false;
             if (searchFilters.status === 'inactive' && !isPast) return false;
@@ -978,7 +1020,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
         }
 
         if (searchFilters.startDate && new Date(b.start_time) < searchFilters.startDate) return false;
-        if (searchFilters.endDate && new Date(b.end_time) > searchFilters.endDate) return false;
+        if (searchFilters.endDate && b.end_time && new Date(b.end_time) > searchFilters.endDate) return false; // Only filter by end date if end_time exists
 
         return true;
     });
@@ -995,10 +1037,15 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
         broadcasts.forEach(b => {
             const start = new Date(b.start_time);
-            const end = new Date(b.end_time);
-            if (now >= start && now <= end) active++;
-            else if (now < start) scheduled++;
-            else inactive++;
+            const end = b.end_time ? new Date(b.end_time) : null;
+
+            const isActive = now >= start && (!end || now <= end);
+            const isPast = end && now > end;
+            const isScheduled = now < start;
+
+            if (isActive) active++;
+            else if (isScheduled) scheduled++;
+            else if (isPast) inactive++; // Only count as inactive if it has an end time and it's past
 
             const p = b.priority || 3;
             if (priorityCounts[p] !== undefined) priorityCounts[p]++;
@@ -1372,9 +1419,26 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 {paginatedBroadcasts.map(b => {
                                     const now = new Date();
                                     const start = new Date(b.start_time);
-                                    const end = new Date(b.end_time);
-                                    const isActive = now >= start && now <= end;
-                                    const isEnded = now > end;
+                                    let end = b.end_time ? new Date(b.end_time) : null;
+                                    if (end && end.getFullYear() > 2090) end = null;
+
+                                    // Status Logic (Infinite Duration Support):
+                                    // - Active: Now >= Start && (End is null OR Now <= End)
+                                    // - Scheduled: Now < Start
+                                    // - Inactive: End is NOT null AND Now > End
+                                    let statusText = 'INACTIVE';
+                                    let statusColor = '#94a3b8';
+
+                                    if (end && now > end) {
+                                        statusText = 'ENDED';
+                                        statusColor = '#94a3b8';
+                                    } else if (now < start) {
+                                        statusText = 'SCHEDULED';
+                                        statusColor = '#3b82f6';
+                                    } else {
+                                        statusText = 'ACTIVE';
+                                        statusColor = '#22c55e';
+                                    }
 
                                     // Priority Logic (Heat Map 1=Highest)
                                     const getPriorityColor = (p) => {
@@ -1388,23 +1452,17 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     };
                                     const priorityColor = getPriorityColor(b.priority);
 
-                                    // Status Logic
-                                    let statusColor = '#3b82f6'; // Scheduled (Blue)
-                                    let statusText = 'SCHEDULED';
-                                    if (isActive) { statusColor = '#22c55e'; statusText = 'ACTIVE'; }
-                                    else if (isEnded) { statusColor = '#94a3b8'; statusText = 'ENDED'; }
-
                                     // Border Color: Always priority color, but 75% transparent (25% opacity) if not active
-                                    const borderColor = isActive ? priorityColor : `${priorityColor}40`;
+                                    const borderColor = (statusText === 'ACTIVE') ? priorityColor : `${priorityColor}40`;
 
                                     // Check if this card should be highlighted (from Timeline hover OR Stats Badge hover)
                                     let isHighlighted = hoveredTimelineBarId === b.id;
 
                                     if (!isHighlighted && hoveredFilterGroup) {
                                         if (hoveredFilterGroup.type === 'status') {
-                                            if (hoveredFilterGroup.value === 'active' && isActive) isHighlighted = true;
-                                            else if (hoveredFilterGroup.value === 'inactive' && isEnded) isHighlighted = true;
-                                            else if (hoveredFilterGroup.value === 'scheduled' && !isActive && !isEnded) isHighlighted = true;
+                                            if (hoveredFilterGroup.value === 'active' && statusText === 'ACTIVE') isHighlighted = true;
+                                            else if (hoveredFilterGroup.value === 'inactive' && statusText === 'ENDED') isHighlighted = true;
+                                            else if (hoveredFilterGroup.value === 'scheduled' && statusText === 'SCHEDULED') isHighlighted = true;
                                         } else if (hoveredFilterGroup.type === 'priority') {
                                             if ((b.priority || 3) === hoveredFilterGroup.value) isHighlighted = true;
                                         } else if (hoveredFilterGroup.type === 'maxViews') {
@@ -1521,13 +1579,13 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 {/* Right: Time Range & Stats */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                                     {/* Time Range */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem', fontWeight: isActive ? '700' : '400' }}>
-                                                        <span style={{ color: isActive ? '#f8fafc' : '#64748b' }}>🕐</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ color: isActive ? '#f8fafc' : '#475569' }}>{formatTimeCET(start)}</span>
-                                                        <span style={{ color: isActive ? '#f8fafc' : '#475569' }}>→</span>
-                                                        <span>{end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ color: isActive ? '#f8fafc' : '#475569' }}>{formatTimeCET(end)}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{formatTimeCET(start)}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>→</span>
+                                                        <span>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
                                                     {/* Delivery Stats */}
@@ -1726,6 +1784,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [showComposeEmojiPicker, setShowComposeEmojiPicker] = useState(false);
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
+    const [justPublished, setJustPublished] = useState(false); // Feedback state
     const userListRef = React.useRef(null);
 
     // Auto-scroll to users when target is set to 'selected'
@@ -1836,8 +1895,10 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     };
 
     const handleSend = async () => {
-        if (!body.trim()) return setResult({ success: false, message: 'Message body is required' });
-        if (target === 'selected' && selectedUsers.length === 0) return setResult({ success: false, message: 'Select at least one user' });
+        if (!title.trim()) return setResult({ success: false, message: 'Title required' });
+        // Removed generic body check as templates might fill it, but safe to keep if using custom
+        // Relaxed EndTime check for infinite duration
+        if (!target) return setResult({ success: false, message: 'Target audience required' });
 
         try {
             setSending(true);
@@ -1861,6 +1922,8 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                 setResult({ success: true, message: `✅ Sent to ${data.sent} users` });
                 setBody('');
                 setImageUrl('');
+                setJustPublished(true); // Trigger green tick feedback
+                setTimeout(() => setJustPublished(false), 1000); // Revert after 1s
                 onSent && onSent();
             } else {
                 setResult({ success: false, message: data.error || 'Failed' });
@@ -2156,7 +2219,7 @@ const FeedbackSection = ({
     // Handle row click: open preview AND mark as read if sent/delivered
     const handleRowClick = async (item) => {
         setPreviewItem(item);
-        if (item.status === 'sent' || item.status === 'delivered' || item.status === 'pending') {
+        if (item.status === 'sent' || item.status === 'new' || item.status === 'pending') {
             await onUpdateStatus(item.id, 'read');
             onUpdate && onUpdate();
         }
@@ -3665,13 +3728,24 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
 
         const sorted = [...broadcasts].filter(b => {
             const s = new Date(b.start_time).getTime();
-            const e = new Date(b.end_time).getTime();
-            return !isNaN(s) && !isNaN(e);
+            // Allow null end_time (Infinite) OR Magic Date (> 2090)
+            let e = b.end_time ? new Date(b.end_time).getTime() : Infinity;
+            if (e > 4102444800000) e = Infinity; // > Jan 1 2100 basically
+
+            return !isNaN(s) && (!b.end_time || !isNaN(e));
         }).sort((a, b) => {
             const sA = new Date(a.start_time).getTime();
             const sB = new Date(b.start_time).getTime();
             if (sA !== sB) return sA - sB;
-            return (new Date(b.end_time).getTime() - sB) - (new Date(a.end_time).getTime() - sA);
+
+            // If end time is null (Infinite) or Magic Date
+            let eA = a.end_time ? new Date(a.end_time).getTime() : Number.MAX_SAFE_INTEGER;
+            if (eA > 4102444800000) eA = Number.MAX_SAFE_INTEGER;
+
+            let eB = b.end_time ? new Date(b.end_time).getTime() : Number.MAX_SAFE_INTEGER;
+            if (eB > 4102444800000) eB = Number.MAX_SAFE_INTEGER;
+
+            return (eB - sB) - (eA - sA);
         });
 
         // Step 1: Find max lane needed for manually assigned broadcasts
@@ -3695,9 +3769,11 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
         sorted.forEach(b => {
             if (b.lane !== null && b.lane !== undefined && b.lane >= 0) {
                 const start = new Date(b.start_time).getTime();
-                const end = new Date(b.end_time).getTime();
+                let end = b.end_time ? new Date(b.end_time).getTime() : Number.MAX_SAFE_INTEGER; // Infinite
+                if (end > 4102444800000) end = Number.MAX_SAFE_INTEGER;
+
                 lanes[b.lane].push(b);
-                laneEnds[b.lane] = Math.max(laneEnds[b.lane], end);
+                laneEnds[b.lane] = Math.max(laneEnds[b.lane], end === Number.MAX_SAFE_INTEGER ? end : end);
             } else {
                 autoPlaceBroadcasts.push(b);
             }
@@ -3706,7 +3782,9 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
         // Step 4: Auto-place remaining broadcasts (no manual lane)
         autoPlaceBroadcasts.forEach(b => {
             const start = new Date(b.start_time).getTime();
-            const end = new Date(b.end_time).getTime();
+            let end = b.end_time ? new Date(b.end_time).getTime() : Number.MAX_SAFE_INTEGER; // Infinite
+            if (end > 4102444800000) end = Number.MAX_SAFE_INTEGER;
+
             let placed = false;
 
             // Try to place in existing lane
@@ -4294,89 +4372,119 @@ function Timeline({ broadcasts, onBroadcastClick, onBroadcastUpdate, onHoveredBa
                             No broadcasts match filters
                         </div>
                     </div>
-                ) : lanes.map((laneItems, laneIndex) => (
-                    laneItems.map(b => {
-                        const isDraggingThis = dragging?.id === b.id;
+                ) : lanes.map((lane, laneIndex) => (
+                    lane.map(b => {
+                        const isDragging = dragging?.id === b.id;
 
-                        // Use dragged times if dragging this item, else normal
-                        const start = isDraggingThis ? dragging.newStart : new Date(b.start_time).getTime();
-                        const end = isDraggingThis ? dragging.newEnd : new Date(b.end_time).getTime();
+                        // Use dragged values if dragging, else actuals
+                        const rawStart = isDragging ? dragging.newStart : new Date(b.start_time).getTime();
+                        let rawEnd = isDragging ? dragging.newEnd : (b.end_time ? new Date(b.end_time).getTime() : null);
 
-                        const left = ((start - viewportStart) / viewportDuration) * 100;
-                        const width = ((end - start) / viewportDuration) * 100;
+                        const isInfinite = rawEnd === null || rawEnd > 4102444800000; // Null or > 2099
+                        if (isInfinite) rawEnd = viewportStart + viewportDuration * 2; // Render way past view
 
-                        // Don't render if completely off-screen
-                        if (left + width < 0 || left > 100) return null;
+                        const left = ((rawStart - viewportStart) / viewportDuration) * 100;
+                        const widthPct = ((rawEnd - rawStart) / viewportDuration) * 100;
 
+                        // Skip if way off screen (but keep infinite bars starting offscreen-left visible)
+                        if (left > 105 || (left + widthPct) < -5) return null;
+
+                        const isSelected = selectedBroadcast?.id === b.id;
+                        const isHovered = hoveredTimelineBarId === b.id;
+                        const isActive = isDragging || isSelected || isHovered;
+
+                        // Priority Color
+                        let color = '#3b82f6';
+                        if (b.priority === 1) color = '#ef4444';
+                        else if (b.priority === 2) color = '#f97316';
+                        else if (b.priority === 3) color = '#eab308';
+                        else if (b.priority === 4) color = '#3b82f6';
+                        else if (b.priority === 5) color = '#64748b';
+
+                        // Opacity for inactive/past
+                        // Note: Infinite bars track "Active" status differently (handled by rendering style)
                         const now = new Date().getTime();
-                        const isActive = now >= start && now <= end;
-                        const isEnded = now > end;
-
-                        const color = getPriorityColor(b.priority);
-
-                        // Use dragged lane if dragging this item, else use lane from layout
-                        const displayLane = isDraggingThis && dragging.newLane !== undefined
-                            ? dragging.newLane
-                            : laneIndex;
-
-                        // Check if this bar is hovered
-                        const isHovered = hoveredBarId === b.id;
+                        const isPast = !isInfinite && now > rawEnd;
+                        const opacity = (isDragging || isSelected || isHovered || (!isPast)) ? 1 : 0.5;
 
                         return (
                             <div
                                 key={b.id}
+                                onMouseDown={(e) => {
+                                    e.stopPropagation();
+                                    handleBarMouseDown(e, b, laneIndex);
+                                }}
+                                onMouseEnter={() => setHoveredTimelineBarId(b.id)}
+                                onMouseLeave={() => setHoveredTimelineBarId(null)}
                                 style={{
                                     position: 'absolute',
                                     left: `${left}%`,
-                                    width: `${Math.max(width, 0.5)}%`,
-                                    top: `${displayLane * (rowHeight + gap) + gap}px`,
+                                    width: `${widthPct}%`,
                                     height: `${rowHeight}px`,
-                                    background: color,
-                                    border: isActive ? '2px solid white' : `1px solid ${color}`,
-                                    borderRadius: '3px',
-                                    opacity: isEnded ? 0.25 : (isActive ? 1 : (isHovered ? 0.9 : 0.6)),
-                                    boxShadow: isActive ? `0 0 10px ${color}` : (isHovered ? `0 0 10px ${color}, 0 0 20px ${color}` : 'none'),
-                                    cursor: isDraggingThis ? 'grabbing' : 'grab',
-                                    zIndex: isHovered || isDraggingThis ? 20 : 10,
-                                    transition: isDraggingThis ? 'none' : 'opacity 0.2s, box-shadow 0.2s, transform 0.15s',
-                                    transform: isHovered && !isDraggingThis ? 'scale(1.1)' : 'none'
+                                    top: `${(laneIndex * (rowHeight + gap) + gap)}px`, // Fixed top calculation relative to container
+                                    borderRadius: '4px',
+                                    background: isInfinite
+                                        ? `linear-gradient(to right, ${color}, ${color}00)`
+                                        : color,
+                                    opacity: opacity,
+                                    border: isActive ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+                                    cursor: 'grab',
+                                    zIndex: isActive ? 20 : 10,
+                                    boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.5)' : 'none',
+                                    transition: isDragging ? 'none' : 'opacity 0.2s, top 0.2s, box-shadow 0.2s',
+                                    pointerEvents: 'auto'
                                 }}
-                                onMouseEnter={(e) => {
-                                    setHoveredBarId(b.id);
-                                    // Delay tooltip appearance by 1s
-                                    hoverTimeoutRef.current = setTimeout(() => {
-                                        setHoveredItem({ ...b, currentStart: start, currentEnd: end });
-                                    }, 1000);
-                                    setCrosshairPos({ x: null, y: null });
-                                }}
-                                onMouseLeave={() => {
-                                    clearTimeout(hoverTimeoutRef.current);
-                                    if (!dragging) {
-                                        setHoveredBarId(null);
-                                        setHoveredItem(null);
-                                    }
-                                }}
-                                onMouseDown={(e) => {
-                                    const barRect = e.currentTarget.getBoundingClientRect();
-                                    const type = getEdgeType(e, barRect);
-                                    handleMouseDown(e, b, type);
-                                }}
-                                onClick={(e) => {
-                                    // Suppress click if we just finished a drag
-                                    const timeSinceDrag = Date.now() - lastDragTimeRef.current;
-                                    if (timeSinceDrag < 100) return;
+                                title={`${b.title} (${isInfinite ? 'Infinite' : new Date(rawEnd).toLocaleString()})`}
+                            >
+                                {/* Left Handle */}
+                                <div
+                                    onMouseDown={(e) => {
+                                        e.stopPropagation();
+                                        handleBarMouseDown(e, b, laneIndex); // Actually utilize handleBarMouseDown for logic? No, wait. 
+                                        // The original code had separate handleResizeMouseDown. 
+                                        // Keeping logic consistent with previous implementation attempts.
+                                        handleResizeMouseDown(e, b, 'left');
+                                    }}
+                                    style={{
+                                        position: 'absolute', left: 0, top: 0, bottom: 0, width: '10px',
+                                        cursor: 'ew-resize', zIndex: 30
+                                    }}
+                                />
 
-                                    if (!dragging && onBroadcastClick) onBroadcastClick(b);
-                                }}
-                                onMouseMove={(e) => {
-                                    if (!dragging) {
-                                        const barRect = e.currentTarget.getBoundingClientRect();
-                                        const type = getEdgeType(e, barRect);
-                                        e.currentTarget.style.cursor = type.includes('resize') ? 'ew-resize' : 'grab';
-                                        setTooltipPos({ x: e.clientX, y: e.clientY });
-                                    }
-                                }}
-                            />
+                                {/* Right Handle - Only if NOT infinite */}
+                                {!isInfinite && (
+                                    <div
+                                        onMouseDown={(e) => {
+                                            e.stopPropagation();
+                                            handleResizeMouseDown(e, b, 'right');
+                                        }}
+                                        style={{
+                                            position: 'absolute', right: 0, top: 0, bottom: 0, width: '10px',
+                                            cursor: 'ew-resize', zIndex: 30
+                                        }}
+                                    />
+                                )}
+
+                                {/* Label */}
+                                <div style={{
+                                    position: 'absolute',
+                                    left: left < 0 ? `${-left}px` : '4px', // Sticky label
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: 'white',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 600,
+                                    whiteSpace: 'nowrap',
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                                    pointerEvents: 'none',
+                                    maxWidth: '100%',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    paddingLeft: left < 0 ? '8px' : '0'
+                                }}>
+                                    {b.title} {isInfinite && '∞'}
+                                </div>
+                            </div>
                         );
                     })
                 ))}
