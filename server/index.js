@@ -75,10 +75,14 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
 app.use(cors(allowedOrigins === true ? {} : { origin: allowedOrigins }));
 app.use(express.json({ limit: '10mb' }));
 
-// Global API rate limiter - 60 requests/min per IP
+// Global API rate limiter - 120 requests/min per IP
 app.use('/api', (req, res, next) => {
-    // Exempt polling endpoint from rate limiting
-    if (req.path === '/points/broadcast/active') {
+    // Exempt polling and admin endpoints from rate limiting
+    const isExempt = req.path === '/points/broadcast/active' ||
+        req.path.startsWith('/admin') ||
+        req.path.startsWith('/push/admin');
+
+    if (isExempt) {
         return next();
     }
     apiLimiter(req, res, next);

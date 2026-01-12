@@ -21,7 +21,7 @@ const logRateLimitHit = (type, req) => {
 
 // Dynamic configuration cache
 let limitConfig = {
-    api_global: 60,
+    api_global: 120,
     registration: 10,
     point_submission: 20,
     voting: 30,
