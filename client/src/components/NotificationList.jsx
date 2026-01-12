@@ -611,7 +611,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
 
     const renderStatusBadge = (item, type) => {
         // Broadcasts: No ticks (Issue 1)
-        if (item.type === 'broadcast') return null;
+        // Broadcasts: No ticks for now (or maybe we add them later)
+        // if (item.type === 'broadcast') return null; // ALLOW rendering for persistence
 
         let ticks = '✓';
         let tickColor = '#16a34a'; // green

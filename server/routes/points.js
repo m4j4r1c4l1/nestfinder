@@ -47,9 +47,10 @@ router.get('/broadcast/active', requireUser, (req, res) => {
       WHERE broadcast_id = ? AND user_id = ?
     `, [broadcast.id, userId]);
 
-    // Check if max_views is exceeded
-    if (broadcast.max_views !== null && viewRecord && viewRecord.view_count >= broadcast.max_views) {
-      continue; // Skip this broadcast, user has seen it enough
+    // Check if max_views is exceeded OR if user has already dismissed/read it
+    if ((broadcast.max_views !== null && viewRecord && viewRecord.view_count >= broadcast.max_views) ||
+      (viewRecord && viewRecord.status === 'read')) {
+      continue; // Skip this broadcast, user has seen/dismissed it
     }
 
     // This is a valid broadcast for this user

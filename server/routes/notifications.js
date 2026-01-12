@@ -44,7 +44,7 @@ const templates = {
 // IN-APP NOTIFICATION ROUTES
 // ========================================
 
-// Get unread notifications
+// Get unread notifications AND seen broadcasts
 router.get('/notifications', (req, res) => {
     try {
         const userId = req.query.userId;
@@ -52,21 +52,45 @@ router.get('/notifications', (req, res) => {
             return res.status(400).json({ error: 'User ID required' });
         }
 
+        // 1. Get standard notifications
         const notifications = all(
             'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
             [userId]
         );
 
-        // Mark fetched notifications as delivered (if not already)
-        // This provides the "Double Tick" status
-        const undeliveredIds = notifications.filter(n => !n.delivered).map(n => n.id);
+        // 2. Get broadcasts seen by this user
+        // We join broadcast_views to get the status for THIS user
+        const broadcastRows = all(`
+            SELECT b.id, b.title, b.message as body, b.image_url, b.created_at,
+                   v.status, v.delivered_at, v.read_at,
+                   CASE WHEN v.status = 'read' THEN 1 ELSE 0 END as read,
+                   'broadcast' as type
+            FROM broadcasts b
+            JOIN broadcast_views v ON b.id = v.broadcast_id
+            WHERE v.user_id = ?
+            ORDER BY b.created_at DESC
+            LIMIT 50
+        `, [userId]);
+
+        // 3. Merge and Sort
+        // We map broadcast fields to match notification schema if needed, but the SELECT above does most of it
+        const unified = [...notifications, ...broadcastRows].sort((a, b) => {
+            return new Date(b.created_at) - new Date(a.created_at);
+        }).slice(0, 50); // Hard limit total inbox size
+
+        // Mark fetched *standard* notifications as delivered (if not already)
+        // (Broadcasts handle their own delivery status in points.js)
+        const undeliveredIds = notifications
+            .filter(n => !n.delivered && n.type !== 'broadcast') // Double safety
+            .map(n => n.id);
+
         if (undeliveredIds.length > 0) {
             run(
                 `UPDATE notifications SET delivered = 1, delivered_at = CURRENT_TIMESTAMP WHERE id IN (${undeliveredIds.join(',')})`
             );
         }
 
-        res.json({ notifications });
+        res.json({ notifications: unified });
     } catch (error) {
         console.error('Get notifications error:', error);
         res.status(500).json({ error: 'Failed to get notifications' });

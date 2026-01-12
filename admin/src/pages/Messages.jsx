@@ -292,8 +292,9 @@ const Messages = () => {
             border-color: #3b82f6;
         }
     `;
-    const [activeTab, setActiveTab] = useState('composer');
+    const [activeTab, setActiveTab] = useState('broadcasts'); // DEBUG: Default to broadcasts for testing
     const [loading, setLoading] = useState(true);
+    const [justPublished, setJustPublished] = useState(false); // Feedback state for Publish button
 
     // Data State
     const [broadcasts, setBroadcasts] = useState([]);
@@ -980,7 +981,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // const [showAdvanced, setShowAdvanced] = useState(false); // REMOVED: Filters now always visible
     const [hoveredTimelineBarId, setHoveredTimelineBarId] = useState(null); // For broadcast card highlighting
     const [hoveredFilterGroup, setHoveredFilterGroup] = useState(null); // For stats badge highlighting
-    const [justPublished, setJustPublished] = useState(false); // Feedback state
+
 
     // Filter Logic
     const filteredBroadcasts = broadcasts.filter(b => {
