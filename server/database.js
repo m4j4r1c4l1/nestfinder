@@ -22,7 +22,6 @@ export const initDatabase = async () => {
       db = new SQL.Database(fileBuffer);
       // Verify integrity immediately - this will throw if malformed
       db.run("PRAGMA integrity_check");
-      db.run("PRAGMA foreign_keys = ON;");
     } catch (err) {
       console.error('CRITICAL: Database file is malformed or corrupted.', err);
       const backupPath = `${DB_PATH}.corrupt.${Date.now()}`;
@@ -37,7 +36,6 @@ export const initDatabase = async () => {
     }
   } else {
     db = new SQL.Database();
-    db.run("PRAGMA foreign_keys = ON;");
   }
 
   // ==========================================

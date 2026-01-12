@@ -4436,7 +4436,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         ? `linear-gradient(to right, ${color}, ${color}00)`
                                         : color,
                                     opacity: opacity,
-                                    border: isTimeActive ? '1px solid white' : '1px solid rgba(0,0,0,0.15)',
+                                    border: isTimeActive ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
                                     cursor: 'grab',
                                     zIndex: isInteractionActive ? 20 : 10,
                                     boxShadow: isTimeActive
@@ -4444,7 +4444,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         : (isInteractionActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)'),
                                     filter: isInteractionActive
                                         ? (isTimeActive ? 'brightness(1.5) saturate(1.2)' : 'brightness(1.2) saturate(1.1)')
-                                        : (isPast ? 'grayscale(0.6) brightness(0.95)' : 'brightness(1.1)'),
+                                        : (isPast ? 'brightness(0.6) grayscale(0.5)' : 'brightness(1.1)'),
                                     transition: isDragging ? 'none' : 'all 0.2s',
                                     pointerEvents: 'auto',
                                     // Mask infinite bars so their glow doesn't fill the whole lane
