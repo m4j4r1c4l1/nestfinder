@@ -4392,7 +4392,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         if (left > 105 || (left + widthPct) < -5) return null;
 
                         const isSelected = selectedBroadcast?.id === b.id;
-                        const isHovered = hoveredTimelineBarId === b.id;
+                        const isHovered = hoveredBarId === b.id;
                         const isActive = isDragging || isSelected || isHovered;
 
                         // Priority Color
