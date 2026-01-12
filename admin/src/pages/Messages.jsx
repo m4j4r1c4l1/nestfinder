@@ -1626,12 +1626,12 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         marginLeft: 'auto',
                                                         marginRight: '1rem' // Restored standard margin
                                                     }}>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
+                                                        <span style={{ opacity: statusText === 'ACTIVE' ? 1 : 0.7 }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{formatTimeCET(start)}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>→</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{formatTimeCET(start)}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>→</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? formatTimeCET(end) : ''}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
                                                     {/* Delivery Stats - Separator Line included in border */}
@@ -3455,10 +3455,48 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                         </div>
 
                         {/* Time Info (Kept separate as it's not a badge) */}
-                        <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.5rem', display: 'flex', gap: '1rem' }}>
-                            <span title="Start Time">🕐 {formatDateTimeCET(broadcast.start_time)}</span>
-                            <span>→</span>
-                            <span title="End Time">{formatDateTimeCET(broadcast.end_time)}</span>
+                        {/* Time Info - Redesigned to match Tooltip Style (Grid Layout) */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'min-content auto min-content',
+                            alignItems: 'center',
+                            columnGap: '0.6rem', // Keep horizontal gap tight
+                            rowGap: '0.3rem',    // Vertical gap
+                            background: '#0f172a',
+                            padding: '0.8rem 1rem 0.8rem 1.4rem', // Extra left padding for icon overhang
+                            borderRadius: '8px',
+                            border: '1px solid #334155',
+                            marginBottom: '1.5rem',
+                            position: 'relative',
+                            width: 'fit-content' // Just wrap content
+                        }}>
+                            {/* Floating Icon on Border */}
+                            <div style={{
+                                position: 'absolute',
+                                left: '10px',
+                                top: '-10px',
+                                background: '#0f172a',
+                                padding: '0 4px',
+                                fontSize: '1rem',
+                                lineHeight: 1,
+                                color: '#94a3b8'
+                            }}>
+                                🕐
+                            </div>
+
+                            {/* Start Row */}
+                            <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Start</span>
+                            <span style={{ color: '#e2e8f0', fontSize: '0.9rem', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
+                                {formatDateTimeCET(broadcast.start_time)}
+                            </span>
+                            <span style={{ fontSize: '0.8rem', opacity: 0 }}></span> {/* Spacer */}
+
+                            {/* End Row */}
+                            <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>End</span>
+                            <span style={{ color: '#e2e8f0', fontSize: '0.9rem', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
+                                {formatDateTimeCET(broadcast.end_time)}
+                            </span>
+                            <span style={{ color: '#64748b', fontSize: '0.8rem' }}></span>
                         </div>
 
 
@@ -3468,58 +3506,77 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                         </div>
 
                         {/* Redesigned Stats Area (Clickable) */}
+                        {/* Redesigned Stats Cards Area */}
                         <div
                             onClick={onViewRecipients}
                             style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                background: '#1e293b',
-                                padding: '1rem 1.5rem',
-                                borderRadius: '8px',
-                                border: '1px solid #334155',
-                                cursor: 'pointer',
-                                transition: 'background 0.2s',
-                                marginBottom: '1rem' // Spacing
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(3, 1fr)',
+                                gap: '1rem',
+                                marginBottom: '1rem',
+                                cursor: 'pointer'
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                            onMouseLeave={e => e.currentTarget.style.background = '#1e293b'}
                             title="View Recipients Details"
                         >
-                            {/* Total - Gold Style Matches Messages.jsx Badge */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc' }}>
+                            {/* Total Card */}
+                            <div style={{
+                                background: '#1e293b',
+                                border: '1px solid #334155',
+                                borderRadius: '8px',
+                                padding: '1rem',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                transition: 'transform 0.1s, border-color 0.1s'
+                            }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#eab308'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                            >
+                                <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
                                     {broadcast.total_users || 0}
                                 </span>
-                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>TOTAL</span>
+                                <span style={{ fontSize: '0.7rem', color: '#eab308', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Total</span>
                             </div>
 
-                            {/* Separator */}
-                            <div style={{ width: '1px', height: '30px', background: '#334155' }}></div>
-
-                            {/* Delivered */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.2rem', fontWeight: 600, color: '#f8fafc' }}>
-                                    <span style={{ color: '#22c55e', fontSize: '1.1rem' }}>✓✓</span>
-                                    {Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}
+                            {/* Delivered Card */}
+                            <div style={{
+                                background: '#1e293b',
+                                border: '1px solid #334155',
+                                borderRadius: '8px',
+                                padding: '1rem',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                transition: 'transform 0.1s, border-color 0.1s'
+                            }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
+                                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
+                                        {Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}
+                                    </span>
                                 </div>
-                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Delivered</span>
+                                <span style={{ fontSize: '0.7rem', color: '#22c55e', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Delivered</span>
                             </div>
 
-                            {/* Separator */}
-                            <div style={{ width: '1px', height: '30px', background: '#334155' }}></div>
-
-                            {/* Read */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.2rem', fontWeight: 600, color: '#f8fafc' }}>
-                                    <span style={{ color: '#3b82f6', fontSize: '1.1rem' }}>✓✓</span>
-                                    {broadcast.read_count || 0}
+                            {/* Read Card */}
+                            <div style={{
+                                background: '#1e293b',
+                                border: '1px solid #334155',
+                                borderRadius: '8px',
+                                padding: '1rem',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                transition: 'transform 0.1s, border-color 0.1s'
+                            }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
+                                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
+                                        {broadcast.read_count || 0}
+                                    </span>
                                 </div>
-                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Read</span>
+                                <span style={{ fontSize: '0.7rem', color: '#3b82f6', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Read</span>
                             </div>
-
-                            {/* Arrow hint */}
-                            <div style={{ color: '#64748b', fontSize: '1.2rem' }}>›</div>
                         </div>
                     </div>
                 </div>
