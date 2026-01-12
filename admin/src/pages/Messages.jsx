@@ -876,7 +876,7 @@ const Messages = () => {
                                                         />
                                                         {newBroadcast.maxViews && (
                                                             <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#64748b', pointerEvents: 'none' }}>
-                                                                views
+                                                                {Number(newBroadcast.maxViews) === 1 ? 'view' : 'views'}
                                                             </span>
                                                         )}
                                                     </div>
