@@ -1596,7 +1596,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         color: '#94a3b8',
                                                         fontSize: '0.75rem',
                                                         fontWeight: statusText === 'ACTIVE' ? '700' : '400', // Bold container if active
-                                                        width: '380px',
+                                                        width: '360px', // Reduced by ~5% (was 380px)
                                                         paddingLeft: '1rem',
                                                         boxSizing: 'border-box',
                                                         border: '1px solid #f97316',
@@ -1604,10 +1604,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         marginRight: '0' // Sticks to the separator
                                                     }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
-                                                        <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{formatTimeCET(start)}</span>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>→</span>
-                                                        <span>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
@@ -4543,10 +4543,17 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     const badgeBg = (color) => `${color}20`; // 12% opacity roughly? 20 hex = 32/255 = ~12%
                     const badgeBorder = (color) => `${color}40`;
 
+                    // Dynamic Vertical Positioning
+                    // If cursor is in the bottom half of the screen, show tooltip ABOVE the cursor.
+                    const isLowerHalf = tooltipPos.y > window.innerHeight / 2;
+                    const topStyle = isLowerHalf ? undefined : tooltipPos.y + 15;
+                    const bottomStyle = isLowerHalf ? (window.innerHeight - tooltipPos.y + 15) : undefined;
+
                     return (
                         <div style={{
                             position: 'fixed',
-                            top: tooltipPos.y + 15,
+                            top: topStyle,
+                            bottom: bottomStyle,
                             left: tooltipPos.x + 15,
                             background: 'rgba(15, 23, 42, 0.95)',
                             border: '1px solid #334155',
