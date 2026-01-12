@@ -3991,11 +3991,18 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
             if (dragging.type === 'move') {
                 newStart = dragging.originalStart + absDelta;
                 newEnd = dragging.originalEnd + absDelta;
-                if (!dragging.hasMoved && Math.abs(absDelta) > 100000) {
-                    setDragging(prev => ({ ...prev, hasMoved: true }));
-                }
+
                 const yOffsetFromRuler = mouseY - rulerHeight - gap;
                 const newLane = Math.max(0, Math.floor(yOffsetFromRuler / (rowHeight + gap)));
+
+                if (!dragging.hasMoved) {
+                    const absXDelta = Math.abs(mouseX - dragging.initialCursorX);
+                    const absYDelta = Math.abs(mouseY - dragging.initialCursorY);
+                    if (absXDelta > 5 || absYDelta > 5) {
+                        setDragging(prev => ({ ...prev, hasMoved: true }));
+                    }
+                }
+
                 setDragging(prev => ({ ...prev, newStart, newEnd, newLane }));
                 return;
             } else if (dragging.type === 'resize-left') {
@@ -4036,6 +4043,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
             broadcast: b,
             type,
             initialCursorTime: cursorTime,
+            initialCursorX: mouseX,
             initialCursorY: mouseY,
             originalStart: new Date(b.start_time).getTime(),
             originalEnd: new Date(b.end_time).getTime(),
@@ -4104,7 +4112,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     while (!laneFound && safetyCounter < 100) {
                         const broadcastsInLane = lanes[finalLane] || [];
                         const hasCollision = broadcastsInLane.some(b => {
-                            if (b.id === dragging.id) return false; // Ignore self
+                            if (String(b.id) === String(dragging.id)) return false; // Ignore self with robust ID check
 
                             const bStart = new Date(b.start_time).getTime();
                             const bEnd = new Date(b.end_time).getTime();
@@ -4271,6 +4279,26 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
             {/* 2. Body / Bars */}
             <div style={{ position: 'relative', width: '100%', height: `${totalHeight - rulerHeight}px` }}>
+                {/* Now Line (Current Time) */}
+                {(() => {
+                    const now = new Date().getTime();
+                    if (now >= viewportStart && now <= viewportStart + viewportDuration) {
+                        const left = ((now - viewportStart) / viewportDuration) * 100;
+                        return (
+                            <div style={{
+                                position: 'absolute',
+                                left: `${left}%`,
+                                top: -rulerHeight,
+                                height: `${totalHeight}px`,
+                                width: '1px',
+                                background: 'rgba(255, 255, 255, 0.4)',
+                                zIndex: 1, // Behind bars (10+)
+                                pointerEvents: 'none'
+                            }} />
+                        );
+                    }
+                    return null;
+                })()}
 
                 {/* Crosshairs */}
                 {crosshairPos.x !== null && !hoveredBarId && !dragging && (
@@ -4372,8 +4400,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     left: `${left}%`,
                                     width: `${widthPct}%`,
                                     height: `${rowHeight}px`,
-                                    top: `${(laneIndex * (rowHeight + gap) + gap)}px`, // Fixed top calculation relative to container
-                                    borderRadius: '4px',
+                                    top: `${((isDragging && dragging.newLane !== undefined) ? dragging.newLane : laneIndex) * (rowHeight + gap) + gap}px`, // Dynamic top for dragging
+                                    borderRadius: '2px', // Less rounded as requested
                                     background: isInfinite
                                         ? `linear-gradient(to right, ${color}, ${color}00)`
                                         : color,
@@ -4382,7 +4410,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     cursor: 'grab',
                                     zIndex: isActive ? 20 : 10,
                                     boxShadow: isActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)',
-                                    filter: isActive ? 'brightness(1.5)' : 'none',
+                                    filter: isActive ? 'brightness(1.5) saturate(1.2)' : (isPast ? 'brightness(0.6) grayscale(0.5)' : 'brightness(1.1)'),
                                     transition: isDragging ? 'none' : 'all 0.2s',
                                     pointerEvents: 'auto'
                                 }}
@@ -4392,7 +4420,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 <div
                                     onMouseDown={(e) => {
                                         e.stopPropagation();
-                                        handleResizeMouseDown(e, b, 'left');
+                                        handleResizeMouseDown(e, b, 'resize-left');
                                     }}
                                     style={{
                                         position: 'absolute', left: 0, top: 0, bottom: 0, width: '10px',
@@ -4405,7 +4433,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     <div
                                         onMouseDown={(e) => {
                                             e.stopPropagation();
-                                            handleResizeMouseDown(e, b, 'right');
+                                            handleResizeMouseDown(e, b, 'resize-right');
                                         }}
                                         style={{
                                             position: 'absolute', right: 0, top: 0, bottom: 0, width: '10px',
