@@ -4448,9 +4448,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                             // Keep default border for infinite or specific logic? 
                             // Usually infinite is active or scheduled.
                         } else if (isInactive) {
-                            // Badge Style requested for inactive
-                            bgStyle = `${color}20`;
-                            borderStyle = `1px solid ${color}40`;
+                            // Badge Style requested for inactive (Boosted to match Badge vividness against dark bg)
+                            bgStyle = `${color}35`; // Was 20
+                            borderStyle = `1px solid ${color}80`; // Was 40
                         }
 
                         // Opacity: Always 1 now, because we control alpha in the color itself for inactive.
