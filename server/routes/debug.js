@@ -42,4 +42,29 @@ router.get('/download', (req, res) => {
 // GET /api/debug/simulate-update - Force a broadcast with incremented stats to prove UI animation
 // (Removed after verifying animation logic)
 
+import { all } from '../database.js';
+
+// GET /api/debug/dump/tables - Dump broadcast_views and notifications
+router.get('/dump/tables', (req, res) => {
+    try {
+        const broadcastViews = all('SELECT * FROM broadcast_views ORDER BY created_at DESC');
+        const notifications = all('SELECT * FROM notifications ORDER BY created_at DESC LIMIT 50');
+        const users = all('SELECT id, nickname, created_at FROM users ORDER BY created_at DESC LIMIT 20');
+
+        res.json({
+            meta: {
+                timestamp: new Date().toISOString(),
+                viewCount: broadcastViews.length,
+                notifCount: notifications.length
+            },
+            broadcastViews,
+            notifications,
+            users
+        });
+    } catch (err) {
+        console.error('Dump error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;

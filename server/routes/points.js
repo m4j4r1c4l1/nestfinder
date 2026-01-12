@@ -22,7 +22,7 @@ export const setBroadcast = (fn) => { broadcast = fn; };
 
 // Get currently active broadcast (with view tracking)
 router.get('/broadcast/active', requireUser, async (req, res) => {
-  console.error('[Broadcast Debug] HIT /active endpoint for user:', req.user.id);
+  console.log('[Broadcast Debug] HIT /active endpoint for user:', req.user.id);
   const userId = req.user.id;
   let selectedBroadcast = null;
   const now = new Date().toISOString();
@@ -84,7 +84,7 @@ router.get('/broadcast/active', requireUser, async (req, res) => {
         if (check) {
           console.log('[Broadcast Debug] VERIFIED: Insert successful.', check);
         } else {
-          console.error('[Broadcast Debug] CRITICAL: Insert reported success but record NOT found immediately after.');
+          console.log('[Broadcast Debug] CRITICAL: Insert reported success but record NOT found immediately after.');
         }
       } else {
         // Increment view count and ensure delivered
@@ -98,7 +98,7 @@ router.get('/broadcast/active', requireUser, async (req, res) => {
         `, [broadcast.id, userId]);
       }
     } catch (dbErr) {
-      console.error(`[Broadcast Debug] DB Write Failed:`, dbErr);
+      console.log(`[Broadcast Debug] DB Write Failed:`, dbErr);
     }
 
     break;
