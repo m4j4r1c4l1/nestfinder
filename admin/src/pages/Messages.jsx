@@ -3986,6 +3986,20 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
     // to allow mutable access to latest state without closures stale. 
     // Simplified version: We just nudge view in 'handleMouseMove' if near edge.
 
+    const handleBarMouseEnter = (b, rawStart, rawEnd) => {
+        setHoveredBarId(b.id);
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = setTimeout(() => {
+            setHoveredItem({ ...b, currentStart: rawStart, currentEnd: rawEnd });
+        }, 500);
+    };
+
+    const handleBarMouseLeave = () => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        setHoveredBarId(null);
+        setHoveredItem(null);
+    };
+
     const handleMouseMove = (e) => {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
@@ -4425,8 +4439,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     e.stopPropagation();
                                     handleBarMouseDown(e, b, laneIndex);
                                 }}
-                                onMouseEnter={() => setHoveredTimelineBarId(b.id)}
-                                onMouseLeave={() => setHoveredTimelineBarId(null)}
+                                onMouseEnter={() => handleBarMouseEnter(b, rawStart, rawEnd)}
+                                onMouseLeave={handleBarMouseLeave}
                                 style={{
                                     position: 'absolute',
                                     left: `${left}%`,
@@ -4441,8 +4455,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     border: isActive ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
                                     cursor: 'grab',
                                     zIndex: isActive ? 20 : 10,
-                                    boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.5)' : 'none',
-                                    transition: isDragging ? 'none' : 'opacity 0.2s, top 0.2s, box-shadow 0.2s',
+                                    boxShadow: isActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)',
+                                    filter: isActive ? 'brightness(1.5)' : 'none',
+                                    transition: isDragging ? 'none' : 'all 0.2s',
                                     pointerEvents: 'auto'
                                 }}
                                 title={`${b.title} (${isInfinite ? 'Infinite' : new Date(rawEnd).toLocaleString()})`}
@@ -4476,25 +4491,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     />
                                 )}
 
-                                {/* Label */}
-                                <div style={{
-                                    position: 'absolute',
-                                    left: left < 0 ? `${-left}px` : '4px', // Sticky label
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    color: 'white',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 600,
-                                    whiteSpace: 'nowrap',
-                                    textShadow: '0 1px 2px rgba(0,0,0,0.8)',
-                                    pointerEvents: 'none',
-                                    maxWidth: '100%',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    paddingLeft: left < 0 ? '8px' : '0'
-                                }}>
-                                    {b.title} {isInfinite && '∞'}
-                                </div>
+                                {/* label removed as requested */}
                             </div>
                         );
                     })
