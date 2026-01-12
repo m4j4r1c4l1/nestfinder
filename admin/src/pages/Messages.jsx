@@ -3957,7 +3957,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
         hoverTimeoutRef.current = setTimeout(() => {
             setHoveredItem({ ...b, currentStart: rawStart, currentEnd: rawEnd });
-        }, 500);
+        }, 750);
     }
 
     function handleBarMouseLeave() {
@@ -4321,7 +4321,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 top: 0,
                                 height: '100%',
                                 width: '1px',
-                                background: 'rgba(0, 0, 0, 0.5)',
+                                background: '#ffffff', // User requested white
                                 zIndex: 1, // Behind bars (10+)
                                 pointerEvents: 'none'
                             }} />
