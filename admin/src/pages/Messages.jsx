@@ -4383,18 +4383,17 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         // Skip if way off screen (but keep infinite bars starting offscreen-left visible)
                         if (left > 105 || (left + widthPct) < -5) return null;
 
-                        const isSelected = selectedBroadcast?.id === b.id;
-                        const isHovered = hoveredBarId === b.id;
-                        const isActive = isDragging || isSelected || isHovered;
+                        const isInteractionActive = isDragging || isSelected || isHovered;
+                        const now = new Date().getTime();
+                        const isTimeActive = now >= rawStart && (isInfinite || now <= rawEnd);
 
                         // Priority Color
                         const color = getPriorityColor(b.priority);
 
                         // Opacity for inactive/past
                         // Note: Infinite bars track "Active" status differently (handled by rendering style)
-                        const now = new Date().getTime();
                         const isPast = !isInfinite && now > rawEnd;
-                        const opacity = (isDragging || isSelected || isHovered || (!isPast)) ? 1 : 0.5;
+                        const opacity = (isInteractionActive || (!isPast)) ? 1 : 0.5;
 
                         return (
                             <div
@@ -4416,11 +4415,11 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         ? `linear-gradient(to right, ${color}, ${color}00)`
                                         : color,
                                     opacity: opacity,
-                                    border: isActive ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+                                    border: isTimeActive ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
                                     cursor: 'grab',
-                                    zIndex: isActive ? 20 : 10,
-                                    boxShadow: isActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)',
-                                    filter: isActive ? 'brightness(1.5) saturate(1.2)' : (isPast ? 'brightness(0.6) grayscale(0.5)' : 'brightness(1.1)'),
+                                    zIndex: isInteractionActive ? 20 : 10,
+                                    boxShadow: isInteractionActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)',
+                                    filter: isInteractionActive ? 'brightness(1.5) saturate(1.2)' : (isPast ? 'brightness(0.6) grayscale(0.5)' : 'brightness(1.1)'),
                                     transition: isDragging ? 'none' : 'all 0.2s',
                                     pointerEvents: 'auto'
                                 }}
