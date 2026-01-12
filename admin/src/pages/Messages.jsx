@@ -1595,20 +1595,20 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         gap: '0.4rem',
                                                         color: '#94a3b8',
                                                         fontSize: '0.75rem',
-                                                        fontWeight: statusText === 'ACTIVE' ? '700' : '400',
-                                                        width: '380px', // Reduced by 10% (was 420px)
-                                                        paddingLeft: '1rem', // Initial offset from tags
+                                                        fontWeight: statusText === 'ACTIVE' ? '700' : '400', // Bold container if active
+                                                        width: '380px',
+                                                        paddingLeft: '1rem',
                                                         boxSizing: 'border-box',
-                                                        border: '1px solid #f97316', // Orange border restored
-                                                        marginLeft: 'auto', // Pushed to the right
-                                                        marginRight: '0.75rem' // Spacing to separator
+                                                        border: '1px solid #f97316',
+                                                        marginLeft: 'auto',
+                                                        marginRight: '0' // Sticks to the separator
                                                     }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{formatTimeCET(start)}</span>
+                                                        <span>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{formatTimeCET(start)}</span>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>→</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
-                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{end ? formatTimeCET(end) : ''}</span>
+                                                        <span>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
+                                                        <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
                                                     {/* Delivery Stats - Separator Line included in border */}
