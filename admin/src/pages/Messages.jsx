@@ -972,6 +972,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     const [hoveredTimelineBarId, setHoveredTimelineBarId] = useState(null); // For broadcast card highlighting
     const [hoveredFilterGroup, setHoveredFilterGroup] = useState(null); // For stats badge highlighting
 
+    // Layout Alignment State
+    const scrollContainerRef = React.useRef(null);
+    const [scrollbarWidth, setScrollbarWidth] = useState(0);
+
 
     // Filter Logic
     const filteredBroadcasts = broadcasts.filter(b => {
@@ -1018,6 +1022,19 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
     const paginatedBroadcasts = filteredBroadcasts.slice((page - 1) * pageSize, page * pageSize);
     const totalPages = Math.ceil(filteredBroadcasts.length / pageSize);
+
+    // Measure scrollbar to align headers
+    React.useLayoutEffect(() => {
+        const updateWidth = () => {
+            if (scrollContainerRef.current) {
+                const width = scrollContainerRef.current.offsetWidth - scrollContainerRef.current.clientWidth;
+                setScrollbarWidth(width);
+            }
+        };
+        updateWidth();
+        window.addEventListener('resize', updateWidth);
+        return () => window.removeEventListener('resize', updateWidth);
+    }, [filteredBroadcasts.length]);
 
     // Calculate broadcast stats from ALL broadcasts (not filtered)
     const broadcastStats = React.useMemo(() => {
@@ -1209,7 +1226,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     gap: '1.5rem',
                     padding: '0.75rem 1rem', // Equal padding top/bottom
                     background: '#0f172a',
-                    margin: '0.75rem 2rem 0.375rem 1rem', // Match Timeline margins for width alignment
+                    margin: `0.75rem calc(1rem + ${scrollbarWidth}px) 0.375rem 1rem`, // Dynamic Alignment
                     borderRadius: '6px',
                     fontSize: '0.8rem',
                     flexWrap: 'wrap',
@@ -1382,7 +1399,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 </div>
 
                 {/* Timeline Visualization */}
-                <div style={{ position: 'relative', zIndex: 1, margin: '0.375rem 2rem 0.75rem 1rem' }}>
+                <div style={{ position: 'relative', zIndex: 1, margin: `0.375rem calc(1rem + ${scrollbarWidth}px) 0.75rem 1rem` }}>
                     <Timeline
                         broadcasts={filteredBroadcasts}
                         selectedBroadcast={selectedBroadcast}
@@ -1400,7 +1417,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     marginBottom: '0.75rem'
                 }} />
 
-                <div style={{ maxHeight: '560px', height: 'auto', minHeight: '200px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
+                <div ref={scrollContainerRef} style={{ maxHeight: '560px', height: 'auto', minHeight: '200px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0 1rem 1rem 1rem', boxSizing: 'border-box' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
@@ -3727,8 +3744,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
     });
 
     // Global Event Listeners for Dragging
+    const isDragging = !!dragging;
     React.useEffect(() => {
-        if (dragging) {
+        if (isDragging) {
 
             const onMove = (e) => {
                 latestHandlers.current.move && latestHandlers.current.move(e);
@@ -3745,7 +3763,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                 window.removeEventListener('mouseup', onUp);
             };
         }
-    }, [dragging]);
+    }, [isDragging]);
 
 
     const { lanes, laneCount, broadcastLaneMap } = React.useMemo(() => {
