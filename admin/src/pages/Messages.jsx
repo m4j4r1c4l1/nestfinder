@@ -4123,6 +4123,14 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
         });
     };
 
+    const handleBarMouseDown = (e, b) => {
+        handleMouseDown(e, b, 'move');
+    };
+
+    const handleResizeMouseDown = (e, b, type) => {
+        handleMouseDown(e, b, type);
+    };
+
     const handleMouseDown = (e, b, type) => {
         e.preventDefault();
         e.stopPropagation();
@@ -4139,6 +4147,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
         setDragging({
             id: b.id,
+            broadcast: b,
             type,
             initialCursorTime: cursorTime,
             initialCursorY: mouseY,
@@ -4147,12 +4156,20 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
             newStart: new Date(b.start_time).getTime(),
             newEnd: new Date(b.end_time).getTime(),
             originalLane: currentLane,
-            newLane: currentLane
+            newLane: currentLane,
+            hasMoved: false
         });
     };
 
     const handleMouseUp = () => {
         if (dragging) {
+            // Click Handler: If not moved, trigger selection
+            if (dragging.id && !dragging.hasMoved && (dragging.type === 'move' || dragging.type === 'resize-left' || dragging.type === 'resize-right')) {
+                if (onBroadcastClick && dragging.broadcast) {
+                    onBroadcastClick(dragging.broadcast);
+                }
+            }
+
             if (dragging.hasMoved) {
                 lastDragTimeRef.current = Date.now();
             }
@@ -4419,12 +4436,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         const isActive = isDragging || isSelected || isHovered;
 
                         // Priority Color
-                        let color = '#3b82f6';
-                        if (b.priority === 1) color = '#ef4444';
-                        else if (b.priority === 2) color = '#f97316';
-                        else if (b.priority === 3) color = '#eab308';
-                        else if (b.priority === 4) color = '#3b82f6';
-                        else if (b.priority === 5) color = '#64748b';
+                        const color = getPriorityColor(b.priority);
 
                         // Opacity for inactive/past
                         // Note: Infinite bars track "Active" status differently (handled by rendering style)
@@ -4466,9 +4478,6 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 <div
                                     onMouseDown={(e) => {
                                         e.stopPropagation();
-                                        handleBarMouseDown(e, b, laneIndex); // Actually utilize handleBarMouseDown for logic? No, wait. 
-                                        // The original code had separate handleResizeMouseDown. 
-                                        // Keeping logic consistent with previous implementation attempts.
                                         handleResizeMouseDown(e, b, 'left');
                                     }}
                                     style={{
