@@ -1409,7 +1409,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     marginBottom: '0.75rem'
                 }} />
 
-                <div style={{ maxHeight: '542px', height: 'auto', minHeight: '200px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
+                <div style={{ maxHeight: '560px', height: 'auto', minHeight: '200px', overflowY: 'auto', background: '#1e293b', position: 'relative', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0 1rem 1rem 1rem', boxSizing: 'border-box' }}>
                         {filteredBroadcasts.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
@@ -1588,7 +1588,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
                                                 {/* Center/Right Group: Time, Stats, Bin */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-                                                    {/* Time Range - Fixed Width for Vertical Alignment */}
+                                                    {/* Time Range - Fixed Width for Vertical Alignment - Pushed to Right Group */}
                                                     <div style={{
                                                         display: 'flex',
                                                         alignItems: 'center',
@@ -1596,9 +1596,12 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         color: '#94a3b8',
                                                         fontSize: '0.75rem',
                                                         fontWeight: statusText === 'ACTIVE' ? '700' : '400',
-                                                        width: '350px', // Revert to fixed width as requested
+                                                        width: '420px', // Wider to prevent wrapping
                                                         paddingLeft: '1rem', // Initial offset from tags
-                                                        boxSizing: 'border-box'
+                                                        boxSizing: 'border-box',
+                                                        border: '1px solid #f97316', // Orange border restored
+                                                        marginLeft: 'auto', // Pushed to the right
+                                                        marginRight: '0.75rem' // Spacing to separator
                                                     }}>
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#64748b' }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
@@ -1608,8 +1611,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         <span style={{ color: statusText === 'ACTIVE' ? '#f8fafc' : '#475569', fontWeight: statusText === 'ACTIVE' ? '700' : '400' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
-                                                    {/* Delivery Stats - Separator Line included in border - Pushed to Right */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem', marginLeft: 'auto' }}>
+                                                    {/* Delivery Stats - Separator Line included in border */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
@@ -3735,7 +3738,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
     // Global Event Listeners for Dragging
     React.useEffect(() => {
         if (dragging) {
-            console.log('[Timeline] Dragging Active', dragging);
+
             const onMove = (e) => {
                 latestHandlers.current.move && latestHandlers.current.move(e);
             };
