@@ -464,8 +464,8 @@ router.get('/admin/notifications/history', requireAdmin, (req, res) => {
 
         const logs = all(
             `SELECT l.*, 
-                (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.entity_id AND n.read = 1) as read_count, 
-                (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.entity_id AND n.delivered = 1) as delivered_count
+                (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.target_id AND n.read = 1) as read_count, 
+                (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.target_id AND n.delivered = 1) as delivered_count
              FROM logs l
              WHERE l.action = 'notification_sent' 
              ORDER BY ${orderBy} ${direction} 
