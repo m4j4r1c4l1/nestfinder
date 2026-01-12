@@ -1525,10 +1525,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
                                             {/* Bottom Line: Professional Layout */}
                                             {/* User requested lime border REMOVED. Added background to bin area. */}
-                                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: '1px solid red', height: '26px', boxSizing: 'border-box' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.75rem', marginTop: '-1px', border: 'none', height: '26px', boxSizing: 'border-box' }}>
 
                                                 {/* Left: Status, Priority, Max Views, Attachment */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '280px', flexShrink: 0, border: '1px solid blue' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '280px', flexShrink: 0 }}>
                                                     <span style={{
                                                         padding: '0.2rem 0.6rem 0.3rem 0.6rem', borderRadius: '4px',
                                                         fontSize: '0.7rem', fontWeight: 700,
@@ -1587,7 +1587,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 </div>
 
                                                 {/* Center/Right Group: Time, Stats, Bin */}
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, border: '1px solid green' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                                                     {/* Time Range - Fixed Width for Vertical Alignment */}
                                                     <div style={{
                                                         display: 'flex',
@@ -1612,7 +1612,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     </div>
 
                                                     {/* Delivery Stats - Separator Line included in border */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem', border: '1px solid magenta' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
@@ -1621,8 +1621,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         </span>
                                                     </div>
 
-                                                    {/* Vertical Separator for Delete Icon - Pushed to right */}
-                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0', marginLeft: 'auto' }}></div>
+                                                    {/* Vertical Separator for Delete Icon - Pushed to right by flex growth of Time Range */}
+                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0' }}></div>
 
                                                     {/* Delete Button (Moved from top) */}
                                                     <button
@@ -4420,7 +4420,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
                         // Opacity for inactive/past
                         // Note: Infinite bars track "Active" status differently (handled by rendering style)
-                        const opacity = (isInteractionActive || isTimeActive || isScheduled) ? 1 : 0.5;
+                        const opacity = (isInteractionActive || isTimeActive || isScheduled) ? 1 : 0.8;
 
                         return (
                             <div
@@ -4442,7 +4442,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         ? `linear-gradient(to right, ${color}, ${color}00)`
                                         : color,
                                     opacity: opacity,
-                                    border: isTimeActive ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+                                    border: isTimeActive ? '1px solid white' : (isScheduled ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.2)'),
                                     cursor: 'grab',
                                     zIndex: isInteractionActive ? 20 : 10,
                                     boxShadow: isTimeActive
@@ -4450,7 +4450,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         : (isInteractionActive ? `0 0 15px ${color}80, 0 0 5px white` : '0 2px 4px rgba(0,0,0,0.3)'),
                                     filter: isInteractionActive
                                         ? (isTimeActive ? 'brightness(1.5) saturate(1.2)' : 'brightness(1.2) saturate(1.1)')
-                                        : (isPast ? 'brightness(0.6) grayscale(0.5)' : 'brightness(1.1)'),
+                                        : (isPast ? 'brightness(0.9) grayscale(0.2)' : 'brightness(1.1)'),
                                     transition: isDragging ? 'none' : 'all 0.2s',
                                     pointerEvents: 'auto',
                                     // Mask infinite bars so their glow doesn't fill the whole lane
