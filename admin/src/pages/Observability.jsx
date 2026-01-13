@@ -248,7 +248,7 @@ const RandomCounter = (props) => {
     return <CountUp {...props} />;
 };
 
-const Observability = () => {
+export default function Observability() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalUsers: 0,
@@ -366,86 +366,103 @@ const Observability = () => {
             <div className="card" style={{ marginBottom: '1.5rem', background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', border: '1px solid #334155', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b, #ec4899)' }} />
 
-                <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #334155' }}>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0 }}>
+                        <span style={{ color: '#f59e0b', fontSize: '1.4rem' }}>⚡</span> Status
+                    </h3>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Node: Nest-Alpha-01</div>
+                </div>
 
-                    {/* Status Header & Main Health (Cardiac Pulse) */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <div style={{ position: 'relative' }}>
-                            <div style={{
-                                width: '60px', height: '60px', borderRadius: '12px',
-                                background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: '2.5rem', boxShadow: '0 0 15px rgba(34, 197, 94, 0.2)',
-                                animation: 'heartbeat 1.5s ease-in-out infinite'
-                            }}>
-                                ⚡
-                            </div>
-                            <style>{`
-                                @keyframes heartbeat {
-                                    0% { transform: scale(1); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
-                                    15% { transform: scale(1.15); box-shadow: 0 0 25px rgba(34, 197, 94, 0.5); }
-                                    30% { transform: scale(1); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
-                                    45% { transform: scale(1.05); box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
-                                    60% { transform: scale(1); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
-                                    100% { transform: scale(1); }
-                                }
-                            `}</style>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.85rem', color: '#94a3b8', letterSpacing: '0.05em', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ padding: '1.2rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
+
+                    {/* Main Health Block */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                                 Operational
-                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
+                                <EKGAnimation color={stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e'} />
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Uptime: {formatUptime(stats.systemHealth?.uptime)}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>Uptime: {formatUptime(stats.systemHealth?.uptime)}</div>
                         </div>
                     </div>
 
-                    <div style={{ width: '1px', height: '50px', background: '#334155' }} />
+                    <div style={{ width: '1px', height: '40px', background: '#334155' }} />
 
-                    {/* Server Node Status (CPU/RAM) */}
+                    {/* Server Load (Stacked) */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ fontSize: '2rem', opacity: 0.8 }}>🖥️</div>
-                        <div>
-                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Server Load</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#e2e8f0' }}>Healthy</div>
-                            <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', gap: '0.5rem' }}>
-                                <span>CPU: {stats.systemHealth?.load || 0}%</span>
-                                <span style={{ opacity: 0.5 }}>|</span>
-                                <span>RAM: {stats.systemHealth?.ram || 0}%</span>
+                        <div style={{ fontSize: '1.8rem', opacity: 0.8 }}>🖥️</div>
+                        <div style={{ display: 'flex', gap: '1.5rem' }}>
+                            <div>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Server Load</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>Healthy</div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.2rem', borderLeft: '1px solid #334155', paddingLeft: '1.2rem' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
+                                    <span>CPU</span>
+                                    <span style={{ fontWeight: 700 }}>{stats.systemHealth?.load || 0}%</span>
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#818cf8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
+                                    <span>RAM</span>
+                                    <span style={{ fontWeight: 700 }}>{stats.systemHealth?.ram || 0}%</span>
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
+                                    <span>Latency</span>
+                                    <span style={{ fontWeight: 700 }}>&lt; 1ms</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div style={{ width: '1px', height: '50px', background: '#334155' }} />
+                    <div style={{ width: '1px', height: '40px', background: '#334155' }} />
 
-                    {/* Database Status (Real) */}
+                    {/* Database Status */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ fontSize: '2rem', opacity: 0.8 }}>🗄️</div>
+                        <div style={{ fontSize: '1.8rem', opacity: 0.8 }}>🗄️</div>
                         <div>
-                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Database</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Database</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e' }}>
                                 {stats.systemHealth?.db || 'Checking...'}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>SQLite v3.4</div>
+                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>SQLite Engine</div>
                         </div>
                     </div>
 
                     {/* Live Connection Counter (Right Aligned) */}
                     <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <div style={{ background: '#0f172a', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                        <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>LIVE CONNECTIONS</span>
-                                <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <button
+                                        onClick={() => window.open(window.location.href, '_blank')}
+                                        title="Open new session in new tab to test connectivity"
+                                        style={{
+                                            background: 'rgba(56, 189, 248, 0.1)',
+                                            border: '1px solid rgba(56, 189, 248, 0.2)',
+                                            borderRadius: '4px',
+                                            padding: '2px 4px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.65rem',
+                                            color: '#38bdf8',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.2rem',
+                                            marginBottom: '0.1rem'
+                                        }}
+                                    >
+                                        <span>+</span> TEST
+                                    </button>
+                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>LIVE SESSIONS</span>
+                                </div>
+                                <span style={{ fontSize: '1.3rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
                                     <RollingBarrelCounter end={stats.connectedClients || 0} />
                                 </span>
                             </div>
-                            <div style={{ position: 'relative', width: '10px', height: '10px' }}>
+                            <div style={{ position: 'relative', width: '8px', height: '8px' }}>
                                 <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#38bdf8', opacity: 0.4, animation: 'ping 1s cubic-bezier(0,0,0.2,1) infinite' }} />
                                 <div style={{ position: 'absolute', inset: '2px', borderRadius: '50%', background: '#38bdf8' }} />
                             </div>
                         </div>
-                        <div style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: '#64748b' }}>Real-time socket sessions</div>
                     </div>
 
                 </div>
@@ -627,68 +644,79 @@ const Observability = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', height: '100%', width: '100%' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
 
-                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, justifyContent: 'space-between' }}>
+                                {/* Main Layout: Symmetric Columns */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '1rem', width: '100%', flex: 1, minHeight: 0 }}>
 
-                                    {/* Main Metric: Active Broadcasts (Teal) */}
-                                    <div style={{ textAlign: 'center', padding: '0.2rem 0', position: 'relative' }}>
+                                    {/* Left Flank: Scheduled */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'flex-end', justifyContent: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <span style={{ color: '#f59e0b', fontWeight: 600 }}>Scheduled</span>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.scheduled || 0}</span>
+                                        </div>
+                                        {/* P1-P3 Priorities (Left side) */}
+                                        <div style={{ display: 'flex', gap: '0.3rem' }}>
+                                            {[1, 2, 3].map(p => (
+                                                <div key={p} style={{
+                                                    width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    background: `${p === 1 ? '#ef4444' : p === 2 ? '#f97316' : '#eab308'}20`,
+                                                    border: `1px solid ${p === 1 ? '#ef4444' : p === 2 ? '#f97316' : '#eab308'}40`,
+                                                    color: p === 1 ? '#ef4444' : p === 2 ? '#f97316' : '#eab308',
+                                                    borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700
+                                                }}>P{p}</div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Center: Active Broadcasts */}
+                                    <div style={{ textAlign: 'center', position: 'relative', minWidth: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                         <div style={{ fontSize: '3.5rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
                                             <RandomCounter end={stats.broadcastMetrics?.active || 0} />
                                         </div>
-                                        <div style={{ position: 'absolute', top: '10px', right: '20%', width: '8px', height: '8px', background: '#2dd4bf', borderRadius: '50%', boxShadow: '0 0 8px #2dd4bf', animation: 'pulse 2s infinite' }}></div>
-                                        <div style={{ fontSize: '1rem', color: '#e2e8f0', marginTop: '0.2rem' }}>Active Broadcasts</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0' }}>Live campaigns</div>
+                                        <div style={{ position: 'absolute', top: '10px', right: '15px', width: '8px', height: '8px', background: '#2dd4bf', borderRadius: '50%', boxShadow: '0 0 8px #2dd4bf', animation: 'pulse 2s infinite' }}></div>
+                                        <div style={{ fontSize: '1rem', color: '#e2e8f0', marginTop: '0.2rem' }}>Active</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Campaigns</div>
                                     </div>
 
-                                    {/* Breakdown Grid: Scheduled, Filled, Ended */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', width: '100%' }}>
-                                        <div style={{ background: '#33415520', padding: '0.5rem', borderRadius: '6px', border: '1px solid #33415540', textAlign: 'center' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Scheduled</div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f59e0b' }}>{stats.broadcastMetrics?.scheduled || 0}</div>
+                                    {/* Right Flank: Ended/Filled */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start', justifyContent: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', background: '#10b98120', border: '1px solid #10b98140', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.filled || 0}</span>
+                                            <span style={{ color: '#10b981', fontWeight: 600 }}>Filled</span>
                                         </div>
-                                        <div style={{ background: '#33415520', padding: '0.5rem', borderRadius: '6px', border: '1px solid #33415540', textAlign: 'center' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Filled</div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#10b981' }}>{stats.broadcastMetrics?.filled || 0}</div>
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.ended || 0}</span>
+                                            <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended</span>
                                         </div>
-                                        <div style={{ background: '#33415520', padding: '0.5rem', borderRadius: '6px', border: '1px solid #33415540', textAlign: 'center' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Ended</div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64748b' }}>{stats.broadcastMetrics?.ended || 0}</div>
-                                        </div>
-                                    </div>
-
-                                    {/* Types and Priorities Row */}
-                                    <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                        {/* Types */}
+                                        {/* P4-P5 Priorities (Right side) */}
                                         <div style={{ display: 'flex', gap: '0.3rem' }}>
-                                            <div title="Limited Broadcasts" style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)', color: '#38bdf8', fontSize: '0.75rem', fontWeight: 600 }}>
-                                                L: {stats.broadcastMetrics?.types?.limited || 0}
-                                            </div>
-                                            <div title="Unlimited Broadcasts" style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)', color: '#a855f7', fontSize: '0.75rem', fontWeight: 600 }}>
-                                                ∞: {stats.broadcastMetrics?.types?.unlimited || 0}
-                                            </div>
-                                        </div>
-                                        {/* Priorities */}
-                                        <div style={{ display: 'flex', gap: '0.2rem', alignItems: 'center', borderLeft: '1px solid #334155', paddingLeft: '0.5rem' }}>
-                                            {[1, 2, 3, 4, 5].map(p => {
-                                                const colors = { 1: '#ef4444', 2: '#f97316', 3: '#eab308', 4: '#3b82f6', 5: '#22c55e' };
-                                                const count = stats.broadcastMetrics?.priorities?.[p] || 0;
-                                                return count > 0 ? (
-                                                    <div key={p} title={`Priority ${p}`} style={{ width: '18px', height: '18px', borderRadius: '50%', background: `${colors[p]}20`, border: `1px solid ${colors[p]}40`, color: colors[p], fontSize: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                                                        {count}
-                                                    </div>
-                                                ) : null;
-                                            })}
+                                            {[4, 5].map(p => (
+                                                <div key={p} style={{
+                                                    width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    background: `${p === 4 ? '#3b82f6' : '#22c55e'}20`,
+                                                    border: `1px solid ${p === 4 ? '#3b82f6' : '#22c55e'}40`,
+                                                    color: p === 4 ? '#3b82f6' : '#22c55e',
+                                                    borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700
+                                                }}>P{p}</div>
+                                            ))}
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Reach Footer */}
-                                    <div style={{ marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid #334155', width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#94a3b8' }}>
-                                        <div title="Total Users Reached">Reach: <span style={{ color: '#f8fafc', fontWeight: 600 }}>{stats.broadcastMetrics?.reach || 0}</span></div>
-                                        <div title="Total Delivered">Delivered: <span style={{ color: '#22c55e', fontWeight: 600 }}>{stats.broadcastMetrics?.delivered || 0}</span></div>
-                                        <div title="Total Read">Read: <span style={{ color: '#3b82f6', fontWeight: 600 }}>{stats.broadcastMetrics?.read || 0}</span></div>
+                                {/* Footer: Engagement (Compact Row) */}
+                                <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', width: '100%', marginTop: '0', borderTop: '1px solid #334155', paddingTop: '0.8rem' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>{stats.broadcastMetrics?.reach || 0}</div>
+                                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Distinct Users</div>
                                     </div>
-
+                                    <div style={{ width: '1px', height: '30px', background: '#334155' }}></div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 700, color: '#3b82f6' }}>{stats.broadcastMetrics?.read || 0}</div>
+                                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Engagement</div>
+                                    </div>
                                 </div>
                             </div>
+
+
 
                             {/* Development Block (Right) - Now gets 50% width */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
@@ -774,10 +802,75 @@ const Observability = () => {
                 </div>
             </div>
 
-
             {/* Metrics Chart Section */}
             <MetricsSection />
-        </div >
+        </div>
+    );
+};
+
+// EKG/Cardiac Monitor Animation
+const EKGAnimation = ({ color = '#22c55e' }) => {
+    return (
+        <div style={{
+            width: '80px',
+            height: '24px',
+            background: 'rgba(15, 23, 42, 0.6)',
+            borderRadius: '4px',
+            border: '1px solid rgba(51, 65, 85, 0.5)',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center'
+        }}>
+            {/* Grid Background */}
+            <div style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: 'linear-gradient(rgba(51, 65, 85, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(51, 65, 85, 0.2) 1px, transparent 1px)',
+                backgroundSize: '8px 8px',
+                zIndex: 0
+            }} />
+
+            {/* EKG Path */}
+            <svg width="160" height="24" viewBox="0 0 160 24" style={{
+                position: 'absolute',
+                left: 0,
+                animation: 'ekg-move 3s linear infinite',
+                zIndex: 1
+            }}>
+                <path
+                    d="M 0 12 H 20 L 23 4 L 27 20 L 30 12 H 50 L 53 4 L 57 20 L 60 12 H 80 L 83 4 L 87 20 L 90 12 H 110 L 113 4 L 117 20 L 120 12 H 140 L 143 4 L 147 20 L 150 12 H 160"
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </svg>
+
+            {/* Scanning Glow */}
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '30%',
+                height: '100%',
+                background: `linear-gradient(90deg, transparent, ${color}33, transparent)`,
+                animation: 'ekg-scan 3s linear infinite',
+                zIndex: 2
+            }} />
+
+            <style>{`
+                @keyframes ekg-move {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-80px); }
+                }
+                @keyframes ekg-scan {
+                    0% { left: -30%; }
+                    100% { left: 100%; }
+                }
+            `}</style>
+        </div>
     );
 };
 
@@ -802,7 +895,7 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
         );
     }
 
-    // Data is now a hierarchical tree: [{ action, count, children: [] }]
+    // Data is now a hierarchical tree: [{action, count, children: [] }]
     const items = Array.isArray(data) ? data : [];
 
     // Calculate global max for consistent bar scaling across all levels
@@ -2048,4 +2141,4 @@ const RatingsChartCard = ({ onPointClick }) => {
 
 
 
-export default Observability;
+
