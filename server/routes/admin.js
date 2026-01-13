@@ -249,10 +249,9 @@ router.get('/stats', async (req, res) => {
                 filled: get("SELECT COUNT(*) as count FROM broadcasts WHERE max_views IS NOT NULL AND (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = broadcasts.id) >= max_views").count
             }
         }
-    }
-};
+    };
 
-res.json({ stats });
+    res.json({ stats });
 });
 
 // Get historical metrics for charting
