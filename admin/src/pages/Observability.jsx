@@ -650,74 +650,78 @@ export default function Observability() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', height: '100%', width: '100%' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
 
-                                {/* Main Layout: Symmetric Columns */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '1rem', width: '100%', flex: 1, minHeight: 0 }}>
+                                {/* Main Layout: Horizontal Flow with flanking stacks */}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', width: '100%', flex: 1 }}>
 
-                                    {/* Left Flank: Scheduled */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'flex-end', justifyContent: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                            <span style={{ color: '#f59e0b', fontWeight: 600 }}>Scheduled</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.scheduled || 0}</span>
+                                    {/* Left Flank: Reach & Delivery Stats */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '100px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Reach</span>
+                                            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
+                                            <div className="text-muted" style={{ fontSize: '0.65rem' }}>Users</div>
                                         </div>
-                                        {/* P1-P3 Priorities (Left side) */}
-                                        <div style={{ display: 'flex', gap: '0.3rem' }}>
-                                            {[1, 2, 3].map(p => (
-                                                <div key={p} style={{
-                                                    width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    background: `${p === 1 ? '#ef4444' : p === 2 ? '#f97316' : '#eab308'}20`,
-                                                    border: `1px solid ${p === 1 ? '#ef4444' : p === 2 ? '#f97316' : '#eab308'}40`,
-                                                    color: p === 1 ? '#ef4444' : p === 2 ? '#f97316' : '#eab308',
-                                                    borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700
-                                                }}>P{p}</div>
-                                            ))}
+                                        <div style={{ width: '100%', height: '1px', background: '#334155' }} />
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                            <span style={{ fontSize: '0.7rem', color: '#22c55e', textTransform: 'uppercase', fontWeight: 600 }}>Delivered</span>
+                                            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                            <span style={{ fontSize: '0.7rem', color: '#3b82f6', textTransform: 'uppercase', fontWeight: 600 }}>Read</span>
+                                            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
                                         </div>
                                     </div>
 
-                                    {/* Center: Active Broadcasts */}
-                                    <div style={{ textAlign: 'center', position: 'relative', minWidth: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    {/* Center: Main Metric (Active) */}
+                                    <div style={{ textAlign: 'center', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         <div style={{ fontSize: '3.5rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
                                             <RandomCounter end={stats.broadcastMetrics?.active || 0} />
                                         </div>
-                                        <div style={{ position: 'absolute', top: '10px', right: '15px', width: '8px', height: '8px', background: '#2dd4bf', borderRadius: '50%', boxShadow: '0 0 8px #2dd4bf', animation: 'pulse 2s infinite' }}></div>
-                                        <div style={{ fontSize: '1rem', color: '#e2e8f0', marginTop: '0.2rem' }}>Active</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Campaigns</div>
+                                        <div style={{ position: 'absolute', top: '5px', right: '-10px', width: '8px', height: '8px', background: '#2dd4bf', borderRadius: '50%', boxShadow: '0 0 8px #2dd4bf', animation: 'pulse 2s infinite' }}></div>
+                                        <div style={{ fontSize: '0.9rem', color: '#e2e8f0', fontWeight: 600, textTransform: 'uppercase', marginTop: '0.4rem' }}>Active</div>
                                     </div>
 
-                                    {/* Right Flank: Ended/Filled */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start', justifyContent: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', background: '#10b98120', border: '1px solid #10b98140', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.filled || 0}</span>
-                                            <span style={{ color: '#10b981', fontWeight: 600 }}>Filled</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.ended || 0}</span>
-                                            <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended</span>
-                                        </div>
-                                        {/* P4-P5 Priorities (Right side) */}
-                                        <div style={{ display: 'flex', gap: '0.3rem' }}>
-                                            {[4, 5].map(p => (
-                                                <div key={p} style={{
-                                                    width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    background: `${p === 4 ? '#3b82f6' : '#22c55e'}20`,
-                                                    border: `1px solid ${p === 4 ? '#3b82f6' : '#22c55e'}40`,
-                                                    color: p === 4 ? '#3b82f6' : '#22c55e',
-                                                    borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700
+                                    {/* Right Flank: Priorities with Counts */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', minWidth: '70px' }}>
+                                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.2rem' }}>Priorities</div>
+                                        {[1, 2, 3, 4, 5].map(p => (
+                                            <div key={p} style={{
+                                                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                                background: 'rgba(30, 41, 59, 0.5)', borderRadius: '4px', padding: '1px 6px',
+                                                border: '1px solid #334155'
+                                            }}>
+                                                <div style={{
+                                                    fontSize: '0.65rem', fontWeight: 900,
+                                                    color: p === 1 ? '#ef4444' : p === 2 ? '#f97316' : p === 3 ? '#eab308' : p === 4 ? '#3b82f6' : '#22c55e'
                                                 }}>P{p}</div>
-                                            ))}
-                                        </div>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#f1f5f9', marginLeft: 'auto' }}>
+                                                    {stats.broadcastMetrics?.priorities?.[p] || 0}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
-                                {/* Footer: Engagement (Compact Row) */}
-                                <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', width: '100%', marginTop: '0', borderTop: '1px solid #334155', paddingTop: '0.8rem' }}>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>{stats.broadcastMetrics?.reach || 0}</div>
-                                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Distinct Users</div>
+                                {/* Baseline: 2x2 Status Badge Grid */}
+                                <div style={{
+                                    display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr',
+                                    gap: '0.5rem', width: '220px', marginTop: '0.5rem', padding: '0.8rem',
+                                    borderTop: '1px solid #334155', background: 'rgba(15, 23, 42, 0.2)', borderRadius: '8px'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f59e0b15', border: '1px solid #f59e0b30', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
+                                        <span style={{ color: '#f59e0b', fontWeight: 600 }}>Scheduled:</span>
+                                        <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.scheduled || 0}</span>
                                     </div>
-                                    <div style={{ width: '1px', height: '30px', background: '#334155' }}></div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '1rem', fontWeight: 700, color: '#3b82f6' }}>{stats.broadcastMetrics?.read || 0}</div>
-                                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Engagement</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#2dd4bf15', border: '1px solid #2dd4bf30', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
+                                        <span style={{ color: '#2dd4bf', fontWeight: 600 }}>Active:</span>
+                                        <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.active || 0}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#10b98115', border: '1px solid #10b98130', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
+                                        <span style={{ color: '#10b981', fontWeight: 600 }}>Filled:</span>
+                                        <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.filled || 0}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#94a3b815', border: '1px solid #94a3b830', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
+                                        <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended:</span>
+                                        <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.ended || 0}</span>
                                     </div>
                                 </div>
                             </div>
