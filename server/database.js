@@ -177,18 +177,10 @@ export const initDatabase = async () => {
       message TEXT NOT NULL,
       status TEXT DEFAULT 'sent',
       rating INTEGER,
-      deleted_by_sender BOOLEAN DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
   `);
-
-  // Migration: Add deleted_by_sender to feedback
-  try {
-    db.run(`ALTER TABLE feedback ADD COLUMN deleted_by_sender BOOLEAN DEFAULT 0`);
-  } catch (e) {
-    // Column likely exists
-  }
 
   // In-App Notifications table
   db.run(`
@@ -307,9 +299,7 @@ export const initDatabase = async () => {
     { key: 'rate_limit_register', value: '10' },
     { key: 'rate_limit_submit', value: '20' },
     { key: 'rate_limit_vote', value: '30' },
-    { key: 'rate_limit_vote', value: '30' },
-    { key: 'rate_limit_admin_login', value: '5' },
-    { key: 'debug_mode_enabled', value: 'false' }
+    { key: 'rate_limit_admin_login', value: '5' }
   ];
 
   defaultSettings.forEach(s => {

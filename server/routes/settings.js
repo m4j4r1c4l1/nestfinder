@@ -38,8 +38,7 @@ router.get('/app-config', (req, res) => {
     res.json({
         testing_banner_enabled: getSetting('testing_banner_enabled') === 'true',
         testing_banner_text: getSetting('testing_banner_text') || 'Beta Testing',
-        polling_interval_ms: parseInt(getSetting('polling_interval_ms') || '60000', 10),
-        debug_mode_enabled: getSetting('debug_mode_enabled') === 'true'
+        polling_interval_ms: parseInt(getSetting('polling_interval_ms') || '60000', 10)
     });
 });
 

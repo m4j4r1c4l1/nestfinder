@@ -12,10 +12,6 @@ const router = Router();
 // All admin routes require authentication
 router.use(requireAdmin);
 
-// Broadcast injection
-let broadcast = () => { };
-export const setBroadcast = (fn) => { broadcast = fn; };
-
 // ================== DB RECOVERY ==================
 
 // Check for corrupt database availability
@@ -241,150 +237,57 @@ router.get('/stats', async (req, res) => {
 // Get historical metrics for charting
 router.get('/metrics/history', (req, res) => {
     const { days = 7 } = req.query;
-    let daysInt = parseInt(days);
 
-    // OPTIMIZATION: If requesting "All Time" (e.g. > 1000 days), clamp to actual data start date.
-    // This prevents returning ~36,500 rows (100 years) of zeros, which crashes the client chart.
-    if (daysInt > 1000) {
-        try {
-            const minDates = [];
-
-            const logMin = get(`SELECT MIN(created_at) as val FROM logs`).val;
-            if (logMin) minDates.push(new Date(logMin));
-
-            const notifMin = get(`SELECT MIN(created_at) as val FROM notifications`).val;
-            if (notifMin) minDates.push(new Date(notifMin));
-
-            const feedMin = get(`SELECT MIN(created_at) as val FROM feedback`).val;
-            if (feedMin) minDates.push(new Date(feedMin));
-
-            if (minDates.length > 0) {
-                // Find earliest date
-                const earliest = new Date(Math.min(...minDates));
-                const now = new Date();
-                // Calculate days diff: (Start of Now - Start of Earliest)
-                // Add 1 day buffer to be safe
-                const diffTime = Math.abs(now - earliest);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                // Use the smaller of the two: requested days OR actual history length
-                // We add 7 days buffer just in case of timezone/start-of-day offsets
-                daysInt = Math.min(daysInt, diffDays + 7);
-            } else {
-                // No data at all? Default to 30 days to avoid empty loops
-                daysInt = 30;
-            }
-        } catch (e) {
-            console.error('Failed to optimize date range:', e);
-            // Fallback to original daysInt if optimization fails
-        }
-    }
-
-    // Calculate cutoff date string (YYYY-MM-DD)
-    const cutoffRow = get(`SELECT date('now', '-${daysInt} days') as val`);
-    const cutoffDate = cutoffRow.val;
-
-    // 1. Initial Baselines (Counts BEFORE the cutoff date)
-    //    We need these to start our cumulative counters correctly.
-
-    const initialNotifications = get(`
-        SELECT COUNT(*) as count 
-        FROM notifications 
-        WHERE date(created_at) <= ?
-    `, [cutoffDate]).count;
-
-    const initialFeedback = get(`
-        SELECT COUNT(*) as count 
-        FROM feedback 
-        WHERE date(created_at) <= ?
-    `, [cutoffDate]).count;
-
-    // 2. Fetch Aggregated Daily Data (from Start Date + 1 day to Now)
-    //    We use startDate+1 because expectations usually are "Last 7 days" implies including Today.
-    //    Actually, simpler to just query WHERE date > cutoffDate.
-
-    // Users Active by Day (Grouped)
-    const usersDaily = all(`
-        SELECT date(created_at) as day, COUNT(DISTINCT user_id) as count
-        FROM logs
-        WHERE date(created_at) > ?
-        AND user_id != 'admin' AND action NOT LIKE 'admin_%'
-        GROUP BY day
-    `, [cutoffDate]);
-
-    // Notifications by Day (Grouped)
-    const notifsDaily = all(`
-        SELECT 
-            date(created_at) as day, 
-            COUNT(*) as total,
-            SUM(CASE WHEN delivered = 1 THEN 1 ELSE 0 END) as delivered,
-            SUM(CASE WHEN read = 1 THEN 1 ELSE 0 END) as read
-        FROM notifications
-        WHERE date(created_at) > ?
-        GROUP BY day
-    `, [cutoffDate]);
-
-    // Feedback by Day (Grouped)
-    const feedbackDaily = all(`
-        SELECT 
-            date(created_at) as day,
-            COUNT(*) as total,
-            SUM(CASE WHEN status IN ('new', 'sent', 'delivered', 'pending') THEN 1 ELSE 0 END) as pending,
-            SUM(CASE WHEN status IN ('read', 'reviewed') THEN 1 ELSE 0 END) as read
-        FROM feedback
-        WHERE date(created_at) > ?
-        GROUP BY day
-    `, [cutoffDate]);
-
-    // 3. Process into Maps for O(1) Lookup
-    const usersMap = usersDaily.reduce((acc, row) => { acc[row.day] = row.count; return acc; }, {});
-    const notifsMap = notifsDaily.reduce((acc, row) => { acc[row.day] = row; return acc; }, {});
-    const feedbackMap = feedbackDaily.reduce((acc, row) => { acc[row.day] = row; return acc; }, {});
-
-    // 4. Build the Result Array
-    //    Iterate day by day in JS to ensure zero-filling for missing days
+    // Get daily metrics for the past N days
     const metrics = [];
 
-    // Running totals start with initial baselines
-    let runningNotifications = initialNotifications;
-    let runningFeedback = initialFeedback;
+    for (let i = parseInt(days) - 1; i >= 0; i--) {
+        const dateOffset = `-${i} days`;
+        const dateLabel = i === 0 ? 'today' : dateOffset;
 
-    for (let i = daysInt - 1; i >= 0; i--) {
-        // Calculate date string for this iteration
-        // Using SQLite date logic in JS to match DB string format exactly might be tricky with TZ.
-        // Safer to ask DB for the specific date string or use consistent JS ISO YYYY-MM-DD.
-        // Given we are in a tight loop, let's pre-generate the date strings or use simple JS date math.
+        // Get date string for the day
+        const dateRow = get(`SELECT date('now', '${dateOffset}') as date_val`);
+        const dateStr = dateRow.date_val;
 
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
+        // Users active this day (Daily Active Users) - EXCLUDE ADMINS
+        const usersCount = get(`
+            SELECT COUNT(DISTINCT user_id) as count 
+            FROM logs 
+            WHERE date(created_at) = date('now', '${dateOffset}')
+            AND user_id != 'admin' AND action NOT LIKE 'admin_%'
+        `).count;
 
-        // Get daily values from maps
-        const uVal = usersMap[dateStr] || 0;
-        const nRow = notifsMap[dateStr] || { total: 0, delivered: 0, read: 0 };
-        const fRow = feedbackMap[dateStr] || { total: 0, pending: 0, read: 0 };
+        // ===== NOTIFICATIONS SENT (to users) =====
+        // Total notifications sent up to this date (CUMULATIVE)
+        const notificationsCount = get(`SELECT COUNT(*) as count FROM notifications WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
 
-        // Update running totals (Cumulative)
-        // Note: The loop goes from Past -> Present (i counts down from days-1 to 0).
-        // Correct order: 
-        // i=(days-1) is oldest day. i=0 is today.
+        // Daily counts for status breakdown (NON-CUMULATIVE)
+        const dailySent = get(`SELECT COUNT(*) as count FROM notifications WHERE date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyDelivered = get(`SELECT COUNT(*) as count FROM notifications WHERE delivered = 1 AND date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyRead = get(`SELECT COUNT(*) as count FROM notifications WHERE read = 1 AND date(created_at) = date('now', '${dateOffset}')`).count;
 
-        runningNotifications += nRow.total;
-        runningFeedback += fRow.total;
+        // ===== FEEDBACK RECEIVED (from users) =====
+        // Total feedback received up to this date (CUMULATIVE)
+        const totalReceived = get(`SELECT COUNT(*) as count FROM feedback WHERE date(created_at) <= date('now', '${dateOffset}')`).count;
+
+        // Daily counts for status breakdown (NON-CUMULATIVE)
+        const dailyReceivedTotal = get(`SELECT COUNT(*) as count FROM feedback WHERE date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyReceivedPending = get(`SELECT COUNT(*) as count FROM feedback WHERE status IN ('new', 'sent', 'delivered', 'pending') AND date(created_at) = date('now', '${dateOffset}')`).count;
+        const dailyReceivedRead = get(`SELECT COUNT(*) as count FROM feedback WHERE status IN ('read', 'reviewed') AND date(created_at) = date('now', '${dateOffset}')`).count;
 
         metrics.push({
             date: dateStr,
-            users: uVal,
-            // Notifications
-            notifications: runningNotifications, // Cumulative
-            sent: nRow.total,                    // Daily
-            delivered: nRow.delivered,           // Daily
-            read: nRow.read,                     // Daily
-            // Feedback
-            totalReceived: runningFeedback,      // Cumulative
-            receivedDaily: fRow.total,           // Daily
-            receivedPending: fRow.pending,       // Daily
-            receivedRead: fRow.read              // Daily
+            users: usersCount,
+            // Sent Notifications
+            notifications: notificationsCount,  // Cumulative total
+            sent: dailySent,                    // Daily
+            delivered: dailyDelivered,          // Daily
+            read: dailyRead,                    // Daily
+            // Received Feedback
+            totalReceived: totalReceived,       // Cumulative total
+            receivedDaily: dailyReceivedTotal,  // Daily total
+            receivedPending: dailyReceivedPending, // Daily pending
+            receivedRead: dailyReceivedRead     // Daily read
         });
     }
 
@@ -1028,32 +931,6 @@ router.put('/broadcasts/:id', (req, res) => {
     res.json({ broadcast });
 });
 
-// Bulk delete broadcasts
-router.post('/broadcasts/bulk-delete', (req, res) => {
-    const { ids } = req.body;
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-        return res.status(400).json({ error: 'No IDs provided' });
-    }
-
-    try {
-        const placeholders = ids.map(() => '?').join(',');
-
-        // Use a transaction for safety (although SQLite handles single statement well, multiple related deletes are better in transaction)
-        const runTransaction = getDb().transaction((broadcastIds) => {
-            getDb().prepare(`DELETE FROM broadcast_views WHERE broadcast_id IN (${placeholders})`).run(...broadcastIds);
-            getDb().prepare(`DELETE FROM broadcasts WHERE id IN (${placeholders})`).run(...broadcastIds);
-        });
-
-        runTransaction(ids);
-        log('admin', 'broadcast_bulk_deleted', null, { count: ids.length, ids });
-
-        res.json({ success: true, count: ids.length });
-    } catch (err) {
-        console.error('Bulk delete error:', err);
-        res.status(500).json({ error: 'Failed to bulk delete broadcasts' });
-    }
-});
-
 // Delete a broadcast (and its views)
 router.delete('/broadcasts/:id', (req, res) => {
     const { id } = req.params;
@@ -1119,21 +996,7 @@ router.put('/feedback/:id/status', (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // Get feedback first to know the user_id for targeting (if we had targeted sockets)
-    // For now, simpler to just update and broadcast to all (client filters by ID)
-    // Or simpler: just run the update.
-    // Ideally we want to know the user_id to maybe log it or optimize broadcast, but broadcast is global currently.
-
     run('UPDATE feedback SET status = ? WHERE id = ?', [status, id]);
-
-    // Broadcast update to client
-    // We send the ID and the new Status. The client will check if it owns this ID.
-    broadcast({
-        type: 'feedback_update',
-        id: parseInt(id),
-        status
-    });
-
     res.json({ success: true });
 });
 

@@ -8,21 +8,8 @@ const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOG_FILE = path.join(__dirname, '../../debug_logs.txt');
 
-import { requireAdmin } from '../middleware/auth.js';
-import { getSetting, all } from '../database.js';
-
-// Middleware: Check if Debug Mode is enabled
-const requireDebugMode = (req, res, next) => {
-    const isEnabled = getSetting('debug_mode_enabled') === 'true';
-    if (!isEnabled) {
-        return res.status(403).json({ error: 'Debug Mode is disabled' });
-    }
-    next();
-};
-
 // POST /api/debug/logs - Append logs
-// Publicly accessible BUT only when Debug Mode is globally enabled
-router.post('/logs', requireDebugMode, (req, res) => {
+router.post('/logs', (req, res) => {
     try {
         const { logs, platform, userAgent } = req.body;
         const timestamp = new Date().toISOString();
@@ -39,9 +26,7 @@ router.post('/logs', requireDebugMode, (req, res) => {
 });
 
 // GET /api/debug/download - Download logs
-// Protected: Requires Admin OR Debug Mode (if we want to allow easy access, but usually Admin only is safer for downloading)
-// Let's restrict to Admin for security, as typically only devs/admins need to read them.
-router.get('/download', requireAdmin, (req, res) => {
+router.get('/download', (req, res) => {
     try {
         if (fs.existsSync(LOG_FILE)) {
             res.download(LOG_FILE, 'swipe_debug_logs.txt');
@@ -54,10 +39,13 @@ router.get('/download', requireAdmin, (req, res) => {
     }
 });
 
+// GET /api/debug/simulate-update - Force a broadcast with incremented stats to prove UI animation
+// (Removed after verifying animation logic)
+
+import { all } from '../database.js';
+
 // GET /api/debug/dump/tables - Dump broadcast_views and notifications
-// CRITICAL SECURITY: Requires Admin Authentication explicitly. 
-// Even if debug mode is on, public shouldn't see PII.
-router.get('/dump/tables', requireAdmin, (req, res) => {
+router.get('/dump/tables', (req, res) => {
     try {
         const broadcastViews = all('SELECT * FROM broadcast_views ORDER BY created_at DESC');
         const notifications = all('SELECT * FROM notifications ORDER BY created_at DESC LIMIT 50');

@@ -15,7 +15,7 @@ import { initDatabase } from './database.js';
 import authRoutes from './routes/auth.js';
 import pointsRoutes, { setBroadcast as setPointsBroadcast } from './routes/points.js';
 import settingsRoutes, { setBroadcast as setSettingsBroadcast } from './routes/settings.js';
-import adminRoutes, { setBroadcast as setAdminBroadcast } from './routes/admin.js';
+import adminRoutes from './routes/admin.js';
 import notificationsRoutes from './routes/notifications.js';
 import webhookRoutes, { setBroadcast as setWebhookBroadcast } from './routes/webhook.js';
 import debugRoutes from './routes/debug.js';
@@ -29,50 +29,18 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server });
 const clients = new Set();
 
-// Rate limit broadcasting updates as multiple connects/disconnects can happen quickly
-let broadcastTimeout = null;
-const broadcastClientsUpdate = () => {
-    if (broadcastTimeout) return;
-    broadcastTimeout = setTimeout(() => {
-        broadcastTimeout = null;
-        broadcast({
-            type: 'clients-update',
-            count: clients.size,
-            timestamp: Date.now()
-        });
-    }, 1000); // Debounce updates to 1s
-};
-
-import { getSystemStats } from './utils/systemStats.js';
-
-// Broadcast System Stats every 5 seconds
-setInterval(async () => {
-    // Only broadcast if there are clients connected
-    if (clients.size > 0) {
-        const stats = await getSystemStats();
-        broadcast({
-            type: 'system-status',
-            data: stats,
-            clientCount: clients.size // Redundant but useful sync
-        });
-    }
-}, 5000);
-
 wss.on('connection', (ws) => {
     clients.add(ws);
     console.log('Client connected. Total:', clients.size);
-    broadcastClientsUpdate();
 
     ws.on('close', () => {
         clients.delete(ws);
         console.log('Client disconnected. Total:', clients.size);
-        broadcastClientsUpdate();
     });
 
     ws.on('error', (error) => {
         console.error('WebSocket error:', error);
         clients.delete(ws);
-        broadcastClientsUpdate();
     });
 });
 
@@ -90,7 +58,6 @@ const broadcast = (data) => {
 setPointsBroadcast(broadcast);
 setSettingsBroadcast(broadcast);
 setWebhookBroadcast(broadcast);
-setAdminBroadcast(broadcast);
 
 // Import rate limiters
 import { apiLimiter } from './middleware/rateLimiter.js';

@@ -159,12 +159,6 @@ const App = () => {
     const [token, setToken] = useState(localStorage.getItem('nestfinder_admin_token'));
     const [view, setView] = useState('dashboard');
 
-    React.useEffect(() => {
-        const handleUnauthorized = () => setToken(null);
-        window.addEventListener('auth:unauthorized', handleUnauthorized);
-        return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
-    }, []);
-
     if (!token) {
         return <Login onLogin={setToken} />;
     }

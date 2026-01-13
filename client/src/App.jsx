@@ -14,13 +14,6 @@ import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 const AppContent = () => {
     const { user, loading } = useAuth();
 
-    // Initialize logger hook
-    useEffect(() => {
-        // Here we could fetch initial debug state if we had an endpoint, 
-        // or wait for socket event. Ideally, pass initial config from server.
-        // For now, let's just listen for the event in the main App component or here.
-    }, []);
-
     if (loading) {
         return (
             <div className="loading-overlay">
@@ -40,52 +33,6 @@ const AppContent = () => {
     );
 };
 
-// Debug Indicator Component
-const DebugIndicator = () => {
-    const [enabled, setEnabled] = useState(false);
-
-    useEffect(() => {
-        // Initial check (from app-config or similar if available, otherwise waiting for socket)
-        // Ideally we fetch this on load. For now, rely on socket updates or initial config fetch.
-        fetch('/api/settings/app-config')
-            .then(res => res.json())
-            .then(data => {
-                if (data.debug_mode_enabled) {
-                    setEnabled(true);
-                    import('./utils/logger').then(m => m.initLogger(true));
-                }
-            })
-            .catch(() => { });
-
-        const handleSettings = (e) => {
-            const settings = e.detail;
-            if (settings.debug_mode_enabled !== undefined) {
-                const isEnabled = String(settings.debug_mode_enabled) === 'true';
-                setEnabled(isEnabled);
-                // Dynamically load logger to avoid large bundle if possible, or just call it
-                import('./utils/logger').then(m => m.setDebugMode(isEnabled));
-            }
-        };
-
-        window.addEventListener('settings_updated', handleSettings);
-        return () => window.removeEventListener('settings_updated', handleSettings);
-    }, []);
-
-    if (!enabled) return null;
-
-    return (
-        <div style={{
-            position: 'fixed', bottom: 10, right: 10,
-            background: 'rgba(239, 68, 68, 0.9)', color: 'white',
-            padding: '4px 8px', borderRadius: '4px', fontSize: '10px',
-            fontWeight: 'bold', zIndex: 9999, pointerEvents: 'none',
-            border: '1px solid rgba(255,255,255,0.2)'
-        }}>
-            DEBUG MODE
-        </div>
-    );
-};
-
 const App = () => {
     return (
         <>
@@ -96,10 +43,6 @@ const App = () => {
                         <OfflineIndicator />
                         <WelcomeMessage />
                         <LanguagePicker />
-
-                        {/* Debug Mode Indicator */}
-                        <DebugIndicator />
-
                         <AppContent />
                     </ToastProvider>
                 </LanguageProvider>

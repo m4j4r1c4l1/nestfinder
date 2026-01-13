@@ -28,12 +28,6 @@ export const adminApi = {
             headers,
         });
 
-        if (response.status === 401 || response.status === 403) {
-            this.logout();
-            window.dispatchEvent(new Event('auth:unauthorized'));
-            throw new Error('Session expired. Please log in again.');
-        }
-
         let data;
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {

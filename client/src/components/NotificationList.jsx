@@ -342,41 +342,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         fetchSent();
         // Poll for status updates (e.g. delivered/read ticks) every 5s
         const interval = setInterval(() => fetchSent(true), 5000);
-
-        // Listen for real-time updates via WebSocket
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        // const wsUrl = `${wsProtocol}//${window.location.host}`; // Production
-        // For dev/mixed env, use API_URL base if available, else window.location
-        // Assuming the app has a global WS connection or we create one here?
-        // The app likely uses a global connection or context. 
-        // Checking existing code... Client seems to not have a global WS Context exposed here easily?
-        // OBSERVATION: The Home.jsx doesn't seem to set up a global WS. 
-        // BUT `Admin` uses `useWebSocket`.
-        // `NotificationList` is used in `MapView`.
-        // Let's check if we can access the WS.
-        // For now, let's stick to polling as the primary, but add a standalone WS listener if we want "Instant".
-        // Actually, creating a new WS connection just for this component might be overkill if it mounts/unmounts often.
-        // But `NotificationList` is usually a persistent modal/panel.
-
-        const ws = new WebSocket(`${wsProtocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`);
-
-        ws.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                if (data.type === 'feedback_update') {
-                    setSentMessages(prev => prev.map(msg =>
-                        msg.id === data.id ? { ...msg, status: data.status } : msg
-                    ));
-                }
-            } catch (e) {
-                // Ignore parse errors
-            }
-        };
-
-        return () => {
-            clearInterval(interval);
-            ws.close();
-        };
+        return () => clearInterval(interval);
     }, []);
 
     // Helper: Filter by retention
@@ -407,9 +373,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         try {
             if (type === 'received') {
                 await api.deleteNotification(id);
-                setDeletedIds(prev => new Set(prev).add(id));
-            } else if (type === 'broadcast') {
-                await api.dismissBroadcast(id);
                 setDeletedIds(prev => new Set(prev).add(id));
             } else {
                 await api.deleteFeedback(id);
@@ -779,9 +742,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         // If Safe Delete is OFF (Instant Mode), delete immediately
                                                         // If Safe Delete is ON, trigger confirmation/reveal (handleDeleteClick)
                                                         if (!swipeEnabled) {
-                                                            performDelete(notification.id, notification.type === 'broadcast' ? 'broadcast' : 'received');
+                                                            performDelete(notification.id, 'received');
                                                         } else {
-                                                            handleDeleteClick(null, notification.id, notification.type === 'broadcast' ? 'broadcast' : 'received');
+                                                            handleDeleteClick(null, notification.id, 'received');
                                                         }
                                                     }}
                                                     onConfirm={() => confirmDelete()}
@@ -807,7 +770,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             className="delete-btn-hover"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleDeleteClick(null, notification.id, notification.type === 'broadcast' ? 'broadcast' : 'received');
+                                                                handleDeleteClick(null, notification.id, 'received');
                                                             }}
                                                             style={{
                                                                 position: 'absolute',
@@ -969,15 +932,6 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     onConfirm={() => confirmDelete()}
                                                     onCancel={cancelDelete}
                                                     className="notification-item read"
-                                                    onClick={() => {
-                                                        // Normalize 'Sent' message structure for the common Popup
-                                                        setSelectedMessage({
-                                                            ...msg,
-                                                            title: getFeedbackTitle(msg.type, t),
-                                                            body: msg.message
-                                                        });
-                                                        setViewingImageOnly(false);
-                                                    }}
                                                     style={{
                                                         padding: '0.75rem',
                                                         borderRadius: 'var(--radius-md)',

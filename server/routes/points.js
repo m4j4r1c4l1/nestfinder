@@ -113,7 +113,7 @@ router.post('/broadcast/:id/read', requireUser, (req, res) => {
         SET status = 'read', 
             view_count = view_count + 1, 
             read_at = ?,
-            dismissed = 0
+            dismissed = 1
         WHERE broadcast_id = ? AND user_id = ?
       `, [nowStr, broadcastId, userId]);
       console.log(`[Broadcast Read] Updated existing view: User ${userId}, Broadcast ${broadcastId}`);
@@ -121,7 +121,7 @@ router.post('/broadcast/:id/read', requireUser, (req, res) => {
       // Create new with read status
       run(`
         INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
-        VALUES (?, ?, 'read', 1, ?, ?, ?, 0)
+        VALUES (?, ?, 'read', 1, ?, ?, ?, 1)
       `, [broadcastId, userId, nowStr, nowStr, nowStr]);
       console.log(`[Broadcast Read] Created new read view: User ${userId}, Broadcast ${broadcastId}`);
     }
@@ -600,7 +600,7 @@ router.get('/feedback', requireUser, (req, res) => {
 
   const feedback = all(`
     SELECT * FROM feedback
-    WHERE user_id = ? AND (deleted_by_sender = 0 OR deleted_by_sender IS NULL)
+    WHERE user_id = ?
     ORDER BY created_at DESC
   `, [userId]);
 
@@ -615,7 +615,7 @@ router.delete('/feedback/prune', requireUser, (req, res) => {
   const userId = req.user.id;
 
   run(`
-    UPDATE feedback SET deleted_by_sender = 1
+    DELETE FROM feedback
     WHERE user_id = ? AND created_at < ?
   `, [userId, cutoff]);
 
@@ -626,7 +626,7 @@ router.delete('/feedback/prune', requireUser, (req, res) => {
 router.delete('/feedback/:id', requireUser, (req, res) => {
   const userId = req.user.id;
 
-  run('UPDATE feedback SET deleted_by_sender = 1 WHERE id = ? AND user_id = ?', [req.params.id, userId]);
+  run('DELETE FROM feedback WHERE id = ? AND user_id = ?', [req.params.id, userId]);
   res.json({ success: true });
 });
 

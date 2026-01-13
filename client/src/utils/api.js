@@ -249,10 +249,6 @@ class ApiClient {
     return this.fetch(`/points/feedback/${id}`, { method: 'DELETE' });
   }
 
-  dismissBroadcast(id) {
-    return this.fetch(`/push/broadcasts/${id}/dismiss`, { method: 'POST' });
-  }
-
   submitFeedback(type, message, rating) {
     return this.fetch('/points/feedback', {
       method: 'POST',

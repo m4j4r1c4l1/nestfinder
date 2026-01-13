@@ -66,7 +66,7 @@ router.get('/notifications', (req, res) => {
                    'broadcast' as type
             FROM broadcasts b
             JOIN broadcast_views v ON b.id = v.broadcast_id
-            WHERE v.user_id = ? AND v.dismissed = 0
+            WHERE v.user_id = ?
             ORDER BY b.created_at DESC
             LIMIT 50
         `, [userId]);
@@ -78,36 +78,14 @@ router.get('/notifications', (req, res) => {
             SELECT b.id, b.title, b.message as body, b.image_url, b.created_at,
                    'sent' as status, NULL as delivered_at, NULL as read_at,
                    0 as read,
-                   'broadcast' as type,
-                   b.max_views,
-                   (SELECT COUNT(*) FROM broadcast_views bv WHERE bv.broadcast_id = b.id) as current_views
+                   'broadcast' as type
             FROM broadcasts b
             WHERE datetime(b.start_time) <= datetime(?)
             AND datetime(b.end_time) >= datetime(?)
             AND b.id NOT IN (SELECT broadcast_id FROM broadcast_views WHERE user_id = ?)
-            -- Filter out filled broadcasts (where current_views >= max_views)
-            AND (b.max_views IS NULL OR (SELECT COUNT(*) FROM broadcast_views bv WHERE bv.broadcast_id = b.id) < b.max_views)
             ORDER BY b.priority DESC, b.created_at DESC
             LIMIT 10
         `, [now, now, userId]);
-
-        // 3.5. Mark these unseen broadcasts as DELIVERED immediately
-        // This ensures Admin counts update even if seen only in inbox
-        if (unseenBroadcasts.length > 0) {
-            const deliveryStmt = getDb().prepare(`
-                INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, dismissed)
-                VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
-                ON CONFLICT(broadcast_id, user_id) DO UPDATE SET
-                    status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
-                    delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
-            `);
-            const transaction = getDb().transaction((broadcasts) => {
-                for (const b of broadcasts) {
-                    deliveryStmt.run(b.id, userId);
-                }
-            });
-            transaction(unseenBroadcasts);
-        }
 
         // 4. Merge and Sort
         const unified = [...notifications, ...seenBroadcasts, ...unseenBroadcasts].sort((a, b) => {
@@ -213,8 +191,6 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         // Get notification metrics
         const notificationCount = get('SELECT COUNT(*) as count FROM notifications');
         const unreadCount = get('SELECT COUNT(*) as count FROM notifications WHERE read = 0');
-        const deliveredCount = get('SELECT COUNT(*) as count FROM notifications WHERE delivered = 1');
-        const readNotificationCount = get('SELECT COUNT(*) as count FROM notifications WHERE read = 1');
 
         // Get rating metrics
         const ratingStats = get(`
@@ -265,39 +241,18 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         const devMetrics = await calculateDevMetrics(rootDir);
 
         // Calculate Broadcast Metrics
-        let broadcastMetrics = { total: 0, active: 0, delivered: 0, read: 0, reach: 0, types: {}, priorities: {} };
+        let broadcastMetrics = { total: 0, active: 0, delivered: 0, read: 0 };
         try {
             const totalBroadcasts = get('SELECT COUNT(*) as count FROM broadcasts');
-            // Active: Started AND (Not Ended OR Infinite)
-            const activeBroadcasts = get("SELECT COUNT(*) as count FROM broadcasts WHERE start_time <= datetime('now') AND (end_time >= datetime('now') OR end_time IS NULL)");
-
+            const activeBroadcasts = get("SELECT COUNT(*) as count FROM broadcasts WHERE end_time > datetime('now')");
             const deliveredBroadcasts = get("SELECT COUNT(*) as count FROM broadcast_views WHERE status IN ('delivered', 'read')");
             const readBroadcasts = get("SELECT COUNT(*) as count FROM broadcast_views WHERE status = 'read'");
-            const reachCount = get("SELECT COUNT(DISTINCT user_id) as count FROM broadcast_views");
-
-            // Breakdown by Type
-            const limitedCount = get("SELECT COUNT(*) as count FROM broadcasts WHERE max_views IS NOT NULL");
-            const unlimitedCount = get("SELECT COUNT(*) as count FROM broadcasts WHERE max_views IS NULL");
-
-            // Breakdown by Priority
-            const prioritiesRaw = all("SELECT priority, COUNT(*) as count FROM broadcasts GROUP BY priority");
-            const prioritiesMap = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-            prioritiesRaw.forEach(p => { if (p.priority) prioritiesMap[p.priority] = p.count; });
 
             broadcastMetrics = {
                 total: totalBroadcasts?.count || 0,
                 active: activeBroadcasts?.count || 0,
                 delivered: deliveredBroadcasts?.count || 0,
-                read: readBroadcasts?.count || 0,
-                reach: reachCount?.count || 0,
-                scheduled: get("SELECT COUNT(*) as count FROM broadcasts WHERE start_time > datetime('now')")?.count || 0,
-                ended: get("SELECT COUNT(*) as count FROM broadcasts WHERE end_time < datetime('now')")?.count || 0,
-                filled: get("SELECT COUNT(*) as count FROM broadcasts WHERE max_views IS NOT NULL AND (SELECT COUNT(*) FROM broadcast_views bv WHERE bv.broadcast_id = broadcasts.id) >= max_views")?.count || 0,
-                types: {
-                    limited: limitedCount?.count || 0,
-                    unlimited: unlimitedCount?.count || 0
-                },
-                priorities: prioritiesMap
+                read: readBroadcasts?.count || 0
             };
         } catch (err) {
             console.error('Broadcast metrics failed:', err);
@@ -316,9 +271,7 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
             broadcastMetrics,
             notificationMetrics: {
                 total: notificationCount?.count || 0,
-                unread: unreadCount?.count || 0,
-                delivered: deliveredCount?.count || 0,
-                read: readNotificationCount?.count || 0
+                unread: unreadCount?.count || 0
             },
             feedbackMetrics: { // added breakdown
                 total: feedbackTotal?.count || 0,
@@ -550,26 +503,6 @@ router.delete('/:id', requireUser, (req, res) => {
 
     run('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, userId]);
     res.json({ success: true });
-});
-
-// Dismiss a broadcast (user action)
-router.post('/broadcasts/:id/dismiss', requireUser, (req, res) => {
-    try {
-        const userId = req.user.id;
-        const broadcastId = req.params.id;
-
-        // Upsert into broadcast_views with dismissed=1
-        run(`
-            INSERT INTO broadcast_views (broadcast_id, user_id, dismissed, status, read_at)
-            VALUES (?, ?, 1, 'read', CURRENT_TIMESTAMP)
-            ON CONFLICT(broadcast_id, user_id) DO UPDATE SET dismissed = 1
-        `, [broadcastId, userId]);
-
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Dismiss broadcast error:', error);
-        res.status(500).json({ error: 'Failed to dismiss broadcast' });
-    }
 });
 
 // Get broadcast interaction details
