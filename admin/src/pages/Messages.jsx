@@ -4815,29 +4815,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 </div>
                             )}
 
-                            {/* Status & Max Views Badge Row - Moved to Bottom */}
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <span style={{
-                                    padding: '2px 6px', borderRadius: '4px',
-                                    fontSize: '0.7rem', fontWeight: 700,
-                                    background: badgeBg(statusColor), color: statusColor,
-                                    border: `1px solid ${badgeBorder(statusColor)}`,
-                                    textTransform: 'uppercase'
-                                }}>
-                                    {statusText}
-                                </span>
-                                {hoveredItem.max_views && (
-                                    <span style={{
-                                        padding: '2px 6px', borderRadius: '4px',
-                                        fontSize: '0.7rem', fontWeight: 600,
-                                        background: isFilled ? '#ec489920' : 'rgba(6, 182, 212, 0.1)',
-                                        color: isFilled ? '#ec4899' : '#06b6d4',
-                                        border: isFilled ? '1px solid #ec489940' : '1px solid rgba(6, 182, 212, 0.3)',
-                                    }}>
-                                        👁 {hoveredItem.total_users || 0} / {hoveredItem.max_views}
-                                    </span>
-                                )}
-                            </div>
+
 
                             {/* Professional Time Display */}
                             <div style={{
@@ -4913,9 +4891,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         <span style={{
                                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                                             fontSize: '0.7rem', fontWeight: 700,
-                                            background: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
-                                            color: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? '#ef4444' : '#06b6d4',
-                                            border: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)'
+                                            background: isFilled ? '#ec489920' : 'rgba(6, 182, 212, 0.1)',
+                                            color: isFilled ? '#ec4899' : '#06b6d4',
+                                            border: isFilled ? '1px solid #ec489940' : '1px solid rgba(6, 182, 212, 0.3)'
                                         }}>
                                             👁 {hoveredItem.total_users || 0} / {hoveredItem.max_views}
                                         </span>
