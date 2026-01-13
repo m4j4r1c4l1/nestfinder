@@ -4638,8 +4638,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         const color = getPriorityColor(b.priority);
 
                         // Visual State Logic
-                        // Inactive = Past AND Not interacting.
-                        const isInactive = isPast && !isInteractionActive;
+                        const isFilled = b.max_views && (b.total_users || 0) >= b.max_views;
+                        // Inactive = Past OR Filled, AND Not interacting.
+                        const isInactive = (isPast || isFilled) && !isInteractionActive;
 
                         // Background & Border Setup
                         let bgStyle = color;
