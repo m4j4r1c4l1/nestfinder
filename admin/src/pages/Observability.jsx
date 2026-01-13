@@ -84,8 +84,8 @@ const CommitReveal = ({ text, duration = 2000 }) => {
             if (timestamp - lastUpdate > 50) { // Throttle scramble speed ~20fps
                 let str = '';
                 for (let i = 0; i < len; i++) {
-                    // Start locking sequence after 1s of initial chaos
-                    const lockTime = 1000 + (i * 500);
+                    // Start locking sequence after 1.5s of initial chaos
+                    const lockTime = 1500 + (i * 500);
 
                     if (elapsed > lockTime) {
                         str += text[i]; // Locked
@@ -99,7 +99,7 @@ const CommitReveal = ({ text, duration = 2000 }) => {
 
             // Continue until all chars are locked
             // Last char locks at 1000 + (len-1)*500
-            const totalDuration = 1000 + (len * 500) + 100;
+            const totalDuration = 1500 + (len * 500) + 100;
 
             if (elapsed < totalDuration) {
                 animationFrame = requestAnimationFrame(animate);

@@ -4698,7 +4698,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                             // Usually infinite is active or scheduled.
                         } else if (isInactive) {
                             // Badge Style requested for inactive (Boosted to match Badge vividness against dark bg)
-                            bgStyle = `${color}35`; // Was 20
+                            // Badge Style requested for inactive (Boosted to match Badge vividness against dark bg)
+                            // Use linear-gradient to overlay transparent color on solid background, preventing underlying lines from showing through
+                            bgStyle = `linear-gradient(0deg, ${color}35, ${color}35), #334155`;
                             borderStyle = `1px solid ${color}80`; // Was 40
                         }
 
