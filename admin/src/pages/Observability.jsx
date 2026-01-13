@@ -377,18 +377,19 @@ export default function Observability() {
                 <div style={{ padding: '1.2rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
 
                     {/* Main Health Block */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                Operational
-                                <EKGAnimation color={stats.systemHealth?.db === 'Error' ? '#ef4444' : '#38bdf8'} />
-                            </div>
+                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>Operational</div>
                             <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
                                 Uptime: {formatUptime(stats.systemHealth?.uptime)}
                             </div>
                         </div>
+                        <EKGAnimation
+                            color={stats.systemHealth?.db === 'Error' ? '#ef4444' : '#38bdf8'}
+                            isLoading={!stats.systemHealth?.db || stats.systemHealth?.db === 'Checking...'}
+                        />
                     </div>
 
                     <div style={{ width: '1px', height: '40px', background: '#334155' }} />
@@ -438,32 +439,7 @@ export default function Observability() {
                     <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <button
-                                        onClick={() => {
-                                            const url = new URL(window.location.href);
-                                            url.searchParams.set('t', Date.now()); // Cache buster to force fresh initialization
-                                            window.open(url.toString(), '_blank');
-                                        }}
-                                        title="Open new session in new tab to test connectivity"
-                                        style={{
-                                            background: 'rgba(56, 189, 248, 0.1)',
-                                            border: '1px solid rgba(56, 189, 248, 0.2)',
-                                            borderRadius: '4px',
-                                            padding: '2px 4px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.65rem',
-                                            color: '#38bdf8',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.2rem',
-                                            marginBottom: '0.1rem'
-                                        }}
-                                    >
-                                        <span>+</span> TEST
-                                    </button>
-                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>LIVE SESSIONS</span>
-                                </div>
+                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>LIVE SESSIONS</span>
                                 <span style={{ fontSize: '1.3rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
                                     <RollingBarrelCounter end={stats.connectedClients || 0} />
                                 </span>
@@ -654,67 +630,61 @@ export default function Observability() {
                                 </div>
                             </div>
 
-                            {/* Broadcasts Block (Center) - Compact */}
+                            {/* Broadcasts Block (Center) - Restructured */}
                             <div style={{
-                                display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'center', height: '100%',
+                                display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', height: '100%',
                                 border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '12px', padding: '0.8rem',
-                                background: 'rgba(45, 212, 191, 0.05)', minWidth: '200px'
+                                background: 'rgba(45, 212, 191, 0.05)', minWidth: '180px'
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>🚀 Broadcasts</div>
 
-                                {/* Top Row: Left metrics | Main Metric | Right metrics */}
-                                <div style={{ display: 'flex', gap: '1rem', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
-
-                                    {/* Left: Messages & Reach (stacked) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
-                                                <span style={{ fontSize: '0.9rem' }}>📡</span>
-                                            </div>
-                                            <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
-                                        </div>
-                                        <div style={{ width: '40px', height: '1px', background: '#334155' }} />
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
-                                                <span style={{ fontSize: '0.9rem' }}>👨‍👩‍👧‍👦</span>
-                                            </div>
-                                            <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
-                                        </div>
+                                {/* Main Metric (Campaigns) */}
+                                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div style={{ fontSize: '2.2rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
+                                        <RandomCounter end={stats.broadcastMetrics?.total || 0} />
                                     </div>
+                                    <div style={{ fontSize: '0.7rem', color: '#e2e8f0', fontWeight: 600, textTransform: 'uppercase' }}>Campaigns</div>
+                                    <div className="text-muted" style={{ fontSize: '0.55rem' }}>Total</div>
+                                </div>
 
-                                    {/* Center: Main Metric (Campaigns) */}
-                                    <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
-                                            <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                {/* Metrics Row: Messages | Users | Sent | Read */}
+                                <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                    {/* Messages */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                            <span style={{ fontSize: '0.8rem' }}>📡</span>
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#e2e8f0', fontWeight: 600, textTransform: 'uppercase', marginTop: '0.2rem' }}>Campaigns</div>
-                                        <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
+                                        <div className="text-muted" style={{ fontSize: '0.55rem' }}>Messages</div>
                                     </div>
-
-                                    {/* Right: Sent & Received (stacked) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                                <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.8rem' }}>✓✓</span>
-                                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
-                                            </div>
-                                            <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
+                                    {/* Users */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
+                                            <span style={{ fontSize: '0.8rem' }}>👨‍👩‍👧‍👦</span>
                                         </div>
-                                        <div style={{ width: '40px', height: '1px', background: '#334155' }} />
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                                <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.8rem' }}>✓✓</span>
-                                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
-                                            </div>
-                                            <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
+                                        <div className="text-muted" style={{ fontSize: '0.55rem' }}>Users</div>
+                                    </div>
+                                    {/* Sent */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                            <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
                                         </div>
+                                        <div className="text-muted" style={{ fontSize: '0.55rem' }}>Sent</div>
+                                    </div>
+                                    {/* Read */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                            <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
+                                        </div>
+                                        <div className="text-muted" style={{ fontSize: '0.55rem' }}>Read</div>
                                     </div>
                                 </div>
 
-                                {/* Priority Badges Row (Centered, horizontal) */}
-                                <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+                                {/* Bottom: Priority Badges */}
+                                <div style={{ display: 'flex', gap: '0.2rem', justifyContent: 'center', marginTop: 'auto' }}>
                                     {[1, 2, 3, 4, 5].map(p => {
                                         let color = '#22c55e';
                                         if (p === 1) color = '#ef4444';
@@ -724,12 +694,12 @@ export default function Observability() {
 
                                         return (
                                             <div key={p} style={{
-                                                width: '20px', height: '20px',
+                                                width: '18px', height: '18px',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                background: `${color}15`, borderRadius: '4px',
+                                                background: `${color}15`, borderRadius: '3px',
                                                 border: `1px solid ${color}30`
                                             }}>
-                                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#f1f5f9' }}>
+                                                <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#f1f5f9' }}>
                                                     {stats.broadcastMetrics?.priorities?.[p] || 0}
                                                 </span>
                                             </div>
@@ -737,24 +707,24 @@ export default function Observability() {
                                     })}
                                 </div>
 
-                                {/* Status Badges Row (2x2 grid, compact) */}
+                                {/* Status Badges Row (2x2 grid) */}
                                 <div style={{
                                     display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr',
-                                    gap: '0.3rem', width: '150px'
+                                    gap: '0.25rem', width: '140px'
                                 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '4px', padding: '0.15rem 0.3rem', fontSize: '0.65rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '3px', padding: '0.1rem 0.25rem', fontSize: '0.6rem' }}>
                                         <span style={{ color: '#3b82f6', fontWeight: 600 }}>Sched</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.scheduled || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '4px', padding: '0.15rem 0.3rem', fontSize: '0.65rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '3px', padding: '0.1rem 0.25rem', fontSize: '0.6rem' }}>
                                         <span style={{ color: '#22c55e', fontWeight: 600 }}>Active</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.active || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '4px', padding: '0.15rem 0.3rem', fontSize: '0.65rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '3px', padding: '0.1rem 0.25rem', fontSize: '0.6rem' }}>
                                         <span style={{ color: '#ec4899', fontWeight: 600 }}>Filled</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.filled || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '4px', padding: '0.15rem 0.3rem', fontSize: '0.65rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '3px', padding: '0.1rem 0.25rem', fontSize: '0.6rem' }}>
                                         <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.ended || 0}</span>
                                     </div>
@@ -857,92 +827,105 @@ export default function Observability() {
     );
 };
 
-// EKG/Cardiac Monitor Animation
-const EKGAnimation = ({ color = '#38bdf8' }) => { // Match Observability blue (Sky 400)
-    // Varied heartbeat form: P-wave, QRS complex (large spike), T-wave
-    // We'll use a path that has 3 distinct "beats" with slightly different heights/forms
+// EKG/Cardiac Monitor Animation with loading states
+const EKGAnimation = ({ color = '#38bdf8', isLoading = false }) => {
+    // Path data for the EKG line
+    const normalPath = `
+        M 0 21 H 10 
+        L 12 18 L 14 21 H 16 
+        L 18 6 L 22 36 L 24 21 H 28
+        L 32 15 L 36 21 H 50
+        
+        M 50 21 H 60
+        L 62 19 L 64 21 H 66
+        L 68 3 L 72 39 L 74 21 H 78
+        L 82 16 L 86 21 H 100
+
+        M 100 21 H 110
+        L 112 16 L 114 21 H 116
+        L 118 9 L 122 33 L 124 21 H 128
+        L 132 18 L 136 21 H 150
+
+        M 150 21 H 160
+        L 162 18 L 164 21 H 166
+        L 168 6 L 172 36 L 174 21 H 178
+        L 182 15 L 186 21 H 200
+    `;
+
+    const loadingPath = `
+        M 0 21 H 15 L 17 18 L 19 24 L 21 21 H 50
+        M 50 21 H 65 L 67 17 L 69 25 L 71 21 H 100
+        M 100 21 H 115 L 117 18 L 119 24 L 121 21 H 150
+        M 150 21 H 165 L 167 17 L 169 25 L 171 21 H 200
+    `;
+
     return (
         <div style={{
             width: '100px',
-            height: '28px',
-            background: 'transparent', // Transparent background
+            height: '42px', // 50% taller (was 28px)
+            background: 'transparent',
             borderRadius: '4px',
-            border: '1px solid rgba(30, 58, 138, 0.3)',
+            border: 'none', // Removed border
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center'
         }}>
-            {/* Real Grid Background (Transparent with subtle lines) */}
+            {/* Fading Grid Background */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
                 backgroundImage: `
-                    linear-gradient(rgba(30, 58, 138, 0.2) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(30, 58, 138, 0.2) 1px, transparent 1px)
+                    linear-gradient(rgba(30, 58, 138, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(30, 58, 138, 0.1) 1px, transparent 1px)
                 `,
                 backgroundSize: '10px 10px',
+                mask: 'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)',
+                WebkitMask: 'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)',
                 zIndex: 0
             }} />
 
-            {/* EKG Path with varied heartbeat forms */}
-            <svg width="200" height="28" viewBox="0 0 200 28" style={{
+            {/* EKG Path */}
+            <svg width="200" height="42" viewBox="0 0 200 42" style={{
                 position: 'absolute',
                 left: 0,
                 animation: 'ekg-move 4s linear infinite',
                 zIndex: 1
             }}>
                 <path
-                    d="
-                        M 0 14 H 10 
-                        L 12 12 L 14 14 H 16 
-                        L 18 4 L 22 24 L 24 14 H 28
-                        L 32 10 L 36 14 H 50
-                        
-                        M 50 14 H 60
-                        L 62 13 L 64 14 H 66
-                        L 68 2 L 72 26 L 74 14 H 78
-                        L 82 11 L 86 14 H 100
-
-                        M 100 14 H 110
-                        L 112 11 L 114 14 H 116
-                        L 118 6 L 122 22 L 124 14 H 128
-                        L 132 12 L 136 14 H 150
-
-                        M 150 14 H 160
-                        L 162 12 L 164 14 H 166
-                        L 168 4 L 172 24 L 174 14 H 178
-                        L 182 10 L 186 14 H 200
-                    "
+                    d={isLoading ? loadingPath : normalPath}
                     fill="none"
                     stroke={color}
-                    strokeWidth="1.2"
+                    strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{ filter: `drop-shadow(0 0 2px ${color})` }}
+                    style={{
+                        filter: `drop-shadow(0 0 3px ${color})`,
+                        transition: 'd 0.5s ease-in-out'
+                    }}
                 />
             </svg>
 
-            {/* Pulse Dot (Whitish, moves along path) */}
-            <div style={{
+            {/* Pulse Dot following the path */}
+            <svg width="200" height="42" viewBox="0 0 200 42" style={{
                 position: 'absolute',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 0 6px rgba(255, 255, 255, 0.8), 0 0 12px rgba(56, 189, 248, 0.6)',
-                animation: 'pulse-move 4s linear infinite',
+                left: 0,
+                animation: 'ekg-move 4s linear infinite',
                 zIndex: 3
-            }} />
+            }}>
+                <circle r="4" fill="rgba(255, 255, 255, 0.95)" style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.8)) drop-shadow(0 0 8px rgba(56, 189, 248, 0.6))' }}>
+                    <animateMotion
+                        dur="4s"
+                        repeatCount="indefinite"
+                        path={isLoading ? loadingPath : normalPath}
+                    />
+                </circle>
+            </svg>
 
             <style>{`
                 @keyframes ekg-move {
                     0% { transform: translateX(0); }
                     100% { transform: translateX(-100px); }
-                }
-                @keyframes pulse-move {
-                    0% { left: 0%; top: 50%; transform: translate(-50%, -50%); }
-                    100% { left: 100%; top: 50%; transform: translate(-50%, -50%); }
                 }
             `}</style>
         </div>
