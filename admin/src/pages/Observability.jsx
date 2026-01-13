@@ -368,8 +368,8 @@ export default function Observability() {
                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b, #ec4899)' }} />
 
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #334155' }}>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0 }}>
-                        <span style={{ color: '#f59e0b', fontSize: '1.4rem' }}>⚡</span> Status
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0 }}>
+                        <span style={{ color: '#f59e0b', fontSize: '1.6rem' }}>⚡</span> Status
                     </h3>
                     <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Node: Nest-Alpha-01</div>
                 </div>
@@ -379,12 +379,15 @@ export default function Observability() {
                     {/* Main Health Block */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                                 Operational
                                 <EKGAnimation color={stats.systemHealth?.db === 'Error' ? '#ef4444' : '#38bdf8'} />
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>Uptime: {formatUptime(stats.systemHealth?.uptime)}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
+                                Uptime: {formatUptime(stats.systemHealth?.uptime)}
+                            </div>
                         </div>
                     </div>
 
@@ -666,21 +669,21 @@ export default function Observability() {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
                                         {/* Messages & Reach */}
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Messages</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                                <span style={{ fontSize: '1rem' }}>📡</span>
+                                                <div className="text-muted" style={{ fontSize: '0.65rem', marginLeft: '0.2rem' }}>Total</div>
                                             </div>
                                             <div style={{ width: '100%', height: '1px', background: '#334155' }} />
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                <span style={{ fontSize: '0.7rem', color: '#3b82f6', textTransform: 'uppercase', fontWeight: 600 }}>Reach</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                <span style={{ fontSize: '1rem' }}>👨‍👩‍👧‍👦</span>
                                                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
-                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Users</div>
+                                                <div className="text-muted" style={{ fontSize: '0.65rem', marginLeft: '0.2rem' }}>Total</div>
                                             </div>
                                         </div>
 
                                         {/* Priority Badges (Below) */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', width: '100%' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.2rem' }}>Priorities</div>
+                                        <div style={{ display: 'flex', gap: '0.3rem', width: '100%', flexWrap: 'wrap' }}>
                                             {[1, 2, 3, 4, 5].map(p => {
                                                 let color = '#22c55e';
                                                 if (p === 1) color = '#ef4444';
@@ -690,15 +693,12 @@ export default function Observability() {
 
                                                 return (
                                                     <div key={p} style={{
-                                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                                        background: `${color}15`, borderRadius: '4px', padding: '1px 6px',
+                                                        width: '22px', height: '22px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        background: `${color}15`, borderRadius: '4px',
                                                         border: `1px solid ${color}30`
                                                     }}>
-                                                        <div style={{
-                                                            fontSize: '0.65rem', fontWeight: 900,
-                                                            color: color
-                                                        }}>P{p}</div>
-                                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#f1f5f9', marginLeft: 'auto' }}>
+                                                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#f1f5f9' }}>
                                                             {stats.broadcastMetrics?.priorities?.[p] || 0}
                                                         </span>
                                                     </div>
@@ -713,41 +713,42 @@ export default function Observability() {
                                             <RandomCounter end={stats.broadcastMetrics?.total || 0} />
                                         </div>
                                         <div style={{ fontSize: '0.9rem', color: '#e2e8f0', fontWeight: 600, textTransform: 'uppercase', marginTop: '0.4rem' }}>Campaigns</div>
+                                        <div className="text-muted" style={{ fontSize: '0.65rem' }}>Total</div>
                                     </div>
 
                                     {/* Right Stack: Sent & Received */}
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', alignItems: 'flex-end' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                            <span style={{ fontSize: '0.7rem', color: '#f97316', textTransform: 'uppercase', fontWeight: 600 }}>Sent</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                            <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.9rem' }}>✓✓</span>
                                             <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
                                         </div>
                                         <div style={{ width: '100%', height: '1px', background: '#334155' }} />
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                            <span style={{ fontSize: '0.7rem', color: '#8b5cf6', textTransform: 'uppercase', fontWeight: 600 }}>Received</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                            <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.9rem' }}>✓✓</span>
                                             <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Baseline: 2x2 Status Badge Grid - No Grey Box */}
+                                {/* Baseline: 2x2 Status Badge Grid */}
                                 <div style={{
                                     display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr',
-                                    gap: '0.5rem', width: '220px', marginTop: 'auto', padding: '0.5rem 0'
+                                    gap: '0.4rem', width: '180px', marginTop: 'auto', padding: '0.5rem 0'
                                 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
-                                        <span style={{ color: '#3b82f6', fontWeight: 600 }}>Scheduled:</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.7rem' }}>
+                                        <span style={{ color: '#3b82f6', fontWeight: 600 }}>Sched</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.scheduled || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
-                                        <span style={{ color: '#22c55e', fontWeight: 600 }}>Active:</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.7rem' }}>
+                                        <span style={{ color: '#22c55e', fontWeight: 600 }}>Active</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.active || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
-                                        <span style={{ color: '#ec4899', fontWeight: 600 }}>Filled:</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.7rem' }}>
+                                        <span style={{ color: '#ec4899', fontWeight: 600 }}>Filled</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.filled || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
-                                        <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended:</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.7rem' }}>
+                                        <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.ended || 0}</span>
                                     </div>
                                 </div>
