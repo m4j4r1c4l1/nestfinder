@@ -1189,12 +1189,11 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 value={searchFilters.status}
                                 onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val }))}
                                 options={[
-                                    { value: 'all', label: 'Any Status' },
-                                    { value: 'active', label: 'Active', color: '#22c55e' },
+                                    { value: 'all', label: 'Any Status', color: null }, // No badge style
                                     { value: 'active', label: 'Active', color: '#22c55e' },
                                     { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' },
                                     { value: 'filled', label: 'Filled', color: '#ec4899' },
-                                    { value: 'inactive', label: 'Past', color: '#94a3b8' }
+                                    { value: 'inactive', label: 'Ended', color: '#94a3b8' }
                                 ]}
                                 placeholder="Filter by Status"
                             />
@@ -1209,7 +1208,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 value={searchFilters.priority}
                                 onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val }))}
                                 options={[
-                                    { value: 'all', label: 'Any Priority' },
+                                    { value: 'all', label: 'Any Priority', color: null },
                                     { value: '1', label: 'P1 - Critical', color: '#ef4444' },
                                     { value: '2', label: 'P2 - High', color: '#f97316' },
                                     { value: '3', label: 'P3 - Medium', color: '#eab308' },
@@ -1324,9 +1323,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'filled' ? '#ec489940' : '#ec489920',
+                            background: searchFilters.status === 'filled' ? '#ec489940' : '#ec489910', // More transparent like inactive
                             color: '#ec4899',
-                            border: searchFilters.status === 'filled' ? '1px solid #ec4899' : '1px solid #ec489940',
+                            border: searchFilters.status === 'filled' ? '1px solid #ec4899' : '1px solid #ec489920',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                         }}
@@ -4776,29 +4775,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 {hoveredItem.title || 'Untitled'}
                             </div>
 
-                            {/* Status & Max Views Badge Row */}
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <span style={{
-                                    padding: '2px 6px', borderRadius: '4px',
-                                    fontSize: '0.7rem', fontWeight: 700,
-                                    background: badgeBg(statusColor), color: statusColor,
-                                    border: `1px solid ${badgeBorder(statusColor)}`,
-                                    textTransform: 'uppercase'
-                                }}>
-                                    {statusText}
-                                </span>
-                                {hoveredItem.max_views && (
-                                    <span style={{
-                                        padding: '2px 6px', borderRadius: '4px',
-                                        fontSize: '0.7rem', fontWeight: 600,
-                                        background: isFilled ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
-                                        color: isFilled ? '#ef4444' : '#06b6d4',
-                                        border: isFilled ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)',
-                                    }}>
-                                        👁 {hoveredItem.total_users || 0} / {hoveredItem.max_views}
-                                    </span>
-                                )}
-                            </div>
+
 
                             {/* Image Preview */}
                             {hoveredItem.image_url && (
@@ -4819,6 +4796,30 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     />
                                 </div>
                             )}
+
+                            {/* Status & Max Views Badge Row - Moved to Bottom */}
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <span style={{
+                                    padding: '2px 6px', borderRadius: '4px',
+                                    fontSize: '0.7rem', fontWeight: 700,
+                                    background: badgeBg(statusColor), color: statusColor,
+                                    border: `1px solid ${badgeBorder(statusColor)}`,
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {statusText}
+                                </span>
+                                {hoveredItem.max_views && (
+                                    <span style={{
+                                        padding: '2px 6px', borderRadius: '4px',
+                                        fontSize: '0.7rem', fontWeight: 600,
+                                        background: isFilled ? '#ec489920' : 'rgba(6, 182, 212, 0.1)',
+                                        color: isFilled ? '#ec4899' : '#06b6d4',
+                                        border: isFilled ? '1px solid #ec489940' : '1px solid rgba(6, 182, 212, 0.3)',
+                                    }}>
+                                        👁 {hoveredItem.total_users || 0} / {hoveredItem.max_views}
+                                    </span>
+                                )}
+                            </div>
 
                             {/* Professional Time Display */}
                             <div style={{
