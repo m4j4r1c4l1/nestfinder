@@ -735,9 +735,13 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                 }}
             >
                 {/* Header */}
-                <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+                {/* Header - Styled to match ChartCard Header */}
+                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '16px 16px 0 0' }}>
                     <div>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>👥 Daily Breakdown</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.2rem' }}>
+                            <span style={{ fontSize: '1.2rem' }}>👨‍👩‍👧‍👦</span>
+                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#e2e8f0' }}>Daily Breakdown</h3>
+                        </div>
                         <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                             {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </span>
@@ -922,7 +926,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const getX = (i) => innerPadding + (i / (metrics.length - 1 || 1)) * (graphWidth - innerPadding * 2);
     const getY = (val, max) => graphHeight - ((val / max) * graphHeight);
 
-    if (loading || metrics.length === 0) {
+    // If initial load (no data), show placeholder.
+    // If refreshing (data exists), show chart with overlay/opacity.
+    if (loading && metrics.length === 0) {
         return (
             <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
@@ -1561,7 +1567,7 @@ const RatingsChartCard = ({ onPointClick }) => {
         </div>
     );
 
-    if (loading || ratings.length === 0) {
+    if (loading && ratings.length === 0) {
         return (
             <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
