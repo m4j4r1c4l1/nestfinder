@@ -234,6 +234,26 @@ const Settings = () => {
                             />
                         </div>
 
+                        {/* Debug Mode Section */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>🔧 Debug Mode</span>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    name="debug_mode_enabled"
+                                    checked={settings.debug_mode_enabled === 'true'}
+                                    onChange={(e) => setSettings({ ...settings, debug_mode_enabled: e.target.checked ? 'true' : 'false' })}
+                                    style={{ width: 18, height: 18, accentColor: '#ef4444' }}
+                                />
+                                Enable Debug Mode (Global)
+                            </label>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginLeft: '1.7rem' }}>
+                                Enables client-side logging uploads, detailed indicators, and access to debug endpoints.
+                            </div>
+                        </div>
+
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                             <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem 2rem', minWidth: '220px' }}>
                                 {saving ? 'Saving...' : 'Save Settings'}
