@@ -875,7 +875,46 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         }
 
         if (hasAnimated.current) {
-            setAnimatedMetrics(metrics);
+            // Update Animation: Staggered Wave from Left to Right
+            let startTime;
+            const totalDuration = 800;
+            const staggerDelay = 400; // How long it takes for the start of animation to travel from left to right
+
+            const animateUpdate = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+
+                const current = metrics.map((m, i) => {
+                    const newM = { ...m };
+                    // Calculate start time for this specific point index
+                    const myDelay = (i / (metrics.length - 1 || 1)) * staggerDelay;
+                    // Calculate local progress (0 to 1) for this point
+                    // Each point takes (totalDuration - staggerDelay) to fully rise
+                    const pointDuration = totalDuration - staggerDelay;
+                    const progress = Math.max(0, Math.min((elapsed - myDelay) / pointDuration, 1));
+
+                    // BackOut easing for a "pop" effect, distinct from initial easeOutCubic
+                    // const ease = 1 - Math.pow(1 - progress, 3); 
+                    // Let's use Elastic or BackOut for "different" feel? Maybe just simple BackOut.
+                    // c3 = 1.70158; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); // Too complex
+                    // Let's stick to a nice smooth QuartOut but staggered
+                    const ease = 1 - Math.pow(1 - progress, 4);
+
+                    seriesConfig.forEach(s => {
+                        const target = m[s.key] || 0;
+                        newM[s.key] = target * ease;
+                    });
+                    return newM;
+                });
+
+                setAnimatedMetrics(current);
+
+                if (elapsed < totalDuration) {
+                    requestAnimationFrame(animateUpdate);
+                }
+            };
+
+            requestAnimationFrame(animateUpdate);
             return;
         }
         hasAnimated.current = true;
@@ -1491,7 +1530,37 @@ const RatingsChartCard = ({ onPointClick }) => {
         }
 
         if (hasAnimated.current) {
-            setAnimatedRatings(ratings);
+            // Update Animation: Staggered Wave
+            let startTime;
+            const totalDuration = 800;
+            const staggerDelay = 400;
+
+            const animateUpdate = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+
+                const current = ratings.map((r, i) => {
+                    // Calculate start time for this specific point index
+                    const myDelay = (i / (ratings.length - 1 || 1)) * staggerDelay;
+                    const pointDuration = totalDuration - staggerDelay;
+                    const progress = Math.max(0, Math.min((elapsed - myDelay) / pointDuration, 1));
+
+                    const ease = 1 - Math.pow(1 - progress, 4); // QuartOut
+
+                    return {
+                        ...r,
+                        count: r.count * ease,
+                        average: r.average * ease
+                    };
+                });
+
+                setAnimatedRatings(current);
+
+                if (elapsed < totalDuration) {
+                    requestAnimationFrame(animateUpdate);
+                }
+            };
+            requestAnimationFrame(animateUpdate);
             return;
         }
         hasAnimated.current = true;
