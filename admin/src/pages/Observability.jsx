@@ -953,26 +953,41 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 />
             </svg>
 
-            {/* Pulse Dot following the path */}
-            <svg width="200" height="42" viewBox="0 0 200 42" style={{
+            {/* Pulse Dot - horizontally centered, vertical movement only */}
+            <div style={{
                 position: 'absolute',
-                left: 0,
-                animation: `ekg-move ${animDuration} linear infinite`,
-                zIndex: 3
-            }}>
-                <circle r="4" fill="rgba(255, 255, 255, 0.95)" style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.8)) drop-shadow(0 0 8px rgba(56, 189, 248, 0.6))' }}>
-                    <animateMotion
-                        dur={animDuration}
-                        repeatCount="indefinite"
-                        path={activePath}
-                    />
-                </circle>
-            </svg>
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.95)',
+                boxShadow: '0 0 4px rgba(255,255,255,0.8), 0 0 8px rgba(56, 189, 248, 0.6)',
+                animation: `ekg-dot-pulse ${animDuration} ease-in-out infinite`,
+                zIndex: 5
+            }} />
 
             <style>{`
                 @keyframes ekg-move {
                     0% { transform: translateX(0); }
                     100% { transform: translateX(-100px); }
+                }
+                @keyframes ekg-dot-pulse {
+                    0%, 100% { top: 50%; }
+                    10% { top: 45%; }
+                    15% { top: 50%; }
+                    20% { top: 15%; }
+                    25% { top: 85%; }
+                    30% { top: 50%; }
+                    35% { top: 40%; }
+                    40% { top: 50%; }
+                    60% { top: 50%; }
+                    65% { top: 10%; }
+                    70% { top: 90%; }
+                    75% { top: 50%; }
+                    80% { top: 42%; }
+                    85% { top: 50%; }
                 }
             `}</style>
         </div>
