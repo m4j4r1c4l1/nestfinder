@@ -12,6 +12,10 @@ const router = Router();
 // All admin routes require authentication
 router.use(requireAdmin);
 
+// Broadcast injection
+let broadcast = () => { };
+export const setBroadcast = (fn) => { broadcast = fn; };
+
 // ================== DB RECOVERY ==================
 
 // Check for corrupt database availability
@@ -1022,7 +1026,21 @@ router.put('/feedback/:id/status', (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    // Get feedback first to know the user_id for targeting (if we had targeted sockets)
+    // For now, simpler to just update and broadcast to all (client filters by ID)
+    // Or simpler: just run the update.
+    // Ideally we want to know the user_id to maybe log it or optimize broadcast, but broadcast is global currently.
+
     run('UPDATE feedback SET status = ? WHERE id = ?', [status, id]);
+
+    // Broadcast update to client
+    // We send the ID and the new Status. The client will check if it owns this ID.
+    broadcast({
+        type: 'feedback_update',
+        id: parseInt(id),
+        status
+    });
+
     res.json({ success: true });
 });
 

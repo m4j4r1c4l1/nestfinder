@@ -342,7 +342,41 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
         fetchSent();
         // Poll for status updates (e.g. delivered/read ticks) every 5s
         const interval = setInterval(() => fetchSent(true), 5000);
-        return () => clearInterval(interval);
+
+        // Listen for real-time updates via WebSocket
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // const wsUrl = `${wsProtocol}//${window.location.host}`; // Production
+        // For dev/mixed env, use API_URL base if available, else window.location
+        // Assuming the app has a global WS connection or we create one here?
+        // The app likely uses a global connection or context. 
+        // Checking existing code... Client seems to not have a global WS Context exposed here easily?
+        // OBSERVATION: The Home.jsx doesn't seem to set up a global WS. 
+        // BUT `Admin` uses `useWebSocket`.
+        // `NotificationList` is used in `MapView`.
+        // Let's check if we can access the WS.
+        // For now, let's stick to polling as the primary, but add a standalone WS listener if we want "Instant".
+        // Actually, creating a new WS connection just for this component might be overkill if it mounts/unmounts often.
+        // But `NotificationList` is usually a persistent modal/panel.
+
+        const ws = new WebSocket(`${wsProtocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`);
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'feedback_update') {
+                    setSentMessages(prev => prev.map(msg =>
+                        msg.id === data.id ? { ...msg, status: data.status } : msg
+                    ));
+                }
+            } catch (e) {
+                // Ignore parse errors
+            }
+        };
+
+        return () => {
+            clearInterval(interval);
+            ws.close();
+        };
     }, []);
 
     // Helper: Filter by retention
