@@ -368,9 +368,7 @@ export default function Observability() {
                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b, #ec4899)' }} />
 
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #334155' }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0 }}>
-                        <span style={{ color: '#f59e0b', fontSize: '1.6rem' }}>⚡</span> Status
-                    </h3>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>⚡ Status</h3>
                     <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Node: Nest-Alpha-01</div>
                 </div>
 
@@ -387,8 +385,9 @@ export default function Observability() {
                             </div>
                         </div>
                         <EKGAnimation
-                            color={stats.systemHealth?.db === 'Error' ? '#ef4444' : '#38bdf8'}
+                            color={stats.systemHealth?.db === 'Error' || (stats.systemHealth?.load > 70) ? '#ef4444' : '#38bdf8'}
                             isLoading={!stats.systemHealth?.db || stats.systemHealth?.db === 'Checking...'}
+                            isStressed={(stats.systemHealth?.load > 50) || (stats.systemHealth?.ram > 70) || stats.systemHealth?.db === 'Error'}
                         />
                     </div>
 
@@ -407,13 +406,15 @@ export default function Observability() {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.2rem', borderLeft: '1px solid #334155', paddingLeft: '1.2rem' }}>
-                                <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>🔲</span>
                                     <span>CPU</span>
-                                    <span style={{ fontWeight: 700 }}>{stats.systemHealth?.load || 0}%</span>
+                                    <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.load || 0}%</span>
                                 </div>
-                                <div style={{ fontSize: '0.75rem', color: '#818cf8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#818cf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>💾</span>
                                     <span>RAM</span>
-                                    <span style={{ fontWeight: 700 }}>{stats.systemHealth?.ram || 0}%</span>
+                                    <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.ram || 0}%</span>
                                 </div>
                             </div>
                         </div>
@@ -421,37 +422,52 @@ export default function Observability() {
 
                     <div style={{ width: '1px', height: '40px', background: '#334155' }} />
 
-                    {/* Database Status */}
+                    {/* Database Status - Vertical layout matching others */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <img src={dbIcon} alt="DB" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
-                        <div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Database</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e' }}>
-                                {stats.systemHealth?.db || 'Checking...'}
+                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>
+                                {stats.systemHealth?.db === 'Error' ? 'Error' : stats.systemHealth?.db === 'Checking...' ? 'Checking...' : 'Connected'}
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>SQLite Engine</div>
+                            <div style={{ fontSize: '0.75rem', color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: stats.systemHealth?.db === 'Error' ? '#ef4444' : stats.systemHealth?.db === 'Checking...' ? '#f59e0b' : '#22c55e', boxShadow: `0 0 5px ${stats.systemHealth?.db === 'Error' ? '#ef4444' : stats.systemHealth?.db === 'Checking...' ? '#f59e0b' : '#22c55e'}` }} />
+                                {stats.systemHealth?.db === 'Error' ? 'Unreachable' : stats.systemHealth?.db === 'Checking...' ? 'Testing...' : 'SQLite Engine'}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Live Connection Counter (Right Aligned) */}
+                    {/* Live Connection Counter (Right Aligned) - Dot on left */}
                     <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            {/* Pulsing dot on left */}
+                            <div style={{ position: 'relative', width: '12px', height: '12px' }}>
+                                <div style={{ position: 'absolute', inset: '-4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.2)', animation: 'pulse-wave 2s ease-out infinite' }} />
+                                <div style={{ position: 'absolute', inset: '-2px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.3)', animation: 'pulse-wave 2s ease-out infinite 0.3s' }} />
+                                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#38bdf8', animation: 'pulse-beat 1s ease-in-out infinite' }} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                 <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>LIVE SESSIONS</span>
                                 <span style={{ fontSize: '1.3rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
                                     <RollingBarrelCounter end={stats.connectedClients || 0} />
                                 </span>
                             </div>
-                            <div style={{ position: 'relative', width: '8px', height: '8px' }}>
-                                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#38bdf8', opacity: 0.4, animation: 'ping 1s cubic-bezier(0,0,0.2,1) infinite' }} />
-                                <div style={{ position: 'absolute', inset: '2px', borderRadius: '50%', background: '#38bdf8' }} />
-                            </div>
                         </div>
                     </div>
 
                 </div>
+                <style>{`
+                    @keyframes pulse-wave {
+                        0% { transform: scale(1); opacity: 0.6; }
+                        100% { transform: scale(2); opacity: 0; }
+                    }
+                    @keyframes pulse-beat {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.2); }
+                    }
+                `}</style>
             </div>
 
             {/* Totals Summary */}
@@ -827,9 +843,9 @@ export default function Observability() {
     );
 };
 
-// EKG/Cardiac Monitor Animation with loading states
-const EKGAnimation = ({ color = '#38bdf8', isLoading = false }) => {
-    // Path data for the EKG line
+// EKG/Cardiac Monitor Animation with loading and stress states
+const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false }) => {
+    // Path data for the EKG line - centered at Y=21 for 42px height
     const normalPath = `
         M 0 21 H 10 
         L 12 18 L 14 21 H 16 
@@ -859,19 +875,41 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false }) => {
         M 150 21 H 165 L 167 17 L 169 25 L 171 21 H 200
     `;
 
+    // Stressed path - more erratic, spiky
+    const stressedPath = `
+        M 0 21 H 5 L 7 10 L 9 32 L 11 15 L 13 27 L 15 21 H 20
+        L 22 5 L 24 38 L 26 8 L 28 34 L 30 21 H 35
+        L 37 12 L 39 30 L 41 21 H 50
+        
+        M 50 21 H 55 L 57 8 L 59 35 L 61 12 L 63 29 L 65 21 H 70
+        L 72 3 L 74 40 L 76 6 L 78 36 L 80 21 H 85
+        L 87 14 L 89 28 L 91 21 H 100
+
+        M 100 21 H 105 L 107 10 L 109 33 L 111 14 L 113 28 L 115 21 H 120
+        L 122 4 L 124 39 L 126 7 L 128 35 L 130 21 H 135
+        L 137 13 L 139 29 L 141 21 H 150
+
+        M 150 21 H 155 L 157 9 L 159 34 L 161 13 L 163 28 L 165 21 H 170
+        L 172 5 L 174 38 L 176 8 L 178 34 L 180 21 H 185
+        L 187 14 L 189 28 L 191 21 H 200
+    `;
+
+    const activePath = isLoading ? loadingPath : isStressed ? stressedPath : normalPath;
+    const animDuration = isStressed ? '2s' : '4s'; // Faster when stressed
+
     return (
         <div style={{
             width: '100px',
-            height: '42px', // 50% taller (was 28px)
+            height: '42px',
             background: 'transparent',
             borderRadius: '4px',
-            border: 'none', // Removed border
+            border: 'none',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center'
         }}>
-            {/* Fading Grid Background */}
+            {/* Fading Grid Background - fade on all edges */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
@@ -880,20 +918,29 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false }) => {
                     linear-gradient(90deg, rgba(30, 58, 138, 0.1) 1px, transparent 1px)
                 `,
                 backgroundSize: '10px 10px',
-                mask: 'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)',
-                WebkitMask: 'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)',
+                mask: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%)',
+                WebkitMask: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%)',
                 zIndex: 0
+            }} />
+
+            {/* Edge fade overlay */}
+            <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(to right, rgba(15,23,42,1) 0%, transparent 15%, transparent 85%, rgba(15,23,42,1) 100%), linear-gradient(to bottom, rgba(15,23,42,0.8) 0%, transparent 20%, transparent 80%, rgba(15,23,42,0.8) 100%)',
+                zIndex: 4,
+                pointerEvents: 'none'
             }} />
 
             {/* EKG Path */}
             <svg width="200" height="42" viewBox="0 0 200 42" style={{
                 position: 'absolute',
                 left: 0,
-                animation: 'ekg-move 4s linear infinite',
+                animation: `ekg-move ${animDuration} linear infinite`,
                 zIndex: 1
             }}>
                 <path
-                    d={isLoading ? loadingPath : normalPath}
+                    d={activePath}
                     fill="none"
                     stroke={color}
                     strokeWidth="1.5"
@@ -910,14 +957,14 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false }) => {
             <svg width="200" height="42" viewBox="0 0 200 42" style={{
                 position: 'absolute',
                 left: 0,
-                animation: 'ekg-move 4s linear infinite',
+                animation: `ekg-move ${animDuration} linear infinite`,
                 zIndex: 3
             }}>
                 <circle r="4" fill="rgba(255, 255, 255, 0.95)" style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.8)) drop-shadow(0 0 8px rgba(56, 189, 248, 0.6))' }}>
                     <animateMotion
-                        dur="4s"
+                        dur={animDuration}
                         repeatCount="indefinite"
-                        path={isLoading ? loadingPath : normalPath}
+                        path={activePath}
                     />
                 </circle>
             </svg>
