@@ -2363,7 +2363,7 @@ const FeedbackSection = ({
     // Handle row click: open preview AND mark as read if sent/delivered
     const handleRowClick = async (item) => {
         setPreviewItem(item);
-        if (item.status === 'sent' || item.status === 'new' || item.status === 'pending') {
+        if (['sent', 'new', 'pending', 'delivered'].includes(item.status)) {
             await onUpdateStatus(item.id, 'read');
             onUpdate && onUpdate();
         }
