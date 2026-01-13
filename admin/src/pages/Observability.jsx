@@ -84,8 +84,8 @@ const CommitReveal = ({ text, duration = 2000 }) => {
             if (timestamp - lastUpdate > 50) { // Throttle scramble speed ~20fps
                 let str = '';
                 for (let i = 0; i < len; i++) {
-                    // Start locking sequence after 1.5s of initial chaos
-                    const lockTime = 1500 + (i * 500);
+                    // Start locking sequence after 1s of initial chaos
+                    const lockTime = 1000 + (i * 500);
 
                     if (elapsed > lockTime) {
                         str += text[i]; // Locked
@@ -99,7 +99,7 @@ const CommitReveal = ({ text, duration = 2000 }) => {
 
             // Continue until all chars are locked
             // Last char locks at 1000 + (len-1)*500
-            const totalDuration = 1500 + (len * 500) + 100;
+            const totalDuration = 1000 + (len * 500) + 100;
 
             if (elapsed < totalDuration) {
                 animationFrame = requestAnimationFrame(animate);
@@ -262,10 +262,7 @@ const Observability = () => {
         notificationMetrics: { total: 0, sent: 0, delivered: 0, read: 0, unread: 0 },
         feedbackMetrics: { total: 0, pending: 0, read: 0 },
         devMetrics: { loc: 0, components: 0, commits: 0, files: 0, apiEndpoints: 0, socketEvents: 0, listeners: 0, hooks: 0 },
-        broadcastMetrics: { total: 0, active: 0, delivered: 0, read: 0 },
-        connectedClients: 0,
-        serverStatus: 'Online',
-        lastHeartbeat: Date.now()
+        broadcastMetrics: { total: 0, active: 0, delivered: 0, read: 0 }
     });
 
     const [activeTab, setActiveTab] = useState('notifications');
@@ -291,476 +288,347 @@ const Observability = () => {
                 setTimeout(loadData, 1000);
             }
         }
-    } else if (message.type === 'clients-update') {
-        setStats(prev => ({
-            ...prev,
-            connectedClients: message.count
-        }));
-    }
-});
+    });
 
-useEffect(() => {
-    loadData();
-}, [timeRange]);
+    useEffect(() => {
+        loadData();
+    }, [timeRange]);
 
-const loadData = async () => {
-    setLoading(true);
-    try {
-        const token = localStorage.getItem('nestfinder_admin_token');
-        const res = await fetch(`${API_URL}/api/push/admin/stats`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('nestfinder_admin_token');
+            const res = await fetch(`${API_URL}/api/push/admin/stats`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
 
-        if (!res.ok) {
-            throw new Error(`Server returned ${res.status} ${res.statusText}`);
+            if (!res.ok) {
+                throw new Error(`Server returned ${res.status} ${res.statusText}`);
+            }
+
+            const data = await res.json();
+            // Merge with default structure to ensure no undefined access
+            setStats(prev => ({ ...prev, ...data }));
+        } catch (err) {
+            console.error('Failed to load observability stats:', err);
+            // We keep the default stats so the UI doesn't crash
         }
+        setLoading(false);
+    };
 
-        const data = await res.json();
-        // Merge with default structure to ensure no undefined access
-        setStats(prev => ({ ...prev, ...data }));
-    } catch (err) {
-        console.error('Failed to load observability stats:', err);
-        // We keep the default stats so the UI doesn't crash
-    }
-    setLoading(false);
-};
-
-return (
-    <div className="notifications-page" style={{ width: '75%', maxWidth: '1500px', margin: '0 auto', padding: '1.5rem 1rem' }}>
-        <div style={{ marginBottom: '2rem' }}>
-            <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                🐦 Observability
-            </h1>
-            <p className="text-muted">Monitor system health, usage statistics, and developer insights</p>
-        </div>
-
-        {/* Status Card (Landscape) */}
-        <div className="card" style={{ marginBottom: '1.5rem', background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', border: '1px solid #334155', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b, #ec4899)' }} />
-
-            <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
-
-                {/* Status Header & Main Health */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                    <div style={{
-                        width: '60px', height: '60px', borderRadius: '12px',
-                        background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '2.5rem', boxShadow: '0 0 15px rgba(34, 197, 94, 0.2)'
-                    }}>
-                        ⚡
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '0.85rem', color: '#94a3b8', letterSpacing: '0.05em', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            Operational
-                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Uptime: {stats.uptime || '99.9%'}</div>
-                    </div>
-                </div>
-
-                <div style={{ width: '1px', height: '50px', background: '#334155' }} />
-
-                {/* Server Node Status */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ fontSize: '2rem', opacity: 0.8 }}>🖥️</div>
-                    <div>
-                        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Server Node</div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#e2e8f0' }}>Healthy</div>
-                        <div style={{ fontSize: '0.75rem', color: '#22c55e' }}>Latency: {parseInt(Math.random() * 20 + 10)}ms</div>
-                    </div>
-                </div>
-
-                <div style={{ width: '1px', height: '50px', background: '#334155' }} />
-
-                {/* Admin Panel Status */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ fontSize: '2rem', opacity: 0.8 }}>🛡️</div>
-                    <div>
-                        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Admin Panel</div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#e2e8f0' }}>Connected</div>
-                        <div style={{ fontSize: '0.75rem', color: '#3b82f6' }}>Socket v2.4 (Secure)</div>
-                    </div>
-                </div>
-
-                {/* Live Connection Counter (Right Aligned) */}
-                <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    <div style={{ background: '#0f172a', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>LIVE CONNECTIONS</span>
-                            <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
-                                <RollingBarrelCounter end={stats.connectedClients || 1} />
-                            </span>
-                        </div>
-                        <div style={{ position: 'relative', width: '10px', height: '10px' }}>
-                            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#38bdf8', opacity: 0.4, animation: 'ping 1s cubic-bezier(0,0,0.2,1) infinite' }} />
-                            <div style={{ position: 'absolute', inset: '2px', borderRadius: '50%', background: '#38bdf8' }} />
-                        </div>
-                    </div>
-                    <div style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: '#64748b' }}>Real-time socket sessions</div>
-                </div>
-
+    return (
+        <div className="notifications-page" style={{ width: '75%', maxWidth: '1500px', margin: '0 auto', padding: '1.5rem 1rem' }}>
+            <div style={{ marginBottom: '2rem' }}>
+                <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    🐦 Observability
+                </h1>
+                <p className="text-muted">Monitor system health, usage statistics, and developer insights</p>
             </div>
-        </div>
 
-        {/* Totals Summary */}
-        <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>📊 Totals</h3>
-            </div>
-            <div className="card-body">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    {/* Row 1: Users, Points, Rating */}
-                    <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
-                        {/* Users Block */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem' }}>
-                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🦚 Users</div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)', lineHeight: 1 }}>
-                                    <RandomCounter end={stats.totalSubscribers} />
-                                </div>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Registered</div>
-                                <div className="text-muted text-sm">Total</div>
-                            </div>
-                            {/* 2x2 Grid Badges */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', width: '100%', maxWidth: '240px' }}>
-                                {[
-                                    { label: 'Eagle', count: stats.userLevels?.eagle, color: '#f59e0b', icon: '🦅' },
-                                    { label: 'Owl', count: stats.userLevels?.owl, color: '#8b5cf6', icon: '🦉' },
-                                    { label: 'Sparrow', count: stats.userLevels?.sparrow, color: '#3b82f6', icon: '🐦' },
-                                    { label: 'Hatchling', count: stats.userLevels?.hatchling, color: '#94a3b8', icon: '🥚' }
-                                ].map(badge => (
-                                    <div key={badge.label} style={{
-                                        display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.4rem',
-                                        background: `${badge.color}20`, border: `1px solid ${badge.color}40`,
-                                        borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem'
-                                    }}>
-                                        <span style={{ fontSize: '1rem' }}>{badge.icon}</span>
-                                        <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
-                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={badge.count || 0} /></span>
+            {/* Totals Summary */}
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>📊 Totals</h3>
+                </div>
+                <div className="card-body">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {/* Row 1: Users, Points, Rating */}
+                        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
+                            {/* Users Block */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🦚 Users</div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary-color, #3b82f6)', lineHeight: 1 }}>
+                                        <RandomCounter end={stats.totalSubscribers} />
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div style={{ width: '1px', height: '60%', alignSelf: 'center', background: '#334155', margin: '0 1rem' }} />
-
-                        {/* Points Block */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem' }}>
-                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>📍 Points</div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', lineHeight: 1 }}>
-                                    <RandomCounter end={(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)} />
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Registered</div>
+                                    <div className="text-muted text-sm">Total</div>
                                 </div>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Submitted</div>
-                                <div className="text-muted text-sm">Total</div>
-                            </div>
-                            {/* Badges: Pending on top, Confirmed+Inactive below */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%', maxWidth: '280px' }}>
-                                {/* Pending badge on top */}
-                                <div style={{
-                                    display: 'flex', alignItems: 'baseline', gap: '0.4rem',
-                                    background: '#f59e0b20', border: '1px solid #f59e0b40',
-                                    borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
-                                }}>
-                                    <span style={{ fontSize: '0.9rem' }}>🟠</span>
-                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Pending</span>
-                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.pending || 0} /></span>
-                                </div>
-                                {/* Confirmed + Inactive row */}
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <div style={{
-                                        display: 'flex', alignItems: 'baseline', gap: '0.4rem',
-                                        background: '#22c55e20', border: '1px solid #22c55e40',
-                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
-                                    }}>
-                                        <span style={{ fontSize: '0.9rem' }}>🟢</span>
-                                        <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Confirmed</span>
-                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.confirmed || 0} /></span>
-                                    </div>
-                                    <div style={{
-                                        display: 'flex', alignItems: 'baseline', gap: '0.4rem',
-                                        background: '#ef444420', border: '1px solid #ef444440',
-                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
-                                    }}>
-                                        <span style={{ fontSize: '0.9rem' }}>🔴</span>
-                                        <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Inactive</span>
-                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.deactivated || 0} /></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ width: '1px', height: '60%', alignSelf: 'center', background: '#334155', margin: '0 1rem' }} />
-
-                        {/* Rating Block */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem', height: '100%' }}>
-                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>⭐ Rating</div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#facc15', lineHeight: 1 }}>
-                                    {stats.avgRating !== undefined ? <RandomCounter end={stats.avgRating} decimals={1} /> : '-'}
-                                </div>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Average</div>
-                                <div className="text-muted text-sm">All time</div>
-                            </div>
-                            {/* Badge - vertically centered to align with Users 2x2 grid center */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-                                <div style={{
-                                    display: 'flex', alignItems: 'baseline', gap: '0.4rem',
-                                    background: '#facc1520', border: '1px solid #facc1540',
-                                    borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
-                                }}>
-                                    <span style={{ fontSize: '0.9rem' }}>⭐</span>
-                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Votes</span>
-                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.totalRatings || 0} /></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Separator Line */}
-                    <div style={{ height: '1px', background: '#334155', width: '100%' }} />
-
-                    {/* Row 2: Messages | Broadcasts | Development */}
-                    {/* Using Grid: 25% | 25% | 50%. Dev block gets 50% width to shift it left. */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '1rem', width: '100%' }}>
-                        {/* Messages Block (Left) */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
-                                {/* Sent Section */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                    <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
-                                            <RandomCounter end={stats.notificationMetrics?.total || 0} />
-                                        </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
-                                        <div className="text-muted text-sm">Total</div>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                            <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.unread || 0} /></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* Received Section */}
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                    <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
-                                            <RandomCounter end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
-                                        </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
-                                        <div className="text-muted text-sm">Total</div>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.pending || 0} /></span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.read || 0} /></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Broadcasts Block (Center) */}
-                        {/* Broadcasts Block (Center) */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', height: '100%', width: '100%' }}>
-                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
-
-                            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
-
-                                {/* Hero: Live Active Broadcasts */}
-                                <div style={{
-                                    background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(15, 23, 42, 0) 100%)',
-                                    border: '1px solid rgba(6, 182, 212, 0.2)',
-                                    borderRadius: '12px',
-                                    padding: '1rem 1.5rem',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-                                        <div style={{
-                                            position: 'relative', width: '14px', height: '14px',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                {/* 2x2 Grid Badges */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', width: '100%', maxWidth: '240px' }}>
+                                    {[
+                                        { label: 'Eagle', count: stats.userLevels?.eagle, color: '#f59e0b', icon: '🦅' },
+                                        { label: 'Owl', count: stats.userLevels?.owl, color: '#8b5cf6', icon: '🦉' },
+                                        { label: 'Sparrow', count: stats.userLevels?.sparrow, color: '#3b82f6', icon: '🐦' },
+                                        { label: 'Hatchling', count: stats.userLevels?.hatchling, color: '#94a3b8', icon: '🥚' }
+                                    ].map(badge => (
+                                        <div key={badge.label} style={{
+                                            display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.4rem',
+                                            background: `${badge.color}20`, border: `1px solid ${badge.color}40`,
+                                            borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem'
                                         }}>
-                                            <div style={{
-                                                position: 'absolute', width: '100%', height: '100%', borderRadius: '50%',
-                                                background: '#22d3ee', opacity: 0.75,
-                                                animation: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite'
-                                            }} />
-                                            <div style={{
-                                                position: 'relative', width: '8px', height: '8px', borderRadius: '50%',
-                                                background: '#06b6d4', boxShadow: '0 0 8px #22d3ee'
-                                            }} />
-                                            <style>{`
-                                                    @keyframes ping {
-                                                        75%, 100% { transform: scale(2); opacity: 0; }
-                                                    }
-                                                `}</style>
+                                            <span style={{ fontSize: '1rem' }}>{badge.icon}</span>
+                                            <span style={{ color: badge.color, fontWeight: 600 }}>{badge.label}</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={badge.count || 0} /></span>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            <span style={{ fontSize: '2.2rem', fontWeight: 'bold', lineHeight: 1, color: '#22d3ee', letterSpacing: '-0.02em' }}>
-                                                <RandomCounter end={stats.broadcastMetrics?.active || 0} />
-                                            </span>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                                Live Now
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div style={{ fontSize: '2.5rem', opacity: 0.15, filter: 'grayscale(100%)' }}>📡</div>
+                                    ))}
                                 </div>
+                            </div>
 
-                                {/* Metrics Grid */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                                    {/* Engagement Rate */}
-                                    <div style={{
-                                        background: '#33415530', borderRadius: '10px', padding: '0.8rem',
-                                        display: 'flex', flexDirection: 'column', border: '1px solid #33415550'
-                                    }}>
-                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.2rem' }}>Engagement</span>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem' }}>
-                                            <span style={{ fontSize: '1.4rem', fontWeight: 600, color: '#4ade80' }}>
-                                                {((stats.broadcastMetrics?.delivered > 0 ? (stats.broadcastMetrics.read / stats.broadcastMetrics.delivered) * 100 : 0)).toFixed(1)}%
-                                            </span>
-                                        </div>
-                                        <span style={{ fontSize: '0.65rem', color: '#4ade8080' }}>Read Rate</span>
+                            <div style={{ width: '1px', height: '60%', alignSelf: 'center', background: '#334155', margin: '0 1rem' }} />
+
+                            {/* Points Block */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>📍 Points</div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22c55e', lineHeight: 1 }}>
+                                        <RandomCounter end={(stats.mapPoints?.confirmed || 0) + (stats.mapPoints?.pending || 0) + (stats.mapPoints?.deactivated || 0)} />
                                     </div>
-
-                                    {/* Total History */}
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Submitted</div>
+                                    <div className="text-muted text-sm">Total</div>
+                                </div>
+                                {/* Badges: Pending on top, Confirmed+Inactive below */}
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%', maxWidth: '280px' }}>
+                                    {/* Pending badge on top */}
                                     <div style={{
-                                        background: '#33415530', borderRadius: '10px', padding: '0.8rem',
-                                        display: 'flex', flexDirection: 'column', border: '1px solid #33415550'
+                                        display: 'flex', alignItems: 'baseline', gap: '0.4rem',
+                                        background: '#f59e0b20', border: '1px solid #f59e0b40',
+                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
                                     }}>
-                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.2rem' }}>History</span>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem' }}>
-                                            <span style={{ fontSize: '1.4rem', fontWeight: 600, color: '#e2e8f0' }}>
-                                                <RollingBarrelCounter end={stats.broadcastMetrics?.total || 0} />
-                                            </span>
+                                        <span style={{ fontSize: '0.9rem' }}>🟠</span>
+                                        <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Pending</span>
+                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.pending || 0} /></span>
+                                    </div>
+                                    {/* Confirmed + Inactive row */}
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <div style={{
+                                            display: 'flex', alignItems: 'baseline', gap: '0.4rem',
+                                            background: '#22c55e20', border: '1px solid #22c55e40',
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
+                                        }}>
+                                            <span style={{ fontSize: '0.9rem' }}>🟢</span>
+                                            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Confirmed</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.confirmed || 0} /></span>
                                         </div>
-                                        <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Created</span>
+                                        <div style={{
+                                            display: 'flex', alignItems: 'baseline', gap: '0.4rem',
+                                            background: '#ef444420', border: '1px solid #ef444440',
+                                            borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
+                                        }}>
+                                            <span style={{ fontSize: '0.9rem' }}>🔴</span>
+                                            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Inactive</span>
+                                            <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.mapPoints?.deactivated || 0} /></span>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Reach Footer */}
-                                <div style={{
-                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                    padding: '0.6rem 1rem', background: '#1e293b50', borderRadius: '8px',
-                                    border: '1px solid #33415530'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <span style={{ fontSize: '0.9rem' }}>👥</span>
-                                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Total Reach</span>
+                            <div style={{ width: '1px', height: '60%', alignSelf: 'center', background: '#334155', margin: '0 1rem' }} />
+
+                            {/* Rating Block */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '1rem', height: '100%' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>⭐ Rating</div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#facc15', lineHeight: 1 }}>
+                                        {stats.avgRating !== undefined ? <RandomCounter end={stats.avgRating} decimals={1} /> : '-'}
                                     </div>
-                                    <span style={{ fontWeight: 600, color: '#f1f5f9', fontSize: '0.9rem' }}>
-                                        <RollingBarrelCounter end={stats.broadcastMetrics?.delivered || 0} separator="," /> <span style={{ fontSize: '0.8em', color: '#64748b', fontWeight: 400 }}>users</span>
-                                    </span>
+                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Average</div>
+                                    <div className="text-muted text-sm">All time</div>
+                                </div>
+                                {/* Badge - vertically centered to align with Users 2x2 grid center */}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                                    <div style={{
+                                        display: 'flex', alignItems: 'baseline', gap: '0.4rem',
+                                        background: '#facc1520', border: '1px solid #facc1540',
+                                        borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.85rem'
+                                    }}>
+                                        <span style={{ fontSize: '0.9rem' }}>⭐</span>
+                                        <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Votes</span>
+                                        <span style={{ fontWeight: 700, color: '#fff', marginLeft: '0.2rem' }}><RollingBarrelCounter end={stats.totalRatings || 0} /></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Development Block (Right) - Now gets 50% width */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
+                        {/* Separator Line */}
+                        <div style={{ height: '1px', background: '#334155', width: '100%' }} />
 
-                            {/* 3 columns Badge Grid (9 items) */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: '0.6rem', width: '100%' }}>
-                                {[
-                                    // Row 1
-                                    { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9', alignBottom: true },
-                                    // Center: Lines of Code (Custom Render)
-                                    {
-                                        isLoc: true,
-                                        count: <RandomCounter end={stats.devMetrics?.loc || 0} separator="." />,
-                                        label: 'Lines of Code',
-                                        sub: 'Total'
-                                    },
-                                    { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' }, alignBottom: true },
+                        {/* Row 2: Messages | Broadcasts | Development */}
+                        {/* Using Grid: 25% | 25% | 50%. Dev block gets 50% width to shift it left. */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '1rem', width: '100%' }}>
+                            {/* Messages Block (Left) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
+                                    {/* Sent Section */}
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
+                                                <RandomCounter end={stats.notificationMetrics?.total || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
+                                            <div className="text-muted text-sm">Total</div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.unread || 0} /></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Received Section */}
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
+                                                <RandomCounter end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
+                                            <div className="text-muted text-sm">Total</div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.pending || 0} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.read || 0} /></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                    // Row 2
-                                    { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#8b5cf6' },
-                                    {
-                                        label: 'Commit ID',
-                                        sub: 'Latest',
-                                        count: <CommitReveal text={stats.devMetrics?.lastCommit} />,
-                                        color: '#4ade80',
-                                        mono: true,
-                                        boxStyle: { background: '#1e3a8a40', border: '1px solid #1e3a8a' }
-                                    },
-                                    { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
+                            {/* Broadcasts Block (Center) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
+                                    {/* Active Section */}
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22d3ee', lineHeight: 1 }}>
+                                                <RandomCounter end={stats.broadcastMetrics?.active || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Banners</div>
+                                            <div className="text-muted text-sm">Active</div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.delivered || 0} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.read || 0} /></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Total Section */}
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4ade80', lineHeight: 1 }}>
+                                                <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Created</div>
+                                            <div className="text-muted text-sm">Total</div>
+                                        </div>
+                                        {/* Status badge */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#c2410c20', border: '1px solid #c2410c40', borderRadius: '8px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#fb923c', fontWeight: 600 }}>Archive Ready ✅</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                    // Row 3
-                                    { label: 'Listeners', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.listeners || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#d946ef' },
-                                    { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#eab308' },
-                                    { label: 'Hooks', sub: 'React Hooks', count: <RollingBarrelCounter end={stats.devMetrics?.hooks || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#6366f1' },
-                                ].map((badge, i) => {
-                                    if (badge.isLoc) {
-                                        return (
-                                            <div key={i} style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
-                                                    {badge.count}
+                            {/* Development Block (Right) - Now gets 50% width */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
+
+                                {/* 3 columns Badge Grid (9 items) */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: '0.6rem', width: '100%' }}>
+                                    {[
+                                        // Row 1
+                                        { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9', alignBottom: true },
+                                        // Center: Lines of Code (Custom Render)
+                                        {
+                                            isLoc: true,
+                                            count: <RandomCounter end={stats.devMetrics?.loc || 0} separator="." />,
+                                            label: 'Lines of Code',
+                                            sub: 'Total'
+                                        },
+                                        { label: 'Files', sub: 'Total Count', count: <RollingBarrelCounter end={stats.devMetrics?.files || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#fb923c', boxStyle: { background: '#c2410c20', border: '1px solid #c2410c40' }, alignBottom: true },
+
+                                        // Row 2
+                                        { label: 'Commits', sub: 'Git History', count: <RollingBarrelCounter end={stats.devMetrics?.commits || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#8b5cf6' },
+                                        {
+                                            label: 'Commit ID',
+                                            sub: 'Latest',
+                                            count: <CommitReveal text={stats.devMetrics?.lastCommit} />,
+                                            color: '#4ade80',
+                                            mono: true,
+                                            boxStyle: { background: '#1e3a8a40', border: '1px solid #1e3a8a' }
+                                        },
+                                        { label: 'API', sub: 'Endpoints', count: <RollingBarrelCounter end={stats.devMetrics?.apiEndpoints || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#ec4899', boxStyle: { background: '#be185d20', border: '1px solid #be185d40' } },
+
+                                        // Row 3
+                                        { label: 'Listeners', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.listeners || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#d946ef' },
+                                        { label: 'Websockets', sub: 'Events', count: <RollingBarrelCounter end={stats.devMetrics?.socketEvents || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#eab308' },
+                                        { label: 'Hooks', sub: 'React Hooks', count: <RollingBarrelCounter end={stats.devMetrics?.hooks || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#6366f1' },
+                                    ].map((badge, i) => {
+                                        if (badge.isLoc) {
+                                            return (
+                                                <div key={i} style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6', lineHeight: 1 }}>
+                                                        {badge.count}
+                                                    </div>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', marginTop: '0.2rem' }}>{badge.label}</div>
+                                                    <div className="text-muted text-sm">{badge.sub}</div>
                                                 </div>
-                                                <div style={{ fontWeight: 600, color: '#e2e8f0', marginTop: '0.2rem' }}>{badge.label}</div>
-                                                <div className="text-muted text-sm">{badge.sub}</div>
+                                            );
+                                        }
+
+                                        return (
+                                            <div key={i} style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
+                                                background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
+                                                border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
+                                                borderRadius: '8px', padding: '0.5rem 0.75rem',
+                                                minHeight: '52px',
+                                                height: badge.alignBottom ? 'auto' : '100%', // Use auto height for bottom aligned items
+                                                alignSelf: badge.alignBottom ? 'end' : 'auto', // Align to bottom of grid cell
+                                                boxSizing: 'border-box'
+                                            }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
+                                                    <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
+                                                </div>
+                                                <span style={{
+                                                    fontWeight: 700,
+                                                    color: badge.color,
+                                                    fontSize: badge.mono ? '1.35rem' : '1.8rem',
+                                                    fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
+                                                    lineHeight: 1,
+                                                    minWidth: badge.mono ? '100px' : '65px',
+                                                    display: 'flex',
+                                                    justifyContent: 'flex-end'
+                                                }}>
+                                                    {badge.count}
+                                                </span>
                                             </div>
                                         );
-                                    }
-
-                                    return (
-                                        <div key={i} style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
-                                            background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
-                                            border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
-                                            borderRadius: '8px', padding: '0.5rem 0.75rem',
-                                            minHeight: '52px',
-                                            height: badge.alignBottom ? 'auto' : '100%', // Use auto height for bottom aligned items
-                                            alignSelf: badge.alignBottom ? 'end' : 'auto', // Align to bottom of grid cell
-                                            boxSizing: 'border-box'
-                                        }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
-                                                <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
-                                            </div>
-                                            <span style={{
-                                                fontWeight: 700,
-                                                color: badge.color,
-                                                fontSize: badge.mono ? '1.35rem' : '1.8rem',
-                                                fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
-                                                lineHeight: 1,
-                                                minWidth: badge.mono ? '100px' : '65px',
-                                                display: 'flex',
-                                                justifyContent: 'flex-end'
-                                            }}>
-                                                {badge.count}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
 
-        {/* Metrics Chart Section */}
-        <MetricsSection />
-    </div >
-);
+            {/* Metrics Chart Section */}
+            <MetricsSection />
+        </div >
+    );
 };
 
 // --- Sub-components ---
@@ -867,13 +735,9 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                 }}
             >
                 {/* Header */}
-                {/* Header - Styled to match ChartCard Header */}
-                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '16px 16px 0 0' }}>
+                <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
                     <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.2rem' }}>
-                            <span style={{ fontSize: '1.2rem' }}>👨‍👩‍👧‍👦</span>
-                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#e2e8f0' }}>Daily Breakdown</h3>
-                        </div>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>👥 Daily Breakdown</h3>
                         <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                             {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </span>
@@ -1007,42 +871,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         }
 
         if (hasAnimated.current) {
-            // Update Animation: Staggered Wave from Left to Right
-            let startTime;
-            const totalDuration = 800;
-            const staggerDelay = 400; // How long it takes for the start of animation to travel from left to right
-
-            const animateUpdate = (timestamp) => {
-                if (!startTime) startTime = timestamp;
-                const elapsed = timestamp - startTime;
-
-                const current = metrics.map((m, i) => {
-                    const newM = { ...m };
-                    // Calculate start time for this specific point index
-                    const myDelay = (i / (metrics.length - 1 || 1)) * staggerDelay;
-                    // Calculate local progress (0 to 1) for this point
-                    // Each point takes (totalDuration - staggerDelay) to fully rise
-                    const pointDuration = totalDuration - staggerDelay;
-                    const progress = Math.max(0, Math.min((elapsed - myDelay) / pointDuration, 1));
-
-                    // QuartOut easing
-                    const ease = 1 - Math.pow(1 - progress, 4);
-
-                    seriesConfig.forEach(s => {
-                        const target = m[s.key] || 0;
-                        newM[s.key] = target * ease;
-                    });
-                    return newM;
-                });
-
-                setAnimatedMetrics(current);
-
-                if (elapsed < totalDuration) {
-                    requestAnimationFrame(animateUpdate);
-                }
-            };
-
-            requestAnimationFrame(animateUpdate);
+            setAnimatedMetrics(metrics);
             return;
         }
         hasAnimated.current = true;
@@ -1093,9 +922,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const getX = (i) => innerPadding + (i / (metrics.length - 1 || 1)) * (graphWidth - innerPadding * 2);
     const getY = (val, max) => graphHeight - ((val / max) * graphHeight);
 
-    // If initial load (no data), show placeholder.
-    // If refreshing (data exists), show chart with overlay/opacity.
-    if (loading && metrics.length === 0) {
+    if (loading || metrics.length === 0) {
         return (
             <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
@@ -1137,9 +964,6 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     <option value={7}>7 Days</option>
                     <option value={14}>14 Days</option>
                     <option value={30}>30 Days</option>
-                    <option value={180}>6 Months</option>
-                    <option value={365}>1 Year</option>
-                    <option value={36500}>All Time</option>
                 </select>
                 <select
                     value={refreshInterval}
@@ -1283,18 +1107,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             )}
 
             {/* Graph Body */}
-            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s', pointerEvents: loading ? 'none' : 'auto' }}>
-                {/* Loading Spinner Overlay if refreshing */}
-                {loading && (
-                    <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        color: 'var(--color-primary)', fontWeight: 'bold', zIndex: 10,
-                        background: 'rgba(15, 23, 42, 0.8)', padding: '0.5rem 1rem', borderRadius: '20px',
-                        border: '1px solid #334155'
-                    }}>
-                        Updating...
-                    </div>
-                )}
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative' }}>
                 <svg
                     width="100%"
                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
@@ -1316,8 +1129,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
                         {/* X-Axis Labels */}
                         {metrics.map((m, i) => {
-                            // Calculate step based on number of days to prevent overlap (aim for ~8 labels)
-                            const labelStep = Math.ceil(metrics.length / 8);
+                            // Calculate step based on number of days to prevent overlap
+                            const labelStep = days > 14 ? 5 : (days > 7 ? 2 : 1);
                             if (i % labelStep !== 0 && i !== metrics.length - 1) return null;
 
                             return (
@@ -1661,37 +1474,7 @@ const RatingsChartCard = ({ onPointClick }) => {
         }
 
         if (hasAnimated.current) {
-            // Update Animation: Staggered Wave
-            let startTime;
-            const totalDuration = 800;
-            const staggerDelay = 400;
-
-            const animateUpdate = (timestamp) => {
-                if (!startTime) startTime = timestamp;
-                const elapsed = timestamp - startTime;
-
-                const current = ratings.map((r, i) => {
-                    // Calculate start time for this specific point index
-                    const myDelay = (i / (ratings.length - 1 || 1)) * staggerDelay;
-                    const pointDuration = totalDuration - staggerDelay;
-                    const progress = Math.max(0, Math.min((elapsed - myDelay) / pointDuration, 1));
-
-                    const ease = 1 - Math.pow(1 - progress, 4); // QuartOut
-
-                    return {
-                        ...r,
-                        count: r.count * ease,
-                        average: r.average * ease
-                    };
-                });
-
-                setAnimatedRatings(current);
-
-                if (elapsed < totalDuration) {
-                    requestAnimationFrame(animateUpdate);
-                }
-            };
-            requestAnimationFrame(animateUpdate);
+            setAnimatedRatings(ratings);
             return;
         }
         hasAnimated.current = true;
@@ -1761,9 +1544,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                 <option value={7}>7 Days</option>
                 <option value={14}>14 Days</option>
                 <option value={30}>30 Days</option>
-                <option value={180}>6 Months</option>
-                <option value={365}>1 Year</option>
-                <option value={36500}>All Time</option>
+                <option value={90}>90 Days</option>
             </select>
             <select
                 value={refreshInterval}
@@ -1780,7 +1561,7 @@ const RatingsChartCard = ({ onPointClick }) => {
         </div>
     );
 
-    if (loading && ratings.length === 0) {
+    if (loading || ratings.length === 0) {
         return (
             <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
@@ -1839,17 +1620,7 @@ const RatingsChartCard = ({ onPointClick }) => {
             </div>
 
             {/* Graph Body */}
-            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s', pointerEvents: loading ? 'none' : 'auto' }}>
-                {loading && (
-                    <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        color: 'var(--color-primary)', fontWeight: 'bold', zIndex: 10,
-                        background: 'rgba(15, 23, 42, 0.8)', padding: '0.5rem 1rem', borderRadius: '20px',
-                        border: '1px solid #334155'
-                    }}>
-                        Updating...
-                    </div>
-                )}
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative' }}>
                 <svg
                     width="100%"
                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
