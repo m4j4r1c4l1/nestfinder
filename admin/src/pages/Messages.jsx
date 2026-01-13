@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import QRCode from 'qrcode';
 import DatePicker from 'react-datepicker';
@@ -28,6 +28,23 @@ const BadgeSelect = ({ value, onChange, options, placeholder, type = 'status' })
     const getBadgeStyle = (optValue, isSelected) => {
         let bg, color, border;
         const option = options.find(o => o.value === optValue);
+
+        if (option && option.color === null) {
+            return {
+                padding: '0.2rem 0.5rem',
+                borderRadius: '4px',
+                fontSize: '0.9rem', // Slightly larger to match placeholder
+                fontWeight: 400, // Normal weight
+                background: 'transparent',
+                color: '#94a3b8',
+                border: 'none',
+                textTransform: 'none', // Normal case
+                cursor: 'pointer',
+                display: 'inline-block',
+                textAlign: 'left',
+                minWidth: 'auto'
+            };
+        }
 
         if (option && option.color) {
             color = option.color;
@@ -322,6 +339,7 @@ const Messages = () => {
 
     // Custom Confirmation Modal State
     const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
+    const [recipientFilter, setRecipientFilter] = useState('all'); // Moved here from ComposeSection
 
     // Watch for Feedback Pagination Changes
     useEffect(() => {
@@ -491,6 +509,18 @@ const Messages = () => {
             fetchData();
         } catch (err) {
             console.error('Failed to delete broadcast:', err);
+        }
+    };
+
+    const handleBulkDeleteBroadcast = async (ids) => {
+        try {
+            await adminApi.fetch('/admin/broadcasts/bulk-delete', {
+                method: 'POST',
+                body: JSON.stringify({ ids })
+            });
+            fetchData();
+        } catch (err) {
+            console.error('Failed to bulk delete broadcasts:', err);
         }
     };
 
@@ -664,6 +694,8 @@ const Messages = () => {
                                 <HistorySection
                                     users={subscribers}
                                     totalSent={stats.notificationMetrics?.total || 0}
+                                    delivered={stats.notificationMetrics?.delivered || 0}
+                                    read={stats.notificationMetrics?.read || 0}
                                     setConfirmModal={setConfirmModal}
                                 />
                             </div>
@@ -970,8 +1002,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // Search State
     const [searchFilters, setSearchFilters] = useState({
         searchText: '',
-        status: 'all', // all, active, scheduled, inactive
-        priority: 'all', // all, 1, 2, 3, 4, 5
+        status: [], // empty = all
+        priority: [], // empty = all
         maxViewsNum: '',
         maxViewsType: 'all', // all, limited, unlimited
         startDate: null,
@@ -1006,17 +1038,30 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
         }
 
         // Status Filter
-        if (searchFilters.status !== 'all') {
-            const isActive = now >= start && (!end || now <= end); // Active if now >= start AND (no end OR now <= end)
-            const isPast = end && now > end; // Past only if end exists and now > end
-            const isScheduled = now < start; // Scheduled if now < start
+        // Status Filter
+        // Status Filter
+        if (searchFilters.status.length > 0) {
+            const isFilled = b.max_views && (b.total_users || 0) >= b.max_views;
+            const isActive = now >= start && (!end || now <= end);
+            const isPast = end && now > end;
+            const isScheduled = now < start;
 
-            if (searchFilters.status === 'active' && !isActive) return false;
-            if (searchFilters.status === 'inactive' && !isPast) return false;
-            if (searchFilters.status === 'scheduled' && !isScheduled) return false;
+            let matchesStatus = false;
+
+            if (searchFilters.status.includes('filled') && isFilled) matchesStatus = true;
+
+            // "Active" means time-active AND NOT filled
+            if (searchFilters.status.includes('active') && (isActive && !isFilled)) matchesStatus = true;
+
+            // Inactive / Ended
+            if (searchFilters.status.includes('inactive') && isPast) matchesStatus = true;
+
+            if (searchFilters.status.includes('scheduled') && isScheduled) matchesStatus = true;
+
+            if (!matchesStatus) return false;
         }
 
-        if (searchFilters.priority !== 'all' && (b.priority || 3) != searchFilters.priority) return false;
+        if (searchFilters.priority.length > 0 && !searchFilters.priority.includes(String(b.priority || 3))) return false;
         // Max Views Filter
         if (searchFilters.maxViewsType === 'limited') {
             if (!b.max_views || b.max_views <= 0) return false;
@@ -1053,7 +1098,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // Calculate broadcast stats from ALL broadcasts (not filtered)
     const broadcastStats = React.useMemo(() => {
         const now = new Date();
-        let active = 0, scheduled = 0, inactive = 0;
+        let active = 0, scheduled = 0, inactive = 0, filled = 0;
         const priorityCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
         let withMaxViews = 0, withoutMaxViews = 0;
 
@@ -1061,13 +1106,15 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
             const start = new Date(b.start_time);
             const end = b.end_time ? new Date(b.end_time) : null;
 
+            const isFilled = b.max_views && (b.total_users || 0) >= b.max_views;
             const isActive = now >= start && (!end || now <= end);
             const isPast = end && now > end;
             const isScheduled = now < start;
 
-            if (isActive) active++;
+            if (isFilled) filled++;
+            else if (isActive) active++;
             else if (isScheduled) scheduled++;
-            else if (isPast) inactive++; // Only count as inactive if it has an end time and it's past
+            else if (isPast) inactive++;
 
             const p = b.priority || 3;
             if (priorityCounts[p] !== undefined) priorityCounts[p]++;
@@ -1076,7 +1123,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
             else withoutMaxViews++;
         });
 
-        return { active, scheduled, inactive, priorityCounts, withMaxViews, withoutMaxViews };
+        return { active, scheduled, inactive, filled, priorityCounts, withMaxViews, withoutMaxViews };
     }, [broadcasts]);
 
     return (
@@ -1113,10 +1160,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
 
                         {/* Clear */}
-                        {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViewsNum || searchFilters.priority !== 'all' || searchFilters.maxViewsType !== 'all') && (
+                        {(searchFilters.searchText || searchFilters.status.length > 0 || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViewsNum || searchFilters.priority.length > 0 || searchFilters.maxViewsType !== 'all') && (
                             <button
                                 className="btn btn-secondary"
-                                onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
+                                onClick={() => setSearchFilters({ searchText: '', status: [], priority: [], maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
                                 style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
                             >
                                 ✕ Clear
@@ -1163,13 +1210,14 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 Status
                             </label>
                             <BadgeSelect
-                                value={searchFilters.status}
-                                onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val }))}
+                                value={searchFilters.status.length > 0 ? searchFilters.status[0] : 'all'}
+                                onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val === 'all' ? [] : [val] }))}
                                 options={[
-                                    { value: 'all', label: 'Any Status' },
+                                    { value: 'all', label: 'Any Status', color: null }, // No badge style
                                     { value: 'active', label: 'Active', color: '#22c55e' },
                                     { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' },
-                                    { value: 'inactive', label: 'Past', color: '#94a3b8' }
+                                    { value: 'filled', label: 'Filled', color: '#ec4899' },
+                                    { value: 'inactive', label: 'Ended', color: '#94a3b8' }
                                 ]}
                                 placeholder="Filter by Status"
                             />
@@ -1181,10 +1229,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 Priority
                             </label>
                             <BadgeSelect
-                                value={searchFilters.priority}
-                                onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val }))}
+                                value={searchFilters.priority.length > 0 ? searchFilters.priority[0] : 'all'}
+                                onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val === 'all' ? [] : [val] }))}
                                 options={[
-                                    { value: 'all', label: 'Any Priority' },
+                                    { value: 'all', label: 'Any Priority', color: null },
                                     { value: '1', label: 'P1 - Critical', color: '#ef4444' },
                                     { value: '2', label: 'P2 - High', color: '#f97316' },
                                     { value: '3', label: 'P3 - Medium', color: '#eab308' },
@@ -1256,7 +1304,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         display: 'flex', alignItems: 'center', gap: '0.4rem',
                         cursor: 'pointer', flexShrink: 0
                     }}
-                        onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
+                        onClick={() => setSearchFilters({ searchText: '', status: [], priority: [], maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
                     >
                         TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px', color: '#eab308' }}>{broadcasts.length}</span>
                     </span>
@@ -1269,13 +1317,18 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'active' ? '#22c55e40' : '#22c55e20', // Highlight if selected
+                            background: searchFilters.status.includes('active') ? '#22c55e40' : '#22c55e20', // Highlight if selected
                             color: '#22c55e',
-                            border: searchFilters.status === 'active' ? '1px solid #22c55e' : '1px solid #22c55e40',
+                            border: searchFilters.status.includes('active') ? '1px solid #22c55e' : '1px solid #22c55e40',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'active' ? 'all' : 'active' }))}
+                            onClick={() => setSearchFilters(prev => ({
+                                ...prev,
+                                status: prev.status.includes('active')
+                                    ? prev.status.filter(s => s !== 'active')
+                                    : [...prev.status, 'active']
+                            }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'active' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1284,13 +1337,18 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'scheduled' ? '#3b82f640' : '#3b82f620',
+                            background: searchFilters.status.includes('scheduled') ? '#3b82f640' : '#3b82f620',
                             color: '#3b82f6',
-                            border: searchFilters.status === 'scheduled' ? '1px solid #3b82f6' : '1px solid #3b82f640',
+                            border: searchFilters.status.includes('scheduled') ? '1px solid #3b82f6' : '1px solid #3b82f640',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'scheduled' ? 'all' : 'scheduled' }))}
+                            onClick={() => setSearchFilters(prev => ({
+                                ...prev,
+                                status: prev.status.includes('scheduled')
+                                    ? prev.status.filter(s => s !== 'scheduled')
+                                    : [...prev.status, 'scheduled']
+                            }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'scheduled' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1299,17 +1357,42 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'inactive' ? '#94a3b840' : '#94a3b820',
-                            color: '#94a3b8',
-                            border: searchFilters.status === 'inactive' ? '1px solid #94a3b8' : '1px solid #94a3b840',
+                            background: searchFilters.status.includes('filled') ? '#ec489940' : '#ec489910', // More transparent like inactive
+                            color: '#ec4899',
+                            border: searchFilters.status.includes('filled') ? '1px solid #ec4899' : '1px solid #ec489920',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'inactive' ? 'all' : 'inactive' }))}
+                            onClick={() => setSearchFilters(prev => ({
+                                ...prev,
+                                status: prev.status.includes('filled')
+                                    ? prev.status.filter(s => s !== 'filled')
+                                    : [...prev.status, 'filled']
+                            }))}
+                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'filled' }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                        >
+                            FILLED <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.filled}</span>
+                        </span>
+                        <span style={{
+                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                            fontSize: '0.7rem', fontWeight: 700,
+                            background: searchFilters.status.includes('inactive') ? '#94a3b840' : '#94a3b820',
+                            color: '#94a3b8',
+                            border: searchFilters.status.includes('inactive') ? '1px solid #94a3b8' : '1px solid #94a3b840',
+                            textTransform: 'uppercase', letterSpacing: '0.5px',
+                            cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
+                        }}
+                            onClick={() => setSearchFilters(prev => ({
+                                ...prev,
+                                status: prev.status.includes('inactive')
+                                    ? prev.status.filter(s => s !== 'inactive')
+                                    : [...prev.status, 'inactive']
+                            }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'inactive' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
-                            INACTIVE <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.inactive}</span>
+                            ENDED <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.inactive}</span>
                         </span>
                     </div>
 
@@ -1329,12 +1412,17 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 <span key={p} style={{
                                     padding: '0.2rem 0.5rem', borderRadius: '4px',
                                     fontSize: '0.7rem', fontWeight: 600,
-                                    background: searchFilters.priority === String(p) ? `${color}40` : `${color}20`,
+                                    background: searchFilters.priority.includes(String(p)) ? `${color}40` : `${color}20`,
                                     color: color,
-                                    border: searchFilters.priority === String(p) ? `1px solid ${color}` : `1px solid ${color}40`,
+                                    border: searchFilters.priority.includes(String(p)) ? `1px solid ${color}` : `1px solid ${color}40`,
                                     cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                                 }}
-                                    onClick={() => setSearchFilters(prev => ({ ...prev, priority: prev.priority === String(p) ? 'all' : String(p) }))}
+                                    onClick={() => setSearchFilters(prev => ({
+                                        ...prev,
+                                        priority: prev.priority.includes(String(p))
+                                            ? prev.priority.filter(x => x !== String(p))
+                                            : [...prev.priority, String(p)]
+                                    }))}
                                     onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'priority', value: p }); }}
                                     onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                                 >
@@ -1404,7 +1492,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     title: 'Bulk Delete Broadcasts',
                                     message: `Are you sure you want to delete ALL ${filteredBroadcasts.length} visible broadcasts? This action cannot be undone.`,
                                     onConfirm: () => {
-                                        filteredBroadcasts.forEach(b => onDelete(b.id));
+                                        // Use new bulk delete endpoint
+                                        const ids = filteredBroadcasts.map(b => b.id);
+                                        handleBulkDeleteBroadcast(ids);
                                     }
                                 });
                             }}
@@ -1466,7 +1556,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     } else if (b.max_views && (b.total_users || 0) >= b.max_views) {
                                         // Global Cap Met
                                         statusText = 'FILLED';
-                                        statusColor = '#94a3b8'; // Grey like Ended, but distinct text
+                                        statusColor = '#ec4899'; // Pink
                                     } else {
                                         statusText = 'ACTIVE';
                                         statusColor = '#22c55e';
@@ -1487,6 +1577,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     // Border Color: Always priority color, but 75% transparent (25% opacity) if not active
                                     const borderColor = (statusText === 'ACTIVE') ? priorityColor : `${priorityColor}40`;
 
+                                    // Opacity for inactive/filled states
+                                    const cardOpacity = (statusText === 'ACTIVE' || statusText === 'SCHEDULED') ? 1 : 0.75;
+
                                     // Check if this card should be highlighted (from Timeline hover OR Stats Badge hover)
                                     let isHighlighted = hoveredTimelineBarId === b.id;
 
@@ -1495,6 +1588,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             if (hoveredFilterGroup.value === 'active' && statusText === 'ACTIVE') isHighlighted = true;
                                             else if (hoveredFilterGroup.value === 'inactive' && statusText === 'ENDED') isHighlighted = true;
                                             else if (hoveredFilterGroup.value === 'scheduled' && statusText === 'SCHEDULED') isHighlighted = true;
+                                            else if (hoveredFilterGroup.value === 'filled' && statusText === 'FILLED') isHighlighted = true;
                                         } else if (hoveredFilterGroup.type === 'priority') {
                                             if ((b.priority || 3) === hoveredFilterGroup.value) isHighlighted = true;
                                         } else if (hoveredFilterGroup.type === 'maxViews') {
@@ -1523,7 +1617,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 flexDirection: 'column',
                                                 gap: '0.4rem',
                                                 boxShadow: isHighlighted ? `0 0 20px ${priorityColor}80, 0 0 40px ${priorityColor}40` : 'none',
-                                                transform: isHighlighted ? 'scale(1.02)' : 'none'
+                                                transform: isHighlighted ? 'scale(1.02)' : 'none',
+                                                opacity: cardOpacity
                                             }}
                                             onMouseEnter={e => {
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -1582,9 +1677,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         <span style={{
                                                             padding: '0.2rem 0.5rem 0.3rem 0.5rem', borderRadius: '4px',
                                                             fontSize: '0.7rem', fontWeight: 600,
-                                                            background: b.total_users >= b.max_views ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
-                                                            color: b.total_users >= b.max_views ? '#ef4444' : '#06b6d4',
-                                                            border: b.total_users >= b.max_views ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)',
+                                                            background: b.total_users >= b.max_views ? '#ec489920' : 'rgba(6, 182, 212, 0.1)',
+                                                            color: b.total_users >= b.max_views ? '#ec4899' : '#06b6d4',
+                                                            border: b.total_users >= b.max_views ? '1px solid #ec489940' : '1px solid rgba(6, 182, 212, 0.3)',
                                                             cursor: 'help'
                                                         }}
                                                             title={`Global Limit: ${b.total_users} / ${b.max_views} users viewed`}
@@ -1633,10 +1728,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     }}>
                                                         <span style={{ opacity: statusText === 'ACTIVE' ? 1 : 0.7 }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{formatTimeCET(start)}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{formatTimeCET(start)}</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>→</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? formatTimeCET(end) : ''}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
                                                     {/* Delivery Stats - Separator Line included in border */}
@@ -1709,9 +1804,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <BroadcastDetailPopup
                         broadcast={selectedBroadcast}
                         onClose={() => setSelectedBroadcast(null)}
-                        onViewRecipients={() => {
+                        onViewRecipients={(filter = 'all') => {
+                            setRecipientFilter(filter);
                             setViewRecipientsId(selectedBroadcast.id);
-                            setSelectedBroadcast(null);
+                            // Keep selectedBroadcast open
                         }}
                         onDelete={() => {
                             setConfirmModal({
@@ -1733,6 +1829,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 viewRecipientsId && (
                     <BroadcastRecipientsModal
                         broadcastId={viewRecipientsId}
+                        filter={recipientFilter}
                         onClose={() => setViewRecipientsId(null)}
                     />
                 )
@@ -1837,6 +1934,33 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [result, setResult] = useState(null);
     const [justPublished, setJustPublished] = useState(false); // Feedback state
     const userListRef = React.useRef(null);
+
+    // Resizable Textarea State
+    const [textAreaHeight, setTextAreaHeight] = useState(132); // ~5 lines
+    const textareaRef = useRef(null);
+    const isDraggingRef = useRef(false);
+    const startYRef = useRef(0);
+    const startHeightRef = useRef(0);
+
+    const handleMouseDown = (e) => {
+        isDraggingRef.current = true;
+        startYRef.current = e.clientY;
+        startHeightRef.current = textAreaHeight;
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDraggingRef.current) return;
+        const delta = e.clientY - startYRef.current;
+        setTextAreaHeight(Math.max(100, startHeightRef.current + delta));
+    };
+
+    const handleMouseUp = () => {
+        isDraggingRef.current = false;
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+    };
 
     // Auto-scroll to users when target is set to 'selected'
     useEffect(() => {
@@ -1965,7 +2089,8 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     imageUrl,
                     target,
                     userIds: target === 'all' ? [] : selectedUsers,
-                    maxViews: newBroadcast.maxViews ? parseInt(newBroadcast.maxViews) : null
+                    // maxViews: null // Not used in simple compose
+                    maxViews: null
                 })
             });
             const data = await response.json();
@@ -2061,7 +2186,40 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 
                 <div className="form-group" style={{ marginTop: '0.25rem', position: 'relative' }}>
                     <label className="form-label" style={{ marginBottom: '0.25rem', display: 'block' }}>Message</label>
-                    <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
+                    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                        <textarea
+                            className="form-input"
+                            value={body}
+                            onChange={(e) => setBody(e.target.value)}
+                            ref={textareaRef}
+                            style={{
+                                width: '100%',
+                                resize: 'none', // Disable native resize
+                                height: `${textAreaHeight}px`,
+                                paddingBottom: '20px' // Space for handle
+                            }}
+                        />
+                        {/* Custom Resize Handle (Bottom Center) */}
+                        <div
+                            onMouseDown={handleMouseDown}
+                            style={{
+                                position: 'absolute',
+                                bottom: '2px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '40px',
+                                height: '6px',
+                                background: '#475569',
+                                borderRadius: '3px',
+                                cursor: 'ns-resize',
+                                zIndex: 10,
+                                opacity: 0.8
+                            }}
+                            onMouseEnter={e => e.target.style.background = '#64748b'}
+                            onMouseLeave={e => e.target.style.background = '#475569'}
+                            title="Drag to resize"
+                        />
+                    </div>
                     <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
                         <button
                             type="button"
@@ -2270,7 +2428,7 @@ const FeedbackSection = ({
     // Handle row click: open preview AND mark as read if sent/delivered
     const handleRowClick = async (item) => {
         setPreviewItem(item);
-        if (item.status === 'sent' || item.status === 'new' || item.status === 'pending') {
+        if (['sent', 'new', 'pending', 'delivered'].includes(item.status)) {
             await onUpdateStatus(item.id, 'read');
             onUpdate && onUpdate();
         }
@@ -2313,15 +2471,16 @@ const FeedbackSection = ({
             <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
                     <h3>💬 Received History</h3>
+                    <span style={{
+                        position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
+                        background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
+                        borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
+                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
+                    }}>
+                        Total: {totalItems}
+                    </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{
-                            background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
-                            borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                            userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
-                        }}>
-                            Showing {paginatedFeedback.length} of {totalItems}
-                        </span>
                         <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
                             <span style={{ fontWeight: 500 }}>
                                 <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedbackCounts.pending} Received</span>
@@ -2439,7 +2598,7 @@ const FeedbackSection = ({
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                 <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
-                                                    {new Date(item.created_at).toLocaleDateString()}
+                                                    {new Date(item.created_at).toLocaleDateString('en-GB')}
                                                 </span>
                                                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
                                                     {(() => {
@@ -2543,7 +2702,7 @@ const FeedbackSection = ({
     );
 };
 
-const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
+const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, setConfirmModal }) => {
     const [history, setHistory] = useState([]);
     const [totalLogs, setTotalLogs] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -2709,9 +2868,19 @@ const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
                         background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
                         borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
+                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', gap: '1rem'
                     }}>
-                        Total: {totalSent}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e' }} title="Sent (Pending Delivery)">
+                            <span>✓</span>
+                            <span>{totalSent - delivered - read}</span>
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e' }} title="Delivered & Read">
+                            <span style={{ letterSpacing: '-3px', marginRight: '3px' }}>✓✓</span>
+                            <span>{delivered + read}</span>
+                        </span>
+                        <span style={{ borderLeft: '1px solid rgba(56, 189, 248, 0.2)', paddingLeft: '1rem', color: '#38bdf8' }}>
+                            Total: {totalSent}
+                        </span>
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button
@@ -2800,7 +2969,7 @@ const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
                                                 onClick={() => handlePreview(log)}
                                             >
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString('en-GB')}</span>
                                                     <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
                                                         {(() => {
                                                             const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
@@ -2936,7 +3105,8 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
     return ReactDOM.createPortal(
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(0,0,0,0.1)', // Lighter backdrop
+            background: 'rgba(15, 23, 42, 0.5)',
+            backdropFilter: 'blur(8px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 10000
         }} onClick={onClose}>
@@ -3038,7 +3208,7 @@ const DetailModal = ({ batchId, onClose }) => {
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString()}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString('en-GB')}</span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{timeString}</span>
             </div>
         );
@@ -3208,14 +3378,16 @@ const MessagePreviewModal = ({ message, onClose }) => {
     let headerTitle = '';
     let headerIcon = null;
 
+    // Define typeIcon outside if block scope so it can be reused in body
+    const typeIconChar = message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝';
+
     if (isFeedback) {
         // Feedback Header: [Icon] [Nickname]
-        const typeIcon = message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝';
         // Ensure we grab the first available nickname property
         const rawNickname = message.user_nickname || message.nickname || 'Anonymous';
         const cleanNickname = String(rawNickname).replace(/^@/, '').trim();
         headerTitle = `@${cleanNickname}`;
-        headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIcon}</span>;
+        headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIconChar}</span>;
     } else {
         // Notification Header: Recipient or Bulk
         // Fallback to target_id if nickname is missing
@@ -3272,8 +3444,8 @@ const MessagePreviewModal = ({ message, onClose }) => {
                             display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center',
                             marginBottom: '1rem', color: '#94a3b8', fontSize: '0.85rem'
                         }}>
-                            <span style={{ textAlign: 'left' }}>{dateObj.toLocaleDateString()}</span>
-                            <span style={{ fontSize: '1rem' }}>🔔</span>
+                            <span style={{ textAlign: 'left' }}>{dateObj.toLocaleDateString('en-GB')}</span>
+                            <span style={{ fontSize: '1rem' }}>{typeIconChar}</span>
                             <span style={{ textAlign: 'right' }}>{formatTimeCET(dateObj)}</span>
                         </div>
                     )}
@@ -3281,7 +3453,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
                     {/* NOTIFICATION STYLE: Split Date/Time */}
                     {isNotification && dateObj && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.8rem', color: '#94a3b8' }}>
-                            <span>{dateObj.toLocaleDateString()}</span>
+                            <span>{dateObj.toLocaleDateString('en-GB')}</span>
                             <span>{formatTimeCET(dateObj)}</span>
                         </div>
                     )}
@@ -3387,22 +3559,34 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                     {broadcast.image_url && (
                         <div style={{
                             flexShrink: 0,
-                            background: '#000', // Matches image bg usually
+                            background: '#0f172a', // Frame bg matches header
                             borderRight: '1px solid #334155',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            maxWidth: '400px' // Reasonable max width
+                            width: '400px', // Fixed frame width
+                            padding: '1.5rem', // Equal padding frame
+                            boxSizing: 'border-box',
+                            overflow: 'hidden'
                         }}>
-                            <img
-                                src={broadcast.image_url}
-                                alt="Broadcast"
-                                style={{
-                                    display: 'block',
-                                    maxWidth: '100%',
-                                    height: 'auto',
-                                    maxHeight: '100%',
-                                    objectFit: 'contain'
-                                }}
-                            />
+                            <div style={{
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                background: '#000', // Inner bg
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                            }}>
+                                <img
+                                    src={broadcast.image_url}
+                                    alt="Broadcast"
+                                    style={{
+                                        display: 'block',
+                                        maxWidth: '100%',
+                                        maxHeight: '100%',
+                                        objectFit: 'contain' // No clipping
+                                    }}
+                                />
+                            </div>
                         </div>
                     )}
 
@@ -3475,13 +3659,16 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             border: '1px solid #334155',
                             marginBottom: '1.5rem',
                             position: 'relative',
-                            width: 'fit-content' // Just wrap content
+                            width: 'fit-content',
+                            marginLeft: 'auto',
+                            marginRight: 'auto' // Center it
                         }}>
                             {/* Floating Icon on Border */}
                             <div style={{
                                 position: 'absolute',
                                 left: '10px',
-                                top: '-10px',
+                                top: '0',
+                                transform: 'translateY(-50%)',
                                 background: '#0f172a',
                                 padding: '0 4px',
                                 fontSize: '1rem',
@@ -3515,15 +3702,12 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                         {/* Redesigned Stats Area (Clickable) */}
                         {/* Redesigned Stats Cards Area */}
                         <div
-                            onClick={onViewRecipients}
                             style={{
                                 display: 'grid',
                                 gridTemplateColumns: 'repeat(3, 1fr)',
                                 gap: '1rem',
-                                marginBottom: '1rem',
-                                cursor: 'pointer'
+                                marginBottom: '1rem'
                             }}
-                            title="View Recipients Details"
                         >
                             {/* Total Card */}
                             <div style={{
@@ -3532,10 +3716,13 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 borderRadius: '8px',
                                 padding: '1rem',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s'
+                                transition: 'transform 0.1s, border-color 0.1s',
+                                cursor: 'pointer'
                             }}
+                                onClick={() => onViewRecipients && onViewRecipients('all')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#eab308'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                title="View All Recipients"
                             >
                                 <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
                                     {broadcast.total_users || 0}
@@ -3550,10 +3737,13 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 borderRadius: '8px',
                                 padding: '1rem',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s'
+                                transition: 'transform 0.1s, border-color 0.1s',
+                                cursor: 'pointer'
                             }}
+                                onClick={() => onViewRecipients && onViewRecipients('delivered')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                title="View Delivered Recipients"
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
@@ -3571,10 +3761,13 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 borderRadius: '8px',
                                 padding: '1rem',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s'
+                                transition: 'transform 0.1s, border-color 0.1s',
+                                cursor: 'pointer'
                             }}
+                                onClick={() => onViewRecipients && onViewRecipients('read')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                title="View Read Recipients"
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
@@ -3614,7 +3807,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
     );
 };
 
-function BroadcastRecipientsModal({ broadcastId, onClose }) {
+function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
     const [views, setViews] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -3649,7 +3842,7 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString('en-GB')}</span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{timeString}</span>
             </div>
         );
@@ -3721,7 +3914,13 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {views.map(view => (
+                                                {views.filter(v => {
+                                                    if (filter === 'all') return true;
+                                                    if (filter === 'sent') return v.status === 'sent';
+                                                    if (filter === 'delivered') return v.status === 'delivered';
+                                                    if (filter === 'read') return v.status === 'read';
+                                                    return true;
+                                                }).map(view => (
                                                     <tr key={view.id} style={{ borderBottom: '1px solid #334155' }}>
                                                         <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
                                                             <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -4591,8 +4790,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         const color = getPriorityColor(b.priority);
 
                         // Visual State Logic
-                        // Inactive = Past AND Not interacting.
-                        const isInactive = isPast && !isInteractionActive;
+                        const isFilled = b.max_views && (b.total_users || 0) >= b.max_views;
+                        // Inactive = Past OR Filled, AND Not interacting.
+                        const isInactive = (isPast || isFilled) && !isInteractionActive;
 
                         // Background & Border Setup
                         let bgStyle = color;
@@ -4604,7 +4804,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                             // Usually infinite is active or scheduled.
                         } else if (isInactive) {
                             // Badge Style requested for inactive (Boosted to match Badge vividness against dark bg)
-                            bgStyle = `${color}35`; // Was 20
+                            // Badge Style requested for inactive (Boosted to match Badge vividness against dark bg)
+                            // Use linear-gradient to overlay transparent color on solid background, preventing underlying lines from showing through
+                            bgStyle = `linear-gradient(0deg, ${color}35, ${color}35), #334155`;
                             borderStyle = `1px solid ${color}80`; // Was 40
                         }
 
@@ -4689,8 +4891,10 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     const isActive = now >= s && now <= e;
                     const isEnded = now > e;
 
-                    let statusText = isActive ? 'Active' : (isEnded ? 'Ended' : 'Scheduled');
-                    let statusColor = isActive ? '#22c55e' : (isEnded ? '#94a3b8' : '#3b82f6');
+                    const isFilled = hoveredItem.max_views && (hoveredItem.total_users || 0) >= hoveredItem.max_views;
+
+                    let statusText = isActive ? (isFilled ? 'Filled' : 'Active') : (isEnded ? 'Ended' : 'Scheduled');
+                    let statusColor = isActive ? (isFilled ? '#ec4899' : '#22c55e') : (isEnded ? '#94a3b8' : '#3b82f6');
                     let priorityColor = getPriorityColor(hoveredItem.priority);
 
                     // Badge transparencies
@@ -4726,6 +4930,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 {hoveredItem.title || 'Untitled'}
                             </div>
 
+
+
                             {/* Image Preview */}
                             {hoveredItem.image_url && (
                                 <div style={{
@@ -4745,6 +4951,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     />
                                 </div>
                             )}
+
+
 
                             {/* Professional Time Display */}
                             <div style={{
@@ -4820,9 +5028,9 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         <span style={{
                                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                                             fontSize: '0.7rem', fontWeight: 700,
-                                            background: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
-                                            color: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? '#ef4444' : '#06b6d4',
-                                            border: (hoveredItem.total_users || 0) >= hoveredItem.max_views ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)'
+                                            background: isFilled ? '#ec489920' : 'rgba(6, 182, 212, 0.1)',
+                                            color: isFilled ? '#ec4899' : '#06b6d4',
+                                            border: isFilled ? '1px solid #ec489940' : '1px solid rgba(6, 182, 212, 0.3)'
                                         }}>
                                             👁 {hoveredItem.total_users || 0} / {hoveredItem.max_views}
                                         </span>
