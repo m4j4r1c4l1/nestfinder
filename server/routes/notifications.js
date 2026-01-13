@@ -266,15 +266,18 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         let broadcastMetrics = { total: 0, active: 0, delivered: 0, read: 0 };
         try {
             const totalBroadcasts = get('SELECT COUNT(*) as count FROM broadcasts');
-            const activeBroadcasts = get("SELECT COUNT(*) as count FROM broadcasts WHERE end_time > datetime('now')");
+            const activeBroadcasts = get("SELECT COUNT(*) as count FROM broadcasts WHERE start_time <= datetime('now') AND end_time >= datetime('now')");
             const deliveredBroadcasts = get("SELECT COUNT(*) as count FROM broadcast_views WHERE status IN ('delivered', 'read')");
             const readBroadcasts = get("SELECT COUNT(*) as count FROM broadcast_views WHERE status = 'read'");
 
             broadcastMetrics = {
                 total: totalBroadcasts?.count || 0,
-                active: activeBroadcasts?.count || 0,
+                active: activeBroadcasts?.count || 0, // Now strictly checking start_time <= now <= end_time
                 delivered: deliveredBroadcasts?.count || 0,
-                read: readBroadcasts?.count || 0
+                read: readBroadcasts?.count || 0,
+                scheduled: get("SELECT COUNT(*) as count FROM broadcasts WHERE start_time > datetime('now')")?.count || 0,
+                ended: get("SELECT COUNT(*) as count FROM broadcasts WHERE end_time < datetime('now')")?.count || 0,
+                filled: get("SELECT COUNT(*) as count FROM broadcasts WHERE max_views IS NOT NULL AND (SELECT COUNT(*) FROM broadcast_views bv WHERE bv.broadcast_id = broadcasts.id) >= max_views")?.count || 0
             };
         } catch (err) {
             console.error('Broadcast metrics failed:', err);
