@@ -1186,8 +1186,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
                         {/* X-Axis Labels */}
                         {metrics.map((m, i) => {
-                            // Calculate step based on number of days to prevent overlap
-                            const labelStep = days > 14 ? 5 : (days > 7 ? 2 : 1);
+                            // Calculate step based on number of days to prevent overlap (aim for ~8 labels)
+                            const labelStep = Math.ceil(metrics.length / 8);
                             if (i % labelStep !== 0 && i !== metrics.length - 1) return null;
 
                             return (
