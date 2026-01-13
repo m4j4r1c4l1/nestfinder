@@ -1979,7 +1979,8 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     imageUrl,
                     target,
                     userIds: target === 'all' ? [] : selectedUsers,
-                    maxViews: newBroadcast.maxViews ? parseInt(newBroadcast.maxViews) : null
+                    // maxViews: null // Not used in simple compose
+                    maxViews: null
                 })
             });
             const data = await response.json();
