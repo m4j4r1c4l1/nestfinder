@@ -964,7 +964,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 borderRadius: '50%',
                 background: 'rgba(255, 255, 255, 0.95)',
                 boxShadow: '0 0 4px rgba(255,255,255,0.8), 0 0 8px rgba(56, 189, 248, 0.6)',
-                animation: `ekg-dot-pulse ${animDuration} ease-in-out infinite`,
+                animation: `ekg-dot-pulse ${animDuration} ease-in-out infinite, ekg-dot-fadein 1s ease-out forwards`,
                 zIndex: 5
             }} />
 
@@ -988,6 +988,10 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                     75% { top: 50%; }
                     80% { top: 42%; }
                     85% { top: 50%; }
+                }
+                @keyframes ekg-dot-fadein {
+                    0% { opacity: 0; }
+                    100% { opacity: 1; }
                 }
             `}</style>
         </div>
