@@ -3443,7 +3443,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
                             display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center',
                             marginBottom: '1rem', color: '#94a3b8', fontSize: '0.85rem'
                         }}>
-                            <span style={{ textAlign: 'left' }}>{dateObj.toLocaleDateString()}</span>
+                            <span style={{ textAlign: 'left' }}>{dateObj.toLocaleDateString('en-GB')}</span>
                             <span style={{ fontSize: '1rem' }}>{typeIconChar}</span>
                             <span style={{ textAlign: 'right' }}>{formatTimeCET(dateObj)}</span>
                         </div>
@@ -3452,7 +3452,7 @@ const MessagePreviewModal = ({ message, onClose }) => {
                     {/* NOTIFICATION STYLE: Split Date/Time */}
                     {isNotification && dateObj && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.8rem', color: '#94a3b8' }}>
-                            <span>{dateObj.toLocaleDateString()}</span>
+                            <span>{dateObj.toLocaleDateString('en-GB')}</span>
                             <span>{formatTimeCET(dateObj)}</span>
                         </div>
                     )}
