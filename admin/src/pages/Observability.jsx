@@ -875,42 +875,37 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         }
 
         if (hasAnimated.current) {
-            // Update Animation: Morphing (Value Interpolation)
-            const startValues = metrics.map((m, i) => {
-                const existing = animatedMetrics[i];
-                if (!existing) {
-                    const zeroed = { ...m };
-                    seriesConfig.forEach(s => zeroed[s.key] = 0);
-                    return zeroed;
-                }
-                return existing;
-            });
-
+            // Update Animation: Staggered Wave from Left to Right
             let startTime;
-            const duration = 600;
+            const totalDuration = 800;
+            const staggerDelay = 400; // How long it takes for the start of animation to travel from left to right
 
             const animateUpdate = (timestamp) => {
                 if (!startTime) startTime = timestamp;
-                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const elapsed = timestamp - startTime;
 
-                // QuartOut for smooth morph
-                const ease = 1 - Math.pow(1 - progress, 4);
+                const current = metrics.map((m, i) => {
+                    const newM = { ...m };
+                    // Calculate start time for this specific point index
+                    const myDelay = (i / (metrics.length - 1 || 1)) * staggerDelay;
+                    // Calculate local progress (0 to 1) for this point
+                    // Each point takes (totalDuration - staggerDelay) to fully rise
+                    const pointDuration = totalDuration - staggerDelay;
+                    const progress = Math.max(0, Math.min((elapsed - myDelay) / pointDuration, 1));
 
-                const current = metrics.map((targetM, i) => {
-                    const startM = startValues[i] || targetM;
-                    const newM = { ...targetM };
+                    // QuartOut easing
+                    const ease = 1 - Math.pow(1 - progress, 4);
 
                     seriesConfig.forEach(s => {
-                        const start = startM[s.key] || 0;
-                        const target = targetM[s.key] || 0;
-                        newM[s.key] = start + (target - start) * ease;
+                        const target = m[s.key] || 0;
+                        newM[s.key] = target * ease;
                     });
                     return newM;
                 });
 
                 setAnimatedMetrics(current);
 
-                if (progress < 1) {
+                if (elapsed < totalDuration) {
                     requestAnimationFrame(animateUpdate);
                 }
             };
@@ -1534,41 +1529,33 @@ const RatingsChartCard = ({ onPointClick }) => {
         }
 
         if (hasAnimated.current) {
-            // Update Animation: Morphing
-            const startValues = ratings.map((r, i) => {
-                const existing = animatedRatings[i];
-                if (!existing) {
-                    return { ...r, count: 0, average: 0 };
-                }
-                return existing;
-            });
-
+            // Update Animation: Staggered Wave
             let startTime;
-            const duration = 600;
+            const totalDuration = 800;
+            const staggerDelay = 400;
 
             const animateUpdate = (timestamp) => {
                 if (!startTime) startTime = timestamp;
-                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const elapsed = timestamp - startTime;
 
-                const ease = 1 - Math.pow(1 - progress, 4);
+                const current = ratings.map((r, i) => {
+                    // Calculate start time for this specific point index
+                    const myDelay = (i / (ratings.length - 1 || 1)) * staggerDelay;
+                    const pointDuration = totalDuration - staggerDelay;
+                    const progress = Math.max(0, Math.min((elapsed - myDelay) / pointDuration, 1));
 
-                const current = ratings.map((targetR, i) => {
-                    const startR = startValues[i] || targetR;
-                    const startCount = startR.count || 0;
-                    const targetCount = targetR.count || 0;
-                    const startAvg = startR.average || 0;
-                    const targetAvg = targetR.average || 0;
+                    const ease = 1 - Math.pow(1 - progress, 4); // QuartOut
 
                     return {
-                        ...targetR,
-                        count: startCount + (targetCount - startCount) * ease,
-                        average: startAvg + (targetAvg - startAvg) * ease
+                        ...r,
+                        count: r.count * ease,
+                        average: r.average * ease
                     };
                 });
 
                 setAnimatedRatings(current);
 
-                if (progress < 1) {
+                if (elapsed < totalDuration) {
                     requestAnimationFrame(animateUpdate);
                 }
             };
