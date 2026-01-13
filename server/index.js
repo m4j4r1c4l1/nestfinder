@@ -61,6 +61,15 @@ setInterval(async () => {
 wss.on('connection', (ws) => {
     clients.add(ws);
     console.log('Client connected. Total:', clients.size);
+
+    // Send current count immediately to the new client
+    ws.send(JSON.stringify({
+        type: 'clients-update',
+        count: clients.size,
+        timestamp: Date.now()
+    }));
+
+    // Also broadcast to all other clients
     broadcastClientsUpdate();
 
     ws.on('close', () => {
