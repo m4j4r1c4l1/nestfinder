@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { adminApi } from '../api';
-import dbIcon from '../assets/db-icon.png';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 
@@ -85,8 +84,8 @@ const CommitReveal = ({ text, duration = 2000 }) => {
             if (timestamp - lastUpdate > 50) { // Throttle scramble speed ~20fps
                 let str = '';
                 for (let i = 0; i < len; i++) {
-                    // Start locking sequence after 1.5s of initial chaos
-                    const lockTime = 1500 + (i * 500);
+                    // Start locking sequence after 1s of initial chaos
+                    const lockTime = 1000 + (i * 500);
 
                     if (elapsed > lockTime) {
                         str += text[i]; // Locked
@@ -100,7 +99,7 @@ const CommitReveal = ({ text, duration = 2000 }) => {
 
             // Continue until all chars are locked
             // Last char locks at 1000 + (len-1)*500
-            const totalDuration = 1500 + (len * 500) + 100;
+            const totalDuration = 1000 + (len * 500) + 100;
 
             if (elapsed < totalDuration) {
                 animationFrame = requestAnimationFrame(animate);
@@ -249,7 +248,7 @@ const RandomCounter = (props) => {
     return <CountUp {...props} />;
 };
 
-export default function Observability() {
+const Observability = () => {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalUsers: 0,
@@ -263,10 +262,7 @@ export default function Observability() {
         notificationMetrics: { total: 0, sent: 0, delivered: 0, read: 0, unread: 0 },
         feedbackMetrics: { total: 0, pending: 0, read: 0 },
         devMetrics: { loc: 0, components: 0, commits: 0, files: 0, apiEndpoints: 0, socketEvents: 0, listeners: 0, hooks: 0 },
-        broadcastMetrics: { total: 0, active: 0, delivered: 0, read: 0 },
-        connectedClients: 0,
-        serverStatus: 'Online',
-        lastHeartbeat: Date.now()
+        broadcastMetrics: { total: 0, active: 0, delivered: 0, read: 0 }
     });
 
     const [activeTab, setActiveTab] = useState('notifications');
@@ -291,42 +287,8 @@ export default function Observability() {
                 // Fallback for older broadcasts
                 setTimeout(loadData, 1000);
             }
-        } else if (message.type === 'clients-update') {
-            setStats(prev => ({
-                ...prev,
-                connectedClients: message.count
-            }));
-        } else if (message.type === 'system-status') {
-            // Real-time System Stats from Backend
-            const { memory, cpu, uptime, db } = message.data;
-            const loadPercent = cpu && cpu.load ? Math.round(cpu.load * 10) : 0; // Simple scaling
-
-            setStats(prev => ({
-                ...prev,
-                connectedClients: message.clientCount || prev.connectedClients,
-                systemHealth: {
-                    uptime: uptime,
-                    load: loadPercent,
-                    ram: memory ? memory.usage : 0,
-                    db: db
-                }
-            }));
         }
     });
-
-    // Helper to format uptime seconds into Dd HHh MMm
-    const formatUptime = (seconds) => {
-        if (!seconds) return '0m';
-        const d = Math.floor(seconds / (3600 * 24));
-        const h = Math.floor(seconds % (3600 * 24) / 3600);
-        const m = Math.floor(seconds % 3600 / 60);
-
-        let str = '';
-        if (d > 0) str += `${d}d `;
-        if (h > 0) str += `${h}h `;
-        str += `${m}m`;
-        return str;
-    };
 
     useEffect(() => {
         loadData();
@@ -361,118 +323,6 @@ export default function Observability() {
                     🐦 Observability
                 </h1>
                 <p className="text-muted">Monitor system health, usage statistics, and developer insights</p>
-            </div>
-
-            {/* Status Card (Landscape) */}
-            <div className="card" style={{ marginBottom: '1.5rem', background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', border: '1px solid #334155', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b, #ec4899)' }} />
-
-                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #334155' }}>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0 }}>
-                        <span style={{ color: '#f59e0b', fontSize: '1.4rem' }}>⚡</span> Status
-                    </h3>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Node: Nest-Alpha-01</div>
-                </div>
-
-                <div style={{ padding: '1.2rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
-
-                    {/* Main Health Block */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                Operational
-                                <EKGAnimation color={stats.systemHealth?.db === 'Error' ? '#ef4444' : '#38bdf8'} />
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>Uptime: {formatUptime(stats.systemHealth?.uptime)}</div>
-                        </div>
-                    </div>
-
-                    <div style={{ width: '1px', height: '40px', background: '#334155' }} />
-
-                    {/* Server Load (Stacked) */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ fontSize: '1.8rem', opacity: 0.8 }}>🖥️</div>
-                        <div style={{ display: 'flex', gap: '1.5rem' }}>
-                            <div>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Server Load</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>Healthy</div>
-                                <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
-                                    Latency: {stats.systemHealth?.latency || '< 1'}ms
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.2rem', borderLeft: '1px solid #334155', paddingLeft: '1.2rem' }}>
-                                <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
-                                    <span>CPU</span>
-                                    <span style={{ fontWeight: 700 }}>{stats.systemHealth?.load || 0}%</span>
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: '#818cf8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
-                                    <span>RAM</span>
-                                    <span style={{ fontWeight: 700 }}>{stats.systemHealth?.ram || 0}%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style={{ width: '1px', height: '40px', background: '#334155' }} />
-
-                    {/* Database Status */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img src={dbIcon} alt="DB" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Database</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e' }}>
-                                {stats.systemHealth?.db || 'Checking...'}
-                            </div>
-                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>SQLite Engine</div>
-                        </div>
-                    </div>
-
-                    {/* Live Connection Counter (Right Aligned) */}
-                    <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <button
-                                        onClick={() => {
-                                            const url = new URL(window.location.href);
-                                            url.searchParams.set('t', Date.now()); // Cache buster to force fresh initialization
-                                            window.open(url.toString(), '_blank');
-                                        }}
-                                        title="Open new session in new tab to test connectivity"
-                                        style={{
-                                            background: 'rgba(56, 189, 248, 0.1)',
-                                            border: '1px solid rgba(56, 189, 248, 0.2)',
-                                            borderRadius: '4px',
-                                            padding: '2px 4px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.65rem',
-                                            color: '#38bdf8',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.2rem',
-                                            marginBottom: '0.1rem'
-                                        }}
-                                    >
-                                        <span>+</span> TEST
-                                    </button>
-                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>LIVE SESSIONS</span>
-                                </div>
-                                <span style={{ fontSize: '1.3rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
-                                    <RollingBarrelCounter end={stats.connectedClients || 0} />
-                                </span>
-                            </div>
-                            <div style={{ position: 'relative', width: '8px', height: '8px' }}>
-                                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#38bdf8', opacity: 0.4, animation: 'ping 1s cubic-bezier(0,0,0.2,1) infinite' }} />
-                                <div style={{ position: 'absolute', inset: '2px', borderRadius: '50%', background: '#38bdf8' }} />
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
             </div>
 
             {/* Totals Summary */}
@@ -597,11 +447,7 @@ export default function Observability() {
                         {/* Using Grid: 25% | 25% | 50%. Dev block gets 50% width to shift it left. */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '1rem', width: '100%' }}>
                             {/* Messages Block (Left) */}
-                            <div style={{
-                                display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center',
-                                border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '12px', padding: '1rem',
-                                background: 'rgba(245, 158, 11, 0.05)'
-                            }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
                                     {/* Sent Section */}
@@ -616,15 +462,15 @@ export default function Observability() {
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
                                             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.delivered || 0} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.read || 0} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#f59e0b', fontWeight: 600 }}>Sent</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0)} /></span>
+                                                <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.unread || 0} /></span>
                                             </div>
                                         </div>
                                     </div>
@@ -652,115 +498,50 @@ export default function Observability() {
                             </div>
 
                             {/* Broadcasts Block (Center) */}
-                            <div style={{
-                                display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', height: '100%', width: '100%',
-                                border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '12px', padding: '1rem',
-                                background: 'rgba(45, 212, 191, 0.05)'
-                            }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
-
-                                {/* Main Layout: Grid 3 cols */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', width: '100%', alignItems: 'start', flex: 1 }}>
-
-                                    {/* Left Stack: Messages, Reach, Priorities */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
-                                        {/* Messages & Reach */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Messages</span>
-                                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
+                                    {/* Active Section */}
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22d3ee', lineHeight: 1 }}>
+                                                <RandomCounter end={stats.broadcastMetrics?.active || 0} />
                                             </div>
-                                            <div style={{ width: '100%', height: '1px', background: '#334155' }} />
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                <span style={{ fontSize: '0.7rem', color: '#3b82f6', textTransform: 'uppercase', fontWeight: 600 }}>Reach</span>
-                                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
-                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Users</div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Banners</div>
+                                            <div className="text-muted text-sm">Active</div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.delivered || 0} /></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.read || 0} /></span>
                                             </div>
                                         </div>
-
-                                        {/* Priority Badges (Below) */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', width: '100%' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.2rem' }}>Priorities</div>
-                                            {[1, 2, 3, 4, 5].map(p => {
-                                                let color = '#22c55e';
-                                                if (p === 1) color = '#ef4444';
-                                                if (p === 2) color = '#f97316';
-                                                if (p === 3) color = '#eab308';
-                                                if (p === 4) color = '#3b82f6';
-
-                                                return (
-                                                    <div key={p} style={{
-                                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                                        background: `${color}15`, borderRadius: '4px', padding: '1px 6px',
-                                                        border: `1px solid ${color}30`
-                                                    }}>
-                                                        <div style={{
-                                                            fontSize: '0.65rem', fontWeight: 900,
-                                                            color: color
-                                                        }}>P{p}</div>
-                                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#f1f5f9', marginLeft: 'auto' }}>
-                                                            {stats.broadcastMetrics?.priorities?.[p] || 0}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
+                                    </div>
+                                    {/* Total Section */}
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4ade80', lineHeight: 1 }}>
+                                                <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Created</div>
+                                            <div className="text-muted text-sm">Total</div>
                                         </div>
-                                    </div>
-
-                                    {/* Center: Main Metric (Campaigns) */}
-                                    <div style={{ textAlign: 'center', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                        <div style={{ fontSize: '3.5rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
-                                            <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                        {/* Status badge */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#c2410c20', border: '1px solid #c2410c40', borderRadius: '8px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: '#fb923c', fontWeight: 600 }}>Archive Ready ✅</span>
+                                            </div>
                                         </div>
-                                        <div style={{ fontSize: '0.9rem', color: '#e2e8f0', fontWeight: 600, textTransform: 'uppercase', marginTop: '0.4rem' }}>Campaigns</div>
-                                    </div>
-
-                                    {/* Right Stack: Sent & Received */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', alignItems: 'flex-end' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                            <span style={{ fontSize: '0.7rem', color: '#f97316', textTransform: 'uppercase', fontWeight: 600 }}>Sent</span>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
-                                        </div>
-                                        <div style={{ width: '100%', height: '1px', background: '#334155' }} />
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                            <span style={{ fontSize: '0.7rem', color: '#8b5cf6', textTransform: 'uppercase', fontWeight: 600 }}>Received</span>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Baseline: 2x2 Status Badge Grid - No Grey Box */}
-                                <div style={{
-                                    display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr',
-                                    gap: '0.5rem', width: '220px', marginTop: 'auto', padding: '0.5rem 0'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
-                                        <span style={{ color: '#3b82f6', fontWeight: 600 }}>Scheduled:</span>
-                                        <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.scheduled || 0}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
-                                        <span style={{ color: '#22c55e', fontWeight: 600 }}>Active:</span>
-                                        <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.active || 0}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
-                                        <span style={{ color: '#ec4899', fontWeight: 600 }}>Filled:</span>
-                                        <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.filled || 0}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
-                                        <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended:</span>
-                                        <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.ended || 0}</span>
                                     </div>
                                 </div>
                             </div>
 
-
-
                             {/* Development Block (Right) - Now gets 50% width */}
-                            <div style={{
-                                display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center',
-                                border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '12px', padding: '1rem',
-                                background: 'rgba(59, 130, 246, 0.05)'
-                            }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
 
                                 {/* 3 columns Badge Grid (9 items) */}
@@ -843,103 +624,10 @@ export default function Observability() {
                 </div>
             </div>
 
+
             {/* Metrics Chart Section */}
             <MetricsSection />
-        </div>
-    );
-};
-
-// EKG/Cardiac Monitor Animation
-const EKGAnimation = ({ color = '#38bdf8' }) => { // Match Observability blue (Sky 400)
-    // Varied heartbeat form: P-wave, QRS complex (large spike), T-wave
-    // We'll use a path that has 3 distinct "beats" with slightly different heights/forms
-    return (
-        <div style={{
-            width: '100px',
-            height: '28px',
-            background: '#020617', // Very dark blue
-            borderRadius: '4px',
-            border: '1px solid #1e293b',
-            position: 'relative',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center'
-        }}>
-            {/* Real Grid Background (Dark Blue) */}
-            <div style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `
-                    linear-gradient(rgba(30, 58, 138, 0.3) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(30, 58, 138, 0.3) 1px, transparent 1px),
-                    linear-gradient(rgba(30, 58, 138, 0.1) 0.5px, transparent 0.5px),
-                    linear-gradient(90deg, rgba(30, 58, 138, 0.1) 0.5px, transparent 0.5px)
-                `,
-                backgroundSize: '10px 10px, 10px 10px, 2px 2px, 2px 2px',
-                zIndex: 0
-            }} />
-
-            {/* EKG Path with varied heartbeat forms */}
-            <svg width="200" height="28" viewBox="0 0 200 28" style={{
-                position: 'absolute',
-                left: 0,
-                animation: 'ekg-move 4s linear infinite',
-                zIndex: 1
-            }}>
-                <path
-                    d="
-                        M 0 14 H 10 
-                        L 12 12 L 14 14 H 16 
-                        L 18 4 L 22 24 L 24 14 H 28
-                        L 32 10 L 36 14 H 50
-                        
-                        M 50 14 H 60
-                        L 62 13 L 64 14 H 66
-                        L 68 2 L 72 26 L 74 14 H 78
-                        L 82 11 L 86 14 H 100
-
-                        M 100 14 H 110
-                        L 112 11 L 114 14 H 116
-                        L 118 6 L 122 22 L 124 14 H 128
-                        L 132 12 L 136 14 H 150
-
-                        M 150 14 H 160
-                        L 162 12 L 164 14 H 166
-                        L 168 4 L 172 24 L 174 14 H 178
-                        L 182 10 L 186 14 H 200
-                    "
-                    fill="none"
-                    stroke={color}
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ filter: `drop-shadow(0 0 2px ${color})` }}
-                />
-            </svg>
-
-            {/* Scanning Glow (Trailing) */}
-            <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '40%',
-                height: '100%',
-                background: `linear-gradient(90deg, transparent, ${color}22, ${color}44 80%, transparent)`,
-                animation: 'ekg-scan 4s linear infinite',
-                zIndex: 2
-            }} />
-
-            <style>{`
-                @keyframes ekg-move {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-100px); }
-                }
-                @keyframes ekg-scan {
-                    0% { left: -40%; }
-                    100% { left: 100%; }
-                }
-            `}</style>
-        </div>
+        </div >
     );
 };
 
@@ -964,7 +652,7 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
         );
     }
 
-    // Data is now a hierarchical tree: [{action, count, children: [] }]
+    // Data is now a hierarchical tree: [{ action, count, children: [] }]
     const items = Array.isArray(data) ? data : [];
 
     // Calculate global max for consistent bar scaling across all levels
@@ -1047,13 +735,9 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                 }}
             >
                 {/* Header */}
-                {/* Header - Styled to match ChartCard Header */}
-                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '16px 16px 0 0' }}>
+                <div style={{ padding: '1.25rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
                     <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.2rem' }}>
-                            <span style={{ fontSize: '1.2rem' }}>👨‍👩‍👧‍👦</span>
-                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#e2e8f0' }}>Daily Breakdown</h3>
-                        </div>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>👥 Daily Breakdown</h3>
                         <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                             {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </span>
@@ -1187,42 +871,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         }
 
         if (hasAnimated.current) {
-            // Update Animation: Staggered Wave from Left to Right
-            let startTime;
-            const totalDuration = 800;
-            const staggerDelay = 400; // How long it takes for the start of animation to travel from left to right
-
-            const animateUpdate = (timestamp) => {
-                if (!startTime) startTime = timestamp;
-                const elapsed = timestamp - startTime;
-
-                const current = metrics.map((m, i) => {
-                    const newM = { ...m };
-                    // Calculate start time for this specific point index
-                    const myDelay = (i / (metrics.length - 1 || 1)) * staggerDelay;
-                    // Calculate local progress (0 to 1) for this point
-                    // Each point takes (totalDuration - staggerDelay) to fully rise
-                    const pointDuration = totalDuration - staggerDelay;
-                    const progress = Math.max(0, Math.min((elapsed - myDelay) / pointDuration, 1));
-
-                    // QuartOut easing
-                    const ease = 1 - Math.pow(1 - progress, 4);
-
-                    seriesConfig.forEach(s => {
-                        const target = m[s.key] || 0;
-                        newM[s.key] = target * ease;
-                    });
-                    return newM;
-                });
-
-                setAnimatedMetrics(current);
-
-                if (elapsed < totalDuration) {
-                    requestAnimationFrame(animateUpdate);
-                }
-            };
-
-            requestAnimationFrame(animateUpdate);
+            setAnimatedMetrics(metrics);
             return;
         }
         hasAnimated.current = true;
@@ -1273,9 +922,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const getX = (i) => innerPadding + (i / (metrics.length - 1 || 1)) * (graphWidth - innerPadding * 2);
     const getY = (val, max) => graphHeight - ((val / max) * graphHeight);
 
-    // If initial load (no data), show placeholder.
-    // If refreshing (data exists), show chart with overlay/opacity.
-    if (loading && metrics.length === 0) {
+    if (loading || metrics.length === 0) {
         return (
             <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
@@ -1317,9 +964,6 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     <option value={7}>7 Days</option>
                     <option value={14}>14 Days</option>
                     <option value={30}>30 Days</option>
-                    <option value={180}>6 Months</option>
-                    <option value={365}>1 Year</option>
-                    <option value={36500}>All Time</option>
                 </select>
                 <select
                     value={refreshInterval}
@@ -1463,18 +1107,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             )}
 
             {/* Graph Body */}
-            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s', pointerEvents: loading ? 'none' : 'auto' }}>
-                {/* Loading Spinner Overlay if refreshing */}
-                {loading && (
-                    <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        color: 'var(--color-primary)', fontWeight: 'bold', zIndex: 10,
-                        background: 'rgba(15, 23, 42, 0.8)', padding: '0.5rem 1rem', borderRadius: '20px',
-                        border: '1px solid #334155'
-                    }}>
-                        Updating...
-                    </div>
-                )}
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative' }}>
                 <svg
                     width="100%"
                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
@@ -1496,8 +1129,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
                         {/* X-Axis Labels */}
                         {metrics.map((m, i) => {
-                            // Calculate step based on number of days to prevent overlap (aim for ~8 labels)
-                            const labelStep = Math.ceil(metrics.length / 8);
+                            // Calculate step based on number of days to prevent overlap
+                            const labelStep = days > 14 ? 5 : (days > 7 ? 2 : 1);
                             if (i % labelStep !== 0 && i !== metrics.length - 1) return null;
 
                             return (
@@ -1841,37 +1474,7 @@ const RatingsChartCard = ({ onPointClick }) => {
         }
 
         if (hasAnimated.current) {
-            // Update Animation: Staggered Wave
-            let startTime;
-            const totalDuration = 800;
-            const staggerDelay = 400;
-
-            const animateUpdate = (timestamp) => {
-                if (!startTime) startTime = timestamp;
-                const elapsed = timestamp - startTime;
-
-                const current = ratings.map((r, i) => {
-                    // Calculate start time for this specific point index
-                    const myDelay = (i / (ratings.length - 1 || 1)) * staggerDelay;
-                    const pointDuration = totalDuration - staggerDelay;
-                    const progress = Math.max(0, Math.min((elapsed - myDelay) / pointDuration, 1));
-
-                    const ease = 1 - Math.pow(1 - progress, 4); // QuartOut
-
-                    return {
-                        ...r,
-                        count: r.count * ease,
-                        average: r.average * ease
-                    };
-                });
-
-                setAnimatedRatings(current);
-
-                if (elapsed < totalDuration) {
-                    requestAnimationFrame(animateUpdate);
-                }
-            };
-            requestAnimationFrame(animateUpdate);
+            setAnimatedRatings(ratings);
             return;
         }
         hasAnimated.current = true;
@@ -1941,9 +1544,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                 <option value={7}>7 Days</option>
                 <option value={14}>14 Days</option>
                 <option value={30}>30 Days</option>
-                <option value={180}>6 Months</option>
-                <option value={365}>1 Year</option>
-                <option value={36500}>All Time</option>
+                <option value={90}>90 Days</option>
             </select>
             <select
                 value={refreshInterval}
@@ -1960,7 +1561,7 @@ const RatingsChartCard = ({ onPointClick }) => {
         </div>
     );
 
-    if (loading && ratings.length === 0) {
+    if (loading || ratings.length === 0) {
         return (
             <div className="card" style={{ marginBottom: '1.5rem', background: '#1e293b', border: '1px solid #334155' }}>
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a', borderBottom: '1px solid #334155', padding: '0.75rem 1rem' }}>
@@ -2019,17 +1620,7 @@ const RatingsChartCard = ({ onPointClick }) => {
             </div>
 
             {/* Graph Body */}
-            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s', pointerEvents: loading ? 'none' : 'auto' }}>
-                {loading && (
-                    <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        color: 'var(--color-primary)', fontWeight: 'bold', zIndex: 10,
-                        background: 'rgba(15, 23, 42, 0.8)', padding: '0.5rem 1rem', borderRadius: '20px',
-                        border: '1px solid #334155'
-                    }}>
-                        Updating...
-                    </div>
-                )}
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative' }}>
                 <svg
                     width="100%"
                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
@@ -2210,4 +1801,4 @@ const RatingsChartCard = ({ onPointClick }) => {
 
 
 
-
+export default Observability;
