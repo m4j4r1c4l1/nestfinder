@@ -381,7 +381,7 @@ export default function Observability() {
                             <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
                             <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                                 Operational
-                                <EKGAnimation color={stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e'} />
+                                <EKGAnimation color={stats.systemHealth?.db === 'Error' ? '#ef4444' : '#38bdf8'} />
                             </div>
                             <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>Uptime: {formatUptime(stats.systemHealth?.uptime)}</div>
                         </div>
