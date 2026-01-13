@@ -309,7 +309,7 @@ const Messages = () => {
             border-color: #3b82f6;
         }
     `;
-    const [activeTab, setActiveTab] = useState('broadcasts'); // DEBUG: Default to broadcasts for testing
+    const [activeTab, setActiveTab] = useState('composer'); // Default to composer tab
     const [loading, setLoading] = useState(true);
     const [justPublished, setJustPublished] = useState(false); // Feedback state for Publish button
 

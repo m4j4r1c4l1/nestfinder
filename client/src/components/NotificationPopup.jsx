@@ -16,16 +16,19 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }
                         <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '12px' }}>
                             {(() => {
                                 try {
-                                    const utcTime = message.created_at.replace(' ', 'T') + (message.created_at.includes('Z') ? '' : 'Z');
-                                    return new Date(utcTime).toLocaleString('en-GB', {
+                                    // Parse and display in local timezone (CET/CEST)
+                                    const dateStr = message.created_at || '';
+                                    const date = new Date(dateStr.replace(' ', 'T'));
+                                    return date.toLocaleString('en-GB', {
                                         day: '2-digit',
                                         month: '2-digit',
                                         year: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit',
                                         second: '2-digit',
-                                        hour12: false
-                                    });
+                                        hour12: false,
+                                        timeZone: 'Europe/Paris'
+                                    }) + ' CET';
                                 } catch (e) { return ''; }
                             })()}
                         </div>
