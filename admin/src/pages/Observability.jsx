@@ -396,6 +396,10 @@ export default function Observability() {
                             <div>
                                 <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Server Load</div>
                                 <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>Healthy</div>
+                                <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
+                                    Latency: {stats.systemHealth?.latency || '< 1'}ms
+                                </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.2rem', borderLeft: '1px solid #334155', paddingLeft: '1.2rem' }}>
                                 <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
@@ -406,10 +410,6 @@ export default function Observability() {
                                     <span>RAM</span>
                                     <span style={{ fontWeight: 700 }}>{stats.systemHealth?.ram || 0}%</span>
                                 </div>
-                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between', gap: '1rem', width: '90px' }}>
-                                    <span>Latency</span>
-                                    <span style={{ fontWeight: 700 }}>&lt; 1ms</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -418,7 +418,9 @@ export default function Observability() {
 
                     {/* Database Status */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ fontSize: '1.8rem', opacity: 0.8 }}>🗄️</div>
+                        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <img src="/db-icon.png" alt="DB" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        </div>
                         <div>
                             <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Database</div>
                             <div style={{ fontSize: '1.1rem', fontWeight: 700, color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e' }}>
@@ -434,7 +436,11 @@ export default function Observability() {
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     <button
-                                        onClick={() => window.open(window.location.href, '_blank')}
+                                        onClick={() => {
+                                            const url = new URL(window.location.href);
+                                            url.searchParams.set('t', Date.now()); // Cache buster to force fresh initialization
+                                            window.open(url.toString(), '_blank');
+                                        }}
                                         title="Open new session in new tab to test connectivity"
                                         style={{
                                             background: 'rgba(56, 189, 248, 0.1)',
@@ -809,64 +815,92 @@ export default function Observability() {
 };
 
 // EKG/Cardiac Monitor Animation
-const EKGAnimation = ({ color = '#22c55e' }) => {
+const EKGAnimation = ({ color = '#38bdf8' }) => { // Match Observability blue (Sky 400)
+    // Varied heartbeat form: P-wave, QRS complex (large spike), T-wave
+    // We'll use a path that has 3 distinct "beats" with slightly different heights/forms
     return (
         <div style={{
-            width: '80px',
-            height: '24px',
-            background: 'rgba(15, 23, 42, 0.6)',
+            width: '100px',
+            height: '28px',
+            background: '#020617', // Very dark blue
             borderRadius: '4px',
-            border: '1px solid rgba(51, 65, 85, 0.5)',
+            border: '1px solid #1e293b',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center'
         }}>
-            {/* Grid Background */}
+            {/* Real Grid Background (Dark Blue) */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: 'linear-gradient(rgba(51, 65, 85, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(51, 65, 85, 0.2) 1px, transparent 1px)',
-                backgroundSize: '8px 8px',
+                backgroundImage: `
+                    linear-gradient(rgba(30, 58, 138, 0.3) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(30, 58, 138, 0.3) 1px, transparent 1px),
+                    linear-gradient(rgba(30, 58, 138, 0.1) 0.5px, transparent 0.5px),
+                    linear-gradient(90deg, rgba(30, 58, 138, 0.1) 0.5px, transparent 0.5px)
+                `,
+                backgroundSize: '10px 10px, 10px 10px, 2px 2px, 2px 2px',
                 zIndex: 0
             }} />
 
-            {/* EKG Path */}
-            <svg width="160" height="24" viewBox="0 0 160 24" style={{
+            {/* EKG Path with varied heartbeat forms */}
+            <svg width="200" height="28" viewBox="0 0 200 28" style={{
                 position: 'absolute',
                 left: 0,
-                animation: 'ekg-move 3s linear infinite',
+                animation: 'ekg-move 4s linear infinite',
                 zIndex: 1
             }}>
                 <path
-                    d="M 0 12 H 20 L 23 4 L 27 20 L 30 12 H 50 L 53 4 L 57 20 L 60 12 H 80 L 83 4 L 87 20 L 90 12 H 110 L 113 4 L 117 20 L 120 12 H 140 L 143 4 L 147 20 L 150 12 H 160"
+                    d="
+                        M 0 14 H 10 
+                        L 12 12 L 14 14 H 16 
+                        L 18 4 L 22 24 L 24 14 H 28
+                        L 32 10 L 36 14 H 50
+                        
+                        M 50 14 H 60
+                        L 62 13 L 64 14 H 66
+                        L 68 2 L 72 26 L 74 14 H 78
+                        L 82 11 L 86 14 H 100
+
+                        M 100 14 H 110
+                        L 112 11 L 114 14 H 116
+                        L 118 6 L 122 22 L 124 14 H 128
+                        L 132 12 L 136 14 H 150
+
+                        M 150 14 H 160
+                        L 162 12 L 164 14 H 166
+                        L 168 4 L 172 24 L 174 14 H 178
+                        L 182 10 L 186 14 H 200
+                    "
                     fill="none"
                     stroke={color}
-                    strokeWidth="1.5"
+                    strokeWidth="1.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    style={{ filter: `drop-shadow(0 0 2px ${color})` }}
                 />
             </svg>
 
-            {/* Scanning Glow */}
+            {/* Scanning Glow (Trailing) */}
             <div style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                width: '30%',
+                width: '40%',
                 height: '100%',
-                background: `linear-gradient(90deg, transparent, ${color}33, transparent)`,
-                animation: 'ekg-scan 3s linear infinite',
+                background: `linear-gradient(90deg, transparent, ${color}22, ${color}44 80%, transparent)`,
+                animation: 'ekg-scan 4s linear infinite',
                 zIndex: 2
             }} />
 
             <style>{`
                 @keyframes ekg-move {
                     0% { transform: translateX(0); }
-                    100% { transform: translateX(-80px); }
+                    100% { transform: translateX(-100px); }
                 }
                 @keyframes ekg-scan {
-                    0% { left: -30%; }
+                    0% { left: -40%; }
                     100% { left: 100%; }
                 }
             `}</style>
