@@ -29,6 +29,23 @@ const BadgeSelect = ({ value, onChange, options, placeholder, type = 'status' })
         let bg, color, border;
         const option = options.find(o => o.value === optValue);
 
+        if (option && option.color === null) {
+            return {
+                padding: '0.2rem 0.5rem',
+                borderRadius: '4px',
+                fontSize: '0.9rem', // Slightly larger to match placeholder
+                fontWeight: 400, // Normal weight
+                background: 'transparent',
+                color: '#94a3b8',
+                border: 'none',
+                textTransform: 'none', // Normal case
+                cursor: 'pointer',
+                display: 'inline-block',
+                textAlign: 'left',
+                minWidth: 'auto'
+            };
+        }
+
         if (option && option.color) {
             color = option.color;
             bg = `${color}20`; // 12% opacity
