@@ -78,14 +78,36 @@ router.get('/notifications', (req, res) => {
             SELECT b.id, b.title, b.message as body, b.image_url, b.created_at,
                    'sent' as status, NULL as delivered_at, NULL as read_at,
                    0 as read,
-                   'broadcast' as type
+                   'broadcast' as type,
+                   b.max_views,
+                   (SELECT COUNT(*) FROM broadcast_views bv WHERE bv.broadcast_id = b.id) as current_views
             FROM broadcasts b
             WHERE datetime(b.start_time) <= datetime(?)
             AND datetime(b.end_time) >= datetime(?)
             AND b.id NOT IN (SELECT broadcast_id FROM broadcast_views WHERE user_id = ?)
+            -- Filter out filled broadcasts (where current_views >= max_views)
+            AND (b.max_views IS NULL OR (SELECT COUNT(*) FROM broadcast_views bv WHERE bv.broadcast_id = b.id) < b.max_views)
             ORDER BY b.priority DESC, b.created_at DESC
             LIMIT 10
         `, [now, now, userId]);
+
+        // 3.5. Mark these unseen broadcasts as DELIVERED immediately
+        // This ensures Admin counts update even if seen only in inbox
+        if (unseenBroadcasts.length > 0) {
+            const deliveryStmt = getDb().prepare(`
+                INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, dismissed)
+                VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+                ON CONFLICT(broadcast_id, user_id) DO UPDATE SET
+                    status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
+                    delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
+            `);
+            const transaction = getDb().transaction((broadcasts) => {
+                for (const b of broadcasts) {
+                    deliveryStmt.run(b.id, userId);
+                }
+            });
+            transaction(unseenBroadcasts);
+        }
 
         // 4. Merge and Sort
         const unified = [...notifications, ...seenBroadcasts, ...unseenBroadcasts].sort((a, b) => {
