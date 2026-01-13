@@ -600,7 +600,7 @@ router.get('/feedback', requireUser, (req, res) => {
 
   const feedback = all(`
     SELECT * FROM feedback
-    WHERE user_id = ?
+    WHERE user_id = ? AND (deleted_by_sender = 0 OR deleted_by_sender IS NULL)
     ORDER BY created_at DESC
   `, [userId]);
 
@@ -615,7 +615,7 @@ router.delete('/feedback/prune', requireUser, (req, res) => {
   const userId = req.user.id;
 
   run(`
-    DELETE FROM feedback
+    UPDATE feedback SET deleted_by_sender = 1
     WHERE user_id = ? AND created_at < ?
   `, [userId, cutoff]);
 
@@ -626,7 +626,7 @@ router.delete('/feedback/prune', requireUser, (req, res) => {
 router.delete('/feedback/:id', requireUser, (req, res) => {
   const userId = req.user.id;
 
-  run('DELETE FROM feedback WHERE id = ? AND user_id = ?', [req.params.id, userId]);
+  run('UPDATE feedback SET deleted_by_sender = 1 WHERE id = ? AND user_id = ?', [req.params.id, userId]);
   res.json({ success: true });
 });
 

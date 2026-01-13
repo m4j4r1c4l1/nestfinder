@@ -177,10 +177,18 @@ export const initDatabase = async () => {
       message TEXT NOT NULL,
       status TEXT DEFAULT 'sent',
       rating INTEGER,
+      deleted_by_sender BOOLEAN DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
   `);
+
+  // Migration: Add deleted_by_sender to feedback
+  try {
+    db.run(`ALTER TABLE feedback ADD COLUMN deleted_by_sender BOOLEAN DEFAULT 0`);
+  } catch (e) {
+    // Column likely exists
+  }
 
   // In-App Notifications table
   db.run(`
