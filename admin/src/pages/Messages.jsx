@@ -999,8 +999,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // Search State
     const [searchFilters, setSearchFilters] = useState({
         searchText: '',
-        status: 'all', // all, active, scheduled, inactive, filled
-        priority: 'all', // all, 1, 2, 3, 4, 5
+        status: [], // empty = all
+        priority: [], // empty = all
         maxViewsNum: '',
         maxViewsType: 'all', // all, limited, unlimited
         startDate: null,
@@ -1036,25 +1036,29 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
         // Status Filter
         // Status Filter
-        if (searchFilters.status !== 'all') {
+        // Status Filter
+        if (searchFilters.status.length > 0) {
             const isFilled = b.max_views && (b.total_users || 0) >= b.max_views;
             const isActive = now >= start && (!end || now <= end);
             const isPast = end && now > end;
             const isScheduled = now < start;
 
-            if (searchFilters.status === 'filled' && !isFilled) return false;
+            let matchesStatus = false;
+
+            if (searchFilters.status.includes('filled') && isFilled) matchesStatus = true;
 
             // "Active" means time-active AND NOT filled
-            if (searchFilters.status === 'active' && (!isActive || isFilled)) return false;
+            if (searchFilters.status.includes('active') && (isActive && !isFilled)) matchesStatus = true;
 
-            if (searchFilters.status === 'inactive' && !isPast && !isFilled) return false; // Inactive usually means ended, but let's keep it strict to time-ended based on user request "filled... must behave like inactive" visually, but logically it's its own status. User said "must behave like a inactive one -more transparent...". Logic-wise, let's keep them distinct in filter.
-            // Correction: If user selects INACTIVE, should they see filled? Usually no if there's a specific filled filter.
-            if (searchFilters.status === 'inactive' && !isPast) return false;
+            // Inactive / Ended
+            if (searchFilters.status.includes('inactive') && isPast) matchesStatus = true;
 
-            if (searchFilters.status === 'scheduled' && !isScheduled) return false;
+            if (searchFilters.status.includes('scheduled') && isScheduled) matchesStatus = true;
+
+            if (!matchesStatus) return false;
         }
 
-        if (searchFilters.priority !== 'all' && (b.priority || 3) != searchFilters.priority) return false;
+        if (searchFilters.priority.length > 0 && !searchFilters.priority.includes(String(b.priority || 3))) return false;
         // Max Views Filter
         if (searchFilters.maxViewsType === 'limited') {
             if (!b.max_views || b.max_views <= 0) return false;
@@ -1153,10 +1157,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
 
                         {/* Clear */}
-                        {(searchFilters.searchText || searchFilters.status !== 'all' || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViewsNum || searchFilters.priority !== 'all' || searchFilters.maxViewsType !== 'all') && (
+                        {(searchFilters.searchText || searchFilters.status.length > 0 || searchFilters.startDate || searchFilters.endDate || searchFilters.maxViewsNum || searchFilters.priority.length > 0 || searchFilters.maxViewsType !== 'all') && (
                             <button
                                 className="btn btn-secondary"
-                                onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
+                                onClick={() => setSearchFilters({ searchText: '', status: [], priority: [], maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
                                 style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
                             >
                                 ✕ Clear
@@ -1203,8 +1207,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 Status
                             </label>
                             <BadgeSelect
-                                value={searchFilters.status}
-                                onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val }))}
+                                value={searchFilters.status.length > 0 ? searchFilters.status[0] : 'all'}
+                                onChange={(val) => setSearchFilters(prev => ({ ...prev, status: val === 'all' ? [] : [val] }))}
                                 options={[
                                     { value: 'all', label: 'Any Status', color: null }, // No badge style
                                     { value: 'active', label: 'Active', color: '#22c55e' },
@@ -1222,8 +1226,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 Priority
                             </label>
                             <BadgeSelect
-                                value={searchFilters.priority}
-                                onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val }))}
+                                value={searchFilters.priority.length > 0 ? searchFilters.priority[0] : 'all'}
+                                onChange={(val) => setSearchFilters(prev => ({ ...prev, priority: val === 'all' ? [] : [val] }))}
                                 options={[
                                     { value: 'all', label: 'Any Priority', color: null },
                                     { value: '1', label: 'P1 - Critical', color: '#ef4444' },
@@ -1297,7 +1301,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         display: 'flex', alignItems: 'center', gap: '0.4rem',
                         cursor: 'pointer', flexShrink: 0
                     }}
-                        onClick={() => setSearchFilters({ searchText: '', status: 'all', priority: 'all', maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
+                        onClick={() => setSearchFilters({ searchText: '', status: [], priority: [], maxViewsNum: '', maxViewsType: 'all', startDate: null, endDate: null })}
                     >
                         TOTAL <span style={{ background: '#0f172a', padding: '0 0.3rem', borderRadius: '3px', color: '#eab308' }}>{broadcasts.length}</span>
                     </span>
@@ -1310,13 +1314,18 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'active' ? '#22c55e40' : '#22c55e20', // Highlight if selected
+                            background: searchFilters.status.includes('active') ? '#22c55e40' : '#22c55e20', // Highlight if selected
                             color: '#22c55e',
-                            border: searchFilters.status === 'active' ? '1px solid #22c55e' : '1px solid #22c55e40',
+                            border: searchFilters.status.includes('active') ? '1px solid #22c55e' : '1px solid #22c55e40',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'active' ? 'all' : 'active' }))}
+                            onClick={() => setSearchFilters(prev => ({
+                                ...prev,
+                                status: prev.status.includes('active')
+                                    ? prev.status.filter(s => s !== 'active')
+                                    : [...prev.status, 'active']
+                            }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'active' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1325,13 +1334,18 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'scheduled' ? '#3b82f640' : '#3b82f620',
+                            background: searchFilters.status.includes('scheduled') ? '#3b82f640' : '#3b82f620',
                             color: '#3b82f6',
-                            border: searchFilters.status === 'scheduled' ? '1px solid #3b82f6' : '1px solid #3b82f640',
+                            border: searchFilters.status.includes('scheduled') ? '1px solid #3b82f6' : '1px solid #3b82f640',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'scheduled' ? 'all' : 'scheduled' }))}
+                            onClick={() => setSearchFilters(prev => ({
+                                ...prev,
+                                status: prev.status.includes('scheduled')
+                                    ? prev.status.filter(s => s !== 'scheduled')
+                                    : [...prev.status, 'scheduled']
+                            }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'scheduled' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1340,13 +1354,18 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'filled' ? '#ec489940' : '#ec489910', // More transparent like inactive
+                            background: searchFilters.status.includes('filled') ? '#ec489940' : '#ec489910', // More transparent like inactive
                             color: '#ec4899',
-                            border: searchFilters.status === 'filled' ? '1px solid #ec4899' : '1px solid #ec489920',
+                            border: searchFilters.status.includes('filled') ? '1px solid #ec4899' : '1px solid #ec489920',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'filled' ? 'all' : 'filled' }))}
+                            onClick={() => setSearchFilters(prev => ({
+                                ...prev,
+                                status: prev.status.includes('filled')
+                                    ? prev.status.filter(s => s !== 'filled')
+                                    : [...prev.status, 'filled']
+                            }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'filled' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1355,13 +1374,18 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
                             fontSize: '0.7rem', fontWeight: 700,
-                            background: searchFilters.status === 'inactive' ? '#94a3b840' : '#94a3b820',
+                            background: searchFilters.status.includes('inactive') ? '#94a3b840' : '#94a3b820',
                             color: '#94a3b8',
-                            border: searchFilters.status === 'inactive' ? '1px solid #94a3b8' : '1px solid #94a3b840',
+                            border: searchFilters.status.includes('inactive') ? '1px solid #94a3b8' : '1px solid #94a3b840',
                             textTransform: 'uppercase', letterSpacing: '0.5px',
                             cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                         }}
-                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'inactive' ? 'all' : 'inactive' }))}
+                            onClick={() => setSearchFilters(prev => ({
+                                ...prev,
+                                status: prev.status.includes('inactive')
+                                    ? prev.status.filter(s => s !== 'inactive')
+                                    : [...prev.status, 'inactive']
+                            }))}
                             onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'inactive' }); }}
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
@@ -1385,12 +1409,17 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 <span key={p} style={{
                                     padding: '0.2rem 0.5rem', borderRadius: '4px',
                                     fontSize: '0.7rem', fontWeight: 600,
-                                    background: searchFilters.priority === String(p) ? `${color}40` : `${color}20`,
+                                    background: searchFilters.priority.includes(String(p)) ? `${color}40` : `${color}20`,
                                     color: color,
-                                    border: searchFilters.priority === String(p) ? `1px solid ${color}` : `1px solid ${color}40`,
+                                    border: searchFilters.priority.includes(String(p)) ? `1px solid ${color}` : `1px solid ${color}40`,
                                     cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
                                 }}
-                                    onClick={() => setSearchFilters(prev => ({ ...prev, priority: prev.priority === String(p) ? 'all' : String(p) }))}
+                                    onClick={() => setSearchFilters(prev => ({
+                                        ...prev,
+                                        priority: prev.priority.includes(String(p))
+                                            ? prev.priority.filter(x => x !== String(p))
+                                            : [...prev.priority, String(p)]
+                                    }))}
                                     onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'priority', value: p }); }}
                                     onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                                 >
