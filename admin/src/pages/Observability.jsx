@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { adminApi } from '../api';
+import dbIcon from '../assets/db-icon.png';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 
@@ -419,7 +420,7 @@ export default function Observability() {
                     {/* Database Status */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img src="/db-icon.png" alt="DB" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <img src={dbIcon} alt="DB" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         <div>
                             <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Database</div>
