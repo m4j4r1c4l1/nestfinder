@@ -1113,7 +1113,18 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             )}
 
             {/* Graph Body */}
-            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative' }}>
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s', pointerEvents: loading ? 'none' : 'auto' }}>
+                {/* Loading Spinner Overlay if refreshing */}
+                {loading && (
+                    <div style={{
+                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                        color: 'var(--color-primary)', fontWeight: 'bold', zIndex: 10,
+                        background: 'rgba(15, 23, 42, 0.8)', padding: '0.5rem 1rem', borderRadius: '20px',
+                        border: '1px solid #334155'
+                    }}>
+                        Updating...
+                    </div>
+                )}
                 <svg
                     width="100%"
                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
@@ -1626,7 +1637,17 @@ const RatingsChartCard = ({ onPointClick }) => {
             </div>
 
             {/* Graph Body */}
-            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative' }}>
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s', pointerEvents: loading ? 'none' : 'auto' }}>
+                {loading && (
+                    <div style={{
+                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                        color: 'var(--color-primary)', fontWeight: 'bold', zIndex: 10,
+                        background: 'rgba(15, 23, 42, 0.8)', padding: '0.5rem 1rem', borderRadius: '20px',
+                        border: '1px solid #334155'
+                    }}>
+                        Updating...
+                    </div>
+                )}
                 <svg
                     width="100%"
                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
