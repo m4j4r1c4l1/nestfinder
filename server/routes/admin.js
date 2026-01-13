@@ -228,10 +228,31 @@ router.get('/stats', async (req, res) => {
                 instance: process.env.RENDER_INSTANCE_ID || 'unknown',
                 region: process.env.RENDER_REGION || 'unknown'
             } : null
+        },
+        broadcastMetrics: {
+            total: get('SELECT COUNT(*) as count FROM broadcasts').count,
+            active: get("SELECT COUNT(*) as count FROM broadcasts WHERE datetime('now') BETWEEN datetime(start_time) AND COALESCE(datetime(end_time), '9999-12-31')").count,
+            delivered: get("SELECT COUNT(*) as count FROM broadcast_views WHERE status IN ('delivered', 'read')").count,
+            read: get("SELECT COUNT(*) as count FROM broadcast_views WHERE status = 'read'").count,
+            reach: get("SELECT COUNT(DISTINCT user_id) as count FROM broadcast_views").count,
+            priorities: {
+                p1: get('SELECT COUNT(*) as count FROM broadcasts WHERE priority = 1').count,
+                p2: get('SELECT COUNT(*) as count FROM broadcasts WHERE priority = 2').count,
+                p3: get('SELECT COUNT(*) as count FROM broadcasts WHERE priority = 3').count,
+                p4: get('SELECT COUNT(*) as count FROM broadcasts WHERE priority = 4').count,
+                p5: get('SELECT COUNT(*) as count FROM broadcasts WHERE priority = 5').count
+            },
+            statuses: {
+                scheduled: get("SELECT COUNT(*) as count FROM broadcasts WHERE datetime(start_time) > datetime('now')").count,
+                active: get("SELECT COUNT(*) as count FROM broadcasts WHERE datetime('now') BETWEEN datetime(start_time) AND COALESCE(datetime(end_time), '9999-12-31') AND (max_views IS NULL OR (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = broadcasts.id) < max_views)").count,
+                ended: get("SELECT COUNT(*) as count FROM broadcasts WHERE datetime(end_time) <= datetime('now')").count,
+                filled: get("SELECT COUNT(*) as count FROM broadcasts WHERE max_views IS NOT NULL AND (SELECT COUNT(*) FROM broadcast_views WHERE broadcast_id = broadcasts.id) >= max_views").count
+            }
         }
-    };
+    }
+};
 
-    res.json({ stats });
+res.json({ stats });
 });
 
 // Get historical metrics for charting
