@@ -307,7 +307,9 @@ export const initDatabase = async () => {
     { key: 'rate_limit_register', value: '10' },
     { key: 'rate_limit_submit', value: '20' },
     { key: 'rate_limit_vote', value: '30' },
-    { key: 'rate_limit_admin_login', value: '5' }
+    { key: 'rate_limit_vote', value: '30' },
+    { key: 'rate_limit_admin_login', value: '5' },
+    { key: 'debug_mode_enabled', value: 'false' }
   ];
 
   defaultSettings.forEach(s => {
