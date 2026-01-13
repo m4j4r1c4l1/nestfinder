@@ -498,44 +498,97 @@ const Observability = () => {
                             </div>
 
                             {/* Broadcasts Block (Center) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                            {/* Broadcasts Block (Center) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', height: '100%', width: '100%' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
-                                    {/* Active Section */}
-                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#22d3ee', lineHeight: 1 }}>
-                                                <RandomCounter end={stats.broadcastMetrics?.active || 0} />
+
+                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+
+                                    {/* Hero: Live Active Broadcasts */}
+                                    <div style={{
+                                        background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(15, 23, 42, 0) 100%)',
+                                        border: '1px solid rgba(6, 182, 212, 0.2)',
+                                        borderRadius: '12px',
+                                        padding: '1rem 1.5rem',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                                            <div style={{
+                                                position: 'relative', width: '14px', height: '14px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <div style={{
+                                                    position: 'absolute', width: '100%', height: '100%', borderRadius: '50%',
+                                                    background: '#22d3ee', opacity: 0.75,
+                                                    animation: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite'
+                                                }} />
+                                                <div style={{
+                                                    position: 'relative', width: '8px', height: '8px', borderRadius: '50%',
+                                                    background: '#06b6d4', boxShadow: '0 0 8px #22d3ee'
+                                                }} />
+                                                <style>{`
+                                                    @keyframes ping {
+                                                        75%, 100% { transform: scale(2); opacity: 0; }
+                                                    }
+                                                `}</style>
                                             </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Banners</div>
-                                            <div className="text-muted text-sm">Active</div>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ fontSize: '2.2rem', fontWeight: 'bold', lineHeight: 1, color: '#22d3ee', letterSpacing: '-0.02em' }}>
+                                                    <RandomCounter end={stats.broadcastMetrics?.active || 0} />
+                                                </span>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                    Live Now
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.delivered || 0} /></span>
+                                        <div style={{ fontSize: '2.5rem', opacity: 0.15, filter: 'grayscale(100%)' }}>📡</div>
+                                    </div>
+
+                                    {/* Metrics Grid */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                        {/* Engagement Rate */}
+                                        <div style={{
+                                            background: '#33415530', borderRadius: '10px', padding: '0.8rem',
+                                            display: 'flex', flexDirection: 'column', border: '1px solid #33415550'
+                                        }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.2rem' }}>Engagement</span>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem' }}>
+                                                <span style={{ fontSize: '1.4rem', fontWeight: 600, color: '#4ade80' }}>
+                                                    {((stats.broadcastMetrics?.delivered > 0 ? (stats.broadcastMetrics.read / stats.broadcastMetrics.delivered) * 100 : 0)).toFixed(1)}%
+                                                </span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.broadcastMetrics?.read || 0} /></span>
+                                            <span style={{ fontSize: '0.65rem', color: '#4ade8080' }}>Read Rate</span>
+                                        </div>
+
+                                        {/* Total History */}
+                                        <div style={{
+                                            background: '#33415530', borderRadius: '10px', padding: '0.8rem',
+                                            display: 'flex', flexDirection: 'column', border: '1px solid #33415550'
+                                        }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.2rem' }}>History</span>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem' }}>
+                                                <span style={{ fontSize: '1.4rem', fontWeight: 600, color: '#e2e8f0' }}>
+                                                    <RollingBarrelCounter end={stats.broadcastMetrics?.total || 0} />
+                                                </span>
                                             </div>
+                                            <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Created</span>
                                         </div>
                                     </div>
-                                    {/* Total Section */}
-                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#4ade80', lineHeight: 1 }}>
-                                                <RandomCounter end={stats.broadcastMetrics?.total || 0} />
-                                            </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Created</div>
-                                            <div className="text-muted text-sm">Total</div>
+
+                                    {/* Reach Footer */}
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        padding: '0.6rem 1rem', background: '#1e293b50', borderRadius: '8px',
+                                        border: '1px solid #33415530'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span style={{ fontSize: '0.9rem' }}>👥</span>
+                                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Total Reach</span>
                                         </div>
-                                        {/* Status badge */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#c2410c20', border: '1px solid #c2410c40', borderRadius: '8px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#fb923c', fontWeight: 600 }}>Archive Ready ✅</span>
-                                            </div>
-                                        </div>
+                                        <span style={{ fontWeight: 600, color: '#f1f5f9', fontSize: '0.9rem' }}>
+                                            <RollingBarrelCounter end={stats.broadcastMetrics?.delivered || 0} separator="," /> <span style={{ fontSize: '0.8em', color: '#64748b', fontWeight: 400 }}>users</span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
