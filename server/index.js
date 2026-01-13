@@ -29,18 +29,35 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server });
 const clients = new Set();
 
+// Rate limit broadcasting updates as multiple connects/disconnects can happen quickly
+let broadcastTimeout = null;
+const broadcastClientsUpdate = () => {
+    if (broadcastTimeout) return;
+    broadcastTimeout = setTimeout(() => {
+        broadcastTimeout = null;
+        broadcast({
+            type: 'clients-update',
+            count: clients.size,
+            timestamp: Date.now()
+        });
+    }, 1000); // Debounce updates to 1s
+};
+
 wss.on('connection', (ws) => {
     clients.add(ws);
     console.log('Client connected. Total:', clients.size);
+    broadcastClientsUpdate();
 
     ws.on('close', () => {
         clients.delete(ws);
         console.log('Client disconnected. Total:', clients.size);
+        broadcastClientsUpdate();
     });
 
     ws.on('error', (error) => {
         console.error('WebSocket error:', error);
         clients.delete(ws);
+        broadcastClientsUpdate();
     });
 });
 
