@@ -1639,7 +1639,6 @@ const RatingsChartCard = ({ onPointClick }) => {
                 <option value={7}>7 Days</option>
                 <option value={14}>14 Days</option>
                 <option value={30}>30 Days</option>
-                <option value={90}>90 Days</option>
             </select>
             <select
                 value={refreshInterval}
