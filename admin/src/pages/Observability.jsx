@@ -630,11 +630,11 @@ export default function Observability() {
                                 </div>
                             </div>
 
-                            {/* Broadcasts Block (Center) - Restructured */}
+                            {/* Broadcasts Block (Center) - Sized to match LOC block */}
                             <div style={{
-                                display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', height: '100%',
+                                display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center',
                                 border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '12px', padding: '0.8rem',
-                                background: 'rgba(45, 212, 191, 0.05)', minWidth: '180px'
+                                background: 'rgba(45, 212, 191, 0.05)', minWidth: '200px', justifyContent: 'flex-end'
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>🚀 Broadcasts</div>
 
@@ -648,9 +648,9 @@ export default function Observability() {
                                 </div>
 
                                 {/* Metrics Row: Messages | Users | Sent | Read */}
-                                <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center', alignItems: 'flex-start', width: '100%' }}>
                                     {/* Messages */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                             <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
                                             <span style={{ fontSize: '0.8rem' }}>📡</span>
@@ -658,7 +658,7 @@ export default function Observability() {
                                         <div className="text-muted" style={{ fontSize: '0.55rem' }}>Messages</div>
                                     </div>
                                     {/* Users */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                             <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
                                             <span style={{ fontSize: '0.8rem' }}>👨‍👩‍👧‍👦</span>
@@ -666,7 +666,7 @@ export default function Observability() {
                                         <div className="text-muted" style={{ fontSize: '0.55rem' }}>Users</div>
                                     </div>
                                     {/* Sent */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                             <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
                                             <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
@@ -674,7 +674,7 @@ export default function Observability() {
                                         <div className="text-muted" style={{ fontSize: '0.55rem' }}>Sent</div>
                                     </div>
                                     {/* Read */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                             <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
                                             <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
@@ -683,8 +683,8 @@ export default function Observability() {
                                     </div>
                                 </div>
 
-                                {/* Bottom: Priority Badges */}
-                                <div style={{ display: 'flex', gap: '0.2rem', justifyContent: 'center', marginTop: 'auto' }}>
+                                {/* Priority Badges - Full width matching metrics row */}
+                                <div style={{ display: 'flex', gap: '0.3rem', justifyContent: 'center', width: '100%' }}>
                                     {[1, 2, 3, 4, 5].map(p => {
                                         let color = '#22c55e';
                                         if (p === 1) color = '#ef4444';
@@ -694,12 +694,12 @@ export default function Observability() {
 
                                         return (
                                             <div key={p} style={{
-                                                width: '18px', height: '18px',
+                                                flex: 1, height: '22px', maxWidth: '32px',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                background: `${color}15`, borderRadius: '3px',
+                                                background: `${color}15`, borderRadius: '4px',
                                                 border: `1px solid ${color}30`
                                             }}>
-                                                <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#f1f5f9' }}>
+                                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#f1f5f9' }}>
                                                     {stats.broadcastMetrics?.priorities?.[p] || 0}
                                                 </span>
                                             </div>
@@ -707,24 +707,24 @@ export default function Observability() {
                                     })}
                                 </div>
 
-                                {/* Status Badges Row (2x2 grid) */}
+                                {/* Status Badges - Full width 2x2 grid */}
                                 <div style={{
                                     display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr',
-                                    gap: '0.25rem', width: '140px'
+                                    gap: '0.3rem', width: '100%'
                                 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '3px', padding: '0.1rem 0.25rem', fontSize: '0.6rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '4px', padding: '0.15rem 0.4rem', fontSize: '0.65rem' }}>
                                         <span style={{ color: '#3b82f6', fontWeight: 600 }}>Sched</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.scheduled || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '3px', padding: '0.1rem 0.25rem', fontSize: '0.6rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '4px', padding: '0.15rem 0.4rem', fontSize: '0.65rem' }}>
                                         <span style={{ color: '#22c55e', fontWeight: 600 }}>Active</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.active || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '3px', padding: '0.1rem 0.25rem', fontSize: '0.6rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '4px', padding: '0.15rem 0.4rem', fontSize: '0.65rem' }}>
                                         <span style={{ color: '#ec4899', fontWeight: 600 }}>Filled</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.filled || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '3px', padding: '0.1rem 0.25rem', fontSize: '0.6rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '4px', padding: '0.15rem 0.4rem', fontSize: '0.65rem' }}>
                                         <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.ended || 0}</span>
                                     </div>
