@@ -374,6 +374,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
             if (type === 'received') {
                 await api.deleteNotification(id);
                 setDeletedIds(prev => new Set(prev).add(id));
+            } else if (type === 'broadcast') {
+                await api.dismissBroadcast(id);
+                setDeletedIds(prev => new Set(prev).add(id));
             } else {
                 await api.deleteFeedback(id);
                 setSentMessages(prev => prev.filter(m => m.id !== id));
@@ -742,9 +745,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                         // If Safe Delete is OFF (Instant Mode), delete immediately
                                                         // If Safe Delete is ON, trigger confirmation/reveal (handleDeleteClick)
                                                         if (!swipeEnabled) {
-                                                            performDelete(notification.id, 'received');
+                                                            performDelete(notification.id, notification.type === 'broadcast' ? 'broadcast' : 'received');
                                                         } else {
-                                                            handleDeleteClick(null, notification.id, 'received');
+                                                            handleDeleteClick(null, notification.id, notification.type === 'broadcast' ? 'broadcast' : 'received');
                                                         }
                                                     }}
                                                     onConfirm={() => confirmDelete()}
@@ -770,7 +773,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             className="delete-btn-hover"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleDeleteClick(null, notification.id, 'received');
+                                                                handleDeleteClick(null, notification.id, notification.type === 'broadcast' ? 'broadcast' : 'received');
                                                             }}
                                                             style={{
                                                                 position: 'absolute',

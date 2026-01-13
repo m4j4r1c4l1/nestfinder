@@ -66,7 +66,7 @@ router.get('/notifications', (req, res) => {
                    'broadcast' as type
             FROM broadcasts b
             JOIN broadcast_views v ON b.id = v.broadcast_id
-            WHERE v.user_id = ?
+            WHERE v.user_id = ? AND v.dismissed = 0
             ORDER BY b.created_at DESC
             LIMIT 50
         `, [userId]);
@@ -503,6 +503,26 @@ router.delete('/:id', requireUser, (req, res) => {
 
     run('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, userId]);
     res.json({ success: true });
+});
+
+// Dismiss a broadcast (user action)
+router.post('/broadcasts/:id/dismiss', requireUser, (req, res) => {
+    try {
+        const userId = req.user.id;
+        const broadcastId = req.params.id;
+
+        // Upsert into broadcast_views with dismissed=1
+        run(`
+            INSERT INTO broadcast_views (broadcast_id, user_id, dismissed, status, read_at)
+            VALUES (?, ?, 1, 'read', CURRENT_TIMESTAMP)
+            ON CONFLICT(broadcast_id, user_id) DO UPDATE SET dismissed = 1
+        `, [broadcastId, userId]);
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Dismiss broadcast error:', error);
+        res.status(500).json({ error: 'Failed to dismiss broadcast' });
+    }
 });
 
 // Get broadcast interaction details
