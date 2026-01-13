@@ -1010,6 +1010,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     <option value={7}>7 Days</option>
                     <option value={14}>14 Days</option>
                     <option value={30}>30 Days</option>
+                    <option value={180}>6 Months</option>
+                    <option value={365}>1 Year</option>
+                    <option value={36500}>All Time</option>
                 </select>
                 <select
                     value={refreshInterval}
@@ -1639,6 +1642,9 @@ const RatingsChartCard = ({ onPointClick }) => {
                 <option value={7}>7 Days</option>
                 <option value={14}>14 Days</option>
                 <option value={30}>30 Days</option>
+                <option value={180}>6 Months</option>
+                <option value={365}>1 Year</option>
+                <option value={36500}>All Time</option>
             </select>
             <select
                 value={refreshInterval}
