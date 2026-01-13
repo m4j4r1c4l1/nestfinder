@@ -241,7 +241,44 @@ router.get('/stats', async (req, res) => {
 // Get historical metrics for charting
 router.get('/metrics/history', (req, res) => {
     const { days = 7 } = req.query;
-    const daysInt = parseInt(days);
+    let daysInt = parseInt(days);
+
+    // OPTIMIZATION: If requesting "All Time" (e.g. > 1000 days), clamp to actual data start date.
+    // This prevents returning ~36,500 rows (100 years) of zeros, which crashes the client chart.
+    if (daysInt > 1000) {
+        try {
+            const minDates = [];
+
+            const logMin = get(`SELECT MIN(created_at) as val FROM logs`).val;
+            if (logMin) minDates.push(new Date(logMin));
+
+            const notifMin = get(`SELECT MIN(created_at) as val FROM notifications`).val;
+            if (notifMin) minDates.push(new Date(notifMin));
+
+            const feedMin = get(`SELECT MIN(created_at) as val FROM feedback`).val;
+            if (feedMin) minDates.push(new Date(feedMin));
+
+            if (minDates.length > 0) {
+                // Find earliest date
+                const earliest = new Date(Math.min(...minDates));
+                const now = new Date();
+                // Calculate days diff: (Start of Now - Start of Earliest)
+                // Add 1 day buffer to be safe
+                const diffTime = Math.abs(now - earliest);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                // Use the smaller of the two: requested days OR actual history length
+                // We add 7 days buffer just in case of timezone/start-of-day offsets
+                daysInt = Math.min(daysInt, diffDays + 7);
+            } else {
+                // No data at all? Default to 30 days to avoid empty loops
+                daysInt = 30;
+            }
+        } catch (e) {
+            console.error('Failed to optimize date range:', e);
+            // Fallback to original daysInt if optimization fails
+        }
+    }
 
     // Calculate cutoff date string (YYYY-MM-DD)
     const cutoffRow = get(`SELECT date('now', '-${daysInt} days') as val`);
