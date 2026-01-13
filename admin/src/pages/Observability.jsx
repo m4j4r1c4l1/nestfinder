@@ -858,25 +858,23 @@ const EKGAnimation = ({ color = '#38bdf8' }) => { // Match Observability blue (S
         <div style={{
             width: '100px',
             height: '28px',
-            background: '#020617', // Very dark blue
+            background: 'transparent', // Transparent background
             borderRadius: '4px',
-            border: '1px solid #1e293b',
+            border: '1px solid rgba(30, 58, 138, 0.3)',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center'
         }}>
-            {/* Real Grid Background (Dark Blue) */}
+            {/* Real Grid Background (Transparent with subtle lines) */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
                 backgroundImage: `
-                    linear-gradient(rgba(30, 58, 138, 0.3) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(30, 58, 138, 0.3) 1px, transparent 1px),
-                    linear-gradient(rgba(30, 58, 138, 0.1) 0.5px, transparent 0.5px),
-                    linear-gradient(90deg, rgba(30, 58, 138, 0.1) 0.5px, transparent 0.5px)
+                    linear-gradient(rgba(30, 58, 138, 0.2) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(30, 58, 138, 0.2) 1px, transparent 1px)
                 `,
-                backgroundSize: '10px 10px, 10px 10px, 2px 2px, 2px 2px',
+                backgroundSize: '10px 10px',
                 zIndex: 0
             }} />
 
@@ -918,16 +916,16 @@ const EKGAnimation = ({ color = '#38bdf8' }) => { // Match Observability blue (S
                 />
             </svg>
 
-            {/* Scanning Glow (Trailing) */}
+            {/* Pulse Dot (Whitish, moves along path) */}
             <div style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '40%',
-                height: '100%',
-                background: `linear-gradient(90deg, transparent, ${color}22, ${color}44 80%, transparent)`,
-                animation: 'ekg-scan 4s linear infinite',
-                zIndex: 2
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.9)',
+                boxShadow: '0 0 6px rgba(255, 255, 255, 0.8), 0 0 12px rgba(56, 189, 248, 0.6)',
+                animation: 'pulse-move 4s linear infinite',
+                zIndex: 3
             }} />
 
             <style>{`
@@ -935,9 +933,9 @@ const EKGAnimation = ({ color = '#38bdf8' }) => { // Match Observability blue (S
                     0% { transform: translateX(0); }
                     100% { transform: translateX(-100px); }
                 }
-                @keyframes ekg-scan {
-                    0% { left: -40%; }
-                    100% { left: 100%; }
+                @keyframes pulse-move {
+                    0% { left: 0%; top: 50%; transform: translate(-50%, -50%); }
+                    100% { left: 100%; top: 50%; transform: translate(-50%, -50%); }
                 }
             `}</style>
         </div>
