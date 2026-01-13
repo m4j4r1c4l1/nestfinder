@@ -694,6 +694,8 @@ const Messages = () => {
                                 <HistorySection
                                     users={subscribers}
                                     totalSent={stats.notificationMetrics?.total || 0}
+                                    delivered={stats.notificationMetrics?.delivered || 0}
+                                    read={stats.notificationMetrics?.read || 0}
                                     setConfirmModal={setConfirmModal}
                                 />
                             </div>
@@ -2700,7 +2702,7 @@ const FeedbackSection = ({
     );
 };
 
-const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
+const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, setConfirmModal }) => {
     const [history, setHistory] = useState([]);
     const [totalLogs, setTotalLogs] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -2866,9 +2868,19 @@ const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
                         background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
                         borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
+                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', gap: '1rem'
                     }}>
-                        Total: {totalSent}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e' }} title="Sent (Pending Delivery)">
+                            <span>✓</span>
+                            <span>{totalSent - delivered - read}</span>
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e' }} title="Delivered & Read">
+                            <span style={{ letterSpacing: '-3px', marginRight: '3px' }}>✓✓</span>
+                            <span>{delivered + read}</span>
+                        </span>
+                        <span style={{ borderLeft: '1px solid rgba(56, 189, 248, 0.2)', paddingLeft: '1rem', color: '#38bdf8' }}>
+                            Total: {totalSent}
+                        </span>
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button

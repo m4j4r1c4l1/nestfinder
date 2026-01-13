@@ -540,15 +540,15 @@ const Observability = () => {
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
                                             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.delivered || 0} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.unread || 0)} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.read || 0} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#f59e0b', fontWeight: 600 }}>Unread</span>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.unread || 0} /></span>
+                                                <span style={{ color: '#f59e0b', fontWeight: 600 }}>Sent</span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0)} /></span>
                                             </div>
                                         </div>
                                     </div>
@@ -576,75 +576,69 @@ const Observability = () => {
                             </div>
 
                             {/* Broadcasts Block (Center) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', height: '100%', width: '100%' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', height: '100%', width: '100%' }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
 
-                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, justifyContent: 'space-between' }}>
 
                                     {/* Main Metric: Active Broadcasts (Teal) */}
-                                    <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
-                                        <div style={{ fontSize: '3.5rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em' }}>
+                                    <div style={{ textAlign: 'center', padding: '0.2rem 0', position: 'relative' }}>
+                                        <div style={{ fontSize: '3.5rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
                                             <RandomCounter end={stats.broadcastMetrics?.active || 0} />
                                         </div>
+                                        <div style={{ position: 'absolute', top: '10px', right: '20%', width: '8px', height: '8px', background: '#2dd4bf', borderRadius: '50%', boxShadow: '0 0 8px #2dd4bf', animation: 'pulse 2s infinite' }}></div>
                                         <div style={{ fontSize: '1rem', color: '#e2e8f0', marginTop: '0.2rem' }}>Active Broadcasts</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.1rem' }}>Live campaigns</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0' }}>Live campaigns</div>
                                     </div>
 
-                                    {/* Detailed Breakdown Grid */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', width: '100%' }}>
+                                    {/* Breakdown Grid: Scheduled, Filled, Ended */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', width: '100%' }}>
+                                        <div style={{ background: '#33415520', padding: '0.5rem', borderRadius: '6px', border: '1px solid #33415540', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Scheduled</div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f59e0b' }}>{stats.broadcastMetrics?.scheduled || 0}</div>
+                                        </div>
+                                        <div style={{ background: '#33415520', padding: '0.5rem', borderRadius: '6px', border: '1px solid #33415540', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Filled</div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#10b981' }}>{stats.broadcastMetrics?.filled || 0}</div>
+                                        </div>
+                                        <div style={{ background: '#33415520', padding: '0.5rem', borderRadius: '6px', border: '1px solid #33415540', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Ended</div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64748b' }}>{stats.broadcastMetrics?.ended || 0}</div>
+                                        </div>
+                                    </div>
 
-                                        {/* Row 1: Scheduled & Filled */}
-                                        <div style={{ background: '#33415520', padding: '0.6rem', borderRadius: '8px', border: '1px solid #33415540' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scheduled</div>
-                                            <div style={{ fontSize: '1.2rem', fontWeight: 600, color: '#f59e0b' }}>
-                                                {stats.broadcastMetrics?.scheduled || 0}
+                                    {/* Types and Priorities Row */}
+                                    <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                        {/* Types */}
+                                        <div style={{ display: 'flex', gap: '0.3rem' }}>
+                                            <div title="Limited Broadcasts" style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)', color: '#38bdf8', fontSize: '0.75rem', fontWeight: 600 }}>
+                                                L: {stats.broadcastMetrics?.types?.limited || 0}
+                                            </div>
+                                            <div title="Unlimited Broadcasts" style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)', color: '#a855f7', fontSize: '0.75rem', fontWeight: 600 }}>
+                                                ∞: {stats.broadcastMetrics?.types?.unlimited || 0}
                                             </div>
                                         </div>
-                                        <div style={{ background: '#33415520', padding: '0.6rem', borderRadius: '8px', border: '1px solid #33415540' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Filled</div>
-                                            <div style={{ fontSize: '1.2rem', fontWeight: 600, color: '#10b981' }}>
-                                                {stats.broadcastMetrics?.filled || 0}
-                                            </div>
-                                        </div>
-
-                                        {/* Row 2: Ended & Total */}
-                                        <div style={{ background: '#33415520', padding: '0.6rem', borderRadius: '8px', border: '1px solid #33415540' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ended</div>
-                                            <div style={{ fontSize: '1.2rem', fontWeight: 600, color: '#ef4444' }}>
-                                                {stats.broadcastMetrics?.ended || 0}
-                                            </div>
-                                        </div>
-                                        <div style={{ background: '#33415520', padding: '0.6rem', borderRadius: '8px', border: '1px solid #33415540' }}>
-                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</div>
-                                            <div style={{ fontSize: '1.2rem', fontWeight: 600, color: '#e2e8f0' }}>
-                                                <RollingBarrelCounter end={stats.broadcastMetrics?.total || 0} />
-                                            </div>
+                                        {/* Priorities */}
+                                        <div style={{ display: 'flex', gap: '0.2rem', alignItems: 'center', borderLeft: '1px solid #334155', paddingLeft: '0.5rem' }}>
+                                            {[1, 2, 3, 4, 5].map(p => {
+                                                const colors = { 1: '#ef4444', 2: '#f97316', 3: '#eab308', 4: '#3b82f6', 5: '#22c55e' };
+                                                const count = stats.broadcastMetrics?.priorities?.[p] || 0;
+                                                return count > 0 ? (
+                                                    <div key={p} title={`Priority ${p}`} style={{ width: '18px', height: '18px', borderRadius: '50%', background: `${colors[p]}20`, border: `1px solid ${colors[p]}40`, color: colors[p], fontSize: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                                                        {count}
+                                                    </div>
+                                                ) : null;
+                                            })}
                                         </div>
                                     </div>
 
                                     {/* Reach Footer */}
-                                    <div style={{
-                                        marginTop: 'auto',
-                                        padding: '0.8rem',
-                                        background: '#1e293b50',
-                                        borderRadius: '8px',
-                                        border: '1px solid #33415530',
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                                    }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>TOTAL REACH</span>
-                                            <span style={{ fontSize: '1rem', fontWeight: 600, color: '#f1f5f9' }}>
-                                                <RollingBarrelCounter end={stats.broadcastMetrics?.delivered || 0} separator="," />
-                                            </span>
-                                        </div>
-                                        <div style={{ height: '30px', width: '1px', background: '#334155' }}></div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>READS</span>
-                                            <span style={{ fontSize: '1rem', fontWeight: 600, color: '#38bdf8' }}>
-                                                <RollingBarrelCounter end={stats.broadcastMetrics?.read || 0} separator="," />
-                                            </span>
-                                        </div>
+                                    <div style={{ marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid #334155', width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#94a3b8' }}>
+                                        <div title="Total Users Reached">Reach: <span style={{ color: '#f8fafc', fontWeight: 600 }}>{stats.broadcastMetrics?.reach || 0}</span></div>
+                                        <div title="Total Delivered">Delivered: <span style={{ color: '#22c55e', fontWeight: 600 }}>{stats.broadcastMetrics?.delivered || 0}</span></div>
+                                        <div title="Total Read">Read: <span style={{ color: '#3b82f6', fontWeight: 600 }}>{stats.broadcastMetrics?.read || 0}</span></div>
                                     </div>
+
                                 </div>
                             </div>
 
