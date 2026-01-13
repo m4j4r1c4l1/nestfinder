@@ -494,6 +494,18 @@ const Messages = () => {
         }
     };
 
+    const handleBulkDeleteBroadcast = async (ids) => {
+        try {
+            await adminApi.fetch('/admin/broadcasts/bulk-delete', {
+                method: 'POST',
+                body: JSON.stringify({ ids })
+            });
+            fetchData();
+        } catch (err) {
+            console.error('Failed to bulk delete broadcasts:', err);
+        }
+    };
+
     const handleUpdateBroadcast = async (id, updates) => {
         // Optimistic Update
         setBroadcasts(prev => prev.map(b =>
@@ -1404,7 +1416,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     title: 'Bulk Delete Broadcasts',
                                     message: `Are you sure you want to delete ALL ${filteredBroadcasts.length} visible broadcasts? This action cannot be undone.`,
                                     onConfirm: () => {
-                                        filteredBroadcasts.forEach(b => onDelete(b.id));
+                                        // Use new bulk delete endpoint
+                                        const ids = filteredBroadcasts.map(b => b.id);
+                                        handleBulkDeleteBroadcast(ids);
                                     }
                                 });
                             }}

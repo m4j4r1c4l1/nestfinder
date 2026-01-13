@@ -931,6 +931,32 @@ router.put('/broadcasts/:id', (req, res) => {
     res.json({ broadcast });
 });
 
+// Bulk delete broadcasts
+router.post('/broadcasts/bulk-delete', (req, res) => {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'No IDs provided' });
+    }
+
+    try {
+        const placeholders = ids.map(() => '?').join(',');
+
+        // Use a transaction for safety (although SQLite handles single statement well, multiple related deletes are better in transaction)
+        const runTransaction = getDb().transaction((broadcastIds) => {
+            getDb().prepare(`DELETE FROM broadcast_views WHERE broadcast_id IN (${placeholders})`).run(...broadcastIds);
+            getDb().prepare(`DELETE FROM broadcasts WHERE id IN (${placeholders})`).run(...broadcastIds);
+        });
+
+        runTransaction(ids);
+        log('admin', 'broadcast_bulk_deleted', null, { count: ids.length, ids });
+
+        res.json({ success: true, count: ids.length });
+    } catch (err) {
+        console.error('Bulk delete error:', err);
+        res.status(500).json({ error: 'Failed to bulk delete broadcasts' });
+    }
+});
+
 // Delete a broadcast (and its views)
 router.delete('/broadcasts/:id', (req, res) => {
     const { id } = req.params;
