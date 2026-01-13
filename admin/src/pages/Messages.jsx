@@ -339,6 +339,7 @@ const Messages = () => {
 
     // Custom Confirmation Modal State
     const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
+    const [recipientFilter, setRecipientFilter] = useState('all'); // Moved here from ComposeSection
 
     // Watch for Feedback Pagination Changes
     useEffect(() => {
@@ -1930,8 +1931,34 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
     const [justPublished, setJustPublished] = useState(false); // Feedback state
-    const [recipientFilter, setRecipientFilter] = useState('all'); // 'all' | 'sent' | 'delivered' | 'read'
     const userListRef = React.useRef(null);
+
+    // Resizable Textarea State
+    const [textAreaHeight, setTextAreaHeight] = useState(132); // ~5 lines
+    const textareaRef = useRef(null);
+    const isDraggingRef = useRef(false);
+    const startYRef = useRef(0);
+    const startHeightRef = useRef(0);
+
+    const handleMouseDown = (e) => {
+        isDraggingRef.current = true;
+        startYRef.current = e.clientY;
+        startHeightRef.current = textAreaHeight;
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDraggingRef.current) return;
+        const delta = e.clientY - startYRef.current;
+        setTextAreaHeight(Math.max(100, startHeightRef.current + delta));
+    };
+
+    const handleMouseUp = () => {
+        isDraggingRef.current = false;
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+    };
 
     // Auto-scroll to users when target is set to 'selected'
     useEffect(() => {
@@ -2157,7 +2184,40 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 
                 <div className="form-group" style={{ marginTop: '0.25rem', position: 'relative' }}>
                     <label className="form-label" style={{ marginBottom: '0.25rem', display: 'block' }}>Message</label>
-                    <textarea className="form-input" value={body} onChange={(e) => setBody(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
+                    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                        <textarea
+                            className="form-input"
+                            value={body}
+                            onChange={(e) => setBody(e.target.value)}
+                            ref={textareaRef}
+                            style={{
+                                width: '100%',
+                                resize: 'none', // Disable native resize
+                                height: `${textAreaHeight}px`,
+                                paddingBottom: '20px' // Space for handle
+                            }}
+                        />
+                        {/* Custom Resize Handle (Bottom Center) */}
+                        <div
+                            onMouseDown={handleMouseDown}
+                            style={{
+                                position: 'absolute',
+                                bottom: '2px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '40px',
+                                height: '6px',
+                                background: '#475569',
+                                borderRadius: '3px',
+                                cursor: 'ns-resize',
+                                zIndex: 10,
+                                opacity: 0.8
+                            }}
+                            onMouseEnter={e => e.target.style.background = '#64748b'}
+                            onMouseLeave={e => e.target.style.background = '#475569'}
+                            title="Drag to resize"
+                        />
+                    </div>
                     <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
                         <button
                             type="button"
@@ -3483,23 +3543,34 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                     {broadcast.image_url && (
                         <div style={{
                             flexShrink: 0,
-                            background: '#000', // Matches image bg usually
+                            background: '#0f172a', // Frame bg matches header
                             borderRight: '1px solid #334155',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: '400px', // Fixed width to ensure no layout shift
-                            maxWidth: '40%', // Responsive cap
-                            overflow: 'hidden' // Ensure cover doesn't spill
+                            width: '400px', // Fixed frame width
+                            padding: '1.5rem', // Equal padding frame
+                            boxSizing: 'border-box',
+                            overflow: 'hidden'
                         }}>
-                            <img
-                                src={broadcast.image_url}
-                                alt="Broadcast"
-                                style={{
-                                    display: 'block',
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover' // Fills the gaps
-                                }}
-                            />
+                            <div style={{
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                background: '#000', // Inner bg
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                            }}>
+                                <img
+                                    src={broadcast.image_url}
+                                    alt="Broadcast"
+                                    style={{
+                                        display: 'block',
+                                        maxWidth: '100%',
+                                        maxHeight: '100%',
+                                        objectFit: 'contain' // No clipping
+                                    }}
+                                />
+                            </div>
                         </div>
                     )}
 
@@ -3580,7 +3651,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             <div style={{
                                 position: 'absolute',
                                 left: '10px',
-                                top: '-10px',
+                                top: '0',
+                                transform: 'translateY(-50%)',
                                 background: '#0f172a',
                                 padding: '0 4px',
                                 fontSize: '1rem',
