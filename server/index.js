@@ -43,6 +43,21 @@ const broadcastClientsUpdate = () => {
     }, 1000); // Debounce updates to 1s
 };
 
+import { getSystemStats } from './utils/systemStats.js';
+
+// Broadcast System Stats every 5 seconds
+setInterval(async () => {
+    // Only broadcast if there are clients connected
+    if (clients.size > 0) {
+        const stats = await getSystemStats();
+        broadcast({
+            type: 'system-status',
+            data: stats,
+            clientCount: clients.size // Redundant but useful sync
+        });
+    }
+}, 5000);
+
 wss.on('connection', (ws) => {
     clients.add(ws);
     console.log('Client connected. Total:', clients.size);

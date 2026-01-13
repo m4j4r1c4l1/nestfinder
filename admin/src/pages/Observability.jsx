@@ -295,8 +295,37 @@ const Observability = () => {
                 ...prev,
                 connectedClients: message.count
             }));
+        } else if (message.type === 'system-status') {
+            // Real-time System Stats from Backend
+            const { memory, cpu, uptime, db } = message.data;
+            const loadPercent = cpu && cpu.load ? Math.round(cpu.load * 10) : 0; // Simple scaling
+
+            setStats(prev => ({
+                ...prev,
+                connectedClients: message.clientCount || prev.connectedClients,
+                systemHealth: {
+                    uptime: uptime,
+                    load: loadPercent,
+                    ram: memory ? memory.usage : 0,
+                    db: db
+                }
+            }));
         }
     });
+
+    // Helper to format uptime seconds into Dd HHh MMm
+    const formatUptime = (seconds) => {
+        if (!seconds) return '0m';
+        const d = Math.floor(seconds / (3600 * 24));
+        const h = Math.floor(seconds % (3600 * 24) / 3600);
+        const m = Math.floor(seconds % 3600 / 60);
+
+        let str = '';
+        if (d > 0) str += `${d}d `;
+        if (h > 0) str += `${h}h `;
+        str += `${m}m`;
+        return str;
+    };
 
     useEffect(() => {
         loadData();
@@ -339,15 +368,28 @@ const Observability = () => {
 
                 <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
 
-                    {/* Status Header & Main Health */}
+                    {/* Status Header & Main Health (Cardiac Pulse) */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <div style={{
-                            width: '60px', height: '60px', borderRadius: '12px',
-                            background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '2.5rem', boxShadow: '0 0 15px rgba(34, 197, 94, 0.2)'
-                        }}>
-                            ⚡
+                        <div style={{ position: 'relative' }}>
+                            <div style={{
+                                width: '60px', height: '60px', borderRadius: '12px',
+                                background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '2.5rem', boxShadow: '0 0 15px rgba(34, 197, 94, 0.2)',
+                                animation: 'heartbeat 1.5s ease-in-out infinite'
+                            }}>
+                                ⚡
+                            </div>
+                            <style>{`
+                                @keyframes heartbeat {
+                                    0% { transform: scale(1); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+                                    15% { transform: scale(1.15); box-shadow: 0 0 25px rgba(34, 197, 94, 0.5); }
+                                    30% { transform: scale(1); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+                                    45% { transform: scale(1.05); box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+                                    60% { transform: scale(1); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+                                    100% { transform: scale(1); }
+                                }
+                            `}</style>
                         </div>
                         <div>
                             <div style={{ fontSize: '0.85rem', color: '#94a3b8', letterSpacing: '0.05em', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
@@ -355,31 +397,37 @@ const Observability = () => {
                                 Operational
                                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Uptime: {stats.uptime || '99.9%'}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Uptime: {formatUptime(stats.systemHealth?.uptime)}</div>
                         </div>
                     </div>
 
                     <div style={{ width: '1px', height: '50px', background: '#334155' }} />
 
-                    {/* Server Node Status */}
+                    {/* Server Node Status (CPU/RAM) */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ fontSize: '2rem', opacity: 0.8 }}>🖥️</div>
                         <div>
-                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Server Node</div>
+                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Server Load</div>
                             <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#e2e8f0' }}>Healthy</div>
-                            <div style={{ fontSize: '0.75rem', color: '#22c55e' }}>Latency: {parseInt(Math.random() * 20 + 10)}ms</div>
+                            <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', gap: '0.5rem' }}>
+                                <span>CPU: {stats.systemHealth?.load || 0}%</span>
+                                <span style={{ opacity: 0.5 }}>|</span>
+                                <span>RAM: {stats.systemHealth?.ram || 0}%</span>
+                            </div>
                         </div>
                     </div>
 
                     <div style={{ width: '1px', height: '50px', background: '#334155' }} />
 
-                    {/* Admin Panel Status */}
+                    {/* Database Status (Real) */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ fontSize: '2rem', opacity: 0.8 }}>🛡️</div>
+                        <div style={{ fontSize: '2rem', opacity: 0.8 }}>🗄️</div>
                         <div>
-                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Admin Panel</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#e2e8f0' }}>Connected</div>
-                            <div style={{ fontSize: '0.75rem', color: '#3b82f6' }}>Socket v2.4 (Secure)</div>
+                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Database</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e' }}>
+                                {stats.systemHealth?.db || 'Checking...'}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>SQLite v3.4</div>
                         </div>
                     </div>
 
@@ -389,7 +437,7 @@ const Observability = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>LIVE CONNECTIONS</span>
                                 <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
-                                    <RollingBarrelCounter end={stats.connectedClients || 1} />
+                                    <RollingBarrelCounter end={stats.connectedClients || 0} />
                                 </span>
                             </div>
                             <div style={{ position: 'relative', width: '10px', height: '10px' }}>
