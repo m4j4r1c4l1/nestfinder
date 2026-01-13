@@ -2896,7 +2896,7 @@ const HistorySection = ({ users = [], totalSent = 0, setConfirmModal }) => {
                                                 onClick={() => handlePreview(log)}
                                             >
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString('en-GB')}</span>
                                                     <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
                                                         {(() => {
                                                             const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
@@ -3134,7 +3134,7 @@ const DetailModal = ({ batchId, onClose }) => {
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString()}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString('en-GB')}</span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{timeString}</span>
             </div>
         );
@@ -3754,7 +3754,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString()}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString('en-GB')}</span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{timeString}</span>
             </div>
         );

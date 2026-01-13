@@ -262,7 +262,7 @@ const LogDetailModal = ({ log, onClose }) => {
 
                                         return (
                                             <>
-                                                <span style={{ fontSize: '1rem', fontWeight: 500, color: '#e2e8f0' }}>{d.toLocaleDateString()}</span>
+                                                <span style={{ fontSize: '1rem', fontWeight: 500, color: '#e2e8f0' }}>{d.toLocaleDateString('en-GB')}</span>
                                                 <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{hours} {isDST ? 'CEST' : 'CET'}</span>
                                             </>
                                         );
@@ -558,7 +558,7 @@ const Logs = () => {
                                         <td style={{ padding: '0.75rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                                 <span style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
-                                                    {new Date(log.created_at).toLocaleDateString()}
+                                                    {new Date(log.created_at).toLocaleDateString('en-GB')}
                                                 </span>
                                                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
                                                     {(() => {
