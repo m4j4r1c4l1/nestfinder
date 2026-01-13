@@ -1801,9 +1801,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <BroadcastDetailPopup
                         broadcast={selectedBroadcast}
                         onClose={() => setSelectedBroadcast(null)}
-                        onViewRecipients={() => {
+                        onViewRecipients={(filter = 'all') => {
+                            setRecipientFilter(filter);
                             setViewRecipientsId(selectedBroadcast.id);
-                            setSelectedBroadcast(null);
+                            // Keep selectedBroadcast open
                         }}
                         onDelete={() => {
                             setConfirmModal({
@@ -1825,6 +1826,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                 viewRecipientsId && (
                     <BroadcastRecipientsModal
                         broadcastId={viewRecipientsId}
+                        filter={recipientFilter}
                         onClose={() => setViewRecipientsId(null)}
                     />
                 )
@@ -1928,6 +1930,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState(null);
     const [justPublished, setJustPublished] = useState(false); // Feedback state
+    const [recipientFilter, setRecipientFilter] = useState('all'); // 'all' | 'sent' | 'delivered' | 'read'
     const userListRef = React.useRef(null);
 
     // Auto-scroll to users when target is set to 'selected'
@@ -3483,17 +3486,18 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             background: '#000', // Matches image bg usually
                             borderRight: '1px solid #334155',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            maxWidth: '400px' // Reasonable max width
+                            width: '400px', // Fixed width to ensure no layout shift
+                            maxWidth: '40%', // Responsive cap
+                            overflow: 'hidden' // Ensure cover doesn't spill
                         }}>
                             <img
                                 src={broadcast.image_url}
                                 alt="Broadcast"
                                 style={{
                                     display: 'block',
-                                    maxWidth: '100%',
-                                    height: 'auto',
-                                    maxHeight: '100%',
-                                    objectFit: 'contain'
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover' // Fills the gaps
                                 }}
                             />
                         </div>
@@ -3568,7 +3572,9 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             border: '1px solid #334155',
                             marginBottom: '1.5rem',
                             position: 'relative',
-                            width: 'fit-content' // Just wrap content
+                            width: 'fit-content',
+                            marginLeft: 'auto',
+                            marginRight: 'auto' // Center it
                         }}>
                             {/* Floating Icon on Border */}
                             <div style={{
@@ -3608,15 +3614,12 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                         {/* Redesigned Stats Area (Clickable) */}
                         {/* Redesigned Stats Cards Area */}
                         <div
-                            onClick={onViewRecipients}
                             style={{
                                 display: 'grid',
                                 gridTemplateColumns: 'repeat(3, 1fr)',
                                 gap: '1rem',
-                                marginBottom: '1rem',
-                                cursor: 'pointer'
+                                marginBottom: '1rem'
                             }}
-                            title="View Recipients Details"
                         >
                             {/* Total Card */}
                             <div style={{
@@ -3625,10 +3628,13 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 borderRadius: '8px',
                                 padding: '1rem',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s'
+                                transition: 'transform 0.1s, border-color 0.1s',
+                                cursor: 'pointer'
                             }}
+                                onClick={() => onViewRecipients && onViewRecipients('all')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#eab308'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                title="View All Recipients"
                             >
                                 <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
                                     {broadcast.total_users || 0}
@@ -3643,10 +3649,13 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 borderRadius: '8px',
                                 padding: '1rem',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s'
+                                transition: 'transform 0.1s, border-color 0.1s',
+                                cursor: 'pointer'
                             }}
+                                onClick={() => onViewRecipients && onViewRecipients('delivered')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                title="View Delivered Recipients"
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
@@ -3664,10 +3673,13 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 borderRadius: '8px',
                                 padding: '1rem',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s'
+                                transition: 'transform 0.1s, border-color 0.1s',
+                                cursor: 'pointer'
                             }}
+                                onClick={() => onViewRecipients && onViewRecipients('read')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                title="View Read Recipients"
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
@@ -3707,7 +3719,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
     );
 };
 
-function BroadcastRecipientsModal({ broadcastId, onClose }) {
+function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
     const [views, setViews] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -3814,7 +3826,13 @@ function BroadcastRecipientsModal({ broadcastId, onClose }) {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {views.map(view => (
+                                                {views.filter(v => {
+                                                    if (filter === 'all') return true;
+                                                    if (filter === 'sent') return v.status === 'sent';
+                                                    if (filter === 'delivered') return v.status === 'delivered';
+                                                    if (filter === 'read') return v.status === 'read';
+                                                    return true;
+                                                }).map(view => (
                                                     <tr key={view.id} style={{ borderBottom: '1px solid #334155' }}>
                                                         <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
                                                             <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
