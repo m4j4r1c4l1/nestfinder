@@ -1647,10 +1647,10 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     }}>
                                                         <span style={{ opacity: statusText === 'ACTIVE' ? 1 : 0.7 }}>🕐</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{formatTimeCET(start)}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{formatTimeCET(start)}</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>→</span>
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{end ? end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '∞'}</span>
-                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400 }}>{end ? formatTimeCET(end) : ''}</span>
+                                                        <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
                                                     {/* Delivery Stats - Separator Line included in border */}

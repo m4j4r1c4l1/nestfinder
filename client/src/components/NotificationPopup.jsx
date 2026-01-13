@@ -16,7 +16,7 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }
                         <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '12px' }}>
                             {(() => {
                                 try {
-                                    const utcTime = message.created_at.replace(' ', 'T') + 'Z';
+                                    const utcTime = message.created_at.replace(' ', 'T') + (message.created_at.includes('Z') ? '' : 'Z');
                                     return new Date(utcTime).toLocaleString('en-GB', {
                                         day: '2-digit',
                                         month: '2-digit',

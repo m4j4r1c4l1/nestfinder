@@ -113,7 +113,7 @@ router.post('/broadcast/:id/read', requireUser, (req, res) => {
         SET status = 'read', 
             view_count = view_count + 1, 
             read_at = ?,
-            dismissed = 1
+            dismissed = 0
         WHERE broadcast_id = ? AND user_id = ?
       `, [nowStr, broadcastId, userId]);
       console.log(`[Broadcast Read] Updated existing view: User ${userId}, Broadcast ${broadcastId}`);
@@ -121,7 +121,7 @@ router.post('/broadcast/:id/read', requireUser, (req, res) => {
       // Create new with read status
       run(`
         INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
-        VALUES (?, ?, 'read', 1, ?, ?, ?, 1)
+        VALUES (?, ?, 'read', 1, ?, ?, ?, 0)
       `, [broadcastId, userId, nowStr, nowStr, nowStr]);
       console.log(`[Broadcast Read] Created new read view: User ${userId}, Broadcast ${broadcastId}`);
     }
