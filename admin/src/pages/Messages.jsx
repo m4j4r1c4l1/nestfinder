@@ -1645,9 +1645,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         <span style={{
                                                             padding: '0.2rem 0.5rem 0.3rem 0.5rem', borderRadius: '4px',
                                                             fontSize: '0.7rem', fontWeight: 600,
-                                                            background: b.total_users >= b.max_views ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
-                                                            color: b.total_users >= b.max_views ? '#ef4444' : '#06b6d4',
-                                                            border: b.total_users >= b.max_views ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)',
+                                                            background: b.total_users >= b.max_views ? '#ec489920' : 'rgba(6, 182, 212, 0.1)',
+                                                            color: b.total_users >= b.max_views ? '#ec4899' : '#06b6d4',
+                                                            border: b.total_users >= b.max_views ? '1px solid #ec489940' : '1px solid rgba(6, 182, 212, 0.3)',
                                                             cursor: 'help'
                                                         }}
                                                             title={`Global Limit: ${b.total_users} / ${b.max_views} users viewed`}
