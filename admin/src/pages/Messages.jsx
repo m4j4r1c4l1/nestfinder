@@ -3105,7 +3105,8 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
     return ReactDOM.createPortal(
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(0,0,0,0.1)', // Lighter backdrop
+            background: 'rgba(15, 23, 42, 0.5)',
+            backdropFilter: 'blur(8px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 10000
         }} onClick={onClose}>
