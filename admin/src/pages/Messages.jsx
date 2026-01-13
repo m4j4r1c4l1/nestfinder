@@ -982,7 +982,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // Search State
     const [searchFilters, setSearchFilters] = useState({
         searchText: '',
-        status: 'all', // all, active, scheduled, inactive
+        status: 'all', // all, active, scheduled, inactive, filled
         priority: 'all', // all, 1, 2, 3, 4, 5
         maxViewsNum: '',
         maxViewsType: 'all', // all, limited, unlimited
@@ -1018,13 +1018,22 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
         }
 
         // Status Filter
+        // Status Filter
         if (searchFilters.status !== 'all') {
-            const isActive = now >= start && (!end || now <= end); // Active if now >= start AND (no end OR now <= end)
-            const isPast = end && now > end; // Past only if end exists and now > end
-            const isScheduled = now < start; // Scheduled if now < start
+            const isFilled = b.max_views && (b.total_users || 0) >= b.max_views;
+            const isActive = now >= start && (!end || now <= end);
+            const isPast = end && now > end;
+            const isScheduled = now < start;
 
-            if (searchFilters.status === 'active' && !isActive) return false;
+            if (searchFilters.status === 'filled' && !isFilled) return false;
+
+            // "Active" means time-active AND NOT filled
+            if (searchFilters.status === 'active' && (!isActive || isFilled)) return false;
+
+            if (searchFilters.status === 'inactive' && !isPast && !isFilled) return false; // Inactive usually means ended, but let's keep it strict to time-ended based on user request "filled... must behave like inactive" visually, but logically it's its own status. User said "must behave like a inactive one -more transparent...". Logic-wise, let's keep them distinct in filter.
+            // Correction: If user selects INACTIVE, should they see filled? Usually no if there's a specific filled filter.
             if (searchFilters.status === 'inactive' && !isPast) return false;
+
             if (searchFilters.status === 'scheduled' && !isScheduled) return false;
         }
 
@@ -1065,7 +1074,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // Calculate broadcast stats from ALL broadcasts (not filtered)
     const broadcastStats = React.useMemo(() => {
         const now = new Date();
-        let active = 0, scheduled = 0, inactive = 0;
+        let active = 0, scheduled = 0, inactive = 0, filled = 0;
         const priorityCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
         let withMaxViews = 0, withoutMaxViews = 0;
 
@@ -1073,13 +1082,15 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
             const start = new Date(b.start_time);
             const end = b.end_time ? new Date(b.end_time) : null;
 
+            const isFilled = b.max_views && (b.total_users || 0) >= b.max_views;
             const isActive = now >= start && (!end || now <= end);
             const isPast = end && now > end;
             const isScheduled = now < start;
 
-            if (isActive) active++;
+            if (isFilled) filled++;
+            else if (isActive) active++;
             else if (isScheduled) scheduled++;
-            else if (isPast) inactive++; // Only count as inactive if it has an end time and it's past
+            else if (isPast) inactive++;
 
             const p = b.priority || 3;
             if (priorityCounts[p] !== undefined) priorityCounts[p]++;
@@ -1088,7 +1099,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
             else withoutMaxViews++;
         });
 
-        return { active, scheduled, inactive, priorityCounts, withMaxViews, withoutMaxViews };
+        return { active, scheduled, inactive, filled, priorityCounts, withMaxViews, withoutMaxViews };
     }, [broadcasts]);
 
     return (
@@ -1180,7 +1191,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                 options={[
                                     { value: 'all', label: 'Any Status' },
                                     { value: 'active', label: 'Active', color: '#22c55e' },
+                                    { value: 'active', label: 'Active', color: '#22c55e' },
                                     { value: 'scheduled', label: 'Scheduled', color: '#3b82f6' },
+                                    { value: 'filled', label: 'Filled', color: '#ec4899' },
                                     { value: 'inactive', label: 'Past', color: '#94a3b8' }
                                 ]}
                                 placeholder="Filter by Status"
@@ -1307,6 +1320,21 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                             onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
                         >
                             SCHEDULED <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.scheduled}</span>
+                        </span>
+                        <span style={{
+                            padding: '0.2rem 0.6rem', borderRadius: '4px',
+                            fontSize: '0.7rem', fontWeight: 700,
+                            background: searchFilters.status === 'filled' ? '#ec489940' : '#ec489920',
+                            color: '#ec4899',
+                            border: searchFilters.status === 'filled' ? '1px solid #ec4899' : '1px solid #ec489940',
+                            textTransform: 'uppercase', letterSpacing: '0.5px',
+                            cursor: 'pointer', transition: 'filter 0.1s', flexShrink: 0
+                        }}
+                            onClick={() => setSearchFilters(prev => ({ ...prev, status: prev.status === 'filled' ? 'all' : 'filled' }))}
+                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.2)'; setHoveredFilterGroup({ type: 'status', value: 'filled' }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; setHoveredFilterGroup(null); }}
+                        >
+                            FILLED <span style={{ marginLeft: '0.3rem', color: '#fff', opacity: 1 }}>{broadcastStats.filled}</span>
                         </span>
                         <span style={{
                             padding: '0.2rem 0.6rem', borderRadius: '4px',
@@ -1480,7 +1508,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     } else if (b.max_views && (b.total_users || 0) >= b.max_views) {
                                         // Global Cap Met
                                         statusText = 'FILLED';
-                                        statusColor = '#94a3b8'; // Grey like Ended, but distinct text
+                                        statusColor = '#ec4899'; // Pink
                                     } else {
                                         statusText = 'ACTIVE';
                                         statusColor = '#22c55e';
@@ -1501,6 +1529,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     // Border Color: Always priority color, but 75% transparent (25% opacity) if not active
                                     const borderColor = (statusText === 'ACTIVE') ? priorityColor : `${priorityColor}40`;
 
+                                    // Opacity for inactive/filled states
+                                    const cardOpacity = (statusText === 'ACTIVE' || statusText === 'SCHEDULED') ? 1 : 0.75;
+
                                     // Check if this card should be highlighted (from Timeline hover OR Stats Badge hover)
                                     let isHighlighted = hoveredTimelineBarId === b.id;
 
@@ -1509,6 +1540,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                             if (hoveredFilterGroup.value === 'active' && statusText === 'ACTIVE') isHighlighted = true;
                                             else if (hoveredFilterGroup.value === 'inactive' && statusText === 'ENDED') isHighlighted = true;
                                             else if (hoveredFilterGroup.value === 'scheduled' && statusText === 'SCHEDULED') isHighlighted = true;
+                                            else if (hoveredFilterGroup.value === 'filled' && statusText === 'FILLED') isHighlighted = true;
                                         } else if (hoveredFilterGroup.type === 'priority') {
                                             if ((b.priority || 3) === hoveredFilterGroup.value) isHighlighted = true;
                                         } else if (hoveredFilterGroup.type === 'maxViews') {
@@ -1537,7 +1569,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                 flexDirection: 'column',
                                                 gap: '0.4rem',
                                                 boxShadow: isHighlighted ? `0 0 20px ${priorityColor}80, 0 0 40px ${priorityColor}40` : 'none',
-                                                transform: isHighlighted ? 'scale(1.02)' : 'none'
+                                                transform: isHighlighted ? 'scale(1.02)' : 'none',
+                                                opacity: cardOpacity
                                             }}
                                             onMouseEnter={e => {
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -4704,8 +4737,10 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     const isActive = now >= s && now <= e;
                     const isEnded = now > e;
 
-                    let statusText = isActive ? 'Active' : (isEnded ? 'Ended' : 'Scheduled');
-                    let statusColor = isActive ? '#22c55e' : (isEnded ? '#94a3b8' : '#3b82f6');
+                    const isFilled = hoveredItem.max_views && (hoveredItem.total_users || 0) >= hoveredItem.max_views;
+
+                    let statusText = isActive ? (isFilled ? 'Filled' : 'Active') : (isEnded ? 'Ended' : 'Scheduled');
+                    let statusColor = isActive ? (isFilled ? '#ec4899' : '#22c55e') : (isEnded ? '#94a3b8' : '#3b82f6');
                     let priorityColor = getPriorityColor(hoveredItem.priority);
 
                     // Badge transparencies
@@ -4739,6 +4774,30 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                         }}>
                             <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>
                                 {hoveredItem.title || 'Untitled'}
+                            </div>
+
+                            {/* Status & Max Views Badge Row */}
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <span style={{
+                                    padding: '2px 6px', borderRadius: '4px',
+                                    fontSize: '0.7rem', fontWeight: 700,
+                                    background: badgeBg(statusColor), color: statusColor,
+                                    border: `1px solid ${badgeBorder(statusColor)}`,
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {statusText}
+                                </span>
+                                {hoveredItem.max_views && (
+                                    <span style={{
+                                        padding: '2px 6px', borderRadius: '4px',
+                                        fontSize: '0.7rem', fontWeight: 600,
+                                        background: isFilled ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
+                                        color: isFilled ? '#ef4444' : '#06b6d4',
+                                        border: isFilled ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)',
+                                    }}>
+                                        👁 {hoveredItem.total_users || 0} / {hoveredItem.max_views}
+                                    </span>
+                                )}
                             </div>
 
                             {/* Image Preview */}
