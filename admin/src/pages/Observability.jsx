@@ -654,100 +654,107 @@ export default function Observability() {
                                 </div>
                             </div>
 
-                            {/* Broadcasts Block (Center) */}
+                            {/* Broadcasts Block (Center) - Compact */}
                             <div style={{
-                                display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', height: '100%', width: '100%',
-                                border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '12px', padding: '1rem',
-                                background: 'rgba(45, 212, 191, 0.05)'
+                                display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'center', height: '100%',
+                                border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '12px', padding: '0.8rem',
+                                background: 'rgba(45, 212, 191, 0.05)', minWidth: '200px'
                             }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
+                                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.2rem' }}>🚀 Broadcasts</div>
 
-                                {/* Main Layout: Grid 3 cols */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', width: '100%', alignItems: 'start', flex: 1 }}>
+                                {/* Top Row: Left metrics | Main Metric | Right metrics */}
+                                <div style={{ display: 'flex', gap: '1rem', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
 
-                                    {/* Left Stack: Messages, Reach, Priorities */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
-                                        {/* Messages & Reach */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
-                                                <span style={{ fontSize: '1rem' }}>📡</span>
-                                                <div className="text-muted" style={{ fontSize: '0.65rem', marginLeft: '0.2rem' }}>Total</div>
+                                    {/* Left: Messages & Reach (stacked) */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                                <span style={{ fontSize: '0.9rem' }}>📡</span>
                                             </div>
-                                            <div style={{ width: '100%', height: '1px', background: '#334155' }} />
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                <span style={{ fontSize: '1rem' }}>👨‍👩‍👧‍👦</span>
-                                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
-                                                <div className="text-muted" style={{ fontSize: '0.65rem', marginLeft: '0.2rem' }}>Total</div>
-                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
                                         </div>
-
-                                        {/* Priority Badges (Below) */}
-                                        <div style={{ display: 'flex', gap: '0.3rem', width: '100%', flexWrap: 'wrap' }}>
-                                            {[1, 2, 3, 4, 5].map(p => {
-                                                let color = '#22c55e';
-                                                if (p === 1) color = '#ef4444';
-                                                if (p === 2) color = '#f97316';
-                                                if (p === 3) color = '#eab308';
-                                                if (p === 4) color = '#3b82f6';
-
-                                                return (
-                                                    <div key={p} style={{
-                                                        width: '22px', height: '22px',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        background: `${color}15`, borderRadius: '4px',
-                                                        border: `1px solid ${color}30`
-                                                    }}>
-                                                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#f1f5f9' }}>
-                                                            {stats.broadcastMetrics?.priorities?.[p] || 0}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
+                                        <div style={{ width: '40px', height: '1px', background: '#334155' }} />
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
+                                                <span style={{ fontSize: '0.9rem' }}>👨‍👩‍👧‍👦</span>
+                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
                                         </div>
                                     </div>
 
                                     {/* Center: Main Metric (Campaigns) */}
-                                    <div style={{ textAlign: 'center', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                        <div style={{ fontSize: '3.5rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
+                                    <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: 400, color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
                                             <RandomCounter end={stats.broadcastMetrics?.total || 0} />
                                         </div>
-                                        <div style={{ fontSize: '0.9rem', color: '#e2e8f0', fontWeight: 600, textTransform: 'uppercase', marginTop: '0.4rem' }}>Campaigns</div>
-                                        <div className="text-muted" style={{ fontSize: '0.65rem' }}>Total</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#e2e8f0', fontWeight: 600, textTransform: 'uppercase', marginTop: '0.2rem' }}>Campaigns</div>
+                                        <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
                                     </div>
 
-                                    {/* Right Stack: Sent & Received */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', alignItems: 'flex-end' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.9rem' }}>✓✓</span>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                    {/* Right: Sent & Received (stacked) */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.8rem' }}>✓✓</span>
+                                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
                                         </div>
-                                        <div style={{ width: '100%', height: '1px', background: '#334155' }} />
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.9rem' }}>✓✓</span>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
+                                        <div style={{ width: '40px', height: '1px', background: '#334155' }} />
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.8rem' }}>✓✓</span>
+                                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
+                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.6rem' }}>Total</div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Baseline: 2x2 Status Badge Grid */}
+                                {/* Priority Badges Row (Centered, horizontal) */}
+                                <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+                                    {[1, 2, 3, 4, 5].map(p => {
+                                        let color = '#22c55e';
+                                        if (p === 1) color = '#ef4444';
+                                        if (p === 2) color = '#f97316';
+                                        if (p === 3) color = '#eab308';
+                                        if (p === 4) color = '#3b82f6';
+
+                                        return (
+                                            <div key={p} style={{
+                                                width: '20px', height: '20px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                background: `${color}15`, borderRadius: '4px',
+                                                border: `1px solid ${color}30`
+                                            }}>
+                                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#f1f5f9' }}>
+                                                    {stats.broadcastMetrics?.priorities?.[p] || 0}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Status Badges Row (2x2 grid, compact) */}
                                 <div style={{
                                     display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr',
-                                    gap: '0.4rem', width: '180px', marginTop: 'auto', padding: '0.5rem 0'
+                                    gap: '0.3rem', width: '150px'
                                 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.7rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '4px', padding: '0.15rem 0.3rem', fontSize: '0.65rem' }}>
                                         <span style={{ color: '#3b82f6', fontWeight: 600 }}>Sched</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.scheduled || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.7rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '4px', padding: '0.15rem 0.3rem', fontSize: '0.65rem' }}>
                                         <span style={{ color: '#22c55e', fontWeight: 600 }}>Active</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.active || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.7rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ec489920', border: '1px solid #ec489940', borderRadius: '4px', padding: '0.15rem 0.3rem', fontSize: '0.65rem' }}>
                                         <span style={{ color: '#ec4899', fontWeight: 600 }}>Filled</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.filled || 0}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '6px', padding: '0.2rem 0.4rem', fontSize: '0.7rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#94a3b820', border: '1px solid #94a3b840', borderRadius: '4px', padding: '0.15rem 0.3rem', fontSize: '0.65rem' }}>
                                         <span style={{ color: '#94a3b8', fontWeight: 600 }}>Ended</span>
                                         <span style={{ fontWeight: 700, color: '#fff' }}>{stats.broadcastMetrics?.ended || 0}</span>
                                     </div>
