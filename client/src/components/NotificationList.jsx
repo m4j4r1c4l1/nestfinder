@@ -969,6 +969,15 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                     onConfirm={() => confirmDelete()}
                                                     onCancel={cancelDelete}
                                                     className="notification-item read"
+                                                    onClick={() => {
+                                                        // Normalize 'Sent' message structure for the common Popup
+                                                        setSelectedMessage({
+                                                            ...msg,
+                                                            title: getFeedbackTitle(msg.type, t),
+                                                            body: msg.message
+                                                        });
+                                                        setViewingImageOnly(false);
+                                                    }}
                                                     style={{
                                                         padding: '0.75rem',
                                                         borderRadius: 'var(--radius-md)',
