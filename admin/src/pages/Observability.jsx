@@ -976,7 +976,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
             {/* EKG Path */}
             <svg width="200" height="42" viewBox="0 0 200 42" style={{
                 position: 'absolute', left: 0,
-                animation: `ekg - move ${100 / speed}s linear infinite`, // Speed control
+                animation: `ekg-move ${100 / speed}s linear infinite`, // Speed control
                 zIndex: 1
             }}>
                 <path
@@ -987,7 +987,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{ filter: `drop - shadow(0 0 3px ${color})` }}
+                    style={{ filter: `drop-shadow(0 0 3px ${color})` }}
                 />
             </svg>
 
@@ -997,15 +997,15 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 width: '4px', height: '4px',
                 borderRadius: '50%',
                 background: '#fff',
-                boxShadow: `0 0 4px #fff, 0 0 8px ${color} `,
+                boxShadow: `0 0 4px #fff, 0 0 8px ${color}`,
                 zIndex: 5,
                 willChange: 'transform'
             }} />
 
             <style>{`
-    @keyframes ekg - move {
-        0 % { transform: translateX(0); }
-        100 % { transform: translateX(-100px); }
+    @keyframes ekg-move {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100px); }
     }
     `}</style>
         </div>
@@ -1202,8 +1202,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const fetchMetrics = async () => {
         try {
             const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL} /api/admin / metrics / history ? days = ${days} `, {
-                headers: { 'Authorization': `Bearer ${token} ` }
+            const res = await fetch(`${API_URL}/api/admin/metrics/history?days=${days}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
                 const data = await res.json();
@@ -1414,12 +1414,12 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                 return (
                     <g key={s.key}>
                         <defs>
-                            <linearGradient id={`gradient - ${s.key} `} x1="0" y1="0" x2="0" y2="1">
+                            <linearGradient id={`gradient-${s.key}`} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor={s.color} stopOpacity="0.3" />
                                 <stop offset="100%" stopColor={s.color} stopOpacity="0" />
                             </linearGradient>
                         </defs>
-                        <polygon points={areaPoints} fill={`url(#gradient - ${s.key})`} />
+                        <polygon points={areaPoints} fill={`url(#gradient-${s.key})`} />
                         <polyline points={points} fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         {displayData.map((m, i) => (
                             <circle
