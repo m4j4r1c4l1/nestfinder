@@ -914,31 +914,24 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
+            // Mask for true fade-to-transparent effect at edges
+            maskImage: 'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)'
         }}>
-            {/* Fading Grid Background - fade on all edges */}
+            {/* Fading Grid Background */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
                 backgroundImage: `
-                    linear-gradient(rgba(30, 58, 138, 0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(30, 58, 138, 0.1) 1px, transparent 1px)
+                    linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px)
                 `,
                 backgroundSize: '10px 10px',
-                // Mask to fade all 4 edges of the grid
-                mask: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 40%, transparent 100%)',
-                WebkitMask: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 40%, transparent 100%)',
                 zIndex: 0
             }} />
 
-            {/* Graph Fade Mask - Horizontal edges only for the path */}
-            <div style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(to right, rgba(15,23,42,1) 0%, transparent 20%, transparent 80%, rgba(15,23,42,1) 100%)',
-                zIndex: 4,
-                pointerEvents: 'none'
-            }} />
+            {/* Opaque Overlay REMOVED */}
 
             {/* EKG Path */}
             <svg width="200" height="28" viewBox="0 0 200 42" style={{ // Keep viewBox 42 to match path logic, scale to 28 height
