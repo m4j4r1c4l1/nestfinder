@@ -368,7 +368,7 @@ export default function Observability() {
                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b, #ec4899)' }} />
 
                 <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #334155' }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>⚡ Status</h3>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>⚡ Status</h3>
                     <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Node: Nest-Alpha-01</div>
                 </div>
 
@@ -412,7 +412,7 @@ export default function Observability() {
                                     <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.load || 0}%</span>
                                 </div>
                                 <div style={{ fontSize: '0.75rem', color: '#818cf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span>💾</span>
+                                    <span>🧠</span>
                                     <span>RAM</span>
                                     <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.ram || 0}%</span>
                                 </div>
@@ -439,18 +439,22 @@ export default function Observability() {
                         </div>
                     </div>
 
-                    {/* Live Connection Counter (Right Aligned) - Dot on left */}
+                    {/* Live Connection Counter - Rearranged for visual appeal */}
                     <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            {/* Pulsing dot on left */}
-                            <div style={{ position: 'relative', width: '12px', height: '12px' }}>
-                                <div style={{ position: 'absolute', inset: '-4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.2)', animation: 'pulse-wave 2s ease-out infinite' }} />
-                                <div style={{ position: 'absolute', inset: '-2px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.3)', animation: 'pulse-wave 2s ease-out infinite 0.3s' }} />
-                                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#38bdf8', animation: 'pulse-beat 1s ease-in-out infinite' }} />
+                        <div style={{
+                            background: 'rgba(15, 23, 42, 0.4)', padding: '0.5rem 1rem', borderRadius: '12px', border: '1px solid #1e293b',
+                            display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        }}>
+                            {/* Pulsing Dot */}
+                            <div style={{ position: 'relative', width: '10px', height: '10px' }}>
+                                <div style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite' }} />
+                                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.8)' }} />
                             </div>
+
+                            {/* Label and Count */}
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>LIVE SESSIONS</span>
-                                <span style={{ fontSize: '1.3rem', fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
+                                <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Sessions</span>
+                                <span style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1, fontFamily: 'monospace' }}>
                                     <RollingBarrelCounter end={stats.connectedClients || 0} />
                                 </span>
                             </div>
@@ -900,7 +904,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
     return (
         <div style={{
             width: '100px',
-            height: '42px',
+            height: '28px', // Restored previous aspect (was 42px)
             background: 'transparent',
             borderRadius: '4px',
             border: 'none',
@@ -918,22 +922,23 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                     linear-gradient(90deg, rgba(30, 58, 138, 0.1) 1px, transparent 1px)
                 `,
                 backgroundSize: '10px 10px',
-                mask: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%)',
-                WebkitMask: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%)',
+                // Mask to fade all 4 edges of the grid
+                mask: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 40%, transparent 100%)',
+                WebkitMask: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 40%, transparent 100%)',
                 zIndex: 0
             }} />
 
-            {/* Edge fade overlay */}
+            {/* Graph Fade Mask - Horizontal edges only for the path */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
-                background: 'linear-gradient(to right, rgba(15,23,42,1) 0%, transparent 15%, transparent 85%, rgba(15,23,42,1) 100%), linear-gradient(to bottom, rgba(15,23,42,0.8) 0%, transparent 20%, transparent 80%, rgba(15,23,42,0.8) 100%)',
+                background: 'linear-gradient(to right, rgba(15,23,42,1) 0%, transparent 20%, transparent 80%, rgba(15,23,42,1) 100%)',
                 zIndex: 4,
                 pointerEvents: 'none'
             }} />
 
             {/* EKG Path */}
-            <svg width="200" height="42" viewBox="0 0 200 42" style={{
+            <svg width="200" height="28" viewBox="0 0 200 42" style={{ // Keep viewBox 42 to match path logic, scale to 28 height
                 position: 'absolute',
                 left: 0,
                 animation: `ekg-move ${animDuration} linear infinite`,
@@ -953,17 +958,17 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 />
             </svg>
 
-            {/* Pulse Dot - horizontally centered, vertical movement only */}
+            {/* Pulse Dot - horizontally centered, small and glowy */}
             <div style={{
                 position: 'absolute',
                 left: '50%',
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '8px',
-                height: '8px',
+                width: '4px', // Smaller
+                height: '4px', // Smaller
                 borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.95)',
-                boxShadow: '0 0 4px rgba(255,255,255,0.8), 0 0 8px rgba(56, 189, 248, 0.6)',
+                background: 'rgba(255, 255, 255, 1)',
+                boxShadow: `0 0 4px rgba(255,255,255,0.9), 0 0 8px ${color}, 0 0 12px ${color}`, // Glowy
                 animation: `ekg-dot-pulse ${animDuration} ease-in-out infinite, ekg-dot-fadein 1s ease-out forwards`,
                 zIndex: 5
             }} />
@@ -977,14 +982,14 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                     0%, 100% { top: 50%; }
                     10% { top: 45%; }
                     15% { top: 50%; }
-                    20% { top: 15%; }
-                    25% { top: 85%; }
+                    20% { top: 15%; } /* Spike Up */
+                    25% { top: 85%; } /* Spike Down */
                     30% { top: 50%; }
                     35% { top: 40%; }
                     40% { top: 50%; }
                     60% { top: 50%; }
-                    65% { top: 10%; }
-                    70% { top: 90%; }
+                    65% { top: 10%; } /* Big Spike Up */
+                    70% { top: 90%; } /* Big Spike Down */
                     75% { top: 50%; }
                     80% { top: 42%; }
                     85% { top: 50%; }
