@@ -623,7 +623,7 @@ export default function Observability() {
                                                     <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
                                                     <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Delivered</span>
                                                 </div>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.delivered || 0} /></span>
+                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={Math.max(0, (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0))} /></span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -687,7 +687,7 @@ export default function Observability() {
                                         {/* Messages */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.total || 0}</span>
                                                 <span style={{ fontSize: '0.8rem' }}>📡</span>
                                             </div>
                                             <div className="text-muted" style={{ fontSize: '0.75rem' }}>Messages</div>
@@ -711,15 +711,17 @@ export default function Observability() {
                                         <div className="text-muted text-sm">Total</div>
                                     </div>
 
-                                    {/* Right Grid: Sent & Read */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        {/* Sent */}
+                                    {/* Right Grid: Delivered & Read */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem', flex: 1 }}>
+                                        {/* Delivered (Exclusive) */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>
+                                                    {Math.max(0, (stats.broadcastMetrics?.delivered || 0) - (stats.broadcastMetrics?.read || 0))}
+                                                </span>
                                             </div>
-                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Sent</div>
+                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Delivered</div>
                                         </div>
                                         {/* Read */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
