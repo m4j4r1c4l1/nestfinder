@@ -931,6 +931,16 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
         return { d, pts };
     };
 
+    // Thresholds Explanation:
+    // -----------------------
+    // COLOR: Red (#ef4444) if DB Error OR CPU Load > 70%. Blue (#38bdf8) otherwise.
+    // SPEED: Fast (150px/s) if Stressed (Load > 50% OR RAM > 70% OR DB Error). Normal (80px/s) otherwise.
+    // SHAPE: 
+    //   - Flat/Loading: If DB is checking/connecting.
+    //   - Amplitude: High (20px) if Stress > 0.5 (approx >50% load/latency combo). Low (14px) otherwise.
+    //   - Jitter: Random variations added to every pulse for realism.
+    //   - Frequency: Higher stress compresses the wave, increasing heart rate.
+
     const stressScore = isStressed ? 0.8 : (load / 200) + (latency / 100); 
     const effectiveStress = Math.min(Math.max(stressScore, 0), 1);
     
@@ -938,43 +948,62 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
     const { d: cycle1, pts: pts1 } = useMemo(() => generatePath(effectiveStress, isLoading), [effectiveStress, isLoading, entropy]);
     
     // Construct full double path string for visual path
+    // We use a double width (200px) path to allow for seamless scrolling
     const fullPath = `${cycle1} M 100 21 ${cycle1.substring(cycle1.indexOf('L')).replace(/L ([\d.]+) /g, (match, x) => `L ${parseFloat(x) + 100} `)}`;
     
-    // Merge points for strict tracking
-    const fullPoints = [...pts1, ...pts1.map(p => ({ x: p.x + 100, y: p.y }))];
-
     const speed = isStressed ? 150 : 80; 
 
-    // Smooth Riding Logic
+    // Smooth Riding & Sync Logic
     useEffect(() => {
         let animationFrameId;
-        const totalLength = pathRef.current ? pathRef.current.getTotalLength() / 2 : 100; 
-        const duration = isStressed ? 800 : 1500; 
-        let startTime = performance.now();
+        // Total cycle length in pixels (100px visual width)
+        const cycleLength = 100;
+        let lastTime = performance.now();
+        let scrollPos = 0;
 
         const animate = () => {
-             if (!pathRef.current || !dotRef.current) {
+            const now = performance.now();
+            const delta = (now - lastTime) / 1000; // seconds
+            lastTime = now;
+
+            if (!pathRef.current || !dotRef.current) {
                 animationFrameId = requestAnimationFrame(animate); 
                 return;
             }
 
-            const now = performance.now();
-            const elapsed = now - startTime;
-            const progress = (elapsed % duration) / duration;
+            // Update Scroll Position based on speed
+            scrollPos += speed * delta;
             
-            const pathX = (progress * 100 + 50) % 100;
+            // Constrain scroll to 0-100 cycle for resetting
+            const visualScroll = scrollPos % cycleLength;
             
+            // Move the SVG Path to the LEFT
+            // When visualScroll is 0, translateX is 0.
+            // When visualScroll is 100, translateX is -100.
+            pathRef.current.style.transform = `translateX(-${visualScroll}px)`;
+
+            // Calculate "Virtual X" of the dot relative to the moving path.
+            // The dot is fixed at screen X = 50 (center of 100px container).
+            // The path point currently under the dot is `visualScroll + 50`.
+            // Example:
+            // Scroll=0 (Path at 0) -> Dot at 50 -> Under dot needs to be x=50 on path.
+            // Scroll=10 (Path at -10) -> Dot at 50 -> Under dot needs to be x=60 on path (since index 50 moved to 40).
+            // Modulo 100 to stay within the Defined Cycle 1 data.
+            const dotVirtualX = (visualScroll + 50) % 100;
+
+            // Interpolate Y
             let targetY = 21;
             for (let i = 0; i < pts1.length - 1; i++) {
                 const p1 = pts1[i];
                 const p2 = pts1[i+1];
-                if (pathX >= p1.x && pathX <= p2.x) {
-                    const ratio = (pathX - p1.x) / (p2.x - p1.x);
+                if (dotVirtualX >= p1.x && dotVirtualX <= p2.x) {
+                    const ratio = (dotVirtualX - p1.x) / (p2.x - p1.x);
                     targetY = p1.y + (p2.y - p1.y) * ratio;
                     break;
                 }
             }
 
+            // Move Dot Vertically
             dotRef.current.style.transform = `translate(-50%, -50%) translate(0, ${targetY - 21}px)`;
             
             animationFrameId = requestAnimationFrame(animate);
@@ -982,7 +1011,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
 
         animate();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [pts1, isStressed]); 
+    }, [pts1, speed]); 
 
     return (
         <div style={{
@@ -999,15 +1028,14 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
         }}>
 
             {/* EKG Path */}
-            <svg width="200" height="42" viewBox="0 0 200 42" style={{
+            <svg width="300" height="42" viewBox="0 0 300 42" style={{
                 fill: 'none',
                 stroke: color,
                 strokeWidth: 2,
                 position: 'absolute',
                 left: 0,
-                // The animation needs to match the JS "progress" duration.
-                // JS duration: 1500ms (normal). CSS duration: 1.5s
-                animation: `ekg-scroll ${isStressed ? 0.8 : 1.5}s linear infinite`
+                // Removed CSS Animation to rely on JS for perfect sync
+                willChange: 'transform'
             }}>
                 <path ref={pathRef} d={fullPath} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -1017,12 +1045,14 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 style={{
                     position: 'absolute',
                     top: '50%', left: '50%',
-                    width: '8px', height: '8px',
+                    width: '6px', height: '6px', // Slightly smaller core
                     background: '#fff',
                     borderRadius: '50%',
                     transform: 'translate(-50%, -50%)',
-                    boxShadow: `0 0 10px 2px ${color}, 0 0 20px 5px ${color}80, -2px 0 20px 4px ${color}40`, 
-                    zIndex: 2
+                    // Reducded Glow
+                    boxShadow: `0 0 4px 1px ${color}, 0 0 8px 2px ${color}40`, 
+                    zIndex: 2,
+                    willChange: 'transform'
                 }}
             />
             
@@ -1031,12 +1061,13 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 style={{
                     position: 'absolute',
                     top: '50%', left: '50%',
-                    width: '20px', height: '4px',
+                    width: '35px', // Longer tail
+                    height: '3px',
                     background: `linear-gradient(to left, ${color}, transparent)`,
                     transformOrigin: 'right center',
-                    transform: 'translate(-120%, -50%)',
-                    opacity: 0.8,
-                    filter: 'blur(1px)',
+                    transform: 'translate(-110%, -50%)', // Attached behind
+                    opacity: 0.9, // More visible
+                    filter: 'blur(0.5px)', // Less blur for sharpness
                     zIndex: 1
                 }}
             />
