@@ -1663,28 +1663,20 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
                 {/* Tooltip */}
                 {hoveredPoint !== null && metrics[hoveredPoint.index] && (() => {
-                    // Strict clamping to container bounds
-                    const tooltipWidth = 140; // Approx
-                    const tooltipHeight = 100; // Approx
-                    const paddingRef = 15;
+                    // Percentage-based positioning for responsive SVG
+                    const xPercent = (hoveredPoint.x + padding.left) / chartWidth * 100;
+                    const yPercent = (hoveredPoint.y + padding.top) / chartHeight * 100;
+                    const isRightSide = xPercent > 60; // Flip if past 60%
 
-                    let left = hoveredPoint.x + padding.left + paddingRef; // Default right side
-                    let top = hoveredPoint.y + padding.top - (tooltipHeight / 2);
-
-                    // Flip to left if too close to right edge
-                    if (left + tooltipWidth > chartWidth) {
-                        left = hoveredPoint.x + padding.left - tooltipWidth - paddingRef;
-                    }
-
-                    // Clamp Top/Bottom
-                    if (top < 0) top = 10;
-                    if (top + tooltipHeight > chartHeight) top = chartHeight - tooltipHeight - 10;
+                    // Clamp Y to avoid clipping top/bottom (approx 15% padding)
+                    const clampedY = Math.max(15, Math.min(85, yPercent));
 
                     return (
                         <div style={{
                             position: 'absolute',
-                            left: `${left}px`,
-                            top: `${top}px`,
+                            left: `${xPercent}%`,
+                            top: `${clampedY}%`,
+                            transform: `translate(${isRightSide ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
                             background: '#0f172a',
                             border: '1px solid #334155',
                             borderRadius: '8px',
@@ -2303,26 +2295,20 @@ const RatingsChartCard = ({ onPointClick }) => {
                 {/* Tooltip */}
                 {hoveredPoint !== null && ratings[hoveredPoint.index] && (() => {
                     // Clamp tooltip Y position to prevent cutoff/scroll
-                    // Strict clamping
-                    const tooltipWidth = 140; 
-                    const tooltipHeight = 60; 
-                    const paddingRef = 15;
+                    // Percentage-based positioning
+                    const xPercent = (hoveredPoint.x + padding.left) / chartWidth * 100;
+                    const yPercent = (hoveredPoint.y + padding.top) / chartHeight * 100;
+                    const isRightSide = xPercent > 60; 
 
-                    let left = hoveredPoint.x + padding.left + paddingRef;
-                    let top = hoveredPoint.y + padding.top - (tooltipHeight / 2);
-
-                    if (left + tooltipWidth > chartWidth) {
-                        left = hoveredPoint.x + padding.left - tooltipWidth - paddingRef;
-                    }
-
-                    if (top < 0) top = 10;
-                    if (top + tooltipHeight > chartHeight) top = chartHeight - tooltipHeight - 10;
+                    // Clamp Y (approx 20% padding)
+                    const clampedY = Math.max(20, Math.min(80, yPercent));
 
                     return (
                         <div style={{
                             position: 'absolute',
-                            left: `${left}px`,
-                            top: `${top}px`,
+                            left: `${xPercent}%`,
+                            top: `${clampedY}%`,
+                            transform: `translate(${isRightSide ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
                             background: '#0f172a',
                             border: '1px solid #334155',
                             borderRadius: '8px',
