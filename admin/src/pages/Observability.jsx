@@ -442,7 +442,7 @@ export default function Observability() {
                     </div>
 
                     {/* Live Connection Counter - Rearranged for visual appeal */}
-                    <div style={{ marginLeft: 'auto', paddingRight: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ marginLeft: 'auto', paddingRight: '0.2rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <div style={{
                             background: 'rgba(15, 23, 42, 0.4)', padding: '0.6rem 1.2rem', borderRadius: '12px', border: '1px solid #1e293b',
                             display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.3rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
@@ -873,6 +873,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
     // Refs
     const pathRef = useRef(null);
     const dotRef = useRef(null);
+    const trailRefs = useRef([]);
     const [entropy, setEntropy] = useState(0);
 
     useEffect(() => {
@@ -912,13 +913,15 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
             add(10 + shift, baseline);
             add(13 + shift, baseline - r(1, 3)); 
             
+            // Wider QRS for smoother riding
             const qrsStart = 35 - (stressLevel * 5) + shift; 
             add(qrsStart, baseline);
             
-            add(qrsStart + 2, baseline + r(4, 7)); // Q
-            add(qrsStart + 4, baseline - amp - r(0, 5)); // R
-            add(qrsStart + 6, baseline + r(6, 10)); // S
-            add(qrsStart + 9, baseline);
+            // Use wider spacing (3-4 units) instead of 2 to allow dot to hit peaks at 60fps
+            add(qrsStart + 3, baseline + r(4, 7)); // Q (Dip)
+            add(qrsStart + 6, baseline - amp - r(0, 5)); // R (Peak)
+            add(qrsStart + 9, baseline + r(6, 10)); // S (Dip)
+            add(qrsStart + 13, baseline); // Back to baseline
             
             const tStart = qrsStart + 15 + r(-1, 2);
             add(tStart, baseline);
@@ -978,33 +981,39 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
             const visualScroll = scrollPos % cycleLength;
             
             // Move the SVG Path to the LEFT
-            // When visualScroll is 0, translateX is 0.
-            // When visualScroll is 100, translateX is -100.
             pathRef.current.style.transform = `translateX(-${visualScroll}px)`;
 
-            // Calculate "Virtual X" of the dot relative to the moving path.
-            // The dot is fixed at screen X = 50 (center of 100px container).
-            // The path point currently under the dot is `visualScroll + 50`.
-            // Example:
-            // Scroll=0 (Path at 0) -> Dot at 50 -> Under dot needs to be x=50 on path.
-            // Scroll=10 (Path at -10) -> Dot at 50 -> Under dot needs to be x=60 on path (since index 50 moved to 40).
-            // Modulo 100 to stay within the Defined Cycle 1 data.
-            const dotVirtualX = (visualScroll + 50) % 100;
-
-            // Interpolate Y
-            let targetY = 21;
-            for (let i = 0; i < pts1.length - 1; i++) {
-                const p1 = pts1[i];
-                const p2 = pts1[i+1];
-                if (dotVirtualX >= p1.x && dotVirtualX <= p2.x) {
-                    const ratio = (dotVirtualX - p1.x) / (p2.x - p1.x);
-                    targetY = p1.y + (p2.y - p1.y) * ratio;
-                    break;
+            // Helper to get Y for any Virtual X
+            const getY = (vx) => {
+                // Handle wrapping for the lookup
+                const modX = ((vx % 100) + 100) % 100; 
+                for (let i = 0; i < pts1.length - 1; i++) {
+                    const p1 = pts1[i];
+                    const p2 = pts1[i+1];
+                    if (modX >= p1.x && modX <= p2.x) {
+                        const ratio = (modX - p1.x) / (p2.x - p1.x);
+                        return p1.y + (p2.y - p1.y) * ratio;
+                    }
                 }
-            }
+                return 21;
+            };
 
-            // Move Dot Vertically
-            dotRef.current.style.transform = `translate(-50%, -50%) translate(0, ${targetY - 21}px)`;
+            // 1. Move Main Dot
+            const dotVirtualX = visualScroll + 50; 
+            const dotY = getY(dotVirtualX);
+            dotRef.current.style.transform = `translate(-50%, -50%) translate(0, ${dotY - 21}px)`;
+
+            // 2. Move Trail Dots (Ghost Trail)
+            trailRefs.current.forEach((ref, i) => {
+                if (ref) {
+                    // Each dot lags by ~1.5 units 
+                    const lag = (i + 1) * 1.5;
+                    const trailVX = dotVirtualX - lag;
+                    const trailY = getY(trailVX);
+                    // Render relative to center with X offset
+                    ref.style.transform = `translate(-50%, -50%) translate(-${lag}px, ${trailY - 21}px)`;
+                }
+            });
             
             animationFrameId = requestAnimationFrame(animate);
         };
@@ -1034,7 +1043,6 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 strokeWidth: 2,
                 position: 'absolute',
                 left: 0,
-                // Removed CSS Animation to rely on JS for perfect sync
                 willChange: 'transform'
             }}>
                 <path ref={pathRef} d={fullPath} strokeLinecap="round" strokeLinejoin="round" />
@@ -1056,21 +1064,24 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 }}
             />
             
-            {/* Comet Tail Effect */}
-            <div ref={(el) => dotRef.current && (dotRef.current.tail = el)} 
-                style={{
-                    position: 'absolute',
-                    top: '50%', left: '50%',
-                    width: '35px', // Longer tail
-                    height: '3px',
-                    background: `linear-gradient(to left, ${color}, transparent)`,
-                    transformOrigin: 'right center',
-                    transform: 'translate(-110%, -50%)', // Attached behind
-                    opacity: 0.9, // More visible
-                    filter: 'blur(0.5px)', // Less blur for sharpness
-                    zIndex: 1
-                }}
-            />
+            {/* FLOWY Ghost Trail */}
+            {[...Array(8)].map((_, i) => (
+                <div key={i} ref={el => trailRefs.current[i] = el}
+                    style={{
+                        position: 'absolute',
+                        top: '50%', left: '50%',
+                        width: `${4.5 - (i * 0.5)}px`, // Decreasing size
+                        height: `${4.5 - (i * 0.5)}px`,
+                        background: color, // Use the path color
+                        borderRadius: '50%',
+                        transform: 'translate(-50%, -50%)', // Initial
+                        opacity: 0.7 - (i * 0.08), // Decreasing opacity
+                        zIndex: 1,
+                        pointerEvents: 'none',
+                        willChange: 'transform'
+                    }}
+                />
+            ))}
             
             <style>{`
                 @keyframes ekg-scroll {
