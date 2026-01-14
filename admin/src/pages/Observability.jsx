@@ -611,23 +611,32 @@ export default function Observability() {
                                     {/* Sent Section */}
                                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.notificationMetrics?.total || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Delivered</span>
+                                                </div>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.delivered || 0} /></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Read</span>
+                                                </div>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.read || 0} /></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#f59e0b', fontWeight: 600 }}>Sent</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span style={{ color: '#f59e0b', fontWeight: 600, fontSize: '0.75rem' }}>✓</span>
+                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Sent</span>
+                                                </div>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0)} /></span>
                                             </div>
                                         </div>
@@ -635,19 +644,25 @@ export default function Observability() {
                                     {/* Received Section */}
                                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', lineHeight: 1 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '130px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Delivered</span>
+                                                </div>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.pending || 0} /></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.4rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Read</span>
+                                                </div>
                                                 <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.read || 0} /></span>
                                             </div>
                                         </div>
@@ -1646,14 +1661,28 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
                 {/* Tooltip */}
                 {hoveredPoint !== null && metrics[hoveredPoint.index] && (() => {
-                    // Clamp tooltip Y position to prevent cutoff/scroll (80px from top for tooltip height)
-                    const tooltipY = Math.max(80, Math.min(chartHeight - 40, hoveredPoint.y ? hoveredPoint.y + padding.top : 80));
+                    // Strict clamping to container bounds
+                    const tooltipWidth = 140; // Approx
+                    const tooltipHeight = 100; // Approx
+                    const paddingRef = 15;
+
+                    let left = hoveredPoint.x + padding.left + paddingRef; // Default right side
+                    let top = hoveredPoint.y + padding.top - (tooltipHeight / 2);
+
+                    // Flip to left if too close to right edge
+                    if (left + tooltipWidth > chartWidth) {
+                        left = hoveredPoint.x + padding.left - tooltipWidth - paddingRef;
+                    }
+
+                    // Clamp Top/Bottom
+                    if (top < 0) top = 10;
+                    if (top + tooltipHeight > chartHeight) top = chartHeight - tooltipHeight - 10;
+
                     return (
                         <div style={{
                             position: 'absolute',
-                            left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}% `,
-                            top: `${tooltipY} px`,
-                            transform: `translate(${hoveredPoint.index > metrics.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50 %)`,
+                            left: `${left}px`,
+                            top: `${top}px`,
                             background: '#0f172a',
                             border: '1px solid #334155',
                             borderRadius: '8px',
@@ -1906,8 +1935,8 @@ const RatingsChartCard = ({ onPointClick }) => {
     const fetchRatings = async () => {
         try {
             const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL} /api/admin / metrics / ratings ? days = ${days} `, {
-                headers: { 'Authorization': `Bearer ${token} ` }
+            const res = await fetch(`${API_URL}/api/admin/metrics/ratings?days=${days}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
                 const data = await res.json();
@@ -2272,13 +2301,26 @@ const RatingsChartCard = ({ onPointClick }) => {
                 {/* Tooltip */}
                 {hoveredPoint !== null && ratings[hoveredPoint.index] && (() => {
                     // Clamp tooltip Y position to prevent cutoff/scroll
-                    const tooltipY = Math.max(40, Math.min(chartHeight - 40, hoveredPoint.y ? hoveredPoint.y + padding.top : 60));
+                    // Strict clamping
+                    const tooltipWidth = 140; 
+                    const tooltipHeight = 60; 
+                    const paddingRef = 15;
+
+                    let left = hoveredPoint.x + padding.left + paddingRef;
+                    let top = hoveredPoint.y + padding.top - (tooltipHeight / 2);
+
+                    if (left + tooltipWidth > chartWidth) {
+                        left = hoveredPoint.x + padding.left - tooltipWidth - paddingRef;
+                    }
+
+                    if (top < 0) top = 10;
+                    if (top + tooltipHeight > chartHeight) top = chartHeight - tooltipHeight - 10;
+
                     return (
                         <div style={{
                             position: 'absolute',
-                            left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}% `,
-                            top: `${tooltipY} px`,
-                            transform: `translate(${hoveredPoint.index > ratings.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50 %)`,
+                            left: `${left}px`,
+                            top: `${top}px`,
                             background: '#0f172a',
                             border: '1px solid #334155',
                             borderRadius: '8px',
