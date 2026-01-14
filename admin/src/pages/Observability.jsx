@@ -442,18 +442,21 @@ export default function Observability() {
                     {/* Live Connection Counter - Rearranged for visual appeal */}
                     <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <div style={{
-                            background: 'rgba(15, 23, 42, 0.4)', padding: '0.5rem 1rem', borderRadius: '12px', border: '1px solid #1e293b',
-                            display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            background: 'rgba(15, 23, 42, 0.4)', padding: '0.6rem 1.2rem', borderRadius: '12px', border: '1px solid #1e293b',
+                            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.3rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                         }}>
-                            {/* Pulsing Dot */}
-                            <div style={{ position: 'relative', width: '10px', height: '10px' }}>
-                                <div style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite' }} />
-                                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.8)' }} />
-                            </div>
+                            <span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Sessions</span>
 
-                            {/* Label and Count */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Sessions</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                {/* Pulsing Dot (Ripple Effect) */}
+                                <div style={{ position: 'relative', width: '8px', height: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {/* Waves Fading Out */}
+                                    <div style={{ position: 'absolute', inset: '-8px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.6)', animation: 'ripple 2s ease-out infinite', opacity: 0 }} />
+                                    <div style={{ position: 'absolute', inset: '-4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'ripple 2s ease-out infinite 0.6s', opacity: 0 }} />
+                                    {/* Core Dot */}
+                                    <div style={{ position: 'relative', width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.8)' }} />
+                                </div>
+
                                 <span style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1, fontFamily: 'monospace' }}>
                                     <RollingBarrelCounter end={stats.connectedClients || 0} />
                                 </span>
@@ -877,124 +880,162 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
 
     const loadingPath = `
         M 0 21 H 15 L 17 18 L 19 24 L 21 21 H 50
-        M 50 21 H 65 L 67 17 L 69 25 L 71 21 H 100
-        M 100 21 H 115 L 117 18 L 119 24 L 121 21 H 150
-        M 150 21 H 165 L 167 17 L 169 25 L 171 21 H 200
-    `;
+    // Precise Dot Tracking using SVG Path
+    const pathRef = useRef(null);
+    const dotRef = useRef(null);
 
-    // Stressed path - more erratic, spiky
+    // Looping Paths (Perfectly seamless start/end)
+    // 100px width per cycle. We draw 2 cycles (200px).
+    // Start Y=21, End Y=21.
+    const normalPath = `
+        M 0 21 L 10 21 L 12 19 L 14 23 L 16 21 L 40 21 
+        L 42 15 L 44 27 L 46 21 L 55 21 L 57 8 L 59 34 L 61 21 L 80 21
+        L 82 18 L 84 24 L 86 21 L 100 21
+        M 100 21 L 110 21 L 112 19 L 114 23 L 116 21 L 140 21 
+        L 142 15 L 144 27 L 146 21 L 155 21 L 157 8 L 159 34 L 161 21 L 180 21
+        L 182 18 L 184 24 L 186 21 L 200 21
+        `;
+
     const stressedPath = `
-        M 0 21 H 5 L 7 10 L 9 32 L 11 15 L 13 27 L 15 21 H 20
-        L 22 5 L 24 38 L 26 8 L 28 34 L 30 21 H 35
-        L 37 12 L 39 30 L 41 21 H 50
-        
-        M 50 21 H 55 L 57 8 L 59 35 L 61 12 L 63 29 L 65 21 H 70
-        L 72 3 L 74 40 L 76 6 L 78 36 L 80 21 H 85
-        L 87 14 L 89 28 L 91 21 H 100
-
-        M 100 21 H 105 L 107 10 L 109 33 L 111 14 L 113 28 L 115 21 H 120
-        L 122 4 L 124 39 L 126 7 L 128 35 L 130 21 H 135
-        L 137 13 L 139 29 L 141 21 H 150
-
-        M 150 21 H 155 L 157 9 L 159 34 L 161 13 L 163 28 L 165 21 H 170
-        L 172 5 L 174 38 L 176 8 L 178 34 L 180 21 H 185
-        L 187 14 L 189 28 L 191 21 H 200
+        M 0 21 L 5 21 L 7 10 L 9 32 L 11 15 L 13 27 L 15 21 L 20 21
+        L 22 5 L 24 38 L 26 8 L 28 34 L 30 21 L 35 21
+        L 37 12 L 39 30 L 41 21 L 50 21
+        L 52 3 L 54 40 L 56 6 L 58 36 L 60 21 L 65 21
+        L 67 14 L 69 28 L 71 21 L 100 21
+        M 100 21 L 105 21 L 107 10 L 109 33 L 111 14 L 113 28 L 115 21 L 120 21
+        L 122 5 L 124 38 L 126 8 L 128 34 L 130 21 L 135 21
+        L 137 12 L 139 30 L 141 21 L 150 21
+        L 152 3 L 154 40 L 156 6 L 158 36 L 160 21 L 165 21
+        L 167 14 L 169 28 L 171 21 L 200 21
     `;
 
     const activePath = isLoading ? loadingPath : isStressed ? stressedPath : normalPath;
-    const animDuration = isStressed ? '2s' : '4s'; // Faster when stressed
+    const speed = isStressed ? 100 : 50; // Pixels per second
+
+    useEffect(() => {
+        let animationFrameId;
+        const startTime = performance.now();
+
+        const animate = () => {
+            const now = performance.now();
+            const elapsed = now - startTime;
+            
+            // Current X position in the loop (0 to 100)
+            // We want the dot to stay at X=50 (center of container)
+            // The graph moves LEFT. So relative to the graph start, the dot moves RIGHT.
+            // Effective X on path = (Scanner Pos) % Loop Width
+            // Scanner Pos = CenterOffset + (Speed * Time)
+            const loopWidth = 100;
+            const centerOffset = 50;
+            const dist = (centerOffset + (elapsed * speed / 1000)) % loopWidth;
+            
+            // To handle the double-cycle drawing (0-200), we map to the first cycle (0-100)
+            // But since the path is duplicated, we can just look up at `dist`.
+            // However, since we are translating the SVG left, the "visual" center corresponds to a shifting X on the path.
+            // Actually, simpler: The SVG moves left. The dot stays at fixed screen X=50.
+            // ScreenX = PathX - TranslateX.
+            // 50 = PathX - (Time * Speed) % 100
+            // PathX = 50 + (Time * Speed) % 100
+            
+            // We'll just look up the point at PathX. If PathX > 100, we wrap or just use the 0-200 range logic.
+            // Since our path is 200 wide (2 cycles), we can just mod 100 to stay in the first uniform cycle logic
+            // providing the second cycle is identical (it is).
+            
+            if (pathRef.current && dotRef.current) {
+                const scrollX = (elapsed * speed / 1000) % 100;
+                const targetX = 50 + scrollX; // 50 is the fixed center position in the container
+
+                // Get Y at this X
+                // Search for point on path. `getPointAtLength` is based on length, not X. 
+                // For a monotonic X graph, we can estimate or scan. 
+                // But for EKG, X is monotonic.
+                // We'll use a binary search or precise sampling if needed, but `getPointAtLength` is standard.
+                // Since X is monotonic, Length ~ X. We can refine.
+                // Or better: Use `pathLength` and ratio? No, line length != x length.
+                
+                // Optimized approach for EKG line (mostly horizontal-ish):
+                // Iterate path segments? Too complex.
+                // Binary search `getPointAtLength` until `.x` matches `targetX`.
+                
+                const len = pathRef.current.getTotalLength();
+                let start = 0;
+                let end = len / 2; // Only need first cycle roughly
+                let targetPoint = { x: 0, y: 21 };
+
+                // Quick binary search for X (10 iterations is usually plenty for screen precision)
+                for(let i=0; i<12; i++) {
+                    const mid = (start + end) / 2;
+                    const p = pathRef.current.getPointAtLength(mid);
+                    if (p.x < targetX) start = mid;
+                    else end = mid;
+                    targetPoint = p;
+                }
+                
+                dotRef.current.style.transform = `translate(-50 %, -50 %) translate(0, ${ targetPoint.y - 21 }px)`; // Offset from Vertical Center (21)
+            }
+            animationFrameId = requestAnimationFrame(animate);
+        };
+
+        animate();
+        return () => cancelAnimationFrame(animationFrameId);
+    }, [activePath, speed]); // Re-bind when path changes
 
     return (
         <div style={{
             width: '100px',
-            height: '28px', // Restored previous aspect (was 42px)
+            height: '42px', // Increased Height
             background: 'transparent',
             borderRadius: '4px',
-            border: 'none',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             // Mask for true fade-to-transparent effect at edges
-            maskImage: 'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)'
+            maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)'
         }}>
             {/* Fading Grid Background */}
             <div style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `
-                    linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px)
-                `,
-                backgroundSize: '10px 10px',
-                zIndex: 0
+                position: 'absolute', inset: 0,
+                backgroundImage: `linear - gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear - gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px)`,
+                backgroundSize: '10px 10px', zIndex: 0
             }} />
 
-            {/* Opaque Overlay REMOVED */}
-
             {/* EKG Path */}
-            <svg width="200" height="28" viewBox="0 0 200 42" style={{ // Keep viewBox 42 to match path logic, scale to 28 height
-                position: 'absolute',
-                left: 0,
-                animation: `ekg-move ${animDuration} linear infinite`,
+            <svg width="200" height="42" viewBox="0 0 200 42" style={{
+                position: 'absolute', left: 0,
+                animation: `ekg - move ${ 100 / speed }s linear infinite`, // Speed control
                 zIndex: 1
             }}>
                 <path
+                    ref={pathRef}
                     d={activePath}
                     fill="none"
                     stroke={color}
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{
-                        filter: `drop-shadow(0 0 3px ${color})`,
-                        transition: 'd 0.5s ease-in-out'
-                    }}
+                    style={{ filter: `drop - shadow(0 0 3px ${ color })` }}
                 />
             </svg>
 
-            {/* Pulse Dot - horizontally centered, small and glowy */}
-            <div style={{
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '4px', // Smaller
-                height: '4px', // Smaller
+            {/* Pulse Dot */}
+            <div ref={dotRef} style={{
+                position: 'absolute', left: '50%', top: '50%',
+                width: '4px', height: '4px',
                 borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 1)',
-                boxShadow: `0 0 4px rgba(255,255,255,0.9), 0 0 8px ${color}, 0 0 12px ${color}`, // Glowy
-                animation: `ekg-dot-pulse ${animDuration} ease-in-out infinite, ekg-dot-fadein 1s ease-out forwards`,
-                zIndex: 5
+                background: '#fff',
+                boxShadow: `0 0 4px #fff, 0 0 8px ${ color } `,
+                zIndex: 5,
+                willChange: 'transform'
             }} />
 
             <style>{`
-                @keyframes ekg-move {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-100px); }
-                }
-                @keyframes ekg-dot-pulse {
-                    0%, 100% { top: 50%; }
-                    10% { top: 45%; }
-                    15% { top: 50%; }
-                    20% { top: 15%; } /* Spike Up */
-                    25% { top: 85%; } /* Spike Down */
-                    30% { top: 50%; }
-                    35% { top: 40%; }
-                    40% { top: 50%; }
-                    60% { top: 50%; }
-                    65% { top: 10%; } /* Big Spike Up */
-                    70% { top: 90%; } /* Big Spike Down */
-                    75% { top: 50%; }
-                    80% { top: 42%; }
-                    85% { top: 50%; }
-                }
-                @keyframes ekg-dot-fadein {
-                    0% { opacity: 0; }
-                    100% { opacity: 1; }
-                }
-            `}</style>
+    @keyframes ekg - move {
+        0 % { transform: translateX(0); }
+        100 % { transform: translateX(-100px); }
+    }
+    `}</style>
         </div>
     );
 };
@@ -1050,7 +1091,7 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
         const barColor = overrideColor || vibrantColors[index % vibrantColors.length];
 
         return (
-            <div key={`${item.action}-${index}`} style={{ marginBottom: '0.75rem' }}>
+            <div key={`${ item.action } -${ index } `} style={{ marginBottom: '0.75rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: isChild ? '0.85rem' : '0.9rem' }}>
                     <span style={{ color: isChild ? '#cbd5e1' : '#e2e8f0', textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {isChild && <span style={{ opacity: 0.5 }}>↳</span>}
@@ -1061,11 +1102,11 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
                 <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{
                         height: '100%',
-                        width: `${percent}%`,
+                        width: `${ percent }% `,
                         background: barColor,
                         borderRadius: '4px',
                         opacity: isChild ? 0.5 : 0.75, // Semi-transparent for "glass" vibe
-                        boxShadow: `0 0 10px ${barColor}66` // Glow for everyone
+                        boxShadow: `0 0 10px ${ barColor } 66` // Glow for everyone
                     }} />
                 </div>
             </div>
@@ -1172,7 +1213,7 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
 
 // Reusable Chart Card Component with independent state
 const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true, onPointClick }) => {
-    const storageKey = `observability_scope_${title ? title.toLowerCase().replace(/\s+/g, '_') : 'default'}`;
+    const storageKey = `observability_scope_${ title ? title.toLowerCase().replace(/\s+/g, '_') : 'default' } `;
     const [metrics, setMetrics] = useState([]);
     const [loading, setLoading] = useState(true);
     const [days, setDays] = useState(() => {
@@ -1189,8 +1230,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const fetchMetrics = async () => {
         try {
             const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/admin/metrics/history?days=${days}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await fetch(`${ API_URL } /api/admin / metrics / history ? days = ${ days } `, {
+                headers: { 'Authorization': `Bearer ${ token } ` }
             });
             if (res.ok) {
                 const data = await res.json();
@@ -1396,17 +1437,17 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const renderLineChart = () => (
         <g>
             {seriesConfig.map(s => {
-                const points = displayData.map((m, i) => `${getX(i)},${getY(m[s.key] || 0, maxY)}`).join(' ');
-                const areaPoints = `0,${graphHeight} ${points} ${graphWidth},${graphHeight}`;
+                const points = displayData.map((m, i) => `${ getX(i) },${ getY(m[s.key] || 0, maxY) } `).join(' ');
+                const areaPoints = `0, ${ graphHeight } ${ points } ${ graphWidth },${ graphHeight } `;
                 return (
                     <g key={s.key}>
                         <defs>
-                            <linearGradient id={`gradient-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                            <linearGradient id={`gradient - ${ s.key } `} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor={s.color} stopOpacity="0.3" />
                                 <stop offset="100%" stopColor={s.color} stopOpacity="0" />
                             </linearGradient>
                         </defs>
-                        <polygon points={areaPoints} fill={`url(#gradient-${s.key})`} />
+                        <polygon points={areaPoints} fill={`url(#gradient - ${ s.key })`} />
                         <polyline points={points} fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         {displayData.map((m, i) => (
                             <circle
@@ -1533,11 +1574,11 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                 )}
                 <svg
                     width="100%"
-                    viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                    viewBox={`0 0 ${ chartWidth } ${ chartHeight } `}
                     style={{ minWidth: 600 }}
                     onMouseLeave={() => setHoveredPoint(null)}
                 >
-                    <g transform={`translate(${padding.left}, ${padding.top})`}>
+                    <g transform={`translate(${ padding.left }, ${ padding.top })`}>
                         {/* Y-Axis Grid & Labels */}
                         {Array.from({ length: gridLinesY + 1 }, (_, i) => {
                             const y = (i / gridLinesY) * graphHeight;
@@ -1569,7 +1610,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                         {/* Hover Overlay Columns */}
                         {displayData.map((m, i) => (
                             <rect
-                                key={`hover-col-${i}`}
+                                key={`hover - col - ${ i } `}
                                 x={getX(i) - (graphWidth / displayData.length) / 2}
                                 y={0}
                                 width={graphWidth / displayData.length}
@@ -1600,9 +1641,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     return (
                         <div style={{
                             position: 'absolute',
-                            left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
-                            top: `${tooltipY}px`,
-                            transform: `translate(${hoveredPoint.index > metrics.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
+                            left: `${ (hoveredPoint.x + padding.left) / chartWidth * 100 }% `,
+                            top: `${ tooltipY } px`,
+                            transform: `translate(${ hoveredPoint.index > metrics.length * 0.6 ? 'calc(-100% - 15px)' : '15px' }, -50 %)`,
                             background: '#0f172a',
                             border: '1px solid #334155',
                             borderRadius: '8px',
@@ -1656,7 +1697,7 @@ const MetricsSection = () => {
             // Fix: Use adminApi.fetch instead of .get, and correct path if needed
             // Assuming /admin/metrics/daily-breakdown based on history endpoint
             const params = new URLSearchParams({ date: point.date });
-            const data = await adminApi.fetch(`/admin/metrics/daily-breakdown?${params}`);
+            const data = await adminApi.fetch(`/ admin / metrics / daily - breakdown ? ${ params } `);
             setBreakdownData(data.breakdown);
         } catch (err) {
             console.error(err);
@@ -1811,9 +1852,9 @@ const RatingsBreakdownModal = ({ data, onClose }) => {
                                 </div>
                                 <div style={{ flex: 1, height: '24px', background: '#1e293b', borderRadius: '4px', overflow: 'hidden', border: '1px solid #334155' }}>
                                     <div style={{
-                                        width: `${pct}%`,
+                                        width: `${ pct }% `,
                                         height: '100%',
-                                        background: `linear-gradient(90deg, ${starColors[star]}99, ${starColors[star]})`,
+                                        background: `linear - gradient(90deg, ${ starColors[star]}99, ${ starColors[star]})`,
                                         borderRadius: '3px',
                                         transition: 'width 0.3s ease'
                                     }} />
@@ -1848,8 +1889,8 @@ const RatingsChartCard = ({ onPointClick }) => {
     const fetchRatings = async () => {
         try {
             const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/admin/metrics/ratings?days=${days}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await fetch(`${ API_URL } /api/admin / metrics / ratings ? days = ${ days } `, {
+                headers: { 'Authorization': `Bearer ${ token } ` }
             });
             if (res.ok) {
                 const data = await res.json();
@@ -2038,8 +2079,8 @@ const RatingsChartCard = ({ onPointClick }) => {
     const maxY = 5; // Ratings are 1-5
 
     // Build area path
-    const points = displayData.map((r, i) => `${getX(i)},${getY(r.average || 0)}`).join(' ');
-    const areaPoints = `0,${graphHeight} ${points} ${graphWidth},${graphHeight}`;
+    const points = displayData.map((r, i) => `${ getX(i) },${ getY(r.average || 0) } `).join(' ');
+    const areaPoints = `0, ${ graphHeight } ${ points } ${ graphWidth },${ graphHeight } `;
 
     return (
         <div ref={cardRef} className="card" style={{ marginBottom: '1.5rem', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155', borderRadius: '8px', backdropFilter: 'blur(8px)' }}>
@@ -2088,7 +2129,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                 )}
                 <svg
                     width="100%"
-                    viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                    viewBox={`0 0 ${ chartWidth } ${ chartHeight } `}
                     style={{ minWidth: 600 }}
                     onMouseLeave={() => setHoveredPoint(null)}
                 >
@@ -2098,12 +2139,12 @@ const RatingsChartCard = ({ onPointClick }) => {
                             <stop offset="100%" stopColor="#facc15" stopOpacity="0.05" />
                         </linearGradient>
                     </defs>
-                    <g transform={`translate(${padding.left}, ${padding.top})`}>
+                    <g transform={`translate(${ padding.left }, ${ padding.top })`}>
                         {/* Y-Axis Grid & Labels (Left - Ratings 1-5) */}
                         {[1, 2, 3, 4, 5].map((val) => {
                             const y = getY(val);
                             return (
-                                <g key={`grid-${val}`}>
+                                <g key={`grid - ${ val } `}>
                                     <line x1={0} y1={y} x2={graphWidth} y2={y} stroke="#334155" strokeWidth="1" strokeDasharray="4,4" />
                                     <text x={-10} y={y + 4} textAnchor="end" fill="#facc15" fontSize="11" fontWeight="500">{val}</text>
                                 </g>
@@ -2120,7 +2161,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                                 const y = graphHeight - (i / ticks) * graphHeight;
                                 // Don't render 0 if it overlaps too much, or render it clearly
                                 return (
-                                    <text key={`vote-${i}`} x={graphWidth + 6} y={y + 4} textAnchor="start" fill="#3b82f6" fontSize="11" fontWeight="500">
+                                    <text key={`vote - ${ i } `} x={graphWidth + 6} y={y + 4} textAnchor="start" fill="#3b82f6" fontSize="11" fontWeight="500">
                                         {val}
                                     </text>
                                 );
@@ -2154,7 +2195,7 @@ const RatingsChartCard = ({ onPointClick }) => {
 
                                 return (
                                     <rect
-                                        key={`bar-${i}`}
+                                        key={`bar - ${ i } `}
                                         x={barX}
                                         y={graphHeight - barHeight}
                                         width={barWidth}
@@ -2193,7 +2234,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                         {/* Hover Overlay Columns */}
                         {displayData.map((r, i) => (
                             <rect
-                                key={`hover-col-${i}`}
+                                key={`hover - col - ${ i } `}
                                 x={getX(i) - (graphWidth / displayData.length) / 2}
                                 y={0}
                                 width={graphWidth / displayData.length}
@@ -2218,9 +2259,9 @@ const RatingsChartCard = ({ onPointClick }) => {
                     return (
                         <div style={{
                             position: 'absolute',
-                            left: `${(hoveredPoint.x + padding.left) / chartWidth * 100}%`,
-                            top: `${tooltipY}px`,
-                            transform: `translate(${hoveredPoint.index > ratings.length * 0.6 ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
+                            left: `${ (hoveredPoint.x + padding.left) / chartWidth * 100 }% `,
+                            top: `${ tooltipY } px`,
+                            transform: `translate(${ hoveredPoint.index > ratings.length * 0.6 ? 'calc(-100% - 15px)' : '15px' }, -50 %)`,
                             background: '#0f172a',
                             border: '1px solid #334155',
                             borderRadius: '8px',
