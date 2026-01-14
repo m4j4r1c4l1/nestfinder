@@ -604,10 +604,10 @@ export default function Observability() {
                             <div style={{
                                 display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center',
                                 borderRadius: '12px', padding: '1rem',
-                                background: 'transparent'
+                                background: 'transparent', height: '100%'
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center', marginTop: 'auto' }}>
                                     {/* Sent Section */}
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
@@ -777,12 +777,12 @@ export default function Observability() {
                             <div style={{
                                 display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center',
                                 borderRadius: '12px', padding: '1rem',
-                                background: 'transparent'
+                                background: 'transparent', height: '100%'
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
 
                                 {/* 3 columns Badge Grid (9 items) */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: '0.6rem', width: '100%' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: '0.6rem', width: '100%', marginTop: 'auto' }}>
                                     {[
                                         // Row 1
                                         { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9', alignBottom: true },
