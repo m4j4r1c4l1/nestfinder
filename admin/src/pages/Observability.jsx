@@ -878,61 +878,63 @@ export default function Observability() {
     );
 };
 
-// ---------------------
 // EKG Component
 // ---------------------
 const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false, load = 0, latency = 0 }) => {
     // Refs
     const pathRef = useRef(null);
     const dotRef = useRef(null);
+    const [entropy, setEntropy] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setEntropy(e => e + 1);
+        }, 1200);
+        return () => clearInterval(interval);
+    }, []);
 
     // Generate Dynamic Path based on metrics
     // Returns { d, pts } where pts is array of {x, y} for strict tracking
     const generatePath = (stressLevel, isLoad) => {
-        // Baselining
-        const width = 100;
         const height = 42;
         const baseline = height / 2;
+        
+        // Randomize peak directions/heights slightly for "entropy"
+        const r = (min, max) => Math.random() * (max - min) + min;
         
         let d = `M 0 ${baseline}`;
         let pts = [{x: 0, y: baseline}];
         
-        // Add point helper
         const add = (x, y) => {
             d += ` L ${x} ${y}`;
             pts.push({x, y});
         };
 
         if (isLoad) {
-            // Flatlined / Loading pattern
             add(15, baseline);
             add(17, baseline - 3);
             add(19, baseline + 3);
             add(21, baseline);
             add(100, baseline);
         } else {
-            // Algorithmic Pulse Generation
-            const amp = stressLevel > 0.5 ? 18 : 10;
-            const jitter = stressLevel > 0.7 ? 5 : 0;
+            const amp = stressLevel > 0.5 ? 20 : 14;
+            const shift = r(-2, 2);
             
-            // PQRST Complex simulation
-            add(10, baseline);
-            add(12, baseline - 2); 
-            add(14, baseline + 1);
-            add(16, baseline);
+            add(10 + shift, baseline);
+            add(13 + shift, baseline - r(1, 3)); 
             
-            const qrsStart = 35 - (stressLevel * 10); 
+            const qrsStart = 35 - (stressLevel * 5) + shift; 
             add(qrsStart, baseline);
             
-            add(qrsStart + 2, baseline + 5 + Math.random() * jitter); // Q
-            add(qrsStart + 4, baseline - amp - Math.random() * jitter); // R (Peak)
-            add(qrsStart + 6, baseline + 8 + Math.random() * jitter); // S
-            add(qrsStart + 8, baseline);
+            add(qrsStart + 2, baseline + r(4, 7)); // Q
+            add(qrsStart + 4, baseline - amp - r(0, 5)); // R
+            add(qrsStart + 6, baseline + r(6, 10)); // S
+            add(qrsStart + 9, baseline);
             
-            const tStart = qrsStart + 15;
+            const tStart = qrsStart + 15 + r(-1, 2);
             add(tStart, baseline);
-            add(tStart + 4, baseline - 4);
-            add(tStart + 8, baseline);
+            add(tStart + 5, baseline - r(3, 6)); // T
+            add(tStart + 10, baseline);
             
             add(100, baseline);
         }
@@ -944,7 +946,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
     const effectiveStress = Math.min(Math.max(stressScore, 0), 1);
     
     // We generate TWO cycles for seamless looping
-    const { d: cycle1, pts: pts1 } = useMemo(() => generatePath(effectiveStress, isLoading), [effectiveStress, isLoading]);
+    const { d: cycle1, pts: pts1 } = useMemo(() => generatePath(effectiveStress, isLoading), [effectiveStress, isLoading, entropy]);
     
     // Construct full double path string for visual path
     const fullPath = `${cycle1} M 100 21 ${cycle1.substring(cycle1.indexOf('L')).replace(/L ([\d.]+) /g, (match, x) => `L ${parseFloat(x) + 100} `)}`;
@@ -952,54 +954,46 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
     // Merge points for strict tracking
     const fullPoints = [...pts1, ...pts1.map(p => ({ x: p.x + 100, y: p.y }))];
 
-    const speed = isStressed ? 150 : 80; // Pixels per second
+    const speed = isStressed ? 150 : 80; 
 
+    // Smooth Riding Logic
     useEffect(() => {
         let animationFrameId;
-        const startTime = performance.now();
+        const totalLength = pathRef.current ? pathRef.current.getTotalLength() / 2 : 100; 
+        const duration = isStressed ? 800 : 1500; 
+        let startTime = performance.now();
 
         const animate = () => {
-             const now = performance.now();
+             if (!pathRef.current || !dotRef.current) {
+                animationFrameId = requestAnimationFrame(animate); 
+                return;
+            }
+
+            const now = performance.now();
             const elapsed = now - startTime;
+            const progress = (elapsed % duration) / duration;
             
-            // Cycle 100px.
-            // Screen X of Dot = 50.
-            // Path moves LEFT (-X).
-            // Current X on Path that is under the Dot = (Elapsed * Speed + 50) % 100.
-            // Actually, we need to consider the start offset.
-            // If at t=0, svg x=0. Dot is at 50 screen. Path X at 50 is under dot.
-            // If at t=1, svg x=-10. Dot is at 50 screen. Path X at 60 is under dot.
-            // So yes, PathX = (Scroll + 50) % 100.
-            
-            const scroll = (elapsed * speed / 1000);
-            const xInCycle = (scroll + 50) % 100;
-            
-            // Allow wrapping logic for points if needed (we did fullPoints 200px coverage so xInCycle 0-100 is fine if we look at first cycle)
-            // But strict tracking: xInCycle is 0-99.99
+            const pathX = (progress * 100 + 50) % 100;
             
             let targetY = 21;
-            // Iterate points to find segment
-            for (let i = 0; i < fullPoints.length - 1; i++) {
-                const p1 = fullPoints[i];
-                const p2 = fullPoints[i+1];
-                if (xInCycle >= p1.x && xInCycle <= p2.x) {
-                    const ratio = (xInCycle - p1.x) / (p2.x - p1.x);
+            for (let i = 0; i < pts1.length - 1; i++) {
+                const p1 = pts1[i];
+                const p2 = pts1[i+1];
+                if (pathX >= p1.x && pathX <= p2.x) {
+                    const ratio = (pathX - p1.x) / (p2.x - p1.x);
                     targetY = p1.y + (p2.y - p1.y) * ratio;
                     break;
                 }
             }
-            
-            if (dotRef.current) {
-                // Dot stays fixed at container center (50px), moves up/down
-                dotRef.current.style.transform = `translate(-50%, -50%) translate(0, ${targetY - 21}px)`;
-            }
+
+            dotRef.current.style.transform = `translate(-50%, -50%) translate(0, ${targetY - 21}px)`;
             
             animationFrameId = requestAnimationFrame(animate);
         };
 
         animate();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [fullPoints, speed]); 
+    }, [pts1, isStressed]); 
 
     return (
         <div style={{
@@ -1014,51 +1008,52 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
             maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)'
         }}>
-            {/* Fading Grid Background */}
-            <div style={{
-                position: 'absolute', inset: 0,
-                backgroundImage: `linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px)`,
-                backgroundSize: '10px 10px', zIndex: 0
-            }} />
 
             {/* EKG Path */}
             <svg width="200" height="42" viewBox="0 0 200 42" style={{
-                position: 'absolute', left: 0,
-                animation: `ekg-move ${100/speed}s linear infinite`, 
-                zIndex: 1
+                fill: 'none',
+                stroke: color,
+                strokeWidth: 2,
+                position: 'absolute',
+                left: 0,
+                // The animation needs to match the JS "progress" duration.
+                // JS duration: 1500ms (normal). CSS duration: 1.5s
+                animation: `ekg-scroll ${isStressed ? 0.8 : 1.5}s linear infinite`
             }}>
-                <path
-                    ref={pathRef}
-                    d={fullPath}
-                    fill="none"
-                    stroke={color}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ filter: `drop-shadow(0 0 3px ${color})` }}
-                />
+                <path ref={pathRef} d={fullPath} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-
-            {/* Pulse Dot with Comet Tail */}
-            <div ref={dotRef} style={{
-                position: 'absolute', left: '50%', top: '50%',
-                width: '4px', height: '4px',
-                borderRadius: '50%',
-                background: '#fff',
-                // Comet Tail: Box shadows trailing to the left
-                boxShadow: `
-                    0 0 4px #fff,
-                    -2px 0 0 rgba(255,255,255,0.8),
-                    -4px 0 0 rgba(255,255,255,0.6),
-                    -8px 0 1px rgba(255,255,255,0.4),
-                    -12px 0 2px rgba(255,255,255,0.2)
-                `, 
-                zIndex: 5,
-                willChange: 'transform'
-            }} />
-
+            
+            {/* Pulse Dot */}
+            <div ref={dotRef}
+                style={{
+                    position: 'absolute',
+                    top: '50%', left: '50%',
+                    width: '8px', height: '8px',
+                    background: '#fff',
+                    borderRadius: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    boxShadow: `0 0 10px 2px ${color}, 0 0 20px 5px ${color}80, -2px 0 20px 4px ${color}40`, 
+                    zIndex: 2
+                }}
+            />
+            
+            {/* Comet Tail Effect */}
+            <div ref={(el) => dotRef.current && (dotRef.current.tail = el)} 
+                style={{
+                    position: 'absolute',
+                    top: '50%', left: '50%',
+                    width: '20px', height: '4px',
+                    background: `linear-gradient(to left, ${color}, transparent)`,
+                    transformOrigin: 'right center',
+                    transform: 'translate(-120%, -50%)',
+                    opacity: 0.8,
+                    filter: 'blur(1px)',
+                    zIndex: 1
+                }}
+            />
+            
             <style>{`
-                @keyframes ekg-move {
+                @keyframes ekg-scroll {
                     0% { transform: translateX(0); }
                     100% { transform: translateX(-100px); }
                 }
