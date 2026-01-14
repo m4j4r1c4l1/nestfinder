@@ -2886,14 +2886,14 @@ const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, se
                             If strict exclusive logic is needed: {delivered} for green, {read} for blue. 
                             Let's follow the plan: delivered -> green checks, read -> blue checks.
                         */}
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Delivered">
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Received">
                             <span style={{ color: '#22c55e', letterSpacing: '-2px', marginRight: '2px' }}>✓✓</span>
-                            <span style={{ color: '#fff' }}>{delivered}</span>
+                            <span style={{ color: '#fff' }}>{totalSent - delivered - read}</span>
                         </span>
                         <span style={{ width: '1px', height: '14px', background: 'rgba(56, 189, 248, 0.2)' }}></span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Read">
                             <span style={{ color: '#3b82f6', letterSpacing: '-2px', marginRight: '2px' }}>✓✓</span>
-                            <span style={{ color: '#fff' }}>{read}</span>
+                            <span style={{ color: '#fff' }}>{delivered + read}</span>
                         </span>
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
