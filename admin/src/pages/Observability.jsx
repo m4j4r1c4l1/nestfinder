@@ -617,7 +617,7 @@ export default function Observability() {
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '170px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '160px' }}>
                                             {[
                                                 { label: 'Delivered', count: stats.notificationMetrics?.delivered || 0, color: '#22c55e', icon: '✓✓' },
                                                 { label: 'Read', count: stats.notificationMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' },
@@ -628,7 +628,7 @@ export default function Observability() {
                                                         <span style={{ color: item.color, fontWeight: 600, fontSize: '0.75rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
                                                         <span style={{ color: item.color, fontWeight: 600, width: '65px' }}>{item.label}</span>
                                                     </div>
-                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto', textAlign: 'right', minWidth: '60px', display: 'flex', justifyContent: 'flex-end' }}><RollingBarrelCounter end={item.count} /></span>
+                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto', textAlign: 'right', minWidth: '60px', paddingRight: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}><RollingBarrelCounter end={item.count} /></span>
                                                 </div>
                                             ))}
                                         </div>
@@ -642,7 +642,7 @@ export default function Observability() {
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '170px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '160px' }}>
                                             {[
                                                 { label: 'Delivered', count: stats.feedbackMetrics?.pending || 0, color: '#22c55e', icon: '✓✓' },
                                                 { label: 'Read', count: stats.feedbackMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' }
@@ -652,7 +652,7 @@ export default function Observability() {
                                                         <span style={{ color: item.color, fontWeight: 600, fontSize: '0.75rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
                                                         <span style={{ color: item.color, fontWeight: 600, width: '65px' }}>{item.label}</span>
                                                     </div>
-                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto', textAlign: 'right', minWidth: '60px', display: 'flex', justifyContent: 'flex-end' }}><RollingBarrelCounter end={item.count} /></span>
+                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto', textAlign: 'right', minWidth: '60px', paddingRight: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}><RollingBarrelCounter end={item.count} /></span>
                                                 </div>
                                             ))}
                                         </div>
