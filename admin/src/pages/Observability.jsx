@@ -623,12 +623,12 @@ export default function Observability() {
                                                 { label: 'Read', count: stats.notificationMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' },
                                                 { label: 'Sent', count: (stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0), color: '#f59e0b', icon: '✓' }
                                             ].map(item => (
-                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.4rem', fontSize: '0.85rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                                         <span style={{ color: item.color, fontWeight: 600, fontSize: '0.75rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
                                                         <span style={{ color: item.color, fontWeight: 600, width: '65px' }}>{item.label}</span>
                                                     </div>
-                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto', textAlign: 'right', minWidth: '60px', marginRight: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}><RollingBarrelCounter end={item.count} /></span>
+                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto', textAlign: 'right', minWidth: '40px', marginRight: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}><RollingBarrelCounter end={item.count} /></span>
                                                 </div>
                                             ))}
                                         </div>
@@ -647,12 +647,12 @@ export default function Observability() {
                                                 { label: 'Delivered', count: stats.feedbackMetrics?.pending || 0, color: '#22c55e', icon: '✓✓' },
                                                 { label: 'Read', count: stats.feedbackMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' }
                                             ].map(item => (
-                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.4rem', fontSize: '0.85rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                                         <span style={{ color: item.color, fontWeight: 600, fontSize: '0.75rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
                                                         <span style={{ color: item.color, fontWeight: 600, width: '65px' }}>{item.label}</span>
                                                     </div>
-                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto', textAlign: 'right', minWidth: '60px', marginRight: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}><RollingBarrelCounter end={item.count} /></span>
+                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto', textAlign: 'right', minWidth: '40px', marginRight: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}><RollingBarrelCounter end={item.count} /></span>
                                                 </div>
                                             ))}
                                         </div>
@@ -668,41 +668,41 @@ export default function Observability() {
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
 
-                                    {/* Main Metrics Row: [Left Grid] [Center Main] [Right Grid] */}
-                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', flex: 1, padding: '0 0.5rem' }}>
-                                        
-                                        {/* Left Grid: Messages & Users */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                            {/* Messages */}
+                                {/* Main Metrics Row: [Left Grid] [Center Main] [Right Grid] */}
+                                <div style={{ display: 'flex', alignItems: 'center', width: '100%', flex: 1, padding: '0 0.5rem' }}>
+
+                                    {/* Left Grid: Messages & Users */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                                        {/* Messages */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                                 <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{(stats.broadcastMetrics?.sent || 0) + (stats.broadcastMetrics?.delivered || 0) + (stats.broadcastMetrics?.read || 0)}</span>
                                                 <span style={{ fontSize: '0.8rem' }}>📡</span>
                                             </div>
-                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Messages</div>
-                                            </div>
-                                            {/* Users */}
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
-                                                    <span style={{ fontSize: '0.8rem' }}>👨‍👩‍👧‍👦</span>
-                                                </div>
-                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Users</div>
-                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.65rem' }}>Messages</div>
                                         </div>
-
-                                        {/* Center: Main Counter */}
-                                        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 2 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em' }}>
-                                                <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                        {/* Users */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
+                                                <span style={{ fontSize: '0.8rem' }}>👨‍👩‍👧‍👦</span>
                                             </div>
-                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem' }}>Campaigns</div>
-                                            <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Total</div>
+                                            <div className="text-muted" style={{ fontSize: '0.65rem' }}>Users</div>
                                         </div>
+                                    </div>
 
-                                        {/* Right Grid: Delivered & Read */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1, justifyContent: 'center' }}>
-                                            {/* Delivered (Exclusive) */}
+                                    {/* Center: Main Counter */}
+                                    <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 2 }}>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em' }}>
+                                            <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem' }}>Campaigns</div>
+                                        <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Total</div>
+                                    </div>
+
+                                    {/* Right Grid: Delivered & Read */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1, justifyContent: 'center' }}>
+                                        {/* Delivered (Exclusive) */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                                 <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
@@ -710,18 +710,18 @@ export default function Observability() {
                                                     {stats.broadcastMetrics?.delivered || 0}
                                                 </span>
                                             </div>
-                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Delivered</div>
+                                            <div className="text-muted" style={{ fontSize: '0.65rem' }}>Delivered</div>
+                                        </div>
+                                        {/* Read */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
                                             </div>
-                                            {/* Read */}
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                    <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
-                                                </div>
-                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Read</div>
-                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.65rem' }}>Read</div>
                                         </div>
                                     </div>
+                                </div>
 
                                 {/* Priority Badges - 5 cols, Squared */}
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.3rem', width: '100%', marginBottom: '0.3rem' }}>
@@ -888,16 +888,16 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
     const generatePath = (stressLevel, isLoad) => {
         const height = 42;
         const baseline = height / 2;
-        
+
         // Randomize peak directions/heights slightly for "entropy"
         const r = (min, max) => Math.random() * (max - min) + min;
-        
+
         let d = `M 0 ${baseline}`;
-        let pts = [{x: 0, y: baseline}];
-        
+        let pts = [{ x: 0, y: baseline }];
+
         const add = (x, y) => {
             d += ` L ${x} ${y}`;
-            pts.push({x, y});
+            pts.push({ x, y });
         };
 
         if (isLoad) {
@@ -909,25 +909,25 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
         } else {
             const amp = stressLevel > 0.5 ? 20 : 14;
             const shift = r(-2, 2);
-            
+
             add(10 + shift, baseline);
-            add(13 + shift, baseline - r(1, 3)); 
-            
+            add(13 + shift, baseline - r(1, 3));
+
             // Wider QRS for smoother riding
-            const qrsStart = 35 - (stressLevel * 5) + shift; 
+            const qrsStart = 35 - (stressLevel * 5) + shift;
             add(qrsStart, baseline);
-            
+
             // Use wider spacing (3-4 units) instead of 2 to allow dot to hit peaks at 60fps
             add(qrsStart + 3, baseline + r(4, 7)); // Q (Dip)
             add(qrsStart + 6, baseline - amp - r(0, 5)); // R (Peak)
             add(qrsStart + 9, baseline + r(6, 10)); // S (Dip)
             add(qrsStart + 13, baseline); // Back to baseline
-            
+
             const tStart = qrsStart + 15 + r(-1, 2);
             add(tStart, baseline);
             add(tStart + 5, baseline - r(3, 6)); // T
             add(tStart + 10, baseline);
-            
+
             add(100, baseline);
         }
 
@@ -944,17 +944,17 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
     //   - Jitter: Random variations added to every pulse for realism.
     //   - Frequency: Higher stress compresses the wave, increasing heart rate.
 
-    const stressScore = isStressed ? 0.8 : (load / 200) + (latency / 100); 
+    const stressScore = isStressed ? 0.8 : (load / 200) + (latency / 100);
     const effectiveStress = Math.min(Math.max(stressScore, 0), 1);
-    
+
     // We generate TWO cycles for seamless looping
     const { d: cycle1, pts: pts1 } = useMemo(() => generatePath(effectiveStress, isLoading), [effectiveStress, isLoading, entropy]);
-    
+
     // Construct full double path string for visual path
     // We use a double width (200px) path to allow for seamless scrolling
     const fullPath = `${cycle1} M 100 21 ${cycle1.substring(cycle1.indexOf('L')).replace(/L ([\d.]+) /g, (match, x) => `L ${parseFloat(x) + 100} `)}`;
-    
-    const speed = isStressed ? 150 : 80; 
+
+    const speed = isStressed ? 150 : 80;
 
     // Smooth Riding & Sync Logic
     useEffect(() => {
@@ -970,26 +970,26 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
             lastTime = now;
 
             if (!pathRef.current || !dotRef.current) {
-                animationFrameId = requestAnimationFrame(animate); 
+                animationFrameId = requestAnimationFrame(animate);
                 return;
             }
 
             // Update Scroll Position based on speed
             scrollPos += speed * delta;
-            
+
             // Constrain scroll to 0-100 cycle for resetting
             const visualScroll = scrollPos % cycleLength;
-            
+
             // Move the SVG Path to the LEFT
             pathRef.current.style.transform = `translateX(-${visualScroll}px)`;
 
             // Helper to get Y for any Virtual X
             const getY = (vx) => {
                 // Handle wrapping for the lookup
-                const modX = ((vx % 100) + 100) % 100; 
+                const modX = ((vx % 100) + 100) % 100;
                 for (let i = 0; i < pts1.length - 1; i++) {
                     const p1 = pts1[i];
-                    const p2 = pts1[i+1];
+                    const p2 = pts1[i + 1];
                     if (modX >= p1.x && modX <= p2.x) {
                         const ratio = (modX - p1.x) / (p2.x - p1.x);
                         return p1.y + (p2.y - p1.y) * ratio;
@@ -999,7 +999,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
             };
 
             // 1. Move Main Dot
-            const dotVirtualX = visualScroll + 50; 
+            const dotVirtualX = visualScroll + 50;
             const dotY = getY(dotVirtualX);
             dotRef.current.style.transform = `translate(-50%, -50%) translate(0, ${dotY - 21}px)`;
 
@@ -1014,18 +1014,18 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                     ref.style.transform = `translate(-50%, -50%) translate(-${lag}px, ${trailY - 21}px)`;
                 }
             });
-            
+
             animationFrameId = requestAnimationFrame(animate);
         };
 
         animate();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [pts1, speed]); 
+    }, [pts1, speed]);
 
     return (
         <div style={{
             width: '100px',
-            height: '42px', 
+            height: '42px',
             background: 'transparent',
             borderRadius: '4px',
             position: 'relative',
@@ -1047,7 +1047,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
             }}>
                 <path ref={pathRef} d={fullPath} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            
+
             {/* Pulse Dot */}
             <div ref={dotRef}
                 style={{
@@ -1058,12 +1058,12 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                     borderRadius: '50%',
                     transform: 'translate(-50%, -50%)',
                     // Reducded Glow
-                    boxShadow: `0 0 4px 1px ${color}, 0 0 8px 2px ${color}40`, 
+                    boxShadow: `0 0 4px 1px ${color}, 0 0 8px 2px ${color}40`,
                     zIndex: 2,
                     willChange: 'transform'
                 }}
             />
-            
+
             {/* FLOWY Ghost Trail */}
             {[...Array(8)].map((_, i) => (
                 <div key={i} ref={el => trailRefs.current[i] = el}
@@ -1082,7 +1082,7 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                     }}
                 />
             ))}
-            
+
             <style>{`
                 @keyframes ekg-scroll {
                     0% { transform: translateX(0); }
@@ -2324,7 +2324,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                     // Percentage-based positioning
                     const xPercent = (hoveredPoint.x + padding.left) / chartWidth * 100;
                     const yPercent = (hoveredPoint.y + padding.top) / chartHeight * 100;
-                    const isRightSide = xPercent > 60; 
+                    const isRightSide = xPercent > 60;
 
                     // Clamp Y (approx 20% padding)
                     const clampedY = Math.max(20, Math.min(80, yPercent));
