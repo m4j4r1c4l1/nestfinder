@@ -619,16 +619,16 @@ export default function Observability() {
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '130px' }}>
                                             {[
-                                                { label: 'Delivered', count: Math.max(0, (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0)), color: '#22c55e', icon: '✓✓' },
+                                                { label: 'Delivered', count: stats.notificationMetrics?.delivered || 0, color: '#22c55e', icon: '✓✓' },
                                                 { label: 'Read', count: stats.notificationMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' },
                                                 { label: 'Sent', count: (stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0), color: '#f59e0b', icon: '✓' }
                                             ].map(item => (
-                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                         <span style={{ color: item.color, fontWeight: 600, fontSize: '0.75rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
                                                         <span style={{ color: item.color, fontWeight: 600, width: '65px' }}>{item.label}</span>
                                                     </div>
-                                                    <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={item.count} /></span>
+                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto' }}><RollingBarrelCounter end={item.count} /></span>
                                                 </div>
                                             ))}
                                         </div>
@@ -647,12 +647,12 @@ export default function Observability() {
                                                 { label: 'Delivered', count: stats.feedbackMetrics?.pending || 0, color: '#22c55e', icon: '✓✓' },
                                                 { label: 'Read', count: stats.feedbackMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' }
                                             ].map(item => (
-                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                         <span style={{ color: item.color, fontWeight: 600, fontSize: '0.75rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
                                                         <span style={{ color: item.color, fontWeight: 600, width: '65px' }}>{item.label}</span>
                                                     </div>
-                                                    <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={item.count} /></span>
+                                                    <span style={{ fontWeight: 700, color: '#fff', marginLeft: 'auto' }}><RollingBarrelCounter end={item.count} /></span>
                                                 </div>
                                             ))}
                                         </div>
@@ -674,11 +674,11 @@ export default function Observability() {
                                         {/* Left Grid: Messages & Users */}
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                                             {/* Messages */}
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.total || 0}</span>
-                                                    <span style={{ fontSize: '0.7rem' }}>📡</span>
-                                                </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{(stats.broadcastMetrics?.sent || 0) + (stats.broadcastMetrics?.delivered || 0) + (stats.broadcastMetrics?.read || 0)}</span>
+                                                <span style={{ fontSize: '0.8rem' }}>📡</span>
+                                            </div>
                                                 <div className="text-muted" style={{ fontSize: '0.65rem' }}>Messages</div>
                                             </div>
                                             {/* Users */}
@@ -703,13 +703,13 @@ export default function Observability() {
                                         {/* Right Grid: Delivered & Read */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1, justifyContent: 'center' }}>
                                             {/* Delivered (Exclusive) */}
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                    <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.65rem' }}>✓✓</span>
-                                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>
-                                                        {Math.max(0, (stats.broadcastMetrics?.delivered || 0) - (stats.broadcastMetrics?.read || 0))}
-                                                    </span>
-                                                </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>
+                                                    {stats.broadcastMetrics?.delivered || 0}
+                                                </span>
+                                            </div>
                                                 <div className="text-muted" style={{ fontSize: '0.65rem' }}>Delivered</div>
                                             </div>
                                             {/* Read */}
@@ -842,7 +842,7 @@ export default function Observability() {
                                                 <span style={{
                                                     fontWeight: 700,
                                                     color: badge.color,
-                                                    fontSize: badge.mono ? '1.1rem' : '1.4rem',
+                                                    fontSize: badge.mono ? '1.2rem' : '1.4rem',
                                                     fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
                                                     lineHeight: 1,
                                                     minWidth: badge.mono ? '80px' : '50px',
