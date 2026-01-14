@@ -407,12 +407,12 @@ export default function Observability() {
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.2rem', borderLeft: '1px solid #334155', paddingLeft: '1.2rem' }}>
                                 <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span>🔲</span>
+                                    <span style={{ width: '20px', textAlign: 'center' }}>🔲</span>
                                     <span>CPU</span>
                                     <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.load || 0}%</span>
                                 </div>
                                 <div style={{ fontSize: '0.75rem', color: '#818cf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span>🧠</span>
+                                    <span style={{ width: '20px', textAlign: 'center' }}>🧠</span>
                                     <span>RAM</span>
                                     <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.ram || 0}%</span>
                                 </div>
@@ -451,8 +451,8 @@ export default function Observability() {
                                 {/* Pulsing Dot (Ripple Effect) */}
                                 <div style={{ position: 'relative', width: '8px', height: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     {/* Waves Fading Out */}
-                                    <div style={{ position: 'absolute', inset: '-8px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.6)', animation: 'ripple 2s ease-out infinite', opacity: 0 }} />
-                                    <div style={{ position: 'absolute', inset: '-4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'ripple 2s ease-out infinite 0.6s', opacity: 0 }} />
+                                    <div style={{ position: 'absolute', inset: '-8px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.6)', animation: 'pulse-wave 2s ease-out infinite', opacity: 0 }} />
+                                    <div style={{ position: 'absolute', inset: '-4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'pulse-wave 2s ease-out infinite 0.6s', opacity: 0 }} />
                                     {/* Core Dot */}
                                     <div style={{ position: 'relative', width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.8)' }} />
                                 </div>
