@@ -2473,22 +2473,24 @@ const FeedbackSection = ({
                     <h3>💬 Received History</h3>
                     <span style={{
                         position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
-                        background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
+                        background: 'rgba(56, 189, 248, 0.1)', color: '#94a3b8', padding: '0 1rem',
                         borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
-                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', minWidth: '170px'
+                        userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', gap: '1rem'
                     }}>
-                        Total: {totalItems}
+                        <span style={{ color: '#cbd5e1' }}>Total: <span style={{ color: '#fff' }}>{totalItems}</span></span>
+                        <span style={{ width: '1px', height: '14px', background: 'rgba(56, 189, 248, 0.2)' }}></span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Received">
+                            <span style={{ color: '#22c55e', letterSpacing: '-2px', marginRight: '2px' }}>✓✓</span>
+                            <span style={{ color: '#fff' }}>{feedbackCounts.pending}</span>
+                        </span>
+                        <span style={{ width: '1px', height: '14px', background: 'rgba(56, 189, 248, 0.2)' }}></span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Read">
+                            <span style={{ color: '#3b82f6', letterSpacing: '-2px', marginRight: '2px' }}>✓✓</span>
+                            <span style={{ color: '#fff' }}>{feedbackCounts.read}</span>
+                        </span>
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.85rem' }}>
-                            <span style={{ fontWeight: 500 }}>
-                                <span style={{ color: '#22c55e' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedbackCounts.pending} Received</span>
-                            </span>
-                            <span style={{ fontWeight: 500 }}>
-                                <span style={{ color: '#3b82f6' }}>✓✓</span> <span style={{ color: '#94a3b8' }}>{feedbackCounts.read} Read</span>
-                            </span>
-                        </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                             {selectedIds.length > 0 && (
                                 <>
@@ -2613,7 +2615,7 @@ const FeedbackSection = ({
                                                         const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
                                                         const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
                                                         // Approximation for display
-                                                        const isDST = d.getTimezoneOffset() < Math.max(jan, jul); 
+                                                        const isDST = d.getTimezoneOffset() < Math.max(jan, jul);
                                                         return `${hours} ${isDST ? 'CEST' : 'CET'}`;
                                                     })()}
                                                 </span>
@@ -2871,21 +2873,27 @@ const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, se
                     <h3>📜 Sent History</h3>
                     <span style={{
                         position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
-                        background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '0 1rem',
+                        background: 'rgba(56, 189, 248, 0.1)', color: '#94a3b8', padding: '0 1rem',
                         borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', cursor: 'default',
                         userSelect: 'none', border: '1px solid rgba(56, 189, 248, 0.2)', width: 'auto', gap: '1rem'
                     }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e' }} title="Sent (Pending Delivery)">
-                            <span>✓</span>
-                            <span>{totalSent - delivered - read}</span>
+                        <span style={{ color: '#cbd5e1' }}>Total: <span style={{ color: '#fff' }}>{totalSent}</span></span>
+                        <span style={{ width: '1px', height: '14px', background: 'rgba(56, 189, 248, 0.2)' }}></span>
+                        {/* Delivered = Total Delivered - Read (if we want exclusive) OR just Delivered? 
+                            User request said: Delivered Icon Green, Read Icon Blue. 
+                            Let's assume "Delivered" means the delivered status count. 
+                            If strict exclusive logic is needed: {delivered} for green, {read} for blue. 
+                            Let's follow the plan: delivered -> green checks, read -> blue checks.
+                        */}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Delivered">
+                            <span style={{ color: '#22c55e', letterSpacing: '-2px', marginRight: '2px' }}>✓✓</span>
+                            <span style={{ color: '#fff' }}>{delivered}</span>
                         </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e' }} title="Delivered & Read">
-                            <span style={{ letterSpacing: '-3px', marginRight: '3px' }}>✓✓</span>
-                            <span>{delivered + read}</span>
-                        </span>
-                        <span style={{ borderLeft: '1px solid rgba(56, 189, 248, 0.2)', paddingLeft: '1rem', color: '#38bdf8' }}>
-                            Total: {totalSent}
+                        <span style={{ width: '1px', height: '14px', background: 'rgba(56, 189, 248, 0.2)' }}></span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Read">
+                            <span style={{ color: '#3b82f6', letterSpacing: '-2px', marginRight: '2px' }}>✓✓</span>
+                            <span style={{ color: '#fff' }}>{read}</span>
                         </span>
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
