@@ -2602,12 +2602,18 @@ const FeedbackSection = ({
                                                 </span>
                                                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
                                                     {(() => {
-                                                        const d = new Date(item.created_at);
+                                                        let safeIso = item.created_at;
+                                                        // Fallback logic to append Z if missing (Treat as UTC)
+                                                        if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
+                                                        if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) { safeIso += 'Z'; }
+
+                                                        const d = new Date(safeIso);
                                                         const hours = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+                                                        // Simplified CET/CEST suffix
                                                         const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
                                                         const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
-                                                        const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
-                                                        const isDST = Math.max(jan, jul) !== parisOffset;
+                                                        // Approximation for display
+                                                        const isDST = d.getTimezoneOffset() < Math.max(jan, jul); 
                                                         return `${hours} ${isDST ? 'CEST' : 'CET'}`;
                                                     })()}
                                                 </span>
@@ -3540,7 +3546,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
         }} onClick={onClose}>
             <div style={{
                 background: '#1e293b', borderRadius: '12px', padding: '0',
-                width: 'min(900px, 95vw)', maxHeight: '90vh',
+                width: 'min(950px, 95vw)', maxHeight: '90vh',
                 display: 'flex', flexDirection: 'column',
                 border: '1px solid #334155',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', overflow: 'hidden'
@@ -3553,25 +3559,26 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                 </div>
 
                 {/* Content Body - Landscape Layout */}
-                <div style={{ padding: '0', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'row', minHeight: '300px' }}>
+                <div style={{ padding: '0', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'row', minHeight: '350px' }}>
 
-                    {/* Left Column: Image (Flexible width, no gaps) */}
+                    {/* Left Column: Image (Dynamic Width) */}
                     {broadcast.image_url && (
                         <div style={{
-                            flexShrink: 0,
-                            background: '#0f172a', // Frame bg matches header
+                            flex: '0 1 auto', // Allow shrinking, but base auto
+                            minWidth: '250px',
+                            maxWidth: '45%', // Don't take more than 45% of width
+                            background: '#0f172a',
                             borderRight: '1px solid #334155',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: '400px', // Fixed frame width
-                            padding: '1.5rem', // Equal padding frame
+                            padding: '1.5rem',
                             boxSizing: 'border-box',
                             overflow: 'hidden'
                         }}>
                             <div style={{
-                                width: '100%',
-                                height: '100%',
+                                maxWidth: '100%',
+                                maxHeight: '100%',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                background: '#000', // Inner bg
+                                background: '#000',
                                 borderRadius: '8px',
                                 overflow: 'hidden',
                                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
@@ -3582,8 +3589,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                     style={{
                                         display: 'block',
                                         maxWidth: '100%',
-                                        maxHeight: '100%',
-                                        objectFit: 'contain' // No clipping
+                                        maxHeight: '500px', // Cap height
+                                        objectFit: 'contain'
                                     }}
                                 />
                             </div>
@@ -3593,212 +3600,137 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                     {/* Right Column: Details */}
                     <div style={{ flex: 1, padding: '1.5rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
 
-                        {/* Title & Badges Row (Replaces Metadata Grid) */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '1rem' }}>
-                            <h4 style={{ margin: 0, color: '#f8fafc', fontSize: '1.2rem' }}>{broadcast.title || 'Untitled Broadcast'}</h4>
+                        {/* Title & Badges */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '1.2rem' }}>
+                            <h4 style={{ margin: 0, color: '#f8fafc', fontSize: '1.3rem' }}>{broadcast.title || 'Untitled Broadcast'}</h4>
 
-                            {/* Badges: Status, Priority, MaxViews */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                {/* Status */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                                {/* Badges... (Same as before) */}
                                 <span style={{
                                     padding: '0.2rem 0.6rem', borderRadius: '4px',
                                     fontSize: '0.75rem', fontWeight: 700,
                                     background: badgeBg(statusColor), color: statusColor,
                                     border: `1px solid ${badgeBorder(statusColor)}`,
                                     textTransform: 'uppercase', letterSpacing: '0.5px'
-                                }}>
-                                    {statusText}
-                                </span>
+                                }}>{statusText}</span>
 
-                                {/* Priority */}
                                 <span style={{
                                     padding: '0.2rem 0.6rem', borderRadius: '4px',
                                     fontSize: '0.75rem', fontWeight: 700,
                                     background: badgeBg(priorityColor), color: priorityColor,
                                     border: `1px solid ${badgeBorder(priorityColor)}`
-                                }}>
-                                    P{broadcast.priority || 3}
-                                </span>
+                                }}>P{broadcast.priority || 3}</span>
 
-                                {/* Max Views */}
                                 {broadcast.max_views ? (
                                     <span style={{
-                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
-                                        fontSize: '0.75rem', fontWeight: 700,
+                                        padding: '0.2rem 0.6rem', borderRadius: '4px', fontWeight: 700, fontSize: '0.75rem',
                                         background: (broadcast.total_users || 0) >= broadcast.max_views ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)',
                                         color: (broadcast.total_users || 0) >= broadcast.max_views ? '#ef4444' : '#06b6d4',
                                         border: (broadcast.total_users || 0) >= broadcast.max_views ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(6, 182, 212, 0.3)'
-                                    }}>
-                                        👁 {broadcast.total_users || 0} / {broadcast.max_views}
-                                    </span>
+                                    }}>👁 {broadcast.total_users || 0} / {broadcast.max_views}</span>
                                 ) : (
                                     <span style={{
-                                        padding: '0.2rem 0.6rem', borderRadius: '4px',
-                                        fontSize: '0.75rem', fontWeight: 700,
-                                        background: 'rgba(6, 182, 212, 0.1)',
-                                        color: '#06b6d4',
-                                        border: '1px solid rgba(6, 182, 212, 0.3)'
-                                    }}>
-                                        👁 ∞
-                                    </span>
+                                        padding: '0.2rem 0.6rem', borderRadius: '4px', fontWeight: 700, fontSize: '0.75rem',
+                                        background: 'rgba(6, 182, 212, 0.1)', color: '#06b6d4', border: '1px solid rgba(6, 182, 212, 0.3)'
+                                    }}>👁 ∞</span>
                                 )}
                             </div>
                         </div>
 
-                        {/* Time Info (Kept separate as it's not a badge) */}
-                        {/* Time Info - Redesigned to match Tooltip Style (Grid Layout) */}
+                        {/* Redesigned Time Box - Flex Row with Centered Icon */}
                         <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'min-content auto min-content',
+                            display: 'flex',
                             alignItems: 'center',
-                            columnGap: '0.6rem', // Keep horizontal gap tight
-                            rowGap: '0.3rem',    // Vertical gap
+                            gap: '1.2rem',
                             background: '#0f172a',
-                            padding: '0.8rem 1rem 0.8rem 1.4rem', // Extra left padding for icon overhang
+                            padding: '0.8rem 1.2rem',
                             borderRadius: '8px',
                             border: '1px solid #334155',
                             marginBottom: '1.5rem',
-                            position: 'relative',
-                            width: 'fit-content',
-                            marginLeft: 'auto',
-                            marginRight: 'auto' // Center it
+                            width: 'fit-content'
                         }}>
-                            {/* Floating Icon on Border */}
-                            <div style={{
-                                position: 'absolute',
-                                left: '10px',
-                                top: '0',
-                                transform: 'translateY(-50%)',
-                                background: '#0f172a',
-                                padding: '0 4px',
-                                fontSize: '1rem',
-                                lineHeight: 1,
-                                color: '#94a3b8'
-                            }}>
-                                🕐
+                            {/* Icon Centered */}
+                            <div style={{ fontSize: '1.5rem', lineHeight: 1, color: '#94a3b8' }}>🕐</div>
+
+                            {/* Divider */}
+                            <div style={{ width: '1px', height: '30px', background: '#334155' }} />
+
+                            {/* Times Stack */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'min-content auto', columnGap: '1rem', rowGap: '0.2rem', alignItems: 'center' }}>
+                                <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Start</span>
+                                <span style={{ color: '#e2e8f0', fontSize: '0.9rem', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
+                                    {formatDateTimeCET(broadcast.start_time)}
+                                </span>
+
+                                <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>End</span>
+                                <span style={{ color: '#e2e8f0', fontSize: '0.9rem', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
+                                    {formatDateTimeCET(broadcast.end_time)}
+                                </span>
                             </div>
-
-                            {/* Start Row */}
-                            <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Start</span>
-                            <span style={{ color: '#e2e8f0', fontSize: '0.9rem', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
-                                {formatDateTimeCET(broadcast.start_time)}
-                            </span>
-                            <span style={{ fontSize: '0.8rem', opacity: 0 }}></span> {/* Spacer */}
-
-                            {/* End Row */}
-                            <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>End</span>
-                            <span style={{ color: '#e2e8f0', fontSize: '0.9rem', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
-                                {formatDateTimeCET(broadcast.end_time)}
-                            </span>
-                            <span style={{ color: '#64748b', fontSize: '0.8rem' }}></span>
                         </div>
 
-
-                        {/* Message Body */}
-                        <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #334155', color: '#cbd5e1', whiteSpace: 'pre-wrap', marginBottom: '1.5rem', flex: 1, overflowY: 'auto' }}>
+                        {/* Message Body - Min Height 6 lines (~9rem) */}
+                        <div style={{
+                            background: '#0f172a',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            border: '1px solid #334155',
+                            color: '#cbd5e1',
+                            whiteSpace: 'pre-wrap',
+                            marginBottom: '1.5rem',
+                            flex: 1,
+                            overflowY: 'auto',
+                            minHeight: '150px' // Approx 6-8 lines
+                        }}>
                             {broadcast.message}
                         </div>
 
-                        {/* Redesigned Stats Area (Clickable) */}
-                        {/* Redesigned Stats Cards Area */}
-                        <div
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(3, 1fr)',
-                                gap: '1rem',
-                                marginBottom: '1rem'
-                            }}
-                        >
-                            {/* Total Card */}
-                            <div style={{
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: '8px',
-                                padding: '1rem',
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s',
-                                cursor: 'pointer'
-                            }}
+                        {/* Stats Cards - Clickable */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+                            <div
+                                style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
                                 onClick={() => onViewRecipients && onViewRecipients('all')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#eab308'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                                title="View All Recipients"
                             >
-                                <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
-                                    {broadcast.total_users || 0}
-                                </span>
-                                <span style={{ fontSize: '0.7rem', color: '#eab308', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Total</span>
+                                <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
+                                <span style={{ fontSize: '0.75rem', color: '#eab308', textTransform: 'uppercase', fontWeight: 600 }}>Total</span>
                             </div>
 
-                            {/* Delivered Card */}
-                            <div style={{
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: '8px',
-                                padding: '1rem',
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s',
-                                cursor: 'pointer'
-                            }}
+                            <div
+                                style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
                                 onClick={() => onViewRecipients && onViewRecipients('delivered')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                                title="View Delivered Recipients"
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
-                                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
-                                        {Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}
-                                    </span>
+                                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}</span>
                                 </div>
-                                <span style={{ fontSize: '0.7rem', color: '#22c55e', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Delivered</span>
+                                <span style={{ fontSize: '0.75rem', color: '#22c55e', textTransform: 'uppercase', fontWeight: 600 }}>Delivered</span>
                             </div>
 
-                            {/* Read Card */}
-                            <div style={{
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: '8px',
-                                padding: '1rem',
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.1s, border-color 0.1s',
-                                cursor: 'pointer'
-                            }}
+                            <div
+                                style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
                                 onClick={() => onViewRecipients && onViewRecipients('read')}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                                title="View Read Recipients"
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
-                                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
-                                        {broadcast.read_count || 0}
-                                    </span>
+                                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.read_count || 0}</span>
                                 </div>
-                                <span style={{ fontSize: '0.7rem', color: '#3b82f6', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Read</span>
+                                <span style={{ fontSize: '0.75rem', color: '#3b82f6', textTransform: 'uppercase', fontWeight: 600 }}>Read</span>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
-                {/* Actions - Sticky Footer */}
-                <div style={{
-                    padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155',
-                    display: 'flex', gap: '1rem', justifyContent: 'flex-end'
-                }}>
-                    <button
-                        onClick={onDelete}
-                        className="btn btn-danger"
-                        style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
-                    >
-                        🗑️ Delete Broadcast
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="btn btn-secondary"
-                    >
-                        Close
-                    </button>
+                {/* Footer */}
+                <div style={{ padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                    <button onClick={onDelete} className="btn btn-danger" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}>🗑️ Delete Broadcast</button>
+                    <button onClick={onClose} className="btn btn-secondary">Close</button>
                 </div>
 
             </div>
