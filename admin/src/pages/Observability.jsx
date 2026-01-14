@@ -609,15 +609,15 @@ export default function Observability() {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
                                     {/* Sent Section */}
-                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.notificationMetrics?.total || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '130px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '130px' }}>
                                             {[
                                                 { label: 'Delivered', count: Math.max(0, (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0)), color: '#22c55e', icon: '✓✓' },
                                                 { label: 'Read', count: stats.notificationMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' },
@@ -634,15 +634,15 @@ export default function Observability() {
                                         </div>
                                     </div>
                                     {/* Received Section */}
-                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                        <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                        <div style={{ textAlign: 'center', width: '100px', flexShrink: 0 }}>
                                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#3b82f6', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '130px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '130px' }}>
                                             {[
                                                 { label: 'Delivered', count: stats.feedbackMetrics?.pending || 0, color: '#22c55e', icon: '✓✓' },
                                                 { label: 'Read', count: stats.feedbackMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' }
@@ -668,60 +668,60 @@ export default function Observability() {
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
 
-                                {/* Main Metrics Row: [Left Grid] [Center Main] [Right Grid] */}
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flex: 1 }}>
-                                    
-                                    {/* Left Grid: Messages & Users */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, alignItems: 'center', justifyContent: 'space-between', height: '100%', padding: '0.5rem 0' }}>
-                                        {/* Messages */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.total || 0}</span>
-                                                <span style={{ fontSize: '0.8rem' }}>📡</span>
+                                    {/* Main Metrics Row: [Left Grid] [Center Main] [Right Grid] */}
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', flex: 1, padding: '0 0.5rem' }}>
+                                        
+                                        {/* Left Grid: Messages & Users */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                                            {/* Messages */}
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.total || 0}</span>
+                                                    <span style={{ fontSize: '0.7rem' }}>📡</span>
+                                                </div>
+                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Messages</div>
                                             </div>
-                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Messages</div>
-                                        </div>
-                                        {/* Users */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
-                                                <span style={{ fontSize: '0.8rem' }}>👨‍👩‍👧‍👦</span>
+                                            {/* Users */}
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
+                                                    <span style={{ fontSize: '0.7rem' }}>👨‍👩‍👧‍👦</span>
+                                                </div>
+                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Users</div>
                                             </div>
-                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Users</div>
                                         </div>
-                                    </div>
 
-                                    {/* Center: Main Counter */}
-                                    <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1.5 }}>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
-                                            <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                        {/* Center: Main Counter */}
+                                        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 2 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em' }}>
+                                                <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                            </div>
+                                            <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem' }}>Campaigns</div>
+                                            <div className="text-muted text-sm" style={{ fontSize: '0.75rem' }}>Total</div>
                                         </div>
-                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Campaigns</div>
-                                        <div className="text-muted text-sm">Total</div>
-                                    </div>
 
-                                    {/* Right Grid: Delivered & Read */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem', flex: 1, justifyContent: 'space-between', height: '100%', padding: '0.5rem 0' }}>
-                                        {/* Delivered (Exclusive) */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>
-                                                    {Math.max(0, (stats.broadcastMetrics?.delivered || 0) - (stats.broadcastMetrics?.read || 0))}
-                                                </span>
+                                        {/* Right Grid: Delivered & Read */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1, justifyContent: 'center' }}>
+                                            {/* Delivered (Exclusive) */}
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                    <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.65rem' }}>✓✓</span>
+                                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>
+                                                        {Math.max(0, (stats.broadcastMetrics?.delivered || 0) - (stats.broadcastMetrics?.read || 0))}
+                                                    </span>
+                                                </div>
+                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Delivered</div>
                                             </div>
-                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Delivered</div>
-                                        </div>
-                                        {/* Read */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
+                                            {/* Read */}
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                    <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.65rem' }}>✓✓</span>
+                                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
+                                                </div>
+                                                <div className="text-muted" style={{ fontSize: '0.65rem' }}>Read</div>
                                             </div>
-                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Read</div>
                                         </div>
                                     </div>
-                                </div>
 
                                 {/* Priority Badges - 5 cols, Squared */}
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.3rem', width: '100%', marginBottom: '0.3rem' }}>
@@ -829,23 +829,23 @@ export default function Observability() {
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem',
                                                 background: badge.boxStyle ? badge.boxStyle.background : `${badge.color}15`,
                                                 border: badge.boxStyle ? badge.boxStyle.border : `1px solid ${badge.color}30`,
-                                                borderRadius: '8px', padding: '0.5rem 0.75rem',
-                                                minHeight: '52px',
+                                                borderRadius: '8px', padding: '0.3rem 0.5rem',
+                                                minHeight: '48px',
                                                 height: badge.alignBottom ? 'auto' : '100%', // Use auto height for bottom aligned items
                                                 alignSelf: badge.alignBottom ? 'end' : 'auto', // Align to bottom of grid cell
                                                 boxSizing: 'border-box'
                                             }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.85rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
-                                                    <div className="text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.75rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.label}</div>
+                                                    <div className="text-muted" style={{ fontSize: '0.65rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{badge.sub}</div>
                                                 </div>
                                                 <span style={{
                                                     fontWeight: 700,
                                                     color: badge.color,
-                                                    fontSize: badge.mono ? '1.35rem' : '1.8rem',
+                                                    fontSize: badge.mono ? '1.1rem' : '1.4rem',
                                                     fontFamily: badge.mono ? '"JetBrains Mono", monospace' : 'inherit',
                                                     lineHeight: 1,
-                                                    minWidth: badge.mono ? '100px' : '65px',
+                                                    minWidth: badge.mono ? '80px' : '50px',
                                                     display: 'flex',
                                                     justifyContent: 'flex-end'
                                                 }}>
