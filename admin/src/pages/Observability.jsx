@@ -388,6 +388,8 @@ export default function Observability() {
                             color={stats.systemHealth?.db === 'Error' || (stats.systemHealth?.load > 70) ? '#ef4444' : '#38bdf8'}
                             isLoading={!stats.systemHealth?.db || stats.systemHealth?.db === 'Checking...'}
                             isStressed={(stats.systemHealth?.load > 50) || (stats.systemHealth?.ram > 70) || stats.systemHealth?.db === 'Error'}
+                            load={stats.systemHealth?.load || 0}
+                            latency={parseInt(stats.systemHealth?.latency) || 0}
                         />
                     </div>
 
@@ -440,19 +442,19 @@ export default function Observability() {
                     </div>
 
                     {/* Live Connection Counter - Rearranged for visual appeal */}
-                    <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ marginLeft: 'auto', paddingRight: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <div style={{
                             background: 'rgba(15, 23, 42, 0.4)', padding: '0.6rem 1.2rem', borderRadius: '12px', border: '1px solid #1e293b',
                             display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.3rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                         }}>
                             <span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Sessions</span>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                                 {/* Pulsing Dot (Ripple Effect) */}
-                                <div style={{ position: 'relative', width: '8px', height: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {/* Waves Fading Out */}
-                                    <div style={{ position: 'absolute', inset: '-8px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.6)', animation: 'pulse-wave 2s ease-out infinite', opacity: 0 }} />
-                                    <div style={{ position: 'absolute', inset: '-4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'pulse-wave 2s ease-out infinite 0.6s', opacity: 0 }} />
+                                <div style={{ position: 'relative', width: '1.4rem', height: '1.4rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {/* Waves Fading Out - Scaled to Container */}
+                                    <div style={{ position: 'absolute', inset: '0', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.6)', animation: 'pulse-wave 2s ease-out infinite', opacity: 0 }} />
+                                    <div style={{ position: 'absolute', inset: '4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'pulse-wave 2s ease-out infinite 0.6s', opacity: 0 }} />
                                     {/* Core Dot */}
                                     <div style={{ position: 'relative', width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.8)' }} />
                                 </div>
@@ -467,8 +469,8 @@ export default function Observability() {
                 </div>
                 <style>{`
                     @keyframes pulse-wave {
-                        0% { transform: scale(1); opacity: 0.6; }
-                        100% { transform: scale(2); opacity: 0; }
+                        0% { transform: scale(0.5); opacity: 0.8; }
+                        100% { transform: scale(1.5); opacity: 0; }
                     }
                     @keyframes pulse-beat {
                         0%, 100% { transform: scale(1); }
@@ -602,7 +604,7 @@ export default function Observability() {
                             <div style={{
                                 display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center',
                                 border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '12px', padding: '1rem',
-                                background: 'rgba(245, 158, 11, 0.05)'
+                                background: 'transparent'
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🔔 Messages</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', alignItems: 'center' }}>
@@ -658,7 +660,7 @@ export default function Observability() {
                             <div style={{
                                 display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center',
                                 border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '12px', padding: '1rem',
-                                background: 'rgba(45, 212, 191, 0.05)', minWidth: '200px', height: '100%', justifyContent: 'space-between'
+                                background: 'transparent', minWidth: '200px', height: '100%', justifyContent: 'space-between'
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
 
@@ -695,7 +697,7 @@ export default function Observability() {
                                     </div>
 
                                     {/* Right Grid: Sent & Read */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         {/* Sent */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
@@ -769,7 +771,7 @@ export default function Observability() {
                             <div style={{
                                 display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center',
                                 border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '12px', padding: '1rem',
-                                background: 'rgba(59, 130, 246, 0.05)'
+                                background: 'transparent'
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
 
@@ -859,134 +861,158 @@ export default function Observability() {
     );
 };
 
-// EKG/Cardiac Monitor Animation with loading and stress states
-const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false }) => {
-    // Precise Dot Tracking using SVG Path
+// ---------------------
+// EKG Component
+// ---------------------
+const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false, load = 0, latency = 0 }) => {
+    // Refs
     const pathRef = useRef(null);
     const dotRef = useRef(null);
 
-    const loadingPath = `
-        M 0 21 H 15 L 17 18 L 19 24 L 21 21 H 50
-        M 50 21 H 60 L 62 19 L 64 21 H 100
-        M 100 21 H 115 L 117 18 L 119 24 L 121 21 H 150
-        M 150 21 H 160 L 162 19 L 164 21 H 200
-    `;
+    // Generate Dynamic Path based on metrics
+    // Returns { d, pts } where pts is array of {x, y} for strict tracking
+    const generatePath = (stressLevel, isLoad) => {
+        // Baselining
+        const width = 100;
+        const height = 42;
+        const baseline = height / 2;
+        
+        let d = `M 0 ${baseline}`;
+        let pts = [{x: 0, y: baseline}];
+        
+        // Add point helper
+        const add = (x, y) => {
+            d += ` L ${x} ${y}`;
+            pts.push({x, y});
+        };
 
-    // Looping Paths (Perfectly seamless start/end)
-    // 100px width per cycle. We draw 2 cycles (200px).
-    // Start Y=21, End Y=21.
-    const normalPath = `
-        M 0 21 L 10 21 L 12 19 L 14 23 L 16 21 L 40 21 
-        L 42 15 L 44 27 L 46 21 L 55 21 L 57 8 L 59 34 L 61 21 L 80 21
-        L 82 18 L 84 24 L 86 21 L 100 21
-        M 100 21 L 110 21 L 112 19 L 114 23 L 116 21 L 140 21 
-        L 142 15 L 144 27 L 146 21 L 155 21 L 157 8 L 159 34 L 161 21 L 180 21
-        L 182 18 L 184 24 L 186 21 L 200 21
-    `;
+        if (isLoad) {
+            // Flatlined / Loading pattern
+            add(15, baseline);
+            add(17, baseline - 3);
+            add(19, baseline + 3);
+            add(21, baseline);
+            add(100, baseline);
+        } else {
+            // Algorithmic Pulse Generation
+            const amp = stressLevel > 0.5 ? 18 : 10;
+            const jitter = stressLevel > 0.7 ? 5 : 0;
+            
+            // PQRST Complex simulation
+            add(10, baseline);
+            add(12, baseline - 2); 
+            add(14, baseline + 1);
+            add(16, baseline);
+            
+            const qrsStart = 35 - (stressLevel * 10); 
+            add(qrsStart, baseline);
+            
+            add(qrsStart + 2, baseline + 5 + Math.random() * jitter); // Q
+            add(qrsStart + 4, baseline - amp - Math.random() * jitter); // R (Peak)
+            add(qrsStart + 6, baseline + 8 + Math.random() * jitter); // S
+            add(qrsStart + 8, baseline);
+            
+            const tStart = qrsStart + 15;
+            add(tStart, baseline);
+            add(tStart + 4, baseline - 4);
+            add(tStart + 8, baseline);
+            
+            add(100, baseline);
+        }
 
-    const stressedPath = `M 0 21 L 5 21 L 7 10 L 9 32 L 11 15 L 13 27 L 15 21 L 20 21 L 22 5 L 24 38 L 26 8 L 28 34 L 30 21 L 35 21 L 37 12 L 39 30 L 41 21 L 50 21 L 52 3 L 54 40 L 56 6 L 58 36 L 60 21 L 65 21 L 67 14 L 69 28 L 71 21 L 100 21 M 100 21 L 105 21 L 107 10 L 109 33 L 111 14 L 113 28 L 115 21 L 120 21 L 122 5 L 124 38 L 126 8 L 128 34 L 130 21 L 135 21 L 137 12 L 139 30 L 141 21 L 150 21 L 152 3 L 154 40 L 156 6 L 158 36 L 160 21 L 165 21 L 167 14 L 169 28 L 171 21 L 200 21`;
+        return { d, pts };
+    };
 
-    const activePath = isLoading ? loadingPath : isStressed ? stressedPath : normalPath;
-    const speed = isStressed ? 100 : 50; // Pixels per second
+    const stressScore = isStressed ? 0.8 : (load / 200) + (latency / 100); 
+    const effectiveStress = Math.min(Math.max(stressScore, 0), 1);
+    
+    // We generate TWO cycles for seamless looping
+    const { d: cycle1, pts: pts1 } = useMemo(() => generatePath(effectiveStress, isLoading), [effectiveStress, isLoading]);
+    
+    // Construct full double path string for visual path
+    const fullPath = `${cycle1} M 100 21 ${cycle1.substring(cycle1.indexOf('L')).replace(/L ([\d.]+) /g, (match, x) => `L ${parseFloat(x) + 100} `)}`;
+    
+    // Merge points for strict tracking
+    const fullPoints = [...pts1, ...pts1.map(p => ({ x: p.x + 100, y: p.y }))];
+
+    const speed = isStressed ? 150 : 80; // Pixels per second
 
     useEffect(() => {
         let animationFrameId;
         const startTime = performance.now();
 
         const animate = () => {
-            const now = performance.now();
+             const now = performance.now();
             const elapsed = now - startTime;
-
-            // Current X position in the loop (0 to 100)
-            // We want the dot to stay at X=50 (center of container)
-            // The graph moves LEFT. So relative to the graph start, the dot moves RIGHT.
-            // Effective X on path = (Scanner Pos) % Loop Width
-            // Scanner Pos = CenterOffset + (Speed * Time)
-            const loopWidth = 100;
-            const centerOffset = 50;
-            const dist = (centerOffset + (elapsed * speed / 1000)) % loopWidth;
-
-            // To handle the double-cycle drawing (0-200), we map to the first cycle (0-100)
-            // But since the path is duplicated, we can just look up at `dist`.
-            // However, since we are translating the SVG left, the "visual" center corresponds to a shifting X on the path.
-            // Actually, simpler: The SVG moves left. The dot stays at fixed screen X=50.
-            // ScreenX = PathX - TranslateX.
-            // 50 = PathX - (Time * Speed) % 100
-            // PathX = 50 + (Time * Speed) % 100
-
-            // We'll just look up the point at PathX. If PathX > 100, we wrap or just use the 0-200 range logic.
-            // Since our path is 200 wide (2 cycles), we can just mod 100 to stay in the first uniform cycle logic
-            // providing the second cycle is identical (it is).
-
-            if (pathRef.current && dotRef.current) {
-                const scrollX = (elapsed * speed / 1000) % 100;
-                const targetX = 50 + scrollX; // 50 is the fixed center position in the container
-
-                // Get Y at this X
-                // Search for point on path. `getPointAtLength` is based on length, not X. 
-                // For a monotonic X graph, we can estimate or scan. 
-                // But for EKG, X is monotonic.
-                // We'll use a binary search or precise sampling if needed, but `getPointAtLength` is standard.
-                // Since X is monotonic, Length ~ X. We can refine.
-                // Or better: Use `pathLength` and ratio? No, line length != x length.
-
-                // Optimized approach for EKG line (mostly horizontal-ish):
-                // Iterate path segments? Too complex.
-                // Binary search `getPointAtLength` until `.x` matches `targetX`.
-
-                const len = pathRef.current.getTotalLength();
-                let start = 0;
-                let end = len / 2; // Only need first cycle roughly
-                let targetPoint = { x: 0, y: 21 };
-
-                // Quick binary search for X (10 iterations is usually plenty for screen precision)
-                for (let i = 0; i < 12; i++) {
-                    const mid = (start + end) / 2;
-                    const p = pathRef.current.getPointAtLength(mid);
-                    if (p.x < targetX) start = mid;
-                    else end = mid;
-                    targetPoint = p;
+            
+            // Cycle 100px.
+            // Screen X of Dot = 50.
+            // Path moves LEFT (-X).
+            // Current X on Path that is under the Dot = (Elapsed * Speed + 50) % 100.
+            // Actually, we need to consider the start offset.
+            // If at t=0, svg x=0. Dot is at 50 screen. Path X at 50 is under dot.
+            // If at t=1, svg x=-10. Dot is at 50 screen. Path X at 60 is under dot.
+            // So yes, PathX = (Scroll + 50) % 100.
+            
+            const scroll = (elapsed * speed / 1000);
+            const xInCycle = (scroll + 50) % 100;
+            
+            // Allow wrapping logic for points if needed (we did fullPoints 200px coverage so xInCycle 0-100 is fine if we look at first cycle)
+            // But strict tracking: xInCycle is 0-99.99
+            
+            let targetY = 21;
+            // Iterate points to find segment
+            for (let i = 0; i < fullPoints.length - 1; i++) {
+                const p1 = fullPoints[i];
+                const p2 = fullPoints[i+1];
+                if (xInCycle >= p1.x && xInCycle <= p2.x) {
+                    const ratio = (xInCycle - p1.x) / (p2.x - p1.x);
+                    targetY = p1.y + (p2.y - p1.y) * ratio;
+                    break;
                 }
-
-                dotRef.current.style.transform = `translate(-50 %, -50 %) translate(0, ${targetPoint.y - 21}px)`; // Offset from Vertical Center (21)
             }
+            
+            if (dotRef.current) {
+                // Dot stays fixed at container center (50px), moves up/down
+                dotRef.current.style.transform = `translate(-50%, -50%) translate(0, ${targetY - 21}px)`;
+            }
+            
             animationFrameId = requestAnimationFrame(animate);
         };
 
         animate();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [activePath, speed]); // Re-bind when path changes
+    }, [fullPoints, speed]); 
 
     return (
         <div style={{
             width: '100px',
-            height: '42px', // Increased Height
+            height: '42px', 
             background: 'transparent',
             borderRadius: '4px',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
-            // Mask for true fade-to-transparent effect at edges
             maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)'
         }}>
             {/* Fading Grid Background */}
             <div style={{
                 position: 'absolute', inset: 0,
-                backgroundImage: `linear - gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear - gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px)`,
+                backgroundImage: `linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px)`,
                 backgroundSize: '10px 10px', zIndex: 0
             }} />
 
             {/* EKG Path */}
             <svg width="200" height="42" viewBox="0 0 200 42" style={{
                 position: 'absolute', left: 0,
-                animation: `ekg-move ${100 / speed}s linear infinite`, // Speed control
+                animation: `ekg-move ${100/speed}s linear infinite`, 
                 zIndex: 1
             }}>
                 <path
                     ref={pathRef}
-                    d={activePath}
+                    d={fullPath}
                     fill="none"
                     stroke={color}
                     strokeWidth="1.5"
@@ -996,23 +1022,30 @@ const EKGAnimation = ({ color = '#38bdf8', isLoading = false, isStressed = false
                 />
             </svg>
 
-            {/* Pulse Dot */}
+            {/* Pulse Dot with Comet Tail */}
             <div ref={dotRef} style={{
                 position: 'absolute', left: '50%', top: '50%',
                 width: '4px', height: '4px',
                 borderRadius: '50%',
                 background: '#fff',
-                boxShadow: `0 0 4px #fff, 0 0 8px ${color}`,
+                // Comet Tail: Box shadows trailing to the left
+                boxShadow: `
+                    0 0 4px #fff,
+                    -2px 0 0 rgba(255,255,255,0.8),
+                    -4px 0 0 rgba(255,255,255,0.6),
+                    -8px 0 1px rgba(255,255,255,0.4),
+                    -12px 0 2px rgba(255,255,255,0.2)
+                `, 
                 zIndex: 5,
                 willChange: 'transform'
             }} />
 
             <style>{`
-    @keyframes ekg-move {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-100px); }
-    }
-    `}</style>
+                @keyframes ekg-move {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-100px); }
+                }
+            `}</style>
         </div>
     );
 };
