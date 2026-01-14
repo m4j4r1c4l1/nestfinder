@@ -658,55 +658,60 @@ export default function Observability() {
                             <div style={{
                                 display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center',
                                 border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '12px', padding: '1rem',
-                                background: 'rgba(45, 212, 191, 0.05)', minWidth: '200px', justifyContent: 'flex-start'
+                                background: 'rgba(45, 212, 191, 0.05)', minWidth: '200px', height: '100%', justifyContent: 'space-between'
                             }}>
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🚀 Broadcasts</div>
 
-                                {/* Main Metric (Campaigns) */}
-                                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1rem' }}>
-                                    <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
-                                        <RandomCounter end={stats.broadcastMetrics?.total || 0} />
+                                {/* Main Metrics Row: [Left Grid] [Center Main] [Right Grid] */}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flex: 1 }}>
+                                    
+                                    {/* Left Grid: Messages & Users */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, alignItems: 'center' }}>
+                                        {/* Messages */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                                <span style={{ fontSize: '0.8rem' }}>📡</span>
+                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Messages</div>
+                                        </div>
+                                        {/* Users */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
+                                                <span style={{ fontSize: '0.8rem' }}>👨‍👩‍👧‍👦</span>
+                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Users</div>
+                                        </div>
                                     </div>
-                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Campaigns</div>
-                                    <div className="text-muted text-sm">Total</div>
-                                </div>
 
-                                {/* Metrics Grid: Messages | Users | Sent | Read (2x2 Col-Flow) */}
-                                <div style={{
-                                    display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr',
-                                    gridAutoFlow: 'column', gap: '0.8rem', width: '100%', marginBottom: '1rem'
-                                }}>
-                                    {/* Messages (TL) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
-                                            <span style={{ fontSize: '0.8rem' }}>📡</span>
+                                    {/* Center: Main Counter */}
+                                    <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1.5 }}>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2dd4bf', lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 20px rgba(45, 212, 191, 0.3)' }}>
+                                            <RandomCounter end={stats.broadcastMetrics?.total || 0} />
                                         </div>
-                                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Messages</div>
+                                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Campaigns</div>
+                                        <div className="text-muted text-sm">Total</div>
                                     </div>
-                                    {/* Users (BL) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.reach || 0}</span>
-                                            <span style={{ fontSize: '0.8rem' }}>👨‍👩‍👧‍👦</span>
+
+                                    {/* Right Grid: Sent & Read */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, alignItems: 'center' }}>
+                                        {/* Sent */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Sent</div>
                                         </div>
-                                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Users</div>
-                                    </div>
-                                    {/* Sent (TR) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                            <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.delivered || 0}</span>
+                                        {/* Read */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
+                                                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
+                                            </div>
+                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Read</div>
                                         </div>
-                                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Sent</div>
-                                    </div>
-                                    {/* Read (BR) */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                            <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>{stats.broadcastMetrics?.read || 0}</span>
-                                        </div>
-                                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Read</div>
                                     </div>
                                 </div>
 
