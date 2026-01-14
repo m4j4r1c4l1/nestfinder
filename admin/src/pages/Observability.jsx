@@ -611,67 +611,56 @@ export default function Observability() {
                                     {/* Sent Section */}
                                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff', lineHeight: 1 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f97316', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.notificationMetrics?.total || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Sent</div>
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Delivered</span>
+                                            {[
+                                                { label: 'Delivered', count: Math.max(0, (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0)), color: '#22c55e', icon: '✓✓' },
+                                                { label: 'Read', count: stats.notificationMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' },
+                                                { label: 'Sent', count: (stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0), color: '#f59e0b', icon: '✓' }
+                                            ].map(item => (
+                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        <span style={{ color: item.color, fontWeight: 600, fontSize: '0.75rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
+                                                        <span style={{ color: item.color, fontWeight: 600, width: '65px' }}>{item.label}</span>
+                                                    </div>
+                                                    <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={item.count} /></span>
                                                 </div>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={Math.max(0, (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0))} /></span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Read</span>
-                                                </div>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.notificationMetrics?.read || 0} /></span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#f59e0b20', border: '1px solid #f59e0b40', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
-                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span style={{ color: '#f59e0b', fontWeight: 600, fontSize: '0.75rem' }}>✓</span>
-                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Sent</span>
-                                                </div>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={(stats.notificationMetrics?.total || 0) - (stats.notificationMetrics?.delivered || 0) - (stats.notificationMetrics?.read || 0)} /></span>
-                                            </div>
+                                            ))}
                                         </div>
                                     </div>
                                     {/* Received Section */}
                                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                                         <div style={{ textAlign: 'center', width: '110px', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff', lineHeight: 1 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#3b82f6', lineHeight: 1 }}>
                                                 <RandomCounter end={stats.feedbackMetrics?.total || stats.totalReceived || 0} />
                                             </div>
                                             <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Received</div>
                                             <div className="text-muted text-sm">Total</div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '130px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#22c55e20', border: '1px solid #22c55e40', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Delivered</span>
+                                            {[
+                                                { label: 'Delivered', count: stats.feedbackMetrics?.pending || 0, color: '#22c55e', icon: '✓✓' },
+                                                { label: 'Read', count: stats.feedbackMetrics?.read || 0, color: '#3b82f6', icon: '✓✓' }
+                                            ].map(item => (
+                                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: `${item.color}20`, border: `1px solid ${item.color}40`, borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        <span style={{ color: item.color, fontWeight: 600, fontSize: '0.75rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
+                                                        <span style={{ color: item.color, fontWeight: 600, width: '65px' }}>{item.label}</span>
+                                                    </div>
+                                                    <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={item.count} /></span>
                                                 </div>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.pending || 0} /></span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', background: '#3b82f620', border: '1px solid #3b82f640', borderRadius: '8px', padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <span style={{ color: '#3b82f6', fontWeight: 600, fontSize: '0.75rem' }}>✓✓</span>
-                                                    <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Read</span>
-                                                </div>
-                                                <span style={{ fontWeight: 700, color: '#fff' }}><RollingBarrelCounter end={stats.feedbackMetrics?.read || 0} /></span>
-                                            </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Broadcasts Block (Center) - Sized to match LOC block */}
-                            {/* Broadcasts Block (Center) - Sized to match LOC block */}
+                            {/* Broadcasts Block (Center) */}
                             <div style={{
                                 display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center',
                                 border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '12px', padding: '1rem',
@@ -683,7 +672,7 @@ export default function Observability() {
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flex: 1 }}>
                                     
                                     {/* Left Grid: Messages & Users */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, alignItems: 'center', justifyContent: 'space-between', height: '100%', padding: '0.5rem 0' }}>
                                         {/* Messages */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
@@ -712,7 +701,7 @@ export default function Observability() {
                                     </div>
 
                                     {/* Right Grid: Delivered & Read */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem', flex: 1 }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem', flex: 1, justifyContent: 'space-between', height: '100%', padding: '0.5rem 0' }}>
                                         {/* Delivered (Exclusive) */}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
