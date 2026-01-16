@@ -4125,7 +4125,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                                             <DateTimeCell isoString={view.delivered_at} />
                                                         </td>
                                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.read }}>
-                                                            <DateTimeCell isoString={view.status === 'read' ? view.updated_at : null} />
+                                                            <DateTimeCell isoString={view.read_at} />
                                                         </td>
                                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.status }}>
                                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
