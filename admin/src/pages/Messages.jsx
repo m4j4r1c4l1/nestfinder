@@ -1549,16 +1549,16 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     let statusText = 'INACTIVE';
                                     let statusColor = '#94a3b8';
 
-                                    if (end && now > end) {
+                                    if (b.max_views && (b.total_users || 0) >= b.max_views) {
+                                        // Global Cap Met - Check this first!
+                                        statusText = 'FILLED';
+                                        statusColor = '#ec4899'; // Pink
+                                    } else if (end && now > end) {
                                         statusText = 'ENDED';
                                         statusColor = '#94a3b8';
                                     } else if (now < start) {
                                         statusText = 'SCHEDULED';
                                         statusColor = '#3b82f6';
-                                    } else if (b.max_views && (b.total_users || 0) >= b.max_views) {
-                                        // Global Cap Met
-                                        statusText = 'FILLED';
-                                        statusColor = '#ec4899'; // Pink
                                     } else {
                                         statusText = 'ACTIVE';
                                         statusColor = '#22c55e';
@@ -1736,48 +1736,47 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
-                                                    {/* Delivery Stats - Separator Line included in border */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
+                                                    {/* Delivery Stats & Delete - Fixed Width Container for Alignment */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem', width: '140px', flexShrink: 0, justifyContent: 'flex-end' }}>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
                                                         <span title="Read" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#3b82f6' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
                                                         </span>
+
+                                                        {/* Vertical Separator */}
+                                                        <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0' }}></div>
+                                                        {/* Delete Button (Moved from top) */}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setConfirmModal({
+                                                                    show: true,
+                                                                    title: 'Delete Broadcast',
+                                                                    message: 'Are you sure you want to delete this broadcast?',
+                                                                    onConfirm: () => onDelete(b.id)
+                                                                });
+                                                            }}
+                                                            className="btn-icon danger"
+                                                            title="Delete"
+                                                            style={{
+                                                                padding: '0.2rem 0.4rem', // create the "area"
+                                                                fontSize: '1rem',
+                                                                background: 'transparent',
+                                                                border: 'none',
+                                                                color: '#ef4444',
+                                                                cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                lineHeight: 1,
+                                                                borderRadius: '4px',
+                                                                transition: 'all 0.2s',
+                                                                opacity: 0.7
+                                                            }}
+                                                        >
+                                                            🗑️
+                                                        </button>
                                                     </div>
-
-                                                    {/* Vertical Separator for Delete Icon - Pushed to right by flex growth of Time Range */}
-                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0' }}></div>
-
-                                                    {/* Delete Button (Moved from top) */}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setConfirmModal({
-                                                                show: true,
-                                                                title: 'Delete Broadcast',
-                                                                message: 'Are you sure you want to delete this broadcast?',
-                                                                onConfirm: () => onDelete(b.id)
-                                                            });
-                                                        }}
-                                                        className="btn-icon danger"
-                                                        title="Delete"
-                                                        style={{
-                                                            padding: '0.2rem 0.4rem', // create the "area"
-                                                            fontSize: '1rem',
-                                                            background: 'transparent',
-                                                            border: 'none',
-                                                            color: '#ef4444',
-                                                            cursor: 'pointer',
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            lineHeight: 1,
-                                                            borderRadius: '4px',
-                                                            transition: 'all 0.2s',
-                                                            opacity: 0.7
-                                                        }}
-                                                    >
-                                                        🗑️
-                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -3691,7 +3690,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             marginBottom: '1.5rem',
                             flex: 1,
                             overflowY: 'auto',
-                            minHeight: '150px' // Approx 6-8 lines
+                            minHeight: '150px', // Approx 6-8 lines
+                            fontStyle: 'italic'
                         }}>
                             {broadcast.message}
                         </div>
@@ -3772,7 +3772,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
 
                 {/* Footer */}
                 <div style={{ padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                    <button onClick={onDelete} className="btn" style={{ background: '#22c55e', color: '#fff', border: '1px solid #16a34a', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s' }}>🗑️ Delete Broadcast</button>
+                    <button onClick={onDelete} className="btn" style={{ background: '#22c55e', color: '#fff', border: '1px solid #16a34a', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s' }}>Delete Broadcast</button>
                 </div>
 
             </div>
