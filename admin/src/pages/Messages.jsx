@@ -973,6 +973,8 @@ const Messages = () => {
                                     onDelete={handleDeleteBroadcast}
                                     onBroadcastUpdate={handleUpdateBroadcast}
                                     setConfirmModal={setConfirmModal}
+                                    recipientFilter={recipientFilter}
+                                    setRecipientFilter={setRecipientFilter}
                                 />
                             </div>
                         )}
@@ -998,7 +1000,7 @@ const Messages = () => {
 };
 
 // --- Broadcast Component ---
-function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBroadcastUpdate, setConfirmModal }) {
+function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBroadcastUpdate, setConfirmModal, recipientFilter, setRecipientFilter }) {
     // Search State
     const [searchFilters, setSearchFilters] = useState({
         searchText: '',
