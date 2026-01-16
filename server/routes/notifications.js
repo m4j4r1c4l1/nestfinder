@@ -95,11 +95,11 @@ router.get('/notifications', (req, res) => {
         // This ensures Admin counts update even if seen only in inbox
         if (unseenBroadcasts.length > 0) {
             const deliveryStmt = getDb().prepare(`
-                INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, dismissed)
-                VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+                INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, dismissed)
+                VALUES (?, ?, 'sent', 1, CURRENT_TIMESTAMP, 0)
                 ON CONFLICT(broadcast_id, user_id) DO UPDATE SET
-                    status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
-                    delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
+                    view_count = view_count + 1,
+                    first_seen_at = COALESCE(first_seen_at, CURRENT_TIMESTAMP)
             `);
             const transaction = getDb().transaction((broadcasts) => {
                 for (const b of broadcasts) {
@@ -550,6 +550,27 @@ router.delete('/:id', requireUser, (req, res) => {
 
     run('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, userId]);
     res.json({ success: true });
+});
+
+// Mark broadcast as delivered (when client receives/displays it)
+router.post('/broadcasts/:id/delivered', requireUser, (req, res) => {
+    try {
+        const userId = req.user.id;
+        const broadcastId = req.params.id;
+
+        // Update status to 'delivered' and set delivered_at timestamp
+        run(`
+            UPDATE broadcast_views 
+            SET status = 'delivered', 
+                delivered_at = CURRENT_TIMESTAMP
+            WHERE broadcast_id = ? AND user_id = ? AND status = 'sent'
+        `, [broadcastId, userId]);
+
+        res.json({ success: true, status: 'delivered' });
+    } catch (error) {
+        console.error('Mark delivered error:', error);
+        res.status(500).json({ error: 'Failed to mark as delivered' });
+    }
 });
 
 // Dismiss a broadcast (user action)
