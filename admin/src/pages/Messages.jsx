@@ -3701,6 +3701,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
+                                justifyContent: 'center',
                                 gap: '0.5rem',
                                 padding: '0.75rem 1rem',
                                 background: '#0f172a',
@@ -3725,8 +3726,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 border: '1px solid rgba(234, 179, 8, 0.3)'
                             }}>
                                 <span style={{ fontSize: '1rem' }}>📊</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#eab308' }}>{broadcast.total_users || 0}</span>
-                                <span style={{ fontSize: '0.7rem', color: '#eab308', textTransform: 'uppercase', fontWeight: 600, opacity: 0.8 }}>Total</span>
+                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
+                                <span style={{ fontSize: '0.7rem', color: '#eab308', fontWeight: 600 }}>Total</span>
                             </div>
 
                             {/* Separator */}
@@ -3743,8 +3744,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 border: '1px solid rgba(34, 197, 94, 0.3)'
                             }}>
                                 <span style={{ color: '#22c55e', fontSize: '0.9rem' }}>✓✓</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#22c55e' }}>{Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}</span>
-                                <span style={{ fontSize: '0.7rem', color: '#22c55e', textTransform: 'uppercase', fontWeight: 600, opacity: 0.8 }}>Delivered</span>
+                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}</span>
+                                <span style={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>Delivered</span>
                             </div>
 
                             {/* Separator */}
@@ -3761,14 +3762,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 border: '1px solid rgba(59, 130, 246, 0.3)'
                             }}>
                                 <span style={{ color: '#3b82f6', fontSize: '0.9rem' }}>✓✓</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#3b82f6' }}>{broadcast.read_count || 0}</span>
-                                <span style={{ fontSize: '0.7rem', color: '#3b82f6', textTransform: 'uppercase', fontWeight: 600, opacity: 0.8 }}>Read</span>
-                            </div>
-
-                            {/* Click hint */}
-                            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#64748b', fontSize: '0.75rem' }}>
-                                <span>View Recipients</span>
-                                <span style={{ fontSize: '0.9rem' }}>→</span>
+                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.read_count || 0}</span>
+                                <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 600 }}>Read</span>
                             </div>
                         </div>
 
@@ -3777,7 +3772,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
 
                 {/* Footer */}
                 <div style={{ padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                    <button onClick={onDelete} className="btn" style={{ background: '#475569', color: '#e2e8f0', border: '1px solid #64748b', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s' }}>🗑️ Delete Broadcast</button>
+                    <button onClick={onDelete} className="btn" style={{ background: '#22c55e', color: '#fff', border: '1px solid #16a34a', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s' }}>🗑️ Delete Broadcast</button>
                 </div>
 
             </div>
@@ -3795,7 +3790,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
 
     // Column widths with localStorage persistence
     const STORAGE_KEY = 'broadcast_recipients_col_widths';
-    const DEFAULT_WIDTHS = { user: 220, received: 140, read: 140, status: 120 };
+    const DEFAULT_WIDTHS = { user: 200, sent: 120, received: 120, read: 120, status: 110 };
     const [colWidths, setColWidths] = useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -3845,6 +3840,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
     const total = views.length;
     const readCount = views.filter(v => v.status === 'read').length;
     const deliveredCount = views.filter(v => v.status === 'delivered').length;
+    const sentCount = views.filter(v => v.status === 'sent').length;
 
     // Sort function
     const sortedViews = React.useMemo(() => {
@@ -3859,6 +3855,10 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                 case 'received':
                     aVal = new Date(a.delivered_at || a.created_at || 0).getTime();
                     bVal = new Date(b.delivered_at || b.created_at || 0).getTime();
+                    break;
+                case 'sent':
+                    aVal = new Date(a.created_at || 0).getTime();
+                    bVal = new Date(b.created_at || 0).getTime();
                     break;
                 case 'read':
                     aVal = a.status === 'read' ? new Date(a.updated_at || 0).getTime() : 0;
@@ -3973,22 +3973,76 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                         </div>
                     ) : (
                         <>
-                            {/* Stats - Compact Horizontal Pills */}
+                            {/* Stats - Matching Pill Design from Details Modal */}
                             <div style={{ padding: '1rem 1.5rem', flexShrink: 0, borderBottom: '1px solid #334155' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', background: '#334155', borderRadius: '8px' }}>
-                                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{total}</span>
-                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Total</span>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                    {/* Total Pill */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        padding: '0.4rem 0.75rem',
+                                        background: 'rgba(234, 179, 8, 0.15)',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(234, 179, 8, 0.3)'
+                                    }}>
+                                        <span style={{ fontSize: '1rem' }}>📊</span>
+                                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{total}</span>
+                                        <span style={{ fontSize: '0.7rem', color: '#eab308', fontWeight: 600 }}>Total</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', background: 'rgba(34, 197, 94, 0.15)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-                                        <span style={{ color: '#22c55e', fontSize: '0.85rem' }}>✓✓</span>
-                                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#22c55e' }}>{deliveredCount}</span>
-                                        <span style={{ fontSize: '0.75rem', color: '#22c55e', textTransform: 'uppercase', opacity: 0.8 }}>Delivered</span>
+
+                                    {/* Separator */}
+                                    <div style={{ width: '1px', height: '24px', background: '#334155' }} />
+
+                                    {/* Sent Pill */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem',
+                                        padding: '0.4rem 0.75rem',
+                                        background: 'rgba(251, 191, 36, 0.15)',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(251, 191, 36, 0.3)'
+                                    }}>
+                                        <span style={{ color: '#fbbf24', fontSize: '0.9rem' }}>✓</span>
+                                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{sentCount}</span>
+                                        <span style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 600 }}>Sent</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                                        <span style={{ color: '#3b82f6', fontSize: '0.85rem' }}>✓✓</span>
-                                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#3b82f6' }}>{readCount}</span>
-                                        <span style={{ fontSize: '0.75rem', color: '#3b82f6', textTransform: 'uppercase', opacity: 0.8 }}>Read</span>
+
+                                    {/* Separator */}
+                                    <div style={{ width: '1px', height: '24px', background: '#334155' }} />
+
+                                    {/* Delivered Pill */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem',
+                                        padding: '0.4rem 0.75rem',
+                                        background: 'rgba(34, 197, 94, 0.15)',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(34, 197, 94, 0.3)'
+                                    }}>
+                                        <span style={{ color: '#22c55e', fontSize: '0.9rem' }}>✓✓</span>
+                                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{deliveredCount}</span>
+                                        <span style={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                    </div>
+
+                                    {/* Separator */}
+                                    <div style={{ width: '1px', height: '24px', background: '#334155' }} />
+
+                                    {/* Read Pill */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem',
+                                        padding: '0.4rem 0.75rem',
+                                        background: 'rgba(59, 130, 246, 0.15)',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(59, 130, 246, 0.3)'
+                                    }}>
+                                        <span style={{ color: '#3b82f6', fontSize: '0.9rem' }}>✓✓</span>
+                                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{readCount}</span>
+                                        <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 600 }}>Read</span>
                                     </div>
                                 </div>
                             </div>
@@ -4014,6 +4068,15 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                                     >
                                                         User<SortIndicator column="user" />
                                                         <ResizeHandle column="user" />
+                                                    </th>
+                                                    <th
+                                                        style={thStyle('sent')}
+                                                        onClick={() => handleSort('sent')}
+                                                        onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
+                                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        Sent<SortIndicator column="sent" />
+                                                        <ResizeHandle column="sent" />
                                                     </th>
                                                     <th
                                                         style={thStyle('received')}
@@ -4054,6 +4117,9 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                                                 </span>
                                                                 <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{view.user_id}</code>
                                                             </div>
+                                                        </td>
+                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.sent }}>
+                                                            <DateTimeCell isoString={view.created_at} />
                                                         </td>
                                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.received }}>
                                                             <DateTimeCell isoString={view.delivered_at || view.created_at} />
