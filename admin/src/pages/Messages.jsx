@@ -3715,19 +3715,37 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             onMouseEnter={e => { e.currentTarget.style.borderColor = '#475569'; e.currentTarget.style.background = '#1e293b'; }}
                             onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#0f172a'; }}
                         >
-                            {/* Total Pill */}
+                            {/* Total Pill - Orange */}
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                padding: '0.4rem 0.75rem',
-                                background: 'rgba(234, 179, 8, 0.15)',
+                                padding: '0.5rem 0.9rem',
+                                background: 'rgba(249, 115, 22, 0.15)',
                                 borderRadius: '20px',
-                                border: '1px solid rgba(234, 179, 8, 0.3)'
+                                border: '1px solid rgba(249, 115, 22, 0.3)'
                             }}>
-                                <span style={{ fontSize: '1rem' }}>📊</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
-                                <span style={{ fontSize: '0.7rem', color: '#eab308', fontWeight: 600 }}>Total</span>
+                                <span style={{ fontSize: '1.1rem' }}>📊</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
+                                <span style={{ fontSize: '0.8rem', color: '#f97316', fontWeight: 600 }}>Total</span>
+                            </div>
+
+                            {/* Separator */}
+                            <div style={{ width: '1px', height: '24px', background: '#334155' }} />
+
+                            {/* Sent Pill - Amber */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.9rem',
+                                background: 'rgba(251, 191, 36, 0.15)',
+                                borderRadius: '20px',
+                                border: '1px solid rgba(251, 191, 36, 0.3)'
+                            }}>
+                                <span style={{ color: '#fbbf24', fontSize: '1rem' }}>✓</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
+                                <span style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 600 }}>Sent</span>
                             </div>
 
                             {/* Separator */}
@@ -3737,15 +3755,15 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.4rem',
-                                padding: '0.4rem 0.75rem',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.9rem',
                                 background: 'rgba(34, 197, 94, 0.15)',
                                 borderRadius: '20px',
                                 border: '1px solid rgba(34, 197, 94, 0.3)'
                             }}>
-                                <span style={{ color: '#22c55e', fontSize: '0.9rem' }}>✓✓</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}</span>
-                                <span style={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.delivered_count || 0}</span>
+                                <span style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 600 }}>Delivered</span>
                             </div>
 
                             {/* Separator */}
@@ -3755,15 +3773,15 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.4rem',
-                                padding: '0.4rem 0.75rem',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.9rem',
                                 background: 'rgba(59, 130, 246, 0.15)',
                                 borderRadius: '20px',
                                 border: '1px solid rgba(59, 130, 246, 0.3)'
                             }}>
-                                <span style={{ color: '#3b82f6', fontSize: '0.9rem' }}>✓✓</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.read_count || 0}</span>
-                                <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.read_count || 0}</span>
+                                <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 600 }}>Read</span>
                             </div>
                         </div>
 
@@ -3994,24 +4012,6 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                     {/* Separator */}
                                     <div style={{ width: '1px', height: '24px', background: '#334155' }} />
 
-                                    {/* Sent Pill */}
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.4rem',
-                                        padding: '0.4rem 0.75rem',
-                                        background: 'rgba(251, 191, 36, 0.15)',
-                                        borderRadius: '20px',
-                                        border: '1px solid rgba(251, 191, 36, 0.3)'
-                                    }}>
-                                        <span style={{ color: '#fbbf24', fontSize: '0.9rem' }}>✓</span>
-                                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{sentCount}</span>
-                                        <span style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 600 }}>Sent</span>
-                                    </div>
-
-                                    {/* Separator */}
-                                    <div style={{ width: '1px', height: '24px', background: '#334155' }} />
-
                                     {/* Delivered Pill */}
                                     <div style={{
                                         display: 'flex',
@@ -4084,7 +4084,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                                         onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
                                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                                     >
-                                                        Received<SortIndicator column="received" />
+                                                        Delivered<SortIndicator column="received" />
                                                         <ResizeHandle column="received" />
                                                     </th>
                                                     <th
@@ -4122,7 +4122,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                                             <DateTimeCell isoString={view.created_at} />
                                                         </td>
                                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.received }}>
-                                                            <DateTimeCell isoString={view.delivered_at || view.created_at} />
+                                                            <DateTimeCell isoString={view.delivered_at} />
                                                         </td>
                                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.read }}>
                                                             <DateTimeCell isoString={view.status === 'read' ? view.updated_at : null} />
@@ -4154,7 +4154,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                     )}
                 </div>
             </div>
-        </div>,
+        </div >,
         document.body
     );
 }
