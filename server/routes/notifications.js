@@ -16,6 +16,10 @@ const rootDir = path.resolve(__dirname, '../../');
 
 const router = express.Router();
 
+// WebSocket broadcast function (injected from index.js)
+let broadcast = () => { };
+export const setBroadcast = (fn) => { broadcast = fn; };
+
 // Notification templates
 const templates = {
     new_points: {
@@ -91,40 +95,16 @@ router.get('/notifications', (req, res) => {
             LIMIT 10
         `, [now, now, userId]);
 
-        // 3.5. Mark these unseen broadcasts as DELIVERED immediately
-        // This ensures Admin counts update even if seen only in inbox
-        if (unseenBroadcasts.length > 0) {
-            const deliveryStmt = getDb().prepare(`
-                INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, dismissed)
-                VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
-                ON CONFLICT(broadcast_id, user_id) DO UPDATE SET
-                    status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
-                    delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
-            `);
-            const transaction = getDb().transaction((broadcasts) => {
-                for (const b of broadcasts) {
-                    deliveryStmt.run(b.id, userId);
-                }
-            });
-            transaction(unseenBroadcasts);
-        }
+        // NOTE: Delivery status is now handled by explicit POST calls from client
+        // Client should call POST /broadcasts/:id/delivered when displaying
 
         // 4. Merge and Sort
         const unified = [...notifications, ...seenBroadcasts, ...unseenBroadcasts].sort((a, b) => {
             return new Date(b.created_at) - new Date(a.created_at);
         }).slice(0, 50);
 
-        // Mark fetched *standard* notifications as delivered (if not already)
-        // (Broadcasts handle their own delivery status in points.js)
-        const undeliveredIds = notifications
-            .filter(n => !n.delivered && n.type !== 'broadcast') // Double safety
-            .map(n => n.id);
-
-        if (undeliveredIds.length > 0) {
-            run(
-                `UPDATE notifications SET delivered = 1, delivered_at = CURRENT_TIMESTAMP WHERE id IN (${undeliveredIds.join(',')})`
-            );
-        }
+        // NOTE: Delivery status is now handled by explicit POST calls from client
+        // Client should call POST /notifications/:id/delivered when displaying
 
         res.json({ notifications: unified });
     } catch (error) {
@@ -144,10 +124,44 @@ router.post('/notifications/:id/read', (req, res) => {
             [id, userId]
         );
 
+        // Broadcast status change for instant tick update
+        broadcast({
+            type: 'notification_status',
+            notificationId: parseInt(id),
+            userId,
+            status: 'read'
+        });
+
         res.json({ success: true });
     } catch (error) {
         console.error('Mark read error:', error);
         res.status(500).json({ error: 'Failed to mark as read' });
+    }
+});
+
+// Mark notification as delivered (when displayed to user)
+router.post('/notifications/:id/delivered', requireUser, (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        run(
+            'UPDATE notifications SET delivered = 1, delivered_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ? AND delivered = 0',
+            [id, userId]
+        );
+
+        // Broadcast status change for instant tick update
+        broadcast({
+            type: 'notification_status',
+            notificationId: parseInt(id),
+            userId,
+            status: 'delivered'
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Mark delivered error:', error);
+        res.status(500).json({ error: 'Failed to mark as delivered' });
     }
 });
 
@@ -552,23 +566,93 @@ router.delete('/:id', requireUser, (req, res) => {
     res.json({ success: true });
 });
 
-// Dismiss a broadcast (user action)
-router.post('/broadcasts/:id/dismiss', requireUser, (req, res) => {
+// Mark broadcast as sent (when client fetches/receives the data)
+router.post('/broadcasts/:id/sent', requireUser, (req, res) => {
     try {
         const userId = req.user.id;
         const broadcastId = req.params.id;
 
-        // Upsert into broadcast_views with dismissed=1
+        // Create broadcast_views record with status 'sent' and sent_at timestamp
         run(`
-            INSERT INTO broadcast_views (broadcast_id, user_id, dismissed, status, read_at)
-            VALUES (?, ?, 1, 'read', CURRENT_TIMESTAMP)
-            ON CONFLICT(broadcast_id, user_id) DO UPDATE SET dismissed = 1
+            INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, fetched_at, dismissed)
+            VALUES (?, ?, 'sent', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+            ON CONFLICT(broadcast_id, user_id) DO NOTHING
         `, [broadcastId, userId]);
+
+        // Broadcast status change for Admin dashboard
+        broadcast({
+            type: 'broadcast_status',
+            broadcastId: parseInt(broadcastId),
+            userId,
+            status: 'sent'
+        });
 
         res.json({ success: true });
     } catch (error) {
-        console.error('Dismiss broadcast error:', error);
-        res.status(500).json({ error: 'Failed to dismiss broadcast' });
+        console.error('Mark broadcast sent error:', error);
+        res.status(500).json({ error: 'Failed to mark broadcast as sent' });
+    }
+});
+
+// Mark broadcast as delivered (when displayed to user)
+router.post('/broadcasts/:id/delivered', requireUser, (req, res) => {
+    try {
+        const userId = req.user.id;
+        const broadcastId = req.params.id;
+
+        // Upsert into broadcast_views - only update if not already delivered/read
+        run(`
+            INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, dismissed)
+            VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+            ON CONFLICT(broadcast_id, user_id) DO UPDATE SET 
+                status = CASE WHEN status IN ('sent', 'created') THEN 'delivered' ELSE status END,
+                delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP),
+                view_count = view_count + 1
+        `, [broadcastId, userId]);
+
+        // Broadcast status change for Admin dashboard
+        broadcast({
+            type: 'broadcast_status',
+            broadcastId: parseInt(broadcastId),
+            userId,
+            status: 'delivered'
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Mark broadcast delivered error:', error);
+        res.status(500).json({ error: 'Failed to mark broadcast as delivered' });
+    }
+});
+
+// Mark broadcast as read (user action)
+router.post('/broadcasts/:id/read', requireUser, (req, res) => {
+    try {
+        const userId = req.user.id;
+        const broadcastId = req.params.id;
+
+        // Upsert into broadcast_views with dismissed=1 and status='read'
+        run(`
+            INSERT INTO broadcast_views (broadcast_id, user_id, dismissed, status, read_at)
+            VALUES (?, ?, 1, 'read', CURRENT_TIMESTAMP)
+            ON CONFLICT(broadcast_id, user_id) DO UPDATE SET 
+                dismissed = 1, 
+                status = 'read', 
+                read_at = CURRENT_TIMESTAMP
+        `, [broadcastId, userId]);
+
+        // Broadcast status change for Admin dashboard
+        broadcast({
+            type: 'broadcast_status',
+            broadcastId: parseInt(broadcastId),
+            userId,
+            status: 'read'
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Mark broadcast read error:', error);
+        res.status(500).json({ error: 'Failed to mark broadcast as read' });
     }
 });
 

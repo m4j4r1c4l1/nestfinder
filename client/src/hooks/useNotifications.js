@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { api } from '../utils/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -35,26 +36,34 @@ export const useNotifications = (userId) => {
             return;
         }
         try {
-            const res = await fetch(`${API_URL}/api/push/notifications?userId=${userId}`);
-            const data = await res.json();
+            const data = await api.get(`/push/notifications?userId=${userId}`);
 
             if (data.notifications && data.notifications.length > 0) {
                 const latestId = data.notifications[0].id;
 
                 // Detect NEW messages for popup
-                // Show popup if we have loaded initially AND this is a new ID
                 if (initialLoaded.current && latestId > maxKnownIdRef.current) {
                     const newMsg = data.notifications[0];
                     if (settings.realTime && !newMsg.read) {
                         setPopupMessage(newMsg);
-                        // Mark as read immediately when popping up (user "sees" it)
-                        markAsRead(newMsg);
+                        // Mark as delivered when popup shows (user sees it)
+                        markAsDelivered(newMsg);
                     }
                 }
 
                 maxKnownIdRef.current = Math.max(maxKnownIdRef.current, latestId);
                 setNotifications(data.notifications);
                 setUnreadCount(data.notifications.filter(n => !n.read).length);
+
+                // Mark undelivered messages: call /sent first (for broadcasts), then /delivered
+                const undelivered = data.notifications.filter(n => !n.delivered && n.status !== 'delivered' && n.status !== 'read');
+                for (const msg of undelivered) {
+                    // For broadcasts without a DB record yet, call /sent first
+                    if (msg.type === 'broadcast' && msg.status === 'sent') {
+                        await markAsSent(msg);
+                    }
+                    markAsDelivered(msg);
+                }
             } else {
                 setNotifications([]);
                 setUnreadCount(0);
@@ -82,13 +91,29 @@ export const useNotifications = (userId) => {
             .catch(err => console.error('Config fetch failed', err));
 
         if (userId && !initialLoaded.current) {
-            fetch(`${API_URL}/api/push/notifications?userId=${userId}`)
-                .then(res => res.json())
+            api.get(`/push/notifications?userId=${userId}`)
                 .then(data => {
                     if (data.notifications && data.notifications.length > 0) {
                         maxKnownIdRef.current = data.notifications[0].id;
                         setNotifications(data.notifications);
                         setUnreadCount(data.notifications.filter(n => !n.read).length);
+
+                        // Mark all as sent (for broadcasts) then delivered on initial load
+                        const undelivered = data.notifications.filter(n => !n.delivered && n.status !== 'delivered' && n.status !== 'read');
+                        undelivered.forEach(async (msg) => {
+                            // For broadcasts without a DB record, call /sent first
+                            if (msg.type === 'broadcast' && msg.status === 'sent') {
+                                try {
+                                    await api.markBroadcastSent(msg.id);
+                                } catch (e) { /* ignore */ }
+                            }
+                            // Then mark as delivered
+                            if (msg.type === 'broadcast') {
+                                api.markBroadcastDelivered(msg.id).catch(() => { });
+                            } else {
+                                api.markNotificationDelivered(msg.id).catch(() => { });
+                            }
+                        });
                     }
                     initialLoaded.current = true;
                     setLoading(false);
@@ -133,6 +158,33 @@ export const useNotifications = (userId) => {
         };
     }, [settings.realTime]);
 
+    // Mark broadcast as sent (when client first fetches it)
+    const markAsSent = async (notification) => {
+        if (!notification || notification.type !== 'broadcast') return;
+        try {
+            await api.markBroadcastSent(notification.id);
+        } catch (err) {
+            console.error('Failed to mark sent:', err);
+        }
+    };
+
+    // Mark message as delivered (when displayed to user)
+    const markAsDelivered = async (notification) => {
+        if (!notification) return;
+        if (notification.delivered || notification.status === 'delivered' || notification.status === 'read') return;
+
+        try {
+            if (notification.type === 'broadcast') {
+                await api.markBroadcastDelivered(notification.id);
+            } else {
+                await api.markNotificationDelivered(notification.id);
+            }
+        } catch (err) {
+            console.error('Failed to mark delivered:', err);
+        }
+    };
+
+    // Mark message as read (when user interacts)
     const markAsRead = async (notification) => {
         if (!notification) return;
 
@@ -144,14 +196,14 @@ export const useNotifications = (userId) => {
         if (notification.read) return;
 
         try {
-            await fetch(`${API_URL}/api/push/notifications/${notification.id}/read`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId })
-            });
+            if (notification.type === 'broadcast') {
+                await api.markBroadcastRead(notification.id);
+            } else {
+                await api.markNotificationRead(notification.id);
+            }
 
             setNotifications(prev => prev.map(n =>
-                n.id === notification.id ? { ...n, read: 1 } : n
+                n.id === notification.id ? { ...n, read: 1, status: 'read' } : n
             ));
             setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (err) {
@@ -161,11 +213,7 @@ export const useNotifications = (userId) => {
 
     const markAllAsRead = async () => {
         try {
-            await fetch(`${API_URL}/api/push/notifications/read-all`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId })
-            });
+            await api.post('/push/notifications/read-all', { userId });
 
             setNotifications(prev => prev.map(n => ({ ...n, read: 1 })));
             setUnreadCount(0);

@@ -249,8 +249,35 @@ class ApiClient {
     return this.fetch(`/points/feedback/${id}`, { method: 'DELETE' });
   }
 
+  // ========================================
+  // NOTIFICATION STATUS METHODS (Regular In-App)
+  // ========================================
+  markNotificationDelivered(id) {
+    return this.fetch(`/push/notifications/${id}/delivered`, { method: 'POST' });
+  }
+
+  markNotificationRead(id) {
+    return this.fetch(`/push/notifications/${id}/read`, { method: 'POST' });
+  }
+
+  // ========================================
+  // BROADCAST STATUS METHODS
+  // ========================================
+  markBroadcastSent(id) {
+    return this.fetch(`/push/broadcasts/${id}/sent`, { method: 'POST' });
+  }
+
+  markBroadcastDelivered(id) {
+    return this.fetch(`/push/broadcasts/${id}/delivered`, { method: 'POST' });
+  }
+
+  markBroadcastRead(id) {
+    return this.fetch(`/push/broadcasts/${id}/read`, { method: 'POST' });
+  }
+
+  // Legacy alias for backward compatibility
   dismissBroadcast(id) {
-    return this.fetch(`/push/broadcasts/${id}/dismiss`, { method: 'POST' });
+    return this.markBroadcastRead(id);
   }
 
   submitFeedback(type, message, rating) {

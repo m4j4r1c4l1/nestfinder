@@ -16,7 +16,7 @@ import authRoutes from './routes/auth.js';
 import pointsRoutes, { setBroadcast as setPointsBroadcast } from './routes/points.js';
 import settingsRoutes, { setBroadcast as setSettingsBroadcast } from './routes/settings.js';
 import adminRoutes, { setBroadcast as setAdminBroadcast } from './routes/admin.js';
-import notificationsRoutes from './routes/notifications.js';
+import notificationsRoutes, { setBroadcast as setNotificationsBroadcast } from './routes/notifications.js';
 import webhookRoutes, { setBroadcast as setWebhookBroadcast } from './routes/webhook.js';
 import debugRoutes from './routes/debug.js';
 
@@ -100,6 +100,7 @@ setPointsBroadcast(broadcast);
 setSettingsBroadcast(broadcast);
 setWebhookBroadcast(broadcast);
 setAdminBroadcast(broadcast);
+setNotificationsBroadcast(broadcast);
 
 // Import rate limiters
 import { apiLimiter } from './middleware/rateLimiter.js';
