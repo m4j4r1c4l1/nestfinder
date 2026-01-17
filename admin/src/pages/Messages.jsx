@@ -3257,22 +3257,40 @@ const DetailModal = ({ batchId, onClose }) => {
                 {/* Fixed Stats Section */}
                 <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                        {/* Total Box - Orange */}
                         <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{details?.stats?.total || 0}</div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '1.5rem' }}>📊</span>
+                                <span>{details?.stats?.total || 0}</span>
+                            </div>
+                            <div style={{ color: '#94a3b8', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Total</div>
                         </div>
-                        {/* New SENT (Pending) Box */}
+
+                        {/* Sent Box - Amber */}
                         <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{pendingCount}</div>
-                            <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sent</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ color: '#fbbf24', fontSize: '1.5rem' }}>✓</span>
+                                <span>{pendingCount}</span>
+                            </div>
+                            <div style={{ color: '#fbbf24', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Sent</div>
                         </div>
+
+                        {/* Delivered Box - Green */}
                         <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{details?.stats?.delivered || 0}</div>
-                            <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Delivered</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ color: '#4ade80', fontSize: '1.5rem' }}>✓✓</span>
+                                <span>{details?.stats?.delivered || 0}</span>
+                            </div>
+                            <div style={{ color: '#4ade80', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Delivered</div>
                         </div>
+
+                        {/* Read Box - Blue */}
                         <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{details?.stats?.read || 0}</div>
-                            <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Read</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ color: '#60a5fa', fontSize: '1.5rem' }}>✓✓</span>
+                                <span>{details?.stats?.read || 0}</span>
+                            </div>
+                            <div style={{ color: '#60a5fa', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Read</div>
                         </div>
                     </div>
                 </div>
@@ -3997,7 +4015,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                             <span style={{ fontSize: '1.5rem' }}>📊</span>
                                             <span>{total}</span>
                                         </div>
-                                        <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Total</div>
+                                        <div style={{ color: '#94a3b8', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Total</div>
                                     </div>
 
                                     {/* Sent Box - Amber */}
@@ -4006,7 +4024,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                             <span style={{ color: '#fbbf24', fontSize: '1.5rem' }}>✓</span>
                                             <span>{sentCount}</span>
                                         </div>
-                                        <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Sent</div>
+                                        <div style={{ color: '#fbbf24', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Sent</div>
                                     </div>
 
                                     {/* Delivered Box - Green */}
@@ -4015,7 +4033,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                             <span style={{ color: '#4ade80', fontSize: '1.5rem' }}>✓✓</span>
                                             <span>{deliveredCount}</span>
                                         </div>
-                                        <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Delivered</div>
+                                        <div style={{ color: '#4ade80', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Delivered</div>
                                     </div>
 
                                     {/* Read Box - Blue */}
@@ -4024,13 +4042,13 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                             <span style={{ color: '#60a5fa', fontSize: '1.5rem' }}>✓✓</span>
                                             <span>{readCount}</span>
                                         </div>
-                                        <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Read</div>
+                                        <div style={{ color: '#60a5fa', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Read</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Table area */}
-                            <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginTop: '1rem' }}>
+                            <div style={{ padding: '0 1.5rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                                 {views.length === 0 ? (
                                     <div style={{ padding: '3rem', border: '1px solid #334155', borderRadius: '12px', textAlign: 'center', color: '#64748b', background: '#0f172a' }}>
                                         <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📭</div>
