@@ -43,14 +43,26 @@ export const adminApi = {
 
         let data;
         const contentType = response.headers.get('content-type');
+
+        // Detect server unavailable (502/503/504) - dispatch event for toast
+        if (response.status === 502 || response.status === 503 || response.status === 504) {
+            window.dispatchEvent(new CustomEvent('server:unavailable', { detail: { status: response.status } }));
+            throw new Error('Server is restarting. Please wait...');
+        }
+
         if (contentType && contentType.includes('application/json')) {
             data = await response.json();
         } else {
             const text = await response.text();
+            // Check if it looks like a 502/503/504 error page
+            if (text.includes('<title>502') || text.includes('<title>503') || text.includes('<title>504')) {
+                window.dispatchEvent(new CustomEvent('server:unavailable', { detail: { status: response.status } }));
+                throw new Error('Server is restarting. Please wait...');
+            }
             if (!response.ok) {
                 throw new Error(`Server Error (${response.status}): ${response.statusText || 'Unknown Connection Error'}`);
             }
-            return text; // Should not happen for this API but safe fallback
+            return text;
         }
 
         if (!response.ok) {

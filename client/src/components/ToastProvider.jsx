@@ -36,10 +36,11 @@ export const ToastProvider = ({ children }) => {
             if (serverUnavailableRef.current) return;
             serverUnavailableRef.current = true;
 
-            addToast('Server updating, please wait...', {
+            addToast('Server is restarting...', {
                 type: 'warning',
-                icon: '🔄',
-                duration: 5000
+                icon: '🥚',
+                duration: 5000,
+                centered: true
             });
 
             setTimeout(() => {
@@ -108,7 +109,7 @@ const ToastContainer = ({ toasts, onDismiss }) => {
                     }}
                 >
                     <span style={{ fontSize: '1.5rem' }}>{toast.icon}</span>
-                    <span style={{ fontWeight: 500, flex: 1 }}>{toast.message}</span>
+                    <span style={{ fontWeight: 500, flex: 1, textAlign: toast.centered ? 'center' : 'left' }}>{toast.message}</span>
                 </div>
             ))}
         </div>

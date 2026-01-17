@@ -159,6 +159,7 @@ const Login = ({ onLogin }) => {
 const App = () => {
     const [token, setToken] = useState(localStorage.getItem('nestfinder_admin_token'));
     const [view, setView] = useState('dashboard');
+    const [serverToast, setServerToast] = useState(null); // Server restart toast
 
     // Check if debug mode is enabled (cached in localStorage by Settings page)
     const [debugModeEnabled, setDebugModeEnabled] = useState(localStorage.getItem('nestfinder_debug_mode') === 'true');
@@ -186,6 +187,25 @@ const App = () => {
         const handleUnauthorized = () => setToken(null);
         window.addEventListener('auth:unauthorized', handleUnauthorized);
         return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    }, []);
+
+    // Listen for server:unavailable events and show toast
+    const serverToastDebounce = React.useRef(false);
+    React.useEffect(() => {
+        const handleServerUnavailable = () => {
+            if (serverToastDebounce.current) return;
+            serverToastDebounce.current = true;
+
+            setServerToast({ message: 'Server is restarting...', icon: '🥚' });
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => setServerToast(null), 5000);
+            // Debounce: only allow once per minute
+            setTimeout(() => { serverToastDebounce.current = false; }, 60000);
+        };
+
+        window.addEventListener('server:unavailable', handleServerUnavailable);
+        return () => window.removeEventListener('server:unavailable', handleServerUnavailable);
     }, []);
 
     if (!token) {
@@ -326,6 +346,33 @@ const App = () => {
                 {view === 'debug' && <Debug />}
                 {view === 'settings' && <Settings />}
             </main>
+
+            {/* Global Server Restart Toast */}
+            {serverToast && (
+                <div
+                    onClick={() => setServerToast(null)}
+                    style={{
+                        position: 'fixed',
+                        bottom: '2rem',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 10000,
+                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                        color: 'black',
+                        padding: '1rem 2rem',
+                        borderRadius: '12px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        cursor: 'pointer',
+                        animation: 'fadeIn 0.3s ease-out'
+                    }}
+                >
+                    <span style={{ fontSize: '1.5rem' }}>{serverToast.icon}</span>
+                    <span style={{ fontWeight: 500, textAlign: 'center' }}>{serverToast.message}</span>
+                </div>
+            )}
         </div>
     );
 };
