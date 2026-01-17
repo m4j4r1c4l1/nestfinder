@@ -4724,7 +4724,14 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                     if (!hasMoved) hasMoved = true;
                     setDragging(prev => ({ ...prev, newStart, newEnd, hasMoved }));
                 } else if (dragging.type === 'resize-right') {
-                    newEnd = Math.max(dragging.originalEnd + absDelta, dragging.originalStart + 900000);
+                    // Fix: Allow snapping infinite broadcasts to current cursor time
+                    const isInfiniteDrag = dragging.originalEnd > 4102444800000 || dragging.originalEnd === 0;
+                    if (isInfiniteDrag) {
+                        newEnd = cursorTime;
+                    } else {
+                        newEnd = Math.max(dragging.originalEnd + absDelta, dragging.originalStart + 900000);
+                    }
+
                     let hasMoved = dragging.hasMoved;
                     if (!hasMoved) hasMoved = true;
                     setDragging(prev => ({ ...prev, newStart, newEnd, hasMoved }));
@@ -5109,8 +5116,10 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
 
                         const isInfinite = rawEnd === null || rawEnd > 4102444800000; // Null or > 2099
                         // If infinite and started, make sure it covers the visible area, otherwise just a reasonable chunk
+                        // Visual State Logic for Infinite Bars
                         if (isInfinite) {
-                            rawEnd = Math.max(rawStart + viewportDuration, viewportStart + viewportDuration * 2);
+                            // Clamp visual end to viewport end for accessibility
+                            rawEnd = viewportStart + viewportDuration;
                         }
 
                         const left = ((rawStart - viewportStart) / viewportDuration) * 100;
@@ -5146,7 +5155,6 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                             // Usually infinite is active or scheduled.
                         } else if (isInactive) {
                             // Badge Style requested for inactive (Boosted to match Badge vividness against dark bg)
-                            // Badge Style requested for inactive (Boosted to match Badge vividness against dark bg)
                             // Use linear-gradient to overlay transparent color on solid background, preventing underlying lines from showing through
                             bgStyle = `linear-gradient(0deg, ${color}35, ${color}35), #334155`;
                             borderStyle = `1px solid ${color}80`; // Was 40
@@ -5161,7 +5169,7 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                 key={b.id}
                                 onMouseDown={(e) => {
                                     e.stopPropagation();
-                                    handleBarMouseDown(e, b, laneIndex);
+                                    handleBarMouseDown(e, b);
                                 }}
                                 onMouseEnter={() => handleBarMouseEnter(b, rawStart, rawEnd)}
                                 onMouseLeave={handleBarMouseLeave}
@@ -5184,10 +5192,8 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                         ? (isTimeActive ? 'brightness(1.5) saturate(1.2)' : 'brightness(1.2) saturate(1.1)')
                                         : (isInactive ? 'none' : 'brightness(1.1)'), // Remove grayscale for inactive, just pure badge style
                                     transition: isDragging ? 'none' : 'all 0.2s',
-                                    pointerEvents: 'auto',
-                                    // Mask infinite bars so their glow doesn't fill the whole lane
-                                    WebkitMaskImage: isInfinite ? 'linear-gradient(to right, black 0%, black 150px, rgba(0,0,0,0.5) 300px, transparent 600px)' : 'none',
-                                    maskImage: isInfinite ? 'linear-gradient(to right, black 0%, black 150px, rgba(0,0,0,0.5) 300px, transparent 600px)' : 'none'
+                                    pointerEvents: 'auto'
+                                    // Mask removed to prevent hiding the handle. Using overlay instead.
                                 }}
                             >
                                 {/* Left Handle */}
@@ -5202,18 +5208,27 @@ function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcast
                                     }}
                                 />
 
-                                {/* Right Handle - Only if NOT infinite */}
-                                {!isInfinite && (
-                                    <div
-                                        onMouseDown={(e) => {
-                                            e.stopPropagation();
-                                            handleResizeMouseDown(e, b, 'resize-right');
-                                        }}
-                                        style={{
-                                            position: 'absolute', right: 0, top: 0, bottom: 0, width: '10px',
-                                            cursor: 'ew-resize', zIndex: 30
-                                        }}
-                                    />
+                                {/* Right Handle - Always visible now to allow capping infinite broadcasts */}
+                                <div
+                                    onMouseDown={(e) => {
+                                        e.stopPropagation();
+                                        handleResizeMouseDown(e, b, 'resize-right');
+                                    }}
+                                    style={{
+                                        position: 'absolute', right: 0, top: 0, bottom: 0, width: '10px',
+                                        cursor: 'ew-resize', zIndex: 30
+                                    }}
+                                />
+
+                                {/* Infinite Fade Overlay */}
+                                {isInfinite && (
+                                    <div style={{
+                                        position: 'absolute', top: 0, bottom: 0, right: 0, width: '80px',
+                                        background: 'linear-gradient(to right, transparent, #334155)',
+                                        pointerEvents: 'none',
+                                        zIndex: 25,
+                                        borderRadius: '0 2px 2px 0'
+                                    }} />
                                 )}
 
                                 {/* label removed as requested */}
