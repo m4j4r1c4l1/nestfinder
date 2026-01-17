@@ -196,7 +196,7 @@ const App = () => {
             if (serverToastDebounce.current) return;
             serverToastDebounce.current = true;
 
-            setServerToast({ message: 'Server is restarting...', icon: '🐣' });
+            setServerToast({ message: 'Server is restarting...', icon: '🙊' });
 
             // Auto-hide after 5 seconds
             setTimeout(() => setServerToast(null), 5000);

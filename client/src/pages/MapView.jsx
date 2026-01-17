@@ -101,7 +101,7 @@ const MapView = () => {
         // Default icons based on type
         let icon = overrideIcon;
         if (!icon) {
-            if (type === 'success') icon = '👍';
+            if (type === 'success') icon = '🦄';
             if (type === 'error') icon = '🙈';
         }
         setToast({ message, type, icon, forceSingleLine });

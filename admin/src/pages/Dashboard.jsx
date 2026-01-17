@@ -767,8 +767,8 @@ const Modal = ({ title, onClose, children }) => (
 // Toast notification for feedback messages
 const Toast = ({ type, message, onClose }) => {
     const colors = {
-        success: { bg: 'rgba(16, 185, 129, 0.95)', icon: '👍' },
-        error: { bg: 'rgba(239, 68, 68, 0.95)', icon: '❗' },
+        success: { bg: 'rgba(16, 185, 129, 0.95)', icon: '🦄' },
+        error: { bg: 'rgba(239, 68, 68, 0.95)', icon: '🙈' },
         info: { bg: 'rgba(59, 130, 246, 0.95)', icon: 'ℹ️' }
     };
     const { bg, icon } = colors[type] || colors.info;
