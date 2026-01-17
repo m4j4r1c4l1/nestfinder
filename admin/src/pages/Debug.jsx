@@ -72,7 +72,7 @@ const Debug = () => {
         } catch { return DEFAULT_WIDTHS; }
     });
 
-    // Resize state
+    // Resize state: stores left column, right column, and starting widths
     const [resizing, setResizing] = useState(null);
 
     // Save column widths
@@ -80,13 +80,21 @@ const Debug = () => {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(colWidths)); } catch { }
     }, [colWidths]);
 
-    // Handle resize
+    // Handle resize - redistribute space between adjacent columns
     useEffect(() => {
         if (!resizing) return;
         const handleMouseMove = (e) => {
             const delta = e.clientX - resizing.startX;
-            const newWidth = Math.max(80, resizing.startWidth + delta);
-            setColWidths(prev => ({ ...prev, [resizing.column]: newWidth }));
+            const newLeftWidth = Math.max(60, resizing.startLeftWidth + delta);
+            const newRightWidth = Math.max(60, resizing.startRightWidth - delta);
+            // Ensure both columns stay above minimum
+            if (newLeftWidth >= 60 && newRightWidth >= 60) {
+                setColWidths(prev => ({
+                    ...prev,
+                    [resizing.leftCol]: newLeftWidth,
+                    [resizing.rightCol]: newRightWidth
+                }));
+            }
         };
         const handleMouseUp = () => setResizing(null);
         document.addEventListener('mousemove', handleMouseMove);
@@ -196,7 +204,8 @@ const Debug = () => {
     const debugEnabledCount = users.filter(u => u.debug_enabled).length;
     const usersWithLogs = users.filter(u => u.log_count > 0).length;
 
-    const ResizeHandle = ({ column }) => (
+    // Resize handle sits between leftCol and rightCol
+    const ResizeHandle = ({ leftCol, rightCol }) => (
         <div
             style={{
                 position: 'absolute',
@@ -205,14 +214,20 @@ const Debug = () => {
                 bottom: 0,
                 width: '6px',
                 cursor: 'col-resize',
-                background: resizing?.column === column ? '#3b82f6' : 'transparent',
+                background: resizing?.leftCol === leftCol ? '#3b82f6' : 'transparent',
                 transition: 'background 0.15s',
                 zIndex: 20
             }}
             onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setResizing({ column, startX: e.clientX, startWidth: colWidths[column] });
+                setResizing({
+                    leftCol,
+                    rightCol,
+                    startX: e.clientX,
+                    startLeftWidth: colWidths[leftCol],
+                    startRightWidth: colWidths[rightCol]
+                });
             }}
             onMouseEnter={(e) => { if (!resizing) e.currentTarget.style.background = '#475569'; }}
             onMouseLeave={(e) => { if (!resizing) e.currentTarget.style.background = 'transparent'; }}
@@ -337,24 +352,23 @@ const Debug = () => {
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
                 {/* Table */}
                 <div style={{ flex: 1, overflow: 'auto' }}>
-                    <table style={{ width: colWidths.user + colWidths.lastActive + colWidths.debugMode + colWidths.logs, minWidth: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
+                    <table style={{ width: colWidths.user + colWidths.lastActive + colWidths.debugMode + colWidths.logs, borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
                             <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
                                 <th style={{ width: colWidths.user, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('user')}>
                                     User <SortIndicator column="user" />
-                                    <ResizeHandle column="user" />
+                                    <ResizeHandle leftCol="user" rightCol="lastActive" />
                                 </th>
                                 <th style={{ width: colWidths.lastActive, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('lastActive')}>
                                     Last Active <SortIndicator column="lastActive" />
-                                    <ResizeHandle column="lastActive" />
+                                    <ResizeHandle leftCol="lastActive" rightCol="debugMode" />
                                 </th>
                                 <th style={{ width: colWidths.debugMode, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('debugMode')}>
                                     Debug Mode <SortIndicator column="debugMode" />
-                                    <ResizeHandle column="debugMode" />
+                                    <ResizeHandle leftCol="debugMode" rightCol="logs" />
                                 </th>
                                 <th style={{ width: colWidths.logs, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('logs')}>
                                     Logs & Actions <SortIndicator column="logs" />
-                                    <ResizeHandle column="logs" />
                                 </th>
                             </tr>
                         </thead>
