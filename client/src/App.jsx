@@ -52,7 +52,6 @@ const DebugIndicator = () => {
             .then(data => {
                 if (data.debug_mode_enabled) {
                     setEnabled(true);
-                    import('./utils/logger').then(m => m.initLogger(true));
                 }
             })
             .catch(() => { });
@@ -62,8 +61,6 @@ const DebugIndicator = () => {
             if (settings.debug_mode_enabled !== undefined) {
                 const isEnabled = String(settings.debug_mode_enabled) === 'true';
                 setEnabled(isEnabled);
-                // Dynamically load logger to avoid large bundle if possible, or just call it
-                import('./utils/logger').then(m => m.setDebugMode(isEnabled));
             }
         };
 

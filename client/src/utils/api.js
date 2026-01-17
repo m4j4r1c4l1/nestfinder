@@ -7,6 +7,12 @@ class ApiClient {
     this.userId = localStorage.getItem('nestfinder_user_id');
     this.userToken = localStorage.getItem('nestfinder_user_token');
     this.adminToken = localStorage.getItem('nestfinder_admin_token');
+
+    if (this.userId) {
+      logger.setUserId(this.userId);
+      // Defer init slightly to avoid blocking constructor or allow method availability
+      setTimeout(() => logger.init(this), 0);
+    }
   }
 
   setUserId(id) {
