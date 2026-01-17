@@ -3988,31 +3988,43 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                     ) : (
                         <>
                             {/* Stats - Matching Pill Design from Details Modal */}
-                            {/* Stats - Grid Layout matching DetailModal but with Ticks */}
-                            <div style={{ padding: '1.5rem', flexShrink: 0, borderBottom: '1px solid #334155' }}>
+                            {/* Stats - Grid Layout with Icon + Count + Text */}
+                            <div style={{ padding: '1.5rem', flexShrink: 0 }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
                                     {/* Total Box - Orange */}
                                     <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{total}</div>
-                                        <div style={{ color: '#94a3b8', fontSize: '1.2rem', marginTop: '0.2rem' }}>📊</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                            <span style={{ fontSize: '1.5rem' }}>📊</span>
+                                            <span>{total}</span>
+                                        </div>
+                                        <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Total</div>
                                     </div>
 
                                     {/* Sent Box - Amber */}
                                     <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{sentCount}</div>
-                                        <div style={{ color: '#fbbf24', fontSize: '1.2rem', marginTop: '0.2rem' }}>✓</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                            <span style={{ color: '#fbbf24', fontSize: '1.5rem' }}>✓</span>
+                                            <span>{sentCount}</span>
+                                        </div>
+                                        <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Sent</div>
                                     </div>
 
                                     {/* Delivered Box - Green */}
                                     <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{deliveredCount}</div>
-                                        <div style={{ color: '#4ade80', fontSize: '1.2rem', marginTop: '0.2rem' }}>✓✓</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                            <span style={{ color: '#4ade80', fontSize: '1.5rem' }}>✓✓</span>
+                                            <span>{deliveredCount}</span>
+                                        </div>
+                                        <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Delivered</div>
                                     </div>
 
                                     {/* Read Box - Blue */}
                                     <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{readCount}</div>
-                                        <div style={{ color: '#60a5fa', fontSize: '1.2rem', marginTop: '0.2rem' }}>✓✓</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                            <span style={{ color: '#60a5fa', fontSize: '1.5rem' }}>✓✓</span>
+                                            <span>{readCount}</span>
+                                        </div>
+                                        <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Read</div>
                                     </div>
                                 </div>
                             </div>
