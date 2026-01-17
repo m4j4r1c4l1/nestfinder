@@ -917,15 +917,55 @@ const ResultModal = ({ type = 'success', title, message, onOk, buttonText = 'OK'
 // Database Manager Modal
 const DBManagerModal = ({ onClose, onResult }) => {
     const [files, setFiles] = React.useState([]);
-    const [usage, setUsage] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     const [actionLoading, setActionLoading] = React.useState(null);
-    const [backupSchedule, setBackupSchedule] = React.useState({ enabled: false, intervalHours: 0 });
-    const [scheduleInput, setScheduleInput] = React.useState('0');
+    const [usage, setUsage] = React.useState(null);
+    const [backupSchedule, setBackupSchedule] = React.useState({ enabled: false, intervalHours: 24 });
+    const [scheduleInput, setScheduleInput] = React.useState('24');
+    const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { filename }
+
+    // Sorting
+    const [sortConfig, setSortConfig] = React.useState({ column: 'modified', direction: 'desc' });
+
+    // Column widths
+    const STORAGE_KEY = 'nestfinder_db_cols';
+    const DEFAULT_WIDTHS = { name: 300, size: 90, modified: 150, type: 100, actions: 120 };
+    const [colWidths, setColWidths] = React.useState(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? { ...DEFAULT_WIDTHS, ...JSON.parse(saved) } : DEFAULT_WIDTHS;
+        } catch { return DEFAULT_WIDTHS; }
+    });
+
+    // Resizing
+    const [resizing, setResizing] = React.useState(null);
+
+    React.useEffect(() => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(colWidths)); } catch { }
+    }, [colWidths]);
+
+    React.useEffect(() => {
+        if (!resizing) return;
+        const handleMouseMove = (e) => {
+            const delta = e.clientX - resizing.startX;
+            const newLeftWidth = Math.max(50, resizing.startLeftWidth + delta);
+            const newRightWidth = Math.max(50, resizing.startRightWidth - delta);
+            if (newLeftWidth >= 50 && newRightWidth >= 50) {
+                setColWidths(prev => ({ ...prev, [resizing.leftCol]: newLeftWidth, [resizing.rightCol]: newRightWidth }));
+            }
+        };
+        const handleMouseUp = () => setResizing(null);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [resizing]);
 
     const loadFiles = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
             const [filesRes, scheduleRes] = await Promise.all([
                 adminApi.getDBFiles(),
                 adminApi.getBackupSchedule()
@@ -982,6 +1022,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
         setActionLoading(filename);
         try {
             await adminApi.downloadDBFile(filename);
+            onResult('success', 'Download Complete', `"${filename}" has been downloaded.`);
         } catch (err) {
             onResult('error', 'Download Failed', err.message);
         } finally {
@@ -989,8 +1030,9 @@ const DBManagerModal = ({ onClose, onResult }) => {
         }
     };
 
-    const handleDelete = async (filename) => {
-        if (!window.confirm(`Delete "${filename}"?\n\nThis cannot be undone.`)) return;
+    const handleDelete = async () => {
+        const filename = deleteConfirm.filename;
+        setDeleteConfirm(null);
         setActionLoading(filename);
         try {
             await adminApi.deleteDBFile(filename);
@@ -1015,10 +1057,6 @@ const DBManagerModal = ({ onClose, onResult }) => {
         } finally {
             setActionLoading(null);
         }
-    };
-
-    const handleUpload = () => {
-        document.getElementById('db-manager-upload').click();
     };
 
     const handleFileUpload = async (e) => {
@@ -1064,235 +1102,246 @@ const DBManagerModal = ({ onClose, onResult }) => {
         }
     };
 
-    return (
+    const handleSort = (column) => {
+        setSortConfig(prev => ({
+            column,
+            direction: prev.column === column && prev.direction === 'asc' ? 'desc' : 'asc'
+        }));
+    };
+
+    const sortedFiles = React.useMemo(() => {
+        const sorted = [...files];
+        sorted.sort((a, b) => {
+            let aVal, bVal;
+            switch (sortConfig.column) {
+                case 'name': aVal = a.name.toLowerCase(); bVal = b.name.toLowerCase(); break;
+                case 'size': aVal = a.size; bVal = b.size; break;
+                case 'modified': aVal = new Date(a.modified).getTime(); bVal = new Date(b.modified).getTime(); break;
+                case 'type': aVal = a.type; bVal = b.type; break;
+                default: return 0;
+            }
+            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        return sorted;
+    }, [files, sortConfig]);
+
+    const stats = React.useMemo(() => {
+        if (!files.length) return null;
+        const sorted = [...files].sort((a, b) => new Date(a.modified) - new Date(b.modified));
+        return {
+            oldest: sorted[0],
+            newest: sorted[sorted.length - 1]
+        };
+    }, [files]);
+
+    const ResizeHandle = ({ leftCol, rightCol }) => (
         <div
             style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0,0,0,0.7)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1500,
-                backdropFilter: 'blur(6px)'
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: '6px',
+                cursor: 'col-resize',
+                zIndex: 20
             }}
-            onClick={onClose}
-        >
+            onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setResizing({ leftCol, rightCol, startX: e.clientX, startLeftWidth: colWidths[leftCol], startRightWidth: colWidths[rightCol] });
+            }}
+        />
+    );
+
+    const SortIndicator = ({ column }) => {
+        if (sortConfig.column !== column) return <span style={{ opacity: 0.3, marginLeft: '4px' }}>↕</span>;
+        return <span style={{ marginLeft: '4px' }}>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
+    };
+
+    return (
+        <React.Fragment>
             <div
-                className="card"
                 style={{
-                    width: '95%',
-                    maxWidth: '800px',
-                    maxHeight: '80vh',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column'
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1500, backdropFilter: 'blur(6px)'
                 }}
-                onClick={e => e.stopPropagation()}
+                onClick={onClose}
             >
-                {/* Header */}
-                <div className="card-header" style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    borderBottom: '1px solid var(--color-border)',
-                    padding: '1rem 1.5rem'
-                }}>
-                    <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>💾</span> Database Manager
-                    </h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>&times;</button>
-                </div>
+                <div
+                    className="card"
+                    style={{
+                        width: '95%', maxWidth: '900px', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        cursor: resizing ? 'col-resize' : 'default', userSelect: resizing ? 'none' : 'auto'
+                    }}
+                    onClick={e => e.stopPropagation()}
+                >
+                    {/* Header */}
+                    <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border)', padding: '1rem 1.5rem' }}>
+                        <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span>💾</span> Database Manager</h3>
+                        <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>&times;</button>
+                    </div>
 
-                {/* Toolbar */}
-                <div style={{
-                    padding: '0.75rem 1.5rem',
-                    borderBottom: '1px solid var(--color-border)',
-                    display: 'flex',
-                    gap: '0.5rem',
-                    background: 'var(--color-bg-tertiary)'
-                }}>
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleUpload}
-                        disabled={actionLoading}
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-                    >
-                        📤 Upload File
-                    </button>
-                    <input
-                        type="file"
-                        id="db-manager-upload"
-                        accept=".db,.sqlite,.sqlite3"
-                        style={{ display: 'none' }}
-                        onChange={handleFileUpload}
-                    />
-                    <button
-                        className="btn"
-                        onClick={handleBackupNow}
-                        disabled={actionLoading}
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)' }}
-                    >
-                        📦 Backup Now
-                    </button>
-                    <button
-                        className="btn"
-                        onClick={loadFiles}
-                        disabled={loading}
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', background: 'var(--color-bg-secondary)' }}
-                    >
-                        🔄 Refresh
-                    </button>
+                    {/* Toolbar */}
+                    <div style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', gap: '0.5rem', background: 'var(--color-bg-tertiary)', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <button className="btn btn-primary" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>📤 Upload File</button>
+                        <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3" style={{ display: 'none' }} onChange={handleFileUpload} />
 
-                    {/* Spacer */}
-                    <div style={{ flex: 1 }} />
+                        <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>📦 Backup Now</button>
 
-                    {/* Backup Schedule */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Auto backup every</span>
-                        <input
-                            type="number"
-                            min="0"
-                            max="168"
-                            value={scheduleInput}
-                            onChange={e => setScheduleInput(e.target.value)}
-                            style={{
-                                width: '50px',
-                                padding: '0.3rem 0.5rem',
-                                borderRadius: '4px',
-                                border: '1px solid var(--color-border)',
-                                background: 'var(--color-bg-secondary)',
-                                color: 'inherit',
-                                textAlign: 'center'
-                            }}
-                        />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>hrs</span>
-                        <button
-                            className="btn"
-                            onClick={handleSetSchedule}
-                            disabled={actionLoading === 'schedule'}
-                            style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: 'var(--color-bg-secondary)' }}
-                        >
-                            Set
-                        </button>
-                        {backupSchedule.enabled && (
-                            <span style={{ fontSize: '0.75rem', color: '#22c55e', marginLeft: '0.25rem' }}>●</span>
+                        <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', fontWeight: 600, background: 'var(--color-bg-secondary)', borderRadius: '9999px', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>REFRESH</button>
+
+                        <div style={{ flex: 1 }} />
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Auto backup every</span>
+                            <input type="number" min="0" max="168" value={scheduleInput} onChange={e => setScheduleInput(e.target.value)} style={{ width: '50px', padding: '0.3rem 0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)', color: 'inherit', textAlign: 'center' }} />
+                            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>hrs</span>
+                            <button className="btn" onClick={handleSetSchedule} disabled={actionLoading === 'schedule'} style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', fontWeight: 600, background: 'var(--color-bg-secondary)', borderRadius: '9999px', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>SET</button>
+                            {backupSchedule.enabled && <span style={{ fontSize: '0.75rem', color: '#22c55e', marginLeft: '0.25rem' }}>●</span>}
+                        </div>
+                    </div>
+
+                    {/* File List Table */}
+                    <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)' }}>
+                        {loading ? (
+                            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading files...</div>
+                        ) : files.length === 0 ? (
+                            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>No database files found</div>
+                        ) : (
+                            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed', minWidth: Object.values(colWidths).reduce((a, b) => a + b, 0) + 'px' }}>
+                                <thead style={{ background: '#1e293b', position: 'sticky', top: 0, zIndex: 10 }}>
+                                    <tr>
+                                        {[
+                                            { key: 'name', label: 'Name', left: 'name', right: 'size' },
+                                            { key: 'size', label: 'Size', left: 'size', right: 'modified' },
+                                            { key: 'modified', label: 'Modified', left: 'modified', right: 'type' },
+                                            { key: 'type', label: 'Type', left: 'type', right: 'actions' },
+                                            { key: 'actions', label: 'Actions', left: 'actions', right: null }
+                                        ].map(col => (
+                                            <th key={col.key}
+                                                style={{
+                                                    width: colWidths[col.key],
+                                                    padding: '0.75rem 1rem',
+                                                    textAlign: col.key === 'name' ? 'left' : 'center',
+                                                    color: '#94a3b8',
+                                                    fontWeight: 600,
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.05em',
+                                                    position: 'relative',
+                                                    userSelect: 'none',
+                                                    cursor: 'pointer',
+                                                    borderBottom: '1px solid #334155'
+                                                }}
+                                                onClick={() => handleSort(col.key)}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: col.key === 'name' ? 'flex-start' : 'center' }}>
+                                                    {col.label}
+                                                    <SortIndicator column={col.key} />
+                                                </div>
+                                                {col.right && <ResizeHandle leftCol={col.left} rightCol={col.right} />}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedFiles.map(file => (
+                                        <tr key={file.name} style={{ borderBottom: '1px solid var(--color-border)', background: 'transparent' }}>
+                                            <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', borderBottom: '1px solid var(--color-border)' }}>{file.name}</td>
+                                            <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: 'var(--color-text-secondary)', borderBottom: '1px solid var(--color-border)' }}>{formatSize(file.size)}</td>
+                                            <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.8rem', borderBottom: '1px solid var(--color-border)' }}>{formatDate(file.modified)}</td>
+                                            <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid var(--color-border)' }}>{getTypeBadge(file.type)}</td>
+                                            <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid var(--color-border)' }}>
+                                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                                    <button onClick={(e) => { e.stopPropagation(); handleDownload(file.name); }} title="Download" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>📥</button>
+                                                    {file.type !== 'active' && (
+                                                        <>
+                                                            <button onClick={(e) => { e.stopPropagation(); handleRestore(file.name); }} title="Restore" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>♻️</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ filename: file.name }); }} title="Delete" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         )}
                     </div>
-                </div>
 
-                {/* File List */}
-                <div style={{ flex: 1, overflow: 'auto', padding: '0' }}>
-                    {loading ? (
-                        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading files...</div>
-                    ) : files.length === 0 ? (
-                        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>No database files found</div>
-                    ) : (
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                            <thead style={{ background: 'var(--color-bg-tertiary)', position: 'sticky', top: 0 }}>
-                                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600 }}>Name</th>
-                                    <th style={{ padding: '0.75rem 0.5rem', textAlign: 'center', fontWeight: 600, width: '80px' }}>Size</th>
-                                    <th style={{ padding: '0.75rem 0.5rem', textAlign: 'center', fontWeight: 600, width: '140px' }}>Modified</th>
-                                    <th style={{ padding: '0.75rem 0.5rem', textAlign: 'center', fontWeight: 600, width: '80px' }}>Type</th>
-                                    <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: 600, width: '140px' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {files.map(file => (
-                                    <tr key={file.name} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' }}>{file.name}</td>
-                                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>{formatSize(file.size)}</td>
-                                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}>{formatDate(file.modified)}</td>
-                                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>{getTypeBadge(file.type)}</td>
-                                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                                            <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
-                                                {/* Download */}
-                                                <button
-                                                    onClick={() => handleDownload(file.name)}
-                                                    disabled={actionLoading === file.name}
-                                                    title="Download"
-                                                    style={{
-                                                        padding: '0.3rem 0.5rem',
-                                                        fontSize: '0.9rem',
-                                                        background: 'var(--color-bg-tertiary)',
-                                                        border: '1px solid var(--color-border)',
-                                                        borderRadius: '4px',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    📥
-                                                </button>
-                                                {/* Restore (not for active) */}
-                                                {file.type !== 'active' && (
-                                                    <button
-                                                        onClick={() => handleRestore(file.name)}
-                                                        disabled={actionLoading === file.name}
-                                                        title="Restore"
-                                                        style={{
-                                                            padding: '0.3rem 0.5rem',
-                                                            fontSize: '0.9rem',
-                                                            background: 'rgba(245, 158, 11, 0.1)',
-                                                            border: '1px solid rgba(245, 158, 11, 0.3)',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer'
-                                                        }}
-                                                    >
-                                                        ♻️
-                                                    </button>
-                                                )}
-                                                {/* Delete (not for active) */}
-                                                {file.type !== 'active' && (
-                                                    <button
-                                                        onClick={() => handleDelete(file.name)}
-                                                        disabled={actionLoading === file.name}
-                                                        title="Delete"
-                                                        style={{
-                                                            padding: '0.3rem 0.5rem',
-                                                            fontSize: '0.9rem',
-                                                            background: 'rgba(239, 68, 68, 0.1)',
-                                                            border: '1px solid rgba(239, 68, 68, 0.3)',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer'
-                                                        }}
-                                                    >
-                                                        🗑️
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                    {/* Usage Footer */}
+                    {/* Expanded Stats & Status Footer */}
+                    <div style={{ padding: '0.75rem 1.5rem', background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
 
-                {/* Storage Usage Footer */}
-                {usage && (
-                    <div style={{ padding: '0.75rem 1.5rem', background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                            <span>DB Folder Size: {formatSize(usage.folderSize)}</span>
-                            {usage.disk?.total > 0 && (
-                                <span>Disk Usage: {formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span>
+                        {/* Backup Status Info */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <span>🗓️ Last Backup: {backupSchedule.lastBackupTime ? formatDate(backupSchedule.lastBackupTime) : 'Never'}</span>
+                                {backupSchedule.lastBackupTime && (
+                                    <span style={{
+                                        color: backupSchedule.lastBackupStatus?.startsWith('Fail') ? '#ef4444' : '#22c55e',
+                                        fontWeight: 600,
+                                        background: backupSchedule.lastBackupStatus?.startsWith('Fail') ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                                        padding: '0.1rem 0.4rem',
+                                        borderRadius: '4px',
+                                        fontSize: '0.7rem'
+                                    }}>
+                                        {backupSchedule.lastBackupStatus === 'Success' ? 'SUCCESS' : 'FAILED'}
+                                    </span>
+                                )}
+                            </div>
+                            {backupSchedule.enabled && (
+                                <span title="Next estimated backup time">🔜 Next: <span style={{ color: 'var(--color-text-primary)' }}>{backupSchedule.nextBackup ? formatDate(backupSchedule.nextBackup) : 'Pending...'}</span></span>
                             )}
                         </div>
-                        {usage.disk?.total > 0 && (
-                            <div style={{ height: '6px', background: 'var(--color-bg-secondary)', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{
-                                    width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`,
-                                    height: '100%',
-                                    background: 'var(--color-primary)',
-                                    borderRadius: '3px'
-                                }} />
+
+                        {/* File & Disk Stats */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{files.length} Files</span>
+                                <span>•</span>
+                                <span>{usage ? formatSize(usage.folderSize) : '0 B'}</span>
+                                {stats && (
+                                    <>
+                                        <span>•</span>
+                                        <span style={{ opacity: 0.8 }} title={`Oldest: ${formatDate(stats.oldest.modified)}\nNewest: ${formatDate(stats.newest.modified)}`}>
+                                            Range: {new Date(stats.oldest.modified).toLocaleDateString()} — {new Date(stats.newest.modified).toLocaleDateString()}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                            {usage?.disk?.total > 0 && <span>Disk: {formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span>}
+                        </div>
+
+                        {usage?.disk?.total > 0 && (
+                            <div style={{ height: '4px', background: 'var(--color-bg-secondary)', borderRadius: '2px', overflow: 'hidden', marginTop: '0.1rem' }}>
+                                <div style={{ width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`, height: '100%', background: 'var(--color-primary)', borderRadius: '2px' }} />
                             </div>
                         )}
                     </div>
-                )}
+                </div>
             </div>
-        </div>
+
+            {/* Custom Delete Confirmation Modal */}
+            {deleteConfirm && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1600, backdropFilter: 'blur(4px)' }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '400px', textAlign: 'center', padding: '2rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🗑️</div>
+                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>Delete Database File?</h3>
+                        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
+                            Are you sure you want to delete <br /><span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{deleteConfirm.filename}</span>?
+                            <br /><br />This action cannot be undone.
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="btn" onClick={() => setDeleteConfirm(null)} style={{ flex: 1, padding: '0.75rem', background: 'var(--color-bg-secondary)' }}>Cancel</button>
+                            <button className="btn btn-primary" onClick={handleDelete} style={{ flex: 1, padding: '0.75rem', background: '#ef4444', border: 'none' }}>Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </React.Fragment>
     );
 };
 
 export default Dashboard;
-

@@ -112,7 +112,7 @@ router.post('/db/upload', (req, res) => {
     try {
         const timestamp = Date.now();
         const dbDir = path.dirname(DB_PATH);
-        const uploadedFilename = `uploaded_${timestamp}.db`;
+        const uploadedFilename = `nestfinder_uploaded_${timestamp}.db`;
         const filePath = path.join(dbDir, uploadedFilename);
 
         const writeStream = fs.createWriteStream(filePath);
@@ -261,9 +261,14 @@ const createScheduledBackup = () => {
             }
         }
 
+        run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_time', new Date().toISOString()]);
+        run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_status', 'Success']);
+
         return backupFilename;
     } catch (error) {
         console.error('Scheduled backup error:', error);
+        run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_time', new Date().toISOString()]);
+        run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_status', `Fail: ${error.message}`]);
         return null;
     }
 };
@@ -295,12 +300,24 @@ setTimeout(async () => {
 // Get backup schedule status
 router.get('/db/backup-schedule', (req, res) => {
     try {
-        const intervalHours = getSetting('backup_interval_hours') || '0';
-        const lastBackup = getSetting('last_scheduled_backup') || null;
+        const intervalHours = parseInt(getSetting('backup_interval_hours') || '0', 10);
+        const lastBackupTime = getSetting('last_scheduled_backup_time') || null;
+        const lastBackupStatus = getSetting('last_scheduled_backup_status') || null;
+
+        let nextBackup = null;
+        if (intervalHours > 0 && lastBackupTime) {
+            const last = new Date(lastBackupTime).getTime();
+            const intervalMs = intervalHours * 60 * 60 * 1000;
+            const next = last + intervalMs;
+            nextBackup = new Date(next).toISOString();
+        }
+
         res.json({
-            enabled: parseInt(intervalHours, 10) > 0,
-            intervalHours: parseInt(intervalHours, 10),
-            lastBackup
+            enabled: intervalHours > 0,
+            intervalHours,
+            lastBackupTime,
+            lastBackupStatus,
+            nextBackup
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to get backup schedule' });
