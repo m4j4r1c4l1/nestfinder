@@ -130,36 +130,42 @@ const Debug = () => {
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
-                {/* Filters */}
-                <div style={{ padding: '1rem', borderBottom: '1px solid #334155' }}>
-                    <input
-                        type="text"
-                        placeholder="Search users..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem 1rem',
-                            background: '#0f172a',
-                            border: '1px solid #475569',
-                            borderRadius: '8px',
-                            color: '#e2e8f0',
-                            fontSize: '0.9rem'
-                        }}
-                    />
-                </div>
+            {/* Search Bar - Detached */}
+            <div style={{ marginBottom: '1rem', position: 'relative', width: '100%', maxWidth: '400px' }}>
+                <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                        width: '100%',
+                        padding: '0.75rem 1rem',
+                        background: '#1e293b',
+                        border: '1px solid #475569',
+                        borderRadius: '8px',
+                        color: '#e2e8f0',
+                        fontSize: '0.9rem',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        outline: 'none',
+                        transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                    onBlur={(e) => e.target.style.borderColor = '#475569'}
+                />
+            </div>
+
+            {/* Main Content - Detached Table Card */}
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
 
                 {/* Table */}
                 <div style={{ flex: 1, overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#1e293b', zIndex: 10 }}>
                             <tr>
-                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '30%' }}>User</th>
-                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '20%' }}>Last Active</th>
-                                <th style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', borderBottom: '1px solid #334155', width: '15%' }}>Debug Mode</th>
-                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '35%' }}>Logs & Actions</th>
+                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '30%', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</th>
+                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '20%', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Active</th>
+                                <th style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', borderBottom: '1px solid #334155', width: '15%', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Debug Mode</th>
+                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '35%', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Logs & Actions</th>
                             </tr>
                         </thead>
                         <tbody>
