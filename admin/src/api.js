@@ -99,6 +99,10 @@ export const adminApi = {
     },
 
 
+    deleteAllLogs() {
+        return this.fetch('/debug/logs', { method: 'DELETE' });
+    },
+
     getLogActions() {
         return this.fetch('/admin/logs/actions');
     },

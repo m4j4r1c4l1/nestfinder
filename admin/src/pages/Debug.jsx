@@ -106,52 +106,101 @@ const Debug = () => {
 
             {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '1rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.25rem', fontWeight: 600 }}>🐛 Debug Enabled</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#8b5cf6' }}>{debugEnabledCount}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>users with debug mode on</div>
-                </div>
-
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.25rem', fontWeight: 600 }}>📨 Users with Logs</div>
-                        <div style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px' }}>
-                            {(users.reduce((acc, u) => acc + (u.log_count || 0), 0))} Total Logs
-                        </div>
+                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-end', textAlign: 'right' }}>🐛 Debug Enabled</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: 700, color: '#8b5cf6', lineHeight: 1 }}>{debugEnabledCount}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>users enabled</div>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#3b82f6' }}>{usersWithLogs}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>have uploaded logs</div>
                 </div>
 
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05))', border: '1px solid rgba(34, 197, 94, 0.2)', padding: '1rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#22c55e', marginBottom: '0.25rem', fontWeight: 600 }}>👥 Total Users</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#22c55e' }}>{users.length}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>in debug system (top 5000)</div>
+                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-end', textAlign: 'right' }}>📨 Users with Logs</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: 700, color: '#3b82f6', lineHeight: 1 }}>{usersWithLogs}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>have logs</div>
+                    </div>
+                </div>
+
+                {/* Golden Badge - Total Logs */}
+                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05))', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-end', textAlign: 'right' }}>📚 Total Logs</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b', lineHeight: 1 }}>
+                            {users.reduce((acc, u) => acc + (u.log_count || 0), 0)}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>entries stored</div>
+                    </div>
+                </div>
+
+                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05))', border: '1px solid rgba(34, 197, 94, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#22c55e', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-end', textAlign: 'right' }}>👥 Total Users</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: 700, color: '#22c55e', lineHeight: 1 }}>{users.length}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>in database</div>
+                    </div>
                 </div>
             </div>
 
-            {/* Search Bar - Detached */}
-            <div style={{ marginBottom: '1rem', position: 'relative', width: '100%', maxWidth: '400px' }}>
-                <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem 1rem',
-                        background: '#1e293b',
-                        border: '1px solid #475569',
-                        borderRadius: '8px',
-                        color: '#e2e8f0',
-                        fontSize: '0.9rem',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                        outline: 'none',
-                        transition: 'border-color 0.2s'
+            {/* Actions Bar */}
+            <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                {/* Search Bar - Detached */}
+                <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem 1rem',
+                            background: '#1e293b',
+                            border: '1px solid #475569',
+                            borderRadius: '8px',
+                            color: '#e2e8f0',
+                            fontSize: '0.9rem',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                            outline: 'none',
+                            transition: 'border-color 0.2s'
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                        onBlur={(e) => e.target.style.borderColor = '#475569'}
+                    />
+                </div>
+
+                {/* Global Actions */}
+                <button
+                    onClick={async () => {
+                        if (!confirm('WARNING: This will delete ALL logs from all users. This action cannot be undone. Are you sure?')) return;
+                        try {
+                            await adminApi.deleteAllLogs();
+                            // Refresh
+                            fetchUsers();
+                            alert('All logs cleared successfully');
+                        } catch (err) {
+                            alert('Failed to clear logs: ' + err.message);
+                        }
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#475569'}
-                />
+                    style={{
+                        padding: '0.75rem 1.5rem',
+                        background: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        boxShadow: '0 4px 6px -1px rgba(147, 51, 234, 0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        transition: 'transform 0.1s'
+                    }}
+                    onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
+                    onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                    🧨 Delete All Logs
+                </button>
             </div>
 
             {/* Main Content - Detached Table Card */}
@@ -160,12 +209,12 @@ const Debug = () => {
                 {/* Table */}
                 <div style={{ flex: 1, overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                        <thead style={{ position: 'sticky', top: 0, background: '#1e293b', zIndex: 10 }}>
-                            <tr>
-                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '30%', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</th>
-                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '20%', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Active</th>
-                                <th style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', borderBottom: '1px solid #334155', width: '15%', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Debug Mode</th>
-                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '35%', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Logs & Actions</th>
+                        <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
+                            <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
+                                <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', width: '30%' }}>User</th>
+                                <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', width: '20%' }}>Last Active</th>
+                                <th style={{ padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', width: '15%' }}>Debug Mode</th>
+                                <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', width: '35%' }}>Logs & Actions</th>
                             </tr>
                         </thead>
                         <tbody>

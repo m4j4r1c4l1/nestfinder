@@ -153,6 +153,17 @@ router.delete('/users/:id/logs', requireAdmin, (req, res) => {
     }
 });
 
+// DELETE /api/debug/logs - Clear ALL logs
+router.delete('/logs', requireAdmin, (req, res) => {
+    try {
+        run('DELETE FROM client_logs');
+        res.json({ success: true, message: 'All logs cleared' });
+    } catch (err) {
+        console.error('Error clearing all logs:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ==========================================
 // CLIENT ENDPOINTS (Require Debug Mode)
 // ==========================================
