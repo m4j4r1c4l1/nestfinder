@@ -240,7 +240,7 @@ const App = () => {
                 </div>
 
                 {/* Navigation */}
-                <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                <nav style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                     {navItems.map(item => {
                         const isDebug = item.id === 'debug';
                         const isHidden = isDebug && !debugModeEnabled;
@@ -264,10 +264,11 @@ const App = () => {
                                     width: '100%',
                                     textAlign: 'left',
                                     height: isHidden ? 0 : 'auto',
+                                    minHeight: isHidden ? 0 : 'auto',
                                     opacity: isHidden ? 0 : 1,
                                     overflow: 'hidden',
                                     pointerEvents: isHidden ? 'none' : 'auto',
-                                    marginBottom: isHidden ? 0 : '0.25rem'
+                                    marginBottom: isHidden ? 0 : '0.5rem'
                                 }}
                             >
                                 <div style={{ width: '150px', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
