@@ -3761,7 +3761,9 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 border: '1px solid rgba(251, 191, 36, 0.3)'
                             }}>
                                 <span style={{ color: '#fbbf24', fontSize: '1rem' }}>✓</span>
-                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                                    {Math.max(0, (broadcast.total_users || 0) - (broadcast.delivered_count || 0))}
+                                </span>
                             </div>
 
                             {/* Separator */}
@@ -3778,7 +3780,9 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                                 border: '1px solid rgba(34, 197, 94, 0.3)'
                             }}>
                                 <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
-                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.delivered_count || 0}</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                                    {Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}
+                                </span>
                             </div>
 
                             {/* Separator */}
