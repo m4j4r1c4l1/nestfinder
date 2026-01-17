@@ -54,6 +54,12 @@ export const useNotifications = (userId) => {
                 if (initialLoaded.current && latestId > maxKnownIdRef.current) {
                     const newMsg = data.notifications[0];
                     if (settings.realTime && !newMsg.read) {
+                        // Safety: If it's a broadcast triggering a popup, ensure it has a client reception time
+                        // This fixes the issue where stale fetched_at might be used
+                        if (newMsg.type === 'broadcast') {
+                            newMsg.client_received_at = new Date().toISOString();
+                        }
+
                         setPopupMessage(newMsg);
                         // Mark as delivered when popup shows (user sees it)
                         markAsDelivered(newMsg);

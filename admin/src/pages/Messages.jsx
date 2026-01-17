@@ -356,11 +356,103 @@ const Messages = () => {
                 read: res.readCount || 0
             });
         } catch (err) {
-            console.error('Failed to fetch feedback:', err);
         }
     };
 
     // Initial Load & Interval (Keep existing efficient pattern but allow independent feedback updates)
+    // WebSocket State & Buffer
+    const [lastBroadcastUpdate, setLastBroadcastUpdate] = useState(null);
+    const wsBuffer = useRef([]);
+
+    useEffect(() => {
+        let ws;
+        let flushInterval;
+
+        const connectWs = () => {
+            try {
+                // Determine WS URL
+                let wsUrl;
+                if (API_URL) {
+                    const url = new URL(API_URL);
+                    wsUrl = (url.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + url.host;
+                } else {
+                    wsUrl = (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host;
+                }
+
+                console.log('Connecting to WS:', wsUrl);
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => console.log('WS Connected');
+
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'broadcast_status') {
+                            wsBuffer.current.push(data);
+                        }
+                    } catch (e) { console.error('WS Parse Error', e); }
+                };
+
+                ws.onerror = (e) => console.error('WS Error', e);
+
+            } catch (err) {
+                console.error('WS Setup Failed', err);
+            }
+        };
+
+        connectWs();
+
+        // Flush Buffer every 1s (Batching)
+        flushInterval = setInterval(() => {
+            if (wsBuffer.current.length === 0) return;
+
+            const events = [...wsBuffer.current];
+            wsBuffer.current = []; // Clear buffer
+
+            // 1. Aggregate updates by broadcastId
+            const updates = {}; // { [id]: { delivered: 0, read: 0 } }
+
+            events.forEach(ev => {
+                if (!updates[ev.broadcastId]) updates[ev.broadcastId] = { delivered: 0, read: 0 };
+                if (ev.status === 'delivered') updates[ev.broadcastId].delivered++;
+                if (ev.status === 'read') updates[ev.broadcastId].read++;
+            });
+
+            // 2. Update Broadcasts State
+            setBroadcasts(prev => prev.map(b => {
+                if (!updates[b.id]) return b;
+                const d = updates[b.id];
+                return {
+                    ...b,
+                    delivered_count: (b.delivered_count || 0) + d.delivered,
+                    read_count: (b.read_count || 0) + d.read
+                };
+            }));
+
+            // 3. Trigger Modal Update Signal (use the last event's context)
+            // We pass the set of updated IDs so the modal knows if it should refresh
+            const updatedIds = Object.keys(updates).map(Number);
+            if (updatedIds.length > 0) {
+                setLastBroadcastUpdate({
+                    timestamp: Date.now(),
+                    broadcastIds: updatedIds
+                });
+            }
+
+        }, 1000);
+
+        return () => {
+            if (ws) ws.close();
+            if (flushInterval) clearInterval(flushInterval);
+        };
+    }, []);
+
+    // Derived active broadcast for live updates in modal
+    const activeBroadcast = React.useMemo(() => {
+        if (!selectedBroadcast) return null;
+        return broadcasts.find(b => b.id === selectedBroadcast.id) || selectedBroadcast;
+    }, [broadcasts, selectedBroadcast]);
+
     useEffect(() => {
         fetchData();
         const interval = setInterval(fetchData, 10000);
@@ -1805,7 +1897,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
             {
                 selectedBroadcast && (
                     <BroadcastDetailPopup
-                        broadcast={selectedBroadcast}
+                        broadcast={activeBroadcast}
                         onClose={() => setSelectedBroadcast(null)}
                         onViewRecipients={(filter = 'all') => {
                             setRecipientFilter(filter);
@@ -1833,6 +1925,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <BroadcastRecipientsModal
                         broadcastId={viewRecipientsId}
                         filter={recipientFilter}
+                        lastUpdate={lastBroadcastUpdate}
                         onClose={() => setViewRecipientsId(null)}
                     />
                 )
@@ -3844,7 +3937,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
     );
 };
 
-function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
+function BroadcastRecipientsModal({ broadcastId, filter = 'all', lastUpdate, onClose }) {
     const [views, setViews] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -3867,13 +3960,16 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
     useEffect(() => {
         const fetchViews = async () => {
             try {
+                // If this update isn't for us, skip (unless it's initial load where lastUpdate is null/undefined)
+                if (lastUpdate && !lastUpdate.broadcastIds.includes(broadcastId)) return;
+
                 const data = await adminApi.fetch(`/admin/broadcasts/${broadcastId}/views`);
                 setViews(data.views || []);
             } catch (e) { console.error(e); }
             finally { setLoading(false); }
         };
         fetchViews();
-    }, [broadcastId]);
+    }, [broadcastId, lastUpdate]);
 
     // Save column widths to localStorage
     useEffect(() => {
