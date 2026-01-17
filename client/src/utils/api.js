@@ -90,11 +90,14 @@ class ApiClient {
       }
     } catch (parseError) {
       if (parseError.message.includes('Server is updating') || parseError.message.includes('Server Error') || parseError.message.includes('The server returned')) {
+        logger.log('API', 'Error', `Request to ${endpoint} failed: ${parseError.message}`);
         throw parseError;
       }
       // JSON parse failed
       const text = await response.text();
-      console.error('JSON parse error. Response text:', text.substring(0, 500));
+      const errMessage = `JSON parse error for ${endpoint}. Preview: ${text.substring(0, 100)}`;
+      console.error(errMessage);
+      logger.log('API', 'Error', errMessage);
       throw new Error('Invalid response from server. Please try again or contact support.');
     }
 

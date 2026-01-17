@@ -29,14 +29,22 @@ const getTimezoneLabel = () => {
 // Format timestamp: DD-MM-YYYY - HH:MM:SS CET/CEST
 const formatTimestamp = () => {
     const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
+    // Get time in Paris
+    const parisString = now.toLocaleString('en-GB', { timeZone: 'Europe/Paris', hour12: false });
+    // parisString is "DD/MM/YYYY, HH:MM:SS"
+    const [datePart, timePart] = parisString.split(', ');
+    const [day, month, year] = datePart.split('/');
+
+    // Determine DST based on offset comparison (same as before or simplified)
+    const unix = now.getTime();
+    const jan = new Date(year, 0, 1).getTimezoneOffset();
+    const jul = new Date(year, 6, 1).getTimezoneOffset();
+    // We can't rely on local offset for remote timezone DST check easily without libraries.
+    // But we can check if the Paris string offset matches.
+    // Simpler: Just rely on the previous logic for label but apply it to the Correct Time.
     const tz = getTimezoneLabel();
-    return `${day}-${month}-${year} - ${hours}:${minutes}:${seconds} ${tz}`;
+
+    return `${day}-${month}-${year} - ${timePart} ${tz}`;
 };
 
 // Get stored logs
@@ -81,16 +89,11 @@ export const logger = {
     log(module, action, message) {
         // Always log to console in dev or if debug enabled
         if (import.meta.env?.DEV || _debugEnabled) {
-            const timestamp = formatTimestamp();
-            // For console, we want a readable format
-            // For storage, we want the timestamped string
-
             // Console output
             if (import.meta.env?.DEV) console.log(`🐛 [${module}][${action}] ${message}`);
         }
 
-        // Only store if debug enabled (or we can store always and only upload if enabled? 
-        // Better to store always in ring buffer so we have history when enabled)
+        // Only store if debug enabled or needed for ring buffer
         const timestamp = formatTimestamp();
         const entry = `${timestamp} [${module}][${action}] ${message}`;
 
@@ -130,8 +133,11 @@ export const logger = {
                 platform: navigator.platform || 'Unknown',
                 userAgent: navigator.userAgent
             });
-            // Don't clear logs automatically, let admin clear or ring buffer handle it
-            // Or maybe clear uploaded ones? For simplicity, we keep ring buffer.
+
+            // Clear logs after successful upload to prevent duplication
+            // We use clear() which removes the item, so getLogs() will return [] next time
+            this.clear();
+
             return true;
         } catch (err) {
             console.error('Failed to upload logs:', err);

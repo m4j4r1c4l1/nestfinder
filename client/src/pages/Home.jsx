@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../i18n/LanguageContext';
 import { api } from '../utils/api';
+import { logger } from '../utils/logger';
 
 const Home = () => {
     const { login, recoverFromKey } = useAuth();
@@ -26,6 +27,8 @@ const Home = () => {
         setLoading(true);
         setError(null);
 
+        logger.log('Home', 'Action', `User clicking start with input: ${nickname ? 'Provided' : 'Empty'}`);
+
         try {
             if (isRecoveryKey(nickname)) {
                 // Attempt recovery
@@ -36,6 +39,7 @@ const Home = () => {
             }
         } catch (err) {
             console.error(err);
+            logger.log('Home', 'Error', `Start action failed: ${err.message}`);
             if (isRecoveryKey(nickname)) {
                 setError(t?.('welcome.invalidRecoveryKey') || 'Invalid recovery key. Please check and try again.');
             } else {

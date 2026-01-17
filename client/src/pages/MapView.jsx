@@ -11,6 +11,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useLanguage } from '../i18n/LanguageContext';
 import { api } from '../utils/api';
+import { logger } from '../utils/logger';
 import { useNotifications } from '../hooks/useNotifications';
 import NotificationBell from '../components/NotificationBell';
 import NotificationList from '../components/NotificationList';
@@ -53,9 +54,13 @@ const MapView = () => {
 
     // Fetch app config for testing banner
     useEffect(() => {
+        logger.log('MapView', 'Load', `Map interface loaded`);
         api.getAppConfig()
             .then(config => setAppConfig(config))
-            .catch(err => console.error('Failed to fetch app config:', err));
+            .catch(err => {
+                console.error('Failed to fetch app config:', err);
+                logger.log('MapView', 'Error', `Failed to fetch app config: ${err.message}`);
+            });
     }, []);
 
     // DO NOT auto-request location on mobile - requires user gesture

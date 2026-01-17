@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../utils/api';
+import { logger } from '../utils/logger';
 import { QRCodeCanvas } from 'qrcode.react';
 
 const NOTIFICATION_PREF_KEY = 'nestfinder_notify_settings';
@@ -67,6 +68,7 @@ const RecoveryKeySection = ({ t }) => {
 
             const result = await api.generateRecoveryKey();
             setRecoveryKey(result.recoveryKey);
+            logger.log('Settings', 'Action', 'Generated new recovery key');
             setKeyVisible(true);
             setFadeOpacity(1);
             setShowKey(true);
@@ -1369,6 +1371,7 @@ const SettingsPanel = ({ onClose }) => {
         setSwipeDirection(dir);
         localStorage.setItem('nestfinder_swipe_direction', dir);
         window.dispatchEvent(new Event('storage'));
+        logger.log('Settings', 'Change', `Swipe direction set to: ${dir}`);
     };
 
     // Swipe Enabled Toggle
@@ -1384,6 +1387,7 @@ const SettingsPanel = ({ onClose }) => {
         setSwipeEnabled(newValue);
         localStorage.setItem('nestfinder_swipe_enabled', newValue);
         window.dispatchEvent(new Event('storage'));
+        logger.log('Settings', 'Toggle', `Swipe gestures ${newValue ? 'enabled' : 'disabled'}`);
     };
 
     const handleRetentionChange = async (val) => {
@@ -1393,6 +1397,8 @@ const SettingsPanel = ({ onClose }) => {
         setRetention(value);
         localStorage.setItem('nestfinder_message_retention', value);
         window.dispatchEvent(new Event('storage'));
+
+        logger.log('Settings', 'Change', `Message retention set to: ${value}`);
 
         // Trigger prune
         if (value !== 'forever') {

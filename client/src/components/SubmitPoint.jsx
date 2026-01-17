@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useLanguage } from '../i18n/LanguageContext';
+import { logger } from '../utils/logger';
 import VoiceButton from './VoiceButton';
 
 const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
@@ -118,6 +119,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         e.preventDefault();
         if (!location) {
             setError(t('submit.locationRequired'));
+            logger.log('SubmitPoint', 'Error', 'Submission attempted without location');
             return;
         }
 
@@ -127,15 +129,19 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
             const allNotes = [...tags, ...needs];
             if (voiceNotes.trim()) allNotes.push(voiceNotes.trim());
 
+            logger.log('SubmitPoint', 'Action', `Submitting point at ${location.latitude},${location.longitude} [${allNotes.join(',')}]`);
+
             await onSubmit({
                 latitude: location.latitude,
                 longitude: location.longitude,
                 address,
                 notes: allNotes.join(',')
             });
+            logger.log('SubmitPoint', 'Success', 'Point submitted successfully');
         } catch (err) {
             console.error('Submit point error:', err);
             setError(err.message || t('submit.error'));
+            logger.log('SubmitPoint', 'Error', `Submission failed: ${err.message}`);
             setIsSubmitting(false);
         }
     };

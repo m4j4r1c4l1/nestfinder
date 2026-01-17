@@ -107,7 +107,7 @@ router.get('/users/:id/logs/download', requireAdmin, (req, res) => {
 DEBUG LOGS EXPORT
 User:      ${user?.nickname || 'Anonymous'}
 UserID:    ${id}
-Generated: ${new Date().toISOString().replace('T', ' ').split('.')[0]}
+Generated: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/Paris' })} (CET/CEST)
 ================================================================================\n\n`;
 
         let content = header;
