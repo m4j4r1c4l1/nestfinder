@@ -21,8 +21,9 @@ const Settings = () => {
         adminApi.getSettings().then(data => {
             setSettings(data.settings);
             // Cache debug mode to localStorage for adminApi.debugLog
-            localStorage.setItem('nestfinder_debug_mode', data.settings.debug_mode_enabled === 'true' ? 'true' : 'false');
-            window.dispatchEvent(new CustomEvent('settings:debug_mode_changed', { detail: { enabled: data.settings.debug_mode_enabled === 'true' } }));
+            const isDebugEnabled = String(data.settings.debug_mode_enabled) === 'true';
+            localStorage.setItem('nestfinder_debug_mode', isDebugEnabled ? 'true' : 'false');
+            window.dispatchEvent(new CustomEvent('settings:debug_mode_changed', { detail: { enabled: isDebugEnabled } }));
             setLoading(false);
         });
     }, []);

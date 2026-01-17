@@ -190,7 +190,7 @@ const App = () => {
         { id: 'messages', label: 'Messages', icon: '🔔' },
         { id: 'users', label: 'Users', icon: '🦚' },
         { id: 'logs', label: 'Logs', icon: '🥚' },
-        ...(debugModeEnabled ? [{ id: 'debug', label: 'Debug', icon: '🐛' }] : []),
+        { id: 'debug', label: 'Debug', icon: '🐛' },
         { id: 'settings', label: 'Settings', icon: '🦉' }
     ];
 
@@ -240,31 +240,42 @@ const App = () => {
 
                 {/* Navigation */}
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-                    {navItems.map(item => (
-                        <button
-                            key={item.id}
-                            onClick={() => setView(item.id)}
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'center', // Centers the inner block
-                                alignItems: 'center',
-                                padding: '0.75rem 0', // Removed horizontal padding, relying on inner block width
-                                background: view === item.id ? 'var(--color-primary-light)' : 'transparent',
-                                border: 'none',
-                                borderRadius: 'var(--radius-md)',
-                                color: view === item.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                width: '100%',
-                                textAlign: 'left'
-                            }}
-                        >
-                            <div style={{ width: '150px', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <span style={{ fontSize: '1.4rem', lineHeight: 1, width: '30px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>{item.icon}</span>
-                                <span style={{ fontSize: '0.9rem', fontWeight: view === item.id ? 600 : 400 }}>{item.label}</span>
-                            </div>
-                        </button>
-                    ))}
+                    {navItems.map(item => {
+                        const isDebug = item.id === 'debug';
+                        const isHidden = isDebug && !debugModeEnabled;
+                        const isActive = view === item.id;
+
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => !isHidden && setView(item.id)}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'center', // Centers the inner block
+                                    alignItems: 'center',
+                                    padding: isHidden ? '0' : '0.75rem 0', // Removed horizontal padding, relying on inner block width
+                                    background: isActive ? 'var(--color-primary-light)' : 'transparent',
+                                    border: 'none',
+                                    borderRadius: 'var(--radius-md)',
+                                    color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                                    cursor: isHidden ? 'default' : 'pointer',
+                                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    height: isHidden ? 0 : 'auto',
+                                    opacity: isHidden ? 0 : 1,
+                                    overflow: 'hidden',
+                                    pointerEvents: isHidden ? 'none' : 'auto',
+                                    marginBottom: isHidden ? 0 : '0.25rem'
+                                }}
+                            >
+                                <div style={{ width: '150px', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <span style={{ fontSize: '1.4rem', lineHeight: 1, width: '30px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>{item.icon}</span>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: isActive ? 600 : 400 }}>{item.label}</span>
+                                </div>
+                            </button>
+                        );
+                    })}
                 </nav>
 
                 {/* Logout */}
