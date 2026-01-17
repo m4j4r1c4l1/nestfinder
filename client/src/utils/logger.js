@@ -2,14 +2,37 @@ import { getSetting } from './api';
 
 const LOG_BUFFER_SIZE = 20;
 const FLUSH_INTERVAL = 5000; // 5 seconds
+const STORAGE_KEY = 'nestfinder_debug_logs';
 
 let logBuffer = [];
 let flushTimer = null;
 let isDebugMode = false;
+let currentUserId = null;
 
-// Initialize logger with current debug state
-export const initLogger = (debugEnabled) => {
+// Get CET/CEST timezone label
+const getTimezoneLabel = () => {
+    const now = new Date();
+    const jan = new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
+    const jul = new Date(now.getFullYear(), 6, 1).getTimezoneOffset();
+    return Math.max(jan, jul) !== Math.min(jan, jul) ? 'CEST' : 'CET';
+};
+
+// Format: DD-MM-YYYY - HH:MM:SS CET/CEST
+const formatTimestamp = () => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${day}-${month}-${year} - ${hours}:${minutes}:${seconds} ${getTimezoneLabel()}`;
+};
+
+// Initialize logger with current debug state and user ID
+export const initLogger = (debugEnabled, userId = null) => {
     isDebugMode = debugEnabled;
+    currentUserId = userId;
     if (isDebugMode) {
         console.log('[Logger] Debug Mode Enabled');
         // Flush any pending logs immediately
@@ -30,12 +53,18 @@ export const setDebugMode = (enabled) => {
     }
 };
 
+// Set user ID for log uploads
+export const setUserId = (userId) => {
+    currentUserId = userId;
+};
+
 const sendLogs = async (logsToSend) => {
     if (!logsToSend || logsToSend.length === 0) return;
 
     try {
         const payload = {
             logs: logsToSend,
+            userId: currentUserId,
             platform: navigator.platform,
             userAgent: navigator.userAgent
         };
@@ -80,7 +109,7 @@ const queueLog = (level, ...args) => {
         return String(arg);
     }).join(' ');
 
-    const entry = `[${new Date().toISOString()}] [${level.toUpperCase()}] ${message}`;
+    const entry = `${formatTimestamp()} [${level.toUpperCase()}] ${message}`;
     logBuffer.push(entry);
 
     if (logBuffer.length >= LOG_BUFFER_SIZE) {

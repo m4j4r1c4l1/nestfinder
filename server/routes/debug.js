@@ -8,10 +8,10 @@ const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOG_FILE = path.join(__dirname, '../../debug_logs.txt');
 
-import { requireAdmin } from '../middleware/auth.js';
-import { getSetting, all } from '../database.js';
+import { requireAdmin, requireAuth } from '../middleware/auth.js';
+import { getSetting, all, run, get } from '../database.js';
 
-// Middleware: Check if Debug Mode is enabled
+// Middleware: Check if Debug Mode is globally enabled
 const requireDebugMode = (req, res, next) => {
     const isEnabled = getSetting('debug_mode_enabled') === 'true';
     if (!isEnabled) {
@@ -20,33 +20,191 @@ const requireDebugMode = (req, res, next) => {
     next();
 };
 
-// POST /api/debug/logs - Append logs
-// Publicly accessible BUT only when Debug Mode is globally enabled
+// ==========================================
+// ADMIN ENDPOINTS (Require Admin Auth)
+// ==========================================
+
+// GET /api/debug/users - List users with debug status
+router.get('/users', requireAdmin, (req, res) => {
+    try {
+        const users = all(`
+            SELECT 
+                u.id, 
+                u.nickname, 
+                u.debug_enabled, 
+                u.debug_last_seen,
+                u.last_active,
+                (SELECT COUNT(*) FROM client_logs WHERE user_id = u.id) as log_count
+            FROM users u
+            ORDER BY u.debug_enabled DESC, u.last_active DESC
+            LIMIT 100
+        `);
+        res.json({ users });
+    } catch (err) {
+        console.error('Error fetching debug users:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/debug/users/:id/toggle - Toggle debug mode for user
+router.post('/users/:id/toggle', requireAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = get('SELECT debug_enabled FROM users WHERE id = ?', [id]);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const newState = user.debug_enabled ? 0 : 1;
+        run('UPDATE users SET debug_enabled = ? WHERE id = ?', [newState, id]);
+
+        res.json({
+            success: true,
+            debug_enabled: newState === 1,
+            message: newState ? 'Debug enabled for user' : 'Debug disabled for user'
+        });
+    } catch (err) {
+        console.error('Error toggling debug:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/debug/users/:id/logs - Get logs for specific user
+router.get('/users/:id/logs', requireAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        const logs = all('SELECT * FROM client_logs WHERE user_id = ? ORDER BY uploaded_at DESC', [id]);
+
+        // Combine all log entries
+        const allLogs = logs.map(entry => {
+            try {
+                return JSON.parse(entry.logs);
+            } catch {
+                return [entry.logs];
+            }
+        }).flat();
+
+        res.json({
+            user_id: id,
+            log_count: allLogs.length,
+            logs: allLogs,
+            entries: logs.length
+        });
+    } catch (err) {
+        console.error('Error fetching user logs:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/debug/users/:id/logs/download - Download logs as text file
+router.get('/users/:id/logs/download', requireAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = get('SELECT nickname FROM users WHERE id = ?', [id]);
+        const logs = all('SELECT * FROM client_logs WHERE user_id = ? ORDER BY uploaded_at ASC', [id]);
+
+        let content = `=== Debug Logs for ${user?.nickname || 'Anonymous'} (${id}) ===\n`;
+        content += `Generated: ${new Date().toISOString()}\n\n`;
+
+        logs.forEach((entry, i) => {
+            content += `--- Upload #${i + 1} [${entry.uploaded_at}] ---\n`;
+            content += `Platform: ${entry.platform || 'Unknown'}\n`;
+            try {
+                const parsed = JSON.parse(entry.logs);
+                content += parsed.join('\n') + '\n';
+            } catch {
+                content += entry.logs + '\n';
+            }
+            content += '\n';
+        });
+
+        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Disposition', `attachment; filename="debug_${user?.nickname || id}_${Date.now()}.txt"`);
+        res.send(content);
+    } catch (err) {
+        console.error('Error downloading logs:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// DELETE /api/debug/users/:id/logs - Clear logs for user
+router.delete('/users/:id/logs', requireAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        run('DELETE FROM client_logs WHERE user_id = ?', [id]);
+        res.json({ success: true, message: 'Logs cleared' });
+    } catch (err) {
+        console.error('Error clearing logs:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==========================================
+// CLIENT ENDPOINTS (Require Debug Mode)
+// ==========================================
+
+// GET /api/debug/status - Check if debug is enabled for current user
+router.get('/status', requireAuth, (req, res) => {
+    try {
+        const globalEnabled = getSetting('debug_mode_enabled') === 'true';
+        const user = get('SELECT debug_enabled FROM users WHERE id = ?', [req.user.id]);
+
+        res.json({
+            global_enabled: globalEnabled,
+            user_enabled: user?.debug_enabled === 1,
+            active: globalEnabled && user?.debug_enabled === 1
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/debug/logs - Upload logs from client (requires both global + user debug)
 router.post('/logs', requireDebugMode, (req, res) => {
     try {
-        const { logs, platform, userAgent } = req.body;
+        const { logs, platform, userAgent, userId } = req.body;
+
+        if (!logs || !Array.isArray(logs) || logs.length === 0) {
+            return res.status(400).json({ error: 'No logs provided' });
+        }
+
+        // Check if user has debug enabled
+        if (userId) {
+            const user = get('SELECT debug_enabled FROM users WHERE id = ?', [userId]);
+            if (!user || user.debug_enabled !== 1) {
+                return res.status(403).json({ error: 'Debug not enabled for this user' });
+            }
+
+            // Store in database
+            run(`
+                INSERT INTO client_logs (user_id, logs, platform, user_agent)
+                VALUES (?, ?, ?, ?)
+            `, [userId, JSON.stringify(logs), platform || null, userAgent || null]);
+
+            // Update last seen
+            run('UPDATE users SET debug_last_seen = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
+        }
+
+        // Also append to legacy file for backwards compatibility
         const timestamp = new Date().toISOString();
-
-        const logEntry = `\n--- LOG ENTRY [${timestamp}] ---\nPlatform: ${platform || 'Unknown'}\nUA: ${userAgent || 'Unknown'}\n${logs.join('\n')}\n----------------------------\n`;
-
+        const logEntry = `\n--- LOG ENTRY [${timestamp}] ---\nUser: ${userId || 'Unknown'}\nPlatform: ${platform || 'Unknown'}\nUA: ${userAgent || 'Unknown'}\n${logs.join('\n')}\n----------------------------\n`;
         fs.appendFileSync(LOG_FILE, logEntry);
-        console.log(`[DEBUG] Received ${logs.length} logs from client.`);
-        res.json({ success: true });
+
+        console.log(`[DEBUG] Received ${logs.length} logs from ${userId || 'unknown client'}.`);
+        res.json({ success: true, stored: logs.length });
     } catch (err) {
         console.error('Error writing debug logs:', err);
         res.status(500).json({ error: 'Failed to save logs' });
     }
 });
 
-// GET /api/debug/download - Download logs
-// Protected: Requires Admin OR Debug Mode (if we want to allow easy access, but usually Admin only is safer for downloading)
-// Let's restrict to Admin for security, as typically only devs/admins need to read them.
+// GET /api/debug/download - Download legacy log file (Admin only)
 router.get('/download', requireAdmin, (req, res) => {
     try {
         if (fs.existsSync(LOG_FILE)) {
-            res.download(LOG_FILE, 'swipe_debug_logs.txt');
+            res.download(LOG_FILE, 'debug_logs.txt');
         } else {
-            res.status(404).send('No logs found.');
+            res.status(404).send('No legacy logs found.');
         }
     } catch (err) {
         console.error('Error sending log file:', err);
@@ -54,14 +212,12 @@ router.get('/download', requireAdmin, (req, res) => {
     }
 });
 
-// GET /api/debug/dump/tables - Dump broadcast_views and notifications
-// CRITICAL SECURITY: Requires Admin Authentication explicitly. 
-// Even if debug mode is on, public shouldn't see PII.
+// GET /api/debug/dump/tables - Dump broadcast_views and notifications (Admin only)
 router.get('/dump/tables', requireAdmin, (req, res) => {
     try {
         const broadcastViews = all('SELECT * FROM broadcast_views ORDER BY created_at DESC');
         const notifications = all('SELECT * FROM notifications ORDER BY created_at DESC LIMIT 50');
-        const users = all('SELECT id, nickname, created_at FROM users ORDER BY created_at DESC LIMIT 20');
+        const users = all('SELECT id, nickname, created_at, debug_enabled FROM users ORDER BY created_at DESC LIMIT 20');
 
         res.json({
             meta: {

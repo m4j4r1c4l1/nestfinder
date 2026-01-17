@@ -6,6 +6,7 @@ import Settings from './pages/Settings';
 import Observability from './pages/Observability';
 import Messages from './pages/Messages';
 import Users from './pages/Users';
+import Debug from './pages/Debug';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -174,6 +175,8 @@ const App = () => {
         setToken(null);
     };
 
+    // Check if debug mode is enabled (cached in localStorage by Settings page)
+    const debugModeEnabled = localStorage.getItem('nestfinder_debug_mode') === 'true';
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '🐥' },
@@ -181,6 +184,7 @@ const App = () => {
         { id: 'messages', label: 'Messages', icon: '🔔' },
         { id: 'users', label: 'Users', icon: '🦚' },
         { id: 'logs', label: 'Logs', icon: '🥚' },
+        ...(debugModeEnabled ? [{ id: 'debug', label: 'Debug', icon: '🐛' }] : []),
         { id: 'settings', label: 'Settings', icon: '🦉' }
     ];
 
@@ -288,6 +292,7 @@ const App = () => {
                 {view === 'messages' && <Messages />}
                 {view === 'users' && <Users />}
                 {view === 'logs' && <Logs />}
+                {view === 'debug' && <Debug />}
                 {view === 'settings' && <Settings />}
             </main>
         </div>

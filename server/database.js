@@ -289,6 +289,24 @@ export const initDatabase = async () => {
   try { db.run("ALTER TABLE feedback ADD COLUMN rating INTEGER"); } catch (e) { /* Exists */ }
   try { db.run("ALTER TABLE feedback ADD COLUMN status TEXT DEFAULT 'sent'"); } catch (e) { /* Exists */ }
 
+  // Debug feature migrations
+  try { db.run("ALTER TABLE users ADD COLUMN debug_enabled INTEGER DEFAULT 0"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE users ADD COLUMN debug_last_seen DATETIME"); } catch (e) { /* Exists */ }
+
+  // Client logs table (per-user debug logs)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS client_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      logs TEXT NOT NULL,
+      platform TEXT,
+      user_agent TEXT,
+      uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(user_id) REFERENCES users(id)
+    );
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_client_logs_user_id ON client_logs(user_id);`);
+
   // ==========================================
   // DEFAULT DATA
   // ==========================================
@@ -309,7 +327,8 @@ export const initDatabase = async () => {
     { key: 'rate_limit_vote', value: '30' },
     { key: 'rate_limit_vote', value: '30' },
     { key: 'rate_limit_admin_login', value: '5' },
-    { key: 'debug_mode_enabled', value: 'false' }
+    { key: 'debug_mode_enabled', value: 'false' },
+    { key: 'debug_retention_days', value: '7' }
   ];
 
   defaultSettings.forEach(s => {
