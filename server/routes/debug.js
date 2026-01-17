@@ -13,6 +13,11 @@ import { getSetting, all, run, get } from '../database.js';
 
 // Middleware: Check if Debug Mode is globally enabled
 const requireDebugMode = (req, res, next) => {
+    // Exception: Crash reports are always allowed
+    if (req.body && req.body.isCrash) {
+        return next();
+    }
+
     const isEnabled = getSetting('debug_mode_enabled') === 'true';
     if (!isEnabled) {
         return res.status(403).json({ error: 'Debug Mode is disabled' });
@@ -191,6 +196,11 @@ router.post('/logs', requireDebugMode, (req, res) => {
 
         if (!logs || !Array.isArray(logs) || logs.length === 0) {
             return res.status(400).json({ error: 'No logs provided' });
+        }
+
+        // Abuse prevention: Limit number of logs per upload
+        if (logs.length > 500) {
+            return res.status(400).json({ error: 'Payload too large: Max 500 logs per request' });
         }
 
         // Check if user has debug enabled, UNLESS it's a crash report
