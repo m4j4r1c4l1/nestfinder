@@ -43,12 +43,21 @@ const Settings = () => {
     const handleSave = async (e) => {
         e.preventDefault();
         setSaving(true);
-        setMessage({ text: '', type: '' });
         try {
             await adminApi.updateSettings(settings);
-            setMessage({ text: 'Settings saved successfully!', type: 'success' });
+            setResultModal({
+                title: 'Settings Saved',
+                message: 'Application settings have been successfully updated.',
+                type: 'success',
+                onClose: () => setResultModal(null)
+            });
         } catch (err) {
-            setMessage({ text: 'Error saving settings', type: 'error' });
+            setResultModal({
+                title: 'Save Failed',
+                message: err.message || 'Error saving settings',
+                type: 'error',
+                onClose: () => setResultModal(null)
+            });
         } finally {
             setSaving(false);
         }
