@@ -164,7 +164,8 @@ const App = () => {
     const [debugModeEnabled, setDebugModeEnabled] = useState(localStorage.getItem('nestfinder_debug_mode') === 'true');
 
     React.useEffect(() => {
-        const handleDebugChange = (e) => setDebugModeEnabled(e.detail.enabled === 'true');
+        const handleDebugChange = (e) => setDebugModeEnabled(String(e.detail.enabled) === 'true');
+        window.dispatchEvent(new CustomEvent('settings:debug_mode_changed', { detail: { enabled: debugModeEnabled } })); // Sync initial
         window.addEventListener('settings:debug_mode_changed', handleDebugChange);
         return () => window.removeEventListener('settings:debug_mode_changed', handleDebugChange);
     }, []);
