@@ -103,19 +103,33 @@ router.get('/users/:id/logs/download', requireAdmin, (req, res) => {
         const user = get('SELECT nickname FROM users WHERE id = ?', [id]);
         const logs = all('SELECT * FROM client_logs WHERE user_id = ? ORDER BY uploaded_at ASC', [id]);
 
-        let content = `=== Debug Logs for ${user?.nickname || 'Anonymous'} (${id}) ===\n`;
-        content += `Generated: ${new Date().toISOString()}\n\n`;
+        const header = `================================================================================
+DEBUG LOGS EXPORT
+User:      ${user?.nickname || 'Anonymous'}
+UserID:    ${id}
+Generated: ${new Date().toISOString().replace('T', ' ').split('.')[0]}
+================================================================================\n\n`;
+
+        let content = header;
 
         logs.forEach((entry, i) => {
-            content += `--- Upload #${i + 1} [${entry.uploaded_at}] ---\n`;
-            content += `Platform: ${entry.platform || 'Unknown'}\n`;
+            content += `--------------------------------------------------------------------------------\n`;
+            content += `UPLOAD #${i + 1}\n`;
+            content += `Timestamp: ${entry.uploaded_at.replace('T', ' ').split('.')[0]}\n`;
+            content += `Platform:  ${entry.platform || 'Unknown'}\n`;
+            content += `--------------------------------------------------------------------------------\n`;
+
             try {
                 const parsed = JSON.parse(entry.logs);
-                content += parsed.join('\n') + '\n';
+                // Format each line for better readability
+                content += parsed.map(line => {
+                    // Try to align timestamps strictly if possible, otherwise just output content
+                    return line;
+                }).join('\n') + '\n';
             } catch {
                 content += entry.logs + '\n';
             }
-            content += '\n';
+            content += '\n\n';
         });
 
         res.setHeader('Content-Type', 'text/plain');
