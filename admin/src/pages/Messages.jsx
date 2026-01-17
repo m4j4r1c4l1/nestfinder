@@ -3727,7 +3727,6 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             }}>
                                 <span style={{ fontSize: '1.1rem' }}>📊</span>
                                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#f97316', fontWeight: 600 }}>Total</span>
                             </div>
 
                             {/* Separator */}
@@ -3745,7 +3744,6 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             }}>
                                 <span style={{ color: '#fbbf24', fontSize: '1rem' }}>✓</span>
                                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 600 }}>Sent</span>
                             </div>
 
                             {/* Separator */}
@@ -3763,7 +3761,6 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             }}>
                                 <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
                                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.delivered_count || 0}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 600 }}>Delivered</span>
                             </div>
 
                             {/* Separator */}
@@ -3781,7 +3778,6 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             }}>
                                 <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
                                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.read_count || 0}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 600 }}>Read</span>
                             </div>
                         </div>
 
@@ -3994,55 +3990,69 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                             {/* Stats - Matching Pill Design from Details Modal */}
                             <div style={{ padding: '1rem 1.5rem', flexShrink: 0, borderBottom: '1px solid #334155' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                    {/* Total Pill */}
+                                    {/* Total Pill - Orange */}
                                     <div style={{
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '0.5rem',
-                                        padding: '0.4rem 0.75rem',
-                                        background: 'rgba(234, 179, 8, 0.15)',
+                                        padding: '0.5rem 0.9rem',
+                                        background: 'rgba(249, 115, 22, 0.15)',
                                         borderRadius: '20px',
-                                        border: '1px solid rgba(234, 179, 8, 0.3)'
+                                        border: '1px solid rgba(249, 115, 22, 0.3)'
                                     }}>
-                                        <span style={{ fontSize: '1rem' }}>📊</span>
-                                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{total}</span>
-                                        <span style={{ fontSize: '0.7rem', color: '#eab308', fontWeight: 600 }}>Total</span>
+                                        <span style={{ fontSize: '1.1rem' }}>📊</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{total}</span>
                                     </div>
 
                                     {/* Separator */}
                                     <div style={{ width: '1px', height: '24px', background: '#334155' }} />
 
-                                    {/* Delivered Pill */}
+                                    {/* Sent Pill - Amber */}
                                     <div style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '0.4rem',
-                                        padding: '0.4rem 0.75rem',
+                                        gap: '0.5rem',
+                                        padding: '0.5rem 0.9rem',
+                                        background: 'rgba(251, 191, 36, 0.15)',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(251, 191, 36, 0.3)'
+                                    }}>
+                                        <span style={{ color: '#fbbf24', fontSize: '1rem' }}>✓</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{sentCount}</span>
+                                    </div>
+
+                                    {/* Separator */}
+                                    <div style={{ width: '1px', height: '24px', background: '#334155' }} />
+
+                                    {/* Delivered Pill - Green */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        padding: '0.5rem 0.9rem',
                                         background: 'rgba(34, 197, 94, 0.15)',
                                         borderRadius: '20px',
                                         border: '1px solid rgba(34, 197, 94, 0.3)'
                                     }}>
-                                        <span style={{ color: '#22c55e', fontSize: '0.9rem' }}>✓✓</span>
-                                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{deliveredCount}</span>
-                                        <span style={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>Delivered</span>
+                                        <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{deliveredCount}</span>
                                     </div>
 
                                     {/* Separator */}
                                     <div style={{ width: '1px', height: '24px', background: '#334155' }} />
 
-                                    {/* Read Pill */}
+                                    {/* Read Pill - Blue */}
                                     <div style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '0.4rem',
-                                        padding: '0.4rem 0.75rem',
+                                        gap: '0.5rem',
+                                        padding: '0.5rem 0.9rem',
                                         background: 'rgba(59, 130, 246, 0.15)',
                                         borderRadius: '20px',
                                         border: '1px solid rgba(59, 130, 246, 0.3)'
                                     }}>
-                                        <span style={{ color: '#3b82f6', fontSize: '0.9rem' }}>✓✓</span>
-                                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>{readCount}</span>
-                                        <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 600 }}>Read</span>
+                                        <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{readCount}</span>
                                     </div>
                                 </div>
                             </div>
