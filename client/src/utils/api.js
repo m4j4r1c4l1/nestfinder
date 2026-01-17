@@ -58,16 +58,28 @@ class ApiClient {
 
     let data;
     try {
+      // Detect server unavailable (502/503/504) - show toast and suppress console noise
+      if (response.status === 502 || response.status === 503 || response.status === 504) {
+        // Dispatch event for toast (deduplicated by listener)
+        window.dispatchEvent(new CustomEvent('server:unavailable', { detail: { status: response.status } }));
+        throw new Error('Server is updating. Please wait...');
+      }
+
       if (isJson) {
         data = await response.json();
       } else {
         // Non-JSON response (likely HTML error page or plain text)
         const text = await response.text();
+        // Check if it looks like a 502/503/504 error page
+        if (text.includes('<title>502') || text.includes('<title>503') || text.includes('<title>504')) {
+          window.dispatchEvent(new CustomEvent('server:unavailable', { detail: { status: response.status } }));
+          throw new Error('Server is updating. Please wait...');
+        }
         console.error('Non-JSON response:', text.substring(0, 500));
         throw new Error('Server Error: The server returned an invalid response format.');
       }
     } catch (parseError) {
-      if (parseError.message.includes('Server Error') || parseError.message.includes('The server returned')) {
+      if (parseError.message.includes('Server is updating') || parseError.message.includes('Server Error') || parseError.message.includes('The server returned')) {
         throw parseError;
       }
       // JSON parse failed

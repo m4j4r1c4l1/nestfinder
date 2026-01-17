@@ -4,6 +4,7 @@ const ToastContext = createContext(null);
 
 export const ToastProvider = ({ children }) => {
     const [toasts, setToasts] = useState([]);
+    const serverUnavailableRef = React.useRef(false); // Debounce flag
 
     const addToast = useCallback((message, options = {}) => {
         const id = Date.now();
@@ -27,6 +28,28 @@ export const ToastProvider = ({ children }) => {
     const removeToast = useCallback((id) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
+
+    // Listen for server:unavailable events (from api.js)
+    useEffect(() => {
+        const handleServerUnavailable = () => {
+            // Debounce: only show once every 10 seconds
+            if (serverUnavailableRef.current) return;
+            serverUnavailableRef.current = true;
+
+            addToast('Server updating, please wait...', {
+                type: 'warning',
+                icon: '🔄',
+                duration: 5000
+            });
+
+            setTimeout(() => {
+                serverUnavailableRef.current = false;
+            }, 60000); // 1 minute debounce
+        };
+
+        window.addEventListener('server:unavailable', handleServerUnavailable);
+        return () => window.removeEventListener('server:unavailable', handleServerUnavailable);
+    }, [addToast]);
 
     return (
         <ToastContext.Provider value={{ addToast, removeToast }}>
