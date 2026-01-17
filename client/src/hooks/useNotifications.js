@@ -55,6 +55,22 @@ export const useNotifications = (userId) => {
                 maxKnownIdRef.current = Math.max(maxKnownIdRef.current, latestId);
                 setNotifications(data.notifications);
                 setUnreadCount(data.notifications.filter(n => !n.read).length);
+
+                // Mark broadcasts as delivered when fetched (regardless of display setting)
+                const undeliveredBroadcasts = data.notifications.filter(n =>
+                    n.type === 'broadcast' && n.status === 'sent'
+                );
+                undeliveredBroadcasts.forEach(async (broadcast) => {
+                    try {
+                        await fetch(`${API_URL}/api/push/notifications/broadcasts/${broadcast.id}/delivered`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId })
+                        });
+                    } catch (e) {
+                        console.warn('Failed to mark broadcast as delivered:', e);
+                    }
+                });
             } else {
                 setNotifications([]);
                 setUnreadCount(0);
@@ -89,6 +105,22 @@ export const useNotifications = (userId) => {
                         maxKnownIdRef.current = data.notifications[0].id;
                         setNotifications(data.notifications);
                         setUnreadCount(data.notifications.filter(n => !n.read).length);
+
+                        // Mark broadcasts as delivered when initially fetched
+                        const undeliveredBroadcasts = data.notifications.filter(n =>
+                            n.type === 'broadcast' && n.status === 'sent'
+                        );
+                        undeliveredBroadcasts.forEach(async (broadcast) => {
+                            try {
+                                await fetch(`${API_URL}/api/push/notifications/broadcasts/${broadcast.id}/delivered`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ userId })
+                                });
+                            } catch (e) {
+                                console.warn('Failed to mark broadcast as delivered:', e);
+                            }
+                        });
                     }
                     initialLoaded.current = true;
                     setLoading(false);
