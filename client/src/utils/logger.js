@@ -168,10 +168,24 @@ export const logger = {
      */
     async init(api) {
         if (api.userId) _userId = api.userId;
+
+        // Initial check
         await this.checkStatus(api);
+
         if (_debugEnabled) {
             this.log('Logger', 'Init', `Debug logging enabled for user ${_userId}`);
+        } else {
+            // Log startup anyway (will only be stored if we decide to store everything, 
+            // but currently log() checks _debugEnabled for console. 
+            // For storage, we might want to store it?)
+            // actually log() stores to ring buffer ALWAYS.
+            this.log('Logger', 'Init', `App started (Debug disabled, User: ${_userId})`);
         }
+
+        // Poll status every 30 seconds to allow dynamic enabling
+        // Clear existing interval if re-initializing
+        if (window._nestfinder_debug_poll) clearInterval(window._nestfinder_debug_poll);
+        window._nestfinder_debug_poll = setInterval(() => this.checkStatus(api), 30000);
     }
 };
 
