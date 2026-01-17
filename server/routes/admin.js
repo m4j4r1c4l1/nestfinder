@@ -18,6 +18,341 @@ export const setBroadcast = (fn) => { broadcast = fn; };
 
 // ================== DB RECOVERY ==================
 
+// List all database files in the DB folder
+router.get('/db/files', (req, res) => {
+    try {
+        const dbDir = path.dirname(DB_PATH);
+        if (!fs.existsSync(dbDir)) return res.json({ files: [] });
+
+        const files = fs.readdirSync(dbDir);
+        const dbFiles = files
+            .filter(f => f.endsWith('.db') || f.includes('.db.'))
+            .map(filename => {
+                const filePath = path.join(dbDir, filename);
+                const stats = fs.statSync(filePath);
+
+                // Determine file type
+                let type = 'other';
+                if (filename === 'nestfinder.db') type = 'active';
+                else if (filename.includes('.corrupt')) type = 'corrupt';
+                else if (filename.includes('.restore_backup')) type = 'restore_backup';
+                else if (filename.startsWith('scheduled_backup_')) type = 'scheduled';
+                else if (filename.startsWith('uploaded_')) type = 'uploaded';
+
+                return {
+                    name: filename,
+                    size: stats.size,
+                    modified: stats.mtime.toISOString(),
+                    type
+                };
+            })
+            .sort((a, b) => new Date(b.modified) - new Date(a.modified)); // Newest first
+
+        // Calculate total folder usage
+        const totalSize = dbFiles.reduce((acc, f) => acc + f.size, 0);
+
+        // Try to get disk stats (Node 18.15+)
+        let diskStats = { total: 0, free: 0, used: 0 };
+        try {
+            if (fs.statfsSync) {
+                const stats = fs.statfsSync(dbDir);
+                diskStats.total = stats.bsize * stats.blocks;
+                diskStats.free = stats.bsize * stats.bfree;
+                diskStats.used = diskStats.total - diskStats.free;
+            }
+        } catch (e) {
+            // Fallback or ignore if not available
+        }
+
+        res.json({
+            files: dbFiles,
+            usage: {
+                folderSize: totalSize,
+                disk: diskStats
+            }
+        });
+    } catch (error) {
+        console.error('List DB files error:', error);
+        res.status(500).json({ error: 'Failed to list database files' });
+    }
+});
+
+// Delete a specific database file (not the active one)
+router.delete('/db/files/:filename', (req, res) => {
+    try {
+        const { filename } = req.params;
+
+        // Prevent deletion of active database
+        if (filename === 'nestfinder.db') {
+            return res.status(403).json({ error: 'Cannot delete the active database' });
+        }
+
+        // Validate filename (prevent path traversal)
+        if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+            return res.status(400).json({ error: 'Invalid filename' });
+        }
+
+        const dbDir = path.dirname(DB_PATH);
+        const filePath = path.join(dbDir, filename);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        fs.unlinkSync(filePath);
+        res.json({ success: true, message: `Deleted ${filename}` });
+    } catch (error) {
+        console.error('Delete DB file error:', error);
+        res.status(500).json({ error: 'Failed to delete file' });
+    }
+});
+
+// Upload a database file (without restoring)
+router.post('/db/upload', (req, res) => {
+    try {
+        const timestamp = Date.now();
+        const dbDir = path.dirname(DB_PATH);
+        const uploadedFilename = `uploaded_${timestamp}.db`;
+        const filePath = path.join(dbDir, uploadedFilename);
+
+        const writeStream = fs.createWriteStream(filePath);
+        req.pipe(writeStream);
+
+        writeStream.on('finish', () => {
+            const stats = fs.statSync(filePath);
+            res.json({
+                success: true,
+                filename: uploadedFilename,
+                size: stats.size
+            });
+        });
+
+        writeStream.on('error', (err) => {
+            console.error('Upload write error:', err);
+            res.status(500).json({ error: 'Failed to upload file' });
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ error: 'Failed to initiate upload' });
+    }
+});
+
+// Download any database file by name
+router.get('/db/files/:filename/download', (req, res) => {
+    try {
+        const { filename } = req.params;
+
+        // Validate filename (prevent path traversal)
+        if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+            return res.status(400).json({ error: 'Invalid filename' });
+        }
+
+        const dbDir = path.dirname(DB_PATH);
+        const filePath = path.join(dbDir, filename);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        // For active DB, ensure latest state is saved
+        if (filename === 'nestfinder.db') {
+            saveDatabase();
+        }
+
+        res.download(filePath, filename);
+    } catch (error) {
+        console.error('Download DB file error:', error);
+        res.status(500).json({ error: 'Failed to download file' });
+    }
+});
+
+// Restore from a specific file
+router.post('/db/restore/:filename', (req, res) => {
+    try {
+        const { filename } = req.params;
+
+        // Validate filename
+        if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+            return res.status(400).json({ error: 'Invalid filename' });
+        }
+
+        if (filename === 'nestfinder.db') {
+            return res.status(400).json({ error: 'Cannot restore from active database' });
+        }
+
+        const dbDir = path.dirname(DB_PATH);
+        const sourcePath = path.join(dbDir, filename);
+
+        if (!fs.existsSync(sourcePath)) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        // Backup current active DB
+        const timestamp = Date.now();
+        const backupPath = `${DB_PATH}.restore_backup.${timestamp}`;
+        if (fs.existsSync(DB_PATH)) {
+            fs.copyFileSync(DB_PATH, backupPath);
+        }
+
+        // Copy source to active
+        fs.copyFileSync(sourcePath, DB_PATH);
+
+        // Hot reload
+        (async () => {
+            try {
+                const { initDatabase, getDb } = await import('../database.js');
+                await initDatabase();
+                const newDb = getDb();
+
+                if (newDb._recovered) {
+                    res.status(422).json({
+                        error: 'Restore Rejected: The database file is corrupt. The server has reset to a clean state.',
+                        backupCreated: backupPath
+                    });
+                } else {
+                    res.json({
+                        success: true,
+                        message: 'Database restored successfully. Server has reloaded.',
+                        backupCreated: backupPath
+                    });
+                }
+            } catch (e) {
+                res.json({
+                    success: true,
+                    message: 'Database restored. Restarting server...',
+                    backupCreated: backupPath
+                });
+                setTimeout(() => process.exit(0), 1000);
+            }
+        })();
+    } catch (error) {
+        console.error('Restore from file error:', error);
+        res.status(500).json({ error: 'Failed to restore from file' });
+    }
+});
+
+// ================== SCHEDULED BACKUPS (Task #8) ==================
+
+let backupInterval = null;
+
+// Create a scheduled backup
+const createScheduledBackup = () => {
+    try {
+        const dbDir = path.dirname(DB_PATH);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupFilename = `scheduled_backup_${timestamp}.db`;
+        const backupPath = path.join(dbDir, backupFilename);
+
+        saveDatabase(); // Ensure latest state
+        fs.copyFileSync(DB_PATH, backupPath);
+        console.log(`📦 Scheduled backup created: ${backupFilename}`);
+
+        // Clean up old scheduled backups (keep only last 5)
+        const files = fs.readdirSync(dbDir);
+        const scheduledBackups = files
+            .filter(f => f.startsWith('scheduled_backup_'))
+            .sort()
+            .reverse();
+
+        if (scheduledBackups.length > 5) {
+            for (const oldBackup of scheduledBackups.slice(5)) {
+                fs.unlinkSync(path.join(dbDir, oldBackup));
+                console.log(`🗑️ Removed old backup: ${oldBackup}`);
+            }
+        }
+
+        return backupFilename;
+    } catch (error) {
+        console.error('Scheduled backup error:', error);
+        return null;
+    }
+};
+
+// Start scheduled backup with given interval (in hours)
+const startScheduledBackup = (intervalHours) => {
+    if (backupInterval) clearInterval(backupInterval);
+    if (!intervalHours || intervalHours <= 0) {
+        console.log('📦 Scheduled backups disabled');
+        return;
+    }
+    const intervalMs = intervalHours * 60 * 60 * 1000;
+    console.log(`📦 Starting scheduled backups every ${intervalHours} hour(s)`);
+    backupInterval = setInterval(createScheduledBackup, intervalMs);
+};
+
+// Initialize scheduled backup from settings on startup
+setTimeout(async () => {
+    try {
+        const intervalSetting = getSetting('backup_interval_hours');
+        if (intervalSetting) {
+            startScheduledBackup(parseInt(intervalSetting, 10));
+        }
+    } catch (e) {
+        console.log('Scheduled backup init skipped');
+    }
+}, 5000);
+
+// Get backup schedule status
+router.get('/db/backup-schedule', (req, res) => {
+    try {
+        const intervalHours = getSetting('backup_interval_hours') || '0';
+        const lastBackup = getSetting('last_scheduled_backup') || null;
+        res.json({
+            enabled: parseInt(intervalHours, 10) > 0,
+            intervalHours: parseInt(intervalHours, 10),
+            lastBackup
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get backup schedule' });
+    }
+});
+
+// Set backup schedule
+router.put('/db/backup-schedule', (req, res) => {
+    try {
+        const { intervalHours } = req.body;
+        const hours = parseInt(intervalHours, 10) || 0;
+
+        run(
+            `INSERT INTO settings (key, value, updated_at) VALUES ('backup_interval_hours', ?, CURRENT_TIMESTAMP)
+             ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+            [String(hours), String(hours)]
+        );
+
+        startScheduledBackup(hours);
+
+        res.json({
+            success: true,
+            enabled: hours > 0,
+            intervalHours: hours,
+            message: hours > 0 ? `Backups scheduled every ${hours} hour(s)` : 'Scheduled backups disabled'
+        });
+    } catch (error) {
+        console.error('Set backup schedule error:', error);
+        res.status(500).json({ error: 'Failed to set backup schedule' });
+    }
+});
+
+// Trigger manual backup now
+router.post('/db/backup-now', (req, res) => {
+    try {
+        const filename = createScheduledBackup();
+        if (filename) {
+            run(
+                `INSERT INTO settings (key, value, updated_at) VALUES ('last_scheduled_backup', ?, CURRENT_TIMESTAMP)
+                 ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+                [filename, filename]
+            );
+            res.json({ success: true, filename, message: 'Backup created successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to create backup' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create backup' });
+    }
+});
+
+
 // Check for corrupt database availability
 router.get('/db/corrupt-check', (req, res) => {
     try {

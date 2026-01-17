@@ -8,8 +8,8 @@ const Dashboard = ({ onNavigate }) => {
     const [filteredPoints, setFilteredPoints] = useState(null);
     const [loading, setLoading] = useState(true);
     const [modalData, setModalData] = useState(null);
-    const [showBackup, setShowBackup] = useState(false);
-    const [corruptDBFound, setCorruptDBFound] = useState(false);
+    const [showDBManager, setShowDBManager] = useState(false);
+    const [resultModal, setResultModal] = useState(null); // { type, title, message }
     const [isRestoring, setIsRestoring] = useState(false);
     const [toast, setToast] = useState(null); // { type: 'success'|'error'|'info', message: string }
     const [confirmModal, setConfirmModal] = useState(null); // { message, onConfirm }
@@ -18,21 +18,15 @@ const Dashboard = ({ onNavigate }) => {
     const showToast = (type, message) => setToast({ type, message });
     const closeToast = () => setToast(null);
 
-    useEffect(() => {
-        // Check for corrupt DB existence once on mount
-        adminApi.checkCorruptDB()
-            .then(res => setCorruptDBFound(res.found))
-            .catch(() => setCorruptDBFound(false));
-    }, []);
     const clickCountRef = useRef(0);
     const clickTimeoutRef = useRef(null);
 
-    // Triple-click handler for DB Size row
+    // Triple-click handler for DB Size row - opens DB Manager Modal
     const handleDBSizeClick = () => {
         clickCountRef.current += 1;
 
         if (clickCountRef.current === 3) {
-            setShowBackup(prev => !prev);
+            setShowDBManager(true);
             clickCountRef.current = 0;
         }
 
@@ -41,6 +35,11 @@ const Dashboard = ({ onNavigate }) => {
         clickTimeoutRef.current = setTimeout(() => {
             clickCountRef.current = 0;
         }, 1000);
+    };
+
+    // Handler for DB Manager result modals
+    const handleDBManagerResult = (type, title, message) => {
+        setResultModal({ type, title, message });
     };
 
     useEffect(() => {
@@ -668,6 +667,24 @@ const Dashboard = ({ onNavigate }) => {
                     onOk={successModal.onOk}
                 />
             )}
+
+            {/* DB Manager Modal */}
+            {showDBManager && (
+                <DBManagerModal
+                    onClose={() => setShowDBManager(false)}
+                    onResult={handleDBManagerResult}
+                />
+            )}
+
+            {/* Result Modal (for DB operations) */}
+            {resultModal && (
+                <ResultModal
+                    type={resultModal.type}
+                    title={resultModal.title}
+                    message={resultModal.message}
+                    onOk={() => setResultModal(null)}
+                />
+            )}
         </div >
     );
 };
@@ -948,6 +965,456 @@ const SuccessModal = ({ title, message, onOk }) => (
         </div>
     </div>
 );
+
+// Calm Result Modal (for success/error/warning outcomes)
+const ResultModal = ({ type = 'success', title, message, onOk, buttonText = 'OK' }) => {
+    const configs = {
+        success: { icon: '✨', iconBg: 'rgba(16, 185, 129, 0.1)', btnBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
+        error: { icon: '🙊', iconBg: 'rgba(239, 68, 68, 0.1)', btnBg: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)' },
+        warning: { icon: '⚠️', iconBg: 'rgba(245, 158, 11, 0.1)', btnBg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }
+    };
+    const config = configs[type] || configs.success;
+
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1700,
+                backdropFilter: 'blur(8px)'
+            }}
+        >
+            <div
+                className="card"
+                style={{
+                    width: '90%',
+                    maxWidth: '420px',
+                    textAlign: 'center',
+                    overflow: 'hidden',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    animation: 'slideIn 0.3s ease-out'
+                }}
+            >
+                <div className="card-body" style={{ padding: '2.5rem 2rem' }}>
+                    <div style={{
+                        width: '64px',
+                        height: '64px',
+                        background: config.iconBg,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 1.5rem auto'
+                    }}>
+                        <span style={{ fontSize: '2rem' }}>{config.icon}</span>
+                    </div>
+
+                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: 600 }}>{title}</h3>
+                    <p style={{ margin: '0 0 2rem 0', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>{message}</p>
+
+                    <button
+                        className="btn btn-primary"
+                        onClick={onOk}
+                        style={{
+                            width: '100%',
+                            padding: '0.8rem',
+                            fontSize: '1rem',
+                            background: config.btnBg,
+                            border: 'none',
+                            borderRadius: 'var(--radius-md)'
+                        }}
+                    >
+                        {buttonText}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Database Manager Modal
+const DBManagerModal = ({ onClose, onResult }) => {
+    const [files, setFiles] = React.useState([]);
+    const [usage, setUsage] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
+    const [actionLoading, setActionLoading] = React.useState(null);
+    const [backupSchedule, setBackupSchedule] = React.useState({ enabled: false, intervalHours: 0 });
+    const [scheduleInput, setScheduleInput] = React.useState('0');
+
+    const loadFiles = async () => {
+        try {
+            setLoading(true);
+            const [filesRes, scheduleRes] = await Promise.all([
+                adminApi.getDBFiles(),
+                adminApi.getBackupSchedule()
+            ]);
+            setFiles(filesRes.files || []);
+            setUsage(filesRes.usage || null);
+            setBackupSchedule(scheduleRes);
+            setScheduleInput(String(scheduleRes.intervalHours || 0));
+        } catch (err) {
+            onResult('error', 'Load Failed', err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => { loadFiles(); }, []);
+
+    const formatSize = (bytes) => {
+        if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
+        return (bytes / 1024).toFixed(1) + ' KB';
+    };
+
+    const formatDate = (isoDate) => {
+        const d = new Date(isoDate);
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const getTypeBadge = (type) => {
+        const badges = {
+            active: { label: 'Active', color: '#22c55e', bg: 'rgba(34, 197, 94, 0.1)' },
+            corrupt: { label: 'Corrupt', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
+            restore_backup: { label: 'Backup', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+            uploaded: { label: 'Uploaded', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
+            scheduled: { label: 'Scheduled', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+            other: { label: 'Other', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)' }
+        };
+        const b = badges[type] || badges.other;
+        return (
+            <span style={{
+                padding: '0.2rem 0.5rem',
+                borderRadius: '4px',
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                color: b.color,
+                background: b.bg,
+                whiteSpace: 'nowrap'
+            }}>
+                {b.label}
+            </span>
+        );
+    };
+
+    const handleDownload = async (filename) => {
+        setActionLoading(filename);
+        try {
+            await adminApi.downloadDBFile(filename);
+        } catch (err) {
+            onResult('error', 'Download Failed', err.message);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleDelete = async (filename) => {
+        if (!window.confirm(`Delete "${filename}"?\n\nThis cannot be undone.`)) return;
+        setActionLoading(filename);
+        try {
+            await adminApi.deleteDBFile(filename);
+            onResult('success', 'File Deleted', `"${filename}" has been deleted.`);
+            loadFiles();
+        } catch (err) {
+            onResult('error', 'Delete Failed', err.message);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleRestore = async (filename) => {
+        if (!window.confirm(`Restore from "${filename}"?\n\nThe current database will be backed up first. The server may restart.`)) return;
+        setActionLoading(filename);
+        try {
+            const res = await adminApi.restoreFromFile(filename);
+            onResult('success', 'Restore Complete', res.message || 'Database restored successfully!');
+            setTimeout(() => window.location.reload(), 2000);
+        } catch (err) {
+            onResult('error', 'Restore Failed', err.message);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleUpload = () => {
+        document.getElementById('db-manager-upload').click();
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setActionLoading('upload');
+        try {
+            const res = await adminApi.uploadDBFile(file);
+            onResult('success', 'Upload Complete', `File saved as "${res.filename}"`);
+            loadFiles();
+        } catch (err) {
+            onResult('error', 'Upload Failed', err.message);
+        } finally {
+            setActionLoading(null);
+            e.target.value = '';
+        }
+    };
+
+    const handleSetSchedule = async () => {
+        const hours = parseInt(scheduleInput, 10) || 0;
+        setActionLoading('schedule');
+        try {
+            const res = await adminApi.setBackupSchedule(hours);
+            setBackupSchedule({ enabled: res.enabled, intervalHours: res.intervalHours });
+            onResult('success', 'Schedule Updated', res.message);
+        } catch (err) {
+            onResult('error', 'Schedule Failed', err.message);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleBackupNow = async () => {
+        setActionLoading('backup-now');
+        try {
+            const res = await adminApi.createBackupNow();
+            onResult('success', 'Backup Created', `Created "${res.filename}"`);
+            loadFiles();
+        } catch (err) {
+            onResult('error', 'Backup Failed', err.message);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.7)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1500,
+                backdropFilter: 'blur(6px)'
+            }}
+            onClick={onClose}
+        >
+            <div
+                className="card"
+                style={{
+                    width: '95%',
+                    maxWidth: '800px',
+                    maxHeight: '80vh',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="card-header" style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottom: '1px solid var(--color-border)',
+                    padding: '1rem 1.5rem'
+                }}>
+                    <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>💾</span> Database Manager
+                    </h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>&times;</button>
+                </div>
+
+                {/* Toolbar */}
+                <div style={{
+                    padding: '0.75rem 1.5rem',
+                    borderBottom: '1px solid var(--color-border)',
+                    display: 'flex',
+                    gap: '0.5rem',
+                    background: 'var(--color-bg-tertiary)'
+                }}>
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleUpload}
+                        disabled={actionLoading}
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                    >
+                        📤 Upload File
+                    </button>
+                    <input
+                        type="file"
+                        id="db-manager-upload"
+                        accept=".db,.sqlite,.sqlite3"
+                        style={{ display: 'none' }}
+                        onChange={handleFileUpload}
+                    />
+                    <button
+                        className="btn"
+                        onClick={handleBackupNow}
+                        disabled={actionLoading}
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)' }}
+                    >
+                        📦 Backup Now
+                    </button>
+                    <button
+                        className="btn"
+                        onClick={loadFiles}
+                        disabled={loading}
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', background: 'var(--color-bg-secondary)' }}
+                    >
+                        🔄 Refresh
+                    </button>
+
+                    {/* Spacer */}
+                    <div style={{ flex: 1 }} />
+
+                    {/* Backup Schedule */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Auto backup every</span>
+                        <input
+                            type="number"
+                            min="0"
+                            max="168"
+                            value={scheduleInput}
+                            onChange={e => setScheduleInput(e.target.value)}
+                            style={{
+                                width: '50px',
+                                padding: '0.3rem 0.5rem',
+                                borderRadius: '4px',
+                                border: '1px solid var(--color-border)',
+                                background: 'var(--color-bg-secondary)',
+                                color: 'inherit',
+                                textAlign: 'center'
+                            }}
+                        />
+                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>hrs</span>
+                        <button
+                            className="btn"
+                            onClick={handleSetSchedule}
+                            disabled={actionLoading === 'schedule'}
+                            style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: 'var(--color-bg-secondary)' }}
+                        >
+                            Set
+                        </button>
+                        {backupSchedule.enabled && (
+                            <span style={{ fontSize: '0.75rem', color: '#22c55e', marginLeft: '0.25rem' }}>●</span>
+                        )}
+                    </div>
+                </div>
+
+                {/* File List */}
+                <div style={{ flex: 1, overflow: 'auto', padding: '0' }}>
+                    {loading ? (
+                        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading files...</div>
+                    ) : files.length === 0 ? (
+                        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>No database files found</div>
+                    ) : (
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                            <thead style={{ background: 'var(--color-bg-tertiary)', position: 'sticky', top: 0 }}>
+                                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600 }}>Name</th>
+                                    <th style={{ padding: '0.75rem 0.5rem', textAlign: 'center', fontWeight: 600, width: '80px' }}>Size</th>
+                                    <th style={{ padding: '0.75rem 0.5rem', textAlign: 'center', fontWeight: 600, width: '140px' }}>Modified</th>
+                                    <th style={{ padding: '0.75rem 0.5rem', textAlign: 'center', fontWeight: 600, width: '80px' }}>Type</th>
+                                    <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: 600, width: '140px' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {files.map(file => (
+                                    <tr key={file.name} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' }}>{file.name}</td>
+                                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>{formatSize(file.size)}</td>
+                                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}>{formatDate(file.modified)}</td>
+                                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>{getTypeBadge(file.type)}</td>
+                                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+                                                {/* Download */}
+                                                <button
+                                                    onClick={() => handleDownload(file.name)}
+                                                    disabled={actionLoading === file.name}
+                                                    title="Download"
+                                                    style={{
+                                                        padding: '0.3rem 0.5rem',
+                                                        fontSize: '0.9rem',
+                                                        background: 'var(--color-bg-tertiary)',
+                                                        border: '1px solid var(--color-border)',
+                                                        borderRadius: '4px',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    📥
+                                                </button>
+                                                {/* Restore (not for active) */}
+                                                {file.type !== 'active' && (
+                                                    <button
+                                                        onClick={() => handleRestore(file.name)}
+                                                        disabled={actionLoading === file.name}
+                                                        title="Restore"
+                                                        style={{
+                                                            padding: '0.3rem 0.5rem',
+                                                            fontSize: '0.9rem',
+                                                            background: 'rgba(245, 158, 11, 0.1)',
+                                                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        ♻️
+                                                    </button>
+                                                )}
+                                                {/* Delete (not for active) */}
+                                                {file.type !== 'active' && (
+                                                    <button
+                                                        onClick={() => handleDelete(file.name)}
+                                                        disabled={actionLoading === file.name}
+                                                        title="Delete"
+                                                        style={{
+                                                            padding: '0.3rem 0.5rem',
+                                                            fontSize: '0.9rem',
+                                                            background: 'rgba(239, 68, 68, 0.1)',
+                                                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+
+                {/* Storage Usage Footer */}
+                {usage && (
+                    <div style={{ padding: '0.75rem 1.5rem', background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                            <span>DB Folder Size: {formatSize(usage.folderSize)}</span>
+                            {usage.disk?.total > 0 && (
+                                <span>Disk Usage: {formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span>
+                            )}
+                        </div>
+                        {usage.disk?.total > 0 && (
+                            <div style={{ height: '6px', background: 'var(--color-bg-secondary)', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{
+                                    width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`,
+                                    height: '100%',
+                                    background: 'var(--color-primary)',
+                                    borderRadius: '3px'
+                                }} />
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 export default Dashboard;
 

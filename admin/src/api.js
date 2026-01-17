@@ -251,5 +251,81 @@ export const adminApi = {
             throw new Error(err.error || 'Restore failed');
         }
         return await response.json();
+    },
+
+    // ========== DB File Management ==========
+
+    getDBFiles() {
+        return this.fetch('/admin/db/files');
+    },
+
+    deleteDBFile(filename) {
+        return this.fetch(`/admin/db/files/${encodeURIComponent(filename)}`, {
+            method: 'DELETE'
+        });
+    },
+
+    async uploadDBFile(file) {
+        const response = await fetch(`${API_URL}/admin/db/upload`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
+            body: file
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || 'Upload failed');
+        }
+        return await response.json();
+    },
+
+    async downloadDBFile(filename) {
+        const response = await fetch(`${API_URL}/admin/db/files/${encodeURIComponent(filename)}/download`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        if (!response.ok) throw new Error('Download failed');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    },
+
+    async restoreFromFile(filename) {
+        const response = await fetch(`${API_URL}/admin/db/restore/${encodeURIComponent(filename)}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || 'Restore failed');
+        }
+        return await response.json();
+    },
+
+    // ========== Backup Schedule (Task #8) ==========
+
+    getBackupSchedule() {
+        return this.fetch('/admin/db/backup-schedule');
+    },
+
+    setBackupSchedule(intervalHours) {
+        return this.fetch('/admin/db/backup-schedule', {
+            method: 'PUT',
+            body: JSON.stringify({ intervalHours })
+        });
+    },
+
+    createBackupNow() {
+        return this.fetch('/admin/db/backup-now', { method: 'POST' });
     }
 };
