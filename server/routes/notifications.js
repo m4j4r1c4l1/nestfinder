@@ -95,11 +95,12 @@ router.get('/notifications', (req, res) => {
         // This ensures Admin counts update even if seen only in inbox
         if (unseenBroadcasts.length > 0) {
             const deliveryStmt = getDb().prepare(`
-                INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, dismissed)
-                VALUES (?, ?, 'sent', 1, CURRENT_TIMESTAMP, 0)
+                INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, fetched_at, dismissed)
+                VALUES (?, ?, 'sent', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
                 ON CONFLICT(broadcast_id, user_id) DO UPDATE SET
                     view_count = view_count + 1,
-                    first_seen_at = COALESCE(first_seen_at, CURRENT_TIMESTAMP)
+                    first_seen_at = COALESCE(first_seen_at, CURRENT_TIMESTAMP),
+                    fetched_at = COALESCE(fetched_at, CURRENT_TIMESTAMP)
             `);
             const transaction = getDb().transaction((broadcasts) => {
                 for (const b of broadcasts) {
@@ -552,6 +553,27 @@ router.delete('/:id', requireUser, (req, res) => {
     res.json({ success: true });
 });
 
+// Mark broadcast as fetched (Sent) - NEW
+router.post('/broadcasts/:id/fetched', requireUser, (req, res) => {
+    try {
+        const userId = req.user.id;
+        const broadcastId = req.params.id;
+
+        // Update status to 'sent' (Fetched) ONLY if currently 'created'
+        run(`
+            UPDATE broadcast_views 
+            SET status = 'sent', 
+                fetched_at = CURRENT_TIMESTAMP
+            WHERE broadcast_id = ? AND user_id = ? AND status = 'created'
+        `, [broadcastId, userId]);
+
+        res.json({ success: true, status: 'sent' });
+    } catch (error) {
+        console.error('Mark fetched error:', error);
+        res.status(500).json({ error: 'Failed to mark as fetched' });
+    }
+});
+
 // Mark broadcast as delivered (when client receives/displays it)
 router.post('/broadcasts/:id/delivered', requireUser, (req, res) => {
     try {
@@ -563,7 +585,7 @@ router.post('/broadcasts/:id/delivered', requireUser, (req, res) => {
             UPDATE broadcast_views 
             SET status = 'delivered', 
                 delivered_at = CURRENT_TIMESTAMP
-            WHERE broadcast_id = ? AND user_id = ? AND status = 'sent'
+            WHERE broadcast_id = ? AND user_id = ? AND status IN ('created', 'sent')
         `, [broadcastId, userId]);
 
         res.json({ success: true, status: 'delivered' });

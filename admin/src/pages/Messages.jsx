@@ -3762,7 +3762,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             }}>
                                 <span style={{ color: '#fbbf24', fontSize: '1rem' }}>✓</span>
                                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
-                                    {Math.max(0, (broadcast.total_users || 0) - (broadcast.delivered_count || 0))}
+                                    {broadcast.sent_count !== undefined ? broadcast.sent_count : Math.max(0, (broadcast.total_users || 0) - (broadcast.delivered_count || 0))}
                                 </span>
                             </div>
 
@@ -3893,8 +3893,8 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                     bVal = new Date(b.delivered_at || b.created_at || 0).getTime();
                     break;
                 case 'sent':
-                    aVal = new Date(a.created_at || 0).getTime();
-                    bVal = new Date(b.created_at || 0).getTime();
+                    aVal = new Date(a.fetched_at || a.created_at || 0).getTime();
+                    bVal = new Date(b.fetched_at || b.created_at || 0).getTime();
                     break;
                 case 'read':
                     aVal = a.status === 'read' ? new Date(a.updated_at || 0).getTime() : 0;
@@ -4123,7 +4123,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                                             </div>
                                                         </td>
                                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.sent }}>
-                                                            <DateTimeCell isoString={view.created_at} />
+                                                            <DateTimeCell isoString={view.fetched_at || view.created_at} />
                                                         </td>
                                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.received }}>
                                                             <DateTimeCell isoString={view.delivered_at} />

@@ -56,21 +56,43 @@ export const useNotifications = (userId) => {
                 setNotifications(data.notifications);
                 setUnreadCount(data.notifications.filter(n => !n.read).length);
 
-                // Mark broadcasts as delivered when fetched (regardless of display setting)
-                const undeliveredBroadcasts = data.notifications.filter(n =>
-                    n.type === 'broadcast' && n.status === 'sent'
+                // 1. Mark 'created' broadcasts as fetched (Sent) immediately
+                const newBroadcasts = data.notifications.filter(n =>
+                    n.type === 'broadcast' && n.status === 'created'
                 );
-                undeliveredBroadcasts.forEach(async (broadcast) => {
+                newBroadcasts.forEach(async (broadcast) => {
                     try {
-                        await fetch(`${API_URL}/api/push/notifications/broadcasts/${broadcast.id}/delivered`, {
+                        await fetch(`${API_URL}/api/push/notifications/broadcasts/${broadcast.id}/fetched`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ userId })
                         });
+                        // Optimistically update status to 'sent' in local state?
+                        // Actually next poll will fix it, but let's assume it's fetched.
                     } catch (e) {
-                        console.warn('Failed to mark broadcast as delivered:', e);
+                        console.warn('Failed to mark broadcast as fetched:', e);
                     }
                 });
+
+                // 2. Mark 'sent' broadcasts as delivered ONLY if Realtime is OFF (Saved to list)
+                // If Realtime is ON, the Popup component will handle delivery ping when displayed.
+                const pendingDeliveryBroadcasts = data.notifications.filter(n =>
+                    n.type === 'broadcast' && (n.status === 'sent' || n.status === 'created')
+                );
+
+                if (!settings.realTime) {
+                    pendingDeliveryBroadcasts.forEach(async (broadcast) => {
+                        try {
+                            await fetch(`${API_URL}/api/push/notifications/broadcasts/${broadcast.id}/delivered`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId })
+                            });
+                        } catch (e) {
+                            console.warn('Failed to mark broadcast as delivered:', e);
+                        }
+                    });
+                }
             } else {
                 setNotifications([]);
                 setUnreadCount(0);

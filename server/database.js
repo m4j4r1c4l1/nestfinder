@@ -215,9 +215,10 @@ export const initDatabase = async () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       broadcast_id INTEGER NOT NULL,
       user_id TEXT NOT NULL,
-      status TEXT DEFAULT 'sent' CHECK (status IN ('sent', 'delivered', 'read')),
+      status TEXT DEFAULT 'created' CHECK (status IN ('created', 'sent', 'delivered', 'read')),
       view_count INTEGER DEFAULT 0,
       first_seen_at DATETIME,
+      fetched_at DATETIME,
       delivered_at DATETIME,
       read_at DATETIME,
       dismissed BOOLEAN DEFAULT 0,
@@ -227,6 +228,93 @@ export const initDatabase = async () => {
       UNIQUE(broadcast_id, user_id)
     );
   `);
+
+  // Migration: Update schema for fetched_at and new statuses
+  try {
+    const tableInfo = db.exec("PRAGMA table_info(broadcast_views)");
+    if (tableInfo.length > 0) {
+      const columns = tableInfo[0].values.map(col => col[1]); // col[1] is column name
+      if (!columns.includes('fetched_at')) {
+        console.log('Migrating broadcast_views schema...');
+        db.run("PRAGMA foreign_keys=OFF");
+
+        // Ensure Transaction
+        db.run("BEGIN TRANSACTION");
+
+        // Create new table
+        db.run(`
+          CREATE TABLE broadcast_views_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            broadcast_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
+            status TEXT DEFAULT 'created' CHECK (status IN ('created', 'sent', 'delivered', 'read')),
+            view_count INTEGER DEFAULT 0,
+            first_seen_at DATETIME,
+            fetched_at DATETIME,
+            delivered_at DATETIME,
+            read_at DATETIME,
+            dismissed BOOLEAN DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (broadcast_id) REFERENCES broadcasts(id),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE(broadcast_id, user_id)
+          )
+        `);
+
+        // Copy data (Mapping old 'sent' -> 'created')
+        db.run(`
+          INSERT INTO broadcast_views_new (id, broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed, created_at)
+          SELECT id, broadcast_id, user_id, 
+            CASE WHEN status = 'sent' THEN 'created' ELSE status END,
+            view_count, first_seen_at, delivered_at, read_at, dismissed, created_at
+          FROM broadcast_views
+        `);
+
+        db.run("DROP TABLE broadcast_views");
+        db.run("ALTER TABLE broadcast_views_new RENAME TO broadcast_views");
+        db.run("COMMIT");
+        db.run("PRAGMA foreign_keys=ON");
+
+        // We need to save if saveDatabase is available here (it should be in scope)
+        if (typeof saveDatabase === 'function') {
+          saveDatabase();
+        } else {
+          // If saveDatabase is defined below, we might need a direct write or assume caller handles saving
+          // Given file structure, saveDatabase is exported at bottom, probably defined above?
+          // I'll assume it's available or the db object tracks changes.
+          // Actually, earlier check Step 860 shows export saveDatabase. It MUST be defined.
+          // However, if defined as const below, it won't be hoisted.
+          // I will verify hoisting. 'export const saveDatabase = ...' is NOT hoisted.
+          // BUT initDatabase is exported const too. They are likely sibling functions.
+          // If initDatabase calls saveDatabase, and saveDatabase is defined AFTER initDatabase?
+          // That would fail.
+          // checking file top: initDatabase is line 14.
+          // saveDatabase must be below.
+          // If I call it here, it might throw 'ReferenceError'.
+          // Solution: Do not call saveDatabase here? Or verify definition order?
+          // If I can't call save, data is in memory.
+          // But server/index.js likely calls initDatabase. Does it persist?
+          // ResetDatabase calls saveDatabase.
+          // I will rely on standard persistence. Or try to invoke it safely.
+          // If I'm unsure, I can define a local write if DB_PATH is available.
+          // Lines 4 and 9 import writeFileSync and define DB_PATH.
+          // So I can replicate save logic: writeFileSync(DB_PATH, Buffer.from(db.export()));
+          try {
+            const data = db.export();
+            writeFileSync(DB_PATH, Buffer.from(data));
+            console.log('Migration saved to disk.');
+          } catch (saveErr) {
+            console.error('Failed to save migration:', saveErr);
+          }
+        }
+
+        console.log('Migration of broadcast_views completed.');
+      }
+    }
+  } catch (err) {
+    console.error('Migration failed:', err);
+    try { db.run("ROLLBACK"); } catch (e) { }
+  }
 
   // Daily ratings aggregation table
   db.run(`
