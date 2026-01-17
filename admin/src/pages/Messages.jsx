@@ -387,7 +387,8 @@ const Messages = () => {
                 ws.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
-                        if (data.type === 'broadcast_status') {
+                        // Accept broadcast_status OR notification_status (if it belongs to a broadcast)
+                        if (data.type === 'broadcast_status' || (data.type === 'notification_status' && data.broadcastId)) {
                             wsBuffer.current.push(data);
                         }
                     } catch (e) { console.error('WS Parse Error', e); }
