@@ -80,6 +80,10 @@ export const adminApi = {
         return this.fetch(`/admin/logs?${params}`);
     },
 
+    getUserLogs(userId) {
+        return this.fetch(`/debug/users/${userId}/logs`);
+    },
+
     async downloadLogs(userId) {
         const response = await fetch(`${API_URL}/debug/users/${userId}/logs/download`, {
             headers: {

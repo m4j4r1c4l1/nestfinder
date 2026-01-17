@@ -23,11 +23,14 @@ const formatTimestampCET = (isoString) => {
     return { date: dateStr, time: `${timeStr} ${isDST ? 'CEST' : 'CET'}` };
 };
 
+import LogModal from '../components/LogModal';
+
 const Debug = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [actionLoading, setActionLoading] = useState(null); // ID of user being processed
+    const [viewingUser, setViewingUser] = useState(null); // User currently being viewed in modal
 
     // Fetch users with debug status
     useEffect(() => {
@@ -303,6 +306,23 @@ const Debug = () => {
                                                         {user.log_count > 0 && (
                                                             <>
                                                                 <button
+                                                                    onClick={() => setViewingUser(user)}
+                                                                    style={{
+                                                                        padding: '0.4rem 0.8rem',
+                                                                        background: 'rgba(245, 158, 11, 0.1)',
+                                                                        color: '#f59e0b',
+                                                                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                                                                        borderRadius: '4px',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: '0.8rem',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '4px'
+                                                                    }}
+                                                                >
+                                                                    <span>👁️</span> View
+                                                                </button>
+                                                                <button
                                                                     onClick={() => handleDownloadLogs(user.id)}
                                                                     style={{
                                                                         padding: '0.4rem 0.8rem',
@@ -347,6 +367,13 @@ const Debug = () => {
                     Showing top {users.length} users
                 </div>
             </div>
+
+            {viewingUser && (
+                <LogModal
+                    user={viewingUser}
+                    onClose={() => setViewingUser(null)}
+                />
+            )}
         </div>
     );
 };
