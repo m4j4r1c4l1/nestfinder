@@ -337,7 +337,7 @@ const Debug = () => {
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
                 {/* Table */}
                 <div style={{ flex: 1, overflow: 'auto' }}>
-                    <table style={{ minWidth: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
+                    <table style={{ width: colWidths.user + colWidths.lastActive + colWidths.debugMode + colWidths.logs, minWidth: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
                             <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
                                 <th style={{ width: colWidths.user, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('user')}>
