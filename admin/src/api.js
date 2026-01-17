@@ -327,5 +327,19 @@ export const adminApi = {
 
     createBackupNow() {
         return this.fetch('/admin/db/backup-now', { method: 'POST' });
+    },
+
+    submitFeedback(type, text, rating) {
+        // Use the public feedback endpoint (same as client)
+        // We don't have a userId context easily, so we can omit it or send 'admin-crash'
+        return this.fetch('/feedback', {
+            method: 'POST',
+            body: JSON.stringify({
+                type,
+                txt: text,
+                rating,
+                // user_id: 'admin' // server might strip this if valid user check fails, but allowed for anon
+            })
+        });
     }
 };
