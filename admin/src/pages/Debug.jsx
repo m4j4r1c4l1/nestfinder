@@ -23,17 +23,25 @@ const Debug = () => {
     // Fetch users with debug status
     useEffect(() => {
         fetchUsers();
+        // Poll every 5 seconds for live updates
+        const interval = setInterval(() => fetchUsers(true), 5000);
+        return () => clearInterval(interval);
     }, []);
 
-    const fetchUsers = async () => {
-        setLoading(true);
+    const fetchUsers = async (isBackground = false) => {
+        if (!isBackground) setLoading(true);
         try {
             const res = await adminApi.fetch('/debug/users');
-            setUsers(res.users || []);
+            // Sort by debug_enabled desc, then last_active desc to keep relevant users on top
+            const sorted = (res.users || []).sort((a, b) => {
+                if (a.debug_enabled !== b.debug_enabled) return b.debug_enabled - a.debug_enabled;
+                return new Date(b.last_active || 0) - new Date(a.last_active || 0);
+            });
+            setUsers(sorted);
         } catch (err) {
             console.error('Failed to fetch debug users:', err);
         } finally {
-            setLoading(false);
+            if (!isBackground) setLoading(false);
         }
     };
 
