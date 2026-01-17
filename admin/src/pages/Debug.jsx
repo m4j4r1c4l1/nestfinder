@@ -31,6 +31,8 @@ const Debug = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [actionLoading, setActionLoading] = useState(null); // ID of user being processed
     const [viewingUser, setViewingUser] = useState(null); // User currently being viewed in modal
+    const [page, setPage] = useState(1);
+    const pageSize = 30;
 
     // Fetch users with debug status
     useEffect(() => {
@@ -137,6 +139,15 @@ const Debug = () => {
         return sorted;
     }, [filteredUsers, sortConfig]);
 
+    // Pagination
+    const totalPages = Math.ceil(sortedUsers.length / pageSize);
+    const paginatedUsers = sortedUsers.slice((page - 1) * pageSize, page * pageSize);
+
+    // Reset page when search changes
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm]);
+
     const handleSort = (column) => {
         setSortConfig(prev => ({
             column,
@@ -228,37 +239,37 @@ const Debug = () => {
             {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-end', textAlign: 'right' }}>🐛 Debug Enabled</div>
-                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-start', textAlign: 'left' }}>🐛 Debug Enabled</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <div style={{ fontSize: '2rem', fontWeight: 700, color: '#8b5cf6', lineHeight: 1 }}>{debugEnabledCount}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>users enabled</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'left' }}>users enabled</div>
                     </div>
                 </div>
 
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-end', textAlign: 'right' }}>📨 Users with Logs</div>
-                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-start', textAlign: 'left' }}>📨 Users with Logs</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <div style={{ fontSize: '2rem', fontWeight: 700, color: '#3b82f6', lineHeight: 1 }}>{usersWithLogs}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>have logs</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'left' }}>have logs</div>
                     </div>
                 </div>
 
-                {/* Golden Badge - Total Logs */}
+                {/* Golden Badge - Total Events */}
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05))', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-end', textAlign: 'right' }}>📚 Total Logs</div>
-                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-start', textAlign: 'left' }}>📚 Total Events</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <div style={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b', lineHeight: 1 }}>
                             {users.reduce((acc, u) => acc + (u.log_count || 0), 0)}
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>entries stored</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'left' }}>entries stored</div>
                     </div>
                 </div>
 
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05))', border: '1px solid rgba(34, 197, 94, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#22c55e', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-end', textAlign: 'right' }}>👥 Total Users</div>
-                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#22c55e', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-start', textAlign: 'left' }}>👥 Total Users</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <div style={{ fontSize: '2rem', fontWeight: 700, color: '#22c55e', lineHeight: 1 }}>{users.length}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>in database</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'left' }}>in database</div>
                     </div>
                 </div>
             </div>
@@ -352,12 +363,12 @@ const Debug = () => {
                                 <tr>
                                     <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading users...</td>
                                 </tr>
-                            ) : sortedUsers.length === 0 ? (
+                            ) : paginatedUsers.length === 0 ? (
                                 <tr>
                                     <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found matching "{searchTerm}"</td>
                                 </tr>
                             ) : (
-                                sortedUsers.map(user => {
+                                paginatedUsers.map(user => {
                                     const rawTimestamp = (user.debug_last_seen && new Date(user.debug_last_seen) > new Date(user.last_active || 0))
                                         ? user.debug_last_seen
                                         : (user.last_active || user.debug_last_seen);
@@ -403,11 +414,19 @@ const Debug = () => {
                                             </td>
                                             <td style={{ padding: '1rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                                    {/* Logs Status */}
-                                                    <div style={{ minWidth: '80px' }}>
-                                                        <div style={{ fontSize: '0.85rem', color: user.log_count > 0 ? '#3b82f6' : '#64748b', fontWeight: 500 }}>
-                                                            {user.log_count > 0 ? `${user.log_count} Logs` : 'No Logs'}
-                                                        </div>
+                                                    {/* Events Badge - Golden */}
+                                                    <div style={{
+                                                        padding: '0.4rem 0.8rem',
+                                                        borderRadius: '20px',
+                                                        border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
+                                                        background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
+                                                        color: user.log_count > 0 ? '#f59e0b' : '#94a3b8',
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: 600,
+                                                        minWidth: '80px',
+                                                        textAlign: 'center'
+                                                    }}>
+                                                        {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
                                                     </div>
 
                                                     {/* Actions */}
@@ -418,9 +437,9 @@ const Debug = () => {
                                                                     onClick={() => setViewingUser(user)}
                                                                     style={{
                                                                         padding: '0.4rem 0.8rem',
-                                                                        background: 'rgba(245, 158, 11, 0.1)',
-                                                                        color: '#f59e0b',
-                                                                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                                                                        background: 'rgba(234, 88, 12, 0.1)',
+                                                                        color: '#ea580c',
+                                                                        border: '1px solid rgba(234, 88, 12, 0.3)',
                                                                         borderRadius: '4px',
                                                                         cursor: 'pointer',
                                                                         fontSize: '0.8rem',
@@ -472,8 +491,35 @@ const Debug = () => {
                         </tbody>
                     </table>
                 </div>
-                <div style={{ borderTop: '1px solid #334155', padding: '0.75rem 1rem', fontSize: '0.8rem', color: '#64748b', textAlign: 'right' }}>
-                    Showing top {users.length} users
+
+                {/* Pagination Footer - Grid for Left Text + Center Buttons */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0.75rem 1rem', borderTop: '1px solid #334155' }}>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                        Showing {sortedUsers.length === 0 ? 0 : (page - 1) * pageSize + 1}-{Math.min(page * pageSize, sortedUsers.length)} of {sortedUsers.length} users
+                    </span>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', visibility: totalPages > 1 ? 'visible' : 'hidden' }}>
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page === 1 ? '#1e293b' : '#334155', color: page === 1 ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer' }}
+                        >
+                            ◀ Prev
+                        </button>
+                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' }}>
+                            Page {page} of {totalPages || 1}
+                        </span>
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page >= totalPages}
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: page >= totalPages ? '#1e293b' : '#334155', color: page >= totalPages ? '#64748b' : '#e2e8f0', border: '1px solid #475569', borderRadius: '4px', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                        >
+                            Next ▶
+                        </button>
+                    </div>
+
+                    {/* Empty right column to balance grid */}
+                    <div></div>
                 </div>
             </div>
 
