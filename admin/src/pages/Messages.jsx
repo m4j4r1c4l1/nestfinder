@@ -426,7 +426,7 @@ const Messages = () => {
                 const d = updates[b.id];
                 return {
                     ...b,
-                    total_users: (b.total_users || 0) + d.sent,
+                    sent_count: (b.sent_count || 0) + d.sent - d.delivered,
                     delivered_count: (b.delivered_count || 0) + d.delivered,
                     read_count: (b.read_count || 0) + d.read
                 };
@@ -1839,8 +1839,8 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'auto', flexShrink: 0, justifyContent: 'flex-end' }}>
                                                         {/* Left Separator (standardized) */}
                                                         <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0 0.25rem' }}></div>
-                                                        <span title="Sent" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#94a3b8' }}>
-                                                            ✓ <span style={{ color: '#94a3b8' }}>{b.total_users || 0}</span>
+                                                        <span title="Sent" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
+                                                            ✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, b.sent_count || 0)}</span>
                                                         </span>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
@@ -3982,6 +3982,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', lastUpdate, onC
                 const data = await adminApi.fetch(`/admin/broadcasts/${broadcastId}/views?_t=${Date.now()}`, {
                     headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
                 });
+                console.log('[Modal] Views received:', data.views ? data.views.length : 'None', data.views && data.views[0] ? data.views[0] : '');
                 setViews(data.views || []);
             } catch (e) { console.error(e); }
             finally { setLoading(false); }

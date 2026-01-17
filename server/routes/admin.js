@@ -975,6 +975,9 @@ router.get('/broadcasts/:id/views', (req, res) => {
     };
 
     console.log(`[Admin Stats] Broadcast ${id} detail views: Total=${stats.total}, Delivered=${stats.delivered}, Read=${stats.read}`);
+    if (views.length > 0) {
+        console.log('[Admin Debug] First view row:', views[0]);
+    }
 
     res.json({ broadcast, views, stats });
 });
