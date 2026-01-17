@@ -3177,6 +3177,7 @@ const EmojiPickerModal = ({ onSelect, onClose }) => {
 const DetailModal = ({ batchId, onClose }) => {
     const [details, setDetails] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [visibleCount, setVisibleCount] = useState(50); // Initially show 50 rows for performance
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -3306,13 +3307,13 @@ const DetailModal = ({ batchId, onClose }) => {
                                     <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Sent</th>
-                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Received</th>
+                                        <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Delivered</th>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Read</th>
                                         <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {details.messages.map(msg => (
+                                    {details.messages.slice(0, visibleCount).map(msg => (
                                         <tr key={msg.id} style={{ borderBottom: '1px solid #334155' }}>
                                             <td style={{ padding: '0.6rem 0.75rem', verticalAlign: 'middle' }}>
                                                 <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={msg.nickname || 'Anonymous'}>
@@ -3357,6 +3358,24 @@ const DetailModal = ({ batchId, onClose }) => {
                                 </tbody>
                             </table>
                             {details.messages.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No recipients found</div>}
+                            {details.messages.length > visibleCount && (
+                                <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid #334155' }}>
+                                    <button
+                                        onClick={() => setVisibleCount(prev => prev + 50)}
+                                        style={{
+                                            background: 'rgba(59, 130, 246, 0.2)',
+                                            border: '1px solid rgba(59, 130, 246, 0.4)',
+                                            color: '#60a5fa',
+                                            padding: '0.5rem 1.5rem',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontWeight: 500
+                                        }}
+                                    >
+                                        Show More ({visibleCount} of {details.messages.length})
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div style={{ color: '#ef4444', textAlign: 'center', padding: '2rem' }}>Error loading details</div>
