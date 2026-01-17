@@ -17,7 +17,8 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }
                             {(() => {
                                 try {
                                     // Parse and display in local timezone (CET/CEST)
-                                    const dateStr = message.fetched_at || message.created_at || '';
+                                    // Parse and display in local timezone (CET/CEST)
+                                    const dateStr = message.client_received_at || message.fetched_at || message.created_at || '';
                                     const date = new Date(dateStr.replace(' ', 'T'));
                                     return date.toLocaleString('en-GB', {
                                         day: '2-digit',

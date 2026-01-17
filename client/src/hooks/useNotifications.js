@@ -43,7 +43,7 @@ export const useNotifications = (userId) => {
                 // If the server didn't provide fetched_at (unseen broadcast), use current time
                 data.notifications = data.notifications.map(n => {
                     if (n.type === 'broadcast' && !n.fetched_at) {
-                        return { ...n, fetched_at: new Date().toISOString() };
+                        return { ...n, client_received_at: new Date().toISOString() };
                     }
                     return n;
                 });
