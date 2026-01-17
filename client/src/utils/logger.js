@@ -1,23 +1,32 @@
-// Client Debug Logger - stores and uploads logs when debug is enabled
+/**
+ * Client Debug Logger
+ * 
+ * Provides structured logging with timestamps and tags.
+ * Stores logs in localStorage ring buffer and uploads to server when enabled.
+ * 
+ * Format: DD-MM-YYYY - HH:MM:SS CET/CEST [Module][Action] message
+ * 
+ * Usage:
+ *   import { logger } from './utils/logger';
+ *   logger.log('Settings', 'Recovery Key', 'Generated new recovery key');
+ */
 
-const LOG_BUFFER_SIZE = 20;
-const FLUSH_INTERVAL = 5000; // 5 seconds
+const MAX_LOGS = 500;
 const STORAGE_KEY = 'nestfinder_debug_logs';
-
-let logBuffer = [];
-let flushTimer = null;
-let isDebugMode = false;
-let currentUserId = null;
 
 // Get CET/CEST timezone label
 const getTimezoneLabel = () => {
     const now = new Date();
     const jan = new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
     const jul = new Date(now.getFullYear(), 6, 1).getTimezoneOffset();
+    const parisNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+    const parisOffset = (now.getTime() - parisNow.getTime()) / (60 * 1000);
+    // Simple check: if offset is different from standard CET (-60), it's DST
+    // But easier way: just check if local offset matches Jan (Standard) or Jul (DST)
     return Math.max(jan, jul) !== Math.min(jan, jul) ? 'CEST' : 'CET';
 };
 
-// Format: DD-MM-YYYY - HH:MM:SS CET/CEST
+// Format timestamp: DD-MM-YYYY - HH:MM:SS CET/CEST
 const formatTimestamp = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, '0');
@@ -26,120 +35,144 @@ const formatTimestamp = () => {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    return `${day}-${month}-${year} - ${hours}:${minutes}:${seconds} ${getTimezoneLabel()}`;
+    const tz = getTimezoneLabel();
+    return `${day}-${month}-${year} - ${hours}:${minutes}:${seconds} ${tz}`;
 };
 
-// Initialize logger with current debug state and user ID
-export const initLogger = (debugEnabled, userId = null) => {
-    isDebugMode = debugEnabled;
-    currentUserId = userId;
-    if (isDebugMode) {
-        console.log('[Logger] Debug Mode Enabled');
-        // Flush any pending logs immediately
-        flushLogs();
-    }
-};
-
-// Update debug state dynamically
-export const setDebugMode = (enabled) => {
-    isDebugMode = enabled;
-    if (enabled) {
-        console.log('[Logger] Debug Mode Switched ON');
-        flushLogs();
-    } else {
-        console.log('[Logger] Debug Mode Switched OFF');
-        // Clear buffer when disabled to stop sending
-        logBuffer = [];
-    }
-};
-
-// Set user ID for log uploads
-export const setUserId = (userId) => {
-    currentUserId = userId;
-};
-
-const sendLogs = async (logsToSend) => {
-    if (!logsToSend || logsToSend.length === 0) return;
-
+// Get stored logs
+const getLogs = () => {
     try {
-        const payload = {
-            logs: logsToSend,
-            userId: currentUserId,
-            platform: navigator.platform,
-            userAgent: navigator.userAgent
-        };
-
-        // Use fetch directly to avoid circular dependency with api.js if it uses logger
-        await fetch('/api/debug/logs', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-    } catch (err) {
-        // Fallback to console if upload fails, but don't loop infinite errors
-        console.error('[Logger] Failed to upload logs', err);
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
     }
 };
 
-const flushLogs = () => {
-    if (flushTimer) {
-        clearTimeout(flushTimer);
-        flushTimer = null;
-    }
-
-    if (logBuffer.length > 0 && isDebugMode) {
-        const batch = [...logBuffer];
-        logBuffer = [];
-        sendLogs(batch);
+// Save logs to localStorage
+const saveLogs = (logs) => {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(logs.slice(-MAX_LOGS)));
+    } catch {
+        // Storage full or unavailable
     }
 };
 
-const queueLog = (level, ...args) => {
-    // Always print to console
-    const originalConsole = window.console[level] || window.console.log;
-    // originalConsole.apply(window.console, args); // Optional: let the original call happen naturally if we just hook
+// Internal state
+let _debugEnabled = false;
+let _userId = null;
+let _uploadInterval = null;
 
-    if (!isDebugMode) return;
+// Logger API
+export const logger = {
+    /**
+     * Set user ID
+     */
+    setUserId(id) {
+        _userId = id;
+    },
 
-    const message = args.map(arg => {
-        if (arg instanceof Error) return arg.toString() + '\n' + arg.stack;
-        if (typeof arg === 'object') return JSON.stringify(arg);
-        return String(arg);
-    }).join(' ');
+    /**
+     * Log a debug message
+     * @param {string} module - Module name (e.g., 'Settings', 'Map', 'API')
+     * @param {string} action - Action name (e.g., 'Recovery Key', 'Submit Point')
+     * @param {string} message - Log message
+     */
+    log(module, action, message) {
+        // Always log to console in dev or if debug enabled
+        if (import.meta.env?.DEV || _debugEnabled) {
+            const timestamp = formatTimestamp();
+            // For console, we want a readable format
+            // For storage, we want the timestamped string
 
-    const entry = `${formatTimestamp()} [${level.toUpperCase()}] ${message}`;
-    logBuffer.push(entry);
+            // Console output
+            if (import.meta.env?.DEV) console.log(`🐛 [${module}][${action}] ${message}`);
+        }
 
-    if (logBuffer.length >= LOG_BUFFER_SIZE) {
-        flushLogs();
-    } else if (!flushTimer) {
-        flushTimer = setTimeout(flushLogs, FLUSH_INTERVAL);
+        // Only store if debug enabled (or we can store always and only upload if enabled? 
+        // Better to store always in ring buffer so we have history when enabled)
+        const timestamp = formatTimestamp();
+        const entry = `${timestamp} [${module}][${action}] ${message}`;
+
+        const logs = getLogs();
+        logs.push(entry);
+        saveLogs(logs);
+    },
+
+    /**
+     * Get all stored logs
+     * @returns {string[]} Array of log entries
+     */
+    getLogs() {
+        return getLogs();
+    },
+
+    /**
+     * Clear all stored logs
+     */
+    clear() {
+        localStorage.removeItem(STORAGE_KEY);
+    },
+
+    /**
+     * Upload logs to server
+     * @param {object} api - API client instance
+     * @returns {Promise<boolean>} Success status
+     */
+    async upload(api) {
+        const logs = getLogs();
+        if (logs.length === 0) return true;
+
+        try {
+            await api.post('/debug/logs', {
+                logs,
+                userId: _userId || api.userId,
+                platform: navigator.platform || 'Unknown',
+                userAgent: navigator.userAgent
+            });
+            // Don't clear logs automatically, let admin clear or ring buffer handle it
+            // Or maybe clear uploaded ones? For simplicity, we keep ring buffer.
+            return true;
+        } catch (err) {
+            console.error('Failed to upload logs:', err);
+            return false;
+        }
+    },
+
+    /**
+     * Check if debug mode is enabled for current user
+     * @param {object} api - API client instance
+     */
+    async checkStatus(api) {
+        try {
+            const res = await api.get('/debug/status');
+            _debugEnabled = res.active;
+
+            // If enabled, start auto-upload
+            if (_debugEnabled && !_uploadInterval) {
+                _uploadInterval = setInterval(() => this.upload(api), 5000); // Upload every 5s
+            } else if (!_debugEnabled && _uploadInterval) {
+                clearInterval(_uploadInterval);
+                _uploadInterval = null;
+            }
+            return res.active;
+        } catch {
+            _debugEnabled = false;
+            return false;
+        }
+    },
+
+    /**
+     * Initialize logger
+     * @param {object} api - API client instance
+     */
+    async init(api) {
+        if (api.userId) _userId = api.userId;
+        await this.checkStatus(api);
+        if (_debugEnabled) {
+            this.log('Logger', 'Init', `Debug logging enabled for user ${_userId}`);
+        }
     }
 };
 
-// Hook console methods
-// Warning: This affects global console. verify if this is desired.
-// For now, we prefer explicit usage or a safe wrapper. 
-// A safer approach for a "helper" is to export log functions, but users might use console.log directly.
-// Let's monkey-patch for "Update 3: user visually identifiable methods for debugging".
-
-const originalLog = console.log;
-const originalWarn = console.warn;
-const originalError = console.error;
-
-export const hookConsole = () => {
-    console.log = (...args) => {
-        originalLog.apply(console, args);
-        queueLog('info', ...args);
-    };
-    console.warn = (...args) => {
-        originalWarn.apply(console, args);
-        queueLog('warn', ...args);
-    };
-    console.error = (...args) => {
-        originalError.apply(console, args);
-        queueLog('error', ...args);
-    };
-};
+export default logger;
