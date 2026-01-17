@@ -335,16 +335,7 @@ export default function Observability() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/push/admin/stats`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (!res.ok) {
-                throw new Error(`Server returned ${res.status} ${res.statusText}`);
-            }
-
-            const data = await res.json();
+            const data = await adminApi.fetch('/push/admin/stats');
             // Merge with default structure to ensure no undefined access
             setStats(prev => ({ ...prev, ...data }));
         } catch (err) {
