@@ -425,7 +425,7 @@ const Logs = () => {
     const handleExportCSV = async () => {
         setExporting(true);
         try {
-            const token = localStorage.getItem('nestfinder_admin_token');
+            const token = adminApi.token;
             const response = await fetch('/api/admin/logs/export?format=csv', {
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -461,12 +461,9 @@ const Messages = () => {
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('nestfinder_admin_token');
             const [broadcastRes, statsRes] = await Promise.all([
                 adminApi.fetch('/admin/broadcasts'),
-                fetch(`${API_URL}/api/push/admin/stats`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }).then(res => res.ok ? res.json() : { subscribers: [], totalSubscribers: 0 })
+                adminApi.fetch('/push/admin/stats').catch(() => ({ subscribers: [], totalSubscribers: 0 }))
             ]);
 
             setBroadcasts(broadcastRes.broadcasts || []);
@@ -2184,10 +2181,8 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
         try {
             setSending(true);
             setResult(null);
-            const token = localStorage.getItem('nestfinder_admin_token');
-            const response = await fetch(`${API_URL}/api/push/admin/send`, {
+            const data = await adminApi.fetch(`/push/admin/send`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
                     template: selectedTemplate,
                     title,
@@ -2199,8 +2194,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
                     maxViews: null
                 })
             });
-            const data = await response.json();
-            if (response.ok) {
+            if (data.sent !== undefined) {
                 setResult({ success: true, message: `✅ Sent to ${data.sent} users` });
                 setBody('');
                 setImageUrl('');
@@ -2909,15 +2903,9 @@ const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, se
     const loadHistory = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/push/admin/notifications/history?page=${page}&limit=${pageSize}&sort=${sortColumn}&dir=${sortDirection}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setHistory(data.logs || []);
-                setTotalLogs(data.total || 0);
-            }
+            const data = await adminApi.fetch(`/push/admin/notifications/history?page=${page}&limit=${pageSize}&sort=${sortColumn}&dir=${sortDirection}`);
+            setHistory(data.logs || []);
+            setTotalLogs(data.total || 0);
         } catch (err) {
             console.error('Failed to load history:', err);
         } finally {
@@ -2940,16 +2928,10 @@ const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, se
         if (meta.count === 1 && log.target_id) {
             try {
                 // We reuse the existing endpoint that the DetailModal uses
-                const token = localStorage.getItem('nestfinder_admin_token');
-                const res = await fetch(`${API_URL}/api/push/admin/notifications/batch/${log.target_id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.messages && data.messages.length > 0) {
-                        // We found the user!
-                        resolvedNickname = data.messages[0].nickname || 'Anonymous';
-                    }
+                const data = await adminApi.fetch(`/push/admin/notifications/batch/${log.target_id}`);
+                if (data.messages && data.messages.length > 0) {
+                    // We found the user!
+                    resolvedNickname = data.messages[0].nickname || 'Anonymous';
                 }
             } catch (err) {
                 console.warn('Failed to resolve nickname for preview:', err);
@@ -3011,12 +2993,7 @@ const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, se
                                     message: 'Are you sure you want to CLEAR ALL Sent History? This will remove all records of sent notifications from this list.',
                                     onConfirm: async () => {
                                         try {
-                                            const token = localStorage.getItem('nestfinder_admin_token');
-                                            const res = await fetch(`${API_URL}/api/push/admin/notifications/cleanup`, {
-                                                method: 'POST',
-                                                headers: { 'Authorization': `Bearer ${token}` }
-                                            });
-                                            const data = await res.json();
+                                            const data = await adminApi.fetch(`/push/admin/notifications/cleanup`, { method: 'POST' });
                                             if (data.success) {
                                                 loadHistory();
                                             }
@@ -3287,14 +3264,8 @@ const DetailModal = ({ batchId, onClose }) => {
     useEffect(() => {
         const fetchDetails = async () => {
             try {
-                const token = localStorage.getItem('nestfinder_admin_token');
-                const res = await fetch(`${API_URL}/api/push/admin/notifications/batch/${batchId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setDetails(data);
-                }
+                const data = await adminApi.fetch(`/push/admin/notifications/batch/${batchId}`);
+                setDetails(data);
             } catch (err) { console.error(err); }
             setLoading(false);
         };

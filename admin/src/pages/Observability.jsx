@@ -1273,14 +1273,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 
     const fetchMetrics = async () => {
         try {
-            const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/admin/metrics/history?days=${days}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setMetrics(data.metrics || []);
-            }
+            const data = await adminApi.fetch(`/admin/metrics/history?days=${days}`);
+            setMetrics(data.metrics || []);
         } catch (err) {
             console.error('Failed to load metrics:', err);
         }
@@ -1945,14 +1939,8 @@ const RatingsChartCard = ({ onPointClick }) => {
 
     const fetchRatings = async () => {
         try {
-            const token = localStorage.getItem('nestfinder_admin_token');
-            const res = await fetch(`${API_URL}/api/admin/metrics/ratings?days=${days}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setRatings(data.ratings || []);
-            }
+            const data = await adminApi.fetch(`/admin/metrics/ratings?days=${days}`);
+            setRatings(data.ratings || []);
         } catch (err) {
             console.error('Failed to load ratings:', err);
         }
