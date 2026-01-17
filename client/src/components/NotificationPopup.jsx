@@ -19,7 +19,12 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }
                                     // Parse and display in local timezone (CET/CEST)
                                     // Parse and display in local timezone (CET/CEST)
                                     const dateStr = message.client_received_at || message.fetched_at || message.created_at || '';
-                                    const date = new Date(dateStr.replace(' ', 'T'));
+                                    // SQLite dates (fetched_at/created_at) are UTC but lack 'Z'. Ensure we treat them as UTC.
+                                    let normalizedDateStr = dateStr.replace(' ', 'T');
+                                    if (normalizedDateStr && !normalizedDateStr.endsWith('Z') && !normalizedDateStr.includes('+')) {
+                                        normalizedDateStr += 'Z';
+                                    }
+                                    const date = new Date(normalizedDateStr);
                                     return date.toLocaleString('en-GB', {
                                         day: '2-digit',
                                         month: '2-digit',
