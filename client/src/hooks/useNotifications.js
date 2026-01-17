@@ -41,10 +41,11 @@ export const useNotifications = (userId) => {
             if (data.notifications && data.notifications.length > 0) {
                 // Ensure new broadcasts have a fetch time for UI display (popup/list)
                 // If the server didn't provide fetched_at (unseen broadcast), use current time
-                data.notifications.forEach(n => {
+                data.notifications = data.notifications.map(n => {
                     if (n.type === 'broadcast' && !n.fetched_at) {
-                        n.fetched_at = new Date().toISOString();
+                        return { ...n, fetched_at: new Date().toISOString() };
                     }
+                    return n;
                 });
 
                 const latestId = data.notifications[0].id;

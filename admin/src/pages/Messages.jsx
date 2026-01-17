@@ -1737,7 +1737,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     </div>
 
                                                     {/* Delivery Stats & Delete - Fixed Width Container for Alignment */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem', width: '140px', flexShrink: 0, justifyContent: 'flex-end' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'auto', flexShrink: 0, justifyContent: 'flex-end' }}>
+                                                        {/* Left Separator (standardized) */}
+                                                        <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0 0.25rem' }}></div>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
