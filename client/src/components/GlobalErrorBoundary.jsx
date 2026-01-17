@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { api } from '../utils/api';
+import { logger } from '../utils/logger';
 
 export class GlobalErrorBoundary extends Component {
     constructor(props) {
@@ -14,26 +15,35 @@ export class GlobalErrorBoundary extends Component {
     componentDidCatch(error, errorInfo) {
         this.setState({ errorInfo });
         console.error("Uncaught error:", error, errorInfo);
+        logger.log('App', 'Crash', `Uncaught React Error: ${error?.message}`);
+        logger.log('App', 'Crash', `Component Stack: ${errorInfo?.componentStack?.substring(0, 200)}`);
+
+        // Attempt to upload logs immediately
+        logger.upload(api).catch(e => console.error("Failed to emergency upload logs", e));
     }
 
     componentDidMount() {
         // Catch unhandled errors (async, event handlers, etc.)
         window.onerror = (message, source, lineno, colno, error) => {
+            const errDetails = `${message} at ${source}:${lineno}:${colno}`;
             this.setState({
                 hasError: true,
                 error: error || new Error(message),
                 errorInfo: { componentStack: `at ${source}:${lineno}:${colno}` }
             });
+            logger.log('App', 'Crash', `Window Error: ${errDetails}`);
             return true; // Prevent default browser error handling
         };
 
         // Catch unhandled promise rejections
         window.onunhandledrejection = (event) => {
+            const reason = event.reason?.message || event.reason;
             this.setState({
                 hasError: true,
                 error: event.reason || new Error('Unhandled Promise Rejection'),
                 errorInfo: { componentStack: 'Promise rejection - no stack available' }
             });
+            logger.log('App', 'Crash', `Unhandled Promise Rejection: ${reason}`);
         };
     }
 
@@ -68,6 +78,9 @@ export class GlobalErrorBoundary extends Component {
 
             // Send as 'bug' with 5 star rating (high priority)
             await api.submitFeedback('bug', detailedReport, 5);
+
+            // Force upload of debug logs as well
+            await logger.upload(api);
 
             this.setState({ reportSent: true, sendingReport: false });
         } catch (e) {
