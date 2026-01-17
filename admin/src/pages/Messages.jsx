@@ -411,10 +411,11 @@ const Messages = () => {
             wsBuffer.current = []; // Clear buffer
 
             // 1. Aggregate updates by broadcastId
-            const updates = {}; // { [id]: { delivered: 0, read: 0 } }
+            const updates = {}; // { [id]: { sent: 0, delivered: 0, read: 0 } }
 
             events.forEach(ev => {
-                if (!updates[ev.broadcastId]) updates[ev.broadcastId] = { delivered: 0, read: 0 };
+                if (!updates[ev.broadcastId]) updates[ev.broadcastId] = { sent: 0, delivered: 0, read: 0 };
+                if (ev.status === 'sent') updates[ev.broadcastId].sent++;
                 if (ev.status === 'delivered') updates[ev.broadcastId].delivered++;
                 if (ev.status === 'read') updates[ev.broadcastId].read++;
             });
@@ -425,6 +426,7 @@ const Messages = () => {
                 const d = updates[b.id];
                 return {
                     ...b,
+                    total_users: (b.total_users || 0) + d.sent,
                     delivered_count: (b.delivered_count || 0) + d.delivered,
                     read_count: (b.read_count || 0) + d.read
                 };
@@ -1836,6 +1838,9 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'auto', flexShrink: 0, justifyContent: 'flex-end' }}>
                                                         {/* Left Separator (standardized) */}
                                                         <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0 0.25rem' }}></div>
+                                                        <span title="Sent" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#94a3b8' }}>
+                                                            ✓ <span style={{ color: '#94a3b8' }}>{b.total_users || 0}</span>
+                                                        </span>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
