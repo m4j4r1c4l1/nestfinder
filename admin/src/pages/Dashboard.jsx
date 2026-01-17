@@ -767,8 +767,8 @@ const Modal = ({ title, onClose, children }) => (
 // Toast notification for feedback messages
 const Toast = ({ type, message, onClose }) => {
     const colors = {
-        success: { bg: 'rgba(16, 185, 129, 0.95)', icon: '✅' },
-        error: { bg: 'rgba(239, 68, 68, 0.95)', icon: '❌' },
+        success: { bg: 'rgba(16, 185, 129, 0.95)', icon: '👍' },
+        error: { bg: 'rgba(239, 68, 68, 0.95)', icon: '❗' },
         info: { bg: 'rgba(59, 130, 246, 0.95)', icon: 'ℹ️' }
     };
     const { bg, icon } = colors[type] || colors.info;
@@ -783,8 +783,9 @@ const Toast = ({ type, message, onClose }) => {
         <div
             style={{
                 position: 'fixed',
-                bottom: '2rem',
-                right: '2rem',
+                top: '2rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
                 background: bg,
                 color: 'white',
                 padding: '1rem 1.5rem',
@@ -795,11 +796,12 @@ const Toast = ({ type, message, onClose }) => {
                 boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                 zIndex: 2000,
                 animation: 'slideIn 0.3s ease',
-                maxWidth: '400px'
+                maxWidth: '400px',
+                whiteSpace: 'nowrap'
             }}
         >
-            <span style={{ fontSize: '1.25rem' }}>{icon}</span>
-            <span style={{ flex: 1, fontSize: '0.9rem' }}>{message}</span>
+            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{icon}</span>
+            <span style={{ flex: 1, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{message}</span>
             <button
                 onClick={onClose}
                 style={{
@@ -809,7 +811,8 @@ const Toast = ({ type, message, onClose }) => {
                     cursor: 'pointer',
                     padding: '0.25rem 0.5rem',
                     borderRadius: '4px',
-                    fontSize: '1rem'
+                    fontSize: '1rem',
+                    flexShrink: 0
                 }}
             >
                 ×

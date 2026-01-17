@@ -108,8 +108,15 @@ const ToastContainer = ({ toasts, onDismiss }) => {
                         backdropFilter: 'blur(10px)'
                     }}
                 >
-                    <span style={{ fontSize: '1.5rem' }}>{toast.icon}</span>
-                    <span style={{ fontWeight: 500, flex: 1, textAlign: toast.centered ? 'center' : 'left' }}>{toast.message}</span>
+                    <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>{toast.icon}</span>
+                    <span style={{
+                        fontWeight: 500,
+                        flex: 1,
+                        textAlign: toast.centered ? 'center' : 'left',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                    }}>{toast.message}</span>
                 </div>
             ))}
         </div>

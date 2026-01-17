@@ -101,7 +101,7 @@ const MapView = () => {
         // Default icons based on type
         let icon = overrideIcon;
         if (!icon) {
-            if (type === 'success') icon = '✔';
+            if (type === 'success') icon = '👍';
             if (type === 'error') icon = '🙈';
         }
         setToast({ message, type, icon, forceSingleLine });
@@ -209,10 +209,11 @@ const MapView = () => {
                     alignItems: 'center',
                     gap: '0.75rem',
                     maxWidth: '90%',
-                    whiteSpace: toast.forceSingleLine ? 'nowrap' : 'normal'
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden'
                 }}>
-                    <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{toast.icon}</span>
-                    <span>{toast.message}</span>
+                    <span style={{ fontSize: '1.2rem', lineHeight: 1, flexShrink: 0 }}>{toast.icon}</span>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{toast.message}</span>
                     {toast.action && (
                         <button
                             onClick={toast.action.onClick}
