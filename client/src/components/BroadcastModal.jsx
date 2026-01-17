@@ -95,7 +95,7 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
             markSeen(currentBroadcast.id);
             try {
                 // Tell server we read it (so it serves the next priority one next time)
-                await api.post(`/points/broadcast/${currentBroadcast.id}/read`);
+                await api.markBroadcastRead(currentBroadcast.id);
                 if (onBroadcastRead) onBroadcastRead();
             } catch (e) {
                 console.warn('Failed to mark broadcast as read:', e);
