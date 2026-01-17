@@ -69,16 +69,18 @@ router.get('/broadcast/active', requireUser, (req, res) => {
 
     // Create or update view record
     if (!viewRecord) {
-      // First time seeing - create record with 'sent' status (not delivered yet)
+      // First time seeing - create record with 'delivered' status
       run(`
-        INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at)
-        VALUES (?, ?, 'sent', 1, CURRENT_TIMESTAMP)
+        INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at)
+        VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `, [broadcast.id, userId]);
     } else {
-      // Increment view count (don't change status - let client mark as delivered)
+      // Increment view count and ensure delivered
       run(`
         UPDATE broadcast_views 
-        SET view_count = view_count + 1
+        SET view_count = view_count + 1, 
+            status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
+            delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
         WHERE broadcast_id = ? AND user_id = ?
       `, [broadcast.id, userId]);
     }

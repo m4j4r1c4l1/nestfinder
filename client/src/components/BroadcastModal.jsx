@@ -64,13 +64,6 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
                         setBroadcasts([response.broadcast]); // Currently server only gives one
                         setCurrentIndex(0);
                         setVisible(true);
-
-                        // Mark as delivered when displayed to user
-                        try {
-                            await api.post(`/notifications/broadcasts/${response.broadcast.id}/delivered`);
-                        } catch (e) {
-                            console.warn('Failed to mark broadcast as delivered:', e);
-                        }
                     }
                 }
             } catch (error) {
@@ -124,13 +117,6 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
                     if (!seenIds.includes(response.broadcast.id)) {
                         setBroadcasts([response.broadcast]);
                         setVisible(true);
-
-                        // Mark as delivered when displayed to user
-                        try {
-                            await api.post(`/notifications/broadcasts/${response.broadcast.id}/delivered`);
-                        } catch (e) {
-                            console.warn('Failed to mark broadcast as delivered:', e);
-                        }
                     }
                 }
             } catch (e) { }
