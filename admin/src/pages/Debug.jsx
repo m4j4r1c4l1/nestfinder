@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { adminApi } from '../api';
 
 // CET/CEST timestamp formatter
@@ -17,24 +17,8 @@ const formatTimestampCET = (isoString) => {
 const Debug = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedUser, setSelectedUser] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [actionLoading, setActionLoading] = useState(false);
-    const [logsLoading, setLogsLoading] = useState(false);
-    const [logs, setLogs] = useState(null);
-    const searchRef = useRef(null);
-
-    // Click outside handler
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchRef.current && !searchRef.current.contains(event.target)) {
-                setShowDropdown(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    const [actionLoading, setActionLoading] = useState(null); // ID of user being processed
 
     // Fetch users with debug status
     useEffect(() => {
@@ -59,61 +43,35 @@ const Debug = () => {
         u.id.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Select a user
-    const handleSelectUser = async (user) => {
-        setSelectedUser(user);
-        setSearchTerm(user.nickname || user.id.substring(0, 12));
-        setShowDropdown(false);
-        setLogs(null);
-
-        // Fetch logs for this user
-        if (user.log_count > 0) {
-            setLogsLoading(true);
-            try {
-                const res = await adminApi.fetch(`/debug/users/${user.id}/logs`);
-                setLogs(res);
-            } catch (err) {
-                console.error('Failed to fetch logs:', err);
-            } finally {
-                setLogsLoading(false);
-            }
-        }
-    };
-
     // Toggle debug mode for user
-    const handleToggleDebug = async () => {
-        if (!selectedUser) return;
-        setActionLoading(true);
+    const handleToggleDebug = async (user) => {
+        setActionLoading(user.id);
         try {
-            const res = await adminApi.fetch(`/debug/users/${selectedUser.id}/toggle`, { method: 'POST' });
-            setSelectedUser({ ...selectedUser, debug_enabled: res.debug_enabled ? 1 : 0 });
-            setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, debug_enabled: res.debug_enabled ? 1 : 0 } : u));
+            const res = await adminApi.fetch(`/debug/users/${user.id}/toggle`, { method: 'POST' });
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, debug_enabled: res.debug_enabled ? 1 : 0 } : u));
         } catch (err) {
             console.error('Failed to toggle debug:', err);
         } finally {
-            setActionLoading(false);
+            setActionLoading(null);
         }
     };
 
     // Download logs
-    const handleDownloadLogs = () => {
-        if (!selectedUser) return;
-        window.open(`${import.meta.env.VITE_API_URL || ''}/api/debug/users/${selectedUser.id}/logs/download`, '_blank');
+    const handleDownloadLogs = (userId) => {
+        window.open(`${import.meta.env.VITE_API_URL || ''}/api/debug/users/${userId}/logs/download`, '_blank');
     };
 
     // Clear logs
-    const handleClearLogs = async () => {
-        if (!selectedUser) return;
-        setActionLoading(true);
+    const handleClearLogs = async (userId) => {
+        if (!confirm('Are you sure you want to clear logs for this user?')) return;
+        setActionLoading(userId);
         try {
-            await adminApi.fetch(`/debug/users/${selectedUser.id}/logs`, { method: 'DELETE' });
-            setLogs({ logs: [], log_count: 0 });
-            setSelectedUser({ ...selectedUser, log_count: 0 });
-            setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, log_count: 0 } : u));
+            await adminApi.fetch(`/debug/users/${userId}/logs`, { method: 'DELETE' });
+            setUsers(prev => prev.map(u => u.id === userId ? { ...u, log_count: 0 } : u));
         } catch (err) {
             console.error('Failed to clear logs:', err);
         } finally {
-            setActionLoading(false);
+            setActionLoading(null);
         }
     };
 
@@ -122,7 +80,7 @@ const Debug = () => {
     const usersWithLogs = users.filter(u => u.log_count > 0).length;
 
     return (
-        <div style={{ width: '75%', maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 1rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
             <div style={{ marginBottom: '1.5rem' }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
@@ -134,7 +92,7 @@ const Debug = () => {
             </div>
 
             {/* Stats Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '1rem' }}>
                     <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.25rem', fontWeight: 600 }}>🐛 Debug Enabled</div>
                     <div style={{ fontSize: '2rem', fontWeight: 700, color: '#8b5cf6' }}>{debugEnabledCount}</div>
@@ -150,265 +108,147 @@ const Debug = () => {
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05))', border: '1px solid rgba(34, 197, 94, 0.2)', padding: '1rem' }}>
                     <div style={{ fontSize: '0.75rem', color: '#22c55e', marginBottom: '0.25rem', fontWeight: 600 }}>👥 Total Users</div>
                     <div style={{ fontSize: '2rem', fontWeight: 700, color: '#22c55e' }}>{users.length}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>in debug system</div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>in debug system (top 5000)</div>
                 </div>
             </div>
 
             {/* Main Content */}
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
-                {/* User Selector */}
-                <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155' }}>
-                    <label style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem', display: 'block', fontWeight: 500 }}>
-                        Select Client to Debug
-                    </label>
-                    <div style={{ position: 'relative' }} ref={searchRef}>
-                        <input
-                            type="text"
-                            placeholder="Search by nickname or ID..."
-                            value={searchTerm}
-                            onChange={(e) => { setSearchTerm(e.target.value); setShowDropdown(true); }}
-                            onFocus={() => setShowDropdown(true)}
-                            style={{
-                                width: '100%',
-                                maxWidth: '500px',
-                                padding: '0.85rem 1rem',
-                                background: '#0f172a',
-                                border: selectedUser ? '2px solid #8b5cf6' : '1px solid #475569',
-                                borderRadius: '10px',
-                                color: '#e2e8f0',
-                                fontSize: '0.95rem',
-                                transition: 'all 0.2s'
-                            }}
-                        />
-                        {searchTerm && (
-                            <button
-                                onClick={() => { setSearchTerm(''); setSelectedUser(null); setLogs(null); }}
-                                style={{
-                                    position: 'absolute',
-                                    right: '12px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: '#94a3b8',
-                                    fontSize: '1.3rem',
-                                    cursor: 'pointer',
-                                    lineHeight: 1
-                                }}
-                            >×</button>
-                        )}
-                        {/* Dropdown */}
-                        {showDropdown && searchTerm && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '100%',
-                                left: 0,
-                                width: '100%',
-                                maxWidth: '500px',
-                                maxHeight: '300px',
-                                overflowY: 'auto',
-                                background: '#0f172a',
-                                border: '1px solid #475569',
-                                borderRadius: '0 0 10px 10px',
-                                zIndex: 50,
-                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-                            }}>
-                                {loading ? (
-                                    <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
-                                ) : filteredUsers.length === 0 ? (
-                                    <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8' }}>No users found</div>
-                                ) : (
-                                    filteredUsers.slice(0, 15).map(user => (
-                                        <div
-                                            key={user.id}
-                                            onClick={() => handleSelectUser(user)}
-                                            style={{
-                                                padding: '0.75rem 1rem',
-                                                cursor: 'pointer',
-                                                borderBottom: '1px solid #334155',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '0.75rem',
-                                                transition: 'background 0.1s'
-                                            }}
-                                            onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
-                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                        >
-                                            <span style={{
-                                                width: '10px',
-                                                height: '10px',
-                                                borderRadius: '50%',
-                                                background: user.debug_enabled ? '#22c55e' : '#475569',
-                                                flexShrink: 0
-                                            }} />
-                                            <div style={{ flex: 1, minWidth: 0 }}>
-                                                <div style={{ color: '#e2e8f0', fontWeight: 500, fontSize: '0.9rem' }}>
-                                                    {user.nickname || 'Anonymous'}
-                                                </div>
-                                                <div style={{ color: '#64748b', fontSize: '0.7rem', display: 'flex', gap: '0.75rem' }}>
-                                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{user.id}</span>
-                                                    {user.log_count > 0 && <span style={{ color: '#3b82f6' }}>📨 {user.log_count}</span>}
-                                                </div>
-                                            </div>
-                                            {user.debug_enabled ? (
-                                                <span style={{ fontSize: '0.7rem', color: '#22c55e', background: 'rgba(34,197,94,0.1)', padding: '0.2rem 0.5rem', borderRadius: '999px' }}>DEBUG ON</span>
-                                            ) : null}
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        )}
-                    </div>
+                {/* Filters */}
+                <div style={{ padding: '1rem', borderBottom: '1px solid #334155' }}>
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem 1rem',
+                            background: '#0f172a',
+                            border: '1px solid #475569',
+                            borderRadius: '8px',
+                            color: '#e2e8f0',
+                            fontSize: '0.9rem'
+                        }}
+                    />
                 </div>
 
-                {/* Selected User Panel */}
-                {selectedUser && (
-                    <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
-                        {/* User Info Header */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-                            <div style={{ flex: '1 1 300px' }}>
-                                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '0.25rem' }}>
-                                    {selectedUser.nickname || 'Anonymous'}
-                                </div>
-                                <code style={{ fontSize: '0.75rem', color: '#64748b' }}>{selectedUser.id}</code>
-                            </div>
+                {/* Table */}
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                        <thead style={{ position: 'sticky', top: 0, background: '#1e293b', zIndex: 10 }}>
+                            <tr>
+                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '30%' }}>User</th>
+                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '20%' }}>Last Active</th>
+                                <th style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', borderBottom: '1px solid #334155', width: '15%' }}>Debug Mode</th>
+                                <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', borderBottom: '1px solid #334155', width: '35%' }}>Logs & Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading users...</td>
+                                </tr>
+                            ) : filteredUsers.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found matching "{searchTerm}"</td>
+                                </tr>
+                            ) : (
+                                filteredUsers.map(user => {
+                                    const lastActive = formatTimestampCET(user.last_active);
+                                    const debugLastSeen = formatTimestampCET(user.debug_last_seen);
 
-                            {/* Debug Toggle */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Debug Mode</div>
-                                    <div style={{
-                                        fontSize: '1rem',
-                                        fontWeight: 700,
-                                        color: selectedUser.debug_enabled ? '#22c55e' : '#64748b'
-                                    }}>
-                                        {selectedUser.debug_enabled ? '🟢 ENABLED' : '⚫ DISABLED'}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={handleToggleDebug}
-                                    disabled={actionLoading}
-                                    style={{
-                                        padding: '0.75rem 1.5rem',
-                                        fontSize: '0.9rem',
-                                        fontWeight: 600,
-                                        background: selectedUser.debug_enabled
-                                            ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-                                            : 'linear-gradient(135deg, #22c55e, #16a34a)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                                        transition: 'transform 0.1s'
-                                    }}
-                                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                                >
-                                    {actionLoading ? '...' : selectedUser.debug_enabled ? 'Disable Debug' : 'Enable Debug'}
-                                </button>
-                            </div>
-                        </div>
+                                    return (
+                                        <tr key={user.id} style={{ borderBottom: '1px solid #334155' }} onMouseEnter={e => e.currentTarget.style.background = '#1e293b'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                            <td style={{ padding: '1rem', color: '#e2e8f0' }}>
+                                                <div style={{ fontWeight: 500 }}>{user.nickname || 'Anonymous'}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>{user.id}</div>
+                                            </td>
+                                            <td style={{ padding: '1rem', color: '#94a3b8' }}>
+                                                <div>{lastActive.date}</div>
+                                                <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{lastActive.time}</div>
+                                            </td>
+                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                <button
+                                                    onClick={() => handleToggleDebug(user)}
+                                                    disabled={actionLoading === user.id}
+                                                    style={{
+                                                        padding: '0.4rem 0.8rem',
+                                                        borderRadius: '6px',
+                                                        border: 'none',
+                                                        background: user.debug_enabled ? '#22c55e' : '#334155',
+                                                        color: user.debug_enabled ? 'white' : '#94a3b8',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: 600,
+                                                        opacity: actionLoading === user.id ? 0.7 : 1
+                                                    }}
+                                                >
+                                                    {user.debug_enabled ? 'ON' : 'OFF'}
+                                                </button>
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                                    {/* Logs Status */}
+                                                    <div style={{ minWidth: '120px' }}>
+                                                        <div style={{ fontSize: '0.85rem', color: user.log_count > 0 ? '#3b82f6' : '#64748b', fontWeight: 500 }}>
+                                                            {user.log_count > 0 ? `📨 ${user.log_count} Logs` : 'No Logs'}
+                                                        </div>
+                                                        {user.debug_last_seen && (
+                                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                                                Last seen: {debugLastSeen.time}
+                                                            </div>
+                                                        )}
+                                                    </div>
 
-                        {/* Status Info */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-                            <div style={{ background: '#0f172a', borderRadius: '8px', padding: '1rem', border: '1px solid #334155' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '0.25rem' }}>Last Active</div>
-                                <div style={{ fontSize: '0.9rem', color: '#e2e8f0' }}>
-                                    {selectedUser.last_active ? formatTimestampCET(selectedUser.last_active).date + ' ' + formatTimestampCET(selectedUser.last_active).time : '—'}
-                                </div>
-                            </div>
-                            <div style={{ background: '#0f172a', borderRadius: '8px', padding: '1rem', border: '1px solid #334155' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '0.25rem' }}>Debug Last Seen</div>
-                                <div style={{ fontSize: '0.9rem', color: selectedUser.debug_last_seen ? '#22c55e' : '#64748b' }}>
-                                    {selectedUser.debug_last_seen ? formatTimestampCET(selectedUser.debug_last_seen).date + ' ' + formatTimestampCET(selectedUser.debug_last_seen).time : 'Never'}
-                                </div>
-                            </div>
-                            <div style={{ background: '#0f172a', borderRadius: '8px', padding: '1rem', border: '1px solid #334155' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '0.25rem' }}>Log Entries</div>
-                                <div style={{ fontSize: '0.9rem', color: selectedUser.log_count > 0 ? '#3b82f6' : '#64748b' }}>
-                                    {selectedUser.log_count || 0} entries
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Logs Section */}
-                        <div style={{ background: '#0f172a', borderRadius: '10px', border: '1px solid #334155', overflow: 'hidden' }}>
-                            <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ fontWeight: 600, color: '#e2e8f0' }}>📋 Client Logs</div>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button
-                                        onClick={handleDownloadLogs}
-                                        disabled={!logs || logs.log_count === 0}
-                                        style={{
-                                            padding: '0.5rem 1rem',
-                                            fontSize: '0.8rem',
-                                            background: logs?.log_count > 0 ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                                            color: logs?.log_count > 0 ? '#3b82f6' : '#64748b',
-                                            border: `1px solid ${logs?.log_count > 0 ? 'rgba(59, 130, 246, 0.3)' : '#334155'}`,
-                                            borderRadius: '6px',
-                                            cursor: logs?.log_count > 0 ? 'pointer' : 'not-allowed',
-                                            fontWeight: 500
-                                        }}
-                                    >
-                                        📥 Download
-                                    </button>
-                                    <button
-                                        onClick={handleClearLogs}
-                                        disabled={!logs || logs.log_count === 0 || actionLoading}
-                                        style={{
-                                            padding: '0.5rem 1rem',
-                                            fontSize: '0.8rem',
-                                            background: logs?.log_count > 0 ? 'rgba(239, 68, 68, 0.1)' : 'transparent',
-                                            color: logs?.log_count > 0 ? '#ef4444' : '#64748b',
-                                            border: `1px solid ${logs?.log_count > 0 ? 'rgba(239, 68, 68, 0.3)' : '#334155'}`,
-                                            borderRadius: '6px',
-                                            cursor: logs?.log_count > 0 ? 'pointer' : 'not-allowed',
-                                            fontWeight: 500
-                                        }}
-                                    >
-                                        🗑️ Clear
-                                    </button>
-                                </div>
-                            </div>
-                            <div style={{ padding: '1rem', maxHeight: '300px', overflowY: 'auto' }}>
-                                {logsLoading ? (
-                                    <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>Loading logs...</div>
-                                ) : !logs || logs.log_count === 0 ? (
-                                    <div style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
-                                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📭</div>
-                                        <div>No logs available</div>
-                                        <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                                            {selectedUser.debug_enabled ? 'Waiting for client to upload logs...' : 'Enable debug mode to start collecting'}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-                                        {logs.logs.slice(0, 100).map((log, i) => (
-                                            <div key={i} style={{ padding: '0.25rem 0', borderBottom: '1px solid #1e293b' }}>{log}</div>
-                                        ))}
-                                        {logs.logs.length > 100 && (
-                                            <div style={{ padding: '0.5rem', textAlign: 'center', color: '#64748b' }}>
-                                                ... and {logs.logs.length - 100} more entries (download for full logs)
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Empty State */}
-                {!selectedUser && (
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
-                        <div style={{ textAlign: 'center', color: '#64748b' }}>
-                            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🐛</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Select a Client</div>
-                            <div style={{ fontSize: '0.9rem' }}>Search and select a user above to manage their debug settings</div>
-                        </div>
-                    </div>
-                )}
+                                                    {/* Actions */}
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        {user.log_count > 0 && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleDownloadLogs(user.id)}
+                                                                    style={{
+                                                                        padding: '0.4rem 0.8rem',
+                                                                        background: 'rgba(59, 130, 246, 0.1)',
+                                                                        color: '#3b82f6',
+                                                                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                                                                        borderRadius: '4px',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: '0.8rem'
+                                                                    }}
+                                                                >
+                                                                    Download
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleClearLogs(user.id)}
+                                                                    disabled={actionLoading === user.id}
+                                                                    style={{
+                                                                        padding: '0.4rem 0.8rem',
+                                                                        background: 'rgba(239, 68, 68, 0.1)',
+                                                                        color: '#ef4444',
+                                                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                                        borderRadius: '4px',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: '0.8rem'
+                                                                    }}
+                                                                >
+                                                                    Clear
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                <div style={{ borderTop: '1px solid #334155', padding: '0.75rem 1rem', fontSize: '0.8rem', color: '#64748b', textAlign: 'right' }}>
+                    Showing top {users.length} users
+                </div>
             </div>
         </div>
     );

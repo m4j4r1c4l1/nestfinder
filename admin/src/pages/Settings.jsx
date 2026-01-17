@@ -250,6 +250,7 @@ const Settings = () => {
                                         const enabled = e.target.checked ? 'true' : 'false';
                                         setSettings({ ...settings, debug_mode_enabled: enabled });
                                         localStorage.setItem('nestfinder_debug_mode', enabled);
+                                        window.dispatchEvent(new CustomEvent('settings:debug_mode_changed', { detail: { enabled } }));
                                     }}
                                     style={{ width: 18, height: 18, accentColor: '#ef4444' }}
                                 />

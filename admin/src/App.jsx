@@ -176,7 +176,13 @@ const App = () => {
     };
 
     // Check if debug mode is enabled (cached in localStorage by Settings page)
-    const debugModeEnabled = localStorage.getItem('nestfinder_debug_mode') === 'true';
+    const [debugModeEnabled, setDebugModeEnabled] = useState(localStorage.getItem('nestfinder_debug_mode') === 'true');
+
+    React.useEffect(() => {
+        const handleDebugChange = (e) => setDebugModeEnabled(e.detail.enabled === 'true');
+        window.addEventListener('settings:debug_mode_changed', handleDebugChange);
+        return () => window.removeEventListener('settings:debug_mode_changed', handleDebugChange);
+    }, []);
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '🐥' },

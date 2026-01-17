@@ -37,7 +37,7 @@ router.get('/users', requireAdmin, (req, res) => {
                 (SELECT COUNT(*) FROM client_logs WHERE user_id = u.id) as log_count
             FROM users u
             ORDER BY u.debug_enabled DESC, u.last_active DESC
-            LIMIT 100
+            LIMIT 5000
         `);
         res.json({ users });
     } catch (err) {
