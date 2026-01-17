@@ -72,8 +72,7 @@ export class GlobalErrorBoundary extends Component {
             this.setState({ reportSent: true, sendingReport: false });
         } catch (e) {
             console.error("Failed to send crash report", e);
-            this.setState({ sendingReport: false });
-            alert("Failed to send report. Please try again.");
+            this.setState({ sendingReport: false, detailedError: "Failed to send report. Please try again." });
         }
     };
 
@@ -205,6 +204,13 @@ export class GlobalErrorBoundary extends Component {
                                 Dismiss
                             </button>
                         </div>
+
+                        {/* Error Message */}
+                        {this.state.detailedError && (
+                            <div style={{ marginTop: '1rem', color: '#ef4444', fontSize: '0.85rem', fontWeight: 500 }}>
+                                {this.state.detailedError}
+                            </div>
+                        )}
 
                         {/* Footer - Nest + Nestfinder */}
                         <div style={{
