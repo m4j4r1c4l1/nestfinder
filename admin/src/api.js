@@ -80,6 +80,25 @@ export const adminApi = {
         return this.fetch(`/admin/logs?${params}`);
     },
 
+    async downloadLogs(userId) {
+        const response = await fetch(`${API_URL}/debug/users/${userId}/logs/download`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        if (!response.ok) throw new Error('Download failed');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nestfinder_logs_${userId}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    },
+
+
     getLogActions() {
         return this.fetch('/admin/logs/actions');
     },

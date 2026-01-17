@@ -48,7 +48,27 @@ const Home = () => {
     return (
         <div className="welcome-screen">
             {/* Testing Mode Notice - Positioned at top */}
-            {appConfig?.testing_banner_enabled && (
+            {/* Testing Mode Notice or Debug Badge */}
+            {(localStorage.getItem('nestfinder_debug_mode') === 'true') ? (
+                <div style={{
+                    position: 'absolute',
+                    top: '2rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    padding: '0.5rem 1rem',
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: 'var(--radius-lg)',
+                    backdropFilter: 'blur(10px)',
+                    textAlign: 'center',
+                    color: '#3b82f6',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
+                }}>
+                    🐛 DEBUG MODE ENABLED
+                </div>
+            ) : (appConfig?.testing_banner_enabled && (
                 <div style={{
                     position: 'absolute',
                     top: '2rem',
@@ -87,7 +107,7 @@ const Home = () => {
                         This app is in testing phase. Your feedback helps us improve.
                     </p>
                 </div>
-            )}
+            ))}
 
             <div className="welcome-logo" style={{ fontSize: '6rem' }}>🪹</div>
             <h1 className="welcome-title">{t('welcome.title')}</h1>

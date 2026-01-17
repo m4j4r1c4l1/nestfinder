@@ -65,8 +65,13 @@ const Debug = () => {
     };
 
     // Download logs
-    const handleDownloadLogs = (userId) => {
-        window.open(`${import.meta.env.VITE_API_URL || ''}/api/debug/users/${userId}/logs/download`, '_blank');
+    const handleDownloadLogs = async (userId) => {
+        try {
+            await adminApi.downloadLogs(userId);
+        } catch (err) {
+            console.error('Failed to download logs:', err);
+            alert('Failed to download logs');
+        }
     };
 
     // Clear logs
@@ -108,7 +113,12 @@ const Debug = () => {
                 </div>
 
                 <div className="card" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '1rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.25rem', fontWeight: 600 }}>📨 Users with Logs</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.25rem', fontWeight: 600 }}>📨 Users with Logs</div>
+                        <div style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px' }}>
+                            {(users.reduce((acc, u) => acc + (u.log_count || 0), 0))} Total Logs
+                        </div>
+                    </div>
                     <div style={{ fontSize: '2rem', fontWeight: 700, color: '#3b82f6' }}>{usersWithLogs}</div>
                     <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>have uploaded logs</div>
                 </div>
@@ -182,17 +192,26 @@ const Debug = () => {
                                                     disabled={actionLoading === user.id}
                                                     style={{
                                                         padding: '0.4rem 0.8rem',
-                                                        borderRadius: '6px',
-                                                        border: 'none',
-                                                        background: user.debug_enabled ? '#22c55e' : '#334155',
-                                                        color: user.debug_enabled ? 'white' : '#94a3b8',
+                                                        borderRadius: '20px', // More badge-like
+                                                        border: user.debug_enabled
+                                                            ? '1px solid rgba(34, 197, 94, 0.3)'
+                                                            : '1px solid rgba(148, 163, 184, 0.3)',
+                                                        background: user.debug_enabled
+                                                            ? 'rgba(34, 197, 94, 0.1)'
+                                                            : (actionLoading === user.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent'), // Blue when enabling
+                                                        color: user.debug_enabled
+                                                            ? '#22c55e'
+                                                            : (actionLoading === user.id ? '#3b82f6' : '#94a3b8'),
                                                         cursor: 'pointer',
                                                         fontSize: '0.8rem',
                                                         fontWeight: 600,
-                                                        opacity: actionLoading === user.id ? 0.7 : 1
+                                                        opacity: 1, // Remove opacity change, use color/text instead
+                                                        transition: 'all 0.2s ease',
+                                                        minWidth: '80px',
+                                                        textAlign: 'center'
                                                     }}
                                                 >
-                                                    {user.debug_enabled ? 'ON' : 'OFF'}
+                                                    {user.debug_enabled ? 'Enabled' : (actionLoading === user.id ? 'Enabling...' : 'Off')}
                                                 </button>
                                             </td>
                                             <td style={{ padding: '1rem' }}>
