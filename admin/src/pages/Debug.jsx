@@ -359,7 +359,7 @@ const Debug = () => {
                                     User <SortIndicator column="user" />
                                     <ResizeHandle leftCol="user" rightCol="lastActive" />
                                 </th>
-                                <th style={{ width: colWidths.lastActive, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('lastActive')}>
+                                <th style={{ width: colWidths.lastActive, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('lastActive')}>
                                     Last Active <SortIndicator column="lastActive" />
                                     <ResizeHandle leftCol="lastActive" rightCol="debugMode" />
                                 </th>
@@ -367,7 +367,7 @@ const Debug = () => {
                                     Debug Mode <SortIndicator column="debugMode" />
                                     <ResizeHandle leftCol="debugMode" rightCol="logs" />
                                 </th>
-                                <th style={{ position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('logs')}>
+                                <th style={{ position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('logs')}>
                                     Logs & Actions <SortIndicator column="logs" />
                                 </th>
                             </tr>
@@ -394,7 +394,7 @@ const Debug = () => {
                                                 <div style={{ fontWeight: 500 }}>{user.nickname || 'Anonymous'}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>{user.id}</div>
                                             </td>
-                                            <td style={{ padding: '1rem', color: '#94a3b8' }}>
+                                            <td style={{ padding: '1rem', color: '#94a3b8', textAlign: 'center' }}>
                                                 <div>{lastActive.date}</div>
                                                 <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{lastActive.time}</div>
                                             </td>
@@ -426,8 +426,8 @@ const Debug = () => {
                                                     {user.debug_enabled ? 'Enabled' : (actionLoading === user.id ? 'Enabling...' : 'Off')}
                                                 </button>
                                             </td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                                                     {/* Events Badge - Golden */}
                                                     <div style={{
                                                         padding: '0.4rem 0.8rem',
