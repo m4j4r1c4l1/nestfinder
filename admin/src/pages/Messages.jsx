@@ -447,11 +447,7 @@ const Messages = () => {
         };
     }, []);
 
-    // Derived active broadcast for live updates in modal
-    const activeBroadcast = React.useMemo(() => {
-        if (!selectedBroadcast) return null;
-        return broadcasts.find(b => b.id === selectedBroadcast.id) || selectedBroadcast;
-    }, [broadcasts, selectedBroadcast]);
+
 
     useEffect(() => {
         fetchData();
@@ -1067,6 +1063,7 @@ const Messages = () => {
                                     setConfirmModal={setConfirmModal}
                                     recipientFilter={recipientFilter}
                                     setRecipientFilter={setRecipientFilter}
+                                    lastUpdate={lastBroadcastUpdate}
                                 />
                             </div>
                         )}
@@ -1092,7 +1089,7 @@ const Messages = () => {
 };
 
 // --- Broadcast Component ---
-function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBroadcastUpdate, setConfirmModal, recipientFilter, setRecipientFilter }) {
+function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBroadcastUpdate, setConfirmModal, recipientFilter, setRecipientFilter, lastUpdate }) {
     // Search State
     const [searchFilters, setSearchFilters] = useState({
         searchText: '',
@@ -1115,6 +1112,12 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
     // Layout Alignment State
     const scrollContainerRef = React.useRef(null);
     const [scrollbarWidth, setScrollbarWidth] = useState(0);
+
+    // Derived active broadcast for live updates in modal
+    const activeBroadcast = React.useMemo(() => {
+        if (!selectedBroadcast) return null;
+        return broadcasts.find(b => b.id === selectedBroadcast.id) || selectedBroadcast;
+    }, [broadcasts, selectedBroadcast]);
 
 
     // Filter Logic
@@ -1925,7 +1928,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                     <BroadcastRecipientsModal
                         broadcastId={viewRecipientsId}
                         filter={recipientFilter}
-                        lastUpdate={lastBroadcastUpdate}
+                        lastUpdate={lastUpdate}
                         onClose={() => setViewRecipientsId(null)}
                     />
                 )
