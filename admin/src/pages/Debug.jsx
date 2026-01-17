@@ -57,11 +57,92 @@ const Debug = () => {
         }
     };
 
+    // Sorting state
+    const [sortConfig, setSortConfig] = useState({ column: 'debug_enabled', direction: 'desc' });
+
+    // Column widths with localStorage persistence
+    const STORAGE_KEY = 'debug_table_col_widths';
+    const DEFAULT_WIDTHS = { user: 250, lastActive: 180, debugMode: 120, logs: 300 };
+    const [colWidths, setColWidths] = useState(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? { ...DEFAULT_WIDTHS, ...JSON.parse(saved) } : DEFAULT_WIDTHS;
+        } catch { return DEFAULT_WIDTHS; }
+    });
+
+    // Resize state
+    const [resizing, setResizing] = useState(null);
+
+    // Save column widths
+    useEffect(() => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(colWidths)); } catch { }
+    }, [colWidths]);
+
+    // Handle resize
+    useEffect(() => {
+        if (!resizing) return;
+        const handleMouseMove = (e) => {
+            const delta = e.clientX - resizing.startX;
+            const newWidth = Math.max(80, resizing.startWidth + delta);
+            setColWidths(prev => ({ ...prev, [resizing.column]: newWidth }));
+        };
+        const handleMouseUp = () => setResizing(null);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [resizing]);
+
     // Filter users based on search
     const filteredUsers = users.filter(u =>
         (u.nickname || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.id.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Sort users
+    const sortedUsers = React.useMemo(() => {
+        const sorted = [...filteredUsers];
+        sorted.sort((a, b) => {
+            let aVal, bVal;
+            switch (sortConfig.column) {
+                case 'user':
+                    aVal = (a.nickname || '').toLowerCase();
+                    bVal = (b.nickname || '').toLowerCase();
+                    break;
+                case 'lastActive':
+                    // Logic from original: prioritize debug_last_seen if newer
+                    const aTime = (a.debug_last_seen && new Date(a.debug_last_seen) > new Date(a.last_active || 0))
+                        ? a.debug_last_seen : (a.last_active || a.debug_last_seen);
+                    const bTime = (b.debug_last_seen && new Date(b.debug_last_seen) > new Date(b.last_active || 0))
+                        ? b.debug_last_seen : (b.last_active || b.debug_last_seen);
+                    aVal = new Date(aTime || 0).getTime();
+                    bVal = new Date(bTime || 0).getTime();
+                    break;
+                case 'debugMode':
+                    aVal = a.debug_enabled ? 1 : 0;
+                    bVal = b.debug_enabled ? 1 : 0;
+                    break;
+                case 'logs':
+                    aVal = a.log_count || 0;
+                    bVal = b.log_count || 0;
+                    break;
+                default: return 0;
+            }
+            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        return sorted;
+    }, [filteredUsers, sortConfig]);
+
+    const handleSort = (column) => {
+        setSortConfig(prev => ({
+            column,
+            direction: prev.column === column && prev.direction === 'asc' ? 'desc' : 'asc'
+        }));
+    };
 
     // Toggle debug mode for user
     const handleToggleDebug = async (user) => {
@@ -104,8 +185,36 @@ const Debug = () => {
     const debugEnabledCount = users.filter(u => u.debug_enabled).length;
     const usersWithLogs = users.filter(u => u.log_count > 0).length;
 
+    const ResizeHandle = ({ column }) => (
+        <div
+            style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: '6px',
+                cursor: 'col-resize',
+                background: resizing?.column === column ? '#3b82f6' : 'transparent',
+                transition: 'background 0.15s',
+                zIndex: 20
+            }}
+            onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setResizing({ column, startX: e.clientX, startWidth: colWidths[column] });
+            }}
+            onMouseEnter={(e) => { if (!resizing) e.currentTarget.style.background = '#475569'; }}
+            onMouseLeave={(e) => { if (!resizing) e.currentTarget.style.background = 'transparent'; }}
+        />
+    );
+
+    const SortIndicator = ({ column }) => {
+        if (sortConfig.column !== column) return <span style={{ opacity: 0.3, marginLeft: '4px' }}>↕</span>;
+        return <span style={{ marginLeft: '4px' }}>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
+    };
+
     return (
-        <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: resizing ? 'col-resize' : 'default', userSelect: resizing ? 'none' : 'auto' }}>
             {/* Header */}
             <div style={{ marginBottom: '1.5rem' }}>
                 <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
@@ -186,7 +295,6 @@ const Debug = () => {
                         if (!confirm('WARNING: This will delete ALL logs from all users. This action cannot be undone. Are you sure?')) return;
                         try {
                             await adminApi.deleteAllLogs();
-                            // Refresh
                             fetchUsers();
                             alert('All logs cleared successfully');
                         } catch (err) {
@@ -195,38 +303,48 @@ const Debug = () => {
                     }}
                     style={{
                         padding: '0.75rem 1.5rem',
-                        background: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
-                        color: 'white',
-                        border: 'none',
+                        background: 'rgba(168, 85, 247, 0.1)', // Purple Badge
+                        color: '#a855f7',
+                        border: '1px solid rgba(168, 85, 247, 0.3)',
                         borderRadius: '8px',
                         cursor: 'pointer',
                         fontSize: '0.9rem',
                         fontWeight: 600,
-                        boxShadow: '0 4px 6px -1px rgba(147, 51, 234, 0.3)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        transition: 'transform 0.1s'
+                        transition: 'all 0.1s'
                     }}
                     onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
                     onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
-                    🧨 Delete All Logs
+                    Delete All Logs
                 </button>
             </div>
 
             {/* Main Content - Detached Table Card */}
             <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}>
-
                 {/* Table */}
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                <div style={{ flex: 1, overflow: 'auto' }}>
+                    <table style={{ minWidth: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                         <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
                             <tr style={{ borderBottom: '2px solid #475569', color: '#94a3b8' }}>
-                                <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', width: '30%' }}>User</th>
-                                <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', width: '20%' }}>Last Active</th>
-                                <th style={{ padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', width: '15%' }}>Debug Mode</th>
-                                <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', width: '35%' }}>Logs & Actions</th>
+                                <th style={{ width: colWidths.user, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('user')}>
+                                    User <SortIndicator column="user" />
+                                    <ResizeHandle column="user" />
+                                </th>
+                                <th style={{ width: colWidths.lastActive, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('lastActive')}>
+                                    Last Active <SortIndicator column="lastActive" />
+                                    <ResizeHandle column="lastActive" />
+                                </th>
+                                <th style={{ width: colWidths.debugMode, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('debugMode')}>
+                                    Debug Mode <SortIndicator column="debugMode" />
+                                    <ResizeHandle column="debugMode" />
+                                </th>
+                                <th style={{ width: colWidths.logs, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('logs')}>
+                                    Logs & Actions <SortIndicator column="logs" />
+                                    <ResizeHandle column="logs" />
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -234,24 +352,20 @@ const Debug = () => {
                                 <tr>
                                     <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading users...</td>
                                 </tr>
-                            ) : filteredUsers.length === 0 ? (
+                            ) : sortedUsers.length === 0 ? (
                                 <tr>
                                     <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found matching "{searchTerm}"</td>
                                 </tr>
                             ) : (
-                                filteredUsers.map(user => {
-                                    // Use debug_last_seen if it exists and is newer than last_active, or if user prefers it
-                                    // Actually user mostly wants the "Logs & Actions" (debug) timestamp in the main column if available
+                                sortedUsers.map(user => {
                                     const rawTimestamp = (user.debug_last_seen && new Date(user.debug_last_seen) > new Date(user.last_active || 0))
                                         ? user.debug_last_seen
                                         : (user.last_active || user.debug_last_seen);
-
                                     const lastActive = formatTimestampCET(rawTimestamp);
-                                    const debugLastSeen = formatTimestampCET(user.debug_last_seen);
 
                                     return (
                                         <tr key={user.id} style={{ borderBottom: '1px solid #334155' }} onMouseEnter={e => e.currentTarget.style.background = '#1e293b'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                            <td style={{ padding: '1rem', color: '#e2e8f0' }}>
+                                            <td style={{ padding: '1rem', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                 <div style={{ fontWeight: 500 }}>{user.nickname || 'Anonymous'}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>{user.id}</div>
                                             </td>
@@ -261,24 +375,24 @@ const Debug = () => {
                                             </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                 <button
-                                                    onClick={() => handleToggleDebug(user)}
+                                                    onClick={(e) => { e.stopPropagation(); handleToggleDebug(user); }}
                                                     disabled={actionLoading === user.id}
                                                     style={{
                                                         padding: '0.4rem 0.8rem',
-                                                        borderRadius: '20px', // More badge-like
+                                                        borderRadius: '20px',
                                                         border: user.debug_enabled
                                                             ? '1px solid rgba(34, 197, 94, 0.3)'
                                                             : '1px solid rgba(148, 163, 184, 0.3)',
                                                         background: user.debug_enabled
                                                             ? 'rgba(34, 197, 94, 0.1)'
-                                                            : (actionLoading === user.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent'), // Blue when enabling
+                                                            : (actionLoading === user.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent'),
                                                         color: user.debug_enabled
                                                             ? '#22c55e'
                                                             : (actionLoading === user.id ? '#3b82f6' : '#94a3b8'),
                                                         cursor: 'pointer',
                                                         fontSize: '0.8rem',
                                                         fontWeight: 600,
-                                                        opacity: 1, // Remove opacity change, use color/text instead
+                                                        opacity: 1,
                                                         transition: 'all 0.2s ease',
                                                         minWidth: '80px',
                                                         textAlign: 'center'
@@ -290,15 +404,10 @@ const Debug = () => {
                                             <td style={{ padding: '1rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                                                     {/* Logs Status */}
-                                                    <div style={{ minWidth: '120px' }}>
+                                                    <div style={{ minWidth: '80px' }}>
                                                         <div style={{ fontSize: '0.85rem', color: user.log_count > 0 ? '#3b82f6' : '#64748b', fontWeight: 500 }}>
-                                                            {user.log_count > 0 ? `📨 ${user.log_count} Logs` : 'No Logs'}
+                                                            {user.log_count > 0 ? `${user.log_count} Logs` : 'No Logs'}
                                                         </div>
-                                                        {user.debug_last_seen && (
-                                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
-                                                                Last seen: {debugLastSeen.time}
-                                                            </div>
-                                                        )}
                                                     </div>
 
                                                     {/* Actions */}
@@ -320,7 +429,7 @@ const Debug = () => {
                                                                         gap: '4px'
                                                                     }}
                                                                 >
-                                                                    <span>👁️</span> View
+                                                                    View
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleDownloadLogs(user.id)}
@@ -341,9 +450,9 @@ const Debug = () => {
                                                                     disabled={actionLoading === user.id}
                                                                     style={{
                                                                         padding: '0.4rem 0.8rem',
-                                                                        background: 'rgba(239, 68, 68, 0.1)',
-                                                                        color: '#ef4444',
-                                                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                                        background: 'rgba(168, 85, 247, 0.1)', // Purple Badge
+                                                                        color: '#a855f7',
+                                                                        border: '1px solid rgba(168, 85, 247, 0.3)',
                                                                         borderRadius: '4px',
                                                                         cursor: 'pointer',
                                                                         fontSize: '0.8rem'
