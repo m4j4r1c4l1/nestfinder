@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { adminApi } from '../api';
 
 export const useWebSocket = (url, onMessage) => {
     const wsRef = useRef(null);
@@ -16,12 +17,12 @@ export const useWebSocket = (url, onMessage) => {
             // Prevent multiple connections
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return;
 
-            console.log('🔌 WebSocket connecting...');
+            adminApi.debugLog('🔌 WebSocket connecting...');
             const ws = new WebSocket(url);
             wsRef.current = ws;
 
             ws.onopen = () => {
-                console.log('✅ WebSocket connected');
+                adminApi.debugLog('✅ WebSocket connected');
                 retryDelay.current = 1000; // Reset delay on successful connection
             };
 
@@ -39,7 +40,7 @@ export const useWebSocket = (url, onMessage) => {
             ws.onclose = (event) => {
                 // Determine if this was a clean close or error
                 if (!event.wasClean) {
-                    console.log(`❌ WebSocket closed unexpectedly. Retrying in ${retryDelay.current}ms...`);
+                    adminApi.debugLog(`❌ WebSocket closed unexpectedly. Retrying in ${retryDelay.current}ms...`);
 
                     // Recursive reconnect with exponential backoff
                     timeoutRef.current = setTimeout(() => {
@@ -49,7 +50,7 @@ export const useWebSocket = (url, onMessage) => {
                     // Increase delay for next time (cap at 30s)
                     retryDelay.current = Math.min(retryDelay.current * 1.5, 30000);
                 } else {
-                    console.log('WebSocket connection closed cleanly');
+                    adminApi.debugLog('WebSocket connection closed cleanly');
                 }
             };
 
