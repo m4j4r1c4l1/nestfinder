@@ -114,10 +114,10 @@ router.get('/notifications', (req, res) => {
 });
 
 // Mark notification as read
-router.post('/notifications/:id/read', (req, res) => {
+router.post('/notifications/:id/read', requireUser, (req, res) => {
     try {
         const { id } = req.params;
-        const { userId } = req.body;
+        const userId = req.user.id;
 
         run(
             'UPDATE notifications SET read = 1, read_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?',
