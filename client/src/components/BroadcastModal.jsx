@@ -133,6 +133,7 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
                 title: broadcast.title || t('broadcast.announcement') || 'Announcement',
                 body: broadcast.message,
                 created_at: broadcast.created_at || broadcast.start_time,
+                client_received_at: new Date().toISOString(), // Force "Received Now" display
                 image_url: broadcast.image_url
             }}
             onDismiss={handleDismiss}
