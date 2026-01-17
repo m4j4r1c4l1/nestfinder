@@ -38,7 +38,7 @@ export const ToastProvider = ({ children }) => {
 
             addToast('Server is restarting...', {
                 type: 'warning',
-                icon: '🥚',
+                icon: '🐣',
                 duration: 5000,
                 centered: true
             });
