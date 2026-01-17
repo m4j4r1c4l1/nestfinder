@@ -973,6 +973,8 @@ const Messages = () => {
                                     onDelete={handleDeleteBroadcast}
                                     onBroadcastUpdate={handleUpdateBroadcast}
                                     setConfirmModal={setConfirmModal}
+                                    recipientFilter={recipientFilter}
+                                    setRecipientFilter={setRecipientFilter}
                                 />
                             </div>
                         )}
@@ -998,7 +1000,7 @@ const Messages = () => {
 };
 
 // --- Broadcast Component ---
-function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBroadcastUpdate, setConfirmModal }) {
+function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBroadcastUpdate, setConfirmModal, recipientFilter, setRecipientFilter }) {
     // Search State
     const [searchFilters, setSearchFilters] = useState({
         searchText: '',
@@ -1547,16 +1549,16 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                     let statusText = 'INACTIVE';
                                     let statusColor = '#94a3b8';
 
-                                    if (end && now > end) {
+                                    if (b.max_views && (b.total_users || 0) >= b.max_views) {
+                                        // Global Cap Met - Check this first!
+                                        statusText = 'FILLED';
+                                        statusColor = '#ec4899'; // Pink
+                                    } else if (end && now > end) {
                                         statusText = 'ENDED';
                                         statusColor = '#94a3b8';
                                     } else if (now < start) {
                                         statusText = 'SCHEDULED';
                                         statusColor = '#3b82f6';
-                                    } else if (b.max_views && (b.total_users || 0) >= b.max_views) {
-                                        // Global Cap Met
-                                        statusText = 'FILLED';
-                                        statusColor = '#ec4899'; // Pink
                                     } else {
                                         statusText = 'ACTIVE';
                                         statusColor = '#22c55e';
@@ -1734,48 +1736,47 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
                                                         <span style={{ fontWeight: statusText === 'ACTIVE' ? 700 : 400, color: statusText === 'ACTIVE' ? '#f8fafc' : 'inherit' }}>{end ? formatTimeCET(end) : ''}</span>
                                                     </div>
 
-                                                    {/* Delivery Stats - Separator Line included in border */}
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem' }}>
+                                                    {/* Delivery Stats & Delete - Fixed Width Container for Alignment */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderLeft: '1px solid #334155', paddingLeft: '0.75rem', width: '140px', flexShrink: 0, justifyContent: 'flex-end' }}>
                                                         <span title="Delivered" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#22c55e' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{Math.max(0, (b.delivered_count || 0) - (b.read_count || 0))}</span>
                                                         </span>
                                                         <span title="Read" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#3b82f6' }}>
                                                             ✓✓ <span style={{ color: '#94a3b8' }}>{b.read_count || 0}</span>
                                                         </span>
+
+                                                        {/* Vertical Separator */}
+                                                        <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0' }}></div>
+                                                        {/* Delete Button (Moved from top) */}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setConfirmModal({
+                                                                    show: true,
+                                                                    title: 'Delete Broadcast',
+                                                                    message: 'Are you sure you want to delete this broadcast?',
+                                                                    onConfirm: () => onDelete(b.id)
+                                                                });
+                                                            }}
+                                                            className="btn-icon danger"
+                                                            title="Delete"
+                                                            style={{
+                                                                padding: '0.2rem 0.4rem', // create the "area"
+                                                                fontSize: '1rem',
+                                                                background: 'transparent',
+                                                                border: 'none',
+                                                                color: '#ef4444',
+                                                                cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                lineHeight: 1,
+                                                                borderRadius: '4px',
+                                                                transition: 'all 0.2s',
+                                                                opacity: 0.7
+                                                            }}
+                                                        >
+                                                            🗑️
+                                                        </button>
                                                     </div>
-
-                                                    {/* Vertical Separator for Delete Icon - Pushed to right by flex growth of Time Range */}
-                                                    <div style={{ width: '1px', height: '12px', background: '#334155', margin: '0' }}></div>
-
-                                                    {/* Delete Button (Moved from top) */}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setConfirmModal({
-                                                                show: true,
-                                                                title: 'Delete Broadcast',
-                                                                message: 'Are you sure you want to delete this broadcast?',
-                                                                onConfirm: () => onDelete(b.id)
-                                                            });
-                                                        }}
-                                                        className="btn-icon danger"
-                                                        title="Delete"
-                                                        style={{
-                                                            padding: '0.2rem 0.4rem', // create the "area"
-                                                            fontSize: '1rem',
-                                                            background: 'transparent',
-                                                            border: 'none',
-                                                            color: '#ef4444',
-                                                            cursor: 'pointer',
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            lineHeight: 1,
-                                                            borderRadius: '4px',
-                                                            transition: 'all 0.2s',
-                                                            opacity: 0.7
-                                                        }}
-                                                    >
-                                                        🗑️
-                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -3256,22 +3257,40 @@ const DetailModal = ({ batchId, onClose }) => {
                 {/* Fixed Stats Section */}
                 <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                        {/* Total Box - Orange */}
                         <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{details?.stats?.total || 0}</div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '1.5rem' }}>📊</span>
+                                <span>{details?.stats?.total || 0}</span>
+                            </div>
+                            <div style={{ color: '#94a3b8', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Total</div>
                         </div>
-                        {/* New SENT (Pending) Box */}
+
+                        {/* Sent Box - Amber */}
                         <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fbbf24' }}>{pendingCount}</div>
-                            <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sent</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ color: '#fbbf24', fontSize: '1.5rem' }}>✓</span>
+                                <span>{pendingCount}</span>
+                            </div>
+                            <div style={{ color: '#fbbf24', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Sent</div>
                         </div>
+
+                        {/* Delivered Box - Green */}
                         <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{details?.stats?.delivered || 0}</div>
-                            <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Delivered</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ color: '#4ade80', fontSize: '1.5rem' }}>✓✓</span>
+                                <span>{details?.stats?.delivered || 0}</span>
+                            </div>
+                            <div style={{ color: '#4ade80', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Delivered</div>
                         </div>
+
+                        {/* Read Box - Blue */}
                         <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{details?.stats?.read || 0}</div>
-                            <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Read</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ color: '#60a5fa', fontSize: '1.5rem' }}>✓✓</span>
+                                <span>{details?.stats?.read || 0}</span>
+                            </div>
+                            <div style={{ color: '#60a5fa', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Read</div>
                         </div>
                     </div>
                 </div>
@@ -3645,7 +3664,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             </div>
                         </div>
 
-                        {/* Redesigned Time Box - Flex Row with Centered Icon */}
+                        {/* Redesigned Time Box - Centered Horizontally */}
                         <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -3655,7 +3674,8 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             borderRadius: '8px',
                             border: '1px solid #334155',
                             marginBottom: '1.5rem',
-                            width: 'fit-content'
+                            width: 'fit-content',
+                            margin: '0 auto 1.5rem auto'
                         }}>
                             {/* Icon Centered */}
                             <div style={{ fontSize: '1.5rem', lineHeight: 1, color: '#94a3b8' }}>🕐</div>
@@ -3688,47 +3708,98 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
                             marginBottom: '1.5rem',
                             flex: 1,
                             overflowY: 'auto',
-                            minHeight: '150px' // Approx 6-8 lines
+                            minHeight: '150px', // Approx 6-8 lines
+                            fontStyle: 'italic'
                         }}>
                             {broadcast.message}
                         </div>
 
-                        {/* Stats Cards - Clickable */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
-                            <div
-                                style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-                                onClick={() => onViewRecipients && onViewRecipients('all')}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#eab308'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                            >
-                                <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
-                                <span style={{ fontSize: '0.75rem', color: '#eab308', textTransform: 'uppercase', fontWeight: 600 }}>Total</span>
+                        {/* Stats Horizontal Bar - Professional Pill Design */}
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem',
+                                padding: '0.75rem 1rem',
+                                background: '#0f172a',
+                                borderRadius: '12px',
+                                border: '1px solid #334155',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                marginBottom: '0.5rem'
+                            }}
+                            onClick={() => onViewRecipients && onViewRecipients('all')}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = '#475569'; e.currentTarget.style.background = '#1e293b'; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#0f172a'; }}
+                        >
+                            {/* Total Pill - Orange */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.9rem',
+                                background: 'rgba(249, 115, 22, 0.15)',
+                                borderRadius: '20px',
+                                border: '1px solid rgba(249, 115, 22, 0.3)'
+                            }}>
+                                <span style={{ fontSize: '1.1rem' }}>📊</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.total_users || 0}</span>
                             </div>
 
-                            <div
-                                style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-                                onClick={() => onViewRecipients && onViewRecipients('delivered')}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
-                                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}</span>
-                                </div>
-                                <span style={{ fontSize: '0.75rem', color: '#22c55e', textTransform: 'uppercase', fontWeight: 600 }}>Delivered</span>
+                            {/* Separator */}
+                            <div style={{ width: '1px', height: '24px', background: '#334155' }} />
+
+                            {/* Sent Pill - Amber */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.9rem',
+                                background: 'rgba(251, 191, 36, 0.15)',
+                                borderRadius: '20px',
+                                border: '1px solid rgba(251, 191, 36, 0.3)'
+                            }}>
+                                <span style={{ color: '#fbbf24', fontSize: '1rem' }}>✓</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                                    {broadcast.sent_count !== undefined ? broadcast.sent_count : Math.max(0, (broadcast.total_users || 0) - (broadcast.delivered_count || 0))}
+                                </span>
                             </div>
 
-                            <div
-                                style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-                                onClick={() => onViewRecipients && onViewRecipients('read')}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
-                                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.read_count || 0}</span>
-                                </div>
-                                <span style={{ fontSize: '0.75rem', color: '#3b82f6', textTransform: 'uppercase', fontWeight: 600 }}>Read</span>
+                            {/* Separator */}
+                            <div style={{ width: '1px', height: '24px', background: '#334155' }} />
+
+                            {/* Delivered Pill */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.9rem',
+                                background: 'rgba(34, 197, 94, 0.15)',
+                                borderRadius: '20px',
+                                border: '1px solid rgba(34, 197, 94, 0.3)'
+                            }}>
+                                <span style={{ color: '#22c55e', fontSize: '1rem' }}>✓✓</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                                    {Math.max(0, (broadcast.delivered_count || 0) - (broadcast.read_count || 0))}
+                                </span>
+                            </div>
+
+                            {/* Separator */}
+                            <div style={{ width: '1px', height: '24px', background: '#334155' }} />
+
+                            {/* Read Pill */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.9rem',
+                                background: 'rgba(59, 130, 246, 0.15)',
+                                borderRadius: '20px',
+                                border: '1px solid rgba(59, 130, 246, 0.3)'
+                            }}>
+                                <span style={{ color: '#3b82f6', fontSize: '1rem' }}>✓✓</span>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>{broadcast.read_count || 0}</span>
                             </div>
                         </div>
 
@@ -3737,8 +3808,7 @@ function BroadcastDetailPopup({ broadcast, onClose, onViewRecipients, onDelete }
 
                 {/* Footer */}
                 <div style={{ padding: '1rem 1.5rem', background: '#0f172a', borderTop: '1px solid #334155', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                    <button onClick={onDelete} className="btn btn-danger" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}>🗑️ Delete Broadcast</button>
-                    <button onClick={onClose} className="btn btn-secondary">Close</button>
+                    <button onClick={onDelete} className="btn" style={{ background: '#22c55e', color: '#fff', border: '1px solid #16a34a', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s' }}>Delete Broadcast</button>
                 </div>
 
             </div>
@@ -3751,10 +3821,25 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
     const [views, setViews] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Sorting state
+    const [sortConfig, setSortConfig] = useState({ column: 'received', direction: 'desc' });
+
+    // Column widths with localStorage persistence
+    const STORAGE_KEY = 'broadcast_recipients_col_widths';
+    const DEFAULT_WIDTHS = { user: 200, sent: 120, received: 120, read: 120, status: 110 };
+    const [colWidths, setColWidths] = useState(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? { ...DEFAULT_WIDTHS, ...JSON.parse(saved) } : DEFAULT_WIDTHS;
+        } catch { return DEFAULT_WIDTHS; }
+    });
+
+    // Resize state
+    const [resizing, setResizing] = useState(null); // { column, startX, startWidth }
+
     useEffect(() => {
         const fetchViews = async () => {
             try {
-                // Use adminApi to ensure correct base URL (/api) and headers
                 const data = await adminApi.fetch(`/admin/broadcasts/${broadcastId}/views`);
                 setViews(data.views || []);
             } catch (e) { console.error(e); }
@@ -3763,16 +3848,110 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
         fetchViews();
     }, [broadcastId]);
 
+    // Save column widths to localStorage
+    useEffect(() => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(colWidths)); } catch { }
+    }, [colWidths]);
+
+    // Handle resize mouse events
+    useEffect(() => {
+        if (!resizing) return;
+
+        const handleMouseMove = (e) => {
+            const delta = e.clientX - resizing.startX;
+            const newWidth = Math.max(80, resizing.startWidth + delta);
+            setColWidths(prev => ({ ...prev, [resizing.column]: newWidth }));
+        };
+
+        const handleMouseUp = () => setResizing(null);
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [resizing]);
+
     const total = views.length;
     const readCount = views.filter(v => v.status === 'read').length;
     const deliveredCount = views.filter(v => v.status === 'delivered').length;
-    const pendingCount = views.filter(v => v.status === 'sent').length;
+    const sentCount = views.filter(v => v.status === 'sent').length;
+
+    // Sort function
+    const sortedViews = React.useMemo(() => {
+        const sorted = [...views];
+        sorted.sort((a, b) => {
+            let aVal, bVal;
+            switch (sortConfig.column) {
+                case 'user':
+                    aVal = (a.user_nickname || '').toLowerCase();
+                    bVal = (b.user_nickname || '').toLowerCase();
+                    break;
+                case 'received':
+                    aVal = new Date(a.delivered_at || a.created_at || 0).getTime();
+                    bVal = new Date(b.delivered_at || b.created_at || 0).getTime();
+                    break;
+                case 'sent':
+                    aVal = new Date(a.fetched_at || a.created_at || 0).getTime();
+                    bVal = new Date(b.fetched_at || b.created_at || 0).getTime();
+                    break;
+                case 'read':
+                    aVal = a.status === 'read' ? new Date(a.updated_at || 0).getTime() : 0;
+                    bVal = b.status === 'read' ? new Date(b.updated_at || 0).getTime() : 0;
+                    break;
+                case 'status':
+                    const statusOrder = { read: 3, delivered: 2, sent: 1 };
+                    aVal = statusOrder[a.status] || 0;
+                    bVal = statusOrder[b.status] || 0;
+                    break;
+                default:
+                    return 0;
+            }
+            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        return sorted;
+    }, [views, sortConfig]);
+
+    const handleSort = (column) => {
+        setSortConfig(prev => ({
+            column,
+            direction: prev.column === column && prev.direction === 'asc' ? 'desc' : 'asc'
+        }));
+    };
+
+    const SortIndicator = ({ column }) => {
+        if (sortConfig.column !== column) return <span style={{ opacity: 0.3, marginLeft: '4px' }}>↕</span>;
+        return <span style={{ marginLeft: '4px' }}>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
+    };
+
+    const ResizeHandle = ({ column }) => (
+        <div
+            style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: '6px',
+                cursor: 'col-resize',
+                background: resizing?.column === column ? '#3b82f6' : 'transparent',
+                transition: 'background 0.15s'
+            }}
+            onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setResizing({ column, startX: e.clientX, startWidth: colWidths[column] });
+            }}
+            onMouseEnter={(e) => { if (!resizing) e.currentTarget.style.background = '#475569'; }}
+            onMouseLeave={(e) => { if (!resizing) e.currentTarget.style.background = 'transparent'; }}
+        />
+    );
 
     const DateTimeCell = ({ isoString }) => {
         if (!isoString) return <span style={{ color: '#64748b' }}>-</span>;
         const date = new Date(isoString);
-
-        // Format Time with CET/CEST
         const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
         const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
         const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
@@ -3788,15 +3967,29 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
         );
     };
 
+    const thStyle = (column) => ({
+        padding: '0.75rem 1rem',
+        fontWeight: 600,
+        textAlign: column === 'user' ? 'left' : 'center',
+        cursor: 'pointer',
+        userSelect: 'none',
+        position: 'relative',
+        width: colWidths[column],
+        minWidth: colWidths[column],
+        maxWidth: colWidths[column],
+        transition: 'background 0.15s'
+    });
+
     return ReactDOM.createPortal(
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
             background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
-            animation: 'fadeIn 0.2s ease'
+            animation: 'fadeIn 0.2s ease',
+            cursor: resizing ? 'col-resize' : 'auto'
         }} onClick={onClose}>
             <div style={{
-                background: '#1e293b', borderRadius: '16px', width: '100%', maxWidth: '900px',
+                background: '#1e293b', borderRadius: '16px', width: '100%', maxWidth: '950px',
                 maxHeight: '85vh', display: 'flex', flexDirection: 'column',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid #334155'
             }} onClick={e => e.stopPropagation()}>
@@ -3816,20 +4009,44 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                         </div>
                     ) : (
                         <>
-                            {/* Stats */}
-                            <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                            {/* Stats - Matching Pill Design from Details Modal */}
+                            {/* Stats - Grid Layout with Icon + Count + Text */}
+                            <div style={{ padding: '1.5rem', flexShrink: 0 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                                    {/* Total Box - Orange */}
                                     <div style={{ padding: '1rem', background: '#334155', borderRadius: '12px', textAlign: 'center', border: '1px solid #475569' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc' }}>{total}</div>
-                                        <div style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase' }}>Total</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                            <span style={{ fontSize: '1.5rem' }}>📊</span>
+                                            <span>{total}</span>
+                                        </div>
+                                        <div style={{ color: '#94a3b8', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Total</div>
                                     </div>
+
+                                    {/* Sent Box - Amber */}
+                                    <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                            <span style={{ color: '#fbbf24', fontSize: '1.5rem' }}>✓</span>
+                                            <span>{sentCount}</span>
+                                        </div>
+                                        <div style={{ color: '#fbbf24', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Sent</div>
+                                    </div>
+
+                                    {/* Delivered Box - Green */}
                                     <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4ade80' }}>{deliveredCount}</div>
-                                        <div style={{ color: '#4ade80', fontSize: '0.85rem', textTransform: 'uppercase' }}>Delivered</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                            <span style={{ color: '#4ade80', fontSize: '1.5rem' }}>✓✓</span>
+                                            <span>{deliveredCount}</span>
+                                        </div>
+                                        <div style={{ color: '#4ade80', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Delivered</div>
                                     </div>
+
+                                    {/* Read Box - Blue */}
                                     <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#60a5fa' }}>{readCount}</div>
-                                        <div style={{ color: '#60a5fa', fontSize: '0.85rem', textTransform: 'uppercase' }}>Read</div>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                            <span style={{ color: '#60a5fa', fontSize: '1.5rem' }}>✓✓</span>
+                                            <span>{readCount}</span>
+                                        </div>
+                                        <div style={{ color: '#60a5fa', fontSize: '1rem', textTransform: 'capitalize', letterSpacing: '0.05em', marginTop: '0.2rem' }}>Read</div>
                                     </div>
                                 </div>
                             </div>
@@ -3844,41 +4061,79 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                     </div>
                                 ) : (
                                     <div style={{ border: '1px solid #334155', borderRadius: '8px', overflow: 'auto', flex: 1, background: '#1e293b' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', tableLayout: 'fixed' }}>
                                             <thead style={{ position: 'sticky', top: 0, background: '#0f172a', zIndex: 10 }}>
                                                 <tr style={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
-                                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'left' }}>User</th>
-                                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Received</th>
-                                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Read</th>
-                                                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, textAlign: 'center' }}>Status</th>
+                                                    <th
+                                                        style={thStyle('user')}
+                                                        onClick={() => handleSort('user')}
+                                                        onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
+                                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        User<SortIndicator column="user" />
+                                                        <ResizeHandle column="user" />
+                                                    </th>
+                                                    <th
+                                                        style={thStyle('sent')}
+                                                        onClick={() => handleSort('sent')}
+                                                        onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
+                                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        Sent<SortIndicator column="sent" />
+                                                        <ResizeHandle column="sent" />
+                                                    </th>
+                                                    <th
+                                                        style={thStyle('received')}
+                                                        onClick={() => handleSort('received')}
+                                                        onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
+                                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        Delivered<SortIndicator column="received" />
+                                                        <ResizeHandle column="received" />
+                                                    </th>
+                                                    <th
+                                                        style={thStyle('read')}
+                                                        onClick={() => handleSort('read')}
+                                                        onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
+                                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        Read<SortIndicator column="read" />
+                                                        <ResizeHandle column="read" />
+                                                    </th>
+                                                    <th
+                                                        style={thStyle('status')}
+                                                        onClick={() => handleSort('status')}
+                                                        onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
+                                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        Status<SortIndicator column="status" />
+                                                        <ResizeHandle column="status" />
+                                                    </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {views.filter(v => {
-                                                    if (filter === 'all') return true;
-                                                    if (filter === 'sent') return v.status === 'sent';
-                                                    if (filter === 'delivered') return v.status === 'delivered';
-                                                    if (filter === 'read') return v.status === 'read';
-                                                    return true;
-                                                }).map(view => (
+                                                {sortedViews.map(view => (
                                                     <tr key={view.id} style={{ borderBottom: '1px solid #334155' }}>
-                                                        <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
+                                                        <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle', width: colWidths.user, overflow: 'hidden' }}>
                                                             <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                                                                 <span style={{ fontWeight: 500, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                                     {view.user_nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>}
                                                                 </span>
-                                                                <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', whiteSpace: 'nowrap' }}>{view.user_id}</code>
+                                                                <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{view.user_id}</code>
                                                             </div>
                                                         </td>
-                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                            <DateTimeCell isoString={view.delivered_at || view.created_at} />
+                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.sent }}>
+                                                            <DateTimeCell isoString={view.fetched_at || view.created_at} />
                                                         </td>
-                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                            <DateTimeCell isoString={view.status === 'read' ? view.updated_at : null} />
+                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.received }}>
+                                                            <DateTimeCell isoString={view.delivered_at} />
                                                         </td>
-                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center', width: '110px', margin: '0 auto' }}>
-                                                                <div style={{ flex: '0 0 30px', fontSize: '1.2rem', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
+                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.read }}>
+                                                            <DateTimeCell isoString={view.read_at} />
+                                                        </td>
+                                                        <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle', textAlign: 'center', width: colWidths.status }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                <span style={{ fontSize: '1rem' }}>
                                                                     {view.status === 'read' ? (
                                                                         <span style={{ color: '#3b82f6' }}>✓✓</span>
                                                                     ) : view.status === 'delivered' ? (
@@ -3886,8 +4141,8 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                                                                     ) : (
                                                                         <span style={{ color: '#22c55e' }}>✓</span>
                                                                     )}
-                                                                </div>
-                                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#94a3b8', textAlign: 'left', marginLeft: '8px' }}>
+                                                                </span>
+                                                                <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#94a3b8' }}>
                                                                     {view.status === 'read' ? 'Read' : (view.status === 'delivered' ? 'Delivered' : 'Sent')}
                                                                 </span>
                                                             </div>
@@ -3903,10 +4158,11 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
                     )}
                 </div>
             </div>
-        </div>,
+        </div >,
         document.body
     );
 }
+
 
 // --- Timeline Component ---
 function Timeline({ broadcasts, selectedBroadcast, onBroadcastClick, onBroadcastUpdate, onHoveredBarChange, externalHoverId }) {
