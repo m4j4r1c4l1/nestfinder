@@ -4,13 +4,22 @@ import { adminApi } from '../api';
 // CET/CEST timestamp formatter
 const formatTimestampCET = (isoString) => {
     if (!isoString) return { date: '—', time: '' };
-    const d = new Date(isoString);
-    const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Paris' });
-    const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
-    const jan = new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
-    const jul = new Date(d.getFullYear(), 6, 1).getTimezoneOffset();
-    const parisOffset = new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+    // Ensure UTC interpretation if Z is missing, though usually API returns ISO
+    const dateObj = new Date(isoString.endsWith('Z') ? isoString : isoString + 'Z');
+
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) return { date: '—', time: '' };
+
+    const dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Paris' });
+    const timeStr = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
+
+    // Simple DST approximation for label (exact logic handled by browser timezone, this is just for the suffix)
+    // We can just rely on the fact that the time ITSELF is correct now.
+    const jan = new Date(dateObj.getFullYear(), 0, 1).getTimezoneOffset();
+    const jul = new Date(dateObj.getFullYear(), 6, 1).getTimezoneOffset();
+    const parisOffset = new Date(dateObj.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
     const isDST = Math.max(jan, jul) !== parisOffset;
+
     return { date: dateStr, time: `${timeStr} ${isDST ? 'CEST' : 'CET'}` };
 };
 
@@ -228,7 +237,13 @@ const Debug = () => {
                                 </tr>
                             ) : (
                                 filteredUsers.map(user => {
-                                    const lastActive = formatTimestampCET(user.last_active);
+                                    // Use debug_last_seen if it exists and is newer than last_active, or if user prefers it
+                                    // Actually user mostly wants the "Logs & Actions" (debug) timestamp in the main column if available
+                                    const rawTimestamp = (user.debug_last_seen && new Date(user.debug_last_seen) > new Date(user.last_active || 0))
+                                        ? user.debug_last_seen
+                                        : (user.last_active || user.debug_last_seen);
+
+                                    const lastActive = formatTimestampCET(rawTimestamp);
                                     const debugLastSeen = formatTimestampCET(user.debug_last_seen);
 
                                     return (

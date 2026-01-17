@@ -115,7 +115,7 @@ Generated: ${new Date().toISOString().replace('T', ' ').split('.')[0]}
         logs.forEach((entry, i) => {
             content += `--------------------------------------------------------------------------------\n`;
             content += `UPLOAD #${i + 1}\n`;
-            content += `Timestamp: ${entry.uploaded_at.replace('T', ' ').split('.')[0]}\n`;
+            content += `Timestamp: ${new Date(entry.uploaded_at).toLocaleString('en-GB', { timeZone: 'Europe/Paris' })} (CET/CEST)\n`;
             content += `Platform:  ${entry.platform || 'Unknown'}\n`;
             content += `--------------------------------------------------------------------------------\n`;
 
