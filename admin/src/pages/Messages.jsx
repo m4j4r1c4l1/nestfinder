@@ -3204,7 +3204,7 @@ const DetailModal = ({ batchId, onClose }) => {
         // We must treat it as UTC by appending 'Z' if missing.
         let safeIso = isoString;
         if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) {
-            safeIso += 'Z';
+            safeIso = safeIso.replace(' ', 'T') + 'Z';
         }
         // Also handle "T" separator if standard ISO
         if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) {
@@ -3213,18 +3213,24 @@ const DetailModal = ({ batchId, onClose }) => {
 
         const date = new Date(safeIso);
 
-        // Format Time with CET/CEST
-        const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
-        // Reliable Summer Time Calculation for Europe/Paris
-        const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
-        const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
-        const parisOffset = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
-        const isDST = Math.max(jan, jul) !== parisOffset;
-        const timeString = `${hours} ${isDST ? 'CEST' : 'CET'}`;
+        // Format Time with Europe/Paris timezone
+        const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            timeZone: 'Europe/Paris', hour12: false
+        });
+        const hours = timeFormatter.format(date);
+
+        // Get timezone abbreviation (CET or CEST) using Intl API
+        const tzFormatter = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Europe/Paris', timeZoneName: 'short'
+        });
+        const parts = tzFormatter.formatToParts(date);
+        const tzAbbrev = parts.find(p => p.type === 'timeZoneName')?.value || 'CET';
+        const timeString = `${hours} ${tzAbbrev}`;
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString('en-GB')}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color }}>{date.toLocaleDateString('en-GB', { timeZone: 'Europe/Paris' })}</span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{timeString}</span>
             </div>
         );
@@ -3970,17 +3976,37 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', onClose }) {
 
     const DateTimeCell = ({ isoString }) => {
         if (!isoString) return <span style={{ color: '#64748b' }}>-</span>;
-        const date = new Date(isoString);
-        const hours = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Paris', hour12: false });
-        const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
-        const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
-        const parisOffset = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
-        const isDST = Math.max(jan, jul) !== parisOffset;
-        const timeString = `${hours} ${isDST ? 'CEST' : 'CET'}`;
+
+        // SQLite CURRENT_TIMESTAMP returns "YYYY-MM-DD HH:MM:SS" which JS parses as Local.
+        // We must treat it as UTC by appending 'Z' if missing.
+        let safeIso = isoString;
+        if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) {
+            safeIso = safeIso.replace(' ', 'T') + 'Z';
+        }
+        if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) {
+            safeIso += 'Z';
+        }
+
+        const date = new Date(safeIso);
+
+        // Format Time with Europe/Paris timezone
+        const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            timeZone: 'Europe/Paris', hour12: false
+        });
+        const hours = timeFormatter.format(date);
+
+        // Get timezone abbreviation (CET or CEST) using Intl API
+        const tzFormatter = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Europe/Paris', timeZoneName: 'short'
+        });
+        const parts = tzFormatter.formatToParts(date);
+        const tzAbbrev = parts.find(p => p.type === 'timeZoneName')?.value || 'CET';
+        const timeString = `${hours} ${tzAbbrev}`;
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2 }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString('en-GB')}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{date.toLocaleDateString('en-GB', { timeZone: 'Europe/Paris' })}</span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{timeString}</span>
             </div>
         );

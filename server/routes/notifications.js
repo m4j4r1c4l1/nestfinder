@@ -65,7 +65,7 @@ router.get('/notifications', (req, res) => {
         // 2. Get broadcasts seen by this user (joined with view record)
         const seenBroadcasts = all(`
             SELECT b.id, b.title, b.message as body, b.image_url, b.created_at,
-                   v.status, v.delivered_at, v.read_at,
+                   v.status, v.fetched_at, v.delivered_at, v.read_at,
                    CASE WHEN v.status = 'read' THEN 1 ELSE 0 END as read,
                    'broadcast' as type
             FROM broadcasts b

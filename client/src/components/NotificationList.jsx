@@ -844,8 +844,8 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                                                             </span>
                                                         </div>
                                                         <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.3, minWidth: '120px' }}>
-                                                            <div>{formatDateTime(notification.created_at).date}</div>
-                                                            <div>{formatDateTime(notification.created_at).time}</div>
+                                                            <div>{formatDateTime(notification.fetched_at || notification.created_at).date}</div>
+                                                            <div>{formatDateTime(notification.fetched_at || notification.created_at).time}</div>
                                                         </div>
                                                     </div>
                                                     {/* 2. Body Row */}
