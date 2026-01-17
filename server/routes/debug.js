@@ -8,7 +8,7 @@ const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOG_FILE = path.join(__dirname, '../../debug_logs.txt');
 
-import { requireAdmin, requireAuth } from '../middleware/auth.js';
+import { requireAdmin, requireUser } from '../middleware/auth.js';
 import { getSetting, all, run, get } from '../database.js';
 
 // Middleware: Check if Debug Mode is globally enabled
@@ -144,7 +144,7 @@ router.delete('/users/:id/logs', requireAdmin, (req, res) => {
 // ==========================================
 
 // GET /api/debug/status - Check if debug is enabled for current user
-router.get('/status', requireAuth, (req, res) => {
+router.get('/status', requireUser, (req, res) => {
     try {
         const globalEnabled = getSetting('debug_mode_enabled') === 'true';
         const user = get('SELECT debug_enabled FROM users WHERE id = ?', [req.user.id]);

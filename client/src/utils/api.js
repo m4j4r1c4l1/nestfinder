@@ -1,4 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api';
+import { logger } from './logger';
+
 
 class ApiClient {
   constructor() {
@@ -10,6 +12,8 @@ class ApiClient {
   setUserId(id) {
     this.userId = id;
     localStorage.setItem('nestfinder_user_id', id);
+    logger.setUserId(id);
+    logger.init(this); // Check if debug is enabled for this user
   }
 
   setUserToken(token) {
@@ -124,7 +128,12 @@ class ApiClient {
     }
 
     if (!response.ok) {
-      throw new Error(data.error || `Server error: ${response.status} ${response.statusText}`);
+      const errorMessage = data.error || `Server error: ${response.status} ${response.statusText}`;
+      // Log error (excluding temporary server unavailable errors which are handled by toast)
+      if (response.status !== 502 && response.status !== 503 && response.status !== 504) {
+        logger.log('API', 'Error', `${endpoint} - ${errorMessage}`);
+      }
+      throw new Error(errorMessage);
     }
 
     return data;
@@ -361,6 +370,10 @@ class ApiClient {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Download failed:', error);
+      // Log significant errors
+      if (!error.message.includes('Server is updating')) {
+        logger.log('API', 'Error', `Download points - ${error.message}`);
+      }
       throw error;
     }
   }

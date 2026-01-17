@@ -1,4 +1,4 @@
-import { getSetting } from './api';
+// Client Debug Logger - stores and uploads logs when debug is enabled
 
 const LOG_BUFFER_SIZE = 20;
 const FLUSH_INTERVAL = 5000; // 5 seconds
