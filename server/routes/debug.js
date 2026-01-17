@@ -187,14 +187,14 @@ router.get('/status', requireUser, (req, res) => {
 // POST /api/debug/logs - Upload logs from client (requires both global + user debug)
 router.post('/logs', requireDebugMode, (req, res) => {
     try {
-        const { logs, platform, userAgent, userId } = req.body;
+        const { logs, platform, userAgent, userId, isCrash } = req.body;
 
         if (!logs || !Array.isArray(logs) || logs.length === 0) {
             return res.status(400).json({ error: 'No logs provided' });
         }
 
-        // Check if user has debug enabled
-        if (userId) {
+        // Check if user has debug enabled, UNLESS it's a crash report
+        if (userId && !isCrash) {
             const user = get('SELECT debug_enabled FROM users WHERE id = ?', [userId]);
             if (!user || user.debug_enabled !== 1) {
                 return res.status(403).json({ error: 'Debug not enabled for this user' });

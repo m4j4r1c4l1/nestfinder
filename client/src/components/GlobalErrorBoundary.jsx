@@ -19,7 +19,7 @@ export class GlobalErrorBoundary extends Component {
         logger.log('App', 'Crash', `Component Stack: ${errorInfo?.componentStack?.substring(0, 200)}`);
 
         // Attempt to upload logs immediately
-        logger.upload(api).catch(e => console.error("Failed to emergency upload logs", e));
+        logger.upload(api, true).catch(e => console.error("Failed to emergency upload logs", e));
     }
 
     componentDidMount() {
@@ -59,7 +59,7 @@ export class GlobalErrorBoundary extends Component {
         try {
             const errorMsg = this.state.error?.toString() || 'Unknown Error';
             const shortSummary = errorMsg.length > 50 ? errorMsg.substring(0, 50) + '...' : errorMsg;
-            const title = `Zero Day: ${shortSummary}`;
+            const title = 'New Bug!';
 
             const detailedReport = [
                 title,
@@ -80,7 +80,7 @@ export class GlobalErrorBoundary extends Component {
             await api.submitFeedback('bug', detailedReport, 5);
 
             // Force upload of debug logs as well
-            await logger.upload(api);
+            await logger.upload(api, true);
 
             this.setState({ reportSent: true, sendingReport: false });
         } catch (e) {

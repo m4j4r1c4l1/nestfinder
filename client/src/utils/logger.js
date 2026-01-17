@@ -122,7 +122,7 @@ export const logger = {
      * @param {object} api - API client instance
      * @returns {Promise<boolean>} Success status
      */
-    async upload(api) {
+    async upload(api, isCrash = false) {
         const logs = getLogs();
         if (logs.length === 0) return true;
 
@@ -131,7 +131,8 @@ export const logger = {
                 logs,
                 userId: _userId || api.userId,
                 platform: navigator.platform || 'Unknown',
-                userAgent: navigator.userAgent
+                userAgent: navigator.userAgent,
+                isCrash
             });
 
             // Clear logs after successful upload to prevent duplication
