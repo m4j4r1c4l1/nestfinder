@@ -3965,7 +3965,7 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', lastUpdate, onC
         const fetchViews = async () => {
             try {
                 // If this update isn't for us, skip (unless it's initial load where lastUpdate is null/undefined)
-                if (lastUpdate && !lastUpdate.broadcastIds.includes(broadcastId)) return;
+                if (lastUpdate && !lastUpdate.broadcastIds.includes(Number(broadcastId))) return;
 
                 const data = await adminApi.fetch(`/admin/broadcasts/${broadcastId}/views`);
                 setViews(data.views || []);
