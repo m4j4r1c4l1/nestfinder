@@ -170,6 +170,18 @@ const App = () => {
         return () => window.removeEventListener('settings:debug_mode_changed', handleDebugChange);
     }, []);
 
+    // Sync debug status on mount
+    React.useEffect(() => {
+        if (!token) return;
+        adminApi.getSettings()
+            .then(data => {
+                const isEnabled = String(data.settings.debug_mode_enabled) === 'true';
+                setDebugModeEnabled(isEnabled);
+                localStorage.setItem('nestfinder_debug_mode', isEnabled ? 'true' : 'false');
+            })
+            .catch(() => { });
+    }, [token]);
+
     React.useEffect(() => {
         const handleUnauthorized = () => setToken(null);
         window.addEventListener('auth:unauthorized', handleUnauthorized);
