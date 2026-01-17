@@ -257,31 +257,7 @@ const Dashboard = ({ onNavigate }) => {
                     <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            {showBackup && (
-                                <button
-                                    className="btn"
-                                    onClick={() => {
-                                        const isProd = window.location.hostname !== 'localhost';
-                                        const API_URL = isProd
-                                            ? 'https://nestfinder-sa1g.onrender.com'
-                                            : (import.meta.env.VITE_API_URL || 'http://localhost:3001');
-
-                                        window.open(`${API_URL}/api/debug/download`, '_blank');
-                                    }}
-                                    title="Download Debug Logs"
-                                    style={{
-                                        background: '#333',
-                                        color: '#0f0',
-                                        padding: '0.2rem 0.5rem',
-                                        fontSize: '0.75rem',
-                                        fontFamily: 'monospace',
-                                        border: '1px solid #444',
-                                        marginRight: '0.5rem'
-                                    }}
-                                >
-                                    LOGS
-                                </button>
-                            )}
+                            {/* Debug Logs button moved or removed - relying on new DB Manager */}
                             {filteredPoints && (
                                 <button
                                     onClick={handleClearFilter}
@@ -361,7 +337,7 @@ const Dashboard = ({ onNavigate }) => {
                     </div>
 
                     {/* 3. Database Metrics - 5 rows + 1.6 overhead = 6.6. Backup adds ~1 row -> 7.6 */}
-                    <div className="card" style={{ flex: showBackup ? 7.6 : 6.6, display: 'flex', flexDirection: 'column', transition: 'flex 0.3s ease' }}>
+                    <div className="card" style={{ flex: 6.6, display: 'flex', flexDirection: 'column', transition: 'flex 0.3s ease' }}>
                         <div className="card-header" style={{ padding: '0.5rem 0.75rem', minHeight: 'auto', borderBottom: '1px solid var(--color-border)' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>💾 Database Metrics</span>
                         </div>
@@ -372,105 +348,7 @@ const Dashboard = ({ onNavigate }) => {
                             <MetricRow label="Votes" value={stats.totalConfirmations} onClick={() => handleStatClick('totalConfirmations')} color="#10b981" />
                             <MetricRow label="DB Size" value={stats.dbSizeBytes ? (stats.dbSizeBytes >= 1048576 ? (stats.dbSizeBytes / 1048576).toFixed(2) + ' MB' : (stats.dbSizeBytes / 1024).toFixed(1) + ' KB') : '-'} onClick={handleDBSizeClick} color="#94a3b8" />
 
-                            {showBackup && (
-                                <div style={{ marginTop: '0.25rem', width: '100%', display: 'flex', gap: '0.25rem' }}>
-                                    {/* 1. Download Active */}
-                                    <button
-                                        className="btn btn-primary"
-                                        style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.35rem', fontSize: '0.8rem' }}
-                                        title="Download Active DB"
-                                        onClick={async () => {
-                                            try {
-                                                await adminApi.downloadBackup();
-                                                showToast('success', 'Active database download started.');
-                                            } catch (err) {
-                                                showToast('error', 'Failed: ' + err.message);
-                                            }
-                                        }}
-                                    >
-                                        📥 Active
-                                    </button>
 
-                                    {/* 2. Download Corrupt (Red if exists, else Gray/Disabled) */}
-                                    <button
-                                        className="btn"
-                                        style={{
-                                            flex: 1,
-                                            display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.35rem', fontSize: '0.8rem',
-                                            background: corruptDBFound ? '#ef4444' : '#334155',
-                                            color: 'white',
-                                            opacity: corruptDBFound ? 1 : 0.5,
-                                            cursor: corruptDBFound ? 'pointer' : 'not-allowed'
-                                        }}
-                                        title="Download Corrupted DB (if valid)"
-                                        disabled={!corruptDBFound}
-                                        onClick={async () => {
-                                            try {
-                                                await adminApi.downloadCorruptDB();
-                                                showToast('success', 'Corrupt database download started.');
-                                            } catch (err) {
-                                                showToast('error', 'Failed: ' + err.message);
-                                            }
-                                        }}
-                                    >
-                                        ☣️ Corrupt
-                                    </button>
-
-                                    {/* 3. Restore (Upload) */}
-                                    <button
-                                        className="btn"
-                                        style={{
-                                            flex: 1,
-                                            display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.35rem', fontSize: '0.8rem',
-                                            background: isRestoring ? '#94a3b8' : '#f59e0b',
-                                            color: 'white',
-                                            opacity: isRestoring ? 0.7 : 1,
-                                            cursor: isRestoring ? 'wait' : 'pointer'
-                                        }}
-                                        title="Restore Database from File"
-                                        disabled={isRestoring}
-                                        onClick={() => document.getElementById('restore-db-input').click()}
-                                    >
-                                        {isRestoring ? 'Wait...' : '♻️ Restore'}
-                                    </button>
-                                    <input
-                                        type="file"
-                                        id="restore-db-input"
-                                        accept=".db,.sqlite,.sqlite3"
-                                        style={{ display: 'none' }}
-                                        disabled={isRestoring}
-                                        onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            if (!file) return;
-                                            setConfirmModal({
-                                                title: 'Database Restore',
-                                                message: `⚠️ WARNING: This will OVERWRITE the current database with '${file.name}'.\n\nThe server will restart.\nAre you sure?`,
-                                                onConfirm: async () => {
-                                                    setConfirmModal(null);
-                                                    setIsRestoring(true);
-                                                    try {
-                                                        const res = await adminApi.restoreDB(file);
-                                                        setSuccessModal({
-                                                            title: 'Restore Complete',
-                                                            message: res.message || 'Database restored successfully! The application will now reload to apply changes.',
-                                                            onOk: () => window.location.reload()
-                                                        });
-                                                    } catch (err) {
-                                                        showToast('error', 'Restore Failed: ' + err.message);
-                                                        setIsRestoring(false);
-                                                    } finally {
-                                                        e.target.value = '';
-                                                    }
-                                                },
-                                                onCancel: () => {
-                                                    setConfirmModal(null);
-                                                    e.target.value = '';
-                                                }
-                                            });
-                                        }}
-                                    />
-                                </div>
-                            )}
                         </div>
                     </div>
 
