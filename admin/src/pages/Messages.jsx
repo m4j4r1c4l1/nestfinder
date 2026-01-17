@@ -436,6 +436,7 @@ const Messages = () => {
             // We pass the set of updated IDs so the modal knows if it should refresh
             const updatedIds = Object.keys(updates).map(Number);
             if (updatedIds.length > 0) {
+                console.log('[Messages] WS Flush: Triggering update for IDs:', updatedIds);
                 setLastBroadcastUpdate({
                     timestamp: Date.now(),
                     broadcastIds: updatedIds
@@ -3968,11 +3969,19 @@ function BroadcastRecipientsModal({ broadcastId, filter = 'all', lastUpdate, onC
 
     useEffect(() => {
         const fetchViews = async () => {
+            console.log('[Modal] Check Update:', { broadcastId, lastUpdate });
             try {
                 // If this update isn't for us, skip (unless it's initial load where lastUpdate is null/undefined)
-                if (lastUpdate && !lastUpdate.broadcastIds.includes(Number(broadcastId))) return;
+                if (lastUpdate && !lastUpdate.broadcastIds.includes(Number(broadcastId))) {
+                    console.log('[Modal] Update skipped: ID mismatch');
+                    return;
+                }
 
-                const data = await adminApi.fetch(`/admin/broadcasts/${broadcastId}/views`);
+                console.log('[Modal] Fetching views...');
+
+                const data = await adminApi.fetch(`/admin/broadcasts/${broadcastId}/views?_t=${Date.now()}`, {
+                    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+                });
                 setViews(data.views || []);
             } catch (e) { console.error(e); }
             finally { setLoading(false); }
