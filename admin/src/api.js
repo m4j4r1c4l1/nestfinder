@@ -13,6 +13,13 @@ export const adminApi = {
         localStorage.removeItem('nestfinder_admin_token');
     },
 
+    // Debug logging helper - only logs when debug mode is enabled
+    debugLog(...args) {
+        if (localStorage.getItem('nestfinder_debug_mode') === 'true') {
+            console.log(...args);
+        }
+    },
+
     async fetch(endpoint, options = {}) {
         const headers = {
             'Content-Type': 'application/json',

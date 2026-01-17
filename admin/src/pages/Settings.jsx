@@ -20,6 +20,8 @@ const Settings = () => {
     useEffect(() => {
         adminApi.getSettings().then(data => {
             setSettings(data.settings);
+            // Cache debug mode to localStorage for adminApi.debugLog
+            localStorage.setItem('nestfinder_debug_mode', data.settings.debug_mode_enabled === 'true' ? 'true' : 'false');
             setLoading(false);
         });
     }, []);
@@ -244,7 +246,11 @@ const Settings = () => {
                                     type="checkbox"
                                     name="debug_mode_enabled"
                                     checked={settings.debug_mode_enabled === 'true'}
-                                    onChange={(e) => setSettings({ ...settings, debug_mode_enabled: e.target.checked ? 'true' : 'false' })}
+                                    onChange={(e) => {
+                                        const enabled = e.target.checked ? 'true' : 'false';
+                                        setSettings({ ...settings, debug_mode_enabled: enabled });
+                                        localStorage.setItem('nestfinder_debug_mode', enabled);
+                                    }}
                                     style={{ width: 18, height: 18, accentColor: '#ef4444' }}
                                 />
                                 Enable Debug Mode (Global)
