@@ -1393,7 +1393,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Unified Control Panel */}
-                    <div style={{ background: '#475569', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', borderRadius: '8px', border: '2px dashed yellow' }}>
+                    <div style={{ background: '#475569', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 0.4rem 0.8rem 1rem', margin: '0.8rem', borderRadius: '8px', border: '2px dashed yellow' }}>
 
                         {/* Top Header: Clock & Actions (Badges) */}
 
