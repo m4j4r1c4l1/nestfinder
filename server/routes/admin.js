@@ -1258,6 +1258,65 @@ router.get('/metrics/daily-breakdown', (req, res) => {
     res.json({ breakdown, totalUsers });
 });
 
+// Bulk delete backups
+router.post('/db/backups/bulk-delete', (req, res) => {
+    const { filenames } = req.body;
+    if (!filenames || !Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'No filenames provided' });
+    }
+
+    try {
+        const dbDir = path.dirname(DB_PATH);
+        let deletedCount = 0;
+        const errors = [];
+
+        filenames.forEach(filename => {
+            // Safety checks
+            if (filename === 'nestfinder.db') {
+                errors.push(`${filename}: Cannot delete active database`);
+                return;
+            }
+            if (!filename.startsWith('nestfinder.db') && !filename.startsWith('corrupted_')) {
+                // Allow our known prefixes. Currently everything is nestfinder.db.*
+                // But let's be strict to avoid path injection
+                errors.push(`${filename}: Invalid filename`);
+                return;
+            }
+            // Basic path traversal prevention
+            if (filename.includes('..') || filename.includes('/')) {
+                errors.push(`${filename}: Invalid filename`);
+                return;
+            }
+
+            const filePath = path.join(dbDir, filename);
+            if (fs.existsSync(filePath)) {
+                try {
+                    fs.unlinkSync(filePath);
+                    deletedCount++;
+                } catch (e) {
+                    errors.push(`${filename}: ${e.message}`);
+                }
+            } else {
+                errors.push(`${filename}: File not found`);
+            }
+        });
+
+        if (deletedCount > 0) {
+            log('admin', 'bulk_delete_backups', null, { count: deletedCount, filenames });
+        }
+
+        res.json({
+            success: true,
+            deletedCount,
+            errors: errors.length > 0 ? errors : undefined,
+            message: `Deleted ${deletedCount} files`
+        });
+    } catch (error) {
+        console.error('Bulk delete error:', error);
+        res.status(500).json({ error: 'Failed to process bulk delete' });
+    }
+});
+
 // Get distinct log actions for filters
 router.get('/logs/actions', (req, res) => {
     // Select distinct actions for autocomplete

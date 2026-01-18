@@ -79,6 +79,17 @@ export const adminApi = {
         });
     },
 
+    deleteBackup(filename) {
+        return this.fetch(`/admin/db/backups/${filename}`, { method: 'DELETE' });
+    },
+
+    deleteBulkBackups(filenames) {
+        return this.fetch('/admin/db/backups/bulk-delete', {
+            method: 'POST',
+            body: JSON.stringify({ filenames })
+        });
+    },
+
     getStats() {
         return this.fetch('/admin/stats');
     },

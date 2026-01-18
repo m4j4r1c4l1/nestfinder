@@ -1141,6 +1141,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             if (scheduleRes.retentionDays) setBackupRetention(String(scheduleRes.retentionDays));
             if (scheduleRes.corruptRetentionDays) setCorruptRetention(String(scheduleRes.corruptRetentionDays));
             if (scheduleRes.uploadRetentionDays) setUploadRetention(String(scheduleRes.uploadRetentionDays));
+            setSelectedFiles(new Set()); // Clear selection on reload
         } catch (err) {
             onResult('error', 'Load Failed', err.message);
         } finally {
@@ -1148,7 +1149,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
         }
     };
 
-    useEffect(() => {
+    React.useEffect(() => {
         loadFiles();
     }, []);
 
@@ -1255,6 +1256,53 @@ const DBManagerModal = ({ onClose, onResult }) => {
             onResult('error', 'Delete Failed', err.message);
         } finally {
             setActionLoading(null);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedFiles.size === 0) return;
+        if (!window.confirm(`Are you sure you want to delete ${selectedFiles.size} files?`)) return;
+
+        try {
+            setActionLoading('delete');
+            const filesArray = Array.from(selectedFiles);
+            const result = await adminApi.deleteBulkBackups(filesArray);
+
+            if (result.success) {
+                if (onResult) onResult('success', 'Bulk Delete', result.message);
+                if (result.errors) {
+                    console.warn('Bulk delete errors:', result.errors);
+                }
+                loadFiles();
+            } else {
+                throw new Error(result.error || 'Unknown error');
+            }
+        } catch (error) {
+            if (onResult) onResult('error', 'Bulk Delete Failed', error.message);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleSelectFile = (filename) => {
+        const newSet = new Set(selectedFiles);
+        if (newSet.has(filename)) {
+            newSet.delete(filename);
+        } else {
+            newSet.add(filename);
+        }
+        setSelectedFiles(newSet);
+    };
+
+    const handleSelectAll = () => {
+        if (selectedFiles.size === sortedFiles.filter(f => f.type !== 'active').length) {
+            setSelectedFiles(new Set());
+        } else {
+            const newSet = new Set();
+            sortedFiles.forEach(f => {
+                if (f.type !== 'active') newSet.add(f.name);
+            });
+            setSelectedFiles(newSet);
         }
     };
 
@@ -1706,7 +1754,11 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3,.gz" style={{ display: 'none' }} onChange={handleFileUpload} />
                                     <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
                                     <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)' }}>Backup Now</button>
-                                    <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
+                                    {selectedFiles.size > 0 ? (
+                                        <button className="btn" onClick={handleBulkDelete} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(168, 85, 247, 0.2)', color: '#d8b4fe', border: '1px solid rgba(168, 85, 247, 0.4)' }}>Delete Selected ({selectedFiles.size})</button>
+                                    ) : (
+                                        <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -1725,6 +1777,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 <thead style={{ background: '#1e293b', position: 'sticky', top: 0, zIndex: 10 }}>
                                     <tr>
                                         {[
+                                            { key: 'select', label: '✓', left: null, right: null },
                                             { key: 'name', label: 'Name', left: 'name', right: 'size' },
                                             { key: 'size', label: 'Size', left: 'size', right: 'modified' },
                                             { key: 'modified', label: 'Modified', left: 'modified', right: 'type' },
@@ -1748,8 +1801,19 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                                 onClick={() => handleSort(col.key)}
                                             >
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: col.key === 'name' ? 'flex-start' : 'center' }}>
-                                                    {col.label}
-                                                    <SortIndicator column={col.key} />
+                                                    {col.key === 'select' ? (
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedFiles.size > 0 && selectedFiles.size === sortedFiles.filter(f => f.type !== 'active').length}
+                                                            onChange={(e) => { e.stopPropagation(); handleSelectAll(); }}
+                                                            style={{ cursor: 'pointer' }}
+                                                        />
+                                                    ) : (
+                                                        <>
+                                                            {col.label}
+                                                            <SortIndicator column={col.key} />
+                                                        </>
+                                                    )}
                                                 </div>
                                                 {col.right && <ResizeHandle leftCol={col.left} rightCol={col.right} />}
                                             </th>
@@ -1758,7 +1822,17 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 </thead>
                                 <tbody>
                                     {sortedFiles.map(file => (
-                                        <tr key={file.name} style={{ borderBottom: '1px solid var(--color-border)', background: 'transparent' }}>
+                                        <tr key={file.name} style={{ borderBottom: '1px solid var(--color-border)', background: selectedFiles.has(file.name) ? 'rgba(168, 85, 247, 0.05)' : 'transparent' }}>
+                                            <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid var(--color-border)' }}>
+                                                {file.type !== 'active' && (
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedFiles.has(file.name)}
+                                                        onChange={(e) => { e.stopPropagation(); handleSelectFile(file.name); }}
+                                                        style={{ cursor: 'pointer' }}
+                                                    />
+                                                )}
+                                            </td>
                                             <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', borderBottom: '1px solid var(--color-border)' }}>
                                                 <span
                                                     onClick={(e) => { e.stopPropagation(); handleDownload(file.name); }}
