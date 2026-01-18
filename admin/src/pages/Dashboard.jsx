@@ -1393,7 +1393,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Unified Control Panel */}
-                    <div style={{ background: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', border: '2px dashed yellow' }}>
+                    <div style={{ background: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', border: '2px dashed yellow' }}>
 
                         {/* Top Header: Clock & Actions (Badges) */}
 
@@ -1401,11 +1401,11 @@ const DBManagerModal = ({ onClose, onResult }) => {
                         {/* Controls Body */}
                         <div style={{ display: 'flex', alignItems: 'stretch' }}>
 
-                            {/* Left Side: Toggle + SET (Swapped) */}
+                            {/* Left Side: Toggle Only */}
                             <div style={{
                                 display: 'flex', flexDirection: 'column',
-                                alignItems: 'center', justifyContent: 'center', gap: '0.8rem',
-                                padding: '1rem', width: '90px',
+                                alignItems: 'center', justifyContent: 'center',
+                                padding: '1rem', width: '70px',
                                 borderRight: '1px solid var(--color-border)',
                                 background: 'rgba(0,0,0,0.02)',
                                 border: '2px dashed red'
@@ -1416,7 +1416,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     style={{
                                         width: '36px',
                                         height: '20px',
-                                        background: backupEnabled ? '#22c55e' : '#475569',
+                                        background: backupEnabled ? '#3b82f6' : '#475569',
                                         borderRadius: '10px',
                                         position: 'relative',
                                         transition: 'background 0.2s',
@@ -1435,26 +1435,6 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                         transition: 'left 0.2s'
                                     }} />
                                 </div>
-
-                                {/* SET Button */}
-                                <button
-                                    onClick={handleSetSchedule}
-                                    disabled={actionLoading === 'schedule'}
-                                    style={{
-                                        padding: '0.25rem 0.8rem',
-                                        borderRadius: '4px',
-                                        fontSize: '0.7rem',
-                                        fontWeight: 600,
-                                        textTransform: 'uppercase',
-                                        background: 'rgba(34, 197, 94, 0.1)',
-                                        color: '#22c55e',
-                                        border: '1px solid #22c55e',
-                                        cursor: 'pointer',
-                                        outline: '2px dashed magenta'
-                                    }}
-                                >
-                                    {actionLoading === 'schedule' ? '...' : 'SET'}
-                                </button>
                             </div>
 
                             {/* Right Side: Pickers (Swapped) */}
@@ -1602,31 +1582,55 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Column 3: Clock + Actions (Right) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', paddingLeft: '1rem', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan' }}>
-                                {/* Row 1: Live Clock (Top) */}
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.4rem',
-                                    padding: '0.15rem 0.5rem',
-                                    background: 'var(--color-bg-primary)',
-                                    border: '1px solid var(--color-border)',
-                                    borderRadius: '4px',
-                                    outline: '2px dashed gold'
-                                }}>
-                                    <span style={{ fontSize: '0.9rem' }}>🕐</span>
-                                    <span style={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: 500,
-                                        color: 'var(--color-text-primary)',
-                                        fontFamily: 'monospace'
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '0.8rem', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan' }}>
+                                {/* Row 1: SET Button + Live Clock (Top) */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    {/* SET Button */}
+                                    <button
+                                        onClick={handleSetSchedule}
+                                        disabled={actionLoading === 'schedule'}
+                                        style={{
+                                            padding: '0.2rem 0.6rem',
+                                            borderRadius: '4px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            textTransform: 'uppercase',
+                                            minWidth: '50px',
+                                            textAlign: 'center',
+                                            background: 'rgba(34, 197, 94, 0.1)',
+                                            color: '#22c55e',
+                                            border: '1px solid #22c55e',
+                                            cursor: 'pointer',
+                                            outline: '2px dashed magenta'
+                                        }}
+                                    >
+                                        {actionLoading === 'schedule' ? '...' : 'SET'}
+                                    </button>
+                                    {/* Live Clock */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem',
+                                        padding: '0.15rem 0.5rem',
+                                        background: 'var(--color-bg-primary)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '4px',
+                                        outline: '2px dashed gold'
                                     }}>
-                                        {currentTime.toLocaleString('en-GB', {
-                                            day: '2-digit', month: '2-digit', year: 'numeric',
-                                            hour: '2-digit', minute: '2-digit', second: '2-digit',
-                                            timeZone: 'Europe/Paris', hour12: false, timeZoneName: 'short'
-                                        })}
-                                    </span>
+                                        <span style={{ fontSize: '0.9rem' }}>🕐</span>
+                                        <span style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: 500,
+                                            color: 'var(--color-text-primary)',
+                                            fontFamily: 'monospace'
+                                        }}>
+                                            {currentTime.toLocaleString('en-GB', {
+                                                day: '2-digit', month: '2-digit', year: 'numeric',
+                                                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                                                timeZone: 'Europe/Paris', hour12: false, timeZoneName: 'short'
+                                            })}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 {/* Row 2: Actions Buttons (Bottom) */}
