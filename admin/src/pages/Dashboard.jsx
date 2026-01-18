@@ -1262,48 +1262,105 @@ const DBManagerModal = ({ onClose, onResult }) => {
                         <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>&times;</button>
                     </div>
 
-                    {/* Toolbar */}
-                    <div style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', gap: '0.5rem', background: 'var(--color-bg-tertiary)', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
-                        <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3,.gz" style={{ display: 'none' }} onChange={handleFileUpload} />
+                    {/* Unified Control Panel */}
+                    <div style={{ background: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column' }}>
 
-                        <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)' }}>Backup Now</button>
-
-                        <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
-
-                        {/* Live Clock - CET/CEST */}
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.4rem',
-                            padding: '0.15rem 0.5rem',
-                            background: 'var(--color-bg-primary)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '4px'
-                        }}>
-                            <span style={{ fontSize: '0.9rem' }}>🕐</span>
-                            <span style={{
-                                fontSize: '0.75rem',
-                                fontWeight: 500,
-                                color: 'var(--color-text-primary)',
-                                fontFamily: 'monospace'
+                        {/* Top Header: Clock & Actions (Badges) */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 1rem', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-tertiary)' }}>
+                            {/* Live Clock (Left) */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                padding: '0.15rem 0.5rem',
+                                background: 'var(--color-bg-primary)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '4px'
                             }}>
-                                {currentTime.toLocaleString('en-GB', {
-                                    day: '2-digit', month: '2-digit', year: 'numeric',
-                                    hour: '2-digit', minute: '2-digit', second: '2-digit',
-                                    timeZone: 'Europe/Paris', hour12: false, timeZoneName: 'short'
-                                })}
-                            </span>
+                                <span style={{ fontSize: '0.9rem' }}>🕐</span>
+                                <span style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: 500,
+                                    color: 'var(--color-text-primary)',
+                                    fontFamily: 'monospace'
+                                }}>
+                                    {currentTime.toLocaleString('en-GB', {
+                                        day: '2-digit', month: '2-digit', year: 'numeric',
+                                        hour: '2-digit', minute: '2-digit', second: '2-digit',
+                                        timeZone: 'Europe/Paris', hour12: false, timeZoneName: 'short'
+                                    })}
+                                </span>
+                            </div>
+
+                            {/* Actions Buttons (Right) */}
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3,.gz" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
+                                <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)' }}>Backup Now</button>
+                                <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
+                            </div>
                         </div>
 
-                        <div style={{ flex: 1 }} />
+                        {/* Controls Body */}
+                        <div style={{ display: 'flex', alignItems: 'stretch' }}>
 
-                        {/* Scheduled Backup Controls - Restructured */}
-                        <div style={{ display: 'flex', gap: '0.8rem', background: 'var(--color-bg-secondary)', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
-                            {/* Left Side: Pickers in 2 rows with separator */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                            {/* Left Side: Toggle + SET (Swapped) */}
+                            <div style={{
+                                display: 'flex', flexDirection: 'column',
+                                alignItems: 'center', justifyContent: 'center', gap: '0.8rem',
+                                padding: '1rem', width: '90px',
+                                borderRight: '1px solid var(--color-border)',
+                                background: 'rgba(0,0,0,0.02)'
+                            }}>
+                                {/* Toggle Switch */}
+                                <div
+                                    onClick={() => setBackupEnabled(!backupEnabled)}
+                                    style={{
+                                        width: '36px',
+                                        height: '20px',
+                                        background: backupEnabled ? '#22c55e' : '#475569',
+                                        borderRadius: '10px',
+                                        position: 'relative',
+                                        transition: 'background 0.2s',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '16px',
+                                        height: '16px',
+                                        background: '#fff',
+                                        borderRadius: '50%',
+                                        position: 'absolute',
+                                        top: '2px',
+                                        left: backupEnabled ? '18px' : '2px',
+                                        transition: 'left 0.2s'
+                                    }} />
+                                </div>
+
+                                {/* SET Button */}
+                                <button
+                                    onClick={handleSetSchedule}
+                                    disabled={actionLoading === 'schedule'}
+                                    style={{
+                                        padding: '0.25rem 0.8rem',
+                                        borderRadius: '4px',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase',
+                                        background: 'rgba(34, 197, 94, 0.1)',
+                                        color: '#22c55e',
+                                        border: '1px solid #22c55e',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {actionLoading === 'schedule' ? '...' : 'SET'}
+                                </button>
+                            </div>
+
+                            {/* Right Side: Pickers (Swapped) */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem' }}>
                                 {/* Row 1: Scheduling Pickers */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Start:</span>
                                     <input
                                         type="date"
@@ -1354,7 +1411,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 </div>
 
                                 {/* Row 2: Retention Policies */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.5rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                         <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Keep DB:</span>
                                         <select
@@ -1442,53 +1499,6 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Right Side: Toggle + SET Button (vertically stacked, spans both rows) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderLeft: '1px solid var(--color-border)', paddingLeft: '0.8rem' }}>
-                                {/* Toggle Switch */}
-                                <div
-                                    onClick={() => setBackupEnabled(!backupEnabled)}
-                                    style={{
-                                        width: '36px',
-                                        height: '20px',
-                                        background: backupEnabled ? '#22c55e' : '#475569',
-                                        borderRadius: '10px',
-                                        position: 'relative',
-                                        transition: 'background 0.2s',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <div style={{
-                                        width: '16px',
-                                        height: '16px',
-                                        background: '#fff',
-                                        borderRadius: '50%',
-                                        position: 'absolute',
-                                        top: '2px',
-                                        left: backupEnabled ? '18px' : '2px',
-                                        transition: 'left 0.2s'
-                                    }} />
-                                </div>
-
-                                {/* SET Button */}
-                                <button
-                                    onClick={handleSetSchedule}
-                                    disabled={actionLoading === 'schedule'}
-                                    style={{
-                                        padding: '0.25rem 0.8rem',
-                                        borderRadius: '4px',
-                                        fontSize: '0.7rem',
-                                        fontWeight: 600,
-                                        textTransform: 'uppercase',
-                                        background: 'rgba(34, 197, 94, 0.1)',
-                                        color: '#22c55e',
-                                        border: '1px solid #22c55e',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    {actionLoading === 'schedule' ? '...' : 'SET'}
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -1648,7 +1658,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             ) : (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>Next Backup:</span>
-                                    <span style={{ color: '#f59e0b', marginLeft: '0.3rem' }}>⚠️ Backup Disabled</span>
+                                    <span style={{ color: '#f59e0b', marginLeft: '0.3rem' }}>Backup Disabled ⚠️</span>
                                     <span style={{ fontSize: '1rem', marginLeft: '0.4rem' }}>📅</span>
                                 </div>
                             )}
