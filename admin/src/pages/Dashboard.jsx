@@ -1416,7 +1416,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                         width: '150%',
                                         marginLeft: '-50%',
                                         height: '20px',
-                                        background: backupEnabled ? '#3b82f6' : '#475569',
+                                        background: backupEnabled ? '#3b82f6' : '#334155',
                                         borderRadius: '10px',
                                         position: 'relative',
                                         transition: 'background 0.2s',
@@ -1437,9 +1437,9 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Right Side: Pickers (Swapped) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', background: 'var(--color-bg-primary)', borderRadius: '6px', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
                                 {/* Row 1: Scheduling Pickers */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Start:</span>
                                     <input
                                         type="date"
@@ -1516,7 +1516,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 </div>
 
                                 {/* Row 2: Retention Policies */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.6rem', flexWrap: 'wrap' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                         <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Retention:</span>
                                         <select
