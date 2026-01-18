@@ -358,7 +358,7 @@ const MapView = () => {
                     textTransform: 'uppercase',
                     boxShadow: '0 2px 8px rgba(59, 130, 246, 0.15)'
                 }}>
-                    🐛 Debug Mode
+                    🐛 DEBUG MODE
                 </div>
             ) : (appConfig?.testing_banner_enabled && (
                 <div style={{
