@@ -21,6 +21,19 @@ router.use(requireAdmin);
 let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
 
+// Debug logging helper - only logs when debug_mode_enabled is true
+const debugLog = (...args) => {
+    try {
+        const debugEnabled = getSetting('debug_mode_enabled') === 'true';
+        if (debugEnabled) {
+            const timestamp = new Date().toISOString();
+            console.log(timestamp, ...args);
+        }
+    } catch (e) {
+        // Silently fail if settings can't be read
+    }
+};
+
 // ================== DB RECOVERY ==================
 
 // List all database files in the DB folder
@@ -126,6 +139,7 @@ router.post('/db/upload', (req, res) => {
 
         writeStream.on('finish', () => {
             const stats = fs.statSync(filePath);
+            debugLog(`📤 File uploaded: ${uploadedFilename} (${stats.size} bytes)`);
             res.json({
                 success: true,
                 filename: uploadedFilename,
@@ -145,7 +159,7 @@ router.post('/db/upload', (req, res) => {
 
 router.post('/db/backup-now', async (req, res) => {
     try {
-        console.log('📦 Manual backup requested');
+        debugLog('📦 Manual backup requested');
 
         // Start backup in background (do not await)
         createScheduledBackup('on_demand').catch(err => {
@@ -200,6 +214,8 @@ router.post('/db/restore/:filename', async (req, res) => {
         if (!fs.existsSync(sourcePath)) {
             return res.status(404).json({ error: 'Backup file not found' });
         }
+
+        debugLog(`🔄 Restore initiated from: ${filename}`);
 
         // Backup current active DB
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -383,7 +399,7 @@ const createScheduledBackup = async (type = 'scheduled') => {
         if (fs.existsSync(DB_PATH)) {
             // Copy to intermediate file first (for health check)
             fs.copyFileSync(DB_PATH, dbPath);
-            console.log(`📦 Uncompressed backup created for check: ${dbFilename}`);
+            debugLog(`📦 Uncompressed backup created for check: ${dbFilename}`);
         }
         updateBackupSectionTask('active_db', 'backup', 'success', 100);
 
@@ -396,7 +412,7 @@ const createScheduledBackup = async (type = 'scheduled') => {
         if (!isHealthy) {
             throw new Error('Database integrity check failed');
         }
-        console.log('✅ Backup integrity verified');
+        debugLog('✅ Backup integrity verified');
         updateBackupSectionTask('active_db', 'health_check', 'success', 100);
 
         // 1.3 Compression
@@ -411,7 +427,7 @@ const createScheduledBackup = async (type = 'scheduled') => {
         // Remove intermediate file
         if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 
-        console.log(`📦 Scheduled backup compressed: ${gzFilename}`);
+        debugLog(`📦 Scheduled backup compressed: ${gzFilename}`);
         updateBackupSectionTask('active_db', 'compression', 'success', 100);
 
 
@@ -451,7 +467,7 @@ const createScheduledBackup = async (type = 'scheduled') => {
                 // "For each uncompressed file found"
                 addBackupTask('archiving', { id: taskId, name: `2.2 Compressing ${file}`, status: 'running', progress: 0 });
 
-                console.log(`📦 Compressing pending file: ${file}`);
+                debugLog(`📦 Compressing pending file: ${file}`);
                 await compressFile(path.join(dbDir, file));
 
                 updateBackupSectionTask('archiving', taskId, 'success', 100);
@@ -549,7 +565,7 @@ const applyRetentionPoliciesLite = (dbDir) => {
                 const s = fs.statSync(path.join(dbDir, file));
                 if (now - s.mtime.getTime() > maxAgeMs) {
                     fs.unlinkSync(path.join(dbDir, file));
-                    console.log(`🗑️ Retention cleanup: ${file}`);
+                    debugLog(`🗑️ Retention cleanup: ${file}`);
                 }
             } catch (e) { }
         });
@@ -559,7 +575,7 @@ const applyRetentionPoliciesLite = (dbDir) => {
         if (remaining.length > cfg.safetyLimit) {
             remaining.slice(cfg.safetyLimit).forEach(file => {
                 fs.unlinkSync(path.join(dbDir, file));
-                console.log(`🗑️ Safety cleanup: ${file}`);
+                debugLog(`🗑️ Safety cleanup: ${file}`);
             });
         }
     });
@@ -572,14 +588,14 @@ const startScheduledBackup = (intervalDays, timeOfDay, startDateStr) => {
     if (backupInterval) clearTimeout(backupInterval);
 
     if (!timeOfDay) {
-        console.log('📦 Scheduled backups disabled (no time set)');
+        debugLog('📦 Scheduled backups disabled (no time set)');
         return;
     }
 
     const [targetHour, targetMinute] = timeOfDay.split(':').map(Number);
     const days = intervalDays || 1;
 
-    console.log(`📦 Configuring scheduled backups every ${days} day(s) at ${timeOfDay}, starting from ${startDateStr || 'today'}`);
+    debugLog(`📦 Configuring scheduled backups every ${days} day(s) at ${timeOfDay}, starting from ${startDateStr || 'today'}`);
 
     const scheduleNextRun = () => {
         const now = new Date();
@@ -617,7 +633,7 @@ const startScheduledBackup = (intervalDays, timeOfDay, startDateStr) => {
         }
 
         const delay = target.getTime() - now.getTime();
-        console.log(`📦 Next backup scheduled in ${(delay / 1000 / 60).toFixed(1)} minutes (${target.toLocaleString('en-GB', { timeZone: 'Europe/Paris' })})`);
+        debugLog(`📦 Next backup scheduled in ${(delay / 1000 / 60).toFixed(1)} minutes (${target.toLocaleString('en-GB', { timeZone: 'Europe/Paris' })})`);
 
         backupInterval = setTimeout(() => {
             createScheduledBackup();
@@ -747,6 +763,7 @@ router.put('/db/backup-schedule', (req, res) => {
             }
 
             startScheduledBackup(days, time, startDate);
+            debugLog(`⚙️ Backup schedule updated: ${time}, every ${days} day(s), starting ${startDate || 'today'}`);
         }
 
         if (retentionDays !== undefined) {
