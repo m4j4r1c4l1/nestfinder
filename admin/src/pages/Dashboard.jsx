@@ -927,7 +927,8 @@ const ResultModal = ({ type = 'success', title, message, onOk, buttonText = 'OK'
                     textAlign: 'center',
                     overflow: 'hidden',
                     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                    animation: 'slideIn 0.3s ease-out'
+                    animation: 'slideIn 0.3s ease-out',
+                    background: '#1e293b'
                 }}
             >
                 <div className="card-body" style={{ padding: '2.5rem 2rem' }}>
@@ -1131,8 +1132,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const getTypeBadge = (type) => {
         const badges = {
             active: { label: 'Active', color: '#22c55e', bg: 'rgba(34, 197, 94, 0.1)' },
-            corrupt: { label: 'Corrupt', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
-            restore_backup: { label: 'Backup', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+            corrupt: { label: 'Corrupted', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
+            restore_backup: { label: 'Restored', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
             uploaded: { label: 'Uploaded', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
             scheduled: { label: 'Scheduled', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
             other: { label: 'Other', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)' }
@@ -1786,9 +1787,19 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     </span>
                                 )}
                             </div>
-                            {backupSchedule.enabled ? (
+                            {backupEnabled ? (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <span title="Next estimated backup time"><span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>Next Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.nextBackup ? formatDate(backupSchedule.nextBackup) : 'Pending (First Run)'}</span></span>
+                                    <span title="Next estimated backup time"><span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>Next Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{(() => {
+                                        // Compute next backup from current picker values for immediate feedback
+                                        const startDate = new Date(scheduleStartDate + 'T' + scheduleTime);
+                                        const now = new Date();
+                                        const intervalMs = parseInt(scheduleInterval, 10) * 24 * 60 * 60 * 1000;
+                                        let nextDate = startDate;
+                                        while (nextDate <= now) {
+                                            nextDate = new Date(nextDate.getTime() + intervalMs);
+                                        }
+                                        return formatDate(nextDate.toISOString());
+                                    })()}</span></span>
                                     <span style={{ fontSize: '1rem', marginLeft: '0.4rem' }}>🔜</span>
                                 </div>
                             ) : (
