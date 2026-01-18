@@ -1017,7 +1017,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
                 // Detect completion to refresh stats
                 if (wasRunningRef.current && !data.running) {
-                    loadBackupSchedule();
+                    loadFiles();
                 }
                 wasRunningRef.current = data.running;
             } catch (e) {
@@ -1290,7 +1290,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             );
             setBackupSchedule(res);
             onResult('success', 'Policies Updated', 'Backup schedule and file retention policies have been updated.');
-            loadBackupSchedule();
+            loadFiles();
         } catch (err) {
             onResult('error', 'Update Failed', err.message);
         } finally {
@@ -1304,7 +1304,6 @@ const DBManagerModal = ({ onClose, onResult }) => {
             const res = await adminApi.createBackupNow();
             onResult('success', 'Backup Created', `Created "${res.filename}"`);
             loadFiles();
-            loadBackupSchedule();
         } catch (err) {
             onResult('error', 'Backup Failed', err.message);
         } finally {
