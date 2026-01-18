@@ -991,9 +991,11 @@ const DBManagerModal = ({ onClose, onResult }) => {
     // Live Backup Events (SSE)
     const [backupState, setBackupState] = React.useState({ running: false, tasks: [] });
     const backupModalClosedRef = React.useRef(false);
+    const wasRunningRef = React.useRef(false);
 
     React.useEffect(() => {
-        const eventSource = new EventSource('/api/admin/db/backup-events');
+        const token = localStorage.getItem('nestfinder_admin_token');
+        const eventSource = new EventSource(`/api/admin/db/backup-events?token=${token}`);
 
         eventSource.onmessage = (event) => {
             try {
@@ -1012,6 +1014,12 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 if (data.running || data.tasks.length > 0) {
                     setBackupState(data);
                 }
+
+                // Detect completion to refresh stats
+                if (wasRunningRef.current && !data.running) {
+                    loadBackupSchedule();
+                }
+                wasRunningRef.current = data.running;
             } catch (e) {
                 console.error('SSE Error:', e);
             }
@@ -1282,6 +1290,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             );
             setBackupSchedule(res);
             onResult('success', 'Policies Updated', 'Backup schedule and file retention policies have been updated.');
+            loadBackupSchedule();
         } catch (err) {
             onResult('error', 'Update Failed', err.message);
         } finally {
@@ -1295,6 +1304,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             const res = await adminApi.createBackupNow();
             onResult('success', 'Backup Created', `Created "${res.filename}"`);
             loadFiles();
+            loadBackupSchedule();
         } catch (err) {
             onResult('error', 'Backup Failed', err.message);
         } finally {
