@@ -17,13 +17,16 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
     };
 
     const getMonkeyIcon = (progress, status) => {
-        if (status === 'success') return <span style={{ fontSize: '1.2rem', color: '#22c55e', fontWeight: 'bold' }}>✓</span>;
         if (status === 'error') return '❌';
         if (status === 'pending') return '...';
 
+        // Only show tick when progress is 100 AND status is success
+        if ((progress || 0) >= 100 || status === 'success') {
+            return <span style={{ fontSize: '1.2rem', color: '#22c55e', fontWeight: 'bold' }}>✓</span>;
+        }
+
         // Running logic: 0-24 🐵, 25-49 🙉, 50-74 🙊, 75-99 🙈
         const p = progress || 0;
-        if (p >= 100) return <span style={{ fontSize: '1.2rem', color: '#22c55e', fontWeight: 'bold' }}>✓</span>;
         if (p >= 75) return '🙈';
         if (p >= 50) return '🙊';
         if (p >= 25) return '🙉';
@@ -69,20 +72,23 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                         </span>
 
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                            <div style={{
-                                                width: '100px', height: '8px',
-                                                background: 'rgba(255,255,255,0.05)',
-                                                borderRadius: '4px',
-                                                overflow: 'hidden',
-                                                border: '1px solid rgba(255,255,255,0.1)'
-                                            }}>
+                                            {/* Only show progress bar if task is still running or has meaningful progress */}
+                                            {(task.status === 'running' || (task.progress > 0 && task.progress < 100)) && (
                                                 <div style={{
-                                                    height: '100%',
-                                                    width: `${task.progress || 0}%`,
-                                                    background: task.status === 'error' ? '#ef4444' : '#3b82f6',
-                                                    transition: 'width 0.3s ease-out'
-                                                }} />
-                                            </div>
+                                                    width: '100px', height: '8px',
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    borderRadius: '4px',
+                                                    overflow: 'hidden',
+                                                    border: '1px solid rgba(255,255,255,0.1)'
+                                                }}>
+                                                    <div style={{
+                                                        height: '100%',
+                                                        width: `${task.progress || 0}%`,
+                                                        background: task.status === 'error' ? '#ef4444' : '#3b82f6',
+                                                        transition: 'width 0.3s ease-out'
+                                                    }} />
+                                                </div>
+                                            )}
 
                                             <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
                                                 {getMonkeyIcon(task.progress, task.status)}
@@ -1756,7 +1762,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
                                     <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)' }}>Backup Now</button>
                                     {selectedFiles.size > 0 ? (
-                                        <button className="btn" onClick={handleBulkDelete} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(168, 85, 247, 0.2)', color: '#d8b4fe', border: '1px solid rgba(168, 85, 247, 0.4)' }}>Delete Selected ({selectedFiles.size})</button>
+                                        <button className="btn" onClick={handleBulkDelete} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(168, 85, 247, 0.2)', color: '#d8b4fe', border: '1px solid rgba(168, 85, 247, 0.4)', whiteSpace: 'nowrap' }}>Delete Selected ({selectedFiles.size})</button>
                                     ) : (
                                         <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
                                     )}
@@ -1778,7 +1784,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 <thead style={{ background: '#1e293b', position: 'sticky', top: 0, zIndex: 10 }}>
                                     <tr>
                                         {[
-                                            { key: 'select', label: '✓', left: null, right: null },
+                                            { key: 'select', label: '✓', left: 'select', right: 'name' },
                                             { key: 'name', label: 'Name', left: 'name', right: 'size' },
                                             { key: 'size', label: 'Size', left: 'size', right: 'modified' },
                                             { key: 'modified', label: 'Modified', left: 'modified', right: 'type' },
