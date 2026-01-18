@@ -1393,7 +1393,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Unified Control Panel */}
-                    <div style={{ background: '#475569', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', borderRadius: '8px', border: '2px dashed yellow' }}>
+                    <div style={{ background: '#475569', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', borderRadius: '8px' }}>
 
                         {/* Top Header: Clock & Actions (Badges) */}
 
@@ -1407,8 +1407,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 alignItems: 'center', justifyContent: 'center',
                                 padding: '1rem', width: '70px',
                                 borderRight: '1px solid var(--color-border)',
-                                background: 'rgba(0,0,0,0.02)',
-                                border: '2px dashed red'
+                                background: 'rgba(0,0,0,0.02)'
                             }}>
                                 {/* Toggle Switch */}
                                 <div
@@ -1420,8 +1419,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                         borderRadius: '10px',
                                         position: 'relative',
                                         transition: 'background 0.2s',
-                                        cursor: 'pointer',
-                                        outline: '2px dashed orange'
+                                        cursor: 'pointer'
                                     }}
                                 >
                                     <div style={{
@@ -1438,9 +1436,9 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Right Side: Pickers (Swapped) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', border: '2px dashed lime', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
                                 {/* Row 1: Scheduling Pickers */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap', border: '2px dashed pink' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Start:</span>
                                     <input
                                         type="date"
@@ -1517,7 +1515,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 </div>
 
                                 {/* Row 2: Retention Policies */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap', border: '2px dashed violet' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                         <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Keep DB:</span>
                                         <select
@@ -1608,7 +1606,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Column 3: Clock + Actions (Right) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
                                 {/* Row 1: SET Button + Live Clock (Top) */}
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                     {/* SET Button - aligned over Upload File */}
@@ -1626,8 +1624,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                             background: 'rgba(34, 197, 94, 0.1)',
                                             color: '#22c55e',
                                             border: '1px solid #22c55e',
-                                            cursor: 'pointer',
-                                            outline: '2px dashed magenta'
+                                            cursor: 'pointer'
                                         }}
                                     >
                                         {actionLoading === 'schedule' ? '...' : 'SET'}
@@ -1640,8 +1637,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                         padding: '0.15rem 0.5rem',
                                         background: 'var(--color-bg-primary)',
                                         border: '1px solid var(--color-border)',
-                                        borderRadius: '4px',
-                                        outline: '2px dashed gold'
+                                        borderRadius: '4px'
                                     }}>
                                         <span style={{ fontSize: '0.9rem' }}>🕐</span>
                                         <span style={{
@@ -1660,7 +1656,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 </div>
 
                                 {/* Row 2: Actions Buttons (Bottom) */}
-                                <div style={{ display: 'flex', gap: '0.5rem', border: '2px dashed aqua' }}>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3,.gz" style={{ display: 'none' }} onChange={handleFileUpload} />
                                     <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
                                     <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)' }}>Backup Now</button>
