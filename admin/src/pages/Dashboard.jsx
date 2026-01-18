@@ -1146,7 +1146,14 @@ const DBManagerModal = ({ onClose, onResult }) => {
         }
     };
 
-    React.useEffect(() => { loadFiles(); }, []);
+    useEffect(() => {
+        loadFiles();
+        // Poll for updates when DB Manager is open
+        if (showDBManager) {
+            const interval = setInterval(loadFiles, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [showDBManager]);
 
     const formatSize = (bytes) => {
         if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
@@ -1902,6 +1909,16 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     <span style={{ fontSize: '1rem' }}>💾</span>
                                     <span><span style={{ color: 'var(--color-text-primary)' }}>DB Folder Size:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{usage ? formatSize(usage.folderSize) : '0 B'}</span></span>
                                 </div>
+
+                                {usage?.disk?.total > 0 && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span style={{ fontSize: '1rem' }}>🧮</span>
+                                        <span style={{ color: 'white', fontWeight: 600 }}>
+                                            {Math.round((usage.disk.used / usage.disk.total) * 100)}%
+                                        </span>
+                                    </div>
+                                )}
+
                                 {usage?.disk?.total > 0 && (
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                         <span><span style={{ color: 'var(--color-text-primary)' }}>Disk:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span></span>
