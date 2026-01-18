@@ -1413,7 +1413,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 <div
                                     onClick={() => setBackupEnabled(!backupEnabled)}
                                     style={{
-                                        width: '100%',
+                                        width: '150%',
+                                        marginLeft: '-50%',
                                         height: '20px',
                                         background: backupEnabled ? '#3b82f6' : '#475569',
                                         borderRadius: '10px',
@@ -1517,7 +1518,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 {/* Row 2: Retention Policies */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Keep DB:</span>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Retention:</span>
                                         <select
                                             value={backupRetention}
                                             onChange={(e) => setBackupRetention(e.target.value)}
@@ -1546,7 +1547,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     </div>
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Corrupt:</span>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Corrupted:</span>
                                         <select
                                             value={corruptRetention}
                                             onChange={(e) => setCorruptRetention(e.target.value)}
@@ -1575,7 +1576,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     </div>
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Uploads:</span>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Uploaded:</span>
                                         <select
                                             value={uploadRetention}
                                             onChange={(e) => setUploadRetention(e.target.value)}
