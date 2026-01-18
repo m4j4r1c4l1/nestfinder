@@ -256,41 +256,81 @@ const Dashboard = ({ onNavigate }) => {
                 <div className="card" style={{ flex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            {/* Debug Logs button moved or removed - relying on new DB Manager */}
-                            {filteredPoints && (
-                                <button
-                                    onClick={handleClearFilter}
-                                    className="btn"
+                        {/* Schedule Controls */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-bg-secondary)', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', paddingRight: '0.5rem', borderRight: '1px solid var(--color-border)' }}>
+                                <input
+                                    type="checkbox"
+                                    id="backupToggle"
+                                    checked={backupEnabled}
+                                    onChange={(e) => setBackupEnabled(e.target.checked)}
+                                    style={{ cursor: 'pointer', width: '14px', height: '14px' }}
+                                />
+                                <label htmlFor="backupToggle" style={{ fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', userSelect: 'none', color: 'var(--color-text-primary)' }}>Enable</label>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Every:</span>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={scheduleInput}
+                                    onChange={(e) => setScheduleInput(e.target.value)}
                                     style={{
-                                        padding: '0.4rem 0.75rem',
+                                        width: '50px',
+                                        padding: '0.15rem 0.3rem',
+                                        background: 'var(--color-bg-primary)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '4px',
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: '0.8rem'
+                                    }}
+                                />
+                                <select
+                                    value={scheduleUnit}
+                                    onChange={(e) => setScheduleUnit(e.target.value)}
+                                    style={{
+                                        padding: '0.15rem 0.3rem',
+                                        background: 'var(--color-bg-primary)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '4px',
+                                        color: 'var(--color-text-primary)',
                                         fontSize: '0.8rem',
-                                        background: 'var(--color-primary)',
-                                        color: 'white'
+                                        outline: 'none'
                                     }}
                                 >
-                                    ✕ Show All Points
-                                </button>
-                            )}
-                            <span style={{
-                                background: 'rgba(56, 189, 248, 0.1)',
-                                color: '#38bdf8',
-                                padding: '0 0.75rem',
-                                borderRadius: '4px',
-                                fontSize: '0.85rem',
-                                fontWeight: 600,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '28px',
-                                border: '1px solid rgba(56, 189, 248, 0.2)',
-                                userSelect: 'none'
-                            }}>
-                                {filteredPoints ? `Filtered: ${filteredPoints.length}` : `Total: ${points.length}`}
-                            </span>
+                                    <option value="hours">Hours</option>
+                                    <option value="days">Days</option>
+                                    <option value="months">Months</option>
+                                    <option value="years">Years</option>
+                                </select>
+                            </div>
+
+                            <button
+                                onClick={handleSetSchedule}
+                                disabled={actionLoading === 'schedule'}
+                                style={{
+                                    padding: '0.2rem 0.6rem',
+                                    borderRadius: '4px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    textTransform: 'uppercase',
+                                    background: 'rgba(34, 197, 94, 0.1)',
+                                    color: backupEnabled ? '#22c55e' : 'var(--color-text-secondary)',
+                                    border: backupEnabled ? '1px solid #22c55e' : '1px solid var(--color-border)',
+                                    cursor: 'pointer',
+                                    minWidth: '60px',
+                                    textAlign: 'center',
+                                    filter: backupEnabled ? 'none' : 'grayscale(100%)',
+                                    marginLeft: '0.25rem'
+                                }}
+                            >
+                                {actionLoading === 'schedule' ? '...' : (backupEnabled ? 'SET' : 'DISABLED')}
+                            </button>
                         </div>
                     </div>
-                    <div style={{ flex: 1, minHeight: '300px' }}>
+
+                    <div style={{ padding: '0 1.5rem 1.5rem 1.5rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <AdminMap
                             points={filteredPoints || points}
                             filteredPoints={filteredPoints}
@@ -922,6 +962,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const [usage, setUsage] = React.useState(null);
     const [backupSchedule, setBackupSchedule] = React.useState({ enabled: false, intervalHours: 24 });
     const [scheduleInput, setScheduleInput] = React.useState('24');
+    const [scheduleUnit, setScheduleUnit] = React.useState('hours');
+    const [backupEnabled, setBackupEnabled] = React.useState(false);
+    const [uploadProgress, setUploadProgress] = React.useState(null);
+
     const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { filename }
 
     // Sorting
@@ -973,7 +1017,18 @@ const DBManagerModal = ({ onClose, onResult }) => {
             setFiles(filesRes.files || []);
             setUsage(filesRes.usage || null);
             setBackupSchedule(scheduleRes);
-            setScheduleInput(String(scheduleRes.intervalHours || 0));
+            const h = scheduleRes.intervalHours || 0;
+            if (h <= 0) {
+                setBackupEnabled(false);
+                setScheduleInput('24');
+                setScheduleUnit('hours');
+            } else {
+                setBackupEnabled(true);
+                if (h % 8760 === 0) { setScheduleInput(String(h / 8760)); setScheduleUnit('years'); }
+                else if (h % 720 === 0) { setScheduleInput(String(h / 720)); setScheduleUnit('months'); }
+                else if (h % 24 === 0) { setScheduleInput(String(h / 24)); setScheduleUnit('days'); }
+                else { setScheduleInput(String(h)); setScheduleUnit('hours'); }
+            }
         } catch (err) {
             onResult('error', 'Load Failed', err.message);
         } finally {
@@ -1065,24 +1120,61 @@ const DBManagerModal = ({ onClose, onResult }) => {
         }
     };
 
-    const handleFileUpload = async (e) => {
+    const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        // Reset input
+        e.target.value = '';
+
         setActionLoading('upload');
-        try {
-            const res = await adminApi.uploadDBFile(file);
-            onResult('success', 'Upload Complete', `File saved as "${res.filename}"`);
-            loadFiles();
-        } catch (err) {
-            onResult('error', 'Upload Failed', err.message);
-        } finally {
+        setUploadProgress(0);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/admin/db/upload');
+
+        const token = localStorage.getItem('nestfinder_admin_token');
+        if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                setUploadProgress(percent);
+            }
+        };
+
+        xhr.onload = () => {
+            setUploadProgress(null);
             setActionLoading(null);
-            e.target.value = '';
-        }
+            if (xhr.status === 200) {
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    onResult('success', 'Upload Complete', `File saved as "${res.filename}"`);
+                    loadFiles();
+                } catch (e) {
+                    onResult('error', 'Upload Failed', 'Invalid server response');
+                }
+            } else {
+                onResult('error', 'Upload Failed', xhr.statusText || 'Server Error');
+            }
+        };
+
+        xhr.onerror = () => {
+            setUploadProgress(null);
+            setActionLoading(null);
+            onResult('error', 'Upload Failed', 'Network Error');
+        };
+
+        xhr.send(file);
     };
 
     const handleSetSchedule = async () => {
-        const hours = parseInt(scheduleInput, 10) || 0;
+        let hours = parseInt(scheduleInput, 10) || 0;
+        if (scheduleUnit === 'days') hours *= 24;
+        else if (scheduleUnit === 'months') hours *= 720;
+        else if (scheduleUnit === 'years') hours *= 8760;
+
+        if (!backupEnabled) hours = 0;
         setActionLoading('schedule');
         try {
             const res = await adminApi.setBackupSchedule(hours);
@@ -1193,18 +1285,83 @@ const DBManagerModal = ({ onClose, onResult }) => {
                         <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
                         <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3" style={{ display: 'none' }} onChange={handleFileUpload} />
 
-                        <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Backup Now</button>
+                        <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)' }}>Backup Now</button>
 
-                        <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>Refresh</button>
+                        <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
 
                         <div style={{ flex: 1 }} />
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Auto backup every</span>
-                            <input type="number" min="0" max="168" value={scheduleInput} onChange={e => setScheduleInput(e.target.value)} style={{ width: '70px', padding: '0.3rem 0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)', color: 'inherit', textAlign: 'center' }} />
-                            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>hrs</span>
-                            <button className="btn" onClick={handleSetSchedule} disabled={actionLoading === 'schedule'} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>Set</button>
-                            {backupSchedule.enabled && <span style={{ fontSize: '0.75rem', color: '#22c55e', marginLeft: '0.25rem' }}>●</span>}
+                        {/* Schedule Controls */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-bg-secondary)', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', paddingRight: '0.5rem', borderRight: '1px solid var(--color-border)' }}>
+                                <input
+                                    type="checkbox"
+                                    id="backupToggle"
+                                    checked={backupEnabled}
+                                    onChange={(e) => setBackupEnabled(e.target.checked)}
+                                    style={{ cursor: 'pointer', width: '14px', height: '14px' }}
+                                />
+                                <label htmlFor="backupToggle" style={{ fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', userSelect: 'none', color: 'var(--color-text-primary)' }}>Enable</label>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Every:</span>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={scheduleInput}
+                                    onChange={(e) => setScheduleInput(e.target.value)}
+                                    style={{
+                                        width: '50px',
+                                        padding: '0.15rem 0.3rem',
+                                        background: 'var(--color-bg-primary)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '4px',
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: '0.8rem'
+                                    }}
+                                />
+                                <select
+                                    value={scheduleUnit}
+                                    onChange={(e) => setScheduleUnit(e.target.value)}
+                                    style={{
+                                        padding: '0.15rem 0.3rem',
+                                        background: 'var(--color-bg-primary)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '4px',
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: '0.8rem',
+                                        outline: 'none'
+                                    }}
+                                >
+                                    <option value="hours">Hours</option>
+                                    <option value="days">Days</option>
+                                    <option value="months">Months</option>
+                                    <option value="years">Years</option>
+                                </select>
+                            </div>
+
+                            <button
+                                onClick={handleSetSchedule}
+                                disabled={actionLoading === 'schedule'}
+                                style={{
+                                    padding: '0.2rem 0.6rem',
+                                    borderRadius: '4px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    textTransform: 'uppercase',
+                                    background: 'rgba(34, 197, 94, 0.1)',
+                                    color: backupEnabled ? '#22c55e' : 'var(--color-text-secondary)',
+                                    border: backupEnabled ? '1px solid #22c55e' : '1px solid var(--color-border)',
+                                    cursor: 'pointer',
+                                    minWidth: '60px',
+                                    textAlign: 'center',
+                                    filter: backupEnabled ? 'none' : 'grayscale(100%)',
+                                    marginLeft: '0.25rem'
+                                }}
+                            >
+                                {actionLoading === 'schedule' ? '...' : (backupEnabled ? 'SET' : 'DISABLED')}
+                            </button>
                         </div>
                     </div>
 
@@ -1254,7 +1411,17 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 <tbody>
                                     {sortedFiles.map(file => (
                                         <tr key={file.name} style={{ borderBottom: '1px solid var(--color-border)', background: 'transparent' }}>
-                                            <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', borderBottom: '1px solid var(--color-border)' }}>{file.name}</td>
+                                            <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', borderBottom: '1px solid var(--color-border)' }}>
+                                                <span
+                                                    onClick={(e) => { e.stopPropagation(); handleDownload(file.name); }}
+                                                    title="Click to download"
+                                                    style={{ cursor: 'pointer', color: '#3b82f6', textDecoration: 'none' }}
+                                                    onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                                                    onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                                                >
+                                                    {file.name}
+                                                </span>
+                                            </td>
                                             <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.7rem', borderBottom: '1px solid var(--color-border)' }}>{formatSize(file.size)}</td>
                                             <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.8rem', borderBottom: '1px solid var(--color-border)' }}>{formatDate(file.modified)}</td>
                                             <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid var(--color-border)' }}>{getTypeBadge(file.type)}</td>
@@ -1278,12 +1445,12 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
                     {/* Usage Footer */}
                     {/* Expanded Stats & Status Footer - Debug Borders */}
-                    <div style={{ padding: '0.75rem 1.5rem', background: 'var(--color-bg-tertiary)', border: '1px dashed magenta', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed magenta', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
 
                         {/* Backup Status Info (Dark Header Style) */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed red' }}>
                             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                                <span><span style={{ color: '#fff', fontWeight: 500 }}>Last Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.lastBackupTime ? formatDate(backupSchedule.lastBackupTime) : 'Never'}</span></span>
+                                <span><span style={{ fontSize: '1rem', marginRight: '0.4rem' }}>🗓️</span><span style={{ color: '#fff', fontWeight: 500 }}>Last Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.lastBackupTime ? formatDate(backupSchedule.lastBackupTime) : 'Never'}</span></span>
                                 {backupSchedule.lastBackupTime && (
                                     <span style={{
                                         color: backupSchedule.lastBackupStatus?.startsWith('Fail') ? '#ef4444' : '#22c55e',
@@ -1298,41 +1465,54 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 )}
                             </div>
                             {backupSchedule.enabled && (
-                                <span title="Next estimated backup time"><span style={{ color: '#fff', fontWeight: 500 }}>Next Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.nextBackup ? formatDate(backupSchedule.nextBackup) : 'Pending (First Run)'}</span></span>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span title="Next estimated backup time"><span style={{ color: '#fff', fontWeight: 500 }}>Next Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.nextBackup ? formatDate(backupSchedule.nextBackup) : 'Pending (First Run)'}</span></span>
+                                    <span style={{ fontSize: '1rem', marginLeft: '0.4rem' }}>🔜</span>
+                                </div>
                             )}
                         </div>
 
-                        {/* Row 2: File Stats (Dark Bg) */}
+                        {/* Row 2: File Stats (Dark Bg) - Symmetric */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed cyan' }}>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ fontSize: '1rem' }}>🗂️</span>
                                 <span><span style={{ color: '#fff' }}>Total Files:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{files.length}</span></span>
-                                {stats && (
-                                    <>
-                                        <span>•</span>
-                                        <span style={{ opacity: 1 }} title={`Oldest: ${formatDate(stats.oldest.modified)}\nNewest: ${formatDate(stats.newest.modified)}`}>
-                                            <span style={{ color: '#fff' }}>Range:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{new Date(stats.oldest.modified).toLocaleDateString()} — {new Date(stats.newest.modified).toLocaleDateString()}</span>
-                                        </span>
-                                    </>
+                            </div>
+                            {stats && (
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <span style={{ opacity: 1 }} title={`Oldest: ${formatDate(stats.oldest.modified)}\nNewest: ${formatDate(stats.newest.modified)}`}>
+                                        <span style={{ color: '#fff' }}>Range:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{new Date(stats.oldest.modified).toLocaleDateString()} — {new Date(stats.newest.modified).toLocaleDateString()}</span>
+                                    </span>
+                                    <span style={{ fontSize: '1rem' }}>📅</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Row 3: Size & Disk (Dark Bg + Bar Inside) */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed lime' }}>
+                            {/* Top Labels */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '1rem' }}>💾</span>
+                                    <span><span style={{ color: '#fff' }}>DB Folder Size:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{usage ? formatSize(usage.folderSize) : '0 B'}</span></span>
+                                </div>
+                                {usage?.disk?.total > 0 && (
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        <span><span style={{ color: '#fff' }}>Disk:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span></span>
+                                        <span style={{ fontSize: '1rem' }}>💿</span>
+                                    </div>
                                 )}
                             </div>
-                        </div>
 
-                        {/* Row 3: Size & Disk (Dark Bg) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed lime' }}>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <span><span style={{ color: '#fff' }}>DB Folder Size:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{usage ? formatSize(usage.folderSize) : '0 B'}</span></span>
-                            </div>
-                            {usage?.disk?.total > 0 && <span><span style={{ color: '#fff' }}>Disk:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span></span>}
-                        </div>
-
-                        {/* Disk Bar Container (Dark Bg) */}
-                        {usage?.disk?.total > 0 && (
-                            <div style={{ height: '4px', background: '#1e293b', paddingBottom: '2px', border: '1px dashed orange' }}>
-                                <div style={{ height: '100%', background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
-                                    <div style={{ width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`, height: '100%', background: 'var(--color-primary)' }} />
+                            {/* Disk Bar (Inside Lime) */}
+                            {usage?.disk?.total > 0 && (
+                                <div style={{ height: '4px', background: '#1e293b', paddingBottom: '2px', border: '1px dashed orange' }}>
+                                    <div style={{ height: '100%', background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
+                                        <div style={{ width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`, height: '100%', background: 'var(--color-primary)' }} />
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1351,6 +1531,19 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             <button className="btn" onClick={() => setDeleteConfirm(null)} style={{ flex: 1, padding: '0.75rem', background: 'var(--color-bg-secondary)' }}>Cancel</button>
                             <button className="btn btn-primary" onClick={handleDelete} style={{ flex: 1, padding: '0.75rem', background: '#ef4444', border: 'none' }}>Delete</button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Upload Progress Modal */}
+            {uploadProgress !== null && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1700, backdropFilter: 'blur(4px)' }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '400px', padding: '2rem', textAlign: 'center', background: 'var(--color-bg-primary)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                        <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem' }}>Uploading Database...</h3>
+                        <div style={{ width: '100%', height: '12px', background: 'var(--color-bg-tertiary)', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+                            <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--color-primary)', transition: 'width 0.2s ease-out' }} />
+                        </div>
+                        <p style={{ marginTop: '1rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>{uploadProgress}%</p>
                     </div>
                 </div>
             )}
