@@ -256,79 +256,8 @@ const Dashboard = ({ onNavigate }) => {
                 <div className="card" style={{ flex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
-                        {/* Schedule Controls */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-bg-secondary)', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', paddingRight: '0.5rem', borderRight: '1px solid var(--color-border)' }}>
-                                <input
-                                    type="checkbox"
-                                    id="backupToggle"
-                                    checked={backupEnabled}
-                                    onChange={(e) => setBackupEnabled(e.target.checked)}
-                                    style={{ cursor: 'pointer', width: '14px', height: '14px' }}
-                                />
-                                <label htmlFor="backupToggle" style={{ fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', userSelect: 'none', color: 'var(--color-text-primary)' }}>Enable</label>
-                            </div>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Every:</span>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={scheduleInput}
-                                    onChange={(e) => setScheduleInput(e.target.value)}
-                                    style={{
-                                        width: '50px',
-                                        padding: '0.15rem 0.3rem',
-                                        background: 'var(--color-bg-primary)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: '4px',
-                                        color: 'var(--color-text-primary)',
-                                        fontSize: '0.8rem'
-                                    }}
-                                />
-                                <select
-                                    value={scheduleUnit}
-                                    onChange={(e) => setScheduleUnit(e.target.value)}
-                                    style={{
-                                        padding: '0.15rem 0.3rem',
-                                        background: 'var(--color-bg-primary)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: '4px',
-                                        color: 'var(--color-text-primary)',
-                                        fontSize: '0.8rem',
-                                        outline: 'none'
-                                    }}
-                                >
-                                    <option value="hours">Hours</option>
-                                    <option value="days">Days</option>
-                                    <option value="months">Months</option>
-                                    <option value="years">Years</option>
-                                </select>
-                            </div>
-
-                            <button
-                                onClick={handleSetSchedule}
-                                disabled={actionLoading === 'schedule'}
-                                style={{
-                                    padding: '0.2rem 0.6rem',
-                                    borderRadius: '4px',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                    textTransform: 'uppercase',
-                                    background: 'rgba(34, 197, 94, 0.1)',
-                                    color: backupEnabled ? '#22c55e' : 'var(--color-text-secondary)',
-                                    border: backupEnabled ? '1px solid #22c55e' : '1px solid var(--color-border)',
-                                    cursor: 'pointer',
-                                    minWidth: '60px',
-                                    textAlign: 'center',
-                                    filter: backupEnabled ? 'none' : 'grayscale(100%)',
-                                    marginLeft: '0.25rem'
-                                }}
-                            >
-                                {actionLoading === 'schedule' ? '...' : (backupEnabled ? 'SET' : 'DISABLED')}
-                            </button>
-                        </div>
                     </div>
+
 
                     <div style={{ padding: '0 1.5rem 1.5rem 1.5rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <AdminMap
