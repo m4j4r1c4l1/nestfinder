@@ -41,6 +41,7 @@ router.get('/db/files', (req, res) => {
                 if (filename === 'nestfinder.db') type = 'active';
                 else if (filename.includes('.corrupt')) type = 'corrupt';
                 else if (filename.includes('.restore')) type = 'restore_backup';
+                else if (filename.includes('.on_demand')) type = 'on_demand';
                 else if (filename.includes('.backup')) type = 'scheduled';
                 else if (filename.includes('.uploaded')) type = 'uploaded';
 
@@ -146,17 +147,13 @@ router.post('/db/backup-now', async (req, res) => {
     try {
         console.log('📦 Manual backup requested');
 
-        // Generate filename immediately to return to client
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `nestfinder.db.backup.${timestamp}.db.gz`;
-
         // Start backup in background (do not await)
-        createScheduledBackup(filename).catch(err => {
+        createScheduledBackup('on_demand').catch(err => {
             console.error('Background backup failed:', err);
         });
 
         // Return immediately so frontend doesn't timeout
-        res.json({ success: true, filename });
+        res.json({ success: true, message: 'Backup started' });
     } catch (error) {
         console.error('Manual backup error:', error);
         res.status(500).json({ error: 'Failed to start backup' });
@@ -460,7 +457,8 @@ const createScheduledBackup = async (type = 'scheduled') => {
                 updateBackupSectionTask('archiving', taskId, 'success', 100);
             }
         } else {
-            // Add note? No, just leave empty or 'None'
+            // No files to compress, add a note
+            addBackupTask('archiving', { id: 'none', name: '2.2 All files properly archived', status: 'success', progress: 100 });
         }
 
         /* 
@@ -504,6 +502,7 @@ const createScheduledBackup = async (type = 'scheduled') => {
         run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_status', 'Success']);
 
         activeBackupState.running = false;
+        activeBackupState.sections = []; // Clear sections so UI closes on reconnect
         broadcastBackupState();
 
         return gzFilename;
