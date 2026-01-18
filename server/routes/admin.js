@@ -1393,7 +1393,7 @@ router.post('/broadcasts/bulk-delete', (req, res) => {
     try {
         const placeholders = ids.map(() => '?').join(',');
 
-        // Use a transaction for safety (although SQLite handles single statement well, multiple related deletes are better in transaction)
+        // Use a transaction for safety
         const runTransaction = getDb().transaction((broadcastIds) => {
             getDb().prepare(`DELETE FROM broadcast_views WHERE broadcast_id IN (${placeholders})`).run(...broadcastIds);
             getDb().prepare(`DELETE FROM broadcasts WHERE id IN (${placeholders})`).run(...broadcastIds);
@@ -1404,10 +1404,37 @@ router.post('/broadcasts/bulk-delete', (req, res) => {
 
         res.json({ success: true, count: ids.length });
     } catch (err) {
-        console.error('Bulk delete error:', err);
-        res.status(500).json({ error: 'Failed to bulk delete broadcasts' });
+        console.error('Bulk delete failed:', err);
+        res.status(500).json({ error: 'Failed to delete broadcasts' });
     }
 });
+
+// Admin Feedback / Crash Reporting
+router.post('/feedback', (req, res) => {
+    const { type, message } = req.body; // Admin crash reports usually don't have rating
+
+    if (!message) {
+        return res.status(400).json({ error: 'Message required' });
+    }
+
+    // Insert feedback with user_id = NULL (since it's an admin/system report)
+    // We can also abuse 'type' or message to indicate it's from admin
+    run(`
+        INSERT INTO feedback (user_id, type, message, status)
+        VALUES (NULL, ?, ?, 'sent')
+    `, [type || 'admin-crash', message]);
+
+    // We don't interact with daily_ratings for crashes
+
+    // Log it
+    // req.admin.id should be available from requireAdmin middleware
+    const adminId = req.admin ? req.admin.id : 'unknown';
+    log('admin_' + adminId, 'admin_feedback_submitted', null, { type });
+
+    res.json({ success: true, message: 'Crash report received' });
+});
+
+
 
 // Delete a broadcast (and its views)
 router.delete('/broadcasts/:id', (req, res) => {
