@@ -1396,7 +1396,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Unified Control Panel */}
-                    <div style={{ background: '#475569', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', borderRadius: '8px' }}>
+                    <div style={{ background: '#475569', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', borderRadius: '8px' }}>
 
                         {/* Top Header: Clock & Actions (Badges) */}
 
@@ -1670,7 +1670,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                         </div>
                     </div>
 
-                    <div style={{ height: '1px', background: 'var(--color-border)', margin: '0 1rem 0.5rem 1rem' }} />
+                    <div style={{ height: '1px', background: 'var(--color-border)', width: '100%', marginBottom: '0.5rem' }} />
 
                     {/* File List Table */}
                     <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)' }}>
