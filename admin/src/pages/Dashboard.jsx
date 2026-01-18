@@ -1595,8 +1595,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             <br /><br />This action cannot be undone.
                         </p>
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button className="btn" onClick={() => setDeleteConfirm(null)} style={{ flex: 1, padding: '0.75rem', background: 'var(--color-bg-secondary)' }}>Cancel</button>
-                            <button className="btn btn-primary" onClick={handleDelete} style={{ flex: 1, padding: '0.75rem', background: '#ef4444', border: 'none' }}>Delete</button>
+                            <button className="btn" onClick={() => setDeleteConfirm(null)} style={{ flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>Cancel</button>
+                            <button className="btn" onClick={handleDelete} style={{ flex: 1, padding: '0.75rem', background: '#a855f7', color: 'white', border: 'none', fontWeight: 600 }}>Delete</button>
                         </div>
                     </div>
                 </div>

@@ -34,10 +34,10 @@ router.get('/db/files', (req, res) => {
                 // Determine file type
                 let type = 'other';
                 if (filename === 'nestfinder.db') type = 'active';
-                else if (filename.includes('.corrupt')) type = 'corrupt';
+                else if (filename.startsWith('corrupted_') || filename.includes('.corrupt')) type = 'corrupt';
                 else if (filename.includes('.restore_backup')) type = 'restore_backup';
                 else if (filename.startsWith('scheduled_backup_')) type = 'scheduled';
-                else if (filename.startsWith('uploaded_')) type = 'uploaded';
+                else if (filename.startsWith('uploaded_') || filename.startsWith('nestfinder_uploaded_')) type = 'uploaded';
 
                 return {
                     name: filename,
@@ -112,7 +112,7 @@ router.post('/db/upload', (req, res) => {
     try {
         const timestamp = Date.now();
         const dbDir = path.dirname(DB_PATH);
-        const uploadedFilename = `nestfinder_uploaded_${timestamp}.db`;
+        const uploadedFilename = `uploaded_${timestamp}.db`;
         const filePath = path.join(dbDir, uploadedFilename);
 
         const writeStream = fs.createWriteStream(filePath);
@@ -440,7 +440,7 @@ router.get('/db/corrupt-check', (req, res) => {
         if (!fs.existsSync(dbDir)) return res.json({ found: false });
 
         const files = fs.readdirSync(dbDir);
-        const corruptFile = files.find(f => f.startsWith('nestfinder.db.corrupt'));
+        const corruptFile = files.find(f => f.startsWith('corrupted_') || f.includes('.corrupt'));
 
         res.json({ found: !!corruptFile, filename: corruptFile });
     } catch (error) {
@@ -454,7 +454,7 @@ router.get('/db/download-corrupt', (req, res) => {
         const dbDir = path.dirname(DB_PATH);
         const files = fs.readdirSync(dbDir);
         // Get the most recent one if multiple
-        const corruptFiles = files.filter(f => f.startsWith('nestfinder.db.corrupt')).sort().reverse();
+        const corruptFiles = files.filter(f => f.startsWith('corrupted_') || f.includes('.corrupt')).sort().reverse();
 
         if (corruptFiles.length === 0) return res.status(404).send('No corrupt database found');
 
