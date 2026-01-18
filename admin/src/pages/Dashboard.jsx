@@ -1263,43 +1263,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Unified Control Panel */}
-                    <div style={{ background: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ background: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem' }}>
 
                         {/* Top Header: Clock & Actions (Badges) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 1rem', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-tertiary)' }}>
-                            {/* Live Clock (Left) */}
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.4rem',
-                                padding: '0.15rem 0.5rem',
-                                background: 'var(--color-bg-primary)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '4px'
-                            }}>
-                                <span style={{ fontSize: '0.9rem' }}>🕐</span>
-                                <span style={{
-                                    fontSize: '0.75rem',
-                                    fontWeight: 500,
-                                    color: 'var(--color-text-primary)',
-                                    fontFamily: 'monospace'
-                                }}>
-                                    {currentTime.toLocaleString('en-GB', {
-                                        day: '2-digit', month: '2-digit', year: 'numeric',
-                                        hour: '2-digit', minute: '2-digit', second: '2-digit',
-                                        timeZone: 'Europe/Paris', hour12: false, timeZoneName: 'short'
-                                    })}
-                                </span>
-                            </div>
 
-                            {/* Actions Buttons (Right) */}
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3,.gz" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
-                                <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)' }}>Backup Now</button>
-                                <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
-                            </div>
-                        </div>
 
                         {/* Controls Body */}
                         <div style={{ display: 'flex', alignItems: 'stretch' }}>
@@ -1498,6 +1465,42 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                             <option value="3650">Forever</option>
                                         </select>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Column 3: Clock + Actions (Right) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', paddingLeft: '1rem', alignItems: 'flex-end', justifyContent: 'center' }}>
+                                {/* Row 1: Live Clock (Top) */}
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.4rem',
+                                    padding: '0.15rem 0.5rem',
+                                    background: 'var(--color-bg-primary)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '4px'
+                                }}>
+                                    <span style={{ fontSize: '0.9rem' }}>🕐</span>
+                                    <span style={{
+                                        fontSize: '0.75rem',
+                                        fontWeight: 500,
+                                        color: 'var(--color-text-primary)',
+                                        fontFamily: 'monospace'
+                                    }}>
+                                        {currentTime.toLocaleString('en-GB', {
+                                            day: '2-digit', month: '2-digit', year: 'numeric',
+                                            hour: '2-digit', minute: '2-digit', second: '2-digit',
+                                            timeZone: 'Europe/Paris', hour12: false, timeZoneName: 'short'
+                                        })}
+                                    </span>
+                                </div>
+
+                                {/* Row 2: Actions Buttons (Bottom) */}
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3,.gz" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                    <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
+                                    <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)' }}>Backup Now</button>
+                                    <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
                                 </div>
                             </div>
                         </div>
