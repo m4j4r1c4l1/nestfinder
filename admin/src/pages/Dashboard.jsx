@@ -903,6 +903,13 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
     const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { filename }
     const [resultModal, setResultModal] = React.useState(null); // { title, message, type }
+    const [currentTime, setCurrentTime] = React.useState(new Date());
+
+    // Live clock for CET/CEST
+    React.useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Sorting
     const [sortConfig, setSortConfig] = React.useState({ column: 'modified', direction: 'desc' });
@@ -997,9 +1004,9 @@ const DBManagerModal = ({ onClose, onResult }) => {
         const badges = {
             active: { label: 'Active', color: '#22c55e', bg: 'rgba(34, 197, 94, 0.1)' },
             corrupt: { label: 'Corrupt', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
-            restore_backup: { label: 'Backup', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+            restore_backup: { label: 'Backup', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
             uploaded: { label: 'Uploaded', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
-            scheduled: { label: 'Scheduled', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+            scheduled: { label: 'Scheduled', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
             other: { label: 'Other', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)' }
         };
         const b = badges[type] || badges.other;
@@ -1244,7 +1251,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 <div
                     className="card"
                     style={{
-                        width: '95%', maxWidth: '900px', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        width: '95%', maxWidth: '990px', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
                         cursor: resizing ? 'col-resize' : 'default', userSelect: resizing ? 'none' : 'auto'
                     }}
                     onClick={e => e.stopPropagation()}
@@ -1264,13 +1271,38 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
                         <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.3)' }}>Refresh</button>
 
+                        {/* Live Clock - CET/CEST */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            padding: '0.15rem 0.5rem',
+                            background: 'var(--color-bg-primary)',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '4px'
+                        }}>
+                            <span style={{ fontSize: '0.9rem' }}>🕐</span>
+                            <span style={{
+                                fontSize: '0.75rem',
+                                fontWeight: 500,
+                                color: 'var(--color-text-primary)',
+                                fontFamily: 'monospace'
+                            }}>
+                                {currentTime.toLocaleString('en-GB', {
+                                    day: '2-digit', month: '2-digit', year: 'numeric',
+                                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                                    timeZone: 'Europe/Paris', hour12: false, timeZoneName: 'short'
+                                })}
+                            </span>
+                        </div>
+
                         <div style={{ flex: 1 }} />
 
                         {/* Scheduled Backup Controls - Restructured */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'var(--color-bg-secondary)', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
-                            {/* Row 1: Pickers (left) | Toggle + Status (right) */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                {/* Left Side: Scheduling Pickers */}
+                        <div style={{ display: 'flex', gap: '0.8rem', background: 'var(--color-bg-secondary)', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                            {/* Left Side: Pickers in 2 rows with separator */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                                {/* Row 1: Scheduling Pickers */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Start:</span>
                                     <input
@@ -1321,160 +1353,142 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Days</span>
                                 </div>
 
-                                <div style={{ flex: 1 }} />
-
-                                {/* Right Side: Toggle + Next Backup Status */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                    {/* Toggle Switch */}
-                                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '0.4rem' }}>
-                                        <div
-                                            onClick={() => setBackupEnabled(!backupEnabled)}
+                                {/* Row 2: Retention Policies */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.5rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Keep DB:</span>
+                                        <select
+                                            value={backupRetention}
+                                            onChange={(e) => setBackupRetention(e.target.value)}
                                             style={{
-                                                width: '36px',
-                                                height: '20px',
-                                                background: backupEnabled ? '#22c55e' : '#475569',
-                                                borderRadius: '10px',
-                                                position: 'relative',
-                                                transition: 'background 0.2s',
-                                                cursor: 'pointer'
+                                                padding: '0.15rem 0.4rem',
+                                                background: 'var(--color-bg-primary)',
+                                                border: '1px solid var(--color-border)',
+                                                borderRadius: '4px',
+                                                color: 'var(--color-text-primary)',
+                                                fontSize: '0.75rem',
+                                                minWidth: '80px'
                                             }}
                                         >
-                                            <div style={{
-                                                width: '16px',
-                                                height: '16px',
-                                                background: '#fff',
-                                                borderRadius: '50%',
-                                                position: 'absolute',
-                                                top: '2px',
-                                                left: backupEnabled ? '18px' : '2px',
-                                                transition: 'left 0.2s'
-                                            }} />
-                                        </div>
-                                    </label>
-
-                                    {/* Next Backup Status */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem' }}>
-                                        <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>📅 Next Backup:</span>
-                                        {backupEnabled ? (
-                                            <span style={{ color: '#22c55e' }}>
-                                                {scheduleStartDate} @ {scheduleTime}
-                                            </span>
-                                        ) : (
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#f59e0b' }}>
-                                                ⚠️ Backup Disabled
-                                            </span>
-                                        )}
+                                            <option value="1">1 Day</option>
+                                            <option value="3">3 Days</option>
+                                            <option value="5">5 Days</option>
+                                            <option value="7">7 Days</option>
+                                            <option value="14">14 Days</option>
+                                            <option value="30">30 Days</option>
+                                            <option value="60">60 Days</option>
+                                            <option value="90">90 Days</option>
+                                            <option value="180">180 Days</option>
+                                            <option value="365">1 Year</option>
+                                            <option value="3650">Forever</option>
+                                        </select>
                                     </div>
 
-                                    {/* SET Button */}
-                                    <button
-                                        onClick={handleSetSchedule}
-                                        disabled={actionLoading === 'schedule'}
-                                        style={{
-                                            padding: '0.25rem 0.8rem',
-                                            borderRadius: '4px',
-                                            fontSize: '0.7rem',
-                                            fontWeight: 600,
-                                            textTransform: 'uppercase',
-                                            background: 'rgba(34, 197, 94, 0.1)',
-                                            color: '#22c55e',
-                                            border: '1px solid #22c55e',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        {actionLoading === 'schedule' ? '...' : 'SET'}
-                                    </button>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Corrupt:</span>
+                                        <select
+                                            value={corruptRetention}
+                                            onChange={(e) => setCorruptRetention(e.target.value)}
+                                            style={{
+                                                padding: '0.15rem 0.4rem',
+                                                background: 'var(--color-bg-primary)',
+                                                border: '1px solid var(--color-border)',
+                                                borderRadius: '4px',
+                                                color: 'var(--color-text-primary)',
+                                                fontSize: '0.75rem',
+                                                minWidth: '80px'
+                                            }}
+                                        >
+                                            <option value="1">1 Day</option>
+                                            <option value="3">3 Days</option>
+                                            <option value="5">5 Days</option>
+                                            <option value="7">7 Days</option>
+                                            <option value="14">14 Days</option>
+                                            <option value="30">30 Days</option>
+                                            <option value="60">60 Days</option>
+                                            <option value="90">90 Days</option>
+                                            <option value="180">180 Days</option>
+                                            <option value="365">1 Year</option>
+                                            <option value="3650">Forever</option>
+                                        </select>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Uploads:</span>
+                                        <select
+                                            value={uploadRetention}
+                                            onChange={(e) => setUploadRetention(e.target.value)}
+                                            style={{
+                                                padding: '0.15rem 0.4rem',
+                                                background: 'var(--color-bg-primary)',
+                                                border: '1px solid var(--color-border)',
+                                                borderRadius: '4px',
+                                                color: 'var(--color-text-primary)',
+                                                fontSize: '0.75rem',
+                                                minWidth: '80px'
+                                            }}
+                                        >
+                                            <option value="1">1 Day</option>
+                                            <option value="3">3 Days</option>
+                                            <option value="5">5 Days</option>
+                                            <option value="7">7 Days</option>
+                                            <option value="14">14 Days</option>
+                                            <option value="30">30 Days</option>
+                                            <option value="60">60 Days</option>
+                                            <option value="90">90 Days</option>
+                                            <option value="180">180 Days</option>
+                                            <option value="365">1 Year</option>
+                                            <option value="3650">Forever</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Row 2: Retention Policies (wider pickers, more granularity) */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.5rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Keep DB:</span>
-                                    <select
-                                        value={backupRetention}
-                                        onChange={(e) => setBackupRetention(e.target.value)}
-                                        style={{
-                                            padding: '0.15rem 0.4rem',
-                                            background: 'var(--color-bg-primary)',
-                                            border: '1px solid var(--color-border)',
-                                            borderRadius: '4px',
-                                            color: 'var(--color-text-primary)',
-                                            fontSize: '0.75rem',
-                                            minWidth: '80px'
-                                        }}
-                                    >
-                                        <option value="1">1 Day</option>
-                                        <option value="3">3 Days</option>
-                                        <option value="5">5 Days</option>
-                                        <option value="7">7 Days</option>
-                                        <option value="14">14 Days</option>
-                                        <option value="30">30 Days</option>
-                                        <option value="60">60 Days</option>
-                                        <option value="90">90 Days</option>
-                                        <option value="180">180 Days</option>
-                                        <option value="365">1 Year</option>
-                                        <option value="3650">Forever</option>
-                                    </select>
+                            {/* Right Side: Toggle + SET Button (vertically stacked, spans both rows) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderLeft: '1px solid var(--color-border)', paddingLeft: '0.8rem' }}>
+                                {/* Toggle Switch */}
+                                <div
+                                    onClick={() => setBackupEnabled(!backupEnabled)}
+                                    style={{
+                                        width: '36px',
+                                        height: '20px',
+                                        background: backupEnabled ? '#22c55e' : '#475569',
+                                        borderRadius: '10px',
+                                        position: 'relative',
+                                        transition: 'background 0.2s',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '16px',
+                                        height: '16px',
+                                        background: '#fff',
+                                        borderRadius: '50%',
+                                        position: 'absolute',
+                                        top: '2px',
+                                        left: backupEnabled ? '18px' : '2px',
+                                        transition: 'left 0.2s'
+                                    }} />
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Corrupt:</span>
-                                    <select
-                                        value={corruptRetention}
-                                        onChange={(e) => setCorruptRetention(e.target.value)}
-                                        style={{
-                                            padding: '0.15rem 0.4rem',
-                                            background: 'var(--color-bg-primary)',
-                                            border: '1px solid var(--color-border)',
-                                            borderRadius: '4px',
-                                            color: 'var(--color-text-primary)',
-                                            fontSize: '0.75rem',
-                                            minWidth: '80px'
-                                        }}
-                                    >
-                                        <option value="1">1 Day</option>
-                                        <option value="3">3 Days</option>
-                                        <option value="5">5 Days</option>
-                                        <option value="7">7 Days</option>
-                                        <option value="14">14 Days</option>
-                                        <option value="30">30 Days</option>
-                                        <option value="60">60 Days</option>
-                                        <option value="90">90 Days</option>
-                                        <option value="180">180 Days</option>
-                                        <option value="365">1 Year</option>
-                                        <option value="3650">Forever</option>
-                                    </select>
-                                </div>
-
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Uploads:</span>
-                                    <select
-                                        value={uploadRetention}
-                                        onChange={(e) => setUploadRetention(e.target.value)}
-                                        style={{
-                                            padding: '0.15rem 0.4rem',
-                                            background: 'var(--color-bg-primary)',
-                                            border: '1px solid var(--color-border)',
-                                            borderRadius: '4px',
-                                            color: 'var(--color-text-primary)',
-                                            fontSize: '0.75rem',
-                                            minWidth: '80px'
-                                        }}
-                                    >
-                                        <option value="1">1 Day</option>
-                                        <option value="3">3 Days</option>
-                                        <option value="5">5 Days</option>
-                                        <option value="7">7 Days</option>
-                                        <option value="14">14 Days</option>
-                                        <option value="30">30 Days</option>
-                                        <option value="60">60 Days</option>
-                                        <option value="90">90 Days</option>
-                                        <option value="180">180 Days</option>
-                                        <option value="365">1 Year</option>
-                                        <option value="3650">Forever</option>
-                                    </select>
-                                </div>
+                                {/* SET Button */}
+                                <button
+                                    onClick={handleSetSchedule}
+                                    disabled={actionLoading === 'schedule'}
+                                    style={{
+                                        padding: '0.25rem 0.8rem',
+                                        borderRadius: '4px',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase',
+                                        background: 'rgba(34, 197, 94, 0.1)',
+                                        color: '#22c55e',
+                                        border: '1px solid #22c55e',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {actionLoading === 'schedule' ? '...' : 'SET'}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1632,8 +1646,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     <span style={{ fontSize: '1rem', marginLeft: '0.4rem' }}>🔜</span>
                                 </div>
                             ) : (
-                                <div style={{ display: 'flex', alignItems: 'center', opacity: 0.5 }}>
-                                    <span style={{ color: 'var(--color-text-secondary)' }}>Backup Disabled</span>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>Next Backup:</span>
+                                    <span style={{ color: '#f59e0b', marginLeft: '0.3rem' }}>⚠️ Backup Disabled</span>
+                                    <span style={{ fontSize: '1rem', marginLeft: '0.4rem' }}>📅</span>
                                 </div>
                             )}
                         </div>
