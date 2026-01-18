@@ -897,6 +897,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const [corruptRetention, setCorruptRetention] = React.useState('30');
     const [uploadRetention, setUploadRetention] = React.useState('30');
     const [uploadProgress, setUploadProgress] = React.useState(null);
+    const [downloadProgress, setDownloadProgress] = React.useState(null);
 
     const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { filename }
 
@@ -1016,14 +1017,48 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
     const handleDownload = async (filename) => {
         setActionLoading(filename);
-        try {
-            await adminApi.downloadDBFile(filename);
-            onResult('success', 'Download Complete', `"${filename}" has been downloaded.`);
-        } catch (err) {
-            onResult('error', 'Download Failed', err.message);
-        } finally {
+        setDownloadProgress(0);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `/api/admin/db/files/${encodeURIComponent(filename)}/download`);
+        xhr.responseType = 'blob';
+
+        const token = localStorage.getItem('nestfinder_admin_token');
+        if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+        xhr.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                setDownloadProgress(percent);
+            }
+        };
+
+        xhr.onload = () => {
+            setDownloadProgress(null);
             setActionLoading(null);
-        }
+            if (xhr.status === 200) {
+                const blob = xhr.response;
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                onResult('success', 'Download Complete', `"${filename}" has been downloaded.`);
+            } else {
+                onResult('error', 'Download Failed', xhr.statusText || 'Server Error');
+            }
+        };
+
+        xhr.onerror = () => {
+            setDownloadProgress(null);
+            setActionLoading(null);
+            onResult('error', 'Download Failed', 'Network Error');
+        };
+
+        xhr.send();
     };
 
     const handleDelete = async () => {
@@ -1611,6 +1646,19 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--color-primary)', transition: 'width 0.2s ease-out' }} />
                         </div>
                         <p style={{ marginTop: '1rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>{uploadProgress}%</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Download Progress Modal */}
+            {downloadProgress !== null && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1700, backdropFilter: 'blur(4px)' }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '400px', padding: '2rem', textAlign: 'center', background: 'var(--color-bg-primary)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                        <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem' }}>Downloading Database...</h3>
+                        <div style={{ width: '100%', height: '12px', background: 'var(--color-bg-tertiary)', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+                            <div style={{ width: `${downloadProgress}%`, height: '100%', background: 'var(--color-primary)', transition: 'width 0.2s ease-out' }} />
+                        </div>
+                        <p style={{ marginTop: '1rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>{downloadProgress}%</p>
                     </div>
                 </div>
             )}
