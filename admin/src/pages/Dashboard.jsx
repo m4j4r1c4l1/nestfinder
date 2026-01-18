@@ -893,6 +893,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const [backupSchedule, setBackupSchedule] = React.useState({ enabled: false, time: '', intervalDays: 1 });
     const [scheduleTime, setScheduleTime] = React.useState('03:00');
     const [scheduleInterval, setScheduleInterval] = React.useState('1');
+    const [scheduleStartDate, setScheduleStartDate] = React.useState(new Date().toISOString().split('T')[0]);
     const [backupEnabled, setBackupEnabled] = React.useState(false);
     const [backupRetention, setBackupRetention] = React.useState('30');
     const [corruptRetention, setCorruptRetention] = React.useState('30');
@@ -952,12 +953,12 @@ const DBManagerModal = ({ onClose, onResult }) => {
             setFiles(filesRes.files || []);
             setUsage(filesRes.usage || null);
             setBackupSchedule(scheduleRes);
-            setBackupSchedule(scheduleRes);
 
             if (scheduleRes.enabled && scheduleRes.time) {
                 setBackupEnabled(true);
                 setScheduleTime(scheduleRes.time);
                 setScheduleInterval(String(scheduleRes.intervalDays || 1));
+                if (scheduleRes.startDate) setScheduleStartDate(scheduleRes.startDate);
             } else {
                 setBackupEnabled(false);
                 setScheduleTime('03:00'); // Default
@@ -1146,6 +1147,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             const res = await adminApi.setBackupSchedule(
                 scheduleTime,
                 parseInt(scheduleInterval, 10),
+                scheduleStartDate,
                 parseInt(backupRetention, 10),
                 parseInt(corruptRetention, 10),
                 parseInt(uploadRetention, 10),
@@ -1264,153 +1266,213 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
                         <div style={{ flex: 1 }} />
 
-                        {/* Scheduled Backup Controls - 2 Rows */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', background: 'var(--color-bg-secondary)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
-                            {/* Row 1: Enable, Time, Interval, Set */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        {/* Scheduled Backup Controls - Restructured */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'var(--color-bg-secondary)', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                            {/* Row 1: Pickers (left) | Toggle + Status (right) */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                {/* Left Side: Scheduling Pickers */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Start:</span>
                                     <input
-                                        type="checkbox"
-                                        id="backupToggle"
-                                        checked={backupEnabled}
-                                        onChange={(e) => setBackupEnabled(e.target.checked)}
-                                        style={{ cursor: 'pointer', width: '14px', height: '14px' }}
-                                    />
-                                    <label htmlFor="backupToggle" style={{ fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', userSelect: 'none', color: 'var(--color-text-primary)' }}>Enable</label>
-                                </div>
-
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Daily At:</span>
-                                    <input
-                                        type="time"
-                                        value={scheduleTime}
-                                        onChange={(e) => setScheduleTime(e.target.value)}
-                                        style={{
-                                            padding: '0.1rem 0.3rem',
-                                            background: 'var(--color-bg-primary)',
-                                            border: '1px solid var(--color-border)',
-                                            borderRadius: '4px',
-                                            color: 'var(--color-text-primary)',
-                                            fontSize: '0.8rem'
-                                        }}
-                                    />
-                                </div>
-
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Every:</span>
-                                    <select
-                                        value={scheduleInterval}
-                                        onChange={(e) => setScheduleInterval(e.target.value)}
+                                        type="date"
+                                        value={scheduleStartDate}
+                                        onChange={(e) => setScheduleStartDate(e.target.value)}
                                         style={{
                                             padding: '0.15rem 0.3rem',
                                             background: 'var(--color-bg-primary)',
                                             border: '1px solid var(--color-border)',
                                             borderRadius: '4px',
                                             color: 'var(--color-text-primary)',
-                                            fontSize: '0.8rem',
-                                            outline: 'none'
+                                            fontSize: '0.75rem'
                                         }}
-                                    >
-                                        <option value="1">1 Day</option>
-                                        <option value="2">2 Days</option>
-                                        <option value="3">3 Days</option>
-                                        <option value="7">7 Days</option>
-                                        <option value="14">14 Days</option>
-                                        <option value="30">30 Days</option>
-                                    </select>
+                                    />
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>At:</span>
+                                    <input
+                                        type="time"
+                                        value={scheduleTime}
+                                        onChange={(e) => setScheduleTime(e.target.value)}
+                                        style={{
+                                            padding: '0.15rem 0.3rem',
+                                            background: 'var(--color-bg-primary)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '4px',
+                                            color: 'var(--color-text-primary)',
+                                            fontSize: '0.75rem'
+                                        }}
+                                    />
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Every:</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="365"
+                                        value={scheduleInterval}
+                                        onChange={(e) => setScheduleInterval(e.target.value)}
+                                        style={{
+                                            width: '50px',
+                                            padding: '0.15rem 0.3rem',
+                                            background: 'var(--color-bg-primary)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '4px',
+                                            color: 'var(--color-text-primary)',
+                                            fontSize: '0.75rem',
+                                            textAlign: 'center'
+                                        }}
+                                    />
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Days</span>
                                 </div>
 
-                                <button
-                                    onClick={handleSetSchedule}
-                                    disabled={actionLoading === 'schedule'}
-                                    style={{
-                                        padding: '0.2rem 0.6rem',
-                                        borderRadius: '4px',
-                                        fontSize: '0.7rem',
-                                        fontWeight: 600,
-                                        textTransform: 'uppercase',
-                                        background: 'rgba(34, 197, 94, 0.1)',
-                                        color: backupEnabled ? '#22c55e' : 'var(--color-text-secondary)',
-                                        border: backupEnabled ? '1px solid #22c55e' : '1px solid var(--color-border)',
-                                        cursor: 'pointer',
-                                        minWidth: '50px',
-                                        textAlign: 'center',
-                                        filter: backupEnabled ? 'none' : 'grayscale(100%)',
-                                        marginLeft: 'auto'
-                                    }}
-                                >
-                                    {actionLoading === 'schedule' ? '...' : (backupEnabled ? 'SET' : 'OFF')}
-                                </button>
+                                <div style={{ flex: 1 }} />
+
+                                {/* Right Side: Toggle + Next Backup Status */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                    {/* Toggle Switch */}
+                                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '0.4rem' }}>
+                                        <div
+                                            onClick={() => setBackupEnabled(!backupEnabled)}
+                                            style={{
+                                                width: '36px',
+                                                height: '20px',
+                                                background: backupEnabled ? '#22c55e' : '#475569',
+                                                borderRadius: '10px',
+                                                position: 'relative',
+                                                transition: 'background 0.2s',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <div style={{
+                                                width: '16px',
+                                                height: '16px',
+                                                background: '#fff',
+                                                borderRadius: '50%',
+                                                position: 'absolute',
+                                                top: '2px',
+                                                left: backupEnabled ? '18px' : '2px',
+                                                transition: 'left 0.2s'
+                                            }} />
+                                        </div>
+                                    </label>
+
+                                    {/* Next Backup Status */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem' }}>
+                                        <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>📅 Next Backup:</span>
+                                        {backupEnabled ? (
+                                            <span style={{ color: '#22c55e' }}>
+                                                {scheduleStartDate} @ {scheduleTime}
+                                            </span>
+                                        ) : (
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#f59e0b' }}>
+                                                ⚠️ Backup Disabled
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* SET Button */}
+                                    <button
+                                        onClick={handleSetSchedule}
+                                        disabled={actionLoading === 'schedule'}
+                                        style={{
+                                            padding: '0.25rem 0.8rem',
+                                            borderRadius: '4px',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 600,
+                                            textTransform: 'uppercase',
+                                            background: 'rgba(34, 197, 94, 0.1)',
+                                            color: '#22c55e',
+                                            border: '1px solid #22c55e',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        {actionLoading === 'schedule' ? '...' : 'SET'}
+                                    </button>
+                                </div>
                             </div>
 
-                            {/* Row 2: Retention Policies */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.4rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>Keep DB:</span>
+                            {/* Row 2: Retention Policies (wider pickers, more granularity) */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.5rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Keep DB:</span>
                                     <select
                                         value={backupRetention}
                                         onChange={(e) => setBackupRetention(e.target.value)}
                                         style={{
-                                            padding: '0.1rem 0.2rem',
+                                            padding: '0.15rem 0.4rem',
                                             background: 'var(--color-bg-primary)',
                                             border: '1px solid var(--color-border)',
                                             borderRadius: '4px',
                                             color: 'var(--color-text-primary)',
                                             fontSize: '0.75rem',
-                                            outline: 'none'
+                                            minWidth: '80px'
                                         }}
                                     >
-                                        <option value="7">7d</option>
-                                        <option value="30">30d</option>
-                                        <option value="90">90d</option>
-                                        <option value="365">1y</option>
-                                        <option value="3650">∞</option>
+                                        <option value="1">1 Day</option>
+                                        <option value="3">3 Days</option>
+                                        <option value="5">5 Days</option>
+                                        <option value="7">7 Days</option>
+                                        <option value="14">14 Days</option>
+                                        <option value="30">30 Days</option>
+                                        <option value="60">60 Days</option>
+                                        <option value="90">90 Days</option>
+                                        <option value="180">180 Days</option>
+                                        <option value="365">1 Year</option>
+                                        <option value="3650">Forever</option>
                                     </select>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>Corrupt:</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Corrupt:</span>
                                     <select
                                         value={corruptRetention}
                                         onChange={(e) => setCorruptRetention(e.target.value)}
                                         style={{
-                                            padding: '0.1rem 0.2rem',
+                                            padding: '0.15rem 0.4rem',
                                             background: 'var(--color-bg-primary)',
                                             border: '1px solid var(--color-border)',
                                             borderRadius: '4px',
                                             color: 'var(--color-text-primary)',
                                             fontSize: '0.75rem',
-                                            outline: 'none'
+                                            minWidth: '80px'
                                         }}
                                     >
-                                        <option value="7">7d</option>
-                                        <option value="30">30d</option>
-                                        <option value="90">90d</option>
-                                        <option value="365">1y</option>
-                                        <option value="3650">∞</option>
+                                        <option value="1">1 Day</option>
+                                        <option value="3">3 Days</option>
+                                        <option value="5">5 Days</option>
+                                        <option value="7">7 Days</option>
+                                        <option value="14">14 Days</option>
+                                        <option value="30">30 Days</option>
+                                        <option value="60">60 Days</option>
+                                        <option value="90">90 Days</option>
+                                        <option value="180">180 Days</option>
+                                        <option value="365">1 Year</option>
+                                        <option value="3650">Forever</option>
                                     </select>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>Uploads:</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>Uploads:</span>
                                     <select
                                         value={uploadRetention}
                                         onChange={(e) => setUploadRetention(e.target.value)}
                                         style={{
-                                            padding: '0.1rem 0.2rem',
+                                            padding: '0.15rem 0.4rem',
                                             background: 'var(--color-bg-primary)',
                                             border: '1px solid var(--color-border)',
                                             borderRadius: '4px',
                                             color: 'var(--color-text-primary)',
                                             fontSize: '0.75rem',
-                                            outline: 'none'
+                                            minWidth: '80px'
                                         }}
                                     >
-                                        <option value="7">7d</option>
-                                        <option value="30">30d</option>
-                                        <option value="90">90d</option>
-                                        <option value="365">1y</option>
-                                        <option value="3650">∞</option>
+                                        <option value="1">1 Day</option>
+                                        <option value="3">3 Days</option>
+                                        <option value="5">5 Days</option>
+                                        <option value="7">7 Days</option>
+                                        <option value="14">14 Days</option>
+                                        <option value="30">30 Days</option>
+                                        <option value="60">60 Days</option>
+                                        <option value="90">90 Days</option>
+                                        <option value="180">180 Days</option>
+                                        <option value="365">1 Year</option>
+                                        <option value="3650">Forever</option>
                                     </select>
                                 </div>
                             </div>

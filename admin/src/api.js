@@ -318,10 +318,10 @@ export const adminApi = {
         return this.fetch('/admin/db/backup-schedule');
     },
 
-    setBackupSchedule(intervalHours, retentionDays, corruptRetentionDays, uploadRetentionDays) {
+    setBackupSchedule(time, intervalDays, startDate, retentionDays, corruptRetentionDays, uploadRetentionDays, enabled) {
         return this.fetch('/admin/db/backup-schedule', {
             method: 'PUT',
-            body: JSON.stringify({ intervalHours, retentionDays, corruptRetentionDays, uploadRetentionDays })
+            body: JSON.stringify({ time, intervalDays, startDate, retentionDays, corruptRetentionDays, uploadRetentionDays, enabled })
         });
     },
 

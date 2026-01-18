@@ -447,6 +447,7 @@ router.get('/db/backup-schedule', (req, res) => {
         const baseTime = getSetting('backup_time') || '';
         const enabled = !!baseTime;
         const intervalDays = parseInt(getSetting('backup_interval_days') || '1', 10);
+        const startDate = getSetting('backup_start_date') || new Date().toISOString().split('T')[0];
         const lastBackupTime = getSetting('last_scheduled_backup_time') || null;
         const lastBackupStatus = getSetting('last_scheduled_backup_status') || null;
         const retentionDays = parseInt(getSetting('backup_retention_days') || '30', 10);
@@ -457,6 +458,7 @@ router.get('/db/backup-schedule', (req, res) => {
             enabled,
             time: baseTime,
             intervalDays,
+            startDate,
             lastBackupTime,
             lastBackupStatus,
             retentionDays,
@@ -472,7 +474,7 @@ router.get('/db/backup-schedule', (req, res) => {
 // Set backup schedule
 router.put('/db/backup-schedule', (req, res) => {
     try {
-        const { time, intervalDays, retentionDays, corruptRetentionDays, uploadRetentionDays, enabled } = req.body;
+        const { time, intervalDays, startDate, retentionDays, corruptRetentionDays, uploadRetentionDays, enabled } = req.body;
 
         // If explicitly disabled (enabled === false) OR empty time, turn it off
         if (enabled === false || (enabled === undefined && !time)) {
@@ -497,6 +499,15 @@ router.put('/db/backup-schedule', (req, res) => {
                  ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
                 [String(days), String(days)]
             );
+
+            // Store start date
+            if (startDate) {
+                run(
+                    `INSERT INTO settings (key, value, updated_at) VALUES ('backup_start_date', ?, CURRENT_TIMESTAMP)
+                     ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+                    [startDate, startDate]
+                );
+            }
 
             startScheduledBackup(days, time);
         }
