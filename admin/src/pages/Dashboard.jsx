@@ -1,5 +1,88 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { adminApi } from '../api';
+
+const BackupProgressModal = ({ tasks, onClose }) => {
+    const isRunning = tasks.some(t => t.status === 'running');
+    const isError = tasks.some(t => t.status === 'error');
+
+    return (
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 9999
+        }}>
+            <div style={{
+                background: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '12px',
+                padding: '2rem',
+                width: '90%',
+                maxWidth: '500px',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                animation: 'slideUp 0.3s ease-out'
+            }}>
+                <h3 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>💾</span> Scheduled Backup
+                </h3>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                    {tasks.map((task, idx) => (
+                        <div key={idx} style={{
+                            background: 'var(--color-bg-primary)',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            border: '1px solid var(--color-border)'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{task.name}</span>
+                                <span style={{ fontSize: '1.2rem' }}>
+                                    {task.status === 'success' && <span style={{ color: '#22c55e', fontSize: '1.2rem', fontWeight: 'bold' }}>✓</span>}
+                                    {task.status === 'running' && '⏳'}
+                                    {task.status === 'error' && '🙈'}
+                                    {task.status === 'pending' && '...'}
+                                </span>
+                            </div>
+
+                            <div style={{
+                                height: '6px',
+                                background: 'rgba(255,255,255,0.1)',
+                                borderRadius: '3px',
+                                overflow: 'hidden'
+                            }}>
+                                <div style={{
+                                    height: '100%',
+                                    width: `${task.progress || 0}%`,
+                                    background: task.status === 'error' ? '#ef4444' : task.status === 'success' ? '#22c55e' : '#3b82f6',
+                                    transition: 'width 0.3s ease-out'
+                                }} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div style={{ textAlign: 'right', marginTop: '1.5rem', opacity: isRunning ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                    <button
+                        className="btn"
+                        onClick={onClose}
+                        disabled={isRunning}
+                        style={{
+                            background: isError ? 'var(--color-error)' : 'var(--color-primary)',
+                            color: 'white',
+                            padding: '0.5rem 1.5rem',
+                            borderRadius: '6px',
+                            cursor: isRunning ? 'not-allowed' : 'pointer',
+                            opacity: isRunning ? 0.7 : 1
+                        }}
+                    >
+                        {isError ? 'Close' : 'Done'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 import AdminMap from '../components/AdminMap';
 
 
@@ -905,6 +988,43 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const [resultModal, setResultModal] = React.useState(null); // { title, message, type }
     const [currentTime, setCurrentTime] = React.useState(new Date());
 
+    // Live Backup Events (SSE)
+    const [backupState, setBackupState] = React.useState({ running: false, tasks: [] });
+    const backupModalClosedRef = React.useRef(false);
+
+    React.useEffect(() => {
+        const eventSource = new EventSource('/api/admin/db/backup-events');
+
+        eventSource.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+
+                // If a new run starts (running=true, progress near 0), un-dismiss
+                if (data.running && backupModalClosedRef.current) {
+                    // Check if it's actually a new run (first task progress < 100)
+                    if (data.tasks.length === 0 || (data.tasks[0] && data.tasks[0].progress < 100 && data.tasks[0].status === 'running')) {
+                        backupModalClosedRef.current = false;
+                    }
+                }
+
+                if (backupModalClosedRef.current) return;
+
+                if (data.running || data.tasks.length > 0) {
+                    setBackupState(data);
+                }
+            } catch (e) {
+                console.error('SSE Error:', e);
+            }
+        };
+
+        return () => eventSource.close();
+    }, []);
+
+    const closeBackupModal = () => {
+        setBackupState({ running: false, tasks: [] });
+        backupModalClosedRef.current = true;
+    };
+
     // Live clock for CET/CEST
     React.useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -1756,6 +1876,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
                         <p style={{ marginTop: '1rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>{downloadProgress}%</p>
                     </div>
                 </div>
+            )}
+            {/* Backup Progress Modal */}
+            {(backupState.running || backupState.tasks.length > 0) && (
+                <BackupProgressModal tasks={backupState.tasks} onClose={closeBackupModal} />
             )}
         </React.Fragment>
     );
