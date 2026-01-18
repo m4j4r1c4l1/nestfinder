@@ -581,9 +581,8 @@ const applyRetentionPoliciesLite = (dbDir) => {
     });
 };
 
-// Start scheduled backup
 // intervalDays: number of days between backups (default 1)
-// timeOfDay: string "HH:MM" (24h format)
+// timeOfDay: string "HH:MM" (24h format) - interpreted as Europe/Paris time
 const startScheduledBackup = (intervalDays, timeOfDay, startDateStr) => {
     if (backupInterval) clearTimeout(backupInterval);
 
@@ -595,80 +594,70 @@ const startScheduledBackup = (intervalDays, timeOfDay, startDateStr) => {
     const [targetHour, targetMinute] = timeOfDay.split(':').map(Number);
     const days = intervalDays || 1;
 
-    debugLog(`📦 Configuring scheduled backups every ${days} day(s) at ${timeOfDay}, starting from ${startDateStr || 'today'}`);
+    debugLog(`📦 Configuring scheduled backups every ${days} day(s) at ${timeOfDay} CET, starting from ${startDateStr || 'today'}`);
+
+    // Helper to get current time in Europe/Paris as a Date object
+    const getParisNow = () => {
+        const now = new Date();
+        // Get Paris time string
+        const parisStr = now.toLocaleString('en-CA', { timeZone: 'Europe/Paris', hour12: false });
+        // Parse back (format: YYYY-MM-DD, HH:MM:SS)
+        const [datePart, timePart] = parisStr.split(', ');
+        const [h, m, s] = timePart.split(':').map(Number);
+        return { datePart, h, m, s, original: now };
+    };
+
+    // Helper to calculate delay until target Paris time
+    const getDelayToParisTime = (dateStr, hour, minute) => {
+        // Build target date string in Paris timezone
+        const targetDateTimeStr = `${dateStr}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
+
+        // Create date assuming Paris timezone by using the offset
+        // Paris is UTC+1 (CET) or UTC+2 (CEST)
+        // We'll calculate the difference based on current Paris offset
+        const now = new Date();
+        const parisOffset = -new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
+        const utcOffset = -now.getTimezoneOffset();
+        const diffMinutes = parisOffset - utcOffset;
+
+        // Parse target as local and adjust
+        const target = new Date(targetDateTimeStr);
+        target.setMinutes(target.getMinutes() - diffMinutes);
+
+        return target.getTime() - now.getTime();
+    };
 
     const scheduleNextRun = () => {
-        const now = new Date();
-        let target = new Date(now);
+        const paris = getParisNow();
+        let targetDate = startDateStr || paris.datePart;
 
-        // If start date is provided and in the future, start then
-        if (startDateStr) {
-            const start = new Date(startDateStr);
-            // reset start to target time to compare correctly
-            start.setHours(targetHour, targetMinute, 0, 0);
+        // Calculate delay to target time
+        let delay = getDelayToParisTime(targetDate, targetHour, targetMinute);
 
-            if (start > now) {
-                target = new Date(start);
-            } else {
-                // Start date is past/today, so we just stick to "next occurrence" logic
-                // But we must align with the start date + N * interval
-                // Calculate days passed since start
-                // For simplicity, if start date is past, we just find next slot from NOW based on interval?
-                // Or do we strictly follow "Start Date + N*Interval"?
-                // Let's strictly follow interval from Start Date to be precise.
-
-                // Set target to start date time
-                target = new Date(start);
-            }
-        } else {
-            target.setHours(targetHour, targetMinute, 0, 0);
+        // If delay is negative (time has passed), add days until positive
+        while (delay <= 0) {
+            const d = new Date(targetDate);
+            d.setDate(d.getDate() + days);
+            targetDate = d.toISOString().split('T')[0];
+            delay = getDelayToParisTime(targetDate, targetHour, targetMinute);
         }
 
-        // Ensure target has correct time
-        target.setHours(targetHour, targetMinute, 0, 0);
-
-        // While target is in the past, add interval
-        while (target <= now) {
-            target.setDate(target.getDate() + days);
-        }
-
-        const delay = target.getTime() - now.getTime();
-        debugLog(`📦 Next backup scheduled in ${(delay / 1000 / 60).toFixed(1)} minutes (${target.toLocaleString('en-GB', { timeZone: 'Europe/Paris' })})`);
+        const delayMinutes = (delay / 1000 / 60).toFixed(1);
+        debugLog(`📦 Next backup scheduled in ${delayMinutes} minutes (${targetDate} ${String(targetHour).padStart(2, '0')}:${String(targetMinute).padStart(2, '0')} CET)`);
 
         backupInterval = setTimeout(() => {
             createScheduledBackup();
-            // After running, schedule the next one based on interval
-            // Note: setTimeout is used instead of setInterval to handle day/time shifts or drift cleanly, 
-            // though for exact multi-day intervals we need to re-calc target.
-
-            // Re-schedule for N days later
-            const nextRun = new Date();
-            nextRun.setDate(nextRun.getDate() + days);
-            nextRun.setHours(targetHour, targetMinute, 0, 0);
-
-            // Recursive setup logic is complex with pure setTimeout loop if we want "intervalDays".
-            // Simpler approach: Just re-call startScheduledBackup logic or a helper that sets the next timeout.
-            // Let's make `scheduleNextRun` smart enough to just find the next date.
-
-            // To properly respect "Every N Days", we technically need to store "Last Run Date". 
-            // But for simplicity/statelessness, let's just run daily at that time if interval is 1.
-            // If interval > 1, we might skip? 
-            // For now, let's assume standard behavior: Next run is now + intervalDays (at that time)
-
-            // We'll just recurse cleanly:
             scheduleNextRecur(days, targetHour, targetMinute);
-
         }, delay);
     };
 
     const scheduleNextRecur = (d, h, m) => {
-        const now = new Date();
-        let target = new Date(now);
-        target.setDate(target.getDate() + d); // Add interval
-        target.setHours(h, m, 0, 0);
+        const paris = getParisNow();
+        const nextDate = new Date(paris.datePart);
+        nextDate.setDate(nextDate.getDate() + d);
+        const targetDate = nextDate.toISOString().split('T')[0];
 
-        // Fix edge case if drift made us land before the target time somehow? Unlikely with simple addition.
-        const delay = target.getTime() - now.getTime();
+        const delay = getDelayToParisTime(targetDate, h, m);
 
         backupInterval = setTimeout(() => {
             createScheduledBackup();
