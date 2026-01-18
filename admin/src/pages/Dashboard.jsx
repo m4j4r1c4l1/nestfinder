@@ -989,8 +989,14 @@ const DBManagerModal = ({ onClose, onResult }) => {
     };
 
     const formatDate = (isoDate) => {
-        const d = new Date(isoDate);
-        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (!isoDate) return '-';
+        return new Date(isoDate).toLocaleString('en-GB', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            timeZone: 'Europe/Paris',
+            hour12: false,
+            timeZoneName: 'short'
+        });
     };
 
     const getTypeBadge = (type) => {
