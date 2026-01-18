@@ -192,6 +192,20 @@ export const initDatabase = async () => {
     // Column likely exists
   }
 
+  // Migration: Add sender_name for system messages (e.g., "🛡️ System")
+  try {
+    db.run(`ALTER TABLE feedback ADD COLUMN sender_name TEXT`);
+  } catch (e) {
+    // Column likely exists
+  }
+
+  // Migration: Add icon for visual indicator (e.g., "💣", "💥")
+  try {
+    db.run(`ALTER TABLE feedback ADD COLUMN icon TEXT`);
+  } catch (e) {
+    // Column likely exists
+  }
+
   // In-App Notifications table
   db.run(`
     CREATE TABLE IF NOT EXISTS notifications (
