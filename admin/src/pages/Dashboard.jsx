@@ -1062,8 +1062,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
                 // Detect completion to refresh stats
                 if (wasRunningRef.current && !data.running) {
-                    // Delay to ensure DB write (status update) completes before refresh
-                    setTimeout(() => loadFiles(), 500);
+                    loadFiles();
                 }
                 wasRunningRef.current = data.running;
             } catch (e) {

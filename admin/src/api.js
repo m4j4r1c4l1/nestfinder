@@ -90,6 +90,10 @@ export const adminApi = {
         });
     },
 
+    createBackupNow() {
+        return this.fetch('/admin/db/backup-now', { method: 'POST' });
+    },
+
     getStats() {
         return this.fetch('/admin/stats');
     },
