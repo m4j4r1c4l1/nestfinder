@@ -329,7 +329,9 @@ export const initDatabase = async () => {
     { key: 'rate_limit_admin_login', value: '5' },
     { key: 'debug_mode_enabled', value: 'false' },
     { key: 'debug_retention_days', value: '7' },
-    { key: 'backup_retention_days', value: '30' }
+    { key: 'backup_retention_days', value: '30' },
+    { key: 'corrupt_retention_days', value: '30' },
+    { key: 'upload_retention_days', value: '30' }
   ];
 
   defaultSettings.forEach(s => {

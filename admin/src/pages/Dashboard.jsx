@@ -893,6 +893,9 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const [scheduleInput, setScheduleInput] = React.useState('24');
     const [scheduleUnit, setScheduleUnit] = React.useState('hours');
     const [backupEnabled, setBackupEnabled] = React.useState(false);
+    const [backupRetention, setBackupRetention] = React.useState('30');
+    const [corruptRetention, setCorruptRetention] = React.useState('30');
+    const [uploadRetention, setUploadRetention] = React.useState('30');
     const [uploadProgress, setUploadProgress] = React.useState(null);
 
     const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { filename }
@@ -958,6 +961,9 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 else if (h % 24 === 0) { setScheduleInput(String(h / 24)); setScheduleUnit('days'); }
                 else { setScheduleInput(String(h)); setScheduleUnit('hours'); }
             }
+            if (scheduleRes.retentionDays) setBackupRetention(String(scheduleRes.retentionDays));
+            if (scheduleRes.corruptRetentionDays) setCorruptRetention(String(scheduleRes.corruptRetentionDays));
+            if (scheduleRes.uploadRetentionDays) setUploadRetention(String(scheduleRes.uploadRetentionDays));
         } catch (err) {
             onResult('error', 'Load Failed', err.message);
         } finally {
@@ -1110,11 +1116,16 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 else interval = val;
             }
 
-            const res = await adminApi.setBackupSchedule(interval, parseInt(backupRetention, 10));
+            const res = await adminApi.setBackupSchedule(
+                interval,
+                parseInt(backupRetention, 10),
+                parseInt(corruptRetention, 10),
+                parseInt(uploadRetention, 10)
+            );
             setBackupSchedule(res);
-            onResult('success', 'Schedule Updated', backupEnabled ? `Backing up every ${scheduleInput} ${scheduleUnit}.` : 'Scheduled backups disabled.');
+            onResult('success', 'Policies Updated', 'Backup schedule and file retention policies have been updated.');
         } catch (err) {
-            onResult('error', 'Schedule Update Failed', err.message);
+            onResult('error', 'Update Failed', err.message);
         } finally {
             setActionLoading(null);
         }
@@ -1274,12 +1285,57 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 </select>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', paddingLeft: '0.5rem', borderLeft: '1px solid var(--color-border)', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Keep:</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', paddingLeft: '0.5rem', borderLeft: '1px solid var(--color-border)' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }} title="Retention for automated scheduled backups">Keep DB:</span>
                                 <select
                                     value={backupRetention}
                                     onChange={(e) => setBackupRetention(e.target.value)}
-                                    title="Retention Period (Age of backup files)"
+                                    style={{
+                                        padding: '0.15rem 0.3rem',
+                                        background: 'var(--color-bg-primary)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '4px',
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: '0.8rem',
+                                        outline: 'none'
+                                    }}
+                                >
+                                    <option value="7">7 Days</option>
+                                    <option value="30">30 Days</option>
+                                    <option value="90">90 Days</option>
+                                    <option value="365">1 Year</option>
+                                    <option value="3650">Forever</option>
+                                </select>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', paddingLeft: '0.5rem', borderLeft: '1px solid var(--color-border)' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }} title="Retention for corrupted database files">Keep Corrupt:</span>
+                                <select
+                                    value={corruptRetention}
+                                    onChange={(e) => setCorruptRetention(e.target.value)}
+                                    style={{
+                                        padding: '0.15rem 0.3rem',
+                                        background: 'var(--color-bg-primary)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '4px',
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: '0.8rem',
+                                        outline: 'none'
+                                    }}
+                                >
+                                    <option value="7">7 Days</option>
+                                    <option value="30">30 Days</option>
+                                    <option value="90">90 Days</option>
+                                    <option value="365">1 Year</option>
+                                    <option value="3650">Forever</option>
+                                </select>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', paddingLeft: '0.5rem', borderLeft: '1px solid var(--color-border)' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }} title="Retention for manually uploaded database files">Keep Uploads:</span>
+                                <select
+                                    value={uploadRetention}
+                                    onChange={(e) => setUploadRetention(e.target.value)}
                                     style={{
                                         padding: '0.15rem 0.3rem',
                                         background: 'var(--color-bg-primary)',
@@ -1383,11 +1439,62 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                             <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid var(--color-border)' }}>{getTypeBadge(file.type)}</td>
                                             <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid var(--color-border)' }}>
                                                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                                    <button onClick={(e) => { e.stopPropagation(); handleDownload(file.name); }} title="Download" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>📥</button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleDownload(file.name); }}
+                                                        title="Download"
+                                                        style={{
+                                                            width: '24px', height: '24px',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            background: 'rgba(45, 212, 191, 0.1)', // Turquoise transparent
+                                                            border: '1px solid rgba(45, 212, 191, 0.3)',
+                                                            borderRadius: '4px',
+                                                            color: '#2dd4bf',
+                                                            cursor: 'pointer',
+                                                            padding: 0
+                                                        }}
+                                                    >
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M12 5v14M19 12l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
                                                     {file.type !== 'active' && (
                                                         <>
-                                                            <button onClick={(e) => { e.stopPropagation(); handleRestore(file.name); }} title="Restore" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>♻️</button>
-                                                            <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ filename: file.name }); }} title="Delete" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleRestore(file.name); }}
+                                                                title="Restore"
+                                                                style={{
+                                                                    width: '24px', height: '24px',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    background: 'rgba(34, 197, 94, 0.1)', // Green transparent
+                                                                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                                                                    borderRadius: '4px',
+                                                                    color: '#22c55e',
+                                                                    cursor: 'pointer',
+                                                                    padding: 0
+                                                                }}
+                                                            >
+                                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                                                    <path d="M12 5v14M5 12h14" />
+                                                                </svg>
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ filename: file.name }); }}
+                                                                title="Delete"
+                                                                style={{
+                                                                    width: '24px', height: '24px',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    background: 'rgba(239, 68, 68, 0.1)', // Red transparent
+                                                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                                    borderRadius: '4px',
+                                                                    color: '#ef4444',
+                                                                    cursor: 'pointer',
+                                                                    padding: 0
+                                                                }}
+                                                            >
+                                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                                                    <path d="M18 6L6 18M6 6l12 12" />
+                                                                </svg>
+                                                            </button>
                                                         </>
                                                     )}
                                                 </div>

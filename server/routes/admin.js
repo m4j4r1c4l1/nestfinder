@@ -248,38 +248,44 @@ const createScheduledBackup = () => {
         fs.copyFileSync(DB_PATH, backupPath);
         console.log(`📦 Scheduled backup created: ${backupFilename}`);
 
-        // Clean up old scheduled backups based on retention days
-        const retentionDays = parseInt(getSetting('backup_retention_days') || '30', 10);
+        // Multi-tier File Retention Policy
         const files = fs.readdirSync(dbDir);
-
-        // Filter for scheduled backups only
-        const scheduledBackups = files.filter(f => f.startsWith('scheduled_backup_'));
-
         const now = Date.now();
-        const maxAgeMs = retentionDays * 24 * 60 * 60 * 1000;
 
-        for (const file of scheduledBackups) {
-            const filePath = path.join(dbDir, file);
-            const stats = fs.statSync(filePath);
-            const ageMs = now - stats.mtime.getTime();
+        const retentionConfigs = [
+            { prefix: 'scheduled_backup_', setting: 'backup_retention_days', default: 30, safetyLimit: 50 },
+            { prefix: 'corrupted_', setting: 'corrupt_retention_days', default: 30, safetyLimit: 20 },
+            { prefix: 'uploaded_', setting: 'upload_retention_days', default: 30, safetyLimit: 20 }
+        ];
 
-            if (ageMs > maxAgeMs) {
-                fs.unlinkSync(filePath);
-                console.log(`🗑️ Removed old backup (retention > ${retentionDays} days): ${file}`);
+        for (const cfg of retentionConfigs) {
+            const retentionDays = parseInt(getSetting(cfg.setting) || cfg.default, 10);
+            const maxAgeMs = retentionDays * 24 * 60 * 60 * 1000;
+            const typeFiles = files.filter(f => f.startsWith(cfg.prefix));
+
+            // 1. Time-based cleanup
+            for (const file of typeFiles) {
+                const filePath = path.join(dbDir, file);
+                const stats = fs.statSync(filePath);
+                const ageMs = now - stats.mtime.getTime();
+
+                if (ageMs > maxAgeMs) {
+                    fs.unlinkSync(filePath);
+                    console.log(`🗑️ Removed old ${cfg.prefix} file (retention > ${retentionDays} days): ${file}`);
+                }
             }
-        }
 
-        // Also fallback to keeping max 50 files if retention is somehow huge/broken to prevent infinite disk usage
-        // Re-read files after cleanup
-        const remainingBackups = fs.readdirSync(dbDir)
-            .filter(f => f.startsWith('scheduled_backup_'))
-            .sort()
-            .reverse();
+            // 2. Count-based safety fallback
+            const remaining = fs.readdirSync(dbDir)
+                .filter(f => f.startsWith(cfg.prefix))
+                .sort()
+                .reverse();
 
-        if (remainingBackups.length > 50) {
-            for (const oldBackup of remainingBackups.slice(50)) {
-                fs.unlinkSync(path.join(dbDir, oldBackup));
-                console.log(`🗑️ Removed old backup (safety limit > 50): ${oldBackup}`);
+            if (remaining.length > cfg.safetyLimit) {
+                for (const oldFile of remaining.slice(cfg.safetyLimit)) {
+                    fs.unlinkSync(path.join(dbDir, oldFile));
+                    console.log(`🗑️ Removed old ${cfg.prefix} file (safety limit > ${cfg.safetyLimit}): ${oldFile}`);
+                }
             }
         }
 
@@ -326,6 +332,8 @@ router.get('/db/backup-schedule', (req, res) => {
         const lastBackupTime = getSetting('last_scheduled_backup_time') || null;
         const lastBackupStatus = getSetting('last_scheduled_backup_status') || null;
         const retentionDays = parseInt(getSetting('backup_retention_days') || '30', 10);
+        const corruptRetentionDays = parseInt(getSetting('corrupt_retention_days') || '30', 10);
+        const uploadRetentionDays = parseInt(getSetting('upload_retention_days') || '30', 10);
 
         let nextBackup = null;
         if (intervalHours > 0) {
@@ -348,33 +356,62 @@ router.get('/db/backup-schedule', (req, res) => {
             lastBackupTime,
             lastBackupStatus,
             nextBackup,
-            retentionDays
+            retentionDays,
+            corruptRetentionDays,
+            uploadRetentionDays
         });
-    });
     } catch (error) {
-    res.status(500).json({ error: 'Failed to get backup schedule' });
-}
+        res.status(500).json({ error: 'Failed to get backup schedule' });
+    }
 });
 
 // Set backup schedule
 router.put('/db/backup-schedule', (req, res) => {
     try {
-        const { intervalHours } = req.body;
-        const hours = parseInt(intervalHours, 10) || 0;
+        const { intervalHours, retentionDays, corruptRetentionDays, uploadRetentionDays } = req.body;
 
-        run(
-            `INSERT INTO settings (key, value, updated_at) VALUES ('backup_interval_hours', ?, CURRENT_TIMESTAMP)
-             ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
-            [String(hours), String(hours)]
-        );
+        if (intervalHours !== undefined) {
+            const hours = parseInt(intervalHours, 10) || 0;
+            run(
+                `INSERT INTO settings (key, value, updated_at) VALUES ('backup_interval_hours', ?, CURRENT_TIMESTAMP)
+                 ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+                [String(hours), String(hours)]
+            );
+            startScheduledBackup(hours);
+        }
 
-        startScheduledBackup(hours);
+        if (retentionDays !== undefined) {
+            run(
+                `INSERT INTO settings (key, value, updated_at) VALUES ('backup_retention_days', ?, CURRENT_TIMESTAMP)
+                 ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+                [String(retentionDays), String(retentionDays)]
+            );
+        }
+
+        if (corruptRetentionDays !== undefined) {
+            run(
+                `INSERT INTO settings (key, value, updated_at) VALUES ('corrupt_retention_days', ?, CURRENT_TIMESTAMP)
+                 ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+                [String(corruptRetentionDays), String(corruptRetentionDays)]
+            );
+        }
+
+        if (uploadRetentionDays !== undefined) {
+            run(
+                `INSERT INTO settings (key, value, updated_at) VALUES ('upload_retention_days', ?, CURRENT_TIMESTAMP)
+                 ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+                [String(uploadRetentionDays), String(uploadRetentionDays)]
+            );
+        }
 
         res.json({
             success: true,
-            enabled: hours > 0,
-            intervalHours: hours,
-            message: hours > 0 ? `Backups scheduled every ${hours} hour(s)` : 'Scheduled backups disabled'
+            enabled: (intervalHours || parseInt(getSetting('backup_interval_hours') || '0', 10)) > 0,
+            intervalHours: parseInt(getSetting('backup_interval_hours') || '0', 10),
+            retentionDays: parseInt(getSetting('backup_retention_days') || '30', 10),
+            corruptRetentionDays: parseInt(getSetting('corrupt_retention_days') || '30', 10),
+            uploadRetentionDays: parseInt(getSetting('upload_retention_days') || '30', 10),
+            message: 'Backup schedule and retention policies updated'
         });
     } catch (error) {
         console.error('Set backup schedule error:', error);
