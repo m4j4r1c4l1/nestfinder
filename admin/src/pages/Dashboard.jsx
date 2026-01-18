@@ -1610,8 +1610,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             {/* Column 3: Clock + Actions (Right) */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
                                 {/* Row 1: SET Button + Live Clock (Top) */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    {/* SET Button */}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                    {/* SET Button - aligned over Upload File */}
                                     <button
                                         onClick={handleSetSchedule}
                                         disabled={actionLoading === 'schedule'}
@@ -1621,7 +1621,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                             fontSize: '0.75rem',
                                             fontWeight: 600,
                                             textTransform: 'uppercase',
-                                            minWidth: '50px',
+                                            minWidth: '80px',
                                             textAlign: 'center',
                                             background: 'rgba(34, 197, 94, 0.1)',
                                             color: '#22c55e',
