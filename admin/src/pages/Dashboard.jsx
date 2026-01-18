@@ -58,7 +58,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                     Starting the Backup process:
                 </h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '55vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '450px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                     {sections.map((section, sIdx) => (
                         <div key={section.id || sIdx}>
                             <div style={{ fontWeight: 600, marginBottom: '0.75rem', color: 'var(--color-text-primary)', fontSize: '1rem' }}>
