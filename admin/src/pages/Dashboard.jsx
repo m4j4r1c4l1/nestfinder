@@ -92,18 +92,34 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                                 )}
 
                                                 <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
-                                                    {getMonkeyIcon(task.progress, task.status)}
+                                                    {/* Hide parent icon if it has subtasks - unless it's running/error */}
+                                                    {(!task.subtasks || task.subtasks.length === 0 || task.status === 'running' || task.status === 'error') ? (
+                                                        getMonkeyIcon(task.progress, task.status)
+                                                    ) : (
+                                                        <span style={{ display: 'inline-block', width: '28px' }}></span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Render Subtasks (Filenames, etc) */}
                                         {task.subtasks && task.subtasks.length > 0 && (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', paddingLeft: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.1)', marginLeft: '0.5rem' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%', marginTop: '0.25rem' }}>
                                                 {task.subtasks.map((sub, subIdx) => (
-                                                    <div key={subIdx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#94a3b8' }}>
-                                                        <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub.name}</span>
-                                                        <span style={{ color: '#22c55e' }}>{sub.status === 'success' ? '✔' : ''}</span>
+                                                    <div key={subIdx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
+                                                        {/* Indent name but align column structure */}
+                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {sub.name}
+                                                        </span>
+
+                                                        {/* Right column for alignment */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                            {/* Spacer to match progress bar width (100px) */}
+                                                            <div style={{ width: '100px' }}></div>
+                                                            <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1, color: '#22c55e' }}>
+                                                                {sub.status === 'success' ? '✔' : ''}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
