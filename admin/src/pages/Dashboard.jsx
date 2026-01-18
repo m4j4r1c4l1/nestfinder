@@ -1025,7 +1025,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const [currentTime, setCurrentTime] = React.useState(new Date());
 
     // Live Backup Events (SSE)
-    const [backupState, setBackupState] = React.useState({ running: false, tasks: [] });
+    const [backupState, setBackupState] = React.useState({ running: false, sections: [] });
     const backupModalClosedRef = React.useRef(false);
     const wasRunningRef = React.useRef(false);
 
@@ -1040,14 +1040,16 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 // If a new run starts (running=true, progress near 0), un-dismiss
                 if (data.running && backupModalClosedRef.current) {
                     // Check if it's actually a new run (first task progress < 100)
-                    if (data.tasks.length === 0 || (data.tasks[0] && data.tasks[0].progress < 100 && data.tasks[0].status === 'running')) {
+                    const hasTasks = data.sections && data.sections.some(s => s.tasks.length > 0);
+                    // Naive check: if running and has tasks, likely new.
+                    if (hasTasks) {
                         backupModalClosedRef.current = false;
                     }
                 }
 
                 if (backupModalClosedRef.current) return;
 
-                if (data.running || data.tasks.length > 0) {
+                if (data.running || (data.sections && data.sections.length > 0)) {
                     setBackupState(data);
                 }
 
@@ -1065,7 +1067,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
     }, []);
 
     const closeBackupModal = () => {
-        setBackupState({ running: false, tasks: [] });
+        setBackupState({ running: false, sections: [] });
         backupModalClosedRef.current = true;
     };
 
