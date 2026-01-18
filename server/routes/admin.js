@@ -41,6 +41,34 @@ const debugLog = (...args) => {
     }
 };
 
+// Check disk usage and alert admin if > 85%
+const checkDiskUsageAlert = (dbDir) => {
+    try {
+        if (!fs.statfsSync) return; // Node <18.15 doesn't have statfsSync
+
+        const stats = fs.statfsSync(dbDir);
+        const total = stats.bsize * stats.blocks;
+        const free = stats.bsize * stats.bfree;
+        const used = total - free;
+        const usagePercent = Math.round((used / total) * 100);
+
+        if (usagePercent > 85) {
+            const usedMB = (used / 1024 / 1024).toFixed(2);
+            const totalMB = (total / 1024 / 1024).toFixed(2);
+
+            // Insert feedback alert for admin
+            run(`
+                INSERT INTO feedback (user_id, type, message, status)
+                VALUES (NULL, 'disk-alert', ?, 'sent')
+            `, [`💿 ${usagePercent}% Disk: ${usedMB} MB / ${totalMB} MB`]);
+
+            debugLog(`⚠️ Disk usage alert: ${usagePercent}% (${usedMB} MB / ${totalMB} MB)`);
+        }
+    } catch (e) {
+        // Silently fail if disk stats unavailable
+    }
+};
+
 // ================== DB RECOVERY ==================
 
 // List all database files in the DB folder
@@ -523,6 +551,9 @@ const createScheduledBackup = async (type = 'scheduled') => {
 
         run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_time', new Date().toISOString()]);
         run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_status', 'Success']);
+
+        // Check disk usage and alert if > 85%
+        checkDiskUsageAlert(dbDir);
 
         activeBackupState.running = false;
         activeBackupState.sections = []; // Clear sections so UI closes on reconnect
@@ -1995,6 +2026,24 @@ router.get('/feedback', (req, res) => {
                 if (idsToUpdate.includes(f.id)) f.status = 'delivered';
             });
         }
+
+        // Add display fields for system messages (NULL user_id)
+        feedback.forEach(f => {
+            if (f.user_id === null) {
+                // System message types
+                const systemTypes = {
+                    'disk-alert': { from: '🛡️ System', icon: '💣', title: 'Disk Usage Monitoring' },
+                    'admin-crash': { from: '🛡️ System', icon: '💥', title: 'Crash Report' },
+                };
+                const sysInfo = systemTypes[f.type] || { from: '🛡️ System', icon: '📢', title: f.type };
+                f.display_from = sysInfo.from;
+                f.display_icon = sysInfo.icon;
+                f.display_title = sysInfo.title;
+            } else {
+                f.display_from = f.user_nickname || 'Anonymous';
+                f.display_icon = null; // User messages use type-based icons in UI
+            }
+        });
 
         res.json({ feedback, total, pendingCount, readCount });
     } catch (error) {
