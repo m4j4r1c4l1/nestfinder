@@ -325,7 +325,7 @@ setTimeout(async () => {
     }
 }, 5000);
 
-// Get backup schedule status
+// Get backup schedule status and retention policies
 router.get('/db/backup-schedule', (req, res) => {
     try {
         const intervalHours = parseInt(getSetting('backup_interval_hours') || '0', 10);
@@ -338,15 +338,8 @@ router.get('/db/backup-schedule', (req, res) => {
         let nextBackup = null;
         if (intervalHours > 0) {
             const last = lastBackupTime ? new Date(lastBackupTime).getTime() : Date.now();
-            // If never backed up, assume next one is one interval from now (since we just started server/scheduler)
-            // Ideally we'd know when the server started, but Date.now() + interval is a safe "at latest" estimate for "Pending"
             const intervalMs = intervalHours * 60 * 60 * 1000;
             const next = last + intervalMs;
-
-            // If next is in the past (because server was down), it will run soon but let's show it as "Pending/Due"
-            // Or strictly show the calculated time.
-            // If lastBackupTime is null, it means we entered "Pending (First Run)" state. 
-            // The scheduler starts immediately on boot if enabled, so expectation is interval from boot.
             nextBackup = new Date(next).toISOString();
         }
 
@@ -361,6 +354,7 @@ router.get('/db/backup-schedule', (req, res) => {
             uploadRetentionDays
         });
     } catch (error) {
+        console.error('Get backup schedule error:', error);
         res.status(500).json({ error: 'Failed to get backup schedule' });
     }
 });

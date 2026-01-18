@@ -1483,10 +1483,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                                                 style={{
                                                                     width: '24px', height: '24px',
                                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                    background: 'rgba(239, 68, 68, 0.1)', // Red transparent
-                                                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                                    background: 'rgba(168, 85, 247, 0.1)', // Purple transparent
+                                                                    border: '1px solid rgba(168, 85, 247, 0.3)',
                                                                     borderRadius: '4px',
-                                                                    color: '#ef4444',
+                                                                    color: '#a855f7',
                                                                     cursor: 'pointer',
                                                                     padding: 0
                                                                 }}
