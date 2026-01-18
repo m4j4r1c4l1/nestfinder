@@ -1089,7 +1089,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
     // Column widths
     const STORAGE_KEY = 'nestfinder_db_cols';
-    const DEFAULT_WIDTHS = { name: 300, size: 90, modified: 150, type: 100, actions: 120 };
+    const DEFAULT_WIDTHS = { select: 40, name: 300, size: 90, modified: 150, type: 100, actions: 120 };
     const [colWidths, setColWidths] = React.useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
