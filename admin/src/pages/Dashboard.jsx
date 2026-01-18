@@ -1147,7 +1147,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 fontWeight: 600,
                 color: b.color,
                 background: b.bg,
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                minWidth: '70px',
+                display: 'inline-block',
+                textAlign: 'center'
             }}>
                 {b.label}
             </span>
@@ -1613,7 +1616,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     {/* SET Button - aligned over Upload File */}
                                     <button
                                         onClick={handleSetSchedule}
-                                        disabled={actionLoading === 'schedule'}
+                                        disabled={actionLoading === 'schedule' || !backupEnabled}
                                         style={{
                                             padding: '0.2rem 0.6rem',
                                             borderRadius: '4px',
@@ -1622,10 +1625,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                             textTransform: 'uppercase',
                                             minWidth: '80px',
                                             textAlign: 'center',
-                                            background: 'rgba(34, 197, 94, 0.1)',
-                                            color: '#22c55e',
-                                            border: '1px solid #22c55e',
-                                            cursor: 'pointer'
+                                            background: backupEnabled ? 'rgba(34, 197, 94, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+                                            color: backupEnabled ? '#22c55e' : '#64748b',
+                                            border: backupEnabled ? '1px solid #22c55e' : '1px solid #64748b',
+                                            cursor: backupEnabled ? 'pointer' : 'not-allowed'
                                         }}
                                     >
                                         {actionLoading === 'schedule' ? '...' : (backupEnabled ? 'SET' : 'OFF')}
