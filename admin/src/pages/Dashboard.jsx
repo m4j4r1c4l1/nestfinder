@@ -1344,7 +1344,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                                 <span
                                                     onClick={(e) => { e.stopPropagation(); handleDownload(file.name); }}
                                                     title="Click to download"
-                                                    style={{ cursor: 'pointer', color: '#3b82f6', textDecoration: 'none' }}
+                                                    style={{ cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}
                                                     onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
                                                     onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
                                                 >
@@ -1373,13 +1373,14 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Usage Footer */}
-                    {/* Expanded Stats & Status Footer - Debug Borders */}
-                    <div style={{ padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed magenta', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {/* Usage Footer */}
+                    {/* Expanded Stats & Status Footer */}
+                    <div style={{ padding: '0.75rem 1.5rem', background: 'var(--color-bg-primary)', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
 
-                        {/* Backup Status Info (Dark Header Style) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed red' }}>
+                        {/* Backup Status Info */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
                             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                                <span><span style={{ fontSize: '1rem', marginRight: '0.4rem' }}>🗓️</span><span style={{ color: '#fff', fontWeight: 500 }}>Last Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.lastBackupTime ? formatDate(backupSchedule.lastBackupTime) : 'Never'}</span></span>
+                                <span><span style={{ fontSize: '1rem', marginRight: '0.4rem' }}>🗓️</span><span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>Last Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.lastBackupTime ? formatDate(backupSchedule.lastBackupTime) : 'Never'}</span></span>
                                 {backupSchedule.lastBackupTime && (
                                     <span style={{
                                         color: backupSchedule.lastBackupStatus?.startsWith('Fail') ? '#ef4444' : '#22c55e',
@@ -1395,47 +1396,47 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
                             {backupSchedule.enabled && (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <span title="Next estimated backup time"><span style={{ color: '#fff', fontWeight: 500 }}>Next Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.nextBackup ? formatDate(backupSchedule.nextBackup) : 'Pending (First Run)'}</span></span>
+                                    <span title="Next estimated backup time"><span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>Next Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.nextBackup ? formatDate(backupSchedule.nextBackup) : 'Pending (First Run)'}</span></span>
                                     <span style={{ fontSize: '1rem', marginLeft: '0.4rem' }}>🔜</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Row 2: File Stats (Dark Bg) - Symmetric */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed cyan' }}>
+                        {/* Row 2: File Stats */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '6px', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                 <span style={{ fontSize: '1rem' }}>🗂️</span>
-                                <span><span style={{ color: '#fff' }}>Total Files:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{files.length}</span></span>
+                                <span><span style={{ color: 'var(--color-text-primary)' }}>Total Files:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{files.length}</span></span>
                             </div>
                             {stats && (
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                     <span style={{ opacity: 1 }} title={`Oldest: ${formatDate(stats.oldest.modified)}\nNewest: ${formatDate(stats.newest.modified)}`}>
-                                        <span style={{ color: '#fff' }}>Range:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{new Date(stats.oldest.modified).toLocaleDateString()} — {new Date(stats.newest.modified).toLocaleDateString()}</span>
+                                        <span style={{ color: 'var(--color-text-primary)' }}>Range:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{new Date(stats.oldest.modified).toLocaleDateString()} — {new Date(stats.newest.modified).toLocaleDateString()}</span>
                                     </span>
                                     <span style={{ fontSize: '1rem' }}>📅</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Row 3: Size & Disk (Dark Bg + Bar Inside) */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed lime' }}>
+                        {/* Row 3: Size & Disk */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem 1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
                             {/* Top Labels */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                     <span style={{ fontSize: '1rem' }}>💾</span>
-                                    <span><span style={{ color: '#fff' }}>DB Folder Size:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{usage ? formatSize(usage.folderSize) : '0 B'}</span></span>
+                                    <span><span style={{ color: 'var(--color-text-primary)' }}>DB Folder Size:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{usage ? formatSize(usage.folderSize) : '0 B'}</span></span>
                                 </div>
                                 {usage?.disk?.total > 0 && (
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                        <span><span style={{ color: '#fff' }}>Disk:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span></span>
+                                        <span><span style={{ color: 'var(--color-text-primary)' }}>Disk:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span></span>
                                         <span style={{ fontSize: '1rem' }}>💿</span>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Disk Bar (Inside Lime) */}
+                            {/* Disk Bar */}
                             {usage?.disk?.total > 0 && (
-                                <div style={{ height: '4px', background: '#1e293b', paddingBottom: '2px', border: '1px dashed orange' }}>
+                                <div style={{ height: '4px', background: 'rgba(0,0,0,0.1)', paddingBottom: '0', borderRadius: '2px', overflow: 'hidden' }}>
                                     <div style={{ height: '100%', background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
                                         <div style={{ width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`, height: '100%', background: 'var(--color-primary)' }} />
                                     </div>
