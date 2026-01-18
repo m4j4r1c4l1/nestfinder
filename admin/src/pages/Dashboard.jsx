@@ -1416,8 +1416,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 <div
                                     onClick={() => setBackupEnabled(!backupEnabled)}
                                     style={{
-                                        width: '150%',
-                                        marginLeft: '-50%',
+                                        width: '145%',
+                                        marginLeft: '-45%',
                                         height: '20px',
                                         background: backupEnabled ? '#3b82f6' : '#334155',
                                         borderRadius: '10px',
