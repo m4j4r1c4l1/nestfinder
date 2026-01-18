@@ -1997,7 +1997,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     sections={backupState.sections || []}
                     onClose={closeBackupModal}
                     onResult={(type, title, msg) => {
-                        handleDBManagerResult(type, title, msg);
+                        if (onResult) onResult(type, title, msg);
                         loadFiles();
                     }}
                 />
