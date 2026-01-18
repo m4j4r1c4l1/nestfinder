@@ -1399,7 +1399,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
 
                         {/* Controls Body */}
-                        <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                        <div style={{ display: 'flex', alignItems: 'stretch', width: '100%' }}>
 
                             {/* Left Side: Toggle Only */}
                             <div style={{
@@ -1608,7 +1608,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Column 3: Clock + Actions (Right) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', minWidth: '320px', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
                                 {/* Row 1: SET Button + Live Clock (Top) */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     {/* SET Button */}
