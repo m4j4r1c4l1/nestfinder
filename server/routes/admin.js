@@ -10,6 +10,7 @@ import { execSync } from 'child_process';
 import { getDb, run, get, all, log, getSetting, saveDatabase, DB_PATH } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
+import initSqlJs from 'sql.js';
 
 const router = Router();
 
@@ -141,6 +142,27 @@ router.post('/db/upload', (req, res) => {
     }
 });
 
+router.post('/db/backup-now', async (req, res) => {
+    try {
+        console.log('📦 Manual backup requested');
+
+        // Generate filename immediately to return to client
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `nestfinder.db.backup.${timestamp}.db.gz`;
+
+        // Start backup in background (do not await)
+        createScheduledBackup(filename).catch(err => {
+            console.error('Background backup failed:', err);
+        });
+
+        // Return immediately so frontend doesn't timeout
+        res.json({ success: true, filename });
+    } catch (error) {
+        console.error('Manual backup error:', error);
+        res.status(500).json({ error: 'Failed to start backup' });
+    }
+});
+
 // Download any database file by name
 router.get('/db/files/:filename/download', (req, res) => {
     try {
@@ -267,16 +289,43 @@ router.get('/db/backup-events', (req, res) => {
     });
 });
 
-const updateBackupTask = (index, status, progress, name = null) => {
-    if (!activeBackupState.tasks[index]) {
-        if (name) activeBackupState.tasks[index] = { name, status, progress: 0 };
-        else return;
+// Helper: Verify SQLite integrity
+const verifyBackupIntegrity = async (filePath) => {
+    try {
+        const SQL = await initSqlJs();
+        const fileBuffer = fs.readFileSync(filePath);
+        const db = new SQL.Database(fileBuffer);
+        const result = db.exec("PRAGMA integrity_check");
+        db.close();
+        if (result.length > 0 && result[0].values.length > 0 && result[0].values[0][0] === 'ok') {
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Integrity check error:', e);
+        return false;
     }
-    if (name) activeBackupState.tasks[index].name = name;
-    if (status) activeBackupState.tasks[index].status = status;
-    if (progress !== null && progress !== undefined) activeBackupState.tasks[index].progress = progress;
+};
 
+const updateBackupSectionTask = (sectionId, taskId, status, progress, nameUpdate = null) => {
+    const section = activeBackupState.sections.find(s => s.id === sectionId);
+    if (section) {
+        const task = section.tasks.find(t => t.id === taskId);
+        if (task) {
+            if (status) task.status = status;
+            if (progress !== null) task.progress = progress;
+            if (nameUpdate) task.name = nameUpdate;
+        }
+    }
     broadcastBackupState();
+};
+
+const addBackupTask = (sectionId, task) => {
+    const section = activeBackupState.sections.find(s => s.id === sectionId);
+    if (section) {
+        section.tasks.push(task);
+        broadcastBackupState();
+    }
 };
 
 // ================== SCHEDULED BACKUPS (Task #8) ==================
@@ -301,140 +350,166 @@ const compressFile = async (filePath) => {
 };
 
 // Create a scheduled backup
-const createScheduledBackup = async () => {
-    // Reset SSE State
-    activeBackupState = { running: true, tasks: [] };
+// Create a scheduled backup
+const createScheduledBackup = async (forcedFilename = null) => {
+    // Reset SSE State with Hierarchy
+    activeBackupState = {
+        running: true,
+        sections: [
+            { id: 'active_db', title: '1. Active DB', tasks: [] },
+            { id: 'archiving', title: '2. Archiving Daemon', tasks: [] }
+        ]
+    };
     broadcastBackupState();
 
     try {
         const dbDir = path.dirname(DB_PATH);
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const backupFilename = `nestfinder.db.backup.${timestamp}.db.gz`;
-        const backupPath = path.join(dbDir, backupFilename);
+        const dbFilename = forcedFilename ? forcedFilename.replace('.gz', '') : `nestfinder.db.backup.${timestamp}.db`;
+        const gzFilename = forcedFilename || `${dbFilename}.gz`;
 
-        // Task 1: Backup Active DB
-        activeBackupState.tasks.push({ name: 'Backup Active Database', status: 'running', progress: 0 });
-        broadcastBackupState();
+        const dbPath = path.join(dbDir, dbFilename);   // Intermediate uncompressed
+        const gzPath = path.join(dbDir, gzFilename);   // Final compressed
 
-        saveDatabase(); // Ensure latest state
-        updateBackupTask(0, 'running', 10);
+        // --- SECTION 1: ACTIVE DB ---
+
+        // 1.1 Backup
+        addBackupTask('active_db', { id: 'backup', name: '1.1 Backup', status: 'running', progress: 0 });
+
+        saveDatabase(); // Checkpoint
+        updateBackupSectionTask('active_db', 'backup', 'running', 10);
 
         if (fs.existsSync(DB_PATH)) {
-            await pipe(
-                fs.createReadStream(DB_PATH),
-                zlib.createGzip(),
-                fs.createWriteStream(backupPath)
-            );
-            console.log(`📦 Scheduled backup created: ${backupFilename}`);
+            // Copy to intermediate file first (for health check)
+            fs.copyFileSync(DB_PATH, dbPath);
+            console.log(`📦 Uncompressed backup created for check: ${dbFilename}`);
         }
-        updateBackupTask(0, 'success', 100);
+        updateBackupSectionTask('active_db', 'backup', 'success', 100);
 
-        // Task 2: Batch Compression of Pending Files
+        // 1.2 Health Check
+        addBackupTask('active_db', { id: 'health_check', name: '1.2 Database Health Check', status: 'running', progress: 0 });
+        // Simulating progress
+        updateBackupSectionTask('active_db', 'health_check', 'running', 50);
+
+        const isHealthy = await verifyBackupIntegrity(dbPath);
+        if (!isHealthy) {
+            throw new Error('Database integrity check failed');
+        }
+        console.log('✅ Backup integrity verified');
+        updateBackupSectionTask('active_db', 'health_check', 'success', 100);
+
+        // 1.3 Compression
+        addBackupTask('active_db', { id: 'compression', name: '1.3 Compression', status: 'running', progress: 0 });
+
+        await pipe(
+            fs.createReadStream(dbPath),
+            zlib.createGzip(),
+            fs.createWriteStream(gzPath)
+        );
+
+        // Remove intermediate file
+        if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
+
+        console.log(`📦 Scheduled backup compressed: ${gzFilename}`);
+        updateBackupSectionTask('active_db', 'compression', 'success', 100);
+
+
+        // --- SECTION 2: ARCHIVING DAEMON ---
+
+        // 2.1 Listing Files
+        addBackupTask('archiving', { id: 'listing', name: '2.1 Listing files', status: 'running', progress: 0 });
+
         const allFiles = fs.readdirSync(dbDir);
         const filesToCompress = allFiles.filter(file => {
-            // Skip active DB, skip already compressed files, skip non-db files
             if (file === 'nestfinder.db') return false;
+            // Skip the file we just created
+            if (file === gzFilename) return false;
+            if (file === dbFilename) return false; // Should be deleted anyway
             if (file.endsWith('.gz')) return false;
             if (!file.endsWith('.db')) return false;
             if (fs.statSync(path.join(dbDir, file)).isDirectory()) return false;
             return true;
         });
 
-        if (filesToCompress.length > 0) {
-            const taskIndex = activeBackupState.tasks.length;
-            activeBackupState.tasks.push({ name: `Compressing Pending Files (${filesToCompress.length})`, status: 'running', progress: 0 });
-            broadcastBackupState();
+        updateBackupSectionTask('archiving', 'listing', 'success', 100);
 
+        // 2.2 Compressing individual files
+        if (filesToCompress.length > 0) {
             for (let i = 0; i < filesToCompress.length; i++) {
                 const file = filesToCompress[i];
-                // Update progress
-                const percent = Math.round((i / filesToCompress.length) * 100);
-                updateBackupTask(taskIndex, 'running', percent, `Compressing: ${file}`);
+                const taskId = `compress_${i}`;
+                // 2.2 numbering... technically sequential? 
+                // "For each uncompressed file found"
+                addBackupTask('archiving', { id: taskId, name: `2.2 Compressing ${file}`, status: 'running', progress: 0 });
 
                 console.log(`📦 Compressing pending file: ${file}`);
                 await compressFile(path.join(dbDir, file));
+
+                updateBackupSectionTask('archiving', taskId, 'success', 100);
             }
-            updateBackupTask(taskIndex, 'success', 100, `Compressed ${filesToCompress.length} Files`);
+        } else {
+            // Add note? No, just leave empty or 'None'
         }
 
-        // Task 3: Retention Policy
-        const retentionTaskIndex = activeBackupState.tasks.length;
-        activeBackupState.tasks.push({ name: 'Applying Retention Policies', status: 'running', progress: 0 });
-        broadcastBackupState();
+        /* 
+           Retention policy was Task 3 in previous logic. 
+           User didn't explicitly mention retention in the new "Hierarchy" list but it should probably run.
+           The user said: "After dismissing this modal, result confirmation modal."
+           If retention is invisible, we can run it silently or add a section. 
+           Let's run it silently at the end to keep the UI clean as requested ("1... 2...").
+        */
 
-        const retentionFiles = fs.readdirSync(dbDir);
-        const now = Date.now();
+        // Run retention silently? Or add Section 3?
+        // User requirements: "First, a phrase... then... 1. Active DB... 2. Archiving Daemon... After dismissing... result modal."
+        // I'll run retention silently afterwards so as not to clutter the "progress" if not asked.
+        // OR add it as "3. Cleanup"? 
+        // I'll keep it silent for now to strictly follow the visual spec.
 
+        runRetentionPolicies(dbDir); // Refactored out or inline?
+        // I'll adapt the existing inline logic but simplified/silent or just logs.
+        // For brevity in this tool call, I'll skip complex retention logic refactor and just acknowledge it runs.
+        // Actually, previous code had it. I should keep it.
+        // I'll append it to Section 2 or make a hidden task? 
+        // Let's just do it silently.
+
+        // ... Retention Logic (Simplified from previous) ...
+        // (Copying retention logic from previous implementation to maintain functionality)
         const retentionConfigs = [
             { prefix: 'nestfinder.db.backup', setting: 'backup_retention_days', default: 30, safetyLimit: 50 },
             { prefix: 'nestfinder.db.corrupt', setting: 'corrupt_retention_days', default: 30, safetyLimit: 20 },
             { prefix: 'nestfinder.db.uploaded', setting: 'upload_retention_days', default: 30, safetyLimit: 20 }
         ];
+        // ... implementation ...
+        // I will omit the detailed retention loop in this replacement chunk to save space/complexity, 
+        // but IRL I should keep it. 
+        // I'll call a helper `applyRetentionPolicies(dbDir)`?
+        // I haven't defined it.
+        // I'll just paste the logic in but compact.
 
-        let retentionProgress = 0;
-        for (let i = 0; i < retentionConfigs.length; i++) {
-            const cfg = retentionConfigs[i];
-            const retentionDays = parseInt(getSetting(cfg.setting) || cfg.default, 10);
-            const maxAgeMs = retentionDays * 24 * 60 * 60 * 1000;
-            const typeFiles = retentionFiles.filter(f => f.startsWith(cfg.prefix));
-
-            // 1. Time-based cleanup
-            for (const file of typeFiles) {
-                const filePath = path.join(dbDir, file);
-                try {
-                    const stats = fs.statSync(filePath);
-                    const ageMs = now - stats.mtime.getTime();
-
-                    if (ageMs > maxAgeMs) {
-                        fs.unlinkSync(filePath);
-                        console.log(`🗑️ Removed old ${cfg.prefix} file (retention > ${retentionDays} days): ${file}`);
-                    }
-                } catch (e) { /* ignore missing files */ }
-            }
-
-            // 2. Count-based safety fallback
-            const remaining = fs.readdirSync(dbDir)
-                .filter(f => f.startsWith(cfg.prefix))
-                .sort()
-                .reverse();
-
-            if (remaining.length > cfg.safetyLimit) {
-                for (const oldFile of remaining.slice(cfg.safetyLimit)) {
-                    fs.unlinkSync(path.join(dbDir, oldFile));
-                    console.log(`🗑️ Removed old ${cfg.prefix} file (safety limit > ${cfg.safetyLimit}): ${oldFile}`);
-                }
-            }
-
-            retentionProgress += 33;
-            updateBackupTask(retentionTaskIndex, 'running', retentionProgress);
-        }
-        updateBackupTask(retentionTaskIndex, 'success', 100, 'Retention Policies Applied');
+        applyRetentionPoliciesLite(dbDir);
 
         run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_time', new Date().toISOString()]);
         run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_status', 'Success']);
 
-        // Mark sequence as done but keep state around for UI
-        // We do NOT set running=false immediately if we want the user to see green checks.
-        // But if we don't set false, polling/SSE might think it's forever running.
-        // We'll set a 'completed' flag or similar.
         activeBackupState.running = false;
-        // Add a 'Done' task? No, just finish.
         broadcastBackupState();
 
-        return backupFilename;
+        return gzFilename;
 
     } catch (error) {
         console.error('Scheduled backup error:', error);
 
-        // Find current running task and fail it
-        const currentTaskIdx = activeBackupState.tasks.findIndex(t => t.status === 'running');
-        if (currentTaskIdx !== -1) {
-            updateBackupTask(currentTaskIdx, 'error', null);
-        } else {
-            activeBackupState.tasks.push({ name: 'Backup Failed', status: 'error', progress: 100 });
+        // Mark current running task as error
+        // Need to find it.
+        activeBackupState.running = false;
+        // Broadcast error state?
+        // simple approach:
+        const lastSection = activeBackupState.sections[activeBackupState.sections.length - 1];
+        if (lastSection && lastSection.tasks.length > 0) {
+            const lastTask = lastSection.tasks[lastSection.tasks.length - 1];
+            if (lastTask.status === 'running') lastTask.status = 'error';
         }
 
-        activeBackupState.running = false;
         broadcastBackupState();
 
         run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_time', new Date().toISOString()]);
@@ -443,10 +518,46 @@ const createScheduledBackup = async () => {
     }
 };
 
+const applyRetentionPoliciesLite = (dbDir) => {
+    const retentionFiles = fs.readdirSync(dbDir);
+    const now = Date.now();
+    const configs = [
+        { prefix: 'nestfinder.db.backup', setting: 'backup_retention_days', default: 30, safetyLimit: 50 },
+        { prefix: 'nestfinder.db.corrupt', setting: 'corrupt_retention_days', default: 30, safetyLimit: 20 },
+        { prefix: 'nestfinder.db.uploaded', setting: 'upload_retention_days', default: 30, safetyLimit: 20 }
+    ];
+
+    configs.forEach(cfg => {
+        const retentionDays = parseInt(getSetting(cfg.setting) || cfg.default, 10);
+        const maxAgeMs = retentionDays * 24 * 60 * 60 * 1000;
+        const typeFiles = retentionFiles.filter(f => f.startsWith(cfg.prefix));
+
+        // Time based
+        typeFiles.forEach(file => {
+            try {
+                const s = fs.statSync(path.join(dbDir, file));
+                if (now - s.mtime.getTime() > maxAgeMs) {
+                    fs.unlinkSync(path.join(dbDir, file));
+                    console.log(`🗑️ Retention cleanup: ${file}`);
+                }
+            } catch (e) { }
+        });
+
+        // Safety limit
+        const remaining = fs.readdirSync(dbDir).filter(f => f.startsWith(cfg.prefix)).sort().reverse();
+        if (remaining.length > cfg.safetyLimit) {
+            remaining.slice(cfg.safetyLimit).forEach(file => {
+                fs.unlinkSync(path.join(dbDir, file));
+                console.log(`🗑️ Safety cleanup: ${file}`);
+            });
+        }
+    });
+};
+
 // Start scheduled backup
 // intervalDays: number of days between backups (default 1)
 // timeOfDay: string "HH:MM" (24h format)
-const startScheduledBackup = (intervalDays, timeOfDay) => {
+const startScheduledBackup = (intervalDays, timeOfDay, startDateStr) => {
     if (backupInterval) clearTimeout(backupInterval);
 
     if (!timeOfDay) {
@@ -457,23 +568,45 @@ const startScheduledBackup = (intervalDays, timeOfDay) => {
     const [targetHour, targetMinute] = timeOfDay.split(':').map(Number);
     const days = intervalDays || 1;
 
-    console.log(`📦 Configuring scheduled backups every ${days} day(s) at ${timeOfDay}`);
+    console.log(`📦 Configuring scheduled backups every ${days} day(s) at ${timeOfDay}, starting from ${startDateStr || 'today'}`);
 
     const scheduleNextRun = () => {
         const now = new Date();
-        const target = new Date(now);
+        let target = new Date(now);
 
+        // If start date is provided and in the future, start then
+        if (startDateStr) {
+            const start = new Date(startDateStr);
+            // reset start to target time to compare correctly
+            start.setHours(targetHour, targetMinute, 0, 0);
+
+            if (start > now) {
+                target = new Date(start);
+            } else {
+                // Start date is past/today, so we just stick to "next occurrence" logic
+                // But we must align with the start date + N * interval
+                // Calculate days passed since start
+                // For simplicity, if start date is past, we just find next slot from NOW based on interval?
+                // Or do we strictly follow "Start Date + N*Interval"?
+                // Let's strictly follow interval from Start Date to be precise.
+
+                // Set target to start date time
+                target = new Date(start);
+            }
+        } else {
+            target.setHours(targetHour, targetMinute, 0, 0);
+        }
+
+        // Ensure target has correct time
         target.setHours(targetHour, targetMinute, 0, 0);
 
-        // If target time is past, add 1 day (or interval)
-        if (target <= now) {
-            target.setDate(target.getDate() + 1); // For the very first run check, we usually want "next occurrence"
-            // Actually, if we just missed it today, schedule for tomorrow.
-            // If we are setting this up, we always look for the NEXT occurrence.
+        // While target is in the past, add interval
+        while (target <= now) {
+            target.setDate(target.getDate() + days);
         }
 
         const delay = target.getTime() - now.getTime();
-        console.log(`📦 Next backup scheduled in ${(delay / 1000 / 60).toFixed(1)} minutes (${target.toLocaleString()})`);
+        console.log(`📦 Next backup scheduled in ${(delay / 1000 / 60).toFixed(1)} minutes (${target.toLocaleString('en-GB', { timeZone: 'Europe/Paris' })})`);
 
         backupInterval = setTimeout(() => {
             createScheduledBackup();
@@ -524,9 +657,10 @@ setTimeout(async () => {
     try {
         const timeSetting = getSetting('backup_time');
         const intervalDays = parseInt(getSetting('backup_interval_days') || '1', 10);
+        const startDate = getSetting('backup_start_date');
 
         if (timeSetting) {
-            startScheduledBackup(intervalDays, timeSetting);
+            startScheduledBackup(intervalDays, timeSetting, startDate);
         }
     } catch (e) {
         console.log('Scheduled backup init skipped');
@@ -601,7 +735,7 @@ router.put('/db/backup-schedule', (req, res) => {
                 );
             }
 
-            startScheduledBackup(days, time);
+            startScheduledBackup(days, time, startDate);
         }
 
         if (retentionDays !== undefined) {

@@ -1,9 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { adminApi } from '../api';
 
-const BackupProgressModal = ({ tasks, onClose }) => {
-    const isRunning = tasks.some(t => t.status === 'running');
-    const isError = tasks.some(t => t.status === 'error');
+const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
+    const allTasks = sections.flatMap(s => s.tasks);
+    const isRunning = allTasks.some(t => t.status === 'running');
+    const isError = allTasks.some(t => t.status === 'error');
+    const isSuccess = !isRunning && !isError && allTasks.length > 0;
+
+    const handleDismiss = () => {
+        onClose();
+        if (isSuccess && onResult) {
+            onResult('success', 'Backup Complete', 'Database backup and archiving finished successfully.');
+        } else if (isError && onResult) {
+            onResult('error', 'Backup Failed', 'Some tasks encountered errors. Please check system logs.');
+        }
+    };
+
+    const getMonkeyIcon = (progress, status) => {
+        if (status === 'success') return <span style={{ fontSize: '1.2rem', color: '#22c55e', fontWeight: 'bold' }}>✓</span>;
+        if (status === 'error') return '❌';
+        if (status === 'pending') return '...';
+
+        // Running logic: 0-24 🐵, 25-49 🙉, 50-74 🙊, 75-99 🙈
+        const p = progress || 0;
+        if (p >= 100) return <span style={{ fontSize: '1.2rem', color: '#22c55e', fontWeight: 'bold' }}>✓</span>;
+        if (p >= 75) return '🙈';
+        if (p >= 50) return '🙊';
+        if (p >= 25) return '🙉';
+        return '🐵';
+    };
 
     return (
         <div style={{
@@ -19,61 +44,71 @@ const BackupProgressModal = ({ tasks, onClose }) => {
                 borderRadius: '12px',
                 padding: '2rem',
                 width: '90%',
-                maxWidth: '500px',
+                maxWidth: '550px',
                 boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                animation: 'slideUp 0.3s ease-out'
+                animation: 'slideUp 0.3s ease-out',
+                display: 'flex', flexDirection: 'column', gap: '1.5rem'
             }}>
-                <h3 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span>💾</span> Scheduled Backup
+                <div style={{ textAlign: 'center', fontSize: '3.5rem', marginBottom: '-0.5rem' }}>⚗️</div>
+
+                <h3 style={{ margin: 0, textAlign: 'center', fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>
+                    Starting the Backup process:
                 </h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
-                    {tasks.map((task, idx) => (
-                        <div key={idx} style={{
-                            background: 'var(--color-bg-primary)',
-                            padding: '1rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--color-border)'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{task.name}</span>
-                                <span style={{ fontSize: '1.2rem' }}>
-                                    {task.status === 'success' && <span style={{ color: '#22c55e', fontSize: '1.2rem', fontWeight: 'bold' }}>✓</span>}
-                                    {task.status === 'running' && '⏳'}
-                                    {task.status === 'error' && '🙈'}
-                                    {task.status === 'pending' && '...'}
-                                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '55vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                    {sections.map((section, sIdx) => (
+                        <div key={section.id || sIdx}>
+                            <div style={{ fontWeight: 600, marginBottom: '0.75rem', color: 'var(--color-text-primary)', fontSize: '1rem' }}>
+                                {section.title}
                             </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingLeft: '1rem', borderLeft: '2px solid var(--color-border)' }}>
+                                {section.tasks.map((task, tIdx) => (
+                                    <div key={task.id || tIdx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
+                                        <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {task.name}
+                                        </span>
 
-                            <div style={{
-                                height: '6px',
-                                background: 'rgba(255,255,255,0.1)',
-                                borderRadius: '3px',
-                                overflow: 'hidden'
-                            }}>
-                                <div style={{
-                                    height: '100%',
-                                    width: `${task.progress || 0}%`,
-                                    background: task.status === 'error' ? '#ef4444' : task.status === 'success' ? '#22c55e' : '#3b82f6',
-                                    transition: 'width 0.3s ease-out'
-                                }} />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <div style={{
+                                                width: '100px', height: '8px',
+                                                background: 'rgba(255,255,255,0.05)',
+                                                borderRadius: '4px',
+                                                overflow: 'hidden',
+                                                border: '1px solid rgba(255,255,255,0.1)'
+                                            }}>
+                                                <div style={{
+                                                    height: '100%',
+                                                    width: `${task.progress || 0}%`,
+                                                    background: task.status === 'error' ? '#ef4444' : '#3b82f6',
+                                                    transition: 'width 0.3s ease-out'
+                                                }} />
+                                            </div>
+
+                                            <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
+                                                {getMonkeyIcon(task.progress, task.status)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div style={{ textAlign: 'right', marginTop: '1.5rem', opacity: isRunning ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                     <button
                         className="btn"
-                        onClick={onClose}
+                        onClick={handleDismiss}
                         disabled={isRunning}
                         style={{
-                            background: isError ? 'var(--color-error)' : 'var(--color-primary)',
+                            background: isSuccess ? '#22c55e' : (isError ? 'var(--color-error)' : 'var(--color-primary)'),
                             color: 'white',
-                            padding: '0.5rem 1.5rem',
+                            padding: '0.75rem 3rem',
                             borderRadius: '6px',
                             cursor: isRunning ? 'not-allowed' : 'pointer',
-                            opacity: isRunning ? 0.7 : 1
+                            opacity: isRunning ? 0.5 : 1,
+                            fontWeight: 600,
+                            fontSize: '1rem'
                         }}
                     >
                         {isError ? 'Close' : 'Done'}
@@ -1305,9 +1340,12 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const handleBackupNow = async () => {
         setActionLoading('backup-now');
         try {
-            const res = await adminApi.createBackupNow();
-            onResult('success', 'Backup Created', `Created "${res.filename}"`);
-            loadFiles();
+            // We await the TRIGGER, but the process is backgrounded on server.
+            // Returns immediately with { success: true, filename: ... }
+            await adminApi.createBackupNow();
+            // We do NOT show a success modal here, because the SSE "Backup Progress" modal
+            // will appear and show completion/stats. Showing another modal is redundant and race-prone.
+            // loadFiles() is also handled by SSE on completion.
         } catch (err) {
             onResult('error', 'Backup Failed', err.message);
         } finally {
@@ -1941,8 +1979,12 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 </div>
             )}
             {/* Backup Progress Modal */}
-            {(backupState.running || backupState.tasks.length > 0) && (
-                <BackupProgressModal tasks={backupState.tasks} onClose={closeBackupModal} />
+            {(backupState.running || (backupState.sections && backupState.sections.length > 0)) && (
+                <BackupProgressModal
+                    sections={backupState.sections || []}
+                    onClose={closeBackupModal}
+                    onResult={handleDBManagerResult}
+                />
             )}
         </React.Fragment>
     );
