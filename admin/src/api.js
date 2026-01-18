@@ -336,7 +336,7 @@ export const adminApi = {
             method: 'POST',
             body: JSON.stringify({
                 type,
-                txt: text,
+                message: text,
                 rating,
                 // user_id: 'admin' // server might strip this if valid user check fails, but allowed for anon
             })
