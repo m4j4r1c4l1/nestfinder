@@ -1142,7 +1142,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             if (scheduleRes.corruptRetentionDays) setCorruptRetention(String(scheduleRes.corruptRetentionDays));
             if (scheduleRes.uploadRetentionDays) setUploadRetention(String(scheduleRes.uploadRetentionDays));
         } catch (err) {
-            handleDBManagerResult('error', 'Load Failed', err.message);
+            onResult('error', 'Load Failed', err.message);
         } finally {
             setLoading(false);
         }
@@ -1227,16 +1227,16 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
-                handleDBManagerResult('success', 'Download Complete', `"${filename}" has been downloaded.`);
+                onResult('success', 'Download Complete', `"${filename}" has been downloaded.`);
             } else {
-                handleDBManagerResult('error', 'Download Failed', xhr.statusText || 'Server Error');
+                onResult('error', 'Download Failed', xhr.statusText || 'Server Error');
             }
         };
 
         xhr.onerror = () => {
             setDownloadProgress(null);
             setActionLoading(null);
-            handleDBManagerResult('error', 'Download Failed', 'Network Error');
+            onResult('error', 'Download Failed', 'Network Error');
         };
 
         xhr.send();
@@ -1248,10 +1248,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
         setActionLoading(filename);
         try {
             await adminApi.deleteDBFile(filename);
-            handleDBManagerResult('success', 'File Deleted', `"${filename}" has been deleted.`);
+            onResult('success', 'File Deleted', `"${filename}" has been deleted.`);
             loadFiles();
         } catch (err) {
-            handleDBManagerResult('error', 'Delete Failed', err.message);
+            onResult('error', 'Delete Failed', err.message);
         } finally {
             setActionLoading(null);
         }
@@ -1262,11 +1262,11 @@ const DBManagerModal = ({ onClose, onResult }) => {
         setActionLoading(filename);
         try {
             const res = await adminApi.restoreFromFile(filename);
-            handleDBManagerResult('success', 'Restore Complete', res.message || 'Database restored successfully!');
+            onResult('success', 'Restore Complete', res.message || 'Database restored successfully!');
             loadFiles();
             setTimeout(() => window.location.reload(), 2000);
         } catch (err) {
-            handleDBManagerResult('error', 'Restore Failed', err.message);
+            onResult('error', 'Restore Failed', err.message);
         } finally {
             setActionLoading(null);
         }
@@ -1301,20 +1301,20 @@ const DBManagerModal = ({ onClose, onResult }) => {
             if (xhr.status === 200) {
                 try {
                     const res = JSON.parse(xhr.responseText);
-                    handleDBManagerResult('success', 'Upload Complete', `File saved as "${res.filename}"`);
+                    onResult('success', 'Upload Complete', `File saved as "${res.filename}"`);
                     loadFiles();
                 } catch (e) {
-                    handleDBManagerResult('error', 'Upload Failed', 'Invalid server response');
+                    onResult('error', 'Upload Failed', 'Invalid server response');
                 }
             } else {
-                handleDBManagerResult('error', 'Upload Failed', xhr.statusText || 'Server Error');
+                onResult('error', 'Upload Failed', xhr.statusText || 'Server Error');
             }
         };
 
         xhr.onerror = () => {
             setUploadProgress(null);
             setActionLoading(null);
-            handleDBManagerResult('error', 'Upload Failed', 'Network Error');
+            onResult('error', 'Upload Failed', 'Network Error');
         };
 
         xhr.send(file);
@@ -1333,10 +1333,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 backupEnabled
             );
             setBackupSchedule(res);
-            handleDBManagerResult('success', 'Policies Updated', 'Backup schedule and file retention policies have been updated.');
+            onResult('success', 'Policies Updated', 'Backup schedule and file retention policies have been updated.');
             loadFiles();
         } catch (err) {
-            handleDBManagerResult('error', 'Update Failed', err.message);
+            onResult('error', 'Update Failed', err.message);
         } finally {
             setActionLoading(null);
         }
@@ -1350,7 +1350,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             await adminApi.createBackupNow();
             // We do NOT show a success modal here, handled by SSE.
         } catch (err) {
-            handleDBManagerResult('error', 'Backup Failed', err.message);
+            onResult('error', 'Backup Failed', err.message);
         } finally {
             setActionLoading(null);
         }
