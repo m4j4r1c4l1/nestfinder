@@ -31,6 +31,7 @@ const Debug = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [actionLoading, setActionLoading] = useState(null); // ID of user being processed
     const [viewingUser, setViewingUser] = useState(null); // User currently being viewed in modal
+    const [deleteConfirm, setDeleteConfirm] = useState(null); // { type: 'user' | 'all', id?: string, name?: string }
     const [page, setPage] = useState(1);
     const pageSize = 30;
 
@@ -187,16 +188,30 @@ const Debug = () => {
     };
 
     // Clear logs
-    const handleClearLogs = async (userId) => {
-        if (!confirm('Are you sure you want to clear logs for this user?')) return;
-        setActionLoading(userId);
+    const handleClearLogs = async (userId, nickname) => {
+        setDeleteConfirm({ type: 'user', id: userId, name: nickname || 'Anonymous' });
+    };
+
+    const confirmClearLogs = async () => {
+        if (!deleteConfirm) return;
+        const { type, id } = deleteConfirm;
+        const targetId = type === 'user' ? id : null;
+
+        setDeleteConfirm(null);
+        if (targetId) setActionLoading(targetId);
+
         try {
-            await adminApi.fetch(`/debug/users/${userId}/logs`, { method: 'DELETE' });
-            setUsers(prev => prev.map(u => u.id === userId ? { ...u, log_count: 0 } : u));
+            if (type === 'all') {
+                await adminApi.fetch('/debug/logs/all', { method: 'DELETE' });
+                fetchUsers();
+            } else {
+                await adminApi.fetch(`/debug/users/${targetId}/logs`, { method: 'DELETE' });
+                setUsers(prev => prev.map(u => u.id === targetId ? { ...u, log_count: 0 } : u));
+            }
         } catch (err) {
             console.error('Failed to clear logs:', err);
         } finally {
-            setActionLoading(null);
+            if (targetId) setActionLoading(null);
         }
     };
 
@@ -317,16 +332,7 @@ const Debug = () => {
 
                 {/* Global Actions */}
                 <button
-                    onClick={async () => {
-                        if (!confirm('WARNING: This will delete ALL logs from all users. This action cannot be undone. Are you sure?')) return;
-                        try {
-                            await adminApi.deleteAllLogs();
-                            fetchUsers();
-                            alert('All logs cleared successfully');
-                        } catch (err) {
-                            alert('Failed to clear logs: ' + err.message);
-                        }
-                    }}
+                    onClick={() => setDeleteConfirm({ type: 'all' })}
                     style={{
                         padding: '0.75rem 1.5rem',
                         background: 'rgba(168, 85, 247, 0.1)', // Purple Badge
@@ -479,7 +485,7 @@ const Debug = () => {
                                                                     Download
                                                                 </button>
                                                                 <button
-                                                                    onClick={() => handleClearLogs(user.id)}
+                                                                    onClick={() => handleClearLogs(user.id, user.nickname)}
                                                                     disabled={actionLoading === user.id}
                                                                     style={{
                                                                         padding: '0.4rem 0.8rem',
@@ -542,6 +548,29 @@ const Debug = () => {
                     user={viewingUser}
                     onClose={() => setViewingUser(null)}
                 />
+            )}
+
+            {/* Custom Delete Confirmation Modal */}
+            {deleteConfirm && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1600, backdropFilter: 'blur(4px)' }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '400px', textAlign: 'center', padding: '2rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', background: '#1e293b', border: '1px solid #334155' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🗑️</div>
+                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', color: 'white' }}>
+                            {deleteConfirm.type === 'all' ? 'Delete All Logs?' : 'Clear User Logs?'}
+                        </h3>
+                        <p style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
+                            {deleteConfirm.type === 'all' ? (
+                                <>WARNING: This will delete ALL logs from all users.<br />This action cannot be undone.</>
+                            ) : (
+                                <>Are you sure you want to clear logs for <br /><span style={{ color: 'white', fontWeight: 600 }}>{deleteConfirm.name}</span>?<br /><br />This action cannot be undone.</>
+                            )}
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="btn" onClick={() => setDeleteConfirm(null)} style={{ flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid #334155', color: 'white' }}>Cancel</button>
+                            <button className="btn" onClick={confirmClearLogs} style={{ flex: 1, padding: '0.75rem', background: '#a855f7', color: 'white', border: 'none', fontWeight: 600 }}>Delete</button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
