@@ -1393,7 +1393,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Unified Control Panel */}
-                    <div style={{ background: '#475569', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 0.4rem 0.8rem 1rem', margin: '0.8rem', borderRadius: '8px', border: '2px dashed yellow' }}>
+                    <div style={{ background: '#475569', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', borderRadius: '8px', border: '2px dashed yellow' }}>
 
                         {/* Top Header: Clock & Actions (Badges) */}
 
@@ -1438,7 +1438,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Right Side: Pickers (Swapped) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', border: '2px dashed lime' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', border: '2px dashed lime', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
                                 {/* Row 1: Scheduling Pickers */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none', flexWrap: 'wrap', border: '2px dashed pink' }}>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Start:</span>
@@ -1608,7 +1608,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Column 3: Clock + Actions (Right) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '0.8rem', paddingLeft: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', paddingLeft: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
                                 {/* Row 1: SET Button + Live Clock (Top) */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     {/* SET Button */}
