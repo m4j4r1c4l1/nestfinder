@@ -1149,10 +1149,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
     };
 
     useEffect(() => {
-        if (showDBManager) {
-            loadFiles();
-        }
-    }, [showDBManager]);
+        loadFiles();
+    }, []);
 
     const formatSize = (bytes) => {
         if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
