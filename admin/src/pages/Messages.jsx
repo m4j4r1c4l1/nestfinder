@@ -3506,23 +3506,28 @@ const MessagePreviewModal = ({ message, onClose }) => {
     const isNotification = !isFeedback;
 
     // Data Parsing
+    let safeIso = message.created_at || message.timestamp;
+    // Fallback logic to append Z if missing (Treat as UTC)
+    if (typeof safeIso === 'string' && !safeIso.endsWith('Z') && !safeIso.includes('+') && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(safeIso)) { safeIso += 'Z'; }
+    if (typeof safeIso === 'string' && safeIso.includes('T') && !safeIso.endsWith('Z') && !safeIso.includes('+')) { safeIso += 'Z'; }
+
     let dateObj = null;
-    if (message.created_at) dateObj = new Date(message.created_at);
-    else if (message.timestamp) dateObj = new Date(message.timestamp);
+    if (safeIso) dateObj = new Date(safeIso);
 
     // Header Content
     let headerTitle = '';
     let headerIcon = null;
 
-    // Define typeIcon outside if block scope so it can be reused in body
-    const typeIconChar = message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝';
+    // Define typeIconChar with override support
+    const typeIconChar = message.display_icon || (message.type === 'bug' ? '🐛' : message.type === 'suggestion' ? '💡' : '📝');
 
     if (isFeedback) {
         // Feedback Header: [Icon] [Nickname]
-        // Ensure we grab the first available nickname property
-        const rawNickname = message.user_nickname || message.nickname || 'Anonymous';
+        // Ensure we grab the first available nickname property, prioritizing display_from
+        const rawNickname = message.display_from || message.user_nickname || message.nickname || 'Anonymous';
         const cleanNickname = String(rawNickname).replace(/^@/, '').trim();
-        headerTitle = `@${cleanNickname}`;
+        // If system message (with space/emoji), usually don't prepend @, but for consistency let's match table unless it looks like a name
+        headerTitle = (rawNickname === '🛡️ System' || rawNickname.includes(' ')) ? rawNickname : `@${cleanNickname}`;
         headerIcon = <span style={{ marginRight: '8px', fontSize: '1.2rem' }}>{typeIconChar}</span>;
     } else {
         // Notification Header: Recipient or Bulk
