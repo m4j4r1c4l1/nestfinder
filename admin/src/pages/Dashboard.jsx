@@ -1606,7 +1606,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Column 3: Clock + Actions (Right) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', background: 'var(--color-bg-primary)', borderRadius: '6px', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-primary)', borderRadius: '6px', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
                                 {/* Row 1: SET Button + Live Clock (Top) */}
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                     {/* SET Button - aligned over Upload File */}
