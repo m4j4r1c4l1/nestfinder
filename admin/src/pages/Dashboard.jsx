@@ -1184,12 +1184,12 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
                     {/* Toolbar */}
                     <div style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', gap: '0.5rem', background: 'var(--color-bg-tertiary)', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <button className="btn btn-primary" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', fontWeight: 600, borderRadius: '9999px' }}>Upload File</button>
+                        <button className="btn" onClick={() => document.getElementById('db-manager-upload').click()} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Upload File</button>
                         <input type="file" id="db-manager-upload" accept=".db,.sqlite,.sqlite3" style={{ display: 'none' }} onChange={handleFileUpload} />
 
-                        <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', fontWeight: 600, borderRadius: '9999px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Backup Now</button>
+                        <button className="btn" onClick={handleBackupNow} disabled={actionLoading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Backup Now</button>
 
-                        <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', fontWeight: 600, background: 'var(--color-bg-secondary)', borderRadius: '9999px', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>Refresh</button>
+                        <button className="btn" onClick={loadFiles} disabled={loading} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>Refresh</button>
 
                         <div style={{ flex: 1 }} />
 
@@ -1197,7 +1197,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Auto backup every</span>
                             <input type="number" min="0" max="168" value={scheduleInput} onChange={e => setScheduleInput(e.target.value)} style={{ width: '70px', padding: '0.3rem 0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)', color: 'inherit', textAlign: 'center' }} />
                             <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>hrs</span>
-                            <button className="btn" onClick={handleSetSchedule} disabled={actionLoading === 'schedule'} style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', fontWeight: 600, background: 'var(--color-bg-secondary)', borderRadius: '9999px', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>Set</button>
+                            <button className="btn" onClick={handleSetSchedule} disabled={actionLoading === 'schedule'} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase', minWidth: '80px', textAlign: 'center', background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>Set</button>
                             {backupSchedule.enabled && <span style={{ fontSize: '0.75rem', color: '#22c55e', marginLeft: '0.25rem' }}>●</span>}
                         </div>
                     </div>
@@ -1297,26 +1297,32 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             )}
                         </div>
 
-                        {/* File & Disk Stats (Lighter Bg) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                        {/* Row 2: File Stats (Dark Bg) */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', borderTop: '1px solid #334155', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <span><span style={{ color: '#fff' }}>Total Files:</span> <span style={{ color: 'var(--color-text-primary)' }}>{files.length}</span></span>
+                                <span><span style={{ color: '#fff' }}>Total Files:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{files.length}</span></span>
                                 {stats && (
                                     <>
                                         <span>•</span>
                                         <span style={{ opacity: 1 }} title={`Oldest: ${formatDate(stats.oldest.modified)}\nNewest: ${formatDate(stats.newest.modified)}`}>
-                                            <span style={{ color: '#fff' }}>Range:</span> <span style={{ color: 'var(--color-text-primary)' }}>{new Date(stats.oldest.modified).toLocaleDateString()} — {new Date(stats.newest.modified).toLocaleDateString()}</span>
+                                            <span style={{ color: '#fff' }}>Range:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{new Date(stats.oldest.modified).toLocaleDateString()} — {new Date(stats.newest.modified).toLocaleDateString()}</span>
                                         </span>
                                     </>
                                 )}
-                                <span>•</span>
-                                <span><span style={{ color: '#fff' }}>DB Folder Size:</span> <span style={{ color: 'var(--color-text-primary)' }}>{usage ? formatSize(usage.folderSize) : '0 B'}</span></span>
                             </div>
-                            {usage?.disk?.total > 0 && <span>Disk: {formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span>}
                         </div>
 
+                        {/* Row 3: Size & Disk (Dark Bg) */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', borderTop: '1px solid #334155', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <span><span style={{ color: '#fff' }}>DB Folder Size:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{usage ? formatSize(usage.folderSize) : '0 B'}</span></span>
+                            </div>
+                            {usage?.disk?.total > 0 && <span><span style={{ color: '#fff' }}>Disk:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{formatSize(usage.disk.used)} / {formatSize(usage.disk.total)}</span></span>}
+                        </div>
+
+                        {/* Disk Bar Container (Dark Bg) */}
                         {usage?.disk?.total > 0 && (
-                            <div style={{ height: '4px', background: 'var(--color-bg-tertiary)', paddingBottom: '2px' }}>
+                            <div style={{ height: '4px', background: '#1e293b', paddingBottom: '2px' }}>
                                 <div style={{ height: '100%', background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
                                     <div style={{ width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`, height: '100%', background: 'var(--color-primary)' }} />
                                 </div>
