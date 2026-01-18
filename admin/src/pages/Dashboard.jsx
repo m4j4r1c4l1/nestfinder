@@ -1410,6 +1410,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 alignItems: 'center', justifyContent: 'center',
                                 padding: '1rem', width: '70px',
                                 borderRight: '1px solid var(--color-border)',
+                                borderTop: '1px solid var(--color-border)',
                                 background: 'rgba(0,0,0,0.02)'
                             }}>
                                 {/* Toggle Switch */}
@@ -1836,7 +1837,6 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>Next Backup:</span>
                                     <span style={{ color: '#f59e0b', marginLeft: '0.3rem' }}>Backup Disabled ⚠️</span>
-                                    <span style={{ fontSize: '1rem', marginLeft: '0.4rem' }}>📅</span>
                                 </div>
                             )}
                         </div>
