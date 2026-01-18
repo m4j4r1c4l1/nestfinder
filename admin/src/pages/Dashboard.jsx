@@ -1670,10 +1670,10 @@ const DBManagerModal = ({ onClose, onResult }) => {
                         </div>
                     </div>
 
-                    <div style={{ height: '1px', background: 'var(--color-border)', width: '100%', marginBottom: '0.5rem' }} />
+
 
                     {/* File List Table */}
-                    <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)' }}>
+                    <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)', borderTop: '1px solid var(--color-border)' }}>
                         {loading ? (
                             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading files...</div>
                         ) : files.length === 0 ? (
