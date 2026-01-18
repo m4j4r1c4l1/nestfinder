@@ -1,199 +1,205 @@
 /**
- * Client Debug Logger
+ * Client-Side Debug Logger (Task 9)
  * 
- * Provides structured logging with timestamps and tags.
- * Stores logs in localStorage ring buffer and uploads to server when enabled.
- * 
- * Format: DD-MM-YYYY - HH:MM:SS CET/CEST [Module][Action] message
- * 
- * Usage:
- *   import { logger } from './utils/logger';
- *   logger.log('Settings', 'Recovery Key', 'Generated new recovery key');
+ * Provides 3 levels of observability:
+ * L1: Console (Safe wrappers, filtered by verbosity)
+ * L2: Durable (Persisted to localStorage for reload survival)
+ * L3: Remote (Upload to server for admin access)
  */
 
-const MAX_LOGS = 500;
+const LOG_PREFIX = '[NestFinder]';
 const STORAGE_KEY = 'nestfinder_debug_logs';
+const MAX_LOGS = 1000;
 
-// Get CET/CEST timezone label
-const getTimezoneLabel = () => {
-    const now = new Date();
-    const jan = new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
-    const jul = new Date(now.getFullYear(), 6, 1).getTimezoneOffset();
-    const parisNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
-    const parisOffset = (now.getTime() - parisNow.getTime()) / (60 * 1000);
-    // Simple check: if offset is different from standard CET (-60), it's DST
-    // But easier way: just check if local offset matches Jan (Standard) or Jul (DST)
-    return Math.max(jan, jul) !== Math.min(jan, jul) ? 'CEST' : 'CET';
-};
+class DebugLogger {
+    constructor() {
+        this.logs = [];
+        this.isInitialized = false;
+        this.config = {
+            enabled: false, // Controls L1 console output visibility
+            persist: true,  // Controls L2 storage (default true for ring buffer)
+            uploadInterval: 10000,
+            pollInterval: 30000
+        };
+        this.timers = {
+            poll: null,
+            upload: null
+        };
 
-// Format timestamp: DD-MM-YYYY - HH:MM:SS CET/CEST
-const formatTimestamp = () => {
-    const now = new Date();
-    // Get time in Paris
-    const parisString = now.toLocaleString('en-GB', { timeZone: 'Europe/Paris', hour12: false });
-    // parisString is "DD/MM/YYYY, HH:MM:SS"
-    const [datePart, timePart] = parisString.split(', ');
-    const [day, month, year] = datePart.split('/');
+        // Load initial logs from storage (L2)
+        this._loadFromStorage();
 
-    // Determine DST based on offset comparison (same as before or simplified)
-    const unix = now.getTime();
-    const jan = new Date(year, 0, 1).getTimezoneOffset();
-    const jul = new Date(year, 6, 1).getTimezoneOffset();
-    // We can't rely on local offset for remote timezone DST check easily without libraries.
-    // But we can check if the Paris string offset matches.
-    // Simpler: Just rely on the previous logic for label but apply it to the Correct Time.
-    const tz = getTimezoneLabel();
-
-    return `${day}-${month}-${year} - ${timePart} ${tz}`;
-};
-
-// Get stored logs
-const getLogs = () => {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : [];
-    } catch {
-        return [];
-    }
-};
-
-// Save logs to localStorage
-const saveLogs = (logs) => {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(logs.slice(-MAX_LOGS)));
-    } catch {
-        // Storage full or unavailable
-    }
-};
-
-// Internal state
-let _debugEnabled = false;
-let _userId = null;
-let _uploadInterval = null;
-
-// Logger API
-export const logger = {
-    /**
-     * Set user ID
-     */
-    setUserId(id) {
-        _userId = id;
-    },
-
-    /**
-     * Log a debug message
-     * @param {string} module - Module name (e.g., 'Settings', 'Map', 'API')
-     * @param {string} action - Action name (e.g., 'Recovery Key', 'Submit Point')
-     * @param {string} message - Log message
-     */
-    log(module, action, message) {
-        // Always log to console in dev or if debug enabled
-        if (import.meta.env?.DEV || _debugEnabled) {
-            // Console output
-            if (import.meta.env?.DEV) console.log(`🐛 [${module}][${action}] ${message}`);
+        // Expose to window for console debugging
+        if (typeof window !== 'undefined') {
+            window.DebugLogger = this;
         }
+    }
 
-        // Only store if debug enabled or needed for ring buffer
-        const timestamp = formatTimestamp();
-        const entry = `${timestamp} [${module}][${action}] ${message}`;
+    init(config = {}) {
+        this.config = { ...this.config, ...config };
+        this.isInitialized = true;
+        this.log('System', 'DebugLogger initialized', this.config);
 
-        const logs = getLogs();
-        logs.push(entry);
-        saveLogs(logs);
-    },
+        // Start polling for remote debug status
+        this._startPolling();
+    }
+
+    async _checkStatus() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const res = await fetch('/api/debug/status', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const isActive = data.active === true;
+
+                if (isActive !== this.config.enabled) {
+                    this.config.enabled = isActive;
+                    this.log('System', `Remote debug status changed: ${isActive ? 'ENABLED' : 'DISABLED'}`);
+
+                    if (isActive) this._startUpload();
+                    else this._stopUpload();
+                }
+            }
+        } catch (e) {
+            // Silent fail on poll
+        }
+    }
+
+    _startPolling() {
+        if (this.timers.poll) clearInterval(this.timers.poll);
+        this._checkStatus(); // Check immediately
+        this.timers.poll = setInterval(() => this._checkStatus(), this.config.pollInterval);
+    }
+
+    _startUpload() {
+        if (this.timers.upload) clearInterval(this.timers.upload);
+        this.timers.upload = setInterval(() => this.upload(), this.config.uploadInterval);
+    }
+
+    _stopUpload() {
+        if (this.timers.upload) {
+            clearInterval(this.timers.upload);
+            this.timers.upload = null;
+        }
+    }
+
+    _loadFromStorage() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                this.logs = JSON.parse(saved);
+                // Prune if needed
+                if (this.logs.length > MAX_LOGS) {
+                    this.logs = this.logs.slice(-MAX_LOGS);
+                }
+            }
+        } catch (e) {
+            console.error(LOG_PREFIX, 'Failed to load logs', e);
+        }
+    }
+
+    _saveToStorage() {
+        if (!this.config.persist) return;
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(this.logs));
+        } catch (e) {
+            console.warn(LOG_PREFIX, 'Failed to save logs', e);
+        }
+    }
 
     /**
-     * Get all stored logs
-     * @returns {string[]} Array of log entries
+     * Internal log entry creation
      */
-    getLogs() {
-        return getLogs();
-    },
+    _entry(level, category, message, data = null) {
+        const entry = {
+            id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+            ts: new Date().toISOString(),
+            level,
+            category: category || 'General',
+            msg: message,
+            data
+        };
+
+        // 1. Add to internal buffer
+        this.logs.push(entry);
+        if (this.logs.length > MAX_LOGS) this.logs.shift();
+
+        // 2. Persist (L2)
+        this._saveToStorage();
+
+        // 3. Console Output (L1)
+        // Always output to console if enabled OR if explicitly an error/warn
+        // Using a cleaner format
+        if (this.config.enabled || level === 'error' || level === 'warn') {
+            const style = level === 'error' ? 'color: #ef4444; font-weight: bold' :
+                level === 'warn' ? 'color: #f59e0b; font-weight: bold' :
+                    'color: #3b82f6; font-weight: bold';
+
+            const args = [`%c${LOG_PREFIX} [${category}]`, style, message];
+            if (data) args.push(data);
+
+            // Safe console call
+            const fn = console[level] || console.log;
+            fn(...args);
+        }
+    }
+
+    log(category, message, data) { this._entry('info', category, message, data); }
+    warn(category, message, data) { this._entry('warn', category, message, data); }
+    error(category, message, data) { this._entry('error', category, message, data); }
+    debug(category, message, data) { this._entry('debug', category, message, data); }
 
     /**
-     * Clear all stored logs
+     * L3: Upload Logs to Server
      */
-    clear() {
-        localStorage.removeItem(STORAGE_KEY);
-    },
-
-    /**
-     * Upload logs to server
-     * @param {object} api - API client instance
-     * @returns {Promise<boolean>} Success status
-     */
-    async upload(api, isCrash = false) {
-        const logs = getLogs();
-        if (logs.length === 0) return true;
+    async upload() {
+        if (this.logs.length === 0) return { success: false, message: 'No logs to upload' };
 
         try {
-            await api.post('/debug/logs', {
-                logs,
-                userId: _userId || api.userId,
-                platform: navigator.platform || 'Unknown',
-                userAgent: navigator.userAgent,
-                isCrash
+            this.log('System', 'Uploading logs to server...');
+
+            // We use the planned endpoint: POST /api/debug/logs
+            // Note: client might not have base URL set, assuming relative path works for proxy
+            const response = await fetch('/api/debug/logs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Include token if available in localStorage
+                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                },
+                body: JSON.stringify({
+                    logs: this.logs,
+                    userAgent: navigator.userAgent,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                })
             });
 
-            // Clear logs after successful upload to prevent duplication
-            // We use clear() which removes the item, so getLogs() will return [] next time
-            this.clear();
+            if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
 
-            return true;
-        } catch (err) {
-            console.error('Failed to upload logs:', err);
-            return false;
+            const result = await response.json();
+            this.log('System', 'Logs uploaded successfully', result);
+            return result;
+        } catch (e) {
+            this.error('System', 'Failed to upload logs', e);
+            throw e; // Re-throw for caller handling
         }
-    },
-
-    /**
-     * Check if debug mode is enabled for current user
-     * @param {object} api - API client instance
-     */
-    async checkStatus(api) {
-        try {
-            const res = await api.get('/debug/status');
-            _debugEnabled = res.active;
-
-            // If enabled, start auto-upload
-            if (_debugEnabled && !_uploadInterval) {
-                _uploadInterval = setInterval(() => this.upload(api), 5000); // Upload every 5s
-            } else if (!_debugEnabled && _uploadInterval) {
-                clearInterval(_uploadInterval);
-                _uploadInterval = null;
-            }
-            return res.active;
-        } catch {
-            _debugEnabled = false;
-            return false;
-        }
-    },
-
-    /**
-     * Initialize logger
-     * @param {object} api - API client instance
-     */
-    async init(api) {
-        if (api.userId) _userId = api.userId;
-
-        // Initial check
-        await this.checkStatus(api);
-
-        if (_debugEnabled) {
-            this.log('Logger', 'Init', `Debug logging enabled for user ${_userId}`);
-        } else {
-            // Log startup anyway (will only be stored if we decide to store everything, 
-            // but currently log() checks _debugEnabled for console. 
-            // For storage, we might want to store it?)
-            // actually log() stores to ring buffer ALWAYS.
-            this.log('Logger', 'Init', `App started (Debug disabled, User: ${_userId})`);
-        }
-
-        // Poll status every 30 seconds to allow dynamic enabling
-        // Clear existing interval if re-initializing
-        if (window._nestfinder_debug_poll) clearInterval(window._nestfinder_debug_poll);
-        window._nestfinder_debug_poll = setInterval(() => this.checkStatus(api), 30000);
     }
-};
 
+    clear() {
+        this.logs = [];
+        localStorage.removeItem(STORAGE_KEY);
+        this.log('System', 'Logs cleared');
+    }
+
+    getDump() {
+        return JSON.stringify(this.logs, null, 2);
+    }
+}
+
+export const logger = new DebugLogger();
 export default logger;
