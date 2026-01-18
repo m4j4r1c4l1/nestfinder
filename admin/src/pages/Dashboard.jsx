@@ -66,34 +66,48 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingLeft: '1rem', borderLeft: '2px solid var(--color-border)' }}>
                                 {section.tasks.map((task, tIdx) => (
-                                    <div key={task.id || tIdx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
-                                        <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {task.name}
-                                        </span>
+                                    <div key={task.id || tIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
+                                            <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {task.name}
+                                            </span>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                            {/* Only show progress bar if task is still running or has meaningful progress */}
-                                            {(task.status === 'running' || (task.progress > 0 && task.progress < 100)) && (
-                                                <div style={{
-                                                    width: '100px', height: '8px',
-                                                    background: 'rgba(255,255,255,0.05)',
-                                                    borderRadius: '4px',
-                                                    overflow: 'hidden',
-                                                    border: '1px solid rgba(255,255,255,0.1)'
-                                                }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                {/* Only show progress bar if task is still running or has meaningful progress */}
+                                                {(task.status === 'running' || (task.progress > 0 && task.progress < 100)) && (
                                                     <div style={{
-                                                        height: '100%',
-                                                        width: `${task.progress || 0}%`,
-                                                        background: task.status === 'error' ? '#ef4444' : '#3b82f6',
-                                                        transition: 'width 0.3s ease-out'
-                                                    }} />
-                                                </div>
-                                            )}
+                                                        width: '100px', height: '8px',
+                                                        background: 'rgba(255,255,255,0.05)',
+                                                        borderRadius: '4px',
+                                                        overflow: 'hidden',
+                                                        border: '1px solid rgba(255,255,255,0.1)'
+                                                    }}>
+                                                        <div style={{
+                                                            height: '100%',
+                                                            width: `${task.progress || 0}%`,
+                                                            background: task.status === 'error' ? '#ef4444' : '#3b82f6',
+                                                            transition: 'width 0.3s ease-out'
+                                                        }} />
+                                                    </div>
+                                                )}
 
-                                            <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
-                                                {getMonkeyIcon(task.progress, task.status)}
+                                                <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
+                                                    {getMonkeyIcon(task.progress, task.status)}
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {/* Render Subtasks (Filenames, etc) */}
+                                        {task.subtasks && task.subtasks.length > 0 && (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', paddingLeft: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.1)', marginLeft: '0.5rem' }}>
+                                                {task.subtasks.map((sub, subIdx) => (
+                                                    <div key={subIdx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                        <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub.name}</span>
+                                                        <span style={{ color: '#22c55e' }}>{sub.status === 'success' ? '✔' : ''}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>

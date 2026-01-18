@@ -376,6 +376,18 @@ const addBackupTask = (sectionId, task) => {
     }
 };
 
+const addBackupSubtask = (sectionId, taskId, subtask) => {
+    const section = activeBackupState.sections.find(s => s.id === sectionId);
+    if (section) {
+        const task = section.tasks.find(t => t.id === taskId);
+        if (task) {
+            if (!task.subtasks) task.subtasks = [];
+            task.subtasks.push(subtask);
+            broadcastBackupState();
+        }
+    }
+};
+
 // ================== SCHEDULED BACKUPS (Task #8) ==================
 
 let backupInterval = null;
@@ -437,6 +449,7 @@ const createScheduledBackup = async (type = 'scheduled') => {
             debugLog(`📦 Uncompressed backup created for check: ${dbFilename}`);
         }
         updateBackupSectionTask('active_db', 'backup', 'success', 100);
+        addBackupSubtask('active_db', 'backup', { name: dbFilename, status: 'success' });
 
         // 1.2 Health Check
         addBackupTask('active_db', { id: 'health_check', name: '1.2 Database Health Check', status: 'running', progress: 0 });
@@ -459,16 +472,18 @@ const createScheduledBackup = async (type = 'scheduled') => {
             fs.createWriteStream(gzPath)
         );
 
-        // Remove intermediate file
+        // remove intermediate
         if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 
         debugLog(`📦 Scheduled backup compressed: ${gzFilename}`);
         updateBackupSectionTask('active_db', 'compression', 'success', 100);
+        addBackupSubtask('active_db', 'compression', { name: gzFilename, status: 'success' });
 
 
         // --- SECTION 2: ARCHIVING DAEMON ---
 
         // 2.1 Listing Files
+        // We want: 2.1 Listing files -> (subtasks if we wanted detailed listing, but user wants compression breakdown)
         addBackupTask('archiving', { id: 'listing', name: '2.1 Listing files', status: 'running', progress: 0 });
 
         const allFiles = fs.readdirSync(dbDir);
@@ -476,48 +491,56 @@ const createScheduledBackup = async (type = 'scheduled') => {
             if (file === 'nestfinder.db') return false;
             // Skip the file we just created
             if (file === gzFilename) return false;
-            // Skip intermediate if it still exists (though we deleted it)
+            // Skip intermediate if it still exists
             if (file === dbFilename) return false;
-
-            // Already compressed?
+            // Already compressed
             if (file.endsWith('.gz')) return false;
-
             // Must start with nestfinder.db
             if (!file.startsWith('nestfinder.db')) return false;
-
-            // At this point, it's a nestfinder.db.* file that is NOT .gz
-            // This includes .corrupt, .restore_backup, .backup (if failed previously), etc.
             if (fs.statSync(path.join(dbDir, file)).isDirectory()) return false;
             return true;
         });
 
         updateBackupSectionTask('archiving', 'listing', 'success', 100);
 
-        // 2.2 Compressing individual files
+        // 2.2 Compressing individual files (if any)
         if (filesToCompress.length > 0) {
+            // Create parent task
+            addBackupTask('archiving', { id: 'archive_compress', name: '2.2 Compression', status: 'running', progress: 0 });
+
             for (let i = 0; i < filesToCompress.length; i++) {
                 const file = filesToCompress[i];
-                const taskId = `compress_${i}`;
-                // 2.2 numbering... technically sequential? 
-                // "For each uncompressed file found"
-                addBackupTask('archiving', { id: taskId, name: `2.2 Compressing ${file}`, status: 'running', progress: 0 });
+                // Add subtask for this file
+                addBackupSubtask('archiving', 'archive_compress', { name: file, status: 'running' });
 
                 debugLog(`📦 Compressing pending file: ${file}`);
                 await compressFile(path.join(dbDir, file));
 
-                updateBackupSectionTask('archiving', taskId, 'success', 100);
+                // Mark subtask done? 
+                // We actually need to update the subtask status.
+                // Since subtasks don't have IDs in my simple implementation, I'll validly assume sequential or 
+                // update by finding name.
+                // Or better, just re-broadcast whole state if subtask modified. 
+                // Let's assume simpler: Just push result 'done' subtask? No, user wants 'name... tick'.
+                // So I need to update the subtask.
+
+                // My addBackupSubtask just pushes.
+                // I need helper updateBackupSubtask? Or just mutate activeBackupState manually here.
+                const section = activeBackupState.sections.find(s => s.id === 'archiving');
+                const task = section.tasks.find(t => t.id === 'archive_compress');
+                const sub = task.subtasks.find(s => s.name === file);
+                if (sub) sub.status = 'success';
+                broadcastBackupState();
             }
+            updateBackupSectionTask('archiving', 'archive_compress', 'success', 100);
         } else {
-            // No files to compress, add a note
-            addBackupTask('archiving', { id: 'none', name: '2.2 All files properly archived', status: 'success', progress: 100 });
+            // No files to compress
+            addBackupTask('archiving', { id: 'archive_compress', name: '2.2 All files properly archived', status: 'success', progress: 100 });
         }
 
         /* 
-           Retention policy was Task 3 in previous logic. 
-           User didn't explicitly mention retention in the new "Hierarchy" list but it should probably run.
-           The user said: "After dismissing this modal, result confirmation modal."
-           If retention is invisible, we can run it silently or add a section. 
-           Let's run it silently at the end to keep the UI clean as requested ("1... 2...").
+           Retention policy... 
+           Let's run it silently at the end.
         */
 
         // Run retention silently? Or add Section 3?
