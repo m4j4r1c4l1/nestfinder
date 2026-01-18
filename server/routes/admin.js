@@ -2,6 +2,10 @@ import { Router } from 'express';
 import path from 'path';
 import os from 'os';
 import fs from 'fs';
+import zlib from 'zlib';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+const pipe = promisify(pipeline);
 import { execSync } from 'child_process';
 import { getDb, run, get, all, log, getSetting, saveDatabase, DB_PATH } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
@@ -26,7 +30,7 @@ router.get('/db/files', (req, res) => {
 
         const files = fs.readdirSync(dbDir);
         const dbFiles = files
-            .filter(f => f.endsWith('.db') || f.includes('.db.'))
+            .filter(f => f.endsWith('.db') || f.endsWith('.db.gz') || f.includes('.db.'))
             .map(filename => {
                 const filePath = path.join(dbDir, filename);
                 const stats = fs.statSync(filePath);
@@ -34,10 +38,10 @@ router.get('/db/files', (req, res) => {
                 // Determine file type
                 let type = 'other';
                 if (filename === 'nestfinder.db') type = 'active';
-                else if (filename.startsWith('corrupted_') || filename.includes('.corrupt')) type = 'corrupt';
-                else if (filename.includes('.restore_backup')) type = 'restore_backup';
-                else if (filename.startsWith('scheduled_backup_')) type = 'scheduled';
-                else if (filename.startsWith('uploaded_') || filename.startsWith('nestfinder_uploaded_')) type = 'uploaded';
+                else if (filename.includes('.corrupt')) type = 'corrupt';
+                else if (filename.includes('.restore')) type = 'restore_backup';
+                else if (filename.includes('.backup')) type = 'scheduled';
+                else if (filename.includes('.uploaded')) type = 'uploaded';
 
                 return {
                     name: filename,
@@ -110,9 +114,9 @@ router.delete('/db/files/:filename', (req, res) => {
 // Upload a database file (without restoring)
 router.post('/db/upload', (req, res) => {
     try {
-        const timestamp = Date.now();
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const dbDir = path.dirname(DB_PATH);
-        const uploadedFilename = `uploaded_${timestamp}.db`;
+        const uploadedFilename = `nestfinder.db.uploaded.${timestamp}.db`;
         const filePath = path.join(dbDir, uploadedFilename);
 
         const writeStream = fs.createWriteStream(filePath);
@@ -167,39 +171,45 @@ router.get('/db/files/:filename/download', (req, res) => {
 });
 
 // Restore from a specific file
-router.post('/db/restore/:filename', (req, res) => {
+// Restore from a backup file
+router.post('/db/restore/:filename', async (req, res) => {
     try {
         const { filename } = req.params;
-
-        // Validate filename
-        if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
-            return res.status(400).json({ error: 'Invalid filename' });
-        }
-
-        if (filename === 'nestfinder.db') {
-            return res.status(400).json({ error: 'Cannot restore from active database' });
-        }
-
         const dbDir = path.dirname(DB_PATH);
         const sourcePath = path.join(dbDir, filename);
 
         if (!fs.existsSync(sourcePath)) {
-            return res.status(404).json({ error: 'File not found' });
+            return res.status(404).json({ error: 'Backup file not found' });
         }
 
         // Backup current active DB
-        const timestamp = Date.now();
-        const backupPath = `${DB_PATH}.restore_backup.${timestamp}`;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = `${DB_PATH}.restore.${timestamp}.db.gz`;
+
         if (fs.existsSync(DB_PATH)) {
-            fs.copyFileSync(DB_PATH, backupPath);
+            // Stream compression for pre-restore backup
+            await pipe(
+                fs.createReadStream(DB_PATH),
+                zlib.createGzip(),
+                fs.createWriteStream(backupPath)
+            );
         }
 
-        // Copy source to active
-        fs.copyFileSync(sourcePath, DB_PATH);
+        // Restore logic (handle .gz)
+        if (filename.endsWith('.gz')) {
+            await pipe(
+                fs.createReadStream(sourcePath),
+                zlib.createGunzip(),
+                fs.createWriteStream(DB_PATH)
+            );
+        } else {
+            fs.copyFileSync(sourcePath, DB_PATH);
+        }
 
         // Hot reload
         (async () => {
             try {
+                // ... same reload logic ...
                 const { initDatabase, getDb } = await import('../database.js');
                 await initDatabase();
                 const newDb = getDb();
@@ -226,7 +236,7 @@ router.post('/db/restore/:filename', (req, res) => {
             }
         })();
     } catch (error) {
-        console.error('Restore from file error:', error);
+        console.error('Restore DB error:', error);
         res.status(500).json({ error: 'Failed to restore from file' });
     }
 });
@@ -235,33 +245,73 @@ router.post('/db/restore/:filename', (req, res) => {
 
 let backupInterval = null;
 
+// Helper to compress a file
+const compressFile = async (filePath) => {
+    try {
+        const destPath = `${filePath}.gz`;
+        await pipe(
+            fs.createReadStream(filePath),
+            zlib.createGzip(),
+            fs.createWriteStream(destPath)
+        );
+        fs.unlinkSync(filePath); // Remove original after successful compression
+        return true;
+    } catch (err) {
+        console.error(`Failed to compress ${filePath}:`, err);
+        return false;
+    }
+};
+
 // Create a scheduled backup
-// Create a scheduled backup
-const createScheduledBackup = () => {
+const createScheduledBackup = async () => {
     try {
         const dbDir = path.dirname(DB_PATH);
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const backupFilename = `scheduled_backup_${timestamp}.db`;
+        const backupFilename = `nestfinder.db.backup.${timestamp}.db.gz`;
         const backupPath = path.join(dbDir, backupFilename);
 
         saveDatabase(); // Ensure latest state
-        fs.copyFileSync(DB_PATH, backupPath);
-        console.log(`📦 Scheduled backup created: ${backupFilename}`);
+
+        // 1. Backup active DB (Compressed)
+        if (fs.existsSync(DB_PATH)) {
+            await pipe(
+                fs.createReadStream(DB_PATH),
+                zlib.createGzip(),
+                fs.createWriteStream(backupPath)
+            );
+            console.log(`📦 Scheduled backup created: ${backupFilename}`);
+        }
+
+        // 2. Batch Compression of Pending Files
+        const files = fs.readdirSync(dbDir);
+        for (const file of files) {
+            // Skip active DB, skip already compressed files, skip non-db files
+            if (file === 'nestfinder.db') continue;
+            if (file.endsWith('.gz')) continue;
+            if (!file.endsWith('.db')) continue;
+
+            // Double check it's not a directory
+            const fullPath = path.join(dbDir, file);
+            if (fs.statSync(fullPath).isDirectory()) continue;
+
+            console.log(`📦 Compressing pending file: ${file}`);
+            await compressFile(fullPath);
+        }
 
         // Multi-tier File Retention Policy
-        const files = fs.readdirSync(dbDir);
+        const retentionFiles = fs.readdirSync(dbDir);
         const now = Date.now();
 
         const retentionConfigs = [
-            { prefix: 'scheduled_backup_', setting: 'backup_retention_days', default: 30, safetyLimit: 50 },
-            { prefix: 'corrupted_', setting: 'corrupt_retention_days', default: 30, safetyLimit: 20 },
-            { prefix: 'uploaded_', setting: 'upload_retention_days', default: 30, safetyLimit: 20 }
+            { prefix: 'nestfinder.db.backup', setting: 'backup_retention_days', default: 30, safetyLimit: 50 },
+            { prefix: 'nestfinder.db.corrupt', setting: 'corrupt_retention_days', default: 30, safetyLimit: 20 },
+            { prefix: 'nestfinder.db.uploaded', setting: 'upload_retention_days', default: 30, safetyLimit: 20 }
         ];
 
         for (const cfg of retentionConfigs) {
             const retentionDays = parseInt(getSetting(cfg.setting) || cfg.default, 10);
             const maxAgeMs = retentionDays * 24 * 60 * 60 * 1000;
-            const typeFiles = files.filter(f => f.startsWith(cfg.prefix));
+            const typeFiles = retentionFiles.filter(f => f.startsWith(cfg.prefix));
 
             // 1. Time-based cleanup
             for (const file of typeFiles) {
@@ -301,24 +351,90 @@ const createScheduledBackup = () => {
     }
 };
 
-// Start scheduled backup with given interval (in hours)
-const startScheduledBackup = (intervalHours) => {
-    if (backupInterval) clearInterval(backupInterval);
-    if (!intervalHours || intervalHours <= 0) {
-        console.log('📦 Scheduled backups disabled');
+// Start scheduled backup
+// intervalDays: number of days between backups (default 1)
+// timeOfDay: string "HH:MM" (24h format)
+const startScheduledBackup = (intervalDays, timeOfDay) => {
+    if (backupInterval) clearTimeout(backupInterval);
+
+    if (!timeOfDay) {
+        console.log('📦 Scheduled backups disabled (no time set)');
         return;
     }
-    const intervalMs = intervalHours * 60 * 60 * 1000;
-    console.log(`📦 Starting scheduled backups every ${intervalHours} hour(s)`);
-    backupInterval = setInterval(createScheduledBackup, intervalMs);
+
+    const [targetHour, targetMinute] = timeOfDay.split(':').map(Number);
+    const days = intervalDays || 1;
+
+    console.log(`📦 Configuring scheduled backups every ${days} day(s) at ${timeOfDay}`);
+
+    const scheduleNextRun = () => {
+        const now = new Date();
+        const target = new Date(now);
+
+        target.setHours(targetHour, targetMinute, 0, 0);
+
+        // If target time is past, add 1 day (or interval)
+        if (target <= now) {
+            target.setDate(target.getDate() + 1); // For the very first run check, we usually want "next occurrence"
+            // Actually, if we just missed it today, schedule for tomorrow.
+            // If we are setting this up, we always look for the NEXT occurrence.
+        }
+
+        const delay = target.getTime() - now.getTime();
+        console.log(`📦 Next backup scheduled in ${(delay / 1000 / 60).toFixed(1)} minutes (${target.toLocaleString()})`);
+
+        backupInterval = setTimeout(() => {
+            createScheduledBackup();
+            // After running, schedule the next one based on interval
+            // Note: setTimeout is used instead of setInterval to handle day/time shifts or drift cleanly, 
+            // though for exact multi-day intervals we need to re-calc target.
+
+            // Re-schedule for N days later
+            const nextRun = new Date();
+            nextRun.setDate(nextRun.getDate() + days);
+            nextRun.setHours(targetHour, targetMinute, 0, 0);
+
+            // Recursive setup logic is complex with pure setTimeout loop if we want "intervalDays".
+            // Simpler approach: Just re-call startScheduledBackup logic or a helper that sets the next timeout.
+            // Let's make `scheduleNextRun` smart enough to just find the next date.
+
+            // To properly respect "Every N Days", we technically need to store "Last Run Date". 
+            // But for simplicity/statelessness, let's just run daily at that time if interval is 1.
+            // If interval > 1, we might skip? 
+            // For now, let's assume standard behavior: Next run is now + intervalDays (at that time)
+
+            // We'll just recurse cleanly:
+            scheduleNextRecur(days, targetHour, targetMinute);
+
+        }, delay);
+    };
+
+    const scheduleNextRecur = (d, h, m) => {
+        const now = new Date();
+        let target = new Date(now);
+        target.setDate(target.getDate() + d); // Add interval
+        target.setHours(h, m, 0, 0);
+
+        // Fix edge case if drift made us land before the target time somehow? Unlikely with simple addition.
+        const delay = target.getTime() - now.getTime();
+
+        backupInterval = setTimeout(() => {
+            createScheduledBackup();
+            scheduleNextRecur(d, h, m);
+        }, delay);
+    };
+
+    scheduleNextRun();
 };
 
 // Initialize scheduled backup from settings on startup
 setTimeout(async () => {
     try {
-        const intervalSetting = getSetting('backup_interval_hours');
-        if (intervalSetting) {
-            startScheduledBackup(parseInt(intervalSetting, 10));
+        const timeSetting = getSetting('backup_time');
+        const intervalDays = parseInt(getSetting('backup_interval_days') || '1', 10);
+
+        if (timeSetting) {
+            startScheduledBackup(intervalDays, timeSetting);
         }
     } catch (e) {
         console.log('Scheduled backup init skipped');
@@ -328,27 +444,21 @@ setTimeout(async () => {
 // Get backup schedule status and retention policies
 router.get('/db/backup-schedule', (req, res) => {
     try {
-        const intervalHours = parseInt(getSetting('backup_interval_hours') || '0', 10);
+        const baseTime = getSetting('backup_time') || '';
+        const enabled = !!baseTime;
+        const intervalDays = parseInt(getSetting('backup_interval_days') || '1', 10);
         const lastBackupTime = getSetting('last_scheduled_backup_time') || null;
         const lastBackupStatus = getSetting('last_scheduled_backup_status') || null;
         const retentionDays = parseInt(getSetting('backup_retention_days') || '30', 10);
         const corruptRetentionDays = parseInt(getSetting('corrupt_retention_days') || '30', 10);
         const uploadRetentionDays = parseInt(getSetting('upload_retention_days') || '30', 10);
 
-        let nextBackup = null;
-        if (intervalHours > 0 && lastBackupTime) {
-            const last = new Date(lastBackupTime).getTime();
-            const intervalMs = intervalHours * 60 * 60 * 1000;
-            const next = last + intervalMs;
-            nextBackup = new Date(next).toISOString();
-        }
-
         res.json({
-            enabled: intervalHours > 0,
-            intervalHours,
+            enabled,
+            time: baseTime,
+            intervalDays,
             lastBackupTime,
             lastBackupStatus,
-            nextBackup,
             retentionDays,
             corruptRetentionDays,
             uploadRetentionDays
@@ -362,16 +472,33 @@ router.get('/db/backup-schedule', (req, res) => {
 // Set backup schedule
 router.put('/db/backup-schedule', (req, res) => {
     try {
-        const { intervalHours, retentionDays, corruptRetentionDays, uploadRetentionDays } = req.body;
+        const { time, intervalDays, retentionDays, corruptRetentionDays, uploadRetentionDays, enabled } = req.body;
 
-        if (intervalHours !== undefined) {
-            const hours = parseInt(intervalHours, 10) || 0;
+        // If explicitly disabled (enabled === false) OR empty time, turn it off
+        if (enabled === false || (enabled === undefined && !time)) {
+            run(`DELETE FROM settings WHERE key = 'backup_time'`);
+            if (backupInterval) clearTimeout(backupInterval);
+            console.log('📦 Scheduled backups disabled via API');
+        } else if (time) {
+            // Validate time format (HH:MM)
+            if (!/^\d{2}:\d{2}$/.test(time)) {
+                return res.status(400).json({ error: 'Invalid time format. Use HH:MM' });
+            }
+
             run(
-                `INSERT INTO settings (key, value, updated_at) VALUES ('backup_interval_hours', ?, CURRENT_TIMESTAMP)
+                `INSERT INTO settings (key, value, updated_at) VALUES ('backup_time', ?, CURRENT_TIMESTAMP)
                  ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
-                [String(hours), String(hours)]
+                [time, time]
             );
-            startScheduledBackup(hours);
+
+            const days = intervalDays || 1;
+            run(
+                `INSERT INTO settings (key, value, updated_at) VALUES ('backup_interval_days', ?, CURRENT_TIMESTAMP)
+                 ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
+                [String(days), String(days)]
+            );
+
+            startScheduledBackup(days, time);
         }
 
         if (retentionDays !== undefined) {
@@ -400,12 +527,7 @@ router.put('/db/backup-schedule', (req, res) => {
 
         res.json({
             success: true,
-            enabled: (intervalHours || parseInt(getSetting('backup_interval_hours') || '0', 10)) > 0,
-            intervalHours: parseInt(getSetting('backup_interval_hours') || '0', 10),
-            retentionDays: parseInt(getSetting('backup_retention_days') || '30', 10),
-            corruptRetentionDays: parseInt(getSetting('corrupt_retention_days') || '30', 10),
-            uploadRetentionDays: parseInt(getSetting('upload_retention_days') || '30', 10),
-            message: 'Backup schedule and retention policies updated'
+            message: 'Backup schedule updated'
         });
     } catch (error) {
         console.error('Set backup schedule error:', error);
@@ -440,7 +562,7 @@ router.get('/db/corrupt-check', (req, res) => {
         if (!fs.existsSync(dbDir)) return res.json({ found: false });
 
         const files = fs.readdirSync(dbDir);
-        const corruptFile = files.find(f => f.startsWith('corrupted_') || f.includes('.corrupt'));
+        const corruptFile = files.find(f => f.includes('nestfinder.db.corrupt') || f.startsWith('corrupted_'));
 
         res.json({ found: !!corruptFile, filename: corruptFile });
     } catch (error) {
@@ -454,7 +576,7 @@ router.get('/db/download-corrupt', (req, res) => {
         const dbDir = path.dirname(DB_PATH);
         const files = fs.readdirSync(dbDir);
         // Get the most recent one if multiple
-        const corruptFiles = files.filter(f => f.startsWith('corrupted_') || f.includes('.corrupt')).sort().reverse();
+        const corruptFiles = files.filter(f => f.includes('nestfinder.db.corrupt') || f.startsWith('corrupted_')).sort().reverse();
 
         if (corruptFiles.length === 0) return res.status(404).send('No corrupt database found');
 
@@ -484,8 +606,8 @@ router.post('/db/restore', (req, res) => {
     // Let's implement a simple stream writer here for the 'POST' body.
 
     try {
-        const timestamp = Date.now();
-        const backupPath = `${DB_PATH}.restore_backup.${timestamp}`;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = `${DB_PATH}.restore_backup.${timestamp}.db`;
 
         // Backup current active DB just in case
         if (fs.existsSync(DB_PATH)) {

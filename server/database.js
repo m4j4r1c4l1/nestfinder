@@ -25,7 +25,8 @@ export const initDatabase = async () => {
     } catch (err) {
       console.error('CRITICAL: Database file is malformed or corrupted.', err);
       const dbDir = dirname(DB_PATH);
-      const backupPath = join(dbDir, `corrupted_${Date.now()}.db`);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const backupPath = join(dbDir, `nestfinder.db.corrupt.${timestamp}.db`);
       console.log(`Renaming corrupted database to: ${backupPath} and starting fresh.`);
       try {
         renameSync(DB_PATH, backupPath);
