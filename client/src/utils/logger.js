@@ -153,6 +153,11 @@ class DebugLogger {
     error(category, message, data) { this._entry('error', category, message, data); }
     debug(category, message, data) { this._entry('debug', category, message, data); }
 
+    setUserId(id) {
+        this.userId = id;
+        this.log('System', `User ID set: ${id}`);
+    }
+
     /**
      * L3: Upload Logs to Server
      */
@@ -175,7 +180,8 @@ class DebugLogger {
                     logs: this.logs,
                     userAgent: navigator.userAgent,
                     url: window.location.href,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    userId: this.userId // Include the User ID
                 })
             });
 
