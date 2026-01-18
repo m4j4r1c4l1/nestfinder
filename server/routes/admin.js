@@ -609,22 +609,25 @@ const startScheduledBackup = (intervalDays, timeOfDay, startDateStr) => {
 
     // Helper to calculate delay until target Paris time
     const getDelayToParisTime = (dateStr, hour, minute) => {
-        // Build target date string in Paris timezone
-        const targetDateTimeStr = `${dateStr}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
-
-        // Create date assuming Paris timezone by using the offset
-        // Paris is UTC+1 (CET) or UTC+2 (CEST)
-        // We'll calculate the difference based on current Paris offset
         const now = new Date();
-        const parisOffset = -new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getTimezoneOffset();
-        const utcOffset = -now.getTimezoneOffset();
-        const diffMinutes = parisOffset - utcOffset;
 
-        // Parse target as local and adjust
-        const target = new Date(targetDateTimeStr);
-        target.setMinutes(target.getMinutes() - diffMinutes);
+        // Get current Paris time components
+        const parisNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
 
-        return target.getTime() - now.getTime();
+        // Create target time in Paris (using the same "trick" - parse a string that represents Paris time)
+        // We'll construct the target by setting Paris date/time, then calculate the offset
+        const [year, month, day] = dateStr.split('-').map(Number);
+
+        // Create a date representing the target Paris time
+        // Start with parisNow to get the right offset relationship
+        const targetParis = new Date(parisNow);
+        targetParis.setFullYear(year, month - 1, day);
+        targetParis.setHours(hour, minute, 0, 0);
+
+        // Calculate the difference in Paris time
+        const delayMs = targetParis.getTime() - parisNow.getTime();
+
+        return delayMs;
     };
 
     const scheduleNextRun = () => {
