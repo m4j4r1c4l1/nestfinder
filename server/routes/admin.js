@@ -236,6 +236,7 @@ router.post('/db/restore/:filename', (req, res) => {
 let backupInterval = null;
 
 // Create a scheduled backup
+// Create a scheduled backup
 const createScheduledBackup = () => {
     try {
         const dbDir = path.dirname(DB_PATH);
@@ -247,17 +248,38 @@ const createScheduledBackup = () => {
         fs.copyFileSync(DB_PATH, backupPath);
         console.log(`📦 Scheduled backup created: ${backupFilename}`);
 
-        // Clean up old scheduled backups (keep only last 5)
+        // Clean up old scheduled backups based on retention days
+        const retentionDays = parseInt(getSetting('backup_retention_days') || '30', 10);
         const files = fs.readdirSync(dbDir);
-        const scheduledBackups = files
+
+        // Filter for scheduled backups only
+        const scheduledBackups = files.filter(f => f.startsWith('scheduled_backup_'));
+
+        const now = Date.now();
+        const maxAgeMs = retentionDays * 24 * 60 * 60 * 1000;
+
+        for (const file of scheduledBackups) {
+            const filePath = path.join(dbDir, file);
+            const stats = fs.statSync(filePath);
+            const ageMs = now - stats.mtime.getTime();
+
+            if (ageMs > maxAgeMs) {
+                fs.unlinkSync(filePath);
+                console.log(`🗑️ Removed old backup (retention > ${retentionDays} days): ${file}`);
+            }
+        }
+
+        // Also fallback to keeping max 50 files if retention is somehow huge/broken to prevent infinite disk usage
+        // Re-read files after cleanup
+        const remainingBackups = fs.readdirSync(dbDir)
             .filter(f => f.startsWith('scheduled_backup_'))
             .sort()
             .reverse();
 
-        if (scheduledBackups.length > 5) {
-            for (const oldBackup of scheduledBackups.slice(5)) {
+        if (remainingBackups.length > 50) {
+            for (const oldBackup of remainingBackups.slice(50)) {
                 fs.unlinkSync(path.join(dbDir, oldBackup));
-                console.log(`🗑️ Removed old backup: ${oldBackup}`);
+                console.log(`🗑️ Removed old backup (safety limit > 50): ${oldBackup}`);
             }
         }
 
@@ -303,12 +325,20 @@ router.get('/db/backup-schedule', (req, res) => {
         const intervalHours = parseInt(getSetting('backup_interval_hours') || '0', 10);
         const lastBackupTime = getSetting('last_scheduled_backup_time') || null;
         const lastBackupStatus = getSetting('last_scheduled_backup_status') || null;
+        const retentionDays = parseInt(getSetting('backup_retention_days') || '30', 10);
 
         let nextBackup = null;
-        if (intervalHours > 0 && lastBackupTime) {
-            const last = new Date(lastBackupTime).getTime();
+        if (intervalHours > 0) {
+            const last = lastBackupTime ? new Date(lastBackupTime).getTime() : Date.now();
+            // If never backed up, assume next one is one interval from now (since we just started server/scheduler)
+            // Ideally we'd know when the server started, but Date.now() + interval is a safe "at latest" estimate for "Pending"
             const intervalMs = intervalHours * 60 * 60 * 1000;
             const next = last + intervalMs;
+
+            // If next is in the past (because server was down), it will run soon but let's show it as "Pending/Due"
+            // Or strictly show the calculated time.
+            // If lastBackupTime is null, it means we entered "Pending (First Run)" state. 
+            // The scheduler starts immediately on boot if enabled, so expectation is interval from boot.
             nextBackup = new Date(next).toISOString();
         }
 
@@ -317,11 +347,13 @@ router.get('/db/backup-schedule', (req, res) => {
             intervalHours,
             lastBackupTime,
             lastBackupStatus,
-            nextBackup
+            nextBackup,
+            retentionDays
         });
+    });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to get backup schedule' });
-    }
+    res.status(500).json({ error: 'Failed to get backup schedule' });
+}
 });
 
 // Set backup schedule

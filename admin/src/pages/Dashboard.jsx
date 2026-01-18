@@ -1098,19 +1098,23 @@ const DBManagerModal = ({ onClose, onResult }) => {
     };
 
     const handleSetSchedule = async () => {
-        let hours = parseInt(scheduleInput, 10) || 0;
-        if (scheduleUnit === 'days') hours *= 24;
-        else if (scheduleUnit === 'months') hours *= 720;
-        else if (scheduleUnit === 'years') hours *= 8760;
-
-        if (!backupEnabled) hours = 0;
         setActionLoading('schedule');
         try {
-            const res = await adminApi.setBackupSchedule(hours);
-            setBackupSchedule({ enabled: res.enabled, intervalHours: res.intervalHours });
-            onResult('success', 'Schedule Updated', res.message);
+            let interval = 0;
+            if (backupEnabled) {
+                const val = parseInt(scheduleInput, 10);
+                if (val <= 0) throw new Error('Interval must be positive');
+                if (scheduleUnit === 'years') interval = val * 8760;
+                else if (scheduleUnit === 'months') interval = val * 720;
+                else if (scheduleUnit === 'days') interval = val * 24;
+                else interval = val;
+            }
+
+            const res = await adminApi.setBackupSchedule(interval, parseInt(backupRetention, 10));
+            setBackupSchedule(res);
+            onResult('success', 'Schedule Updated', backupEnabled ? `Backing up every ${scheduleInput} ${scheduleUnit}.` : 'Scheduled backups disabled.');
         } catch (err) {
-            onResult('error', 'Schedule Failed', err.message);
+            onResult('error', 'Schedule Update Failed', err.message);
         } finally {
             setActionLoading(null);
         }
@@ -1270,6 +1274,30 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 </select>
                             </div>
 
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', paddingLeft: '0.5rem', borderLeft: '1px solid var(--color-border)', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Keep:</span>
+                                <select
+                                    value={backupRetention}
+                                    onChange={(e) => setBackupRetention(e.target.value)}
+                                    title="Retention Period (Age of backup files)"
+                                    style={{
+                                        padding: '0.15rem 0.3rem',
+                                        background: 'var(--color-bg-primary)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '4px',
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: '0.8rem',
+                                        outline: 'none'
+                                    }}
+                                >
+                                    <option value="7">7 Days</option>
+                                    <option value="30">30 Days</option>
+                                    <option value="90">90 Days</option>
+                                    <option value="365">1 Year</option>
+                                    <option value="3650">Forever</option>
+                                </select>
+                            </div>
+
                             <button
                                 onClick={handleSetSchedule}
                                 disabled={actionLoading === 'schedule'}
@@ -1319,7 +1347,6 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                                     color: '#94a3b8',
                                                     fontWeight: 600,
                                                     fontSize: '0.75rem',
-
                                                     letterSpacing: '0.05em',
                                                     position: 'relative',
                                                     userSelect: 'none',
@@ -1373,9 +1400,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Usage Footer */}
-                    {/* Usage Footer */}
                     {/* Expanded Stats & Status Footer */}
-                    <div style={{ padding: '0.75rem 1.5rem', background: 'var(--color-bg-primary)', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ padding: '0.75rem 1.5rem', background: '#1e293b', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
 
                         {/* Backup Status Info */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
@@ -1394,10 +1420,14 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                     </span>
                                 )}
                             </div>
-                            {backupSchedule.enabled && (
+                            {backupSchedule.enabled ? (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <span title="Next estimated backup time"><span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>Next Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.nextBackup ? formatDate(backupSchedule.nextBackup) : 'Pending (First Run)'}</span></span>
                                     <span style={{ fontSize: '1rem', marginLeft: '0.4rem' }}>🔜</span>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', opacity: 0.5 }}>
+                                    <span style={{ color: 'var(--color-text-secondary)' }}>Backup Disabled</span>
                                 </div>
                             )}
                         </div>
