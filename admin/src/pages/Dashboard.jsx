@@ -1062,7 +1062,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
                 // Detect completion to refresh stats
                 if (wasRunningRef.current && !data.running) {
-                    loadFiles();
+                    // Delay to ensure DB write (status update) completes before refresh
+                    setTimeout(() => loadFiles(), 500);
                 }
                 wasRunningRef.current = data.running;
             } catch (e) {
@@ -1774,7 +1775,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
 
                     {/* File List Table */}
-                    <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)', borderTop: '1px solid var(--color-border)' }}>
+                    <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)', borderTop: '1px solid var(--color-border)', minHeight: '300px' }}>
                         {loading ? (
                             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading files...</div>
                         ) : files.length === 0 ? (
