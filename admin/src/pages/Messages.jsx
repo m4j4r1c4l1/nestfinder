@@ -2739,7 +2739,7 @@ const FeedbackSection = ({
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                             <div style={{ fontWeight: 500, color: '#e2e8f0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.user_nickname || 'Anonymous'}>
-                                                {(item.user_nickname || '').length > 30 ? (item.user_nickname.substring(0, 30) + '...') : (item.user_nickname || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>)}
+                                                {(item.user_nickname || '').length > 30 ? (item.user_nickname.substring(0, 30) + '...') : (item.user_nickname || (item.type === 'bug' ? 'System' : <span style={{ color: '#64748b', fontStyle: 'italic' }}>Anonymous</span>))}
                                             </div>
                                             <code style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.user_id}>
                                                 {item.user_id ? (item.user_id.length > 30 ? (item.user_id.substring(0, 30) + '...') : item.user_id) : ''}

@@ -67,7 +67,7 @@ export class GlobalErrorBoundary extends Component {
                 '',
                 '--- DEVICE INFO ---',
                 `User Agent: ${navigator.userAgent}`,
-                `Time: ${new Date().toISOString()}`,
+                `Time: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/Paris' })} CET`,
                 `URL: ${window.location.href}`
             ].join('\n');
 
