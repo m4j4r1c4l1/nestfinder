@@ -1021,6 +1021,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const [downloadProgress, setDownloadProgress] = React.useState(null);
 
     const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { filename }
+    const [selectedFiles, setSelectedFiles] = React.useState(new Set()); // Set of filenames for bulk delete
     const [resultModal, setResultModal] = React.useState(null); // { title, message, type }
     const [currentTime, setCurrentTime] = React.useState(new Date());
 
