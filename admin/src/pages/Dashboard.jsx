@@ -1277,12 +1277,11 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Usage Footer */}
-                    {/* Expanded Stats & Status Footer */}
-                    <div style={{ padding: '0.75rem 1.5rem', background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {/* Expanded Stats & Status Footer - Debug Borders */}
+                    <div style={{ padding: '0.75rem 1.5rem', background: 'var(--color-bg-tertiary)', border: '1px dashed magenta', fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
 
-                        {/* Backup Status Info */}
                         {/* Backup Status Info (Dark Header Style) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', borderTop: '1px solid #334155' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed red' }}>
                             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                 <span><span style={{ color: '#fff', fontWeight: 500 }}>Last Backup:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{backupSchedule.lastBackupTime ? formatDate(backupSchedule.lastBackupTime) : 'Never'}</span></span>
                                 {backupSchedule.lastBackupTime && (
@@ -1304,7 +1303,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                         </div>
 
                         {/* Row 2: File Stats (Dark Bg) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', borderTop: '1px solid #334155', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed cyan' }}>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                 <span><span style={{ color: '#fff' }}>Total Files:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{files.length}</span></span>
                                 {stats && (
@@ -1319,7 +1318,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                         </div>
 
                         {/* Row 3: Size & Disk (Dark Bg) */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', borderTop: '1px solid #334155', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#1e293b', border: '1px dashed lime' }}>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                 <span><span style={{ color: '#fff' }}>DB Folder Size:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{usage ? formatSize(usage.folderSize) : '0 B'}</span></span>
                             </div>
@@ -1328,7 +1327,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
                         {/* Disk Bar Container (Dark Bg) */}
                         {usage?.disk?.total > 0 && (
-                            <div style={{ height: '4px', background: '#1e293b', paddingBottom: '2px' }}>
+                            <div style={{ height: '4px', background: '#1e293b', paddingBottom: '2px', border: '1px dashed orange' }}>
                                 <div style={{ height: '100%', background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
                                     <div style={{ width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`, height: '100%', background: 'var(--color-primary)' }} />
                                 </div>
