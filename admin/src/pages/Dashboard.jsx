@@ -1641,6 +1641,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             {uploadProgress !== null && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1700, backdropFilter: 'blur(4px)' }}>
                     <div className="card" style={{ width: '90%', maxWidth: '400px', padding: '2rem', textAlign: 'center', background: 'var(--color-bg-primary)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🗄️</div>
                         <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem' }}>Uploading Database...</h3>
                         <div style={{ width: '100%', height: '12px', background: 'var(--color-bg-tertiary)', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
                             <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--color-primary)', transition: 'width 0.2s ease-out' }} />
@@ -1654,6 +1655,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             {downloadProgress !== null && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1700, backdropFilter: 'blur(4px)' }}>
                     <div className="card" style={{ width: '90%', maxWidth: '400px', padding: '2rem', textAlign: 'center', background: 'var(--color-bg-primary)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🗄️</div>
                         <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem' }}>Downloading Database...</h3>
                         <div style={{ width: '100%', height: '12px', background: 'var(--color-bg-tertiary)', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
                             <div style={{ width: `${downloadProgress}%`, height: '100%', background: 'var(--color-primary)', transition: 'width 0.2s ease-out' }} />

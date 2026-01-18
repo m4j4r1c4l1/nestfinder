@@ -78,7 +78,7 @@ router.post('/users/:id/toggle', requireAdmin, (req, res) => {
 router.get('/users/:id/logs', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
-        const logs = all('SELECT * FROM client_logs WHERE user_id = ? ORDER BY uploaded_at DESC', [id]);
+        const logs = all('SELECT * FROM client_logs WHERE user_id = ? ORDER BY uploaded_at ASC', [id]);
 
         // Combine all log entries
         const allLogs = logs.map(entry => {

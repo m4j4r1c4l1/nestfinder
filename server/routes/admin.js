@@ -336,8 +336,8 @@ router.get('/db/backup-schedule', (req, res) => {
         const uploadRetentionDays = parseInt(getSetting('upload_retention_days') || '30', 10);
 
         let nextBackup = null;
-        if (intervalHours > 0) {
-            const last = lastBackupTime ? new Date(lastBackupTime).getTime() : Date.now();
+        if (intervalHours > 0 && lastBackupTime) {
+            const last = new Date(lastBackupTime).getTime();
             const intervalMs = intervalHours * 60 * 60 * 1000;
             const next = last + intervalMs;
             nextBackup = new Date(next).toISOString();
