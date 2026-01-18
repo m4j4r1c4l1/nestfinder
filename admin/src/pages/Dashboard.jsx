@@ -1393,7 +1393,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                     </div>
 
                     {/* Unified Control Panel */}
-                    <div style={{ background: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', border: '2px dashed yellow' }}>
+                    <div style={{ background: '#475569', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'stretch', padding: '0.8rem 1rem', margin: '0.8rem', borderRadius: '8px', border: '2px dashed yellow' }}>
 
                         {/* Top Header: Clock & Actions (Badges) */}
 
@@ -1456,10 +1456,12 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                         }}
                                     />
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>At:</span>
-                                    <input
-                                        type="time"
-                                        value={scheduleTime}
-                                        onChange={(e) => setScheduleTime(e.target.value)}
+                                    <select
+                                        value={scheduleTime.split(':')[0] || '00'}
+                                        onChange={(e) => {
+                                            const mins = scheduleTime.split(':')[1] || '00';
+                                            setScheduleTime(`${e.target.value}:${mins}`);
+                                        }}
                                         style={{
                                             padding: '0.15rem 0.3rem',
                                             background: 'var(--color-bg-primary)',
@@ -1468,7 +1470,31 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                             color: 'var(--color-text-primary)',
                                             fontSize: '0.75rem'
                                         }}
-                                    />
+                                    >
+                                        {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                                            <option key={h} value={h}>{h}</option>
+                                        ))}
+                                    </select>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>:</span>
+                                    <select
+                                        value={scheduleTime.split(':')[1] || '00'}
+                                        onChange={(e) => {
+                                            const hrs = scheduleTime.split(':')[0] || '00';
+                                            setScheduleTime(`${hrs}:${e.target.value}`);
+                                        }}
+                                        style={{
+                                            padding: '0.15rem 0.3rem',
+                                            background: 'var(--color-bg-primary)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '4px',
+                                            color: 'var(--color-text-primary)',
+                                            fontSize: '0.75rem'
+                                        }}
+                                    >
+                                        {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
+                                            <option key={m} value={m}>{m}</option>
+                                        ))}
+                                    </select>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Every:</span>
                                     <input
                                         type="number"
@@ -1582,7 +1608,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Column 3: Clock + Actions (Right) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '0.8rem', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '0.8rem', paddingLeft: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'flex-end', justifyContent: 'center', border: '2px dashed cyan' }}>
                                 {/* Row 1: SET Button + Live Clock (Top) */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     {/* SET Button */}
@@ -1824,7 +1850,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             {stats && (
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                     <span style={{ opacity: 1 }} title={`Oldest: ${formatDate(stats.oldest.modified)}\nNewest: ${formatDate(stats.newest.modified)}`}>
-                                        <span style={{ color: 'var(--color-text-primary)' }}>Range:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{new Date(stats.oldest.modified).toLocaleDateString()} — {new Date(stats.newest.modified).toLocaleDateString()}</span>
+                                        <span style={{ color: 'var(--color-text-primary)' }}>Range:</span> <span style={{ color: 'var(--color-text-secondary)' }}>{new Date(stats.oldest.modified).toLocaleDateString()} → {new Date(stats.newest.modified).toLocaleDateString()}</span>
                                     </span>
                                     <span style={{ fontSize: '1rem' }}>📅</span>
                                 </div>
@@ -1851,7 +1877,15 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             {usage?.disk?.total > 0 && (
                                 <div style={{ height: '4px', background: 'rgba(0,0,0,0.1)', paddingBottom: '0', borderRadius: '2px', overflow: 'hidden' }}>
                                     <div style={{ height: '100%', background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
-                                        <div style={{ width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`, height: '100%', background: 'var(--color-primary)' }} />
+                                        <div style={{
+                                            width: `${Math.min(100, (usage.disk.used / usage.disk.total) * 100)}%`, height: '100%', background: (() => {
+                                                const pct = (usage.disk.used / usage.disk.total) * 100;
+                                                if (pct < 50) return '#22c55e'; // Green
+                                                if (pct < 70) return '#eab308'; // Yellow
+                                                if (pct < 85) return '#f97316'; // Orange
+                                                return '#ef4444'; // Red
+                                            })(), borderRadius: '2px'
+                                        }} />
                                     </div>
                                 </div>
                             )}
