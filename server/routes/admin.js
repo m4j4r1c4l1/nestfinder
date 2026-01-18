@@ -351,7 +351,8 @@ const compressFile = async (filePath) => {
 
 // Create a scheduled backup
 // Create a scheduled backup
-const createScheduledBackup = async (forcedFilename = null) => {
+// Create a backup (scheduled or on-demand)
+const createScheduledBackup = async (type = 'scheduled') => {
     // Reset SSE State with Hierarchy
     activeBackupState = {
         running: true,
@@ -365,8 +366,11 @@ const createScheduledBackup = async (forcedFilename = null) => {
     try {
         const dbDir = path.dirname(DB_PATH);
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const dbFilename = forcedFilename ? forcedFilename.replace('.gz', '') : `nestfinder.db.backup.${timestamp}.db`;
-        const gzFilename = forcedFilename || `${dbFilename}.gz`;
+        // Naming convention: nestfinder.db.{type}.{timestamp}.db
+        // Types: 'backup' (scheduled), 'on_demand', 'manual' (legacy)
+        const typeSlug = type === 'on_demand' ? 'on_demand' : 'backup';
+        const dbFilename = `nestfinder.db.${typeSlug}.${timestamp}.db`;
+        const gzFilename = `${dbFilename}.gz`;
 
         const dbPath = path.join(dbDir, dbFilename);   // Intermediate uncompressed
         const gzPath = path.join(dbDir, gzFilename);   // Final compressed
@@ -424,9 +428,17 @@ const createScheduledBackup = async (forcedFilename = null) => {
             if (file === 'nestfinder.db') return false;
             // Skip the file we just created
             if (file === gzFilename) return false;
-            if (file === dbFilename) return false; // Should be deleted anyway
+            // Skip intermediate if it still exists (though we deleted it)
+            if (file === dbFilename) return false;
+
+            // Already compressed?
             if (file.endsWith('.gz')) return false;
-            if (!file.endsWith('.db')) return false;
+
+            // Must start with nestfinder.db
+            if (!file.startsWith('nestfinder.db')) return false;
+
+            // At this point, it's a nestfinder.db.* file that is NOT .gz
+            // This includes .corrupt, .restore_backup, .backup (if failed previously), etc.
             if (fs.statSync(path.join(dbDir, file)).isDirectory()) return false;
             return true;
         });
@@ -497,7 +509,7 @@ const createScheduledBackup = async (forcedFilename = null) => {
         return gzFilename;
 
     } catch (error) {
-        console.error('Scheduled backup error:', error);
+        console.error('Backup error:', error);
 
         // Mark current running task as error
         // Need to find it.
@@ -775,7 +787,7 @@ router.put('/db/backup-schedule', (req, res) => {
 // Trigger manual backup now
 router.post('/db/backup-now', (req, res) => {
     try {
-        const filename = createScheduledBackup();
+        const filename = createScheduledBackup('on_demand'); // Changed from default to 'on_demand'
         if (filename) {
             run(
                 `INSERT INTO settings (key, value, updated_at) VALUES ('last_scheduled_backup', ?, CURRENT_TIMESTAMP)

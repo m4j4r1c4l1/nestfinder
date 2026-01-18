@@ -1175,6 +1175,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
             restore_backup: { label: 'Restored', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
             uploaded: { label: 'Uploaded', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
             scheduled: { label: 'Scheduled', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+            on_demand: { label: 'On Demand', color: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)' },
             other: { label: 'Other', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)' }
         };
         const b = badges[type] || badges.other;
