@@ -1343,11 +1343,9 @@ const DBManagerModal = ({ onClose, onResult }) => {
             // We await the TRIGGER, but the process is backgrounded on server.
             // Returns immediately with { success: true, filename: ... }
             await adminApi.createBackupNow();
-            // We do NOT show a success modal here, because the SSE "Backup Progress" modal
-            // will appear and show completion/stats. Showing another modal is redundant and race-prone.
-            // loadFiles() is also handled by SSE on completion.
+            // We do NOT show a success modal here, handled by SSE.
         } catch (err) {
-            onResult('error', 'Backup Failed', err.message);
+            handleDBManagerResult('error', 'Backup Failed', err.message);
         } finally {
             setActionLoading(null);
         }
