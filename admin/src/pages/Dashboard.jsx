@@ -1410,7 +1410,6 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 alignItems: 'center', justifyContent: 'center',
                                 padding: '1rem', width: '70px',
                                 borderRight: '1px solid var(--color-border)',
-                                borderTop: '1px solid var(--color-border)',
                                 background: 'rgba(0,0,0,0.02)'
                             }}>
                                 {/* Toggle Switch */}
@@ -1670,6 +1669,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
                         </div>
                     </div>
+
+                    <div style={{ height: '1px', background: 'var(--color-border)', margin: '0 1rem 0.5rem 1rem' }} />
 
                     {/* File List Table */}
                     <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)' }}>
