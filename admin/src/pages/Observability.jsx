@@ -1625,7 +1625,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             )}
 
             {/* Graph Body */}
-            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', position: 'relative', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s', pointerEvents: loading ? 'none' : 'auto' }}>
+            <div className="card-body" style={{ padding: '1rem', overflowX: 'auto', overflowY: 'hidden', position: 'relative', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s', pointerEvents: loading ? 'none' : 'auto' }}>
                 {/* Loading Spinner Overlay if refreshing */}
                 {loading && (
                     <div style={{
@@ -1756,8 +1756,24 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 };
 
 const MetricsSection = () => {
-    const [globalDays, setGlobalDays] = useState(7);
-    const [globalRefreshInterval, setGlobalRefreshInterval] = useState(0);
+    // Initialize from localStorage or default
+    const [globalDays, setGlobalDays] = useState(() => {
+        const saved = localStorage.getItem('nest_trends_global_days');
+        return saved ? parseInt(saved) : 7;
+    });
+    const [globalRefreshInterval, setGlobalRefreshInterval] = useState(() => {
+        const saved = localStorage.getItem('nest_trends_global_refresh');
+        return saved ? parseInt(saved) : 0;
+    });
+
+    // Persistence effects
+    useEffect(() => {
+        localStorage.setItem('nest_trends_global_days', globalDays);
+    }, [globalDays]);
+
+    useEffect(() => {
+        localStorage.setItem('nest_trends_global_refresh', globalRefreshInterval);
+    }, [globalRefreshInterval]);
 
     const [breakdownDate, setBreakdownDate] = useState(null);
     const [breakdownData, setBreakdownData] = useState(null);
