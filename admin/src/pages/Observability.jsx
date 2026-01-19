@@ -1818,19 +1818,27 @@ const MetricsSection = () => {
         return saved ? parseInt(saved) : Date.now();
     });
 
-    // Persistence effects
+    // Persistence effects (Fixed: Don't update timestamp on initial mount)
+    const isMounted = useRef(false);
+
     useEffect(() => {
-        localStorage.setItem('nest_trends_global_days', globalDays);
-        const now = Date.now();
-        setGlobalDaysTs(now);
-        localStorage.setItem('nest_trends_global_days_ts', now);
+        if (isMounted.current) {
+            localStorage.setItem('nest_trends_global_days', globalDays);
+            const now = Date.now();
+            setGlobalDaysTs(now);
+            localStorage.setItem('nest_trends_global_days_ts', now);
+        }
     }, [globalDays]);
 
     useEffect(() => {
-        localStorage.setItem('nest_trends_global_refresh', globalRefreshInterval);
-        const now = Date.now();
-        setGlobalRefreshTs(now);
-        localStorage.setItem('nest_trends_global_refresh_ts', now);
+        if (isMounted.current) {
+            localStorage.setItem('nest_trends_global_refresh', globalRefreshInterval);
+            const now = Date.now();
+            setGlobalRefreshTs(now);
+            localStorage.setItem('nest_trends_global_refresh_ts', now);
+        } else {
+            isMounted.current = true;
+        }
     }, [globalRefreshInterval]);
 
     const [breakdownDate, setBreakdownDate] = useState(null);
@@ -1947,7 +1955,9 @@ const MetricsSection = () => {
                     type="line"
                     seriesConfig={sentSeries}
                     days={globalDays}
+                    daysTs={globalDaysTs}
                     refreshInterval={globalRefreshInterval}
+                    refreshIntervalTs={globalRefreshTs}
                 />
 
                 {/* Notifications Received Graph */}
@@ -1957,14 +1967,18 @@ const MetricsSection = () => {
                     type="line"
                     seriesConfig={receivedSeries}
                     days={globalDays}
+                    daysTs={globalDaysTs}
                     refreshInterval={globalRefreshInterval}
+                    refreshIntervalTs={globalRefreshTs}
                 />
 
                 {/* Ratings Graph */}
                 <RatingsChartCard
                     onPointClick={handleRatingsBarClick}
                     days={globalDays}
+                    daysTs={globalDaysTs}
                     refreshInterval={globalRefreshInterval}
+                    refreshIntervalTs={globalRefreshTs}
                 />
             </div>
 
