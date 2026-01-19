@@ -1848,14 +1848,32 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             <div style={{
                                 position: 'absolute',
                                 inset: 0,
-                                background: files.length > 0 ? 'rgba(255,255,255,0.05)' : 'transparent',
-                                backdropFilter: files.length > 0 ? 'blur(1px)' : 'none',
+                                background: files.length > 0 ? 'rgba(0,0,0,0.6)' : 'transparent',
+                                backdropFilter: files.length > 0 ? 'blur(4px)' : 'none',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 zIndex: 20
                             }}>
-                                <span style={{ color: 'var(--color-text-secondary)' }}>Loading Databases...</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', letterSpacing: '0.05em', fontWeight: 500 }}>Loading Databases...</span>
+                                    <style>
+                                        {`
+                                            @keyframes spin-premium {
+                                                0% { transform: rotate(0deg); }
+                                                100% { transform: rotate(360deg); }
+                                            }
+                                        `}
+                                    </style>
+                                    <div style={{
+                                        width: '32px',
+                                        height: '32px',
+                                        border: '3px solid rgba(59, 130, 246, 0.1)',
+                                        borderTop: '3px solid #3b82f6',
+                                        borderRadius: '50%',
+                                        animation: 'spin-premium 0.8s linear infinite'
+                                    }}></div>
+                                </div>
                             </div>
                         )}
                         {files.length === 0 && !loading ? (
