@@ -1813,7 +1813,7 @@ const MetricsSection = () => {
                 <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                     📈 Trends Graphs
                 </h3>
-                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', marginRight: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <select
                             value={globalDays}
