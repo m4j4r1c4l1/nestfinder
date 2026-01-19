@@ -529,7 +529,9 @@ const createScheduledBackup = async (type = 'scheduled') => {
 
         // Add candidate files as subtasks to 'listing'
         filesToCompress.forEach(file => {
-            addBackupSubtask('archiving', 'listing', { name: file, status: 'success' });
+            const fPath = path.join(dbDir, file);
+            const fSize = fs.existsSync(fPath) ? fs.statSync(fPath).size : 0;
+            addBackupSubtask('archiving', 'listing', { name: file, status: 'success', size: formatBytes(fSize) });
         });
 
         updateBackupSectionTask('archiving', 'listing', 'success', 100);
