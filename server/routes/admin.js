@@ -473,7 +473,8 @@ const createScheduledBackup = async (type = 'scheduled') => {
             debugLog(`📦 Uncompressed backup created for check: ${dbFilename}`);
         }
         updateBackupSectionTask('active_db', 'backup', 'success', 100);
-        addBackupSubtask('active_db', 'backup', { name: dbFilename, status: 'success' });
+        const dbSize = fs.existsSync(dbPath) ? fs.statSync(dbPath).size : 0;
+        addBackupSubtask('active_db', 'backup', { name: dbFilename, status: 'success', size: formatBytes(dbSize) });
 
         // 1.2 Health Check
         addBackupTask('active_db', { id: 'health_check', name: '1.2 Database Health Check', status: 'running', progress: 0 });
@@ -526,6 +527,11 @@ const createScheduledBackup = async (type = 'scheduled') => {
             return true;
         });
 
+        // Add candidate files as subtasks to 'listing'
+        filesToCompress.forEach(file => {
+            addBackupSubtask('archiving', 'listing', { name: file, status: 'success' });
+        });
+
         updateBackupSectionTask('archiving', 'listing', 'success', 100);
 
         // 2.2 Compressing individual files (if any)
@@ -535,29 +541,17 @@ const createScheduledBackup = async (type = 'scheduled') => {
 
             for (let i = 0; i < filesToCompress.length; i++) {
                 const file = filesToCompress[i];
-                // Add subtask for this file
-                addBackupSubtask('archiving', 'archive_compress', { name: file, status: 'running' });
+                const gzFile = file + '.gz';
+                // Add subtask for this file as FINAL NAME (gz)
+                addBackupSubtask('archiving', 'archive_compress', { name: gzFile, status: 'running' });
 
                 debugLog(`📦 Compressing pending file: ${file}`);
                 await compressFile(path.join(dbDir, file));
 
-                // Mark subtask done with size
-                const finalPath = path.join(dbDir, file + '.gz');
+                // Update size and status
+                const finalPath = path.join(dbDir, gzFile);
                 const finalSize = fs.existsSync(finalPath) ? fs.statSync(finalPath).size : 0;
-                updateBackupSubtask('archiving', 'archive_compress', file, { status: 'success', size: formatBytes(finalSize) });
-                // Since subtasks don't have IDs in my simple implementation, I'll validly assume sequential or 
-                // update by finding name.
-                // Or better, just re-broadcast whole state if subtask modified. 
-                // Let's assume simpler: Just push result 'done' subtask? No, user wants 'name... tick'.
-                // So I need to update the subtask.
-
-                // My addBackupSubtask just pushes.
-                // I need helper updateBackupSubtask? Or just mutate activeBackupState manually here.
-                const section = activeBackupState.sections.find(s => s.id === 'archiving');
-                const task = section.tasks.find(t => t.id === 'archive_compress');
-                const sub = task.subtasks.find(s => s.name === file);
-                if (sub) sub.status = 'success';
-                broadcastBackupState();
+                updateBackupSubtask('archiving', 'archive_compress', gzFile, { status: 'success', size: formatBytes(finalSize) });
             }
             updateBackupSectionTask('archiving', 'archive_compress', 'success', 100);
         } else {
