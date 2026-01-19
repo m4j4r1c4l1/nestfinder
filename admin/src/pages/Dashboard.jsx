@@ -81,8 +81,8 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                                 {/* Progress bar removed as requested */}
 
                                                 <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
-                                                    {/* Hide parent icon if it has subtasks - unless it's running/error. Also hide for 'listing' task (user req) */}
-                                                    {(!task.subtasks || task.subtasks.length === 0 || task.status === 'running' || task.status === 'error') && task.id !== 'listing' ? (
+                                                    {/* Hide parent icon if it has subtasks. Only show if task has NO subtasks (e.g. simple task) */}
+                                                    {(!task.subtasks || task.subtasks.length === 0) && task.id !== 'listing' ? (
                                                         getStatusIcon(task.status)
                                                     ) : (
                                                         <span style={{ display: 'inline-block', width: '28px' }}></span>
@@ -107,8 +107,8 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                                             <div style={{ width: '100px', textAlign: 'right', fontSize: '0.75rem', color: '#64748b' }}>
                                                                 {sub.size || ''}
                                                             </div>
-                                                            <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1, color: '#22c55e' }}>
-                                                                {sub.status === 'success' ? '✔' : ''}
+                                                            <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
+                                                                {getStatusIcon(sub.status)}
                                                             </div>
                                                         </div>
                                                     </div>
