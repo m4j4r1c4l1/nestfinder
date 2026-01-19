@@ -666,6 +666,7 @@ const Dashboard = ({ onNavigate }) => {
                 <DBManagerModal
                     onClose={() => setShowDBManager(false)}
                     onResult={handleDBManagerResult}
+                    showToast={showToast}
                 />
             )}
 
@@ -1031,7 +1032,7 @@ const ResultModal = ({ type = 'success', title, message, onOk, buttonText = 'OK'
 };
 
 // Database Manager Modal
-const DBManagerModal = ({ onClose, onResult }) => {
+const DBManagerModal = ({ onClose, onResult, showToast }) => {
     const [files, setFiles] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [actionLoading, setActionLoading] = React.useState(null);
