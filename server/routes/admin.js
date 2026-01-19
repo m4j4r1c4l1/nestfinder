@@ -63,6 +63,9 @@ const checkDiskUsageAlert = (dbDir) => {
             `, [`💿 **${usagePercent}% Disk:** ${usedMB} MB / ${totalMB} MB`]);
 
             debugLog(`⚠️ Disk usage alert: ${usagePercent}% (${usedMB} MB / ${totalMB} MB)`);
+        } else {
+            // Debug log even if not critical, just to track check
+            // debugLog(`Disk usage OK: ${usagePercent}%`); // Too noisy? Optional.
         }
     } catch (e) {
         // Silently fail if disk stats unavailable
@@ -154,6 +157,7 @@ router.delete('/db/files/:filename', (req, res) => {
         }
 
         fs.unlinkSync(filePath);
+        debugLog(`🗑️ Deleted DB file: ${filename}`);
         res.json({ success: true, message: `Deleted ${filename}` });
     } catch (error) {
         console.error('Delete DB file error:', error);
@@ -205,6 +209,7 @@ router.post('/db/backup-now', async (req, res) => {
         res.json({ success: true, message: 'Backup started' });
     } catch (error) {
         console.error('Manual backup error:', error);
+        debugLog(`❌ Manual backup start failed: ${error.message}`);
         res.status(500).json({ error: 'Failed to start backup' });
     }
 });
@@ -234,6 +239,7 @@ router.get('/db/files/:filename/download', (req, res) => {
         res.download(filePath, filename);
     } catch (error) {
         console.error('Download DB file error:', error);
+        debugLog(`❌ Download DB file failed: ${filename} - ${error.message}`);
         res.status(500).json({ error: 'Failed to download file' });
     }
 });
@@ -306,6 +312,7 @@ router.post('/db/restore/:filename', async (req, res) => {
             }
         })();
     } catch (error) {
+        debugLog(`❌ Restore DB failed: ${error.message}`);
         console.error('Restore DB error:', error);
         res.status(500).json({ error: 'Failed to restore from file' });
     }
@@ -987,6 +994,7 @@ router.post('/db/restore', (req, res) => {
         });
 
     } catch (error) {
+        debugLog(`❌ Restore error (upload): ${error.message}`);
         console.error('Restore error:', error);
         res.status(500).json({ error: 'Failed to initiate restore' });
     }
@@ -1403,7 +1411,9 @@ router.post('/db/backups/bulk-delete', (req, res) => {
             errors: errors.length > 0 ? errors : undefined,
             message: `Deleted ${deletedCount} files`
         });
+        debugLog(`🗑️ Bulk deleted ${deletedCount} backup files.`);
     } catch (error) {
+        debugLog(`❌ Bulk delete backups failed: ${error.message}`);
         console.error('Bulk delete error:', error);
         res.status(500).json({ error: 'Failed to process bulk delete' });
     }
@@ -1607,6 +1617,7 @@ router.delete('/users/:id', (req, res) => {
             success: true,
             message: `User ${user.nickname || user.id} deleted successfully`
         });
+        debugLog(`🗑️ User deleted: ${user.nickname || user.id} (${userId})`);
     } catch (err) {
         res.status(500).json({ error: 'Failed to delete user' });
     }
@@ -1681,7 +1692,7 @@ router.get('/notifications', (req, res) => {
         FROM notifications n
         LEFT JOIN users u ON n.user_id = u.id
         ORDER BY n.created_at DESC
-    `);
+            `);
 
     res.json({ notifications });
 });
@@ -1689,14 +1700,14 @@ router.get('/notifications', (req, res) => {
 // Get all confirmations (admin only)
 router.get('/confirmations', (req, res) => {
     const confirmations = all(`
-        SELECT c.*, 
-               u.nickname as user_nickname,
-               p.latitude, p.longitude, p.address, p.status as point_status
+        SELECT c.*,
+            u.nickname as user_nickname,
+            p.latitude, p.longitude, p.address, p.status as point_status
         FROM confirmations c
         LEFT JOIN users u ON c.user_id = u.id
         LEFT JOIN points p ON c.point_id = p.id
         ORDER BY c.created_at DESC
-    `);
+            `);
 
     res.json({ confirmations });
 });
@@ -1706,8 +1717,8 @@ router.get('/confirmations', (req, res) => {
 router.get('/points', (req, res) => {
     const points = all(`
     SELECT p.*, u.nickname as submitter_nickname,
-      (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'confirm') as confirm_count,
-      (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'deactivate') as deactivate_count
+            (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'confirm') as confirm_count,
+            (SELECT COUNT(*) FROM confirmations WHERE point_id = p.id AND type = 'deactivate') as deactivate_count
     FROM points p
     LEFT JOIN users u ON p.user_id = u.id
     ORDER BY p.created_at DESC
@@ -1735,6 +1746,7 @@ router.delete('/points/:id', (req, res) => {
             success: true,
             message: `Point ${pointId} deleted successfully`
         });
+        debugLog(`🗑️ Point deleted: ${pointId}`);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to delete point' });
@@ -1749,8 +1761,8 @@ router.get('/logs/export', (req, res) => {
     SELECT l.*, u.nickname as user_nickname
     FROM logs l
     LEFT JOIN users u ON l.user_id = u.id
-    WHERE 1=1
-  `;
+    WHERE 1 = 1
+    `;
     const params = [];
 
     if (startDate) {
@@ -1939,6 +1951,7 @@ router.post('/broadcasts', (req, res) => {
 
     const broadcast = get('SELECT * FROM broadcasts ORDER BY id DESC LIMIT 1');
     log('admin', 'broadcast_created', broadcast.id.toString(), { title, message: message.substring(0, 50), maxViews });
+    debugLog(`📢 Broadcast created: "${title || 'Untitled'}" (ID: ${broadcast.id})`);
 
     res.json({ broadcast });
 });
@@ -1988,6 +2001,7 @@ router.post('/broadcasts/bulk-delete', (req, res) => {
         log('admin', 'broadcast_bulk_deleted', null, { count: ids.length, ids });
 
         res.json({ success: true, count: ids.length });
+        debugLog(`🗑️ Bulk deleted ${ids.length} broadcasts.`);
     } catch (err) {
         console.error('Bulk delete failed:', err);
         res.status(500).json({ error: 'Failed to delete broadcasts' });
@@ -2025,7 +2039,9 @@ router.delete('/broadcasts/:id', (req, res) => {
     const { id } = req.params;
     run('DELETE FROM broadcast_views WHERE broadcast_id = ?', [id]);
     run('DELETE FROM broadcasts WHERE id = ?', [id]);
+    run('DELETE FROM broadcasts WHERE id = ?', [id]);
     log('admin', 'broadcast_deleted', id);
+    debugLog(`🗑️ Broadcast deleted: ${id}`);
     res.json({ success: true });
 });
 
@@ -2125,6 +2141,7 @@ router.put('/feedback/:id/status', (req, res) => {
 router.delete('/feedback/:id', (req, res) => {
     const { id } = req.params;
     run('DELETE FROM feedback WHERE id = ?', [id]);
+    debugLog(`🗑️ Feedback deleted: ${id}`);
     res.json({ success: true });
 });
 
