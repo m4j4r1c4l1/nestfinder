@@ -46,8 +46,9 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                 border: '1px solid var(--color-border)',
                 borderRadius: '12px',
                 padding: '2rem',
-                width: '90%',
-                maxWidth: '550px',
+                width: 'auto',
+                minWidth: '500px',
+                maxWidth: '90vw',
                 boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
                 animation: 'slideUp 0.3s ease-out',
                 display: 'flex', flexDirection: 'column', gap: '1.5rem'
@@ -55,10 +56,10 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                 <div style={{ textAlign: 'center', fontSize: '3.5rem', marginBottom: '-0.5rem' }}>⚗️</div>
 
                 <h3 style={{ margin: 0, textAlign: 'center', fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>
-                    Starting the Backup process:
+                    Starting the Backup process
                 </h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '450px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
                     {sections.map((section, sIdx) => (
                         <div key={section.id || sIdx}>
                             <div style={{ fontWeight: 600, marginBottom: '0.75rem', color: 'var(--color-text-primary)', fontSize: '1rem' }}>
@@ -68,7 +69,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                 {section.tasks.map((task, tIdx) => (
                                     <div key={task.id || tIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
-                                            <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
                                                 {task.name}
                                             </span>
 
@@ -108,7 +109,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                                 {task.subtasks.map((sub, subIdx) => (
                                                     <div key={subIdx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
                                                         {/* Indent name but align column structure */}
-                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'nowrap' }}>
                                                             {sub.name}
                                                         </span>
 
