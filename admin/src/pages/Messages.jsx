@@ -2666,14 +2666,12 @@ const FeedbackSection = ({
                                     </th>
 
                                     <th style={{ padding: '0.75rem 1rem', textAlign: 'left', position: 'relative' }}>Message</th>
-                                    <th style={{ padding: '0.75rem 0.5rem', width: selectedIds.length > 0 ? '280px' : '120px', textAlign: 'right' }}>
+                                    <th style={{ padding: '0.75rem 0.5rem', width: '120px', textAlign: 'right', position: 'relative' }}>
                                         {selectedIds.length > 0 && (
-                                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                            <div style={{ position: 'absolute', top: 0, bottom: 0, right: 0, display: 'flex', gap: '0.5rem', alignItems: 'center', paddingRight: '0.5rem', background: '#0f172a', zIndex: 5, paddingLeft: '1rem', borderLeft: '1px solid #334155' }}>
                                                 {/* Show Mark as Read ONLY if at least one selected item is NOT read yet */}
                                                 {selectedIds.some(id => {
                                                     const item = feedback.find(f => f.id === id);
-                                                    // If item is sent/new/delivered/pending, it needs reading.
-                                                    // If item is reviewed/read, it is already read.
                                                     return item && ['sent', 'new', 'delivered', 'pending'].includes(item.status);
                                                 }) && (
                                                         <button
@@ -2689,7 +2687,7 @@ const FeedbackSection = ({
                                                     className="btn btn-danger btn-sm"
                                                     style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '28px', display: 'flex', alignItems: 'center', padding: '0 0.8rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
                                                 >
-                                                    🗑️ ({selectedIds.length})
+                                                    Delete ({selectedIds.length})
                                                 </button>
                                             </div>
                                         )}
