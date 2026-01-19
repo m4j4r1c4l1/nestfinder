@@ -1434,8 +1434,9 @@ const DBManagerModal = ({ onClose, onResult }) => {
         xhr.send(file);
     };
 
-    const handleSetSchedule = async () => {
+    const handleSetSchedule = async (explicitEnabled = null) => {
         setActionLoading('schedule');
+        const finalEnabled = explicitEnabled !== null ? explicitEnabled : backupEnabled;
         try {
             const res = await adminApi.setBackupSchedule(
                 scheduleTime,
@@ -1444,13 +1445,18 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 parseInt(backupRetention, 10),
                 parseInt(corruptRetention, 10),
                 parseInt(uploadRetention, 10),
-                backupEnabled
+                finalEnabled
             );
             setBackupSchedule(res);
-            onResult('success', 'Policies Updated', 'Backup schedule and file retention policies have been updated.');
+            if (explicitEnabled !== null) {
+                showToast('success', finalEnabled ? 'Backups Enabled' : 'Backups Disabled');
+            } else {
+                onResult('success', 'Policies Updated', 'Backup schedule and file retention policies have been updated.');
+            }
             loadFiles();
         } catch (err) {
             onResult('error', 'Update Failed', err.message);
+            if (explicitEnabled !== null) setBackupEnabled(!finalEnabled);
         } finally {
             setActionLoading(null);
         }
@@ -1569,7 +1575,11 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             }}>
                                 {/* Toggle Switch */}
                                 <div
-                                    onClick={() => setBackupEnabled(!backupEnabled)}
+                                    onClick={() => {
+                                        const next = !backupEnabled;
+                                        setBackupEnabled(next);
+                                        handleSetSchedule(next);
+                                    }}
                                     style={{
                                         width: '145%',
                                         marginLeft: '-45%',
