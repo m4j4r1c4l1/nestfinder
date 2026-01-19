@@ -1594,7 +1594,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Right Side: Pickers (Swapped) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', background: 'var(--color-bg-primary)', borderRadius: '6px', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
                                 {/* Row 1: Scheduling Pickers */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Start:</span>
