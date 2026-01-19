@@ -666,7 +666,6 @@ const Dashboard = ({ onNavigate }) => {
                 <DBManagerModal
                     onClose={() => setShowDBManager(false)}
                     onResult={handleDBManagerResult}
-                    showToast={showToast}
                 />
             )}
 
@@ -1032,7 +1031,7 @@ const ResultModal = ({ type = 'success', title, message, onOk, buttonText = 'OK'
 };
 
 // Database Manager Modal
-const DBManagerModal = ({ onClose, onResult, showToast }) => {
+const DBManagerModal = ({ onClose, onResult }) => {
     const [files, setFiles] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [actionLoading, setActionLoading] = React.useState(null);
@@ -1449,9 +1448,7 @@ const DBManagerModal = ({ onClose, onResult, showToast }) => {
                 finalEnabled
             );
             setBackupSchedule(res);
-            if (explicitEnabled !== null) {
-                showToast('success', finalEnabled ? 'Backups Enabled' : 'Backups Disabled');
-            } else {
+            if (explicitEnabled === null) {
                 onResult('success', 'Policies Updated', 'Backup schedule and file retention policies have been updated.');
             }
             loadFiles();
