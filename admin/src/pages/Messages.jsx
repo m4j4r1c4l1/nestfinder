@@ -2591,44 +2591,30 @@ const FeedbackSection = ({
                         </span>
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            {selectedIds.length > 0 && (
-                                <>
-                                    <button
-                                        onClick={confirmMarkRead}
-                                        className="btn btn-sm"
-                                        style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '32px', display: 'flex', alignItems: 'center' }}
-                                    >
-                                        <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
-                                    </button>
-                                    <button onClick={handleBulkDelete} className="btn btn-danger btn-sm" style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '32px', display: 'flex', alignItems: 'center', padding: '0 0.8rem' }}>🗑️ Delete ({selectedIds.length})</button>
-                                </>
-                            )}
-                            <button
-                                onClick={async () => {
-                                    setConfirmModal({
-                                        show: true,
-                                        title: 'Clear Received History',
-                                        message: 'Are you sure you want to CLEAR ALL Received History? This will remove all feedback messages from this list.',
-                                        onConfirm: async () => {
-                                            try {
-                                                // Delete all feedback
-                                                for (const item of feedback) {
-                                                    await onDelete(item.id);
-                                                }
-                                                onUpdate && onUpdate();
-                                            } catch (err) { console.error('Cleanup failed:', err); }
-                                        }
-                                    });
-                                }}
-                                className="btn btn-sm"
-                                style={{ marginRight: '0.5rem', background: '#6366f1', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px', border: 'none', borderRadius: '6px' }}
-                                title="Delete all received messages"
-                            >
-                                🗑️ Clear History
-                            </button>
-                            <button onClick={onUpdate} className="btn btn-secondary btn-sm" style={{ width: '170px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}>🔄 Refresh</button>
-                        </div>
+                        <button
+                            onClick={async () => {
+                                setConfirmModal({
+                                    show: true,
+                                    title: 'Clear Received History',
+                                    message: 'Are you sure you want to CLEAR ALL Received History? This will remove all feedback messages from this list.',
+                                    onConfirm: async () => {
+                                        try {
+                                            // Delete all feedback
+                                            for (const item of feedback) {
+                                                await onDelete(item.id);
+                                            }
+                                            onUpdate && onUpdate();
+                                        } catch (err) { console.error('Cleanup failed:', err); }
+                                    }
+                                });
+                            }}
+                            className="btn btn-sm"
+                            style={{ marginRight: '0.5rem', background: '#6366f1', color: 'white', width: '170px', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', height: '32px', border: 'none', borderRadius: '6px' }}
+                            title="Delete all received messages"
+                        >
+                            🗑️ Clear History
+                        </button>
+                        <button onClick={onUpdate} className="btn btn-secondary btn-sm" style={{ width: '170px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}>🔄 Refresh</button>
                     </div>
                 </div>
 
@@ -2678,7 +2664,26 @@ const FeedbackSection = ({
                                     </th>
 
                                     <th style={{ padding: '0.75rem 1rem', textAlign: 'left', position: 'relative' }}>Message</th>
-                                    <th style={{ padding: '0.75rem 1rem', width: '120px' }}></th>
+                                    <th style={{ padding: '0.75rem 0.5rem', width: selectedIds.length > 0 ? '280px' : '120px', textAlign: 'right' }}>
+                                        {selectedIds.length > 0 && (
+                                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                                <button
+                                                    onClick={confirmMarkRead}
+                                                    className="btn btn-sm"
+                                                    style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '28px', display: 'flex', alignItems: 'center', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                                                >
+                                                    <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
+                                                </button>
+                                                <button
+                                                    onClick={handleBulkDelete}
+                                                    className="btn btn-danger btn-sm"
+                                                    style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444', height: '28px', display: 'flex', alignItems: 'center', padding: '0 0.8rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                                                >
+                                                    🗑️ ({selectedIds.length})
+                                                </button>
+                                            </div>
+                                        )}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
