@@ -816,7 +816,7 @@ router.put('/db/backup-schedule', (req, res) => {
         if (enabled === false || (enabled === undefined && !time)) {
             run(`DELETE FROM settings WHERE key = 'backup_time'`);
             if (backupInterval) clearTimeout(backupInterval);
-            console.log('📦 Scheduled backups disabled via API');
+            debugLog('📦 Backup schedule toggled OFF (Disabled)');
         } else if (time) {
             // Validate time format (HH:MM)
             if (!/^\d{2}:\d{2}$/.test(time)) {
@@ -846,7 +846,7 @@ router.put('/db/backup-schedule', (req, res) => {
             }
 
             startScheduledBackup(days, time, startDate);
-            debugLog(`⚙️ Backup schedule updated: ${time}, every ${days} day(s), starting ${startDate || 'today'}`);
+            debugLog(`⚙️ Backup schedule ENABLED/UPDATED: ${time}, every ${days} day(s), starting ${startDate || 'today'}. Retention (Days): Success=${retentionDays || 'N/A'}, Corrupt=${corruptRetentionDays || 'N/A'}, Uploads=${uploadRetentionDays || 'N/A'}`);
         }
 
         if (retentionDays !== undefined) {
