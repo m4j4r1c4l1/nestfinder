@@ -81,9 +81,9 @@ const ToastContainer = ({ toasts, onDismiss }) => {
     return (
         <div style={{
             position: 'fixed',
-            bottom: 'calc(80px + var(--space-4))', // Above bottom nav
+            top: '50%',
             left: '50%',
-            transform: 'translateX(-50%)',
+            transform: 'translate(-50%, -50%)',
             zIndex: 10000,
             display: 'flex',
             flexDirection: 'column',

@@ -353,9 +353,9 @@ const App = () => {
                     onClick={() => setServerToast(null)}
                     style={{
                         position: 'fixed',
-                        bottom: '2rem',
+                        top: '50%',
                         left: '50%',
-                        transform: 'translateX(-50%)',
+                        transform: 'translate(-50%, -50%)',
                         zIndex: 10000,
                         background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                         color: 'black',
