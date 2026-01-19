@@ -777,7 +777,7 @@ export default function Observability() {
                                 <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '1.4rem' }}>🛠️ Development</div>
 
                                 {/* 3 columns Badge Grid (9 items) */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: '0.6rem', width: '100%', marginTop: 'auto' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: '0.6rem', width: '100%', marginTop: '0' }}>
                                     {[
                                         // Row 1
                                         { label: 'Components', sub: 'React/JSX', count: <RollingBarrelCounter end={stats.devMetrics?.components || 0} trigger={stats.devMetrics?.lastCommit} separator="." />, color: '#0ea5e9', alignBottom: true },
