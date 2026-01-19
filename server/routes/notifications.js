@@ -58,7 +58,7 @@ router.get('/notifications', (req, res) => {
 
         // 1. Get standard notifications
         const notifications = all(
-            'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+            'SELECT * FROM notifications WHERE user_id = ? AND dismissed = 0 ORDER BY created_at DESC LIMIT 50',
             [userId]
         );
 
@@ -199,8 +199,9 @@ router.delete('/notifications/:id', requireUser, (req, res) => {
             return res.status(404).json({ error: 'Notification not found' });
         }
 
-        run('DELETE FROM notifications WHERE id = ? AND user_id = ?', [id, userId]);
-        log(userId, 'delete_notification', id.toString(), {});
+        // Soft Delete: Mark as dismissed instead of removing record
+        run('UPDATE notifications SET dismissed = 1 WHERE id = ? AND user_id = ?', [id, userId]);
+        log(userId, 'delete_notification', id.toString(), { type: 'soft_delete' });
 
         res.json({ success: true });
     } catch (error) {

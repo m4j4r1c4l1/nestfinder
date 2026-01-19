@@ -1943,7 +1943,7 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
 
 // --- Sub-components ---
 
-const ConfirmationModal = ({ title, message, onConfirm, onCancel }) => {
+const ConfirmationModal = ({ title, message, onConfirm, onCancel, confirmText = 'Delete', confirmColor = '#ef4444' }) => {
     return ReactDOM.createPortal(
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
@@ -1999,19 +1999,19 @@ const ConfirmationModal = ({ title, message, onConfirm, onCancel }) => {
                         style={{
                             padding: '0.6rem 1.2rem',
                             borderRadius: '8px',
-                            background: '#ef4444',
+                            background: confirmColor,
                             color: '#fff',
                             border: 'none',
                             fontSize: '0.9rem',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2)',
+                            boxShadow: `0 4px 6px -1px ${confirmColor}33`,
                             transition: 'all 0.2s'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(110%)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.filter = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
-                        Delete
+                        {confirmText}
                     </button>
                 </div>
             </div>
@@ -2504,6 +2504,8 @@ const FeedbackSection = ({
             show: true,
             title: 'Confirm Action',
             message: `Are you sure you want to mark ${selectedIds.length} items as read?`,
+            confirmText: 'Mark as Read',
+            confirmColor: '#14532d', // Green/Dark Green match
             onConfirm: () => {
                 handleBulkMarkRead();
             }
@@ -2667,13 +2669,21 @@ const FeedbackSection = ({
                                     <th style={{ padding: '0.75rem 0.5rem', width: selectedIds.length > 0 ? '280px' : '120px', textAlign: 'right' }}>
                                         {selectedIds.length > 0 && (
                                             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                                                <button
-                                                    onClick={confirmMarkRead}
-                                                    className="btn btn-sm"
-                                                    style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '28px', display: 'flex', alignItems: 'center', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
-                                                >
-                                                    <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
-                                                </button>
+                                                {/* Show Mark as Read ONLY if at least one selected item is NOT read yet */}
+                                                {selectedIds.some(id => {
+                                                    const item = feedback.find(f => f.id === id);
+                                                    // If item is sent/new/delivered/pending, it needs reading.
+                                                    // If item is reviewed/read, it is already read.
+                                                    return item && ['sent', 'new', 'delivered', 'pending'].includes(item.status);
+                                                }) && (
+                                                        <button
+                                                            onClick={confirmMarkRead}
+                                                            className="btn btn-sm"
+                                                            style={{ background: '#14532d', color: 'white', border: 'none', padding: '0 0.8rem', borderRadius: '6px', fontWeight: 500, height: '28px', display: 'flex', alignItems: 'center', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                                                        >
+                                                            <span style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '4px' }}>✓✓</span> Mark as Read
+                                                        </button>
+                                                    )}
                                                 <button
                                                     onClick={handleBulkDelete}
                                                     className="btn btn-danger btn-sm"

@@ -220,6 +220,7 @@ export const initDatabase = async () => {
       delivered BOOLEAN DEFAULT 0,
       delivered_at DATETIME,
       read_at DATETIME,
+      dismissed BOOLEAN DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
@@ -292,6 +293,7 @@ export const initDatabase = async () => {
   try { db.run("ALTER TABLE notifications ADD COLUMN delivered BOOLEAN DEFAULT 0"); } catch (e) { /* Exists */ }
   try { db.run("ALTER TABLE notifications ADD COLUMN delivered_at DATETIME"); } catch (e) { /* Exists */ }
   try { db.run("ALTER TABLE notifications ADD COLUMN read_at DATETIME"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE notifications ADD COLUMN dismissed BOOLEAN DEFAULT 0"); } catch (e) { /* Exists */ }
 
   // Broadcasts table migrations
   try { db.run("ALTER TABLE broadcasts ADD COLUMN title TEXT"); } catch (e) { /* Exists */ }

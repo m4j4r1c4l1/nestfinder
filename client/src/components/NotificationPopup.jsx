@@ -1,8 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+const getIconForType = (type) => {
+    switch (type) {
+        case 'bug': return '🐛';
+        case 'suggestion': return '💡';
+        case 'other': return '💭';
+        case 'alert': return '🚨';
+        case 'success': return '✅';
+        case 'reward': return '🏆';
+        case 'broadcast': return '📢';
+        default: return '🔔';
+    }
+};
+
 const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }) => {
     if (!message) return null;
+
+    const icon = message.icon || getIconForType(message.type);
 
     return ReactDOM.createPortal(
         <div className="notification-popup-overlay" onClick={() => { onMarkRead(message); onDismiss(); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
@@ -11,7 +26,7 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }
                     message.image_url && <img src={message.image_url} alt="Notification" style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }} />
                 ) : (
                     <>
-                        <span className="notification-popup-icon" style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>🔔</span>
+                        <span className="notification-popup-icon" style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>{icon}</span>
                         <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem' }}>{message.title}</h3>
                         <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '12px' }}>
                             {(() => {
