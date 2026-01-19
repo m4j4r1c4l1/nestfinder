@@ -466,6 +466,12 @@ const createScheduledBackup = async (type = 'scheduled') => {
         const dbPath = path.join(dbDir, dbFilename);   // Intermediate uncompressed
         const gzPath = path.join(dbDir, gzFilename);   // Final compressed
 
+        let currentDbFilename = dbFilename;
+        let currentGzFilename = gzFilename;
+        let currentDbPath = dbPath;
+        let currentGzPath = gzPath;
+        let healthFailed = false;
+
         // --- SECTION 1: ACTIVE DB ---
 
         // 1.1 Backup
@@ -490,27 +496,40 @@ const createScheduledBackup = async (type = 'scheduled') => {
 
         const isHealthy = await verifyBackupIntegrity(dbPath);
         if (!isHealthy) {
-            throw new Error('Database integrity check failed');
+            healthFailed = true;
+            debugLog(`⚠️ Database integrity check FAILED for ${dbFilename}. Marking as corrupt.`);
+
+            currentDbFilename = dbFilename.replace('.backup.', '.corrupt.').replace('.on_demand.', '.corrupt.');
+            currentGzFilename = gzFilename.replace('.backup.', '.corrupt.').replace('.on_demand.', '.corrupt.');
+            currentDbPath = path.join(dbDir, currentDbFilename);
+            currentGzPath = path.join(dbDir, currentGzFilename);
+
+            if (fs.existsSync(dbPath)) {
+                fs.renameSync(dbPath, currentDbPath);
+            }
+
+            updateBackupSectionTask('active_db', 'health_check', 'warning', 100, '1.2 Health Check (CORRUPT)');
+        } else {
+            debugLog('✅ Backup integrity verified');
+            updateBackupSectionTask('active_db', 'health_check', 'success', 100);
         }
-        debugLog('✅ Backup integrity verified');
-        updateBackupSectionTask('active_db', 'health_check', 'success', 100);
 
         // 1.3 Compression
         addBackupTask('active_db', { id: 'compression', name: '1.3 Compression', status: 'running', progress: 0 });
 
         await pipe(
-            fs.createReadStream(dbPath),
+            fs.createReadStream(currentDbPath),
             zlib.createGzip(),
-            fs.createWriteStream(gzPath)
+            fs.createWriteStream(currentGzPath)
         );
 
         // remove intermediate
-        if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
+        if (fs.existsSync(currentDbPath)) fs.unlinkSync(currentDbPath);
 
-        debugLog(`📦 Scheduled backup compressed: ${gzFilename}`);
+        debugLog(`📦 ${healthFailed ? 'CORRUPT' : 'Scheduled'} backup compressed: ${currentGzFilename}`);
         updateBackupSectionTask('active_db', 'compression', 'success', 100);
-        const gzSize = fs.existsSync(gzPath) ? fs.statSync(gzPath).size : 0;
-        addBackupSubtask('active_db', 'compression', { name: gzFilename, status: 'success', size: formatBytes(gzSize) });
+        const gzSize = fs.existsSync(currentGzPath) ? fs.statSync(currentGzPath).size : 0;
+        addBackupSubtask('active_db', 'compression', { name: currentGzFilename, status: 'success', size: formatBytes(gzSize) });
 
 
         // --- SECTION 2: ARCHIVING DAEMON ---
@@ -603,7 +622,7 @@ const createScheduledBackup = async (type = 'scheduled') => {
         applyRetentionPoliciesLite(dbDir);
 
         run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_time', new Date().toISOString()]);
-        run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_status', 'Success']);
+        run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', ['last_scheduled_backup_status', healthFailed ? 'Success (Corrupt)' : 'Success']);
 
         // Check disk usage and alert if > 85%
         checkDiskUsageAlert(dbDir);
@@ -612,7 +631,7 @@ const createScheduledBackup = async (type = 'scheduled') => {
         activeBackupState.sections = []; // Clear sections so UI closes on reconnect
         broadcastBackupState();
 
-        return gzFilename;
+        return currentGzFilename;
 
     } catch (error) {
         console.error('Backup error:', error);
