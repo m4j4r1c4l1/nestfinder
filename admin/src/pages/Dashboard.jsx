@@ -93,8 +93,8 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                                 )}
 
                                                 <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
-                                                    {/* Hide parent icon if it has subtasks - unless it's running/error */}
-                                                    {(!task.subtasks || task.subtasks.length === 0 || task.status === 'running' || task.status === 'error') ? (
+                                                    {/* Hide parent icon if it has subtasks - unless it's running/error. Also hide for 'listing' task (user req) */}
+                                                    {(!task.subtasks || task.subtasks.length === 0 || task.status === 'running' || task.status === 'error') && task.id !== 'listing' ? (
                                                         getMonkeyIcon(task.progress, task.status)
                                                     ) : (
                                                         <span style={{ display: 'inline-block', width: '28px' }}></span>
