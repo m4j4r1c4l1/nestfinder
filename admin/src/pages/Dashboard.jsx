@@ -1778,7 +1778,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     {/* SET Button - aligned over Upload File */}
                                     <button
-                                        onClick={handleSetSchedule}
+                                        onClick={() => handleSetSchedule()}
                                         disabled={actionLoading === 'schedule' || !backupEnabled}
                                         style={{
                                             padding: '0.2rem 0.6rem',
