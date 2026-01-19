@@ -1843,13 +1843,25 @@ const DBManagerModal = ({ onClose, onResult }) => {
 
 
                     {/* File List Table */}
-                    <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)', borderTop: '1px solid var(--color-border)', minHeight: '300px' }}>
-                        {loading ? (
-                            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading files...</div>
-                        ) : files.length === 0 ? (
+                    <div style={{ flex: 1, overflow: 'auto', padding: '0', background: 'var(--color-bg-primary)', borderTop: '1px solid var(--color-border)', minHeight: '300px', position: 'relative' }}>
+                        {loading && (
+                            <div style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: files.length > 0 ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                backdropFilter: files.length > 0 ? 'blur(1px)' : 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 20
+                            }}>
+                                <span style={{ color: 'var(--color-text-secondary)' }}>Loading Databases...</span>
+                            </div>
+                        )}
+                        {files.length === 0 && !loading ? (
                             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>No database files found</div>
                         ) : (
-                            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed', minWidth: Object.values(colWidths).reduce((a, b) => a + b, 0) + 'px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed', minWidth: Object.values(colWidths).reduce((a, b) => a + b, 0) + 'px', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
                                 <thead style={{ background: '#1e293b', position: 'sticky', top: 0, zIndex: 10 }}>
                                     <tr>
                                         {[
