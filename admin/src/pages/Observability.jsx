@@ -1810,18 +1810,15 @@ const MetricsSection = () => {
                     📈 Trends Graphs
                 </h3>
                 <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Scope:</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <select
                             value={globalDays}
                             onChange={(e) => setGlobalDays(parseInt(e.target.value))}
                             style={{
                                 background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
-                                borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer',
-                                fontWeight: 600, outline: 'none'
+                                borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
                             }}
                         >
-                            <option value={1}>24 Hours</option>
                             <option value={7}>7 Days</option>
                             <option value={14}>14 Days</option>
                             <option value={30}>30 Days</option>
@@ -1829,23 +1826,17 @@ const MetricsSection = () => {
                             <option value={365}>1 Year</option>
                             <option value={36500}>All Time</option>
                         </select>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Refresh:</span>
                         <select
                             value={globalRefreshInterval}
                             onChange={(e) => setGlobalRefreshInterval(parseInt(e.target.value))}
                             style={{
                                 background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
-                                borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer',
-                                fontWeight: 600, outline: 'none'
+                                borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
                             }}
                         >
-                            <option value={0}>Off</option>
-                            <option value={10}>10s</option>
+                            <option value={0}>Refresh: Off</option>
                             <option value={30}>30s</option>
                             <option value={60}>1m</option>
-                            <option value={300}>5m</option>
                         </select>
                     </div>
                 </div>
