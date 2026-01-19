@@ -1706,15 +1706,17 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     const yPercent = (hoveredPoint.y + padding.top) / chartHeight * 100;
                     const isRightSide = xPercent > 60; // Flip if past 60%
 
-                    // Clamp Y to avoid clipping top/bottom (approx 15% padding)
-                    const clampedY = Math.max(15, Math.min(85, yPercent));
+                    // Dynamic vertical alignment to prevent overflow
+                    let translateY = '-50%';
+                    if (yPercent > 80) translateY = '-100%'; // Bottom: shift up
+                    else if (yPercent < 20) translateY = '0%'; // Top: shift down
 
                     return (
                         <div style={{
                             position: 'absolute',
                             left: `${xPercent}%`,
-                            top: `${clampedY}%`,
-                            transform: `translate(${isRightSide ? 'calc(-100% - 15px)' : '15px'}, -50%)`,
+                            top: `${yPercent}%`, // Follow the point directly relying on transform for offset
+                            transform: `translate(${isRightSide ? 'calc(-100% - 15px)' : '15px'}, ${translateY})`,
                             background: '#0f172a',
                             border: '1px solid #334155',
                             borderRadius: '8px',
