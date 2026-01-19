@@ -58,6 +58,7 @@ const checkDiskUsageAlert = (dbDir) => {
 
             // Insert feedback alert for admin
             run(`
+                INSERT INTO feedback (user_id, type, message, status)
                 VALUES (NULL, 'disk-alert', ?, 'sent')
             `, [`**${usagePercent}% Disk:** ${usedMB} MB / ${totalMB} MB`]);
 
