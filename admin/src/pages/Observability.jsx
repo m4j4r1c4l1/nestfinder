@@ -1267,8 +1267,25 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const [internalRefreshInterval, setInternalRefreshInterval] = useState(0);
 
     // Use props if provided, otherwise fallback to internal state
-    const days = propsDays !== undefined ? propsDays : internalDays;
-    const refreshInterval = propsRefreshInterval !== undefined ? propsRefreshInterval : internalRefreshInterval;
+    // Use props if provided, otherwise fallback to internal state
+    const days = internalDays;
+    const refreshInterval = internalRefreshInterval;
+
+    // Sync with global props when they change (skip initial mount to preserve local storage persistence)
+    const isMounted = useRef(false);
+    useEffect(() => {
+        if (isMounted.current) {
+            if (propsDays !== undefined) setInternalDays(propsDays);
+        }
+    }, [propsDays]);
+
+    useEffect(() => {
+        if (isMounted.current) {
+            if (propsRefreshInterval !== undefined) setInternalRefreshInterval(propsRefreshInterval);
+        } else {
+            isMounted.current = true;
+        }
+    }, [propsRefreshInterval]);
 
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const cardRef = useRef(null);
@@ -1572,7 +1589,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     </div>
                     {/* Right-aligned controls */}
                     <div style={{ marginLeft: 'auto' }}>
-                        {!propsDays && renderControls()}
+                        {renderControls()}
                     </div>
                 </div>
             </div>
@@ -1798,8 +1815,8 @@ const MetricsSection = () => {
                             value={globalDays}
                             onChange={(e) => setGlobalDays(parseInt(e.target.value))}
                             style={{
-                                background: 'rgba(15, 23, 42, 0.4)', color: '#e2e8f0', border: '1px solid #334155',
-                                borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer',
+                                background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
+                                borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer',
                                 fontWeight: 600, outline: 'none'
                             }}
                         >
@@ -1818,8 +1835,8 @@ const MetricsSection = () => {
                             value={globalRefreshInterval}
                             onChange={(e) => setGlobalRefreshInterval(parseInt(e.target.value))}
                             style={{
-                                background: 'rgba(15, 23, 42, 0.4)', color: '#e2e8f0', border: '1px solid #334155',
-                                borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer',
+                                background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
+                                borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer',
                                 fontWeight: 600, outline: 'none'
                             }}
                         >
@@ -1988,8 +2005,25 @@ const RatingsChartCard = ({ onPointClick, days: propsDays, refreshInterval: prop
     });
     const [internalRefreshInterval, setInternalRefreshInterval] = useState(0);
 
-    const days = propsDays !== undefined ? propsDays : internalDays;
-    const refreshInterval = propsRefreshInterval !== undefined ? propsRefreshInterval : internalRefreshInterval;
+    const days = internalDays;
+    const refreshInterval = internalRefreshInterval;
+
+    // Sync with global props for RatingsChartCard too
+    const isMounted = useRef(false);
+    useEffect(() => {
+        if (isMounted.current) {
+            if (propsDays !== undefined) setInternalDays(propsDays);
+        }
+    }, [propsDays]);
+
+    useEffect(() => {
+        if (isMounted.current) {
+            if (propsRefreshInterval !== undefined) setInternalRefreshInterval(propsRefreshInterval);
+        } else {
+            isMounted.current = true;
+        }
+    }, [propsRefreshInterval]);
+
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const cardRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -2169,7 +2203,7 @@ const RatingsChartCard = ({ onPointClick, days: propsDays, refreshInterval: prop
                         <span style={{ fontSize: '1.2rem' }}>⭐</span>
                         <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>App Ratings</h3>
                     </div>
-                    {!propsDays && renderControls()}
+                    {renderControls()}
                 </div>
                 <div className="card-body" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
                     {loading ? 'Loading...' : 'No ratings data available yet'}
@@ -2196,7 +2230,7 @@ const RatingsChartCard = ({ onPointClick, days: propsDays, refreshInterval: prop
                         <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem', fontWeight: 600 }}>App Ratings</h3>
                     </div>
                     <div style={{ marginLeft: 'auto' }}>
-                        {!propsDays && renderControls()}
+                        {renderControls()}
                     </div>
                 </div>
             </div>
