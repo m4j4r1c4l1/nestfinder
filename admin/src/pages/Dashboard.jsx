@@ -7,6 +7,20 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
     const isError = allTasks.some(t => t.status === 'error');
     const isSuccess = !isRunning && !isError && allTasks.length > 0;
 
+    // Monkey animation state
+    const [monkeyIndex, setMonkeyIndex] = useState(0);
+    const monkeys = ['🐵', '🙉', '🙊', '🙈'];
+
+    useEffect(() => {
+        if (!isRunning) return;
+
+        const interval = setInterval(() => {
+            setMonkeyIndex(prev => (prev + 1) % 4);
+        }, 500);
+
+        return () => clearInterval(interval);
+    }, [isRunning]);
+
     const handleDismiss = () => {
         onClose();
         if (isSuccess && onResult) {
@@ -16,21 +30,11 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
         }
     };
 
-    const getMonkeyIcon = (progress, status) => {
+    const getStatusIcon = (status) => {
         if (status === 'error') return '❌';
-        if (status === 'pending') return '...';
-
-        // Only show tick when progress is 100 AND status is success
-        if ((progress || 0) >= 100 || status === 'success') {
-            return <span style={{ fontSize: '1.2rem', color: '#22c55e', fontWeight: 'bold' }}>✓</span>;
-        }
-
-        // Running logic: 0-24 🐵, 25-49 🙉, 50-74 🙊, 75-99 🙈
-        const p = progress || 0;
-        if (p >= 75) return '🙈';
-        if (p >= 50) return '🙊';
-        if (p >= 25) return '🙉';
-        return '🐵';
+        if (status === 'success') return <span style={{ fontSize: '1.2rem', color: '#22c55e', fontWeight: 'bold' }}>✓</span>;
+        if (status === 'running') return monkeys[monkeyIndex];
+        return '...'; // Pending
     };
 
     return (
@@ -74,28 +78,12 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                             </span>
 
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                {/* Only show progress bar if task is still running or has meaningful progress */}
-                                                {(task.status === 'running' || (task.progress > 0 && task.progress < 100)) && (
-                                                    <div style={{
-                                                        width: '100px', height: '8px',
-                                                        background: 'rgba(255,255,255,0.05)',
-                                                        borderRadius: '4px',
-                                                        overflow: 'hidden',
-                                                        border: '1px solid rgba(255,255,255,0.1)'
-                                                    }}>
-                                                        <div style={{
-                                                            height: '100%',
-                                                            width: `${task.progress || 0}%`,
-                                                            background: task.status === 'error' ? '#ef4444' : '#3b82f6',
-                                                            transition: 'width 0.3s ease-out'
-                                                        }} />
-                                                    </div>
-                                                )}
+                                                {/* Progress bar removed as requested */}
 
                                                 <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1 }}>
                                                     {/* Hide parent icon if it has subtasks - unless it's running/error. Also hide for 'listing' task (user req) */}
                                                     {(!task.subtasks || task.subtasks.length === 0 || task.status === 'running' || task.status === 'error') && task.id !== 'listing' ? (
-                                                        getMonkeyIcon(task.progress, task.status)
+                                                        getStatusIcon(task.status)
                                                     ) : (
                                                         <span style={{ display: 'inline-block', width: '28px' }}></span>
                                                     )}
