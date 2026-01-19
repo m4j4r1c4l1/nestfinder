@@ -1210,15 +1210,15 @@ const DBManagerModal = ({ onClose, onResult }) => {
         const b = badges[type] || badges.other;
         return (
             <span style={{
-                padding: '0.2rem 0.5rem',
+                padding: '0.2rem 0.6rem',
                 borderRadius: '4px',
                 fontSize: '0.7rem',
                 fontWeight: 600,
                 color: b.color,
                 background: b.bg,
                 whiteSpace: 'nowrap',
-                minWidth: '70px',
-                display: 'inline-block',
+                width: '85px', // Fixed width
+                display: 'inline-block', // Required for width
                 textAlign: 'center'
             }}>
                 {b.label}
