@@ -1290,7 +1290,8 @@ const DBManagerModal = ({ onClose, onResult }) => {
             title: 'Delete Database File?',
             message: (
                 <>
-                    Are you sure you want to delete <br />
+                    Are you sure you want to delete
+                    <div style={{ height: '0.8rem' }} /> {/* Empty line */}
                     <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{filename}</span>?
                     <br /><br />This action cannot be undone.
                 </>
@@ -2133,14 +2134,14 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 style={{
                                     flex: 1,
                                     padding: '0.75rem',
-                                    background: 'transparent',
-                                    border: '1px solid #334155',
-                                    color: '#e2e8f0',
+                                    background: 'rgba(34, 197, 94, 0.1)', // Green tint like "Active" badge
+                                    border: '1px solid rgba(34, 197, 94, 0.4)',
+                                    color: '#22c55e', // Green text
                                     borderRadius: '8px',
-                                    fontWeight: 500
+                                    fontWeight: 600
                                 }}
-                                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.2)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)'}
                             >
                                 Cancel
                             </button>
