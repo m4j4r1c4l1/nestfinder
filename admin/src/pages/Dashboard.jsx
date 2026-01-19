@@ -69,7 +69,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                 {section.tasks.map((task, tIdx) => (
                                     <div key={task.id || tIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
-                                            <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
+                                            <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                                                 {task.name}
                                             </span>
 
@@ -109,7 +109,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                                 {task.subtasks.map((sub, subIdx) => (
                                                     <div key={subIdx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
                                                         {/* Indent name but align column structure */}
-                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'nowrap' }}>
+                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'normal', wordBreak: 'break-all' }}>
                                                             {sub.name}
                                                         </span>
 
