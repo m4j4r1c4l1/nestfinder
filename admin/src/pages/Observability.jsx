@@ -1260,36 +1260,82 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
 };
 
 // Reusable Chart Card Component with independent state
-const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true, onPointClick, days: propsDays, refreshInterval: propsRefreshInterval }) => {
+// Reusable Chart Card Component with independent state
+const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true, onPointClick, days: propsDays, daysTs: propsDaysTs, refreshInterval: propsRefreshInterval, refreshIntervalTs: propsRefreshIntervalTs }) => {
     const storageKey = `observability_scope_${title ? title.toLowerCase().replace(/\s+/g, '_') : 'default'} `;
+    const tsStorageKey = `${storageKey}_ts`;
     const [metrics, setMetrics] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [internalDays, setInternalDays] = useState(() => {
-        const saved = localStorage.getItem(storageKey);
-        return saved ? parseInt(saved) : 7;
-    });
-    const [internalRefreshInterval, setInternalRefreshInterval] = useState(0);
 
-    // Use props if provided, otherwise fallback to internal state
-    // Use props if provided, otherwise fallback to internal state
+    // Smart Persistence Logic: Compare Global TS vs Local TS
+    const [internalDays, setInternalDays] = useState(() => {
+        const localVal = localStorage.getItem(storageKey);
+        const localTs = localStorage.getItem(`${tsStorageKey}_days`);
+        const globalTs = propsDaysTs || 0;
+
+        // If Global is newer than Local, use Global
+        if (propsDays !== undefined && globalTs > (parseInt(localTs) || 0)) {
+            return propsDays;
+        }
+        return localVal ? parseInt(localVal) : (propsDays || 7);
+    });
+
+    const [internalRefreshInterval, setInternalRefreshInterval] = useState(() => {
+        const localVal = localStorage.getItem(`${storageKey}_refresh`);
+        const localTs = localStorage.getItem(`${tsStorageKey}_refresh`);
+        const globalTs = propsRefreshIntervalTs || 0;
+
+        if (propsRefreshInterval !== undefined && globalTs > (parseInt(localTs) || 0)) {
+            return propsRefreshInterval;
+        }
+        return localVal ? parseInt(localVal) : (propsRefreshInterval || 0);
+    });
+
     const days = internalDays;
     const refreshInterval = internalRefreshInterval;
 
-    // Sync with global props when they change (skip initial mount to preserve local storage persistence)
-    const isMounted = useRef(false);
+    // Track local timestamps
+    const [localDaysTs, setLocalDaysTs] = useState(() => parseInt(localStorage.getItem(`${tsStorageKey}_days`) || 0));
+    const [localRefreshTs, setLocalRefreshTs] = useState(() => parseInt(localStorage.getItem(`${tsStorageKey}_refresh`) || 0));
+
+    // Sync from Global if it becomes newer
     useEffect(() => {
-        if (isMounted.current) {
-            if (propsDays !== undefined) setInternalDays(propsDays);
+        if (propsDays !== undefined && propsDaysTs > localDaysTs) {
+            setInternalDays(propsDays);
+            setLocalDaysTs(propsDaysTs);
+            // Don't update local storage value here, just the current view? 
+            // Actually, if global wins, we should probably treat it as the new local baseline too?
+            // "The last value set... persist"
+            localStorage.setItem(storageKey, propsDays);
+            localStorage.setItem(`${tsStorageKey}_days`, propsDaysTs);
         }
-    }, [propsDays]);
+    }, [propsDays, propsDaysTs]);
 
     useEffect(() => {
-        if (isMounted.current) {
-            if (propsRefreshInterval !== undefined) setInternalRefreshInterval(propsRefreshInterval);
-        } else {
-            isMounted.current = true;
+        if (propsRefreshInterval !== undefined && propsRefreshIntervalTs > localRefreshTs) {
+            setInternalRefreshInterval(propsRefreshInterval);
+            setLocalRefreshTs(propsRefreshIntervalTs);
+            localStorage.setItem(`${storageKey}_refresh`, propsRefreshInterval);
+            localStorage.setItem(`${tsStorageKey}_refresh`, propsRefreshIntervalTs);
         }
-    }, [propsRefreshInterval]);
+    }, [propsRefreshInterval, propsRefreshIntervalTs]);
+
+    // Update Local Storage when Internal changes (due to user interaction)
+    const handleDaysChange = (newDays) => {
+        setInternalDays(newDays);
+        const now = Date.now();
+        setLocalDaysTs(now);
+        localStorage.setItem(storageKey, newDays);
+        localStorage.setItem(`${tsStorageKey}_days`, now);
+    };
+
+    const handleRefreshChange = (newInterval) => {
+        setInternalRefreshInterval(newInterval);
+        const now = Date.now();
+        setLocalRefreshTs(now);
+        localStorage.setItem(`${storageKey}_refresh`, newInterval);
+        localStorage.setItem(`${tsStorageKey}_refresh`, now);
+    };
 
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const cardRef = useRef(null);
@@ -1466,11 +1512,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <select
                     value={internalDays}
-                    onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        setInternalDays(val);
-                        localStorage.setItem(storageKey, val);
-                    }}
+                    onChange={(e) => handleDaysChange(parseInt(e.target.value))}
                     style={{
                         background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
                         borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
@@ -1485,7 +1527,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                 </select>
                 <select
                     value={internalRefreshInterval}
-                    onChange={(e) => setInternalRefreshInterval(parseInt(e.target.value))}
+                    onChange={(e) => handleRefreshChange(parseInt(e.target.value))}
                     style={{
                         background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
                         borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
@@ -1766,13 +1808,29 @@ const MetricsSection = () => {
         return saved ? parseInt(saved) : 0;
     });
 
+    // Timestamp states for conflict resolution
+    const [globalDaysTs, setGlobalDaysTs] = useState(() => {
+        const saved = localStorage.getItem('nest_trends_global_days_ts');
+        return saved ? parseInt(saved) : Date.now();
+    });
+    const [globalRefreshTs, setGlobalRefreshTs] = useState(() => {
+        const saved = localStorage.getItem('nest_trends_global_refresh_ts');
+        return saved ? parseInt(saved) : Date.now();
+    });
+
     // Persistence effects
     useEffect(() => {
         localStorage.setItem('nest_trends_global_days', globalDays);
+        const now = Date.now();
+        setGlobalDaysTs(now);
+        localStorage.setItem('nest_trends_global_days_ts', now);
     }, [globalDays]);
 
     useEffect(() => {
         localStorage.setItem('nest_trends_global_refresh', globalRefreshInterval);
+        const now = Date.now();
+        setGlobalRefreshTs(now);
+        localStorage.setItem('nest_trends_global_refresh_ts', now);
     }, [globalRefreshInterval]);
 
     const [breakdownDate, setBreakdownDate] = useState(null);
@@ -1877,7 +1935,9 @@ const MetricsSection = () => {
                     showLegend={true}
                     onPointClick={handleClientBarClick}
                     days={globalDays}
+                    daysTs={globalDaysTs}
                     refreshInterval={globalRefreshInterval}
+                    refreshIntervalTs={globalRefreshTs}
                 />
 
                 {/* Notifications Sent Graph */}
@@ -2013,34 +2073,79 @@ const RatingsBreakdownModal = ({ data, onClose }) => {
 };
 
 // Ratings Chart Card Component (Area Chart with Stars)
-const RatingsChartCard = ({ onPointClick, days: propsDays, refreshInterval: propsRefreshInterval }) => {
+// Ratings Chart Card Component (Area Chart with Stars)
+const RatingsChartCard = ({ onPointClick, days: propsDays, daysTs: propsDaysTs, refreshInterval: propsRefreshInterval, refreshIntervalTs: propsRefreshIntervalTs }) => {
     const storageKey = 'observability_scope_ratings';
+    const tsStorageKey = `${storageKey}_ts`;
     const [ratings, setRatings] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Smart Persistence Logic: Compare Global TS vs Local TS
     const [internalDays, setInternalDays] = useState(() => {
-        const saved = localStorage.getItem(storageKey);
-        return saved ? parseInt(saved) : 7;
+        const localVal = localStorage.getItem(storageKey);
+        const localTs = localStorage.getItem(`${tsStorageKey}_days`);
+        const globalTs = propsDaysTs || 0;
+
+        // If Global is newer than Local, use Global
+        if (propsDays !== undefined && globalTs > (parseInt(localTs) || 0)) {
+            return propsDays;
+        }
+        return localVal ? parseInt(localVal) : (propsDays || 7);
     });
-    const [internalRefreshInterval, setInternalRefreshInterval] = useState(0);
+
+    const [internalRefreshInterval, setInternalRefreshInterval] = useState(() => {
+        const localVal = localStorage.getItem(`${storageKey}_refresh`);
+        const localTs = localStorage.getItem(`${tsStorageKey}_refresh`);
+        const globalTs = propsRefreshIntervalTs || 0;
+
+        if (propsRefreshInterval !== undefined && globalTs > (parseInt(localTs) || 0)) {
+            return propsRefreshInterval;
+        }
+        return localVal ? parseInt(localVal) : (propsRefreshInterval || 0);
+    });
 
     const days = internalDays;
     const refreshInterval = internalRefreshInterval;
 
-    // Sync with global props for RatingsChartCard too
-    const isMounted = useRef(false);
+    // Track local timestamps
+    const [localDaysTs, setLocalDaysTs] = useState(() => parseInt(localStorage.getItem(`${tsStorageKey}_days`) || 0));
+    const [localRefreshTs, setLocalRefreshTs] = useState(() => parseInt(localStorage.getItem(`${tsStorageKey}_refresh`) || 0));
+
+    // Sync from Global if it becomes newer
     useEffect(() => {
-        if (isMounted.current) {
-            if (propsDays !== undefined) setInternalDays(propsDays);
+        if (propsDays !== undefined && propsDaysTs > localDaysTs) {
+            setInternalDays(propsDays);
+            setLocalDaysTs(propsDaysTs);
+            localStorage.setItem(storageKey, propsDays);
+            localStorage.setItem(`${tsStorageKey}_days`, propsDaysTs);
         }
-    }, [propsDays]);
+    }, [propsDays, propsDaysTs]);
 
     useEffect(() => {
-        if (isMounted.current) {
-            if (propsRefreshInterval !== undefined) setInternalRefreshInterval(propsRefreshInterval);
-        } else {
-            isMounted.current = true;
+        if (propsRefreshInterval !== undefined && propsRefreshIntervalTs > localRefreshTs) {
+            setInternalRefreshInterval(propsRefreshInterval);
+            setLocalRefreshTs(propsRefreshIntervalTs);
+            localStorage.setItem(`${storageKey}_refresh`, propsRefreshInterval);
+            localStorage.setItem(`${tsStorageKey}_refresh`, propsRefreshIntervalTs);
         }
-    }, [propsRefreshInterval]);
+    }, [propsRefreshInterval, propsRefreshIntervalTs]);
+
+    // Update Local Storage when Internal changes (due to user interaction)
+    const handleDaysChange = (newDays) => {
+        setInternalDays(newDays);
+        const now = Date.now();
+        setLocalDaysTs(now);
+        localStorage.setItem(storageKey, newDays);
+        localStorage.setItem(`${tsStorageKey}_days`, now);
+    };
+
+    const handleRefreshChange = (newInterval) => {
+        setInternalRefreshInterval(newInterval);
+        const now = Date.now();
+        setLocalRefreshTs(now);
+        localStorage.setItem(`${storageKey}_refresh`, newInterval);
+        localStorage.setItem(`${tsStorageKey}_refresh`, now);
+    };
 
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const cardRef = useRef(null);
@@ -2181,11 +2286,7 @@ const RatingsChartCard = ({ onPointClick, days: propsDays, refreshInterval: prop
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <select
                 value={internalDays}
-                onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    setInternalDays(val);
-                    localStorage.setItem(storageKey, val);
-                }}
+                onChange={(e) => handleDaysChange(parseInt(e.target.value))}
                 style={{
                     background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
                     borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
@@ -2200,7 +2301,7 @@ const RatingsChartCard = ({ onPointClick, days: propsDays, refreshInterval: prop
             </select>
             <select
                 value={internalRefreshInterval}
-                onChange={(e) => setInternalRefreshInterval(parseInt(e.target.value))}
+                onChange={(e) => handleRefreshChange(parseInt(e.target.value))}
                 style={{
                     background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
                     borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
