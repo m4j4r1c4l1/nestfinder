@@ -1805,7 +1805,11 @@ const MetricsSection = () => {
 
     return (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="card-header" style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
+                padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
+            }}>
                 <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                     📈 Trends Graphs
                 </h3>
