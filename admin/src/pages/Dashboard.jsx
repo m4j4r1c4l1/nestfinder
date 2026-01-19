@@ -59,7 +59,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                     Starting the Backup process
                 </h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '80vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '80vh', overflow: 'auto', paddingRight: '0.25rem' }}>
                     {sections.map((section, sIdx) => (
                         <div key={section.id || sIdx}>
                             <div style={{ fontWeight: 600, marginBottom: '0.75rem', color: 'var(--color-text-primary)', fontSize: '1rem' }}>
@@ -69,7 +69,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                 {section.tasks.map((task, tIdx) => (
                                     <div key={task.id || tIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
-                                            <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
+                                            <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none' }}>
                                                 {task.name}
                                             </span>
 
@@ -109,7 +109,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                                 {task.subtasks.map((sub, subIdx) => (
                                                     <div key={subIdx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
                                                         {/* Indent name but align column structure */}
-                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'nowrap' }}>
+                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none' }}>
                                                             {sub.name}
                                                         </span>
 
