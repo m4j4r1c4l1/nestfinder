@@ -1606,7 +1606,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Right Side: Pickers (Swapped) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', background: 'var(--color-bg-primary)', borderRadius: '6px', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
                                 {/* Row 1: Scheduling Pickers */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Start:</span>
@@ -1776,7 +1776,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                             </div>
 
                             {/* Column 3: Clock + Actions (Right) */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-primary)', borderRadius: '6px', opacity: backupEnabled ? 1 : 0.5, pointerEvents: backupEnabled ? 'auto' : 'none' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', borderLeft: '1px solid var(--color-border)', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-primary)', borderRadius: '6px' }}>
                                 {/* Row 1: SET Button + Live Clock (Top) */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     {/* SET Button - aligned over Upload File */}
