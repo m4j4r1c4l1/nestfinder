@@ -1736,6 +1736,9 @@ const MetricsSection = () => {
     const [globalRefreshInterval, setGlobalRefreshInterval] = useState(0);
 
     const [breakdownDate, setBreakdownDate] = useState(null);
+    const [breakdownData, setBreakdownData] = useState(null);
+    const [breakdownTotal, setBreakdownTotal] = useState(0);
+    const [ratingsBreakdown, setRatingsBreakdown] = useState(null);
 
     const handleClientBarClick = async (point) => {
         setBreakdownDate(point.date);

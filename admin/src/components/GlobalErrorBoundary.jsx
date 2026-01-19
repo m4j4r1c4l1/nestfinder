@@ -72,7 +72,7 @@ export class GlobalErrorBoundary extends Component {
             ].join('\n');
 
             // Send as 'bug' with 5 star rating
-            await adminApi.submitFeedback('bug', detailedReport, 5);
+            await adminApi.submitFeedback('admin-crash', detailedReport, 5);
 
             this.setState({ reportSent: true, sendingReport: false });
         } catch (e) {
