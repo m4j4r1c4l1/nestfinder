@@ -115,8 +115,10 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
 
                                                         {/* Right column for alignment */}
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                            {/* Spacer to match progress bar width (100px) */}
-                                                            <div style={{ width: '100px' }}></div>
+                                                            {/* Spacer/Size column (100px) */}
+                                                            <div style={{ width: '100px', textAlign: 'right', fontSize: '0.75rem', color: '#64748b' }}>
+                                                                {sub.size || ''}
+                                                            </div>
                                                             <div style={{ width: '28px', textAlign: 'center', fontSize: '1.2rem', lineHeight: 1, color: '#22c55e' }}>
                                                                 {sub.status === 'success' ? '✔' : ''}
                                                             </div>

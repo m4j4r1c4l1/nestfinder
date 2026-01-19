@@ -388,6 +388,30 @@ const addBackupSubtask = (sectionId, taskId, subtask) => {
     }
 };
 
+const updateBackupSubtask = (sectionId, taskId, subtaskName, updates) => {
+    const section = activeBackupState.sections.find(s => s.id === sectionId);
+    if (section) {
+        const task = section.tasks.find(t => t.id === taskId);
+        if (task && task.subtasks) {
+            const sub = task.subtasks.find(s => s.name === subtaskName);
+            if (sub) {
+                Object.assign(sub, updates);
+                broadcastBackupState();
+            }
+        }
+    }
+};
+
+const formatBytes = (bytes, decimals = 2) => {
+    if (!+bytes) return '0 B';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+};
+
+
 // ================== SCHEDULED BACKUPS (Task #8) ==================
 
 let backupInterval = null;
@@ -477,7 +501,8 @@ const createScheduledBackup = async (type = 'scheduled') => {
 
         debugLog(`📦 Scheduled backup compressed: ${gzFilename}`);
         updateBackupSectionTask('active_db', 'compression', 'success', 100);
-        addBackupSubtask('active_db', 'compression', { name: gzFilename, status: 'success' });
+        const gzSize = fs.existsSync(gzPath) ? fs.statSync(gzPath).size : 0;
+        addBackupSubtask('active_db', 'compression', { name: gzFilename, status: 'success', size: formatBytes(gzSize) });
 
 
         // --- SECTION 2: ARCHIVING DAEMON ---
@@ -516,8 +541,10 @@ const createScheduledBackup = async (type = 'scheduled') => {
                 debugLog(`📦 Compressing pending file: ${file}`);
                 await compressFile(path.join(dbDir, file));
 
-                // Mark subtask done? 
-                // We actually need to update the subtask status.
+                // Mark subtask done with size
+                const finalPath = path.join(dbDir, file + '.gz');
+                const finalSize = fs.existsSync(finalPath) ? fs.statSync(finalPath).size : 0;
+                updateBackupSubtask('archiving', 'archive_compress', file, { status: 'success', size: formatBytes(finalSize) });
                 // Since subtasks don't have IDs in my simple implementation, I'll validly assume sequential or 
                 // update by finding name.
                 // Or better, just re-broadcast whole state if subtask modified. 
