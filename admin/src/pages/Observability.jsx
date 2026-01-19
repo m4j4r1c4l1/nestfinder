@@ -1256,15 +1256,20 @@ const DailyBreakdownModal = ({ date, data, totalUsers, onClose }) => {
 };
 
 // Reusable Chart Card Component with independent state
-const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true, onPointClick }) => {
+const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLegend = true, onPointClick, days: propsDays, refreshInterval: propsRefreshInterval }) => {
     const storageKey = `observability_scope_${title ? title.toLowerCase().replace(/\s+/g, '_') : 'default'} `;
     const [metrics, setMetrics] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [days, setDays] = useState(() => {
+    const [internalDays, setInternalDays] = useState(() => {
         const saved = localStorage.getItem(storageKey);
         return saved ? parseInt(saved) : 7;
     });
-    const [refreshInterval, setRefreshInterval] = useState(0);
+    const [internalRefreshInterval, setInternalRefreshInterval] = useState(0);
+
+    // Use props if provided, otherwise fallback to internal state
+    const days = propsDays !== undefined ? propsDays : internalDays;
+    const refreshInterval = propsRefreshInterval !== undefined ? propsRefreshInterval : internalRefreshInterval;
+
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const cardRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -1438,10 +1443,10 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
         return (
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <select
-                    value={days}
+                    value={internalDays}
                     onChange={(e) => {
                         const val = parseInt(e.target.value);
-                        setDays(val);
+                        setInternalDays(val);
                         localStorage.setItem(storageKey, val);
                     }}
                     style={{
@@ -1457,8 +1462,8 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     <option value={36500}>All Time</option>
                 </select>
                 <select
-                    value={refreshInterval}
-                    onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
+                    value={internalRefreshInterval}
+                    onChange={(e) => setInternalRefreshInterval(parseInt(e.target.value))}
                     style={{
                         background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
                         borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
@@ -1567,7 +1572,7 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
                     </div>
                     {/* Right-aligned controls */}
                     <div style={{ marginLeft: 'auto' }}>
-                        {renderControls()}
+                        {!propsDays && renderControls()}
                     </div>
                 </div>
             </div>
@@ -1727,12 +1732,10 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
 };
 
 const MetricsSection = () => {
-    const [breakdownDate, setBreakdownDate] = useState(null);
-    const [breakdownData, setBreakdownData] = useState(null);
-    const [breakdownTotal, setBreakdownTotal] = useState(0);
+    const [globalDays, setGlobalDays] = useState(7);
+    const [globalRefreshInterval, setGlobalRefreshInterval] = useState(0);
 
-    // Ratings breakdown state
-    const [ratingsBreakdown, setRatingsBreakdown] = useState(null);
+    const [breakdownDate, setBreakdownDate] = useState(null);
 
     const handleClientBarClick = async (point) => {
         setBreakdownDate(point.date);
@@ -1781,10 +1784,50 @@ const MetricsSection = () => {
 
     return (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <div className="card-header">
-                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                     📈 Trends Graphs
                 </h3>
+                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Scope:</span>
+                        <select
+                            value={globalDays}
+                            onChange={(e) => setGlobalDays(parseInt(e.target.value))}
+                            style={{
+                                background: 'rgba(15, 23, 42, 0.4)', color: '#e2e8f0', border: '1px solid #334155',
+                                borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer',
+                                fontWeight: 600, outline: 'none'
+                            }}
+                        >
+                            <option value={1}>24 Hours</option>
+                            <option value={7}>7 Days</option>
+                            <option value={14}>14 Days</option>
+                            <option value={30}>30 Days</option>
+                            <option value={180}>6 Months</option>
+                            <option value={365}>1 Year</option>
+                            <option value={36500}>All Time</option>
+                        </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Refresh:</span>
+                        <select
+                            value={globalRefreshInterval}
+                            onChange={(e) => setGlobalRefreshInterval(parseInt(e.target.value))}
+                            style={{
+                                background: 'rgba(15, 23, 42, 0.4)', color: '#e2e8f0', border: '1px solid #334155',
+                                borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer',
+                                fontWeight: 600, outline: 'none'
+                            }}
+                        >
+                            <option value={0}>Off</option>
+                            <option value={10}>10s</option>
+                            <option value={30}>30s</option>
+                            <option value={60}>1m</option>
+                            <option value={300}>5m</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {/* Clients Graph - FIRST */}
@@ -1795,6 +1838,8 @@ const MetricsSection = () => {
                     seriesConfig={clientSeries}
                     showLegend={true}
                     onPointClick={handleClientBarClick}
+                    days={globalDays}
+                    refreshInterval={globalRefreshInterval}
                 />
 
                 {/* Notifications Sent Graph */}
@@ -1803,6 +1848,8 @@ const MetricsSection = () => {
                     icon={<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', fontSize: '1rem' }}>↑</span>}
                     type="line"
                     seriesConfig={sentSeries}
+                    days={globalDays}
+                    refreshInterval={globalRefreshInterval}
                 />
 
                 {/* Notifications Received Graph */}
@@ -1811,10 +1858,16 @@ const MetricsSection = () => {
                     icon={<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', fontSize: '1rem' }}>↓</span>}
                     type="line"
                     seriesConfig={receivedSeries}
+                    days={globalDays}
+                    refreshInterval={globalRefreshInterval}
                 />
 
                 {/* Ratings Graph */}
-                <RatingsChartCard onPointClick={handleRatingsBarClick} />
+                <RatingsChartCard
+                    onPointClick={handleRatingsBarClick}
+                    days={globalDays}
+                    refreshInterval={globalRefreshInterval}
+                />
             </div>
 
             {/* Render Popup */}
@@ -1922,15 +1975,18 @@ const RatingsBreakdownModal = ({ data, onClose }) => {
 };
 
 // Ratings Chart Card Component (Area Chart with Stars)
-const RatingsChartCard = ({ onPointClick }) => {
+const RatingsChartCard = ({ onPointClick, days: propsDays, refreshInterval: propsRefreshInterval }) => {
     const storageKey = 'observability_scope_ratings';
     const [ratings, setRatings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [days, setDays] = useState(() => {
+    const [internalDays, setInternalDays] = useState(() => {
         const saved = localStorage.getItem(storageKey);
         return saved ? parseInt(saved) : 7;
     });
-    const [refreshInterval, setRefreshInterval] = useState(0);
+    const [internalRefreshInterval, setInternalRefreshInterval] = useState(0);
+
+    const days = propsDays !== undefined ? propsDays : internalDays;
+    const refreshInterval = propsRefreshInterval !== undefined ? propsRefreshInterval : internalRefreshInterval;
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const cardRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -2069,10 +2125,10 @@ const RatingsChartCard = ({ onPointClick }) => {
     const renderControls = () => (
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <select
-                value={days}
+                value={internalDays}
                 onChange={(e) => {
                     const val = parseInt(e.target.value);
-                    setDays(val);
+                    setInternalDays(val);
                     localStorage.setItem(storageKey, val);
                 }}
                 style={{
@@ -2088,8 +2144,8 @@ const RatingsChartCard = ({ onPointClick }) => {
                 <option value={36500}>All Time</option>
             </select>
             <select
-                value={refreshInterval}
-                onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
+                value={internalRefreshInterval}
+                onChange={(e) => setInternalRefreshInterval(parseInt(e.target.value))}
                 style={{
                     background: '#334155', color: '#e2e8f0', border: '1px solid #475569',
                     borderRadius: '4px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', cursor: 'pointer'
@@ -2110,12 +2166,12 @@ const RatingsChartCard = ({ onPointClick }) => {
                         <span style={{ fontSize: '1.2rem' }}>⭐</span>
                         <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem' }}>App Ratings</h3>
                     </div>
-                    {renderControls()}
+                    {!propsDays && renderControls()}
                 </div>
                 <div className="card-body" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
                     {loading ? 'Loading...' : 'No ratings data available yet'}
                 </div>
-            </div>
+            </div >
         );
     }
 
@@ -2137,7 +2193,7 @@ const RatingsChartCard = ({ onPointClick }) => {
                         <h3 style={{ color: '#e2e8f0', margin: 0, fontSize: '1rem', fontWeight: 600 }}>App Ratings</h3>
                     </div>
                     <div style={{ marginLeft: 'auto' }}>
-                        {renderControls()}
+                        {!propsDays && renderControls()}
                     </div>
                 </div>
             </div>
