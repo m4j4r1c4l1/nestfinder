@@ -2134,14 +2134,13 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                 style={{
                                     flex: 1,
                                     padding: '0.75rem',
-                                    background: 'rgba(34, 197, 94, 0.1)', // Green tint like "Active" badge
-                                    border: '1px solid rgba(34, 197, 94, 0.4)',
-                                    color: '#22c55e', // Green text
+                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                    color: 'white',
+                                    border: 'none',
                                     borderRadius: '8px',
-                                    fontWeight: 600
+                                    fontWeight: 600,
+                                    boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)'
                                 }}
-                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.2)'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)'}
                             >
                                 Cancel
                             </button>
