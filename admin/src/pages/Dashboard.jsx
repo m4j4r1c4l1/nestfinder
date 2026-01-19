@@ -59,7 +59,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                     Starting the Backup process
                 </h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '80vh', overflow: 'auto', paddingRight: '0.25rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div className="custom-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '80vh', overflowY: 'auto', overflowX: 'hidden', paddingRight: '0.5rem' }}>
                     {sections.map((section, sIdx) => (
                         <div key={section.id || sIdx}>
                             <div style={{ fontWeight: 600, marginBottom: '0.75rem', color: 'var(--color-text-primary)', fontSize: '1rem' }}>
@@ -109,7 +109,7 @@ const BackupProgressModal = ({ sections = [], onClose, onResult }) => {
                                                 {task.subtasks.map((sub, subIdx) => (
                                                     <div key={subIdx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
                                                         {/* Indent name but align column structure */}
-                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none' }}>
+                                                        <span style={{ flex: 1, fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '1.5rem', whiteSpace: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', fontStyle: 'italic' }}>
                                                             {sub.name}
                                                         </span>
 

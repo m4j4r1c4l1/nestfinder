@@ -2770,7 +2770,17 @@ const FeedbackSection = ({
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem', verticalAlign: 'middle' }}>
                                             <div style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {(item.message || '').replace(/\n*\[Rating:\s*\d\/5\s*⭐\]/g, '').trim()}
+                                                {(() => {
+                                                    const text = item.message || '';
+                                                    const clean = text.replace(/\n*\[Rating:\s*\d\/5\s*⭐\]/g, '').trim();
+                                                    const parts = clean.split(/(\*\*.*?\*\*)/g);
+                                                    return parts.map((part, i) => {
+                                                        if (part.startsWith('**') && part.endsWith('**')) {
+                                                            return <strong key={i} style={{ color: '#fff', fontWeight: '800' }}>{part.slice(2, -2)}</strong>;
+                                                        }
+                                                        return part;
+                                                    });
+                                                })()}
                                             </div>
                                         </td>
 
@@ -3622,9 +3632,19 @@ const MessagePreviewModal = ({ message, onClose }) => {
                             </div>
                         )}
 
-                        {/* Message/Body */}
+                        {/* Message/Body using Global renderMessage logic or inline equivalent */}
                         <div style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
-                            {((message.message || message.body) || '').replace(/\n*\[Rating:\s*\d\/5\s*⭐\]/g, '').trim()}
+                            {(() => {
+                                const text = message.message || message.body || '';
+                                const clean = text.replace(/\n*\[Rating:\s*\d\/5\s*⭐\]/g, '').trim();
+                                const parts = clean.split(/(\*\*.*?\*\*)/g);
+                                return parts.map((part, i) => {
+                                    if (part.startsWith('**') && part.endsWith('**')) {
+                                        return <strong key={i} style={{ color: '#fff', fontWeight: '800' }}>{part.slice(2, -2)}</strong>;
+                                    }
+                                    return part;
+                                });
+                            })()}
                         </div>
                     </div>
                 </div>
