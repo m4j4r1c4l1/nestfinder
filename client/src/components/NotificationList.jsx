@@ -409,7 +409,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 await api.deleteNotification(id);
                 setDeletedIds(prev => new Set(prev).add(id));
             } else if (type === 'broadcast') {
-                await api.dismissBroadcast(id);
+                await api.deleteBroadcast(id);
                 setDeletedIds(prev => new Set(prev).add(id));
             } else {
                 await api.deleteFeedback(id);

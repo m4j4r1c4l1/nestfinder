@@ -634,9 +634,8 @@ router.post('/broadcasts/:id/read', requireUser, (req, res) => {
         // Upsert into broadcast_views with dismissed=1 and status='read'
         run(`
             INSERT INTO broadcast_views (broadcast_id, user_id, dismissed, status, read_at)
-            VALUES (?, ?, 1, 'read', CURRENT_TIMESTAMP)
+            VALUES (?, ?, 0, 'read', CURRENT_TIMESTAMP)
             ON CONFLICT(broadcast_id, user_id) DO UPDATE SET 
-                dismissed = 1, 
                 status = 'read', 
                 read_at = CURRENT_TIMESTAMP
         `, [broadcastId, userId]);
@@ -653,6 +652,27 @@ router.post('/broadcasts/:id/read', requireUser, (req, res) => {
     } catch (error) {
         console.error('Mark broadcast read error:', error);
         res.status(500).json({ error: 'Failed to mark broadcast as read' });
+    }
+});
+
+// Dismiss broadcast (user delete action)
+router.delete('/broadcasts/:id', requireUser, (req, res) => {
+    try {
+        const userId = req.user.id;
+        const broadcastId = req.params.id;
+
+        // Upsert into broadcast_views with dismissed=1
+        run(`
+            INSERT INTO broadcast_views (broadcast_id, user_id, dismissed, status)
+            VALUES (?, ?, 1, 'read')
+            ON CONFLICT(broadcast_id, user_id) DO UPDATE SET 
+                dismissed = 1
+        `, [broadcastId, userId]);
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Dismiss broadcast error:', error);
+        res.status(500).json({ error: 'Failed to dismiss broadcast' });
     }
 });
 

@@ -305,9 +305,13 @@ class ApiClient {
     return this.fetch(`/push/broadcasts/${id}/read`, { method: 'POST' });
   }
 
-  // Legacy alias for backward compatibility
+  deleteBroadcast(id) {
+    return this.fetch(`/push/broadcasts/${id}`, { method: 'DELETE' });
+  }
+
+  // Legacy alias for backward compatibility - now truly deletes/dismisses
   dismissBroadcast(id) {
-    return this.markBroadcastRead(id);
+    return this.deleteBroadcast(id);
   }
 
   submitFeedback(type, message, rating) {
