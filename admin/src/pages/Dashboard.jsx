@@ -1059,7 +1059,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
     const [uploadProgress, setUploadProgress] = React.useState(null);
     const [downloadProgress, setDownloadProgress] = React.useState(null);
 
-    const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { filename }
+    const [confirmAction, setConfirmAction] = React.useState(null); // { title, message, onConfirm, type: 'danger'|'warning' }
     const [selectedFiles, setSelectedFiles] = React.useState(new Set()); // Set of filenames for bulk delete
     const [resultModal, setResultModal] = React.useState(null); // { title, message, type }
     const [currentTime, setCurrentTime] = React.useState(new Date());
@@ -1284,9 +1284,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
         xhr.send();
     };
 
-    const handleDelete = async () => {
-        const filename = deleteConfirm.filename;
-        setDeleteConfirm(null);
+    const performDelete = async (filename) => {
         setActionLoading(filename);
         try {
             await adminApi.deleteDBFile(filename);
@@ -1299,29 +1297,54 @@ const DBManagerModal = ({ onClose, onResult }) => {
         }
     };
 
+    const handleDelete = (filename) => {
+        setConfirmAction({
+            title: 'Delete Database File?',
+            message: (
+                <>
+                    Are you sure you want to delete <br />
+                    <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{filename}</span>?
+                    <br /><br />This action cannot be undone.
+                </>
+            ),
+            type: 'danger',
+            onConfirm: () => {
+                setConfirmAction(null);
+                performDelete(filename);
+            }
+        });
+    };
+
     const handleBulkDelete = async () => {
         if (selectedFiles.size === 0) return;
-        if (!window.confirm(`Are you sure you want to delete ${selectedFiles.size} files?`)) return;
 
-        try {
-            setActionLoading('delete');
-            const filesArray = Array.from(selectedFiles);
-            const result = await adminApi.deleteBulkBackups(filesArray);
+        setConfirmAction({
+            title: 'Bulk Delete Files',
+            message: `Are you sure you want to delete ${selectedFiles.size} files? This action cannot be undone.`,
+            type: 'danger',
+            onConfirm: async () => {
+                setConfirmAction(null);
+                try {
+                    setActionLoading('delete');
+                    const filesArray = Array.from(selectedFiles);
+                    const result = await adminApi.deleteBulkBackups(filesArray);
 
-            if (result.success) {
-                if (onResult) onResult('success', 'Bulk Delete', result.message);
-                if (result.errors) {
-                    console.warn('Bulk delete errors:', result.errors);
+                    if (result.success) {
+                        if (onResult) onResult('success', 'Bulk Delete', result.message);
+                        if (result.errors) {
+                            console.warn('Bulk delete errors:', result.errors);
+                        }
+                        loadFiles();
+                    } else {
+                        throw new Error(result.error || 'Unknown error');
+                    }
+                } catch (error) {
+                    if (onResult) onResult('error', 'Bulk Delete Failed', error.message);
+                } finally {
+                    setActionLoading(null);
                 }
-                loadFiles();
-            } else {
-                throw new Error(result.error || 'Unknown error');
             }
-        } catch (error) {
-            if (onResult) onResult('error', 'Bulk Delete Failed', error.message);
-        } finally {
-            setActionLoading(null);
-        }
+        });
     };
 
     const handleSelectFile = (filename) => {
@@ -1347,18 +1370,31 @@ const DBManagerModal = ({ onClose, onResult }) => {
     };
 
     const handleRestore = async (filename) => {
-        if (!window.confirm(`Restore from "${filename}"?\n\nThe current database will be backed up first. The server may restart.`)) return;
-        setActionLoading(filename);
-        try {
-            const res = await adminApi.restoreFromFile(filename);
-            onResult('success', 'Restore Complete', res.message || 'Database restored successfully!');
-            loadFiles();
-            setTimeout(() => window.location.reload(), 2000);
-        } catch (err) {
-            onResult('error', 'Restore Failed', err.message);
-        } finally {
-            setActionLoading(null);
-        }
+        setConfirmAction({
+            title: 'Restore Database',
+            message: (
+                <>
+                    Restore from <span style={{ fontWeight: 600, color: '#f59e0b' }}>{filename}</span>?
+                    <br /><br />
+                    The current database will be backed up first. The server may restart.
+                </>
+            ),
+            type: 'warning',
+            onConfirm: async () => {
+                setConfirmAction(null);
+                setActionLoading(filename);
+                try {
+                    const res = await adminApi.restoreFromFile(filename);
+                    onResult('success', 'Restore Complete', res.message || 'Database restored successfully!');
+                    loadFiles();
+                    setTimeout(() => window.location.reload(), 2000);
+                } catch (err) {
+                    onResult('error', 'Restore Failed', err.message);
+                } finally {
+                    setActionLoading(null);
+                }
+            }
+        });
     };
 
     const handleFileUpload = (e) => {
@@ -1926,7 +1962,7 @@ const DBManagerModal = ({ onClose, onResult }) => {
                                                                 </svg>
                                                             </button>
                                                             <button
-                                                                onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ filename: file.name }); }}
+                                                                onClick={(e) => { e.stopPropagation(); handleDelete(file.name); }}
                                                                 title="Delete"
                                                                 style={{
                                                                     width: '24px', height: '24px',
@@ -2061,19 +2097,51 @@ const DBManagerModal = ({ onClose, onResult }) => {
                 </div>
             </div>
 
-            {/* Custom Delete Confirmation Modal */}
-            {deleteConfirm && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1600, backdropFilter: 'blur(4px)' }}>
-                    <div className="card" style={{ width: '90%', maxWidth: '400px', textAlign: 'center', padding: '2rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🗑️</div>
-                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>Delete Database File?</h3>
-                        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-                            Are you sure you want to delete <br /><span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{deleteConfirm.filename}</span>?
-                            <br /><br />This action cannot be undone.
-                        </p>
+            {/* Custom Generic Confirmation Modal */}
+            {confirmAction && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1600, backdropFilter: 'blur(4px)' }} onClick={() => setConfirmAction(null)}>
+                    <div className="card" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '400px', textAlign: 'center', padding: '2rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', animation: 'scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)', border: '1px solid #334155' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+                            {confirmAction.type === 'warning' ? '⚠️' : '🗑️'}
+                        </div>
+                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', color: '#f8fafc' }}>{confirmAction.title}</h3>
+                        <div style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem', lineHeight: '1.5', fontSize: '0.95rem' }}>
+                            {confirmAction.message}
+                        </div>
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button className="btn" onClick={() => setDeleteConfirm(null)} style={{ flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>Cancel</button>
-                            <button className="btn" onClick={handleDelete} style={{ flex: 1, padding: '0.75rem', background: '#a855f7', color: 'white', border: 'none', fontWeight: 600 }}>Delete</button>
+                            <button
+                                className="btn"
+                                onClick={() => setConfirmAction(null)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem',
+                                    background: 'transparent',
+                                    border: '1px solid #334155',
+                                    color: '#e2e8f0',
+                                    borderRadius: '8px',
+                                    fontWeight: 500
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn"
+                                onClick={confirmAction.onConfirm}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem',
+                                    background: confirmAction.type === 'warning' ? '#f59e0b' : '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    fontWeight: 600,
+                                    borderRadius: '8px',
+                                    boxShadow: confirmAction.type === 'warning' ? '0 4px 6px -1px rgba(245, 158, 11, 0.2)' : '0 4px 6px -1px rgba(239, 68, 68, 0.2)'
+                                }}
+                            >
+                                {confirmAction.type === 'warning' ? 'Proceed' : 'Delete'}
+                            </button>
                         </div>
                     </div>
                 </div>
