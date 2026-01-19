@@ -873,6 +873,13 @@ router.put('/db/backup-schedule', (req, res) => {
             );
         }
 
+        // Apply new retention policies immediately to existing files
+        try {
+            applyRetentionPoliciesLite(path.dirname(DB_PATH));
+        } catch (e) {
+            console.error('Immediate retention cleanup failed:', e);
+        }
+
         res.json({
             success: true,
             message: 'Backup schedule updated'
