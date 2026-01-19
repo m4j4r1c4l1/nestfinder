@@ -1426,8 +1426,9 @@ const ChartCard = ({ title, icon, type = 'line', dataKey, seriesConfig, showLege
     const graphHeight = chartHeight - padding.top - padding.bottom;
 
     // Helper functions - add inner padding so bars don't overlap Y-axis
-    const innerPadding = type === 'bar' ? graphWidth / (metrics.length * 2 || 1) : 0;
-    const getX = (i) => innerPadding + (i / (metrics.length - 1 || 1)) * (graphWidth - innerPadding * 2);
+    // Use displayData.length to ensure matching coordinates during animation transitions
+    const innerPadding = type === 'bar' ? graphWidth / (displayData.length * 2 || 1) : 0;
+    const getX = (i) => innerPadding + (i / (displayData.length - 1 || 1)) * (graphWidth - innerPadding * 2);
     const getY = (val, max) => graphHeight - ((val / max) * graphHeight);
 
     // If initial load (no data), show placeholder.
