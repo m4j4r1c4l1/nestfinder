@@ -811,12 +811,13 @@ router.get('/db/backup-schedule', (req, res) => {
 router.put('/db/backup-schedule', (req, res) => {
     try {
         const { time, intervalDays, startDate, retentionDays, corruptRetentionDays, uploadRetentionDays, enabled } = req.body;
+        const wasEnabled = !!getSetting('backup_time');
 
         // If explicitly disabled (enabled === false) OR empty time, turn it off
         if (enabled === false || (enabled === undefined && !time)) {
             run(`DELETE FROM settings WHERE key = 'backup_time'`);
             if (backupInterval) clearTimeout(backupInterval);
-            debugLog('📦 Backup schedule toggled OFF (Disabled)');
+            debugLog('📦 Backup schedule: Disabled');
         } else if (time) {
             // Validate time format (HH:MM)
             if (!/^\d{2}:\d{2}$/.test(time)) {
@@ -845,8 +846,9 @@ router.put('/db/backup-schedule', (req, res) => {
                 );
             }
 
+            const action = wasEnabled ? 'Updated' : 'Enabled';
             startScheduledBackup(days, time, startDate);
-            debugLog(`⚙️ Backup schedule ENABLED/UPDATED: ${time}, every ${days} day(s), starting ${startDate || 'today'}. Retention (Days): Success=${retentionDays || 'N/A'}, Corrupt=${corruptRetentionDays || 'N/A'}, Uploads=${uploadRetentionDays || 'N/A'}`);
+            debugLog(`⚙️ Backup schedule: ${action}. Config: ${time}, every ${days} day(s), starting ${startDate || 'today'}. Retention (Days): Success=${retentionDays || 'N/A'}, Corrupt=${corruptRetentionDays || 'N/A'}, Uploads=${uploadRetentionDays || 'N/A'}`);
         }
 
         if (retentionDays !== undefined) {
