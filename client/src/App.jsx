@@ -42,43 +42,66 @@ const AppContent = () => {
 
 // Debug Indicator Component
 const DebugIndicator = () => {
-    const [enabled, setEnabled] = useState(false);
+    const [status, setStatus] = useState({ enabled: false, level: 'default' });
+    const [appConfig, setAppConfig] = useState(null);
 
     useEffect(() => {
-        // Initial check (from app-config or similar if available, otherwise waiting for socket)
-        // Ideally we fetch this on load. For now, rely on socket updates or initial config fetch.
+        // Fetch app config for testing banner
         fetch('/api/settings/app-config')
             .then(res => res.json())
-            .then(data => {
-                if (data.debug_mode_enabled) {
-                    setEnabled(true);
-                }
-            })
+            .then(data => setAppConfig(data))
             .catch(() => { });
 
-        const handleSettings = (e) => {
-            const settings = e.detail;
-            if (settings.debug_mode_enabled !== undefined) {
-                const isEnabled = String(settings.debug_mode_enabled) === 'true';
-                setEnabled(isEnabled);
-            }
+        // Initial check for debug status (standalone logger handles its own fetch, we listen)
+        const handleStatusUpdate = (e) => {
+            setStatus({
+                enabled: e.detail.enabled,
+                level: e.detail.level || 'default'
+            });
         };
 
-        window.addEventListener('settings_updated', handleSettings);
-        return () => window.removeEventListener('settings_updated', handleSettings);
+        window.addEventListener('debug_status_updated', handleStatusUpdate);
+        return () => window.removeEventListener('debug_status_updated', handleStatusUpdate);
     }, []);
 
-    if (!enabled) return null;
+    // If debug is OFF, but testing banner is ON, show testing banner
+    if (!status.enabled) {
+        if (appConfig?.testing_banner_enabled) {
+            return (
+                <div style={{
+                    position: 'fixed', top: '0.4rem', left: '50%', transform: 'translateX(-50%)',
+                    zIndex: 9999, padding: '0.2rem 0.6rem', background: 'rgba(255, 193, 7, 0.2)',
+                    border: '1px solid rgba(255, 193, 7, 0.4)', borderRadius: '4px',
+                    backdropFilter: 'blur(10px)', fontSize: '0.7rem', fontWeight: 600,
+                    letterSpacing: '0.05em', color: '#ffc107', textTransform: 'uppercase',
+                    pointerEvents: 'none'
+                }}>
+                    {appConfig.testing_banner_text || 'TESTING MODE'}
+                </div>
+            );
+        }
+        return null;
+    }
+
+    // Debug is ON -> Show Debug Badge (Top Center, replacing banner)
+    const levelColors = {
+        default: { bg: 'rgba(59, 130, 246, 0.2)', border: 'rgba(59, 130, 246, 0.4)', text: '#3b82f6' },
+        aggressive: { bg: 'rgba(168, 85, 247, 0.2)', border: 'rgba(168, 85, 247, 0.4)', text: '#a855f7' },
+        paranoic: { bg: 'rgba(239, 68, 68, 0.2)', border: 'rgba(239, 68, 68, 0.4)', text: '#ef4444' }
+    };
+
+    const colors = levelColors[status.level] || levelColors.default;
 
     return (
         <div style={{
-            position: 'fixed', bottom: 10, right: 10,
-            background: 'rgba(239, 68, 68, 0.9)', color: 'white',
-            padding: '4px 8px', borderRadius: '4px', fontSize: '10px',
-            fontWeight: 'bold', zIndex: 9999, pointerEvents: 'none',
-            border: '1px solid rgba(255,255,255,0.2)'
+            position: 'fixed', top: '0.4rem', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 9999, padding: '0.2rem 0.6rem', background: colors.bg,
+            border: `1px solid ${colors.border}`, borderRadius: '4px',
+            backdropFilter: 'blur(10px)', fontSize: '0.7rem', fontWeight: 700,
+            letterSpacing: '0.05em', color: colors.text, textTransform: 'uppercase',
+            boxShadow: `0 2px 8px ${colors.bg}`, pointerEvents: 'none'
         }}>
-            DEBUG MODE
+            🐛 DEBUG MODE {status.level !== 'default' && `(${status.level})`}
         </div>
     );
 };

@@ -17,8 +17,9 @@ class DebugLogger {
         this.isInitialized = false;
         this.config = {
             enabled: false, // Controls L1 console output visibility
+            debugLevel: 'default', // default | aggressive | paranoic
             persist: true,  // Controls L2 storage (default true for ring buffer)
-            uploadInterval: 10000,
+            uploadInterval: 5000, // Updated to 5s
             pollInterval: 30000
         };
         this.timers = {
@@ -42,26 +43,48 @@ class DebugLogger {
 
         // Start polling for remote debug status
         this._startPolling();
+
+        // ASAP Sync: Listen for WebSocket broadcasts
+        window.addEventListener('debug_update', (e) => {
+            if (this.userId && (e.detail?.userId === this.userId || !e.detail?.userId)) {
+                this._checkStatus();
+            }
+        });
     }
 
     async _checkStatus() {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('nestfinder_user_token');
             if (!token) return;
 
             const res = await fetch('/api/debug/status', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
-                const data = await res.json();
                 const isActive = data.active === true;
+                const newLevel = data.debug_level || 'default';
 
+                let changed = false;
                 if (isActive !== this.config.enabled) {
                     this.config.enabled = isActive;
                     this.log('System', `Remote debug status changed: ${isActive ? 'ENABLED' : 'DISABLED'}`);
+                    changed = true;
 
                     if (isActive) this._startUpload();
                     else this._stopUpload();
+                }
+
+                if (newLevel !== this.config.debugLevel) {
+                    this.log('System', `Debug level changed: ${this.config.debugLevel} -> ${newLevel}`);
+                    this.config.debugLevel = newLevel;
+                    changed = true;
+                }
+
+                if (changed) {
+                    // Update internal state or emit event
+                    window.dispatchEvent(new CustomEvent('debug_status_updated', {
+                        detail: { enabled: this.config.enabled, level: this.config.debugLevel }
+                    }));
                 }
             }
         } catch (e) {
@@ -131,18 +154,35 @@ class DebugLogger {
         // 2. Persist (L2)
         this._saveToStorage();
 
-        // 3. Console Output (L1)
-        // Always output to console if enabled OR if explicitly an error/warn
-        // Using a cleaner format
-        if (this.config.enabled || level === 'error' || level === 'warn') {
+        // 3. Console Output (L1) & Filtering
+        const currentLevel = this.config.debugLevel;
+        const isError = level === 'error' || level === 'warn';
+
+        // Verbosity check
+        let shouldShow = isError; // Errors always show
+        if (!shouldShow && this.config.enabled) {
+            if (currentLevel === 'paranoic') shouldShow = true;
+            else if (currentLevel === 'aggressive') {
+                // In aggressive, hide high-frequency or raw data categories
+                const rawCategories = ['RawMap', 'RawGPS', 'RawPayload'];
+                shouldShow = !rawCategories.includes(category);
+            } else {
+                // Default: Only major categories
+                const majorCategories = ['System', 'Auth', 'Home', 'MapView', 'API'];
+                shouldShow = majorCategories.includes(category);
+            }
+        }
+
+        if (shouldShow) {
             const style = level === 'error' ? 'color: #ef4444; font-weight: bold' :
                 level === 'warn' ? 'color: #f59e0b; font-weight: bold' :
-                    'color: #3b82f6; font-weight: bold';
+                    currentLevel === 'paranoic' ? 'color: #ef4444; font-weight: bold' :
+                        currentLevel === 'aggressive' ? 'color: #a855f7; font-weight: bold' :
+                            'color: #3b82f6; font-weight: bold';
 
             const args = [`%c${LOG_PREFIX} [${category}]`, style, message];
             if (data) args.push(data);
 
-            // Safe console call
             const fn = console[level] || console.log;
             fn(...args);
         }

@@ -336,53 +336,6 @@ const MapView = () => {
                 route={routePath}
             />
 
-            {/* Testing Mode Banner - Same style as login page */}
-            {/* Testing Mode Banner or Debug Badge */}
-            {(localStorage.getItem('nestfinder_debug_mode') === 'true') ? (
-                <div style={{
-                    position: 'fixed',
-                    top: '0.5rem',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 100,
-                    padding: '0.2rem 0.6rem',
-                    background: 'rgba(59, 130, 246, 0.2)', // Blue bg
-                    border: '1px solid rgba(59, 130, 246, 0.4)', // Blue border
-                    borderRadius: 'var(--radius-md)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.05em',
-                    color: '#3b82f6', // Blue text
-                    textTransform: 'uppercase',
-                    boxShadow: '0 2px 8px rgba(59, 130, 246, 0.15)'
-                }}>
-                    🐛 DEBUG MODE
-                </div>
-            ) : (appConfig?.testing_banner_enabled && (
-                <div style={{
-                    position: 'fixed',
-                    top: '0.5rem',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 100,
-                    padding: '0.2rem 0.6rem',
-                    background: 'rgba(255, 193, 7, 0.2)',
-                    border: '1px solid rgba(255, 193, 7, 0.4)',
-                    borderRadius: 'var(--radius-md)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.05em',
-                    color: '#ffc107',
-                    textTransform: 'uppercase'
-                }}>
-                    {appConfig.testing_banner_text}
-                </div>
-            ))}
-
             {/* Bottom Sheet Container */}
             <div className={`bottom-sheet ${activeSheet ? 'open' : ''}`}>
                 <div className="bottom-sheet-handle" onClick={handleSheetClose} />

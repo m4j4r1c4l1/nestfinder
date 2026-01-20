@@ -64,6 +64,15 @@ router.post('/users/:id/toggle', requireAdmin, (req, res) => {
         const newState = user.debug_enabled ? 0 : 1;
         run('UPDATE users SET debug_enabled = ? WHERE id = ?', [newState, id]);
 
+        // ASAP Sync: Broadcast update
+        const wss = req.app?.get('wss');
+        if (wss) {
+            const payload = JSON.stringify({ type: 'debug_update', userId: id, enabled: newState === 1 });
+            wss.clients.forEach(client => {
+                if (client.readyState === 1) client.send(payload);
+            });
+        }
+
         res.json({
             success: true,
             debug_enabled: newState === 1,
@@ -91,6 +100,15 @@ router.post('/users/:id/level', requireAdmin, (req, res) => {
         }
 
         run('UPDATE users SET debug_level = ? WHERE id = ?', [level, id]);
+
+        // ASAP Sync: Broadcast update
+        const wss = req.app?.get('wss');
+        if (wss) {
+            const payload = JSON.stringify({ type: 'debug_update', userId: id, level });
+            wss.clients.forEach(client => {
+                if (client.readyState === 1) client.send(payload);
+            });
+        }
 
         res.json({
             success: true,

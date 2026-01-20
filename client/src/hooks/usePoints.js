@@ -82,6 +82,9 @@ export const usePoints = () => {
             case 'settings_updated':
                 // Could expose settings updates here if needed
                 break;
+            case 'debug_update':
+                window.dispatchEvent(new CustomEvent('debug_update', { detail: message }));
+                break;
             default:
                 break;
         }
