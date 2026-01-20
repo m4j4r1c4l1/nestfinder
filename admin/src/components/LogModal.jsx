@@ -11,6 +11,7 @@ const LogModal = ({ user, onClose }) => {
     const scrollRef = useRef(null);
     const pollingRef = useRef(null);
     const isUserScrollingRef = useRef(false);
+    const [copied, setCopied] = useState(false);
 
     const fetchLogs = async (sinceId = 0) => {
         try {
@@ -29,7 +30,6 @@ const LogModal = ({ user, onClose }) => {
             } else {
                 console.warn('Log polling failed:', err.message);
                 // Don't set global error state for background polls to avoid UI jitter
-                // Maybe a small transient indicator?
             }
         } finally {
             if (sinceId === 0) setLoading(false);
@@ -64,10 +64,6 @@ const LogModal = ({ user, onClose }) => {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [logs, isFollowing]);
-
-    // Detect manual scroll up to pause following maybe? 
-    // Actually, user requested a specific "stop" button or modal close.
-    // I'll stick to the toggle button for clarity.
 
     // Syntax Highlighting parser
     const parseLogLine = (line) => {
@@ -110,7 +106,8 @@ const LogModal = ({ user, onClose }) => {
                 hour12: false,
                 hour: '2-digit',
                 minute: '2-digit',
-                second: '2-digit'
+                second: '2-digit',
+                fractionalSecondDigits: 3 // Task: Add milliseconds
             }) + ' CET';
         };
 
@@ -156,7 +153,7 @@ const LogModal = ({ user, onClose }) => {
                 </span>
 
                 {/* Timestamp */}
-                <span style={{ color: '#64748b', fontSize: '0.85em', minWidth: '85px' }}>
+                <span style={{ color: '#64748b', fontSize: '0.85em', minWidth: '110px' }}>
                     {formatTime(ts)}
                 </span>
 
@@ -208,6 +205,21 @@ const LogModal = ({ user, onClose }) => {
         );
     };
 
+    const handleCopy = () => {
+        const text = logs.map(line => {
+            if (typeof line === 'object') {
+                const { ts, level, category, msg, data } = line;
+                return `${ts} [${category}] [${level}] ${msg} ${data ? JSON.stringify(data) : ''}`;
+            }
+            return line;
+        }).join('\n');
+
+        navigator.clipboard.writeText(text).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1000);
+        });
+    };
+
     if (!user) return null;
 
     return (
@@ -247,14 +259,46 @@ const LogModal = ({ user, onClose }) => {
                     alignItems: 'center',
                     background: '#1e293b'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                         <div style={{ fontSize: '1.5rem' }}>📃</div>
-                        <div>
+                        <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '1.1rem' }}>
                                 Debug Logs
                             </div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontFamily: 'monospace' }}>
-                                {user.nickname} • {user.id}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#94a3b8', fontSize: '0.85rem', fontFamily: 'monospace', width: '100%', marginTop: '2px' }}>
+                                <div>
+                                    {user.nickname} • {user.id}
+                                </div>
+                                {logs.length > 0 && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <polyline points="12 6 12 12 16 14"></polyline>
+                                            </svg>
+                                            {(() => {
+                                                const firstTs = logs[0].ts;
+                                                if (!firstTs) return 'N/A';
+                                                const d = new Date(firstTs);
+                                                const pad = (n, l = 2) => String(n).padStart(l, '0');
+                                                const datePart = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+                                                const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+                                                return `${datePart} - ${timePart} CET`;
+                                            })()}
+                                        </span>
+                                        <div style={{
+                                            width: '10px',
+                                            height: '10px',
+                                            borderRadius: '50%',
+                                            backgroundColor: !user.debug_enabled ? '#64748b' :
+                                                user.debug_level === 'paranoic' ? '#ef4444' :
+                                                    user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                            boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
+                                                user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
+                                                }` : 'none'
+                                        }} title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`} />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -359,16 +403,27 @@ const LogModal = ({ user, onClose }) => {
                     <span style={{ marginRight: 'auto', color: '#64748b', fontSize: '0.85rem', alignSelf: 'center' }}>
                         {logs.length} entries
                     </span>
-                    <button onClick={onClose} style={{
-                        padding: '0.5rem 1rem',
-                        background: 'transparent',
-                        border: '1px solid #475569',
-                        color: '#e2e8f0',
-                        borderRadius: '6px',
-                        cursor: 'pointer'
-                    }}>
-                        Close
-                    </button>
+                    {logs.length > 0 && (
+                        <button onClick={handleCopy} style={{
+                            padding: '0.5rem 1rem',
+                            background: '#1e293b',
+                            border: '1px solid #1e293b',
+                            color: '#64748b',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontWeight: 600,
+                            fontSize: '0.9rem'
+                        }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            {copied ? 'Copied!' : 'Copy'}
+                        </button>
+                    )}
                 </div>
             </div>
             <style>
