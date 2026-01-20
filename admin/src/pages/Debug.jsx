@@ -228,7 +228,7 @@ const Debug = () => {
 
         try {
             if (type === 'all') {
-                await adminApi.fetch('/debug/logs/all', { method: 'DELETE' });
+                await adminApi.fetch('/debug/logs', { method: 'DELETE' });
                 fetchUsers();
             } else {
                 await adminApi.fetch(`/debug/users/${targetId}/logs`, { method: 'DELETE' });
