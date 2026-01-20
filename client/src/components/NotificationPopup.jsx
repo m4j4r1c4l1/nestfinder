@@ -9,7 +9,7 @@ const getIconForType = (type) => {
         case 'alert': return '🚨';
         case 'success': return '✅';
         case 'reward': return '🏆';
-        case 'broadcast': return '📢';
+        case 'broadcast': return '🔔';
         default: return '🔔';
     }
 };
