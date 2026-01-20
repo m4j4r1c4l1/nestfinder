@@ -12,6 +12,23 @@ const LogModal = ({ user, onClose }) => {
     const pollingRef = useRef(null);
     const isUserScrollingRef = useRef(false);
     const [copied, setCopied] = useState(false);
+    const [isColorEnabled, setIsColorEnabled] = useState(false);
+
+    // Category color map for COLOR toggle
+    const CATEGORY_COLORS = {
+        System: '#10b981',
+        API: '#3b82f6',
+        Interaction: '#f59e0b',
+        MapView: '#06b6d4',
+        Auth: '#8b5cf6',
+        Debug: '#6b7280',
+        App: '#ec4899',
+        Report: '#14b8a6',
+        Inbox: '#f472b6',
+        Settings: '#a78bfa',
+        Home: '#22d3ee',
+        Default: '#94a3b8'
+    };
 
     const fetchLogs = async (sinceId = 0) => {
         try {
@@ -174,7 +191,7 @@ const LogModal = ({ user, onClose }) => {
                 </span>
 
                 {/* Hierarchy: [Category] */}
-                <span style={{ color: '#94a3b8', fontWeight: 600 }}>
+                <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
                     [{category || 'General'}]
                 </span>
 
@@ -296,18 +313,52 @@ const LogModal = ({ user, onClose }) => {
                     </button>
                 </div>
 
-                {/* Sub-header with Follow Toggle */}
+                {/* Sub-header with Follow Toggle and COLOR Toggle */}
                 <div style={{
                     padding: '8px 1.5rem',
                     backgroundColor: '#1e293b',
                     borderBottom: '1px solid #334155',
                     display: 'flex',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: '12px'
                 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <button
+                            onClick={() => setIsFollowing(!isFollowing)}
+                            style={{
+                                padding: '4px 12px',
+                                borderRadius: '4px',
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                backgroundColor: isFollowing ? '#059669' : 'transparent',
+                                color: isFollowing ? 'white' : '#94a3b8',
+                                border: `1px solid ${isFollowing ? '#059669' : '#334155'}`,
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <div style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                backgroundColor: isFollowing ? '#34d399' : '#64748b',
+                                boxShadow: isFollowing ? '0 0 8px #34d399' : 'none',
+                                animation: isFollowing ? 'pulse 1.5s infinite' : 'none'
+                            }} />
+                            {isFollowing ? 'FOLLOWING' : 'FOLLOW OFF'}
+                        </button>
+                        {isFollowing && (
+                            <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                                Auto-refreshing live...
+                            </span>
+                        )}
+                    </div>
                     <button
-                        onClick={() => setIsFollowing(!isFollowing)}
+                        onClick={() => setIsColorEnabled(!isColorEnabled)}
                         style={{
                             padding: '4px 12px',
                             borderRadius: '4px',
@@ -317,9 +368,9 @@ const LogModal = ({ user, onClose }) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            backgroundColor: isFollowing ? '#059669' : 'transparent',
-                            color: isFollowing ? 'white' : '#94a3b8',
-                            border: `1px solid ${isFollowing ? '#059669' : '#334155'}`,
+                            backgroundColor: isColorEnabled ? '#3b82f6' : 'transparent',
+                            color: isColorEnabled ? 'white' : '#94a3b8',
+                            border: `1px solid ${isColorEnabled ? '#3b82f6' : '#334155'}`,
                             transition: 'all 0.2s ease'
                         }}
                     >
@@ -327,17 +378,12 @@ const LogModal = ({ user, onClose }) => {
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            backgroundColor: isFollowing ? '#34d399' : '#64748b',
-                            boxShadow: isFollowing ? '0 0 8px #34d399' : 'none',
-                            animation: isFollowing ? 'pulse 1.5s infinite' : 'none'
+                            backgroundColor: isColorEnabled ? '#60a5fa' : '#64748b',
+                            boxShadow: isColorEnabled ? '0 0 8px #60a5fa' : 'none',
+                            animation: isColorEnabled ? 'pulse 1.5s infinite' : 'none'
                         }} />
-                        {isFollowing ? 'FOLLOWING (tail -f)' : 'FOLLOW OFF'}
+                        COLOR
                     </button>
-                    {isFollowing && (
-                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                            Auto-refreshing live...
-                        </span>
-                    )}
                 </div>
 
                 {/* Content */}
@@ -385,23 +431,37 @@ const LogModal = ({ user, onClose }) => {
                         {logs.length} entries
                     </span>
 
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {logs.length > 0 && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f8fafc', fontSize: '0.85rem', fontFamily: 'monospace' }}>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+                            <>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f8fafc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
-                                {(() => {
-                                    const firstTs = logs[0].ts;
-                                    if (!firstTs) return 'N/A';
-                                    const d = new Date(firstTs);
-                                    const pad = (n, l = 2) => String(n).padStart(l, '0');
-                                    const datePart = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-                                    const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
-                                    return `${datePart} - ${timePart} CET`;
-                                })()}
-                            </div>
+                                <span style={{ color: '#f8fafc', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+                                    {(() => {
+                                        const firstTs = logs[0].ts;
+                                        if (!firstTs) return 'N/A';
+                                        const d = new Date(firstTs);
+                                        const pad = (n, l = 2) => String(n).padStart(l, '0');
+                                        const datePart = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+                                        const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                                        return `${datePart} - ${timePart} CET`;
+                                    })()}
+                                </span>
+                                <div style={{
+                                    width: '10px',
+                                    height: '10px',
+                                    borderRadius: '50%',
+                                    marginLeft: '4px',
+                                    backgroundColor: !user.debug_enabled ? '#64748b' :
+                                        user.debug_level === 'paranoic' ? '#ef4444' :
+                                            user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                    boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
+                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
+                                        }` : 'none'
+                                }} title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`} />
+                            </>
                         )}
                     </div>
 
