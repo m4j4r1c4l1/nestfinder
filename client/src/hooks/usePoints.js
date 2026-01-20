@@ -80,7 +80,8 @@ export const usePoints = () => {
                 setPoints(prev => prev.map(p => p.id === message.point.id ? message.point : p));
                 break;
             case 'settings_updated':
-                // Could expose settings updates here if needed
+                // ASAP Sync: If global settings change (like debug mode), notify the logger
+                logger._handleSocketUpdate({ type: 'debug_update', global: true });
                 break;
             case 'debug_update':
                 logger._handleSocketUpdate(message);

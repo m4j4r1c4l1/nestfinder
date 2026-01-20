@@ -56,9 +56,10 @@ class DebugLogger {
      * ASAP Sync (Task 113): External trigger from WebSocket listeners
      */
     _handleSocketUpdate(message) {
-        if (message.type === 'debug_update') {
-            // If message specifies a userId, only react if it matches
-            if (message.userId && message.userId !== this.userId) return;
+        if (message.type === 'debug_update' || message.global) {
+            // Internal bypass: If it's a global setting update, we check anyway.
+            // If it's a specific userId, only react if it's ours.
+            if (!message.global && message.userId && message.userId !== this.userId) return;
 
             this.log('System', 'Received ASAP debug update signal via WS');
             this._checkStatus();
