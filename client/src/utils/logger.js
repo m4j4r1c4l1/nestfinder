@@ -72,7 +72,16 @@ class DebugLogger {
             const token = localStorage.getItem('nestfinder_user_token');
             if (!token) return;
 
-            const res = await fetch('/api/debug/status', {
+            // Task 113: Ensure we use the correct API_URL for status checks
+            const baseUrl = import.meta.env.VITE_API_URL || '/api';
+            const url = `${baseUrl}/debug/status`;
+
+            const currentLevel = this.config.debugLevel;
+            if (currentLevel !== 'default') {
+                this.log('System', `Checking remote debug status (ASAP Sync)...`, { url });
+            }
+
+            const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -110,6 +119,7 @@ class DebugLogger {
             } else if (res.status === 401 || res.status === 403) {
                 // Task #25: If unauthorized/forbidden, disable locally
                 if (this.config.enabled) {
+                    this.log('System', `Access denied (${res.status}): Disabling debug mode.`);
                     this.config.enabled = false;
                     this._stopUpload();
                     window.dispatchEvent(new CustomEvent('debug_status_updated', {

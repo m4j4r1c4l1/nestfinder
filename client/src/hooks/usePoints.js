@@ -8,9 +8,6 @@ export const usePoints = () => {
         status: ['pending', 'confirmed', 'deactivated'] // Include all statuses
     });
 
-    // WebSocket reference
-    const wsRef = useRef(null);
-
     const fetchPoints = async () => {
         try {
             setLoading(true);
@@ -29,37 +26,13 @@ export const usePoints = () => {
         fetchPoints();
     }, [filters]);
 
-    useEffect(() => {
-        // Setup WebSocket for real-time updates
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}`; // Use current host/port
+    // WebSocket reference
+    const wsRef = useRef(null);
+    const reconnectTimeoutRef = useRef(null);
+    const reconnectAttemptsRef = useRef(0);
 
-        wsRef.current = new WebSocket(wsUrl);
-
-        wsRef.current.onopen = () => {
-            console.log('Connected to real-time updates');
-        };
-
-        wsRef.current.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                handleRealtimeUpdate(message);
-            } catch (e) {
-                console.error('WS message error:', e);
-            }
-        };
-
-        wsRef.current.onclose = () => {
-            console.log('Disconnected from updates');
-            // Simple reconnect logic could go here
-        };
-
-        return () => {
-            if (wsRef.current) {
-                wsRef.current.close();
-            }
-        };
-    }, []);
+    // Use a ref for the handler to avoid stale closures in the socket onmessage
+    const handleMessageRef = useRef(null);
 
     const handleRealtimeUpdate = (message) => {
         switch (message.type) {
@@ -91,6 +64,81 @@ export const usePoints = () => {
                 break;
         }
     };
+
+    // Update the ref whenever the function changes (though it shouldn't really change)
+    useEffect(() => {
+        handleMessageRef.current = handleRealtimeUpdate;
+    }, [handleRealtimeUpdate]);
+
+    useEffect(() => {
+        const connect = () => {
+            // Setup WebSocket for real-time updates
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+            // Task 113: Improve host detection for local dev
+            let host = window.location.host;
+            if (host.includes('localhost:5173')) {
+                host = 'localhost:3001'; // Default dev backend port
+            }
+
+            const wsUrl = `${protocol}//${host}`;
+
+            console.log(`[WS] Connecting to ${wsUrl}...`);
+            const socket = new WebSocket(wsUrl);
+            wsRef.current = socket;
+
+            socket.onopen = () => {
+                console.log('[WS] Connected to real-time updates');
+                reconnectAttemptsRef.current = 0;
+                if (reconnectTimeoutRef.current) {
+                    clearTimeout(reconnectTimeoutRef.current);
+                    reconnectTimeoutRef.current = null;
+                }
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    if (handleMessageRef.current) {
+                        handleMessageRef.current(message);
+                    }
+                } catch (e) {
+                    console.error('[WS] Message error:', e);
+                }
+            };
+
+            socket.onclose = (event) => {
+                if (event.wasClean) {
+                    console.log('[WS] Disconnected cleanly');
+                } else {
+                    console.warn('[WS] Connection lost');
+
+                    // Reconnect logic with exponential backoff
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+                    reconnectAttemptsRef.current++;
+
+                    console.log(`[WS] Reconnecting in ${delay}ms...`);
+                    reconnectTimeoutRef.current = setTimeout(connect, delay);
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error('[WS] Socket error:', error);
+                socket.close(); // Force onclose logic
+            };
+        };
+
+        connect();
+
+        return () => {
+            if (wsRef.current) {
+                wsRef.current.close();
+            }
+            if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Callback for new point notifications
     const onNewPointCallback = useRef(null);
