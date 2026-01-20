@@ -27,6 +27,7 @@ const server = createServer(app);
 
 // WebSocket server for real-time updates
 const wss = new WebSocketServer({ server });
+app.set('wss', wss);
 const clients = new Set();
 
 // Rate limit broadcasting updates as multiple connects/disconnects can happen quickly

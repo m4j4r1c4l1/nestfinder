@@ -83,6 +83,7 @@ export const usePoints = () => {
                 // Could expose settings updates here if needed
                 break;
             case 'debug_update':
+                logger._handleSocketUpdate(message);
                 window.dispatchEvent(new CustomEvent('debug_update', { detail: message }));
                 break;
             default:

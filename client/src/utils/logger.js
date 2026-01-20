@@ -43,20 +43,26 @@ class DebugLogger {
         };
     }
 
-    init(config = {}) {
-        this.config = { ...this.config, ...config };
+    init(api) {
+        this.api = api;
         this.isInitialized = true;
         this.log('System', 'DebugLogger initialized', this.config);
 
-        // Start polling for remote debug status
+        // Start polling for remote debug status as fallback
         this._startPolling();
+    }
 
-        // ASAP Sync: Listen for WebSocket broadcasts
-        window.addEventListener('debug_update', (e) => {
-            if (this.userId && (e.detail?.userId === this.userId || !e.detail?.userId)) {
-                this._checkStatus();
-            }
-        });
+    /**
+     * ASAP Sync (Task 113): External trigger from WebSocket listeners
+     */
+    _handleSocketUpdate(message) {
+        if (message.type === 'debug_update') {
+            // If message specifies a userId, only react if it matches
+            if (message.userId && message.userId !== this.userId) return;
+
+            this.log('System', 'Received ASAP debug update signal via WS');
+            this._checkStatus();
+        }
     }
 
     async _checkStatus() {
@@ -129,6 +135,8 @@ class DebugLogger {
 
     _startUpload() {
         if (this.timers.upload) clearInterval(this.timers.upload);
+        // Trigger immediate upload of whatever is pending (e.g. initial packet)
+        this.upload();
         this.timers.upload = setInterval(() => this.upload(), this.config.uploadInterval);
     }
 
