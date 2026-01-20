@@ -98,9 +98,14 @@ class DebugLogger {
 
                     if (isActive) {
                         this._logSystemInfo(); // Task #107: Initial Debug Packet
+                        this.log('Debug', 'Next, the relation of live events -and pending if any- for this Debug Session:');
                         this._startUpload();
                     } else {
                         this._stopUpload();
+                        // Task #31: Clear logs when disabled for default level
+                        if (this.config.debugLevel === 'default') {
+                            this.clear();
+                        }
                     }
                 }
 
@@ -225,12 +230,18 @@ class DebugLogger {
             dl: this.config.debugLevel // Capture the source debug level (d=default, a=aggressive, p=paranoic)
         };
 
-        // 1. Add to internal buffer
-        this.logs.push(entry);
-        if (this.logs.length > MAX_LOGS) this.logs.shift();
+        // Task #31: Conditional buffering based on level
+        // Default level: Only buffer when enabled. Aggressive/Paranoic: Always buffer.
+        const shouldBuffer = this.config.enabled || this.config.debugLevel !== 'default';
 
-        // 2. Persist (L2)
-        this._saveToStorage();
+        if (shouldBuffer) {
+            // 1. Add to internal buffer
+            this.logs.push(entry);
+            if (this.logs.length > MAX_LOGS) this.logs.shift();
+
+            // 2. Persist (L2)
+            this._saveToStorage();
+        }
 
         // 3. Console Output (L1) & Filtering
         const currentLevel = this.config.debugLevel;

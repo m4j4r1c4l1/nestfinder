@@ -51,6 +51,10 @@ router.put('/', requireAdmin, (req, res) => {
         return res.status(400).json({ error: 'Settings object required' });
     }
 
+    // Task #31: Reset all per-device debug when global toggle is re-enabled
+    const wasDebugEnabled = getSetting('debug_mode_enabled') === 'true';
+    const willDebugEnable = settings.debug_mode_enabled === 'true' || settings.debug_mode_enabled === true;
+
     for (const [key, value] of Object.entries(settings)) {
         let valueToStore = String(value);
 
@@ -74,6 +78,12 @@ router.put('/', requireAdmin, (req, res) => {
        ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
             [key, valueToStore, valueToStore]
         );
+    }
+
+    // Reset all user debug states if global debug was just enabled
+    if (!wasDebugEnabled && willDebugEnable) {
+        console.log('🔄 Global debug enabled: Resetting all per-device debug states to OFF');
+        run('UPDATE users SET debug_enabled = 0');
     }
 
     const updatedSettings = getSettings();
