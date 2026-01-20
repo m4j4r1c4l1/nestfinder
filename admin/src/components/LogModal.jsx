@@ -269,36 +269,17 @@ const LogModal = ({ user, onClose }) => {
                                 <div>
                                     {user.nickname} • {user.id}
                                 </div>
-                                {logs.length > 0 && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
-                                                <circle cx="12" cy="12" r="10"></circle>
-                                                <polyline points="12 6 12 12 16 14"></polyline>
-                                            </svg>
-                                            {(() => {
-                                                const firstTs = logs[0].ts;
-                                                if (!firstTs) return 'N/A';
-                                                const d = new Date(firstTs);
-                                                const pad = (n, l = 2) => String(n).padStart(l, '0');
-                                                const datePart = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-                                                const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
-                                                return `${datePart} - ${timePart} CET`;
-                                            })()}
-                                        </span>
-                                        <div style={{
-                                            width: '10px',
-                                            height: '10px',
-                                            borderRadius: '50%',
-                                            backgroundColor: !user.debug_enabled ? '#64748b' :
-                                                user.debug_level === 'paranoic' ? '#ef4444' :
-                                                    user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                            boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
-                                                user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
-                                                }` : 'none'
-                                        }} title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`} />
-                                    </div>
-                                )}
+                                <div style={{
+                                    width: '10px',
+                                    height: '10px',
+                                    borderRadius: '50%',
+                                    backgroundColor: !user.debug_enabled ? '#64748b' :
+                                        user.debug_level === 'paranoic' ? '#ef4444' :
+                                            user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                    boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
+                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
+                                        }` : 'none'
+                                }} title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`} />
                             </div>
                         </div>
                     </div>
@@ -393,37 +374,59 @@ const LogModal = ({ user, onClose }) => {
 
                 {/* Footer */}
                 <div style={{
-                    padding: '1rem',
+                    padding: '0.75rem 1.5rem',
                     borderTop: '1px solid #334155',
                     background: '#1e293b',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: '1rem'
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto 1fr',
+                    alignItems: 'center'
                 }}>
-                    <span style={{ marginRight: 'auto', color: '#64748b', fontSize: '0.85rem', alignSelf: 'center' }}>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
                         {logs.length} entries
                     </span>
-                    {logs.length > 0 && (
-                        <button onClick={handleCopy} style={{
-                            padding: '0.5rem 1rem',
-                            background: '#1e293b',
-                            border: '1px solid #1e293b',
-                            color: '#64748b',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            fontWeight: 600,
-                            fontSize: '0.9rem'
-                        }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                            {copied ? 'Copied!' : 'Copy'}
-                        </button>
-                    )}
+
+                    <div style={{ textAlign: 'center' }}>
+                        {logs.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f8fafc', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                {(() => {
+                                    const firstTs = logs[0].ts;
+                                    if (!firstTs) return 'N/A';
+                                    const d = new Date(firstTs);
+                                    const pad = (n, l = 2) => String(n).padStart(l, '0');
+                                    const datePart = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+                                    const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+                                    return `${datePart} - ${timePart} CET`;
+                                })()}
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        {logs.length > 0 && (
+                            <button onClick={handleCopy} style={{
+                                padding: '0.4rem 0.8rem',
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#64748b',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '0.85rem',
+                                transition: 'color 0.2s'
+                            }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                {copied ? 'Copied!' : 'Copy'}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
             <style>
