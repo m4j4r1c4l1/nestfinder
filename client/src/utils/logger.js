@@ -26,6 +26,7 @@ class DebugLogger {
             poll: null,
             upload: null
         };
+        this.lastGpsTick = null; // Throttling for Paranoic GPS
 
         // Load initial logs from storage (L2)
         this._loadFromStorage();
@@ -210,7 +211,8 @@ class DebugLogger {
             level,
             category: category || 'General',
             msg: message,
-            data
+            data,
+            dl: this.config.debugLevel // Capture the source debug level (d=default, a=aggressive, p=paranoic)
         };
 
         // 1. Add to internal buffer
@@ -227,14 +229,26 @@ class DebugLogger {
         // Verbosity check
         let shouldShow = isError; // Errors always show
         if (!shouldShow && this.config.enabled) {
-            if (currentLevel === 'paranoic') shouldShow = true;
+            if (currentLevel === 'paranoic') {
+                // Optimization: Throttle RawGPS ticks to prevent spam
+                if (category === 'RawGPS' && data?.latitude && data?.longitude) {
+                    const last = this.lastGpsTick;
+                    const now = Date.now();
+                    const distMoved = last ? Math.sqrt(Math.pow(data.latitude - last.lat, 2) + Math.pow(data.longitude - last.lon, 2)) : 1;
+
+                    // Only log if moved significantly or every 10s
+                    if (last && distMoved < 0.0001 && (now - last.ts < 10000)) return;
+                    this.lastGpsTick = { lat: data.latitude, lon: data.longitude, ts: now };
+                }
+                shouldShow = true;
+            }
             else if (currentLevel === 'aggressive') {
                 // In aggressive, hide high-frequency or raw data categories
                 const rawCategories = ['RawMap', 'RawGPS', 'RawPayload'];
                 shouldShow = !rawCategories.includes(category);
             } else {
-                // Default: Only major categories
-                const majorCategories = ['System', 'Auth', 'Home', 'MapView', 'API'];
+                // Default: Major categories + Interaction
+                const majorCategories = ['System', 'Auth', 'Home', 'MapView', 'API', 'Interaction'];
                 shouldShow = majorCategories.includes(category);
             }
         }

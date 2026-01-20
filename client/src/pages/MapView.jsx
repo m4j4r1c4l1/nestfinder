@@ -125,6 +125,7 @@ const MapView = () => {
     };
 
     const handleSheetClose = () => {
+        logger.log('Interaction', `Closing sheet: ${activeSheet}`);
         setActiveSheet(null);
         setSelectedPoint(null);
     };
@@ -427,7 +428,11 @@ const MapView = () => {
             <nav className="bottom-nav">
                 <button
                     className={`bottom-nav-item ${activeSheet === 'filter' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(activeSheet === 'filter' ? null : 'filter')}
+                    onClick={() => {
+                        const next = activeSheet === 'filter' ? null : 'filter';
+                        if (next) logger.log('Interaction', 'Opening Filter menu');
+                        setActiveSheet(next);
+                    }}
                 >
                     <span>🔍</span>
                     {t('map.filters')}

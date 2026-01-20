@@ -62,6 +62,9 @@ class ApiClient {
       headers,
     });
 
+    // Aggressive/Paranoic: Log request high level info
+    logger.log('API', `Request: ${options.method || 'GET'} ${endpoint}`);
+
     // Check if response is JSON before parsing
     const contentType = response.headers.get('content-type');
     const isJson = contentType && contentType.includes('application/json');
@@ -134,6 +137,12 @@ class ApiClient {
 
       // Refresh failed or not possible - propagate 401
       throw new Error(data.error || 'Session expired. Please login again.');
+    }
+
+    if (response.ok) {
+      if (endpoint !== '/debug/status' && endpoint !== '/debug/logs') {
+        logger.log('API', `Response: ${response.status} from ${endpoint}`, { data });
+      }
     }
 
     if (!response.ok) {

@@ -74,8 +74,9 @@ const LogModal = ({ user, onClose }) => {
         let ts, level, category, msg, data;
 
         // Task #108: Handle both Object (new) and String (legacy) formats
+        let dl; // Source Debug Level
         if (typeof line === 'object' && line !== null) {
-            ({ ts, level, category, msg, data } = line);
+            ({ ts, level, category, msg, data, dl } = line);
         } else if (typeof line === 'string') {
             // Check if it's a JSON string disguised as a string
             if (line.trim().startsWith('{')) {
@@ -125,8 +126,35 @@ const LogModal = ({ user, onClose }) => {
 
         const { color: levelColor, label: levelLabel } = getLevelStyles(level);
 
+        // 3. Source Level Indicator
+        const getDlStyle = (sourceLvl) => {
+            const s = (sourceLvl || 'default').toLowerCase();
+            if (s === 'paranoic') return { color: '#ef4444', char: 'P' };
+            if (s === 'aggressive') return { color: '#a855f7', char: 'A' };
+            return { color: '#3b82f6', char: 'D' };
+        };
+        const { color: dlColor, char: dlChar } = getDlStyle(dl);
+
         return (
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+                {/* Source Log Level Indicator (D/A/P) */}
+                <span title={`Source Level: ${dl || 'Default'}`} style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 900,
+                    color: dlColor,
+                    backgroundColor: `${dlColor}22`,
+                    border: `1px solid ${dlColor}44`,
+                    width: '18px',
+                    height: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    flexShrink: 0
+                }}>
+                    {dlChar}
+                </span>
+
                 {/* Timestamp */}
                 <span style={{ color: '#64748b', fontSize: '0.85em', minWidth: '85px' }}>
                     {formatTime(ts)}

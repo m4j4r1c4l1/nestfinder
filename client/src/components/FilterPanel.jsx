@@ -1,14 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { logger } from '../utils/logger';
 
 const FilterPanel = ({ filters, onChange, onClose }) => {
     const { t } = useLanguage();
+
+    useEffect(() => {
+        logger.log('Interaction', 'Entering Filters section');
+    }, []);
 
     const toggleStatus = (status) => {
         const current = filters.status;
         const next = current.includes(status)
             ? current.filter(s => s !== status)
             : [...current, status];
+
+        const action = current.includes(status) ? 'unselected' : 'selected';
+        logger.log('Interaction', `${action} ${status}`, { previous: current, next });
+
         onChange({ ...filters, status: next });
     };
 
@@ -70,7 +79,10 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
 
                 <div style={{ marginTop: 'var(--space-6)', display: 'flex', justifyContent: 'center' }}>
                     <button
-                        onClick={onClose}
+                        onClick={() => {
+                            logger.log('Interaction', 'Clicked Done in Filters');
+                            onClose();
+                        }}
                         className="btn btn-primary"
                         style={{ padding: '0.75rem 2rem' }}
                     >
