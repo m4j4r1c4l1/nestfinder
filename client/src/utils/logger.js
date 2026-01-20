@@ -96,7 +96,14 @@ class DebugLogger {
                 }
             }
         } catch (e) {
-            // Silent fail on poll
+            // Enhanced error reporting (Task #105)
+            const currentLevel = this.config.debugLevel;
+            if (currentLevel === 'paranoic') {
+                console.error(`${LOG_PREFIX} [System] Status check failed:`, e);
+            } else if (currentLevel === 'aggressive') {
+                console.warn(`${LOG_PREFIX} [System] Status check failed: ${e.message}`);
+            }
+            // 'default' remains silent to avoid console noise for regular users
         }
     }
 

@@ -26,13 +26,16 @@ const LogModal = ({ user, onClose }) => {
 
     // Syntax Highlighting parser
     const parseLogLine = (line) => {
+        // Robustness check: Ensure line is a string (Task #104)
+        if (typeof line !== 'string') {
+            try {
+                return <span style={{ color: '#94a3b8' }}>[RAW] {JSON.stringify(line)}</span>;
+            } catch {
+                return <span style={{ color: '#94a3b8' }}>[INVALID LOG ENTRY]</span>;
+            }
+        }
+
         // Expected Format: "DD-MM-YYYY - HH:MM:SS CET/CEST [Module][Action] Message"
-        // Regex to capture parts
-        // 1: Timestamp
-        // 2: Timezone
-        // 3: Module
-        // 4: Action
-        // 5: Message
         const regex = /^(\d{2}-\d{2}-\d{4} - \d{2}:\d{2}:\d{2}) (CET|CEST) \[([\w\s]+)\]\[([\w\s]+)\] (.+)$/;
         const match = line.match(regex);
 
