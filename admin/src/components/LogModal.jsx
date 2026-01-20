@@ -13,6 +13,7 @@ const LogModal = ({ user, onClose }) => {
     const isUserScrollingRef = useRef(false);
     const [copied, setCopied] = useState(false);
     const [isColorEnabled, setIsColorEnabled] = useState(false);
+    const [liveTime, setLiveTime] = useState(new Date());
 
     // Category color map for COLOR toggle
     const CATEGORY_COLORS = {
@@ -81,6 +82,12 @@ const LogModal = ({ user, onClose }) => {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [logs, isFollowing]);
+
+    // Live timer for footer
+    useEffect(() => {
+        const timer = setInterval(() => setLiveTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Syntax Highlighting parser
     const parseLogLine = (line) => {
@@ -286,17 +293,6 @@ const LogModal = ({ user, onClose }) => {
                                 <div>
                                     {user.nickname} • {user.id}
                                 </div>
-                                <div style={{
-                                    width: '10px',
-                                    height: '10px',
-                                    borderRadius: '50%',
-                                    backgroundColor: !user.debug_enabled ? '#64748b' :
-                                        user.debug_level === 'paranoic' ? '#ef4444' :
-                                            user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                    boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
-                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
-                                        }` : 'none'
-                                }} title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`} />
                             </div>
                         </div>
                     </div>
@@ -335,9 +331,9 @@ const LogModal = ({ user, onClose }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                backgroundColor: isFollowing ? '#059669' : 'transparent',
+                                backgroundColor: isFollowing ? '#dc2626' : 'transparent',
                                 color: isFollowing ? 'white' : '#94a3b8',
-                                border: `1px solid ${isFollowing ? '#059669' : '#334155'}`,
+                                border: `1px solid ${isFollowing ? '#dc2626' : '#334155'}`,
                                 transition: 'all 0.2s ease'
                             }}
                         >
@@ -345,17 +341,15 @@ const LogModal = ({ user, onClose }) => {
                                 width: '8px',
                                 height: '8px',
                                 borderRadius: '50%',
-                                backgroundColor: isFollowing ? '#34d399' : '#64748b',
-                                boxShadow: isFollowing ? '0 0 8px #34d399' : 'none',
+                                backgroundColor: isFollowing ? '#ef4444' : '#64748b',
+                                boxShadow: isFollowing ? '0 0 8px #ef4444' : 'none',
                                 animation: isFollowing ? 'pulse 1.5s infinite' : 'none'
                             }} />
-                            {isFollowing ? 'FOLLOWING' : 'FOLLOW OFF'}
+                            {isFollowing ? 'LIVE' : 'OFF'}
                         </button>
-                        {isFollowing && (
-                            <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                                Auto-refreshing live...
-                            </span>
-                        )}
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                            {isFollowing ? 'Auto-refreshing live...' : 'Auto-refreshing stopped'}
+                        </span>
                     </div>
                     <button
                         onClick={() => setIsColorEnabled(!isColorEnabled)}
@@ -368,9 +362,9 @@ const LogModal = ({ user, onClose }) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            backgroundColor: isColorEnabled ? '#3b82f6' : 'transparent',
+                            backgroundColor: isColorEnabled ? '#059669' : 'transparent',
                             color: isColorEnabled ? 'white' : '#94a3b8',
-                            border: `1px solid ${isColorEnabled ? '#3b82f6' : '#334155'}`,
+                            border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`,
                             transition: 'all 0.2s ease'
                         }}
                     >
@@ -378,11 +372,11 @@ const LogModal = ({ user, onClose }) => {
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            backgroundColor: isColorEnabled ? '#60a5fa' : '#64748b',
-                            boxShadow: isColorEnabled ? '0 0 8px #60a5fa' : 'none',
+                            backgroundColor: isColorEnabled ? '#34d399' : '#64748b',
+                            boxShadow: isColorEnabled ? '0 0 8px #34d399' : 'none',
                             animation: isColorEnabled ? 'pulse 1.5s infinite' : 'none'
                         }} />
-                        COLOR
+                        {isColorEnabled ? 'FOCUS ON' : 'FOCUS OFF'}
                     </button>
                 </div>
 
@@ -440,12 +434,9 @@ const LogModal = ({ user, onClose }) => {
                                 </svg>
                                 <span style={{ color: '#f8fafc', fontSize: '0.85rem', fontFamily: 'monospace' }}>
                                     {(() => {
-                                        const firstTs = logs[0].ts;
-                                        if (!firstTs) return 'N/A';
-                                        const d = new Date(firstTs);
                                         const pad = (n, l = 2) => String(n).padStart(l, '0');
-                                        const datePart = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-                                        const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                                        const datePart = `${pad(liveTime.getDate())}/${pad(liveTime.getMonth() + 1)}/${liveTime.getFullYear()}`;
+                                        const timePart = `${pad(liveTime.getHours())}:${pad(liveTime.getMinutes())}:${pad(liveTime.getSeconds())}`;
                                         return `${datePart} - ${timePart} CET`;
                                     })()}
                                 </span>

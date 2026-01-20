@@ -43,6 +43,8 @@ router.get('/users', requireAdmin, (req, res) => {
                 u.debug_level,
                 u.debug_last_seen,
                 u.last_active,
+                u.debug_session_start,
+                u.debug_session_end,
                 (SELECT COUNT(*) FROM client_logs WHERE user_id = u.id) as log_count
             FROM users u
             ORDER BY u.debug_enabled DESC, u.last_active DESC
@@ -65,7 +67,13 @@ router.post('/users/:id/toggle', requireAdmin, (req, res) => {
         }
 
         const newState = user.debug_enabled ? 0 : 1;
-        run('UPDATE users SET debug_enabled = ? WHERE id = ?', [newState, id]);
+        if (newState === 1) {
+            // Enabling: Set session start, clear session end
+            run('UPDATE users SET debug_enabled = 1, debug_session_start = CURRENT_TIMESTAMP, debug_session_end = NULL WHERE id = ?', [id]);
+        } else {
+            // Disabling: Set session end
+            run('UPDATE users SET debug_enabled = 0, debug_session_end = CURRENT_TIMESTAMP WHERE id = ?', [id]);
+        }
 
         // ASAP Sync: Broadcast update
         const wss = req.app?.get('wss');
