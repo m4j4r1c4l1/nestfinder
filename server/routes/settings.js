@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { run, getSettings, getSetting } from '../database.js';
+import { run, runWithoutSave, saveDatabase, getSettings, getSetting } from '../database.js';
 import { requireAdmin } from '../middleware/auth.js';
 import { encrypt, decrypt, isEncrypted } from '../crypto.js';
 
@@ -69,12 +69,15 @@ router.put('/', requireAdmin, (req, res) => {
             }
         }
 
-        run(
+        runWithoutSave(
             `INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
        ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP`,
             [key, valueToStore, valueToStore]
         );
     }
+
+    // Save database once after all updates are done
+    saveDatabase();
 
     const updatedSettings = getSettings();
 

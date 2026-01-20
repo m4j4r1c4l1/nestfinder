@@ -402,6 +402,11 @@ export const run = (sql, params = []) => {
   saveDatabase();
 };
 
+// Helper: run query WITHOUT immediate save (for batch operations)
+export const runWithoutSave = (sql, params = []) => {
+  db.run(sql, params);
+};
+
 // Helper: get single row
 export const get = (sql, params = []) => {
   const stmt = db.prepare(sql);
@@ -480,4 +485,4 @@ export const resetDatabase = (target = 'all') => {
   console.log(`Database reset completed: ${target}`);
 };
 
-export default { initDatabase, getDb, run, get, all, log, getSetting, getSettings, saveDatabase, resetDatabase };
+export default { initDatabase, getDb, run, runWithoutSave, get, all, log, getSetting, getSettings, saveDatabase, resetDatabase };
