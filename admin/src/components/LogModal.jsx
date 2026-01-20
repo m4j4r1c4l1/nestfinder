@@ -26,38 +26,112 @@ const LogModal = ({ user, onClose }) => {
 
     // Syntax Highlighting parser
     const parseLogLine = (line) => {
-        // Robustness check: Ensure line is a string (Task #104)
-        if (typeof line !== 'string') {
-            try {
-                return <span style={{ color: '#94a3b8' }}>[RAW] {JSON.stringify(line)}</span>;
-            } catch {
-                return <span style={{ color: '#94a3b8' }}>[INVALID LOG ENTRY]</span>;
+        let ts, level, category, msg, data;
+
+        // Task #108: Handle both Object (new) and String (legacy) formats
+        if (typeof line === 'object' && line !== null) {
+            ({ ts, level, category, msg, data } = line);
+        } else if (typeof line === 'string') {
+            // Check if it's a JSON string disguised as a string
+            if (line.trim().startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(line);
+                    ({ ts, level, category, msg, data } = parsed);
+                } catch {
+                    // Fallback to regex if parsing fails
+                }
             }
+
+            if (!ts) {
+                // Legacy Regex: "DD-MM-YYYY - HH:MM:SS CET/CEST [Module][Action] Message"
+                const regex = /^(\d{2}-\d{2}-\d{4} - \d{2}:\d{2}:\d{2}) (CET|CEST) \[([\w\s]+)\]\[([\w\s]+)\] (.+)$/;
+                const match = line.match(regex);
+                if (!match) return <span style={{ color: '#94a3b8' }}>{line}</span>;
+                [_, ts, category, level, msg] = match; // Note: legacy mapped Action to msg usually
+            }
+        } else {
+            return <span style={{ color: '#ef4444' }}>[INVALID LOG ENTRY]</span>;
         }
 
-        // Expected Format: "DD-MM-YYYY - HH:MM:SS CET/CEST [Module][Action] Message"
-        const regex = /^(\d{2}-\d{2}-\d{4} - \d{2}:\d{2}:\d{2}) (CET|CEST) \[([\w\s]+)\]\[([\w\s]+)\] (.+)$/;
-        const match = line.match(regex);
+        // --- Formatting Helpers ---
 
-        if (!match) return <span style={{ color: '#94a3b8' }}>{line}</span>;
+        // 1. Timezone Correction (Task #108: Always show CET/CEST)
+        const formatTime = (iso) => {
+            if (!iso) return 'N/A';
+            const date = new Date(iso);
+            return date.toLocaleString('en-GB', {
+                timeZone: 'Europe/Paris',
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }) + ' CET';
+        };
 
-        const [_, timestamp, tz, module, action, message] = match;
+        // 2. Vibrant Level Colors
+        const getLevelStyles = (lvl) => {
+            const l = lvl?.toLowerCase() || '';
+            if (l.includes('error') || l.includes('fail')) return { color: '#ef4444', label: 'ERROR' };
+            if (l.includes('warn')) return { color: '#fbbf24', label: 'WARN' };
+            if (l.includes('debug')) return { color: '#a855f7', label: 'DEBUG' };
+            if (l.includes('system')) return { color: '#10b981', label: 'SYSTEM' };
+            return { color: '#3b82f6', label: 'INFO' };
+        };
 
-        let actionColor = '#fbbf24'; // Default Yellow
-        if (action.toLowerCase().includes('error') || action.toLowerCase().includes('fail')) actionColor = '#ef4444'; // Red
-        if (action.toLowerCase().includes('success') || action.toLowerCase().includes('recover')) actionColor = '#22c55e'; // Green
-
-        let moduleColor = '#60a5fa'; // Blue
-        if (module === 'App' && action === 'Crash') moduleColor = '#ef4444';
+        const { color: levelColor, label: levelLabel } = getLevelStyles(level);
 
         return (
-            <>
-                <span style={{ color: '#64748b', marginRight: '8px' }}>{timestamp}</span>
-                <span style={{ color: '#475569', fontSize: '0.75em', marginRight: '8px' }}>{tz}</span>
-                <span style={{ color: moduleColor, fontWeight: 600 }}>[{module}]</span>
-                <span style={{ color: actionColor, fontWeight: 600 }}>[{action}]</span>
-                <span style={{ color: '#e2e8f0', marginLeft: '8px' }}>{message}</span>
-            </>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+                {/* Timestamp */}
+                <span style={{ color: '#64748b', fontSize: '0.85em', minWidth: '85px' }}>
+                    {formatTime(ts)}
+                </span>
+
+                {/* Level Badge */}
+                <span style={{
+                    color: levelColor,
+                    fontWeight: 800,
+                    fontSize: '0.7em',
+                    letterSpacing: '0.05em',
+                    border: `1px solid ${levelColor}44`,
+                    padding: '1px 4px',
+                    borderRadius: '3px',
+                    minWidth: '50px',
+                    textAlign: 'center',
+                    backgroundColor: `${levelColor}11`
+                }}>
+                    {levelLabel}
+                </span>
+
+                {/* Hierarchy: [Category] */}
+                <span style={{ color: '#94a3b8', fontWeight: 600 }}>
+                    [{category || 'General'}]
+                </span>
+
+                {/* Message */}
+                <span style={{ color: '#f8fafc', flex: 1 }}>
+                    {msg}
+                </span>
+
+                {/* Data Payload (Task #108) */}
+                {data && (
+                    <div style={{
+                        width: '100%',
+                        marginTop: '4px',
+                        padding: '6px 12px',
+                        backgroundColor: 'rgba(15, 23, 42, 0.5)',
+                        borderLeft: `2px solid ${levelColor}`,
+                        color: levelColor === '#3b82f6' ? '#94a3b8' : levelColor, // Dim info data
+                        fontSize: '0.85em',
+                        borderRadius: '0 4px 4px 0',
+                        fontFamily: 'monospace',
+                        overflowX: 'auto'
+                    }}>
+                        <span style={{ opacity: 0.6, marginRight: '8px' }}>DATA:</span>
+                        {typeof data === 'object' ? JSON.stringify(data) : data}
+                    </div>
+                )}
+            </div>
         );
     };
 

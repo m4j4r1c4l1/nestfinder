@@ -78,8 +78,12 @@ class DebugLogger {
                     this.log('System', `Remote debug status changed: ${isActive ? 'ENABLED' : 'DISABLED'}`);
                     changed = true;
 
-                    if (isActive) this._startUpload();
-                    else this._stopUpload();
+                    if (isActive) {
+                        this._logSystemInfo(); // Task #107: Initial Debug Packet
+                        this._startUpload();
+                    } else {
+                        this._stopUpload();
+                    }
                 }
 
                 if (newLevel !== this.config.debugLevel) {
@@ -150,9 +154,37 @@ class DebugLogger {
     }
 
     /**
+     * Gathers and logs initial system state (Task #107)
+     */
+    _logSystemInfo() {
+        if (!typeof window === 'undefined') return;
+
+        const info = {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            screen: `${window.screen.width}x${window.screen.height}`,
+            viewport: `${window.innerWidth}x${window.innerHeight}`,
+            route: window.location.pathname,
+            localTime: new Date().toLocaleString('en-GB', { timeZone: 'Europe/Paris' }) + ' CET',
+            memory: performance?.memory ? {
+                totalJS: Math.round(performance.memory.totalJSHeapSize / 1048576) + 'MB',
+                usedJS: Math.round(performance.memory.usedJSHeapSize / 1048576) + 'MB'
+            } : 'N/A'
+        };
+
+        this.log('System', 'Debug Mode Activated (Initial Status)', info);
+    }
+
+    /**
      * Internal log entry creation
      */
     _entry(level, category, message, data = null) {
+        // Task #106: Filter internal upload noise
+        const internalMsgs = ['Uploading logs to server...', 'Logs uploaded successfully'];
+        if (category === 'System' && internalMsgs.includes(message)) {
+            return;
+        }
+
         const entry = {
             id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
             ts: new Date().toISOString(),
@@ -217,37 +249,45 @@ class DebugLogger {
      * L3: Upload Logs to Server
      */
     async upload() {
-        if (this.logs.length === 0) return { success: false, message: 'No logs to upload' };
+        const toUpload = this.logs.filter(l => !l.uploaded);
+        if (toUpload.length === 0) return { success: false, message: 'No new logs to upload' };
 
         try {
-            this.log('System', 'Uploading logs to server...');
+            // Task #106: Dedup - We don't log "Uploading..." to avoid infinite loops if it fails
+            // this.log('System', 'Uploading logs to server...'); 
 
-            // We use the planned endpoint: POST /api/debug/logs
-            // Note: client might not have base URL set, assuming relative path works for proxy
             const response = await fetch('/api/debug/logs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Include token if available in localStorage
-                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                    'Authorization': `Bearer ${localStorage.getItem('nestfinder_user_token') || ''}`
                 },
                 body: JSON.stringify({
-                    logs: this.logs,
+                    logs: toUpload,
                     userAgent: navigator.userAgent,
                     url: window.location.href,
                     timestamp: new Date().toISOString(),
-                    userId: this.userId // Include the User ID
+                    userId: this.userId
                 })
             });
 
             if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
 
             const result = await response.json();
-            this.log('System', 'Logs uploaded successfully', result);
+
+            // Mark as uploaded and prune old uploaded logs to keep storage clean
+            toUpload.forEach(l => l.uploaded = true);
+
+            // Optional: Prune uploaded logs if they are too old or buffer is large
+            // keep it simple for now, _entry already handles MAX_LOGS
+
+            this._saveToStorage();
+
             return result;
         } catch (e) {
-            this.error('System', 'Failed to upload logs', e);
-            throw e; // Re-throw for caller handling
+            // Avoid logging the error to L3 if it's an upload error to prevent recursion
+            console.error(LOG_PREFIX, 'Failed to upload logs', e);
+            throw e;
         }
     }
 
