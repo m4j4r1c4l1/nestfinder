@@ -67,6 +67,7 @@ class DebugLogger {
             const res = await fetch('/api/debug/status', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+
             if (res.ok) {
                 const data = await res.json();
                 const isActive = data.active === true;
@@ -96,6 +97,15 @@ class DebugLogger {
                     // Update internal state or emit event
                     window.dispatchEvent(new CustomEvent('debug_status_updated', {
                         detail: { enabled: this.config.enabled, level: this.config.debugLevel }
+                    }));
+                }
+            } else if (res.status === 401 || res.status === 403) {
+                // Task #25: If unauthorized/forbidden, disable locally
+                if (this.config.enabled) {
+                    this.config.enabled = false;
+                    this._stopUpload();
+                    window.dispatchEvent(new CustomEvent('debug_status_updated', {
+                        detail: { enabled: false, level: this.config.debugLevel }
                     }));
                 }
             }
@@ -271,7 +281,18 @@ class DebugLogger {
                 })
             });
 
-            if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
+            if (!response.ok) {
+                // If 403, it means we are no longer allowed to upload.
+                // Stop the interval and trigger a status check update.
+                if (response.status === 403) {
+                    const errData = await response.json().catch(() => ({}));
+                    console.warn(LOG_PREFIX, `Upload Forbidden (${errData.code || 'UNKNOWN'}): Stopping auto-upload.`);
+                    this._stopUpload();
+                    this._checkStatus(); // Force status sync
+                    throw new Error(`Upload failed (403): ${errData.error || 'Forbidden'}`);
+                }
+                throw new Error(`Upload failed: ${response.status}`);
+            }
 
             const result = await response.json();
 

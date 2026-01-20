@@ -20,7 +20,10 @@ const requireDebugMode = (req, res, next) => {
 
     const isEnabled = getSetting('debug_mode_enabled') === 'true';
     if (!isEnabled) {
-        return res.status(403).json({ error: 'Debug Mode is disabled' });
+        return res.status(403).json({
+            error: 'Debug Mode is disabled',
+            code: 'GLOBAL_DEBUG_DISABLED'
+        });
     }
     next();
 };
@@ -237,8 +240,24 @@ router.get('/status', requireUser, (req, res) => {
     }
 });
 
-// POST /api/debug/logs - Upload logs from client (requires both global + user debug)
-router.post('/logs', requireDebugMode, (req, res) => {
+// POST /api/debug/logs - Upload logs from client
+// We used to only use requireDebugMode, but now we allow crashes to bypass everything
+// and regular logs to be authenticated.
+router.post('/logs', (req, res, next) => {
+    // If it's a crash report, bypass global debug check and user check
+    if (req.body && req.body.isCrash) {
+        return next();
+    }
+    // Otherwise, require global debug mode
+    requireDebugMode(req, res, next);
+}, (req, res, next) => {
+    // If it's a crash report, bypass user check
+    if (req.body && req.body.isCrash) {
+        return next();
+    }
+    // Otherwise, require authenticated user
+    requireUser(req, res, next);
+}, (req, res) => {
     try {
         const { logs, platform, userAgent, userId, isCrash } = req.body;
 
@@ -246,34 +265,57 @@ router.post('/logs', requireDebugMode, (req, res) => {
             return res.status(400).json({ error: 'No logs provided' });
         }
 
-        // Abuse prevention: Limit number of logs per upload
         if (logs.length > 500) {
             return res.status(400).json({ error: 'Payload too large: Max 500 logs per request' });
         }
 
-        // Check if user has debug enabled, UNLESS it's a crash report
-        if (userId && !isCrash) {
-            const user = get('SELECT debug_enabled FROM users WHERE id = ?', [userId]);
-            if (!user || user.debug_enabled !== 1) {
-                return res.status(403).json({ error: 'Debug not enabled for this user' });
+        // --- Handling Authenticated User Logs ---
+        if (!isCrash && req.user) {
+            // Verify body userId matches token userId to prevent spoofing
+            if (userId && userId !== req.user.id) {
+                return res.status(403).json({
+                    error: 'User ID mismatch',
+                    code: 'USER_ID_MISMATCH'
+                });
+            }
+
+            // Check if user has debug enabled specifically
+            if (req.user.debug_enabled !== 1) {
+                return res.status(403).json({
+                    error: 'Debug not enabled for this user',
+                    code: 'USER_DEBUG_DISABLED'
+                });
             }
 
             // Store in database
             run(`
                 INSERT INTO client_logs (user_id, logs, platform, user_agent)
                 VALUES (?, ?, ?, ?)
-            `, [userId, JSON.stringify(logs), platform || null, userAgent || null]);
+            `, [req.user.id, JSON.stringify(logs), platform || null, userAgent || null]);
 
             // Update last seen
-            run('UPDATE users SET debug_last_seen = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
+            run('UPDATE users SET debug_last_seen = CURRENT_TIMESTAMP WHERE id = ?', [req.user.id]);
+
+            console.log(`[DEBUG] Received ${logs.length} logs from ${req.user.id} (${req.user.nickname}).`);
+        }
+        // --- Handling Crash Reports (potentially anonymous) ---
+        else if (isCrash) {
+            const crashUserId = userId || req.user?.id || 'anonymous';
+
+            // Store crashes even if debug is off
+            run(`
+                INSERT INTO client_logs (user_id, logs, platform, user_agent)
+                VALUES (?, ?, ?, ?)
+            `, [crashUserId, JSON.stringify(logs), platform || null, userAgent || null]);
+
+            console.log(`[CRASH] Received crash report from ${crashUserId}.`);
         }
 
         // Also append to legacy file for backwards compatibility
         const timestamp = new Date().toISOString();
-        const logEntry = `\n--- LOG ENTRY [${timestamp}] ---\nUser: ${userId || 'Unknown'}\nPlatform: ${platform || 'Unknown'}\nUA: ${userAgent || 'Unknown'}\n${logs.join('\n')}\n----------------------------\n`;
+        const logEntry = `\n--- LOG ENTRY [${timestamp}] ---\nUser: ${req.user?.id || userId || 'Unknown'}\nPlatform: ${platform || 'Unknown'}\nType: ${isCrash ? 'CRASH' : 'DEBUG'}\n${logs.join('\n')}\n----------------------------\n`;
         fs.appendFileSync(LOG_FILE, logEntry);
 
-        console.log(`[DEBUG] Received ${logs.length} logs from ${userId || 'unknown client'}.`);
         res.json({ success: true, stored: logs.length });
     } catch (err) {
         console.error('Error writing debug logs:', err);
