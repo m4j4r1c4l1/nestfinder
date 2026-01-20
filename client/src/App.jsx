@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import MapView from './pages/MapView';
 
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
+import { logger } from './utils/logger';
 
 
 const AppContent = () => {
@@ -53,6 +54,9 @@ const DebugIndicator = () => {
             .catch(() => { });
 
         // Initial check for debug status (standalone logger handles its own fetch, we listen)
+        const initialStatus = logger.getStatus();
+        setStatus(initialStatus);
+
         const handleStatusUpdate = (e) => {
             setStatus({
                 enabled: e.detail.enabled,

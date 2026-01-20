@@ -36,6 +36,13 @@ class DebugLogger {
         }
     }
 
+    getStatus() {
+        return {
+            enabled: this.config.enabled,
+            level: this.config.debugLevel
+        };
+    }
+
     init(config = {}) {
         this.config = { ...this.config, ...config };
         this.isInitialized = true;
@@ -61,6 +68,7 @@ class DebugLogger {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
+                const data = await res.json();
                 const isActive = data.active === true;
                 const newLevel = data.debug_level || 'default';
 
