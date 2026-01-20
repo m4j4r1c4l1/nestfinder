@@ -354,122 +354,6 @@ export default function Observability() {
                 <p className="text-muted">Monitor system health, usage statistics, and developer insights</p>
             </div>
 
-            {/* Status Card (Landscape) */}
-            <div className="card" style={{ marginBottom: '1.5rem', background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', border: '1px solid #334155', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b, #ec4899)' }} />
-
-                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #334155' }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>⚡ Status</h3>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Node: Nest-Alpha-01</div>
-                </div>
-
-                <div style={{ padding: '1.2rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
-
-                    {/* Main Health Block */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>Operational</div>
-                            <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
-                                Uptime: {formatUptime(stats.systemHealth?.uptime)}
-                            </div>
-                        </div>
-                        <EKGAnimation
-                            color={stats.systemHealth?.db === 'Error' || (stats.systemHealth?.load > 70) ? '#ef4444' : '#38bdf8'}
-                            isLoading={!stats.systemHealth?.db || stats.systemHealth?.db === 'Checking...'}
-                            isStressed={(stats.systemHealth?.load > 50) || (stats.systemHealth?.ram > 70) || stats.systemHealth?.db === 'Error'}
-                            load={stats.systemHealth?.load || 0}
-                            latency={parseInt(stats.systemHealth?.latency) || 0}
-                        />
-                    </div>
-
-                    <div style={{ width: '1px', height: '40px', background: '#334155' }} />
-
-                    {/* Server Load (Stacked) */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ fontSize: '1.8rem', opacity: 0.8 }}>🖥️</div>
-                        <div style={{ display: 'flex', gap: '1.5rem' }}>
-                            <div>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Server Load</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>Healthy</div>
-                                <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
-                                    Latency: {stats.systemHealth?.latency || '< 1'}ms
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.2rem', borderLeft: '1px solid #334155', paddingLeft: '1.2rem' }}>
-                                <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ width: '20px', textAlign: 'center' }}>🔲</span>
-                                    <span>CPU</span>
-                                    <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.load || 0}%</span>
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: '#818cf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ width: '20px', textAlign: 'center' }}>🧠</span>
-                                    <span>RAM</span>
-                                    <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.ram || 0}%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style={{ width: '1px', height: '40px', background: '#334155' }} />
-
-                    {/* Database Status - Vertical layout matching others */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img src={dbIcon} alt="DB" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Database</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>
-                                {stats.systemHealth?.db === 'Error' ? 'Error' : stats.systemHealth?.db === 'Checking...' ? 'Checking...' : 'Connected'}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: stats.systemHealth?.db === 'Error' ? '#ef4444' : stats.systemHealth?.db === 'Checking...' ? '#f59e0b' : '#22c55e', boxShadow: `0 0 5px ${stats.systemHealth?.db === 'Error' ? '#ef4444' : stats.systemHealth?.db === 'Checking...' ? '#f59e0b' : '#22c55e'}` }} />
-                                {stats.systemHealth?.db === 'Error' ? 'Unreachable' : stats.systemHealth?.db === 'Checking...' ? 'Testing...' : 'SQLite Engine'}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Live Connection Counter - Rearranged for visual appeal */}
-                    <div style={{ marginLeft: 'auto', paddingRight: '0.2rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <div style={{
-                            background: 'rgba(15, 23, 42, 0.4)', padding: '0.6rem 1.2rem', borderRadius: '12px', border: '1px solid #1e293b',
-                            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.3rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                        }}>
-                            <span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Sessions</span>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                {/* Pulsing Dot (Ripple Effect) */}
-                                <div style={{ position: 'relative', width: '1.4rem', height: '1.4rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {/* Waves Fading Out - Scaled to Container */}
-                                    <div style={{ position: 'absolute', inset: '0', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.6)', animation: 'pulse-wave 2s ease-out infinite', opacity: 0 }} />
-                                    <div style={{ position: 'absolute', inset: '4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'pulse-wave 2s ease-out infinite 0.6s', opacity: 0 }} />
-                                    {/* Core Dot */}
-                                    <div style={{ position: 'relative', width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.8)' }} />
-                                </div>
-
-                                <span style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1, fontFamily: 'monospace' }}>
-                                    <RollingBarrelCounter end={stats.connectedClients || 0} />
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <style>{`
-                    @keyframes pulse-wave {
-                        0% { transform: scale(0.5); opacity: 0.8; }
-                        100% { transform: scale(1.5); opacity: 0; }
-                    }
-                    @keyframes pulse-beat {
-                        0%, 100% { transform: scale(1); }
-                        50% { transform: scale(1.2); }
-                    }
-                `}</style>
-            </div>
-
             {/* Totals Summary */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div className="card-header" style={{
@@ -856,9 +740,126 @@ export default function Observability() {
                 </div>
             </div>
 
+            {/* Status Card (Landscape) */}
+            <div className="card" style={{ marginBottom: '1.5rem', background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', border: '1px solid #334155', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b, #ec4899)' }} />
+
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #334155' }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>⚡ Status</h3>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Node: Nest-Alpha-01</div>
+                </div>
+
+                <div style={{ padding: '1.2rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
+
+                    {/* Main Health Block */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>System Status</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>Operational</div>
+                            <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
+                                Uptime: {formatUptime(stats.systemHealth?.uptime)}
+                            </div>
+                        </div>
+                        <EKGAnimation
+                            color={stats.systemHealth?.db === 'Error' || (stats.systemHealth?.load > 70) ? '#ef4444' : '#38bdf8'}
+                            isLoading={!stats.systemHealth?.db || stats.systemHealth?.db === 'Checking...'}
+                            isStressed={(stats.systemHealth?.load > 50) || (stats.systemHealth?.ram > 70) || stats.systemHealth?.db === 'Error'}
+                            load={stats.systemHealth?.load || 0}
+                            latency={parseInt(stats.systemHealth?.latency) || 0}
+                        />
+                    </div>
+
+                    <div style={{ width: '1px', height: '40px', background: '#334155' }} />
+
+                    {/* Server Load (Stacked) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ fontSize: '1.8rem', opacity: 0.8 }}>🖥️</div>
+                        <div style={{ display: 'flex', gap: '1.5rem' }}>
+                            <div>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Server Load</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>Healthy</div>
+                                <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
+                                    Latency: {stats.systemHealth?.latency || '< 1'}ms
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.2rem', borderLeft: '1px solid #334155', paddingLeft: '1.2rem' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ width: '20px', textAlign: 'center' }}>🔲</span>
+                                    <span>CPU</span>
+                                    <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.load || 0}%</span>
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#818cf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ width: '20px', textAlign: 'center' }}>🧠</span>
+                                    <span>RAM</span>
+                                    <span style={{ fontWeight: 700, marginLeft: 'auto' }}>{stats.systemHealth?.ram || 0}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ width: '1px', height: '40px', background: '#334155' }} />
+
+                    {/* Database Status - Vertical layout matching others */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <img src={dbIcon} alt="DB" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Database</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0' }}>
+                                {stats.systemHealth?.db === 'Error' ? 'Error' : stats.systemHealth?.db === 'Checking...' ? 'Checking...' : 'Connected'}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: stats.systemHealth?.db === 'Error' ? '#ef4444' : '#22c55e', fontWeight: 600, marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: stats.systemHealth?.db === 'Error' ? '#ef4444' : stats.systemHealth?.db === 'Checking...' ? '#f59e0b' : '#22c55e', boxShadow: `0 0 5px ${stats.systemHealth?.db === 'Error' ? '#ef4444' : stats.systemHealth?.db === 'Checking...' ? '#f59e0b' : '#22c55e'}` }} />
+                                {stats.systemHealth?.db === 'Error' ? 'Unreachable' : stats.systemHealth?.db === 'Checking...' ? 'Testing...' : 'SQLite Engine'}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Live Connection Counter - Rearranged for visual appeal */}
+                    <div style={{ marginLeft: 'auto', paddingRight: '0.2rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <div style={{
+                            background: 'rgba(15, 23, 42, 0.4)', padding: '0.6rem 1.2rem', borderRadius: '12px', border: '1px solid #1e293b',
+                            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.3rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        }}>
+                            <span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Sessions</span>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                {/* Pulsing Dot (Ripple Effect) */}
+                                <div style={{ position: 'relative', width: '1.4rem', height: '1.4rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {/* Waves Fading Out - Scaled to Container */}
+                                    <div style={{ position: 'absolute', inset: '0', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.6)', animation: 'pulse-wave 2s ease-out infinite', opacity: 0 }} />
+                                    <div style={{ position: 'absolute', inset: '4px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.4)', animation: 'pulse-wave 2s ease-out infinite 0.6s', opacity: 0 }} />
+                                    {/* Core Dot */}
+                                    <div style={{ position: 'relative', width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.8)' }} />
+                                </div>
+
+                                <span style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1, fontFamily: 'monospace' }}>
+                                    <RollingBarrelCounter end={stats.connectedClients || 0} />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <style>{`
+                    @keyframes pulse-wave {
+                        0% { transform: scale(0.5); opacity: 0.8; }
+                        100% { transform: scale(1.5); opacity: 0; }
+                    }
+                    @keyframes pulse-beat {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.2); }
+                    }
+                `}</style>
+            </div>
+
+
             {/* Metrics Chart Section */}
             <MetricsSection />
-        </div>
+        </div >
     );
 };
 

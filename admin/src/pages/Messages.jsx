@@ -817,8 +817,12 @@ const Messages = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '2rem' }}>
                                 {/* Create New Broadcast */}
                                 <div className="card" style={{ flexShrink: 0, marginBottom: 0, overflow: 'visible', zIndex: 20 }}>
-                                    <div className="card-header">
-                                        <h3>🌈 Create Broadcasts</h3>
+                                    <div className="card-header" style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
+                                        padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
+                                    }}>
+                                        <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🌈 Create Broadcasts</h3>
                                     </div>
                                     <div className="card-body">
                                         <form onSubmit={handleCreateBroadcast}>
@@ -1228,8 +1232,12 @@ function BroadcastsSection({ broadcasts, page, setPage, pageSize, onDelete, onBr
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {/* Broadcasts List Card */}
             <div className="card" style={{ display: 'flex', flexDirection: 'column', marginBottom: 0 }}>
-                <div className="card-header">
-                    <h3>🎬 Manage Broadcasts</h3>
+                <div className="card-header" style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
+                    padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
+                }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🎬 Manage Broadcasts</h3>
                 </div>
 
                 {/* Sticky Search Form - Below Header */}
@@ -2230,7 +2238,13 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
 
     return (
         <div className="card" style={{ marginBottom: '1rem', maxHeight: 'none', overflow: 'visible' }}>
-            <div className="card-header"><h3>✉️ Create Notifications</h3></div>
+            <div className="card-header" style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
+                padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
+            }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>✉️ Create Notifications</h3>
+            </div>
             <div className="card-body">
                 <div className="form-group">
                     <label className="form-label">Template</label>

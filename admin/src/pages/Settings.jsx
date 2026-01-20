@@ -146,8 +146,12 @@ const Settings = () => {
 
             {/* App Settings */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-header" style={{ borderBottom: '1px solid var(--color-border)', padding: '1rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem' }}>📱 Application Settings</h3>
+                <div className="card-header" style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
+                    padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
+                }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>📱 Application Settings</h3>
                 </div>
                 <div className="card-body" style={{ padding: '1.5rem' }}>
                     <form onSubmit={handleSave}>
@@ -283,8 +287,12 @@ const Settings = () => {
 
             {/* Security Settings */}
             <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-header" style={{ borderBottom: '1px solid var(--color-border)', padding: '1rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem' }}>🔒 Security</h3>
+                <div className="card-header" style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
+                    padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
+                }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>🔒 Security</h3>
                 </div>
                 <div className="card-body" style={{ padding: '1.5rem' }}>
                     <form onSubmit={handleSave}>
@@ -366,8 +374,12 @@ const Settings = () => {
 
             {/* Danger Zone */}
             <div className="card" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
-                <div className="card-header" style={{ borderBottom: '1px solid rgba(239, 68, 68, 0.3)', padding: '1rem', background: 'rgba(239, 68, 68, 0.05)' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--color-deactivated)' }}>⚠️ Danger Zone</h3>
+                <div className="card-header" style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
+                    padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
+                }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-deactivated)' }}>⚠️ Danger Zone</h3>
                 </div>
                 <div className="card-body" style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

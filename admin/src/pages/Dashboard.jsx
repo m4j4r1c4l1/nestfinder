@@ -400,12 +400,15 @@ const Dashboard = ({ onNavigate }) => {
 
                 {/* Map - Left side, takes most width */}
                 <div className="card" style={{ flex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <div className="card-header" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 600 }}>🗺️ Global Activity Map</span>
+                    <div className="card-header" style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
+                        padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
+                    }}>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>🗺️ Global Activity Map</h3>
                     </div>
 
-
-                    <div style={{ padding: '0 1.5rem 1.5rem 1.5rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '1rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <AdminMap
                             points={filteredPoints || points}
                             filteredPoints={filteredPoints}
