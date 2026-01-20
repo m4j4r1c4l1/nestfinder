@@ -107,8 +107,8 @@ export const adminApi = {
         return this.fetch(`/admin/logs?${params}`);
     },
 
-    getUserLogs(userId) {
-        return this.fetch(`/debug/users/${userId}/logs`);
+    getUserLogs(userId, since = 0) {
+        return this.fetch(`/debug/users/${userId}/logs?since=${since}`);
     },
 
     async downloadLogs(userId) {

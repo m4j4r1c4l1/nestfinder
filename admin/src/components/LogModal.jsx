@@ -5,24 +5,69 @@ const LogModal = ({ user, onClose }) => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isFollowing, setIsFollowing] = useState(true);
+    const [lastBatchId, setLastBatchId] = useState(0);
     const contentRef = useRef(null);
+    const scrollRef = useRef(null);
+    const pollingRef = useRef(null);
+    const isUserScrollingRef = useRef(false);
 
-    useEffect(() => {
-        const fetchLogs = async () => {
-            try {
-                const res = await adminApi.getUserLogs(user.id);
+    const fetchLogs = async (sinceId = 0) => {
+        try {
+            const res = await adminApi.getUserLogs(user.id, sinceId);
+            if (sinceId === 0) {
                 setLogs(res.logs || []);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
+                setLastBatchId(res.max_id || 0);
+                setError(null); // Clear any previous error on full refresh
+            } else if (res.logs && res.logs.length > 0) {
+                setLogs(prev => [...prev, ...res.logs]);
+                setLastBatchId(res.max_id);
             }
-        };
+        } catch (err) {
+            if (sinceId === 0) {
+                setError(err.message);
+            } else {
+                console.warn('Log polling failed:', err.message);
+                // Don't set global error state for background polls to avoid UI jitter
+                // Maybe a small transient indicator?
+            }
+        } finally {
+            if (sinceId === 0) setLoading(false);
+        }
+    };
 
+    // Initial fetch
+    useEffect(() => {
         if (user) {
-            fetchLogs();
+            fetchLogs(0);
         }
     }, [user]);
+
+    // Polling fetch (tail -f)
+    useEffect(() => {
+        if (isFollowing && user) {
+            pollingRef.current = setInterval(() => {
+                fetchLogs(lastBatchId);
+            }, 3000); // Poll every 3 seconds
+        } else {
+            if (pollingRef.current) clearInterval(pollingRef.current);
+        }
+
+        return () => {
+            if (pollingRef.current) clearInterval(pollingRef.current);
+        };
+    }, [isFollowing, user, lastBatchId]);
+
+    // Auto-scroll logic
+    useEffect(() => {
+        if (isFollowing && scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [logs, isFollowing]);
+
+    // Detect manual scroll up to pause following maybe? 
+    // Actually, user requested a specific "stop" button or modal close.
+    // I'll stick to the toggle button for clarity.
 
     // Syntax Highlighting parser
     const parseLogLine = (line) => {
@@ -198,8 +243,52 @@ const LogModal = ({ user, onClose }) => {
                     </button>
                 </div>
 
+                {/* Sub-header with Follow Toggle */}
+                <div style={{
+                    padding: '8px 1.5rem',
+                    backgroundColor: '#1e293b',
+                    borderBottom: '1px solid #334155',
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    gap: '12px'
+                }}>
+                    <button
+                        onClick={() => setIsFollowing(!isFollowing)}
+                        style={{
+                            padding: '4px 12px',
+                            borderRadius: '4px',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            backgroundColor: isFollowing ? '#059669' : 'transparent',
+                            color: isFollowing ? 'white' : '#94a3b8',
+                            border: `1px solid ${isFollowing ? '#059669' : '#334155'}`,
+                            transition: 'all 0.2s ease'
+                        }}
+                    >
+                        <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: isFollowing ? '#34d399' : '#64748b',
+                            boxShadow: isFollowing ? '0 0 8px #34d399' : 'none',
+                            animation: isFollowing ? 'pulse 1.5s infinite' : 'none'
+                        }} />
+                        {isFollowing ? 'FOLLOWING (tail -f)' : 'FOLLOW OFF'}
+                    </button>
+                    {isFollowing && (
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                            Auto-refreshing live...
+                        </span>
+                    )}
+                </div>
+
                 {/* Content */}
-                <div style={{ flex: 1, padding: '0', overflowY: 'auto' }} ref={contentRef}>
+                <div style={{ flex: 1, padding: '0', overflowY: 'auto', scrollBehavior: 'smooth' }} ref={scrollRef}>
                     {loading ? (
                         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
                             Loading logs...
@@ -254,6 +343,15 @@ const LogModal = ({ user, onClose }) => {
                     </button>
                 </div>
             </div>
+            <style>
+                {`
+                    @keyframes pulse {
+                        0% { opacity: 1; transform: scale(1); }
+                        50% { opacity: 0.5; transform: scale(1.2); }
+                        100% { opacity: 1; transform: scale(1); }
+                    }
+                `}
+            </style>
         </div>
     );
 };

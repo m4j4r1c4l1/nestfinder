@@ -128,7 +128,12 @@ router.post('/users/:id/level', requireAdmin, (req, res) => {
 router.get('/users/:id/logs', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
-        const logs = all('SELECT * FROM client_logs WHERE user_id = ? ORDER BY uploaded_at ASC', [id]);
+        const since = parseInt(req.query.since, 10) || 0;
+
+        const logs = all('SELECT * FROM client_logs WHERE user_id = ? AND id > ? ORDER BY uploaded_at ASC', [id, since]);
+
+        // Find the new max ID for incremental fetching
+        const maxId = logs.reduce((max, entry) => Math.max(max, entry.id), since);
 
         // Combine all log entries
         const allLogs = logs.map(entry => {
@@ -143,7 +148,8 @@ router.get('/users/:id/logs', requireAdmin, (req, res) => {
             user_id: id,
             log_count: allLogs.length,
             logs: allLogs,
-            entries: logs.length
+            entries: logs.length,
+            max_id: maxId
         });
     } catch (err) {
         console.error('Error fetching user logs:', err);
