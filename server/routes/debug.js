@@ -37,6 +37,7 @@ router.get('/users', requireAdmin, (req, res) => {
                 u.id, 
                 u.nickname, 
                 u.debug_enabled, 
+                u.debug_level,
                 u.debug_last_seen,
                 u.last_active,
                 (SELECT COUNT(*) FROM client_logs WHERE user_id = u.id) as log_count
@@ -70,6 +71,34 @@ router.post('/users/:id/toggle', requireAdmin, (req, res) => {
         });
     } catch (err) {
         console.error('Error toggling debug:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/debug/users/:id/level - Set debug level for user
+router.post('/users/:id/level', requireAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        const { level } = req.body;
+
+        if (!['default', 'aggressive', 'paranoic'].includes(level)) {
+            return res.status(400).json({ error: 'Invalid debug level' });
+        }
+
+        const user = get('SELECT id FROM users WHERE id = ?', [id]);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        run('UPDATE users SET debug_level = ? WHERE id = ?', [level, id]);
+
+        res.json({
+            success: true,
+            debug_level: level,
+            message: `Debug level set to ${level}`
+        });
+    } catch (err) {
+        console.error('Error setting debug level:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -177,11 +206,12 @@ router.delete('/logs', requireAdmin, (req, res) => {
 router.get('/status', requireUser, (req, res) => {
     try {
         const globalEnabled = getSetting('debug_mode_enabled') === 'true';
-        const user = get('SELECT debug_enabled FROM users WHERE id = ?', [req.user.id]);
+        const user = get('SELECT debug_enabled, debug_level FROM users WHERE id = ?', [req.user.id]);
 
         res.json({
             global_enabled: globalEnabled,
             user_enabled: user?.debug_enabled === 1,
+            debug_level: user?.debug_level || 'default',
             active: globalEnabled && user?.debug_enabled === 1
         });
     } catch (err) {

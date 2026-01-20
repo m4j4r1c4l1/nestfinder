@@ -65,7 +65,7 @@ const Debug = () => {
 
     // Column widths with localStorage persistence
     const STORAGE_KEY = 'debug_table_col_widths';
-    const DEFAULT_WIDTHS = { user: 250, lastActive: 180, debugMode: 120, logs: 300 };
+    const DEFAULT_WIDTHS = { user: 250, lastActive: 180, debugMode: 120, debugLevel: 140, logs: 300 };
     const [colWidths, setColWidths] = useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -139,6 +139,11 @@ const Debug = () => {
                     aVal = a.log_count || 0;
                     bVal = b.log_count || 0;
                     break;
+                case 'debugLevel':
+                    const levels = { default: 0, aggressive: 1, paranoic: 2 };
+                    aVal = levels[a.debug_level || 'default'];
+                    bVal = levels[b.debug_level || 'default'];
+                    break;
                 default: return 0;
             }
             if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -174,6 +179,27 @@ const Debug = () => {
             console.error('Failed to toggle debug:', err);
         } finally {
             setActionLoading(null);
+        }
+    };
+
+    // Cycle debug level: Default -> Aggressive -> Paranoic -> Default
+    const handleCycleDebugLevel = async (user) => {
+        const levels = ['default', 'aggressive', 'paranoic'];
+        const currentIdx = levels.indexOf(user.debug_level || 'default');
+        const nextLevel = levels[(currentIdx + 1) % levels.length];
+
+        // Optimistic update
+        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, debug_level: nextLevel } : u));
+
+        try {
+            await adminApi.fetch(`/debug/users/${user.id}/level`, {
+                method: 'POST',
+                body: JSON.stringify({ level: nextLevel })
+            });
+        } catch (err) {
+            console.error('Failed to set debug level:', err);
+            // Revert on failure
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, debug_level: user.debug_level } : u));
         }
     };
 
@@ -371,7 +397,11 @@ const Debug = () => {
                                 </th>
                                 <th style={{ width: colWidths.debugMode, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('debugMode')}>
                                     Debug Mode <SortIndicator column="debugMode" />
-                                    <ResizeHandle leftCol="debugMode" rightCol="logs" />
+                                    <ResizeHandle leftCol="debugMode" rightCol="debugLevel" />
+                                </th>
+                                <th style={{ width: colWidths.debugLevel, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('debugLevel')}>
+                                    Debug Level <SortIndicator column="debugLevel" />
+                                    <ResizeHandle leftCol="debugLevel" rightCol="logs" />
                                 </th>
                                 <th style={{ position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('logs')}>
                                     Logs & Actions <SortIndicator column="logs" />
@@ -381,11 +411,11 @@ const Debug = () => {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading users...</td>
+                                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading users...</td>
                                 </tr>
                             ) : paginatedUsers.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found matching "{searchTerm}"</td>
+                                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found matching "{searchTerm}"</td>
                                 </tr>
                             ) : (
                                 paginatedUsers.map(user => {
@@ -430,6 +460,29 @@ const Debug = () => {
                                                     }}
                                                 >
                                                     {user.debug_enabled ? 'Enabled' : (actionLoading === user.id ? 'Enabling...' : 'Off')}
+                                                </button>
+                                            </td>
+                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleCycleDebugLevel(user); }}
+                                                    style={{
+                                                        padding: '0.3rem 0.6rem',
+                                                        borderRadius: '6px',
+                                                        border: '1px solid',
+                                                        borderColor: (user.debug_level || 'default') === 'paranoic' ? '#ef4444' : (user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'),
+                                                        background: (user.debug_level || 'default') === 'paranoic' ? '#ef444420' : (user.debug_level === 'aggressive' ? '#a855f720' : '#3b82f620'),
+                                                        color: (user.debug_level || 'default') === 'paranoic' ? '#ef4444' : (user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'),
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 600,
+                                                        minWidth: '90px',
+                                                        opacity: user.debug_enabled ? 1 : 0.5,
+                                                        transition: 'all 0.2s ease',
+                                                        textTransform: 'capitalize'
+                                                    }}
+                                                    title="Click to cycle verbosity"
+                                                >
+                                                    {(user.debug_level || 'default')}
                                                 </button>
                                             </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>

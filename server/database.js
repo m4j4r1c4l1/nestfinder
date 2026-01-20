@@ -310,6 +310,8 @@ export const initDatabase = async () => {
   // Debug feature migrations
   try { db.run("ALTER TABLE users ADD COLUMN debug_enabled INTEGER DEFAULT 0"); } catch (e) { /* Exists */ }
   try { db.run("ALTER TABLE users ADD COLUMN debug_last_seen DATETIME"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE users ADD COLUMN debug_level TEXT DEFAULT 'default'"); } catch (e) { /* Exists */ }
+  try { db.run("ALTER TABLE users ADD COLUMN debug_level TEXT DEFAULT 'default'"); } catch (e) { /* Exists */ }
 
   // Client logs table (per-user debug logs)
   db.run(`
