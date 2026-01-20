@@ -14,6 +14,19 @@ const LogModal = ({ user, onClose }) => {
     const [copied, setCopied] = useState(false);
     const [isColorEnabled, setIsColorEnabled] = useState(false);
     const [liveTime, setLiveTime] = useState(new Date());
+    const [deviceInfo, setDeviceInfo] = useState(null);
+    const [refreshDots, setRefreshDots] = useState('');
+    const [animating, setAnimating] = useState(false);
+
+    // --- SVGs ---
+    const Icons = {
+        Apple: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.3,12.7c0,2.4,2.5,3.6,2.6,3.7c-0.1,0.2-0.5,1.7-1.6,3.3c-1,1.4-2,2.8-3.6,2.8 c-1.5,0-2-0.9-3.7-0.9c-1.8,0-2.3,0.9-3.8,0.9c-1.5,0-2.7-1.5-3.8-3.2c-1.9-2.9-1.6-7-0.1-9.7c1.4-2.4,3.7-2.6,4.9-2.6 c1.7,0,3.1,1,4.1,1c1.1,0,2.6-1.5,4.7-1.3c0.4,0,2.4,0.1,4.2,2.3C21.1,9.3,17.4,10.6,17.3,12.7z M12.9,6.1 c0.8-1,1.3-2.3,1.2-3.8c-1.2,0.1-2.5,0.8-3.3,1.8C10,5,9.6,6.3,9.7,7.7C11,7.8,12.2,7,12.9,6.1z" /></svg>,
+        Android: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.72l1.927-3.337c.1691-.2955.0688-.6718-.2256-.8421-.2949-.1691-.6702-.0681-.8404.2268l-1.9161 3.3183c-1.8211-1.0275-4.0792-1.6253-6.5262-1.6253-2.447 0-4.7061.5978-6.5273 1.6253L1.8568 4.6706c-.1691-.2949-.5454-.3959-.8393-.2268-.2955.1703-.3959.5466-.2268.8421l1.927 3.337C.683 10.3802 0 13.062 0 15.9055c0 .1085.0087.2158.0253.3218h23.9493c.0166-.106.0264-.2133.0264-.3218 0-2.8435-.683-5.5253-2.7032-7.2841" /></svg>,
+        Windows: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M0,3.449L9.124,2.193v8.834H0V3.449z M9.124,12.915v8.892L0,20.555v-7.64H9.124z M10.41,1.968L24,0v11.027H10.41V1.968z M10.41,12.914H24v11.086L10.41,22.03V12.914z" /></svg>,
+        Linux: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C9,2,8,4,8,4s-1,2-1,6c0,2,2,3,2,3s1,4,0,5c-1,1-2,1-1,1s-1,2.5,1,2c2-0.5,5-3,5-3s3,2.5,5,3c2,0.5,1-2,1-2s0,0-1-1 c-1-1,0-4,0-5s2-1,2-3s-1-6-1-6S15,2,12,2z M10.5,8C10.5,8,10,8.5,10,9s0.5,1,0.5,1S10,11,9.5,11s-0.5-0.5-0.5-1S9.5,8,10.5,8z M13.5,8C13.5,8,13,8.5,13,9s0.5,1,0.5,1s0.5,1,0,1s-0.5-0.5-0.5-1S12.5,8,13.5,8z" /></svg>,
+        Phone: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2" /><line x1="12" y1="18" x2="12.01" y2="18" /></svg>,
+        Browser: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="4" /><line x1="21.17" y1="8" x2="12" y2="8" /><line x1="3.95" y1="6.06" x2="8.54" y2="14" /><line x1="10.88" y1="21.94" x2="15.46" y2="14" /></svg>
+    };
 
     // Category color map for COLOR toggle
     const CATEGORY_COLORS = {
@@ -60,6 +73,106 @@ const LogModal = ({ user, onClose }) => {
             fetchLogs(0);
         }
     }, [user]);
+
+    // Parse User Agent from logs (Task Phase 2)
+    useEffect(() => {
+        if (!logs.length) return;
+
+        // Look for the "Debug Mode Activated" log which contains system info
+        const initLog = logs.find(l => {
+            const msg = typeof l === 'object' ? l.msg : l;
+            return msg && msg.includes && msg.includes('Debug Mode Activated');
+        });
+
+        if (initLog) {
+            let data = typeof initLog === 'object' ? initLog.data : null;
+            // If data is stringified JSON in legacy string format
+            if (!data && typeof initLog === 'string' && initLog.includes('{')) {
+                try { data = JSON.parse(initLog.substring(initLog.indexOf('{'))); } catch { }
+            }
+
+            if (data && (data.userAgent || data.platform)) {
+                // Simple Parser
+                const ua = data.userAgent || '';
+                const plat = data.platform || '';
+
+                let os = { icon: 'Windows', name: 'Windows', ver: '' };
+                let device = { icon: null, name: null };
+                let browser = { icon: 'Browser', name: 'Browser', ver: '' };
+
+                // OS / Platform
+                if (plat.includes('Win')) os = { icon: 'Windows', name: 'Windows', ver: '' };
+                else if (plat.includes('Mac')) os = { icon: 'Apple', name: 'macOS', ver: '' };
+                else if (plat.includes('Linux')) os = { icon: 'Linux', name: 'Linux', ver: '' };
+                else if (ua.includes('iPhone') || ua.includes('iPad')) os = { icon: 'Apple', name: 'iOS', ver: '' };
+                else if (ua.includes('Android')) os = { icon: 'Android', name: 'Android', ver: '' };
+
+                // Version Extraction (Simple regexes)
+                if (os.name === 'iOS') {
+                    const match = ua.match(/OS (\d+[._]\d+)/);
+                    if (match) os.ver = match[1].replace('_', '.');
+                    device = { icon: 'Phone', name: 'iPhone' }; // Assume iPhone if iOS
+                } else if (os.name === 'Android') {
+                    const match = ua.match(/Android (\d+(\.\d+)?)/);
+                    if (match) os.ver = match[1];
+                    device = { icon: 'Phone', name: 'Device' };
+                } else if (os.name === 'macOS') {
+                    const match = ua.match(/Mac OS X (\d+[._]\d+)/);
+                    if (match) os.ver = match[1].replace('_', '.');
+                } else if (os.name === 'Windows') {
+                    // Windows version mapping is messy in UA, simplified
+                    if (ua.includes('Windows NT 10.0')) os.ver = '10/11';
+                    else if (ua.includes('Windows NT 6.3')) os.ver = '8.1';
+                }
+
+                // Browser
+                if (ua.includes('Chrome/')) { browser.name = 'Chrome'; browser.ver = ua.split('Chrome/')[1].split(' ')[0]; }
+                else if (ua.includes('Firefox/')) { browser.name = 'Firefox'; browser.ver = ua.split('Firefox/')[1]; }
+                else if (ua.includes('Safari/') && !ua.includes('Chrome/')) { browser.name = 'Safari'; browser.ver = ua.split('Version/')[1].split(' ')[0]; }
+                else if (ua.includes('Edg/')) { browser.name = 'Edge'; browser.ver = ua.split('Edg/')[1]; }
+
+                setDeviceInfo({ os, device, browser });
+            }
+        }
+    }, [logs]);
+
+    // Live Text Animation (Task Phase 2)
+    useEffect(() => {
+        if (!isFollowing) {
+            setRefreshDots('');
+            setAnimating(false);
+            return;
+        }
+
+        // Trigger animation on new logs
+        if (logs.length > 0 && isFollowing) {
+            setAnimating(true);
+            let count = 0;
+            const maxCycles = 2; // Twice
+            const cycleDur = 3; // 3 steps (. .. ...)
+            let step = 0;
+
+            const interval = setInterval(() => {
+                step++;
+                const dotCount = (step % 4); // 0, 1, 2, 3 (but we want 1,2,3)
+                if (dotCount === 0) {
+                    // Pause or reset
+                    setRefreshDots('');
+                } else {
+                    setRefreshDots('.'.repeat(dotCount));
+                }
+
+                // Stop after 2 full cycles (approx 6-8 ticks)
+                if (step >= 8) {
+                    clearInterval(interval);
+                    setAnimating(false);
+                    setRefreshDots(''); // Reset to static
+                }
+            }, 500); // 0.5s per dot
+
+            return () => clearInterval(interval);
+        }
+    }, [logs.length, isFollowing]);
 
     // Polling fetch (tail -f)
     useEffect(() => {
@@ -293,6 +406,26 @@ const LogModal = ({ user, onClose }) => {
                                 <div>
                                     {user.nickname} • {user.id}
                                 </div>
+                                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                                    {deviceInfo && (
+                                        <>
+                                            {deviceInfo.device.name && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    {Icons[deviceInfo.device.icon] || Icons.Phone}
+                                                    <span>{deviceInfo.device.name}</span>
+                                                </div>
+                                            )}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                {Icons[deviceInfo.os.icon] || Icons.Windows}
+                                                <span>{deviceInfo.os.name} {deviceInfo.os.ver}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                {Icons[deviceInfo.browser.icon] || Icons.Browser}
+                                                <span>{deviceInfo.browser.name} {deviceInfo.browser.ver}</span>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -331,9 +464,9 @@ const LogModal = ({ user, onClose }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                backgroundColor: isFollowing ? '#dc2626' : 'transparent',
+                                backgroundColor: isFollowing ? '#059669' : 'transparent', // Updated Green
                                 color: isFollowing ? 'white' : '#94a3b8',
-                                border: `1px solid ${isFollowing ? '#dc2626' : '#334155'}`,
+                                border: `1px solid ${isFollowing ? '#059669' : '#334155'}`,
                                 transition: 'all 0.2s ease'
                             }}
                         >
@@ -341,14 +474,14 @@ const LogModal = ({ user, onClose }) => {
                                 width: '8px',
                                 height: '8px',
                                 borderRadius: '50%',
-                                backgroundColor: isFollowing ? '#ef4444' : '#64748b',
+                                backgroundColor: isFollowing ? '#ef4444' : '#64748b', // Red Glow
                                 boxShadow: isFollowing ? '0 0 8px #ef4444' : 'none',
                                 animation: isFollowing ? 'pulse 1.5s infinite' : 'none'
                             }} />
                             {isFollowing ? 'LIVE' : 'OFF'}
                         </button>
-                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                            {isFollowing ? 'Auto-refreshing live...' : 'Auto-refreshing stopped'}
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: isFollowing ? 'italic' : 'normal' }}>
+                            {isFollowing ? `Auto-refreshing live${refreshDots}` : 'Auto-refreshing stopped'}
                         </span>
                     </div>
                     <button
@@ -362,7 +495,7 @@ const LogModal = ({ user, onClose }) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            backgroundColor: isColorEnabled ? '#059669' : 'transparent',
+                            backgroundColor: isColorEnabled ? '#059669' : 'transparent', // Updated Green
                             color: isColorEnabled ? 'white' : '#94a3b8',
                             border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`,
                             transition: 'all 0.2s ease'
@@ -372,8 +505,8 @@ const LogModal = ({ user, onClose }) => {
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            backgroundColor: isColorEnabled ? '#34d399' : '#64748b',
-                            boxShadow: isColorEnabled ? '0 0 8px #34d399' : 'none',
+                            backgroundColor: isColorEnabled ? '#3b82f6' : '#64748b', // Blue Glow
+                            boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none',
                             animation: isColorEnabled ? 'pulse 1.5s infinite' : 'none'
                         }} />
                         {isColorEnabled ? 'FOCUS ON' : 'FOCUS OFF'}
