@@ -65,7 +65,7 @@ const Debug = () => {
 
     // Column widths with localStorage persistence
     const STORAGE_KEY = 'debug_table_col_widths';
-    const DEFAULT_WIDTHS = { user: 250, lastActive: 180, debugMode: 120, debugLevel: 140, logs: 300 };
+    const DEFAULT_WIDTHS = { user: 200, lastActive: 140, sessionStart: 140, sessionEnd: 140, debugMode: 100, debugLevel: 120, logs: 260 };
     const [colWidths, setColWidths] = useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -393,7 +393,15 @@ const Debug = () => {
                                 </th>
                                 <th style={{ width: colWidths.lastActive, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('lastActive')}>
                                     Last Active <SortIndicator column="lastActive" />
-                                    <ResizeHandle leftCol="lastActive" rightCol="debugMode" />
+                                    <ResizeHandle leftCol="lastActive" rightCol="sessionStart" />
+                                </th>
+                                <th style={{ width: colWidths.sessionStart, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('sessionStart')}>
+                                    Session Start <SortIndicator column="sessionStart" />
+                                    <ResizeHandle leftCol="sessionStart" rightCol="sessionEnd" />
+                                </th>
+                                <th style={{ width: colWidths.sessionEnd, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('sessionEnd')}>
+                                    Session End <SortIndicator column="sessionEnd" />
+                                    <ResizeHandle leftCol="sessionEnd" rightCol="debugMode" />
                                 </th>
                                 <th style={{ width: colWidths.debugMode, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('debugMode')}>
                                     Debug Mode <SortIndicator column="debugMode" />
@@ -411,11 +419,11 @@ const Debug = () => {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading users...</td>
+                                    <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading users...</td>
                                 </tr>
                             ) : paginatedUsers.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found matching "{searchTerm}"</td>
+                                    <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found matching "{searchTerm}"</td>
                                 </tr>
                             ) : (
                                 paginatedUsers.map(user => {
@@ -423,6 +431,8 @@ const Debug = () => {
                                         ? user.debug_last_seen
                                         : (user.last_active || user.debug_last_seen);
                                     const lastActive = formatTimestampCET(rawTimestamp);
+                                    const sessionStart = user.debug_session_start ? formatTimestampCET(user.debug_session_start) : null;
+                                    const sessionEnd = user.debug_session_end ? formatTimestampCET(user.debug_session_end) : null;
 
                                     return (
                                         <tr key={user.id} style={{ borderBottom: '1px solid #334155' }} onMouseEnter={e => e.currentTarget.style.background = '#1e293b'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
@@ -433,6 +443,22 @@ const Debug = () => {
                                             <td style={{ padding: '1rem', color: '#94a3b8', textAlign: 'center' }}>
                                                 <div>{lastActive.date}</div>
                                                 <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{lastActive.time}</div>
+                                            </td>
+                                            <td style={{ padding: '0.75rem', color: sessionStart ? '#10b981' : '#64748b', textAlign: 'center', fontSize: '0.8rem' }}>
+                                                {sessionStart ? (
+                                                    <>
+                                                        <div>{sessionStart.date}</div>
+                                                        <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{sessionStart.time}</div>
+                                                    </>
+                                                ) : '—'}
+                                            </td>
+                                            <td style={{ padding: '0.75rem', color: sessionEnd ? '#ef4444' : '#64748b', textAlign: 'center', fontSize: '0.8rem' }}>
+                                                {sessionEnd ? (
+                                                    <>
+                                                        <div>{sessionEnd.date}</div>
+                                                        <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{sessionEnd.time}</div>
+                                                    </>
+                                                ) : '—'}
                                             </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                 <button
