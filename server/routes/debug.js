@@ -312,7 +312,7 @@ router.post('/logs', (req, res, next) => {
             }
 
             // Check if user has debug enabled specifically
-            if (req.user.debug_enabled !== 1) {
+            if (!req.user.debug_enabled) {
                 return res.status(403).json({
                     error: 'Debug not enabled for this user',
                     code: 'USER_DEBUG_DISABLED'
