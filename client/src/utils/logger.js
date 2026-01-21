@@ -391,9 +391,9 @@ class DebugLogger {
 
             // Upload to server
             const formData = new FormData();
-            formData.append('screenshot', blob, `screenshot_${Date.now()}.webp`);
             formData.append('userId', this.userId || 'unknown');
             formData.append('timestamp', new Date().toISOString());
+            formData.append('screenshot', blob, `screenshot_${Date.now()}.webp`);
 
             const response = await fetch('/api/debug/screenshot', {
                 method: 'POST',

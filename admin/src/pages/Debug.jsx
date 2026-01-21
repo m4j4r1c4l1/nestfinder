@@ -834,7 +834,16 @@ const Debug = () => {
             {viewingScreenshot && (
                 <ScreenshotModal
                     filename={viewingScreenshot}
-                    onClose={() => setViewingScreenshot(null)}
+                    onClose={() => {
+                        // Clear the received status so the user can take another picture
+                        setReceivedScreenshots(prev => {
+                            const next = { ...prev };
+                            const userId = Object.keys(next).find(key => next[key] === viewingScreenshot);
+                            if (userId) delete next[userId];
+                            return next;
+                        });
+                        setViewingScreenshot(null);
+                    }}
                 />
             )}
 

@@ -471,10 +471,26 @@ const LogModal = ({ user, onClose }) => {
                                         {Icons[deviceInfo.browser.icon] || Icons.Safari}
                                         <span style={{ color: '#e2e8f0' }}>{deviceInfo.browser.name} {deviceInfo.browser.ver}</span>
                                     </div>
+                                    {/* IP Address(es) */}
                                     {deviceInfo.ip && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            {Icons.World}
-                                            <span style={{ color: '#60a5fa', fontWeight: 600 }}>{deviceInfo.ip}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                            {/* Real IP */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <span style={{ fontSize: '1rem', lineHeight: '1', width: '16px', textAlign: 'center' }}>📡</span>
+                                                <span style={{ color: '#e2e8f0' }}>
+                                                    {(deviceInfo.ip || '').split(',')[0].trim()}
+                                                </span>
+                                            </div>
+
+                                            {/* Proxy IP (if present) */}
+                                            {(deviceInfo.ip || '').split(',')[1] && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <span style={{ fontSize: '1rem', lineHeight: '1', width: '16px', textAlign: 'center' }} title="Proxy/Internal IP">⚔️</span>
+                                                    <span style={{ color: '#e2e8f0' }}>
+                                                        {(deviceInfo.ip || '').split(',')[1].trim()}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </>
