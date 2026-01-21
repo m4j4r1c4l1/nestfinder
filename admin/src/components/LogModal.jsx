@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { adminApi } from '../api';
 
-const LogModal = ({ user, onClose }) => {
+const LogModal = ({ user, onClose, onUserUpdate }) => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -512,7 +512,7 @@ const LogModal = ({ user, onClose }) => {
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                                             {/* Real IP */}
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <span style={{ fontSize: '1rem', lineHeight: '1', width: '16px', textAlign: 'center' }}>📡</span>
+                                                <span style={{ fontSize: '14px', lineHeight: '16px', width: '16px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📡</span>
                                                 <span style={{ color: '#e2e8f0' }}>
                                                     {(deviceInfo.ip || '').split(',')[0].trim()}
                                                 </span>
@@ -521,7 +521,7 @@ const LogModal = ({ user, onClose }) => {
                                             {/* Proxy IP (if present) */}
                                             {(deviceInfo.ip || '').split(',')[1] && (
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <span style={{ fontSize: '1rem', lineHeight: '1', width: '16px', textAlign: 'center' }} title="Proxy/Internal IP">⚔️</span>
+                                                    <span style={{ fontSize: '14px', lineHeight: '16px', width: '16px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Proxy/Internal IP">⚔️</span>
                                                     <span style={{ color: '#e2e8f0' }}>
                                                         {(deviceInfo.ip || '').split(',')[1].trim()}
                                                     </span>
