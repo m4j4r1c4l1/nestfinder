@@ -322,11 +322,15 @@ export const initDatabase = async () => {
       logs TEXT NOT NULL,
       platform TEXT,
       user_agent TEXT,
+      ip_address TEXT,
       uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(user_id) REFERENCES users(id)
     );
   `);
   db.run(`CREATE INDEX IF NOT EXISTS idx_client_logs_user_id ON client_logs(user_id);`);
+
+  // Migration: Add ip_address to client_logs
+  try { db.run("ALTER TABLE client_logs ADD COLUMN ip_address TEXT"); } catch (e) { /* Exists */ }
 
   // Screenshots table (debug screenshot captures)
   db.run(`

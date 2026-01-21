@@ -29,12 +29,7 @@ const uploadScreenshot = multer({ storage: screenshotStorage, limits: { fileSize
 import { requireAdmin, requireUser } from '../middleware/auth.js';
 import { getSetting, all, run, get } from '../database.js';
 
-// Migration: Add ip_address to client_logs
-try {
-    run("ALTER TABLE client_logs ADD COLUMN ip_address TEXT");
-} catch (e) {
-    // Column likely exists
-}
+
 
 // Middleware: Check if Debug Mode is globally enabled
 const requireDebugMode = (req, res, next) => {
