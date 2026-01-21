@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
+import { logger } from '../utils/logger';
 
 export const usePoints = () => {
     const [points, setPoints] = useState([]);
