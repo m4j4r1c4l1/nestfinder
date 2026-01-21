@@ -18,14 +18,28 @@ const LogModal = ({ user, onClose }) => {
     const [refreshDots, setRefreshDots] = useState('');
     const [animating, setAnimating] = useState(false);
 
-    // --- SVGs ---
+    // --- Colorful Brand SVGs ---
     const Icons = {
-        Apple: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.3,12.7c0,2.4,2.5,3.6,2.6,3.7c-0.1,0.2-0.5,1.7-1.6,3.3c-1,1.4-2,2.8-3.6,2.8 c-1.5,0-2-0.9-3.7-0.9c-1.8,0-2.3,0.9-3.8,0.9c-1.5,0-2.7-1.5-3.8-3.2c-1.9-2.9-1.6-7-0.1-9.7c1.4-2.4,3.7-2.6,4.9-2.6 c1.7,0,3.1,1,4.1,1c1.1,0,2.6-1.5,4.7-1.3c0.4,0,2.4,0.1,4.2,2.3C21.1,9.3,17.4,10.6,17.3,12.7z M12.9,6.1 c0.8-1,1.3-2.3,1.2-3.8c-1.2,0.1-2.5,0.8-3.3,1.8C10,5,9.6,6.3,9.7,7.7C11,7.8,12.2,7,12.9,6.1z" /></svg>,
-        Android: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.72l1.927-3.337c.1691-.2955.0688-.6718-.2256-.8421-.2949-.1691-.6702-.0681-.8404.2268l-1.9161 3.3183c-1.8211-1.0275-4.0792-1.6253-6.5262-1.6253-2.447 0-4.7061.5978-6.5273 1.6253L1.8568 4.6706c-.1691-.2949-.5454-.3959-.8393-.2268-.2955.1703-.3959.5466-.2268.8421l1.927 3.337C.683 10.3802 0 13.062 0 15.9055c0 .1085.0087.2158.0253.3218h23.9493c.0166-.106.0264-.2133.0264-.3218 0-2.8435-.683-5.5253-2.7032-7.2841" /></svg>,
-        Windows: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M0,3.449L9.124,2.193v8.834H0V3.449z M9.124,12.915v8.892L0,20.555v-7.64H9.124z M10.41,1.968L24,0v11.027H10.41V1.968z M10.41,12.914H24v11.086L10.41,22.03V12.914z" /></svg>,
-        Linux: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C9,2,8,4,8,4s-1,2-1,6c0,2,2,3,2,3s1,4,0,5c-1,1-2,1-1,1s-1,2.5,1,2c2-0.5,5-3,5-3s3,2.5,5,3c2,0.5,1-2,1-2s0,0-1-1 c-1-1,0-4,0-5s2-1,2-3s-1-6-1-6S15,2,12,2z M10.5,8C10.5,8,10,8.5,10,9s0.5,1,0.5,1S10,11,9.5,11s-0.5-0.5-0.5-1S9.5,8,10.5,8z M13.5,8C13.5,8,13,8.5,13,9s0.5,1,0.5,1s0.5,1,0,1s-0.5-0.5-0.5-1S12.5,8,13.5,8z" /></svg>,
-        Phone: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2" /><line x1="12" y1="18" x2="12.01" y2="18" /></svg>,
-        Browser: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="4" /><line x1="21.17" y1="8" x2="12" y2="8" /><line x1="3.95" y1="6.06" x2="8.54" y2="14" /><line x1="10.88" y1="21.94" x2="15.46" y2="14" /></svg>
+        // Apple - Gray/Silver
+        Apple: <svg width="16" height="16" viewBox="0 0 24 24" fill="#A2AAAD"><path d="M17.3,12.7c0,2.4,2.5,3.6,2.6,3.7c-0.1,0.2-0.5,1.7-1.6,3.3c-1,1.4-2,2.8-3.6,2.8 c-1.5,0-2-0.9-3.7-0.9c-1.8,0-2.3,0.9-3.8,0.9c-1.5,0-2.7-1.5-3.8-3.2c-1.9-2.9-1.6-7-0.1-9.7c1.4-2.4,3.7-2.6,4.9-2.6 c1.7,0,3.1,1,4.1,1c1.1,0,2.6-1.5,4.7-1.3c0.4,0,2.4,0.1,4.2,2.3C21.1,9.3,17.4,10.6,17.3,12.7z M12.9,6.1 c0.8-1,1.3-2.3,1.2-3.8c-1.2,0.1-2.5,0.8-3.3,1.8C10,5,9.6,6.3,9.7,7.7C11,7.8,12.2,7,12.9,6.1z" /></svg>,
+        // Android - Green
+        Android: <svg width="16" height="16" viewBox="0 0 24 24" fill="#3DDC84"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.72l1.927-3.337c.1691-.2955.0688-.6718-.2256-.8421-.2949-.1691-.6702-.0681-.8404.2268l-1.9161 3.3183c-1.8211-1.0275-4.0792-1.6253-6.5262-1.6253-2.447 0-4.7061.5978-6.5273 1.6253L1.8568 4.6706c-.1691-.2949-.5454-.3959-.8393-.2268-.2955.1703-.3959.5466-.2268.8421l1.927 3.337C.683 10.3802 0 13.062 0 15.9055c0 .1085.0087.2158.0253.3218h23.9493c.0166-.106.0264-.2133.0264-.3218 0-2.8435-.683-5.5253-2.7032-7.2841" /></svg>,
+        // Windows - Blue
+        Windows: <svg width="16" height="16" viewBox="0 0 24 24" fill="#00A4EF"><path d="M0,3.449L9.124,2.193v8.834H0V3.449z M9.124,12.915v8.892L0,20.555v-7.64H9.124z M10.41,1.968L24,0v11.027H10.41V1.968z M10.41,12.914H24v11.086L10.41,22.03V12.914z" /></svg>,
+        // Linux - Yellow (Tux)
+        Linux: <svg width="16" height="16" viewBox="0 0 24 24" fill="#FCC624"><path d="M12,2C9,2,8,4,8,4s-1,2-1,6c0,2,2,3,2,3s1,4,0,5c-1,1-2,1-1,1s-1,2.5,1,2c2-0.5,5-3,5-3s3,2.5,5,3c2,0.5,1-2,1-2s0,0-1-1 c-1-1,0-4,0-5s2-1,2-3s-1-6-1-6S15,2,12,2z M10.5,8C10.5,8,10,8.5,10,9s0.5,1,0.5,1S10,11,9.5,11s-0.5-0.5-0.5-1S9.5,8,10.5,8z M13.5,8C13.5,8,13,8.5,13,9s0.5,1,0.5,1s0.5,1,0,1s-0.5-0.5-0.5-1S12.5,8,13.5,8z" /></svg>,
+        // iPhone (Phone icon) - White/Silver
+        Phone: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E5E5E5" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2" /><line x1="12" y1="18" x2="12.01" y2="18" /></svg>,
+        // Safari - Blue Compass
+        Safari: <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#006CFF" /><polygon points="12,2 14,10 22,12 14,14 12,22 10,14 2,12 10,10" fill="#fff" /><circle cx="12" cy="12" r="2" fill="#FF3B30" /></svg>,
+        // Chrome - Multi-color
+        Chrome: <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#4285F4" /><circle cx="12" cy="12" r="4" fill="#fff" /><path d="M12 8 L20.5 8 A10 10 0 0 1 16 20" fill="#34A853" /><path d="M8 12 L3.5 20 A10 10 0 0 1 3.5 4" fill="#FBBC04" /><path d="M16 12 L20.5 4 A10 10 0 0 0 3.5 4 L8 12" fill="#EA4335" /><circle cx="12" cy="12" r="4" fill="#fff" /></svg>,
+        // Firefox - Orange Fox
+        Firefox: <svg width="16" height="16" viewBox="0 0 24 24" fill="#FF7139"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /><circle cx="12" cy="12" r="6" fill="#FF7139" /></svg>,
+        // Edge - Blue
+        Edge: <svg width="16" height="16" viewBox="0 0 24 24" fill="#0078D4"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c2.76 0 5.26-1.12 7.07-2.93l-1.41-1.41C16.15 19.15 14.15 20 12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8c2.15 0 4.15.85 5.66 2.34l1.41-1.41C17.26 3.12 14.76 2 12 2z" /></svg>,
+        // World - Globe for IP
+        World: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
     };
 
     // Category color map for COLOR toggle
@@ -125,13 +139,24 @@ const LogModal = ({ user, onClose }) => {
                     else if (ua.includes('Windows NT 6.3')) os.ver = '8.1';
                 }
 
-                // Browser
-                if (ua.includes('Chrome/')) { browser.name = 'Chrome'; browser.ver = ua.split('Chrome/')[1].split(' ')[0]; }
-                else if (ua.includes('Firefox/')) { browser.name = 'Firefox'; browser.ver = ua.split('Firefox/')[1]; }
-                else if (ua.includes('Safari/') && !ua.includes('Chrome/')) { browser.name = 'Safari'; browser.ver = ua.split('Version/')[1].split(' ')[0]; }
-                else if (ua.includes('Edg/')) { browser.name = 'Edge'; browser.ver = ua.split('Edg/')[1]; }
+                // Browser - Set both name and icon
+                if (ua.includes('Chrome/') && !ua.includes('Edg/')) {
+                    browser = { icon: 'Chrome', name: 'Chrome', ver: ua.split('Chrome/')[1].split(' ')[0] };
+                }
+                else if (ua.includes('Firefox/')) {
+                    browser = { icon: 'Firefox', name: 'Firefox', ver: ua.split('Firefox/')[1].split(' ')[0] };
+                }
+                else if (ua.includes('Safari/') && !ua.includes('Chrome/')) {
+                    browser = { icon: 'Safari', name: 'Safari', ver: ua.split('Version/')[1]?.split(' ')[0] || '' };
+                }
+                else if (ua.includes('Edg/')) {
+                    browser = { icon: 'Edge', name: 'Edge', ver: ua.split('Edg/')[1].split(' ')[0] };
+                }
 
-                setDeviceInfo({ os, device, browser });
+                // IP Address (if available in data)
+                const ip = data.ip || data.publicIp || null;
+
+                setDeviceInfo({ os, device, browser, ip });
             }
         }
     }, [logs]);
@@ -391,55 +416,60 @@ const LogModal = ({ user, onClose }) => {
                 <div style={{
                     padding: '1rem 1.5rem',
                     borderBottom: '1px solid #334155',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
                     background: '#1e293b'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                        <div style={{ fontSize: '1.5rem' }}>📃</div>
-                        <div style={{ flex: 1 }}>
+                    {/* Row 1: Icon + Title + X Button */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ fontSize: '1.5rem' }}>📃</div>
                             <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '1.1rem' }}>
                                 Debug Logs
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#94a3b8', fontSize: '0.85rem', fontFamily: 'monospace', width: '100%', marginTop: '2px' }}>
-                                <div>
-                                    {user.nickname} • {user.id}
-                                </div>
-                                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                                    {deviceInfo && (
-                                        <>
-                                            {deviceInfo.device.name && (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    {Icons[deviceInfo.device.icon] || Icons.Phone}
-                                                    <span>{deviceInfo.device.name}</span>
-                                                </div>
-                                            )}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                {Icons[deviceInfo.os.icon] || Icons.Windows}
-                                                <span>{deviceInfo.os.name} {deviceInfo.os.ver}</span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                {Icons[deviceInfo.browser.icon] || Icons.Browser}
-                                                <span>{deviceInfo.browser.name} {deviceInfo.browser.ver}</span>
-                                            </div>
-                                        </>
+                        </div>
+                        <button onClick={onClose} style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#94a3b8',
+                            fontSize: '1.5rem',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            lineHeight: 1
+                        }}>
+                            &times;
+                        </button>
+                    </div>
+                    {/* Row 2: User ID + Device/OS/Browser/IP Info */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#94a3b8', fontSize: '0.85rem', fontFamily: 'monospace', marginTop: '6px' }}>
+                        <div>
+                            {user.nickname} • {user.id}
+                        </div>
+                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                            {deviceInfo && (
+                                <>
+                                    {deviceInfo.device?.name && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            {Icons[deviceInfo.device.icon] || Icons.Phone}
+                                            <span>{deviceInfo.device.name}</span>
+                                        </div>
                                     )}
-                                </div>
-                            </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {Icons[deviceInfo.os.icon] || Icons.Windows}
+                                        <span>{deviceInfo.os.name} {deviceInfo.os.ver}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {Icons[deviceInfo.browser.icon] || Icons.Safari}
+                                        <span>{deviceInfo.browser.name} {deviceInfo.browser.ver}</span>
+                                    </div>
+                                    {deviceInfo.ip && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            {Icons.World}
+                                            <span>{deviceInfo.ip}</span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
-                    <button onClick={onClose} style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#94a3b8',
-                        fontSize: '1.5rem',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        lineHeight: 1
-                    }}>
-                        &times;
-                    </button>
                 </div>
 
                 {/* Sub-header with Follow Toggle and COLOR Toggle */}
