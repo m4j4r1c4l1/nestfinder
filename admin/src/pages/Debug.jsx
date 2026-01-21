@@ -25,6 +25,121 @@ const formatTimestampCET = (isoString) => {
 
 import LogModal from '../components/LogModal';
 
+const ScreenshotModal = ({ filename, onClose }) => {
+    const [imgSrc, setImgSrc] = React.useState(null);
+    const [error, setError] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        let active = true;
+        const fetchImage = async () => {
+            try {
+                const token = localStorage.getItem('nestfinder_admin_token');
+                const res = await fetch(`/api/debug/screenshot/${filename}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) throw new Error(res.statusText);
+
+                const blob = await res.blob();
+                if (active) {
+                    const url = URL.createObjectURL(blob);
+                    setImgSrc(url);
+                    setLoading(false);
+                }
+            } catch (err) {
+                if (active) {
+                    console.error("Failed to load screenshot:", err);
+                    setError(err.message);
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchImage();
+        return () => {
+            active = false;
+            if (imgSrc) URL.revokeObjectURL(imgSrc);
+        };
+    }, [filename]);
+
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.85)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1700,
+                backdropFilter: 'blur(8px)',
+                flexDirection: 'column',
+                gap: '1rem'
+            }}
+            onClick={onClose}
+        >
+            {loading && <div style={{ color: 'white' }}>Loading screenshot...</div>}
+
+            {error && (
+                <div style={{ color: '#ef4444', textAlign: 'center' }}>
+                    <p>Failed to load image</p>
+                    <small>{error}</small>
+                </div>
+            )}
+
+            {imgSrc && (
+                <>
+                    <img
+                        src={imgSrc}
+                        alt="Debug Screenshot"
+                        style={{
+                            maxWidth: '90vw',
+                            maxHeight: '80vh',
+                            borderRadius: '8px',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <a
+                            href={imgSrc}
+                            download={filename}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                background: '#3b82f6',
+                                color: '#fff',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                fontSize: '0.9rem'
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            ⬇️ Download
+                        </a>
+                        <button
+                            onClick={onClose}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                background: '#475569',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontWeight: 600,
+                                fontSize: '0.9rem'
+                            }}
+                        >
+                            ✕ Close
+                        </button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
+
 const Debug = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -717,67 +832,12 @@ const Debug = () => {
 
             {/* Screenshot Modal */}
             {viewingScreenshot && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        background: 'rgba(0,0,0,0.85)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1700,
-                        backdropFilter: 'blur(8px)',
-                        flexDirection: 'column',
-                        gap: '1rem'
-                    }}
-                    onClick={() => setViewingScreenshot(null)}
-                >
-                    <img
-                        src={`/api/debug/screenshot/${viewingScreenshot}`}
-                        alt="Debug Screenshot"
-                        style={{
-                            maxWidth: '90vw',
-                            maxHeight: '80vh',
-                            borderRadius: '8px',
-                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                    />
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <a
-                            href={`/api/debug/screenshot/${viewingScreenshot}`}
-                            download={viewingScreenshot}
-                            style={{
-                                padding: '0.75rem 1.5rem',
-                                background: '#3b82f6',
-                                color: '#fff',
-                                borderRadius: '8px',
-                                textDecoration: 'none',
-                                fontWeight: 600,
-                                fontSize: '0.9rem'
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            ⬇️ Download
-                        </a>
-                        <button
-                            onClick={() => setViewingScreenshot(null)}
-                            style={{
-                                padding: '0.75rem 1.5rem',
-                                background: '#475569',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontWeight: 600,
-                                fontSize: '0.9rem'
-                            }}
-                        >
-                            ✕ Close
-                        </button>
-                    </div>
-                </div>
+                <ScreenshotModal
+                    filename={viewingScreenshot}
+                    onClose={() => setViewingScreenshot(null)}
+                />
             )}
+
 
             {/* Shutter Animation */}
             <style>

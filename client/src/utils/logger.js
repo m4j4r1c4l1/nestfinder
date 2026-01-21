@@ -337,9 +337,13 @@ class DebugLogger {
                 if (response.status === 403) {
                     const errData = await response.json().catch(() => ({}));
                     console.warn(LOG_PREFIX, `Upload Forbidden (${errData.code || 'UNKNOWN'}): Stopping auto-upload.`);
+
+                    // Task Bug Fix: Do NOT throw here, or it becomes a crash report.
+                    // Instead, gracefully shut down local debug.
                     this._stopUpload();
-                    this._checkStatus(); // Force status sync
-                    throw new Error(`Upload failed (403): ${errData.error || 'Forbidden'}`);
+                    this.clear(); // Clear pending logs to prevent retry loops
+                    this._checkStatus(); // Force status sync to update UI
+                    return { success: false, stopped: true };
                 }
                 throw new Error(`Upload failed: ${response.status}`);
             }
