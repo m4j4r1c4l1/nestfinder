@@ -149,6 +149,13 @@ export const adminApi = {
         });
     },
 
+    setDebugLevel(userId, level) {
+        return this.fetch(`/debug/users/${userId}/level`, {
+            method: 'POST',
+            body: JSON.stringify({ level })
+        });
+    },
+
     getUsers() {
         return this.fetch('/admin/users');
     },

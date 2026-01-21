@@ -804,6 +804,12 @@ const Debug = () => {
                 <LogModal
                     user={viewingUser}
                     onClose={() => setViewingUser(null)}
+                    onUserUpdate={(updatedFields) => {
+                        // Update the local viewingUser state immediately
+                        setViewingUser(prev => ({ ...prev, ...updatedFields }));
+                        // Also update the main users list to keep it in sync
+                        setUsers(prev => prev.map(u => u.id === viewingUser.id ? { ...u, ...updatedFields } : u));
+                    }}
                 />
             )}
 

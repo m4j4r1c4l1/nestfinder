@@ -10,6 +10,42 @@ const LogModal = ({ user, onClose }) => {
     const contentRef = useRef(null);
     const scrollRef = useRef(null);
     const pollingRef = useRef(null);
+    const selectorRef = useRef(null); // Ref for the level selector container
+
+    // Debug Level Selector State
+    const [showLevelSelector, setShowLevelSelector] = useState(false);
+
+    // Click outside to close level selector
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (selectorRef.current && !selectorRef.current.contains(event.target)) {
+                setShowLevelSelector(false);
+            }
+        };
+
+        if (showLevelSelector) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showLevelSelector]);
+
+    const handleSetLevel = async (newLevel) => {
+        try {
+            // Optimistically update logic handled by parent via callback, but we trigger API here
+            await adminApi.setDebugLevel(user.id, newLevel);
+
+            // Notify parent to update local state immediately
+            if (onUserUpdate) {
+                onUserUpdate({ debug_level: newLevel });
+            }
+            setShowLevelSelector(false);
+        } catch (err) {
+            console.error('Failed to set debug level:', err);
+            setError(err.message);
+        }
+    };
     const isUserScrollingRef = useRef(false);
     const [copied, setCopied] = useState(false);
     const [isColorEnabled, setIsColorEnabled] = useState(false);
@@ -624,18 +660,89 @@ const LogModal = ({ user, onClose }) => {
                                         return `${datePart} - ${timePart} CET`;
                                     })()}
                                 </span>
-                                <div style={{
-                                    width: '10px',
-                                    height: '10px',
-                                    borderRadius: '50%',
-                                    marginLeft: '4px',
-                                    backgroundColor: !user.debug_enabled ? '#64748b' :
-                                        user.debug_level === 'paranoic' ? '#ef4444' :
-                                            user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                    boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
-                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
-                                        }` : 'none'
-                                }} title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`} />
+                                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} ref={selectorRef}>
+                                    <div
+                                        style={{
+                                            width: '10px',
+                                            height: '10px',
+                                            borderRadius: '50%',
+                                            marginLeft: '4px',
+                                            backgroundColor: !user.debug_enabled ? '#64748b' :
+                                                user.debug_level === 'paranoic' ? '#ef4444' :
+                                                    user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                            boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
+                                                user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
+                                                }` : 'none',
+                                            cursor: user.debug_enabled ? 'pointer' : 'default',
+                                            position: 'relative',
+                                            zIndex: 50
+                                        }}
+                                        title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`}
+                                        onMouseEnter={() => {
+                                            if (user.debug_enabled) setShowLevelSelector(true);
+                                        }}
+                                    />
+
+                                    {/* Level Selector Popup */}
+                                    {showLevelSelector && user.debug_enabled && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '20px',
+                                            left: '50%',
+                                            transform: 'translateX(-50%)',
+                                            background: '#0f172a',
+                                            border: '1px solid #334155',
+                                            borderRadius: '8px',
+                                            padding: '4px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '2px',
+                                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+                                            zIndex: 100,
+                                            minWidth: '110px'
+                                        }}>
+                                            {['default', 'aggressive', 'paranoic']
+                                                .filter(lvl => lvl !== user.debug_level)
+                                                .map(lvl => {
+                                                    const color = lvl === 'paranoic' ? '#ef4444' : lvl === 'aggressive' ? '#a855f7' : '#3b82f6';
+                                                    return (
+                                                        <button
+                                                            key={lvl}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleSetLevel(lvl);
+                                                            }}
+                                                            onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
+                                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '8px',
+                                                                padding: '6px 10px',
+                                                                background: 'transparent',
+                                                                border: 'none',
+                                                                color: '#e2e8f0',
+                                                                fontSize: '0.8rem',
+                                                                cursor: 'pointer',
+                                                                borderRadius: '4px',
+                                                                width: '100%',
+                                                                textAlign: 'left'
+                                                            }}
+                                                        >
+                                                            <div style={{
+                                                                width: '8px',
+                                                                height: '8px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: color,
+                                                                boxShadow: `0 0 4px ${color}`
+                                                            }} />
+                                                            <span style={{ textTransform: 'capitalize' }}>{lvl}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                        </div>
+                                    )}
+                                </div>
                             </>
                         )}
                     </div>
