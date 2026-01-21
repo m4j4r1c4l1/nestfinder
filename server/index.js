@@ -79,6 +79,20 @@ wss.on('connection', (ws) => {
         broadcastClientsUpdate();
     });
 
+    ws.on('message', (message) => {
+        try {
+            const data = JSON.parse(message);
+            // Handle Admin Capture Request
+            if (data.type === 'capture_request') {
+                console.log(`[WS] Admin requested screenshot for user: ${data.userId}`);
+                // Broadcast to all clients (client will filter by ID)
+                broadcast(data);
+            }
+        } catch (e) {
+            console.error('Failed to parse WS message:', e);
+        }
+    });
+
     ws.on('error', (error) => {
         console.error('WebSocket error:', error);
         clients.delete(ws);

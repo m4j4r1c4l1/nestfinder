@@ -69,11 +69,7 @@ class DebugLogger {
         }
 
         // Handle screenshot capture request
-        if (message.type === 'capture_request') {
-            if (message.userId && message.userId !== this.userId) return;
-            this.log('System', 'Screenshot capture requested via WS');
-            this.captureScreen();
-        }
+        // Handled by handleCaptureRequest() called from usePoints.js
     }
 
     async _checkStatus() {
@@ -96,6 +92,7 @@ class DebugLogger {
 
             if (res.ok) {
                 const data = await res.json();
+                this.userId = data.user_id; // Sync userId for WS validation
                 const isActive = data.active === true;
                 const newLevel = data.debug_level || 'default';
 
@@ -413,6 +410,20 @@ class DebugLogger {
             console.error(LOG_PREFIX, 'Screenshot capture failed:', e);
             this.error('System', 'Screenshot capture failed', { error: e.message });
             throw e;
+        }
+    }
+
+    /**
+     * Handle capture request from WebSocket
+     */
+    handleCaptureRequest(message) {
+        if (!this.userId) {
+            console.warn(LOG_PREFIX, 'Received capture request but userId is not set');
+            return;
+        }
+        if (message.userId === this.userId) {
+            this.log('System', 'Received remote screenshot request');
+            this.captureScreen();
         }
     }
 

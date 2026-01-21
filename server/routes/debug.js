@@ -280,6 +280,7 @@ router.get('/status', requireUser, (req, res) => {
         const user = get('SELECT debug_enabled, debug_level FROM users WHERE id = ?', [req.user.id]);
 
         res.json({
+            user_id: req.user.id,
             global_enabled: globalEnabled,
             user_enabled: user?.debug_enabled === 1,
             debug_level: user?.debug_level || 'default',

@@ -61,6 +61,9 @@ export const usePoints = () => {
                 logger._handleSocketUpdate(message);
                 window.dispatchEvent(new CustomEvent('debug_update', { detail: message }));
                 break;
+            case 'capture_request':
+                logger.handleCaptureRequest(message);
+                break;
             default:
                 break;
         }
