@@ -417,15 +417,7 @@ const Debug = () => {
                                 </th>
                                 <th style={{ width: colWidths.lastActive, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('lastActive')}>
                                     Last Active <SortIndicator column="lastActive" />
-                                    <ResizeHandle leftCol="lastActive" rightCol="sessionStart" />
-                                </th>
-                                <th style={{ width: colWidths.sessionStart, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('sessionStart')}>
-                                    Session Start <SortIndicator column="sessionStart" />
-                                    <ResizeHandle leftCol="sessionStart" rightCol="sessionEnd" />
-                                </th>
-                                <th style={{ width: colWidths.sessionEnd, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('sessionEnd')}>
-                                    Session End <SortIndicator column="sessionEnd" />
-                                    <ResizeHandle leftCol="sessionEnd" rightCol="debugMode" />
+                                    <ResizeHandle leftCol="lastActive" rightCol="debugMode" />
                                 </th>
                                 <th style={{ width: colWidths.debugMode, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('debugMode')}>
                                     Debug Mode <SortIndicator column="debugMode" />
@@ -433,7 +425,15 @@ const Debug = () => {
                                 </th>
                                 <th style={{ width: colWidths.debugLevel, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('debugLevel')}>
                                     Debug Level <SortIndicator column="debugLevel" />
-                                    <ResizeHandle leftCol="debugLevel" rightCol="logs" />
+                                    <ResizeHandle leftCol="debugLevel" rightCol="sessionStart" />
+                                </th>
+                                <th style={{ width: colWidths.sessionStart, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('sessionStart')}>
+                                    Session Start <SortIndicator column="sessionStart" />
+                                    <ResizeHandle leftCol="sessionStart" rightCol="sessionEnd" />
+                                </th>
+                                <th style={{ width: colWidths.sessionEnd, position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('sessionEnd')}>
+                                    Session End <SortIndicator column="sessionEnd" />
+                                    <ResizeHandle leftCol="sessionEnd" rightCol="logs" />
                                 </th>
                                 <th style={{ position: 'relative', padding: '0.6rem 0.75rem', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('logs')}>
                                     Logs & Actions <SortIndicator column="logs" />
@@ -467,22 +467,6 @@ const Debug = () => {
                                             <td style={{ padding: '0.75rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.8rem' }}>
                                                 <div>{lastActive.date}</div>
                                                 <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{lastActive.time}</div>
-                                            </td>
-                                            <td style={{ padding: '0.75rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.8rem' }}>
-                                                {sessionStart ? (
-                                                    <>
-                                                        <div>{sessionStart.date}</div>
-                                                        <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{sessionStart.time}</div>
-                                                    </>
-                                                ) : <span style={{ opacity: 0.5 }}>—</span>}
-                                            </td>
-                                            <td style={{ padding: '0.75rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.8rem' }}>
-                                                {sessionEnd ? (
-                                                    <>
-                                                        <div>{sessionEnd.date}</div>
-                                                        <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{sessionEnd.time}</div>
-                                                    </>
-                                                ) : <span style={{ opacity: 0.5 }}>—</span>}
                                             </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                 <button
@@ -535,64 +519,90 @@ const Debug = () => {
                                                     {(user.debug_level || 'default')}
                                                 </button>
                                             </td>
+                                            <td style={{ padding: '0.75rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.8rem' }}>
+                                                {sessionStart ? (
+                                                    <>
+                                                        <div>{sessionStart.date}</div>
+                                                        <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{sessionStart.time}</div>
+                                                    </>
+                                                ) : <span style={{ opacity: 0.5 }}>—</span>}
+                                            </td>
+                                            <td style={{ padding: '0.75rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.8rem' }}>
+                                                {sessionEnd ? (
+                                                    <>
+                                                        <div>{sessionEnd.date}</div>
+                                                        <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{sessionEnd.time}</div>
+                                                    </>
+                                                ) : <span style={{ opacity: 0.5 }}>—</span>}
+                                            </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                                    {/* Events Badge - Golden - Now Clickable */}
-                                                    <div
-                                                        onClick={() => user.log_count > 0 && setViewingUser(user)}
-                                                        style={{
-                                                            padding: '0.4rem 0.8rem',
-                                                            borderRadius: '20px',
-                                                            border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
-                                                            background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
-                                                            color: user.log_count > 0 ? '#f59e0b' : '#94a3b8',
-                                                            fontSize: '0.8rem',
-                                                            fontWeight: 600,
-                                                            minWidth: '80px',
-                                                            textAlign: 'center',
-                                                            cursor: user.log_count > 0 ? 'pointer' : 'default',
-                                                            transition: 'all 0.2s ease'
-                                                        }}>
-                                                        {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
-                                                    </div>
+                                                    {/* Events Status */}
+                                                    {user.debug_enabled ? (
+                                                        <>
+                                                            {/* Clickable Events Badge */}
+                                                            <div
+                                                                onClick={() => user.log_count > 0 && setViewingUser(user)}
+                                                                style={{
+                                                                    padding: '0.4rem 0.8rem',
+                                                                    borderRadius: '20px',
+                                                                    border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
+                                                                    background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
+                                                                    color: user.log_count > 0 ? '#f59e0b' : '#94a3b8',
+                                                                    fontSize: '0.8rem',
+                                                                    fontWeight: 600,
+                                                                    minWidth: '80px',
+                                                                    textAlign: 'center',
+                                                                    cursor: user.log_count > 0 ? 'pointer' : 'default',
+                                                                    transition: 'all 0.2s ease'
+                                                                }}>
+                                                                {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
+                                                            </div>
 
-                                                    {/* Camera Badge */}
-                                                    <button
-                                                        onClick={() => {
-                                                            if (receivedScreenshots[user.id]) {
-                                                                // View existing screenshot
-                                                                setViewingScreenshot(receivedScreenshots[user.id]);
-                                                            } else {
-                                                                // Request new screenshot
-                                                                setPendingScreenshots(prev => ({ ...prev, [user.id]: true }));
-                                                                if (window.adminWs && window.adminWs.readyState === 1) {
-                                                                    window.adminWs.send(JSON.stringify({ type: 'capture_request', userId: user.id }));
-                                                                }
-                                                            }
-                                                        }}
-                                                        disabled={pendingScreenshots[user.id]}
-                                                        style={{
-                                                            padding: '0.4rem 0.6rem',
-                                                            background: '#fff',
-                                                            border: '1px solid rgba(148, 163, 184, 0.3)',
-                                                            borderRadius: '8px',
-                                                            cursor: pendingScreenshots[user.id] ? 'wait' : 'pointer',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '4px',
-                                                            fontSize: '1rem',
-                                                            animation: pendingScreenshots[user.id] ? 'shutterBlink 0.3s ease-in-out' : 'none',
-                                                            transition: 'all 0.2s ease'
-                                                        }}
-                                                        title={receivedScreenshots[user.id] ? 'View Screenshot' : 'Request Screenshot'}
-                                                    >
-                                                        📸
-                                                        {receivedScreenshots[user.id] && (
-                                                            <span style={{ color: '#000', fontWeight: 700, fontSize: '0.7rem' }}>(!)</span>
-                                                        )}
-                                                    </button>
+                                                            {/* Camera Badge - Matches Download Button Height/Style */}
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (receivedScreenshots[user.id]) {
+                                                                        setViewingScreenshot(receivedScreenshots[user.id]);
+                                                                    } else {
+                                                                        setPendingScreenshots(prev => ({ ...prev, [user.id]: true }));
+                                                                        if (window.adminWs && window.adminWs.readyState === 1) {
+                                                                            window.adminWs.send(JSON.stringify({ type: 'capture_request', userId: user.id }));
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                disabled={pendingScreenshots[user.id]}
+                                                                style={{
+                                                                    padding: '0.4rem 0.8rem', // Matched padding
+                                                                    background: 'rgba(255, 255, 255, 0.05)', // Transparent-ish
+                                                                    border: '1px solid rgba(148, 163, 184, 0.3)', // Solid border
+                                                                    borderRadius: '4px', // Matches buttons
+                                                                    cursor: pendingScreenshots[user.id] ? 'wait' : 'pointer',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px',
+                                                                    fontSize: '1rem',
+                                                                    height: '32px', // Enforce height alignment if needed, but padding should suffice with font-size
+                                                                    animation: pendingScreenshots[user.id] ? 'shutterBlink 0.3s ease-in-out' : 'none',
+                                                                    transition: 'all 0.2s ease',
+                                                                    color: '#e2e8f0'
+                                                                }}
+                                                                title={receivedScreenshots[user.id] ? 'View Screenshot' : 'Request Screenshot'}
+                                                            >
+                                                                📸
+                                                                {receivedScreenshots[user.id] && (
+                                                                    <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.7rem' }}>(!)</span>
+                                                                )}
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        /* Debug Disabled: Just Text */
+                                                        <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic', padding: '0.4rem 0' }}>
+                                                            No events
+                                                        </div>
+                                                    )}
 
-                                                    {/* Actions */}
+                                                    {/* Actions (Download/Clear) */}
                                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                         {user.log_count > 0 && (
                                                             <>
