@@ -35,12 +35,36 @@ const Debug = () => {
     const [page, setPage] = useState(1);
     const pageSize = 30;
 
+    // Screenshot state
+    const [pendingScreenshots, setPendingScreenshots] = useState({}); // userId -> true (pending)
+    const [receivedScreenshots, setReceivedScreenshots] = useState({}); // userId -> filename
+    const [viewingScreenshot, setViewingScreenshot] = useState(null); // filename to view in modal
+
     // Fetch users with debug status
     useEffect(() => {
         fetchUsers();
         // Poll every 5 seconds for live updates
         const interval = setInterval(() => fetchUsers(true), 5000);
         return () => clearInterval(interval);
+    }, []);
+
+    // WebSocket listener for screenshot_ready
+    useEffect(() => {
+        const handleWsMessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'screenshot_ready') {
+                    setPendingScreenshots(prev => ({ ...prev, [data.userId]: false }));
+                    setReceivedScreenshots(prev => ({ ...prev, [data.userId]: data.filename }));
+                }
+            } catch { }
+        };
+
+        // Attach to existing WebSocket if available
+        if (window.adminWs) {
+            window.adminWs.addEventListener('message', handleWsMessage);
+            return () => window.adminWs.removeEventListener('message', handleWsMessage);
+        }
     }, []);
 
     const fetchUsers = async (isBackground = false) => {
@@ -440,25 +464,25 @@ const Debug = () => {
                                                 <div style={{ fontWeight: 500 }}>{user.nickname || 'Anonymous'}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>{user.id}</div>
                                             </td>
-                                            <td style={{ padding: '1rem', color: '#94a3b8', textAlign: 'center' }}>
+                                            <td style={{ padding: '0.75rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.8rem' }}>
                                                 <div>{lastActive.date}</div>
-                                                <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{lastActive.time}</div>
+                                                <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{lastActive.time}</div>
                                             </td>
-                                            <td style={{ padding: '0.75rem', color: sessionStart ? '#10b981' : '#64748b', textAlign: 'center', fontSize: '0.8rem' }}>
+                                            <td style={{ padding: '0.75rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.8rem' }}>
                                                 {sessionStart ? (
                                                     <>
                                                         <div>{sessionStart.date}</div>
                                                         <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{sessionStart.time}</div>
                                                     </>
-                                                ) : '—'}
+                                                ) : <span style={{ opacity: 0.5 }}>—</span>}
                                             </td>
-                                            <td style={{ padding: '0.75rem', color: sessionEnd ? '#ef4444' : '#64748b', textAlign: 'center', fontSize: '0.8rem' }}>
+                                            <td style={{ padding: '0.75rem', color: '#94a3b8', textAlign: 'center', fontSize: '0.8rem' }}>
                                                 {sessionEnd ? (
                                                     <>
                                                         <div>{sessionEnd.date}</div>
                                                         <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{sessionEnd.time}</div>
                                                     </>
-                                                ) : '—'}
+                                                ) : <span style={{ opacity: 0.5 }}>—</span>}
                                             </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                 <button
@@ -513,42 +537,65 @@ const Debug = () => {
                                             </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                                    {/* Events Badge - Golden */}
-                                                    <div style={{
-                                                        padding: '0.4rem 0.8rem',
-                                                        borderRadius: '20px',
-                                                        border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
-                                                        background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
-                                                        color: user.log_count > 0 ? '#f59e0b' : '#94a3b8',
-                                                        fontSize: '0.8rem',
-                                                        fontWeight: 600,
-                                                        minWidth: '80px',
-                                                        textAlign: 'center'
-                                                    }}>
+                                                    {/* Events Badge - Golden - Now Clickable */}
+                                                    <div
+                                                        onClick={() => user.log_count > 0 && setViewingUser(user)}
+                                                        style={{
+                                                            padding: '0.4rem 0.8rem',
+                                                            borderRadius: '20px',
+                                                            border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
+                                                            background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
+                                                            color: user.log_count > 0 ? '#f59e0b' : '#94a3b8',
+                                                            fontSize: '0.8rem',
+                                                            fontWeight: 600,
+                                                            minWidth: '80px',
+                                                            textAlign: 'center',
+                                                            cursor: user.log_count > 0 ? 'pointer' : 'default',
+                                                            transition: 'all 0.2s ease'
+                                                        }}>
                                                         {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
                                                     </div>
+
+                                                    {/* Camera Badge */}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (receivedScreenshots[user.id]) {
+                                                                // View existing screenshot
+                                                                setViewingScreenshot(receivedScreenshots[user.id]);
+                                                            } else {
+                                                                // Request new screenshot
+                                                                setPendingScreenshots(prev => ({ ...prev, [user.id]: true }));
+                                                                if (window.adminWs && window.adminWs.readyState === 1) {
+                                                                    window.adminWs.send(JSON.stringify({ type: 'capture_request', userId: user.id }));
+                                                                }
+                                                            }
+                                                        }}
+                                                        disabled={pendingScreenshots[user.id]}
+                                                        style={{
+                                                            padding: '0.4rem 0.6rem',
+                                                            background: '#fff',
+                                                            border: '1px solid rgba(148, 163, 184, 0.3)',
+                                                            borderRadius: '8px',
+                                                            cursor: pendingScreenshots[user.id] ? 'wait' : 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px',
+                                                            fontSize: '1rem',
+                                                            animation: pendingScreenshots[user.id] ? 'shutterBlink 0.3s ease-in-out' : 'none',
+                                                            transition: 'all 0.2s ease'
+                                                        }}
+                                                        title={receivedScreenshots[user.id] ? 'View Screenshot' : 'Request Screenshot'}
+                                                    >
+                                                        📸
+                                                        {receivedScreenshots[user.id] && (
+                                                            <span style={{ color: '#000', fontWeight: 700, fontSize: '0.7rem' }}>(!)</span>
+                                                        )}
+                                                    </button>
 
                                                     {/* Actions */}
                                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                         {user.log_count > 0 && (
                                                             <>
-                                                                <button
-                                                                    onClick={() => setViewingUser(user)}
-                                                                    style={{
-                                                                        padding: '0.4rem 0.8rem',
-                                                                        background: 'rgba(234, 88, 12, 0.1)',
-                                                                        color: '#ea580c',
-                                                                        border: '1px solid rgba(234, 88, 12, 0.3)',
-                                                                        borderRadius: '4px',
-                                                                        cursor: 'pointer',
-                                                                        fontSize: '0.8rem',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        gap: '4px'
-                                                                    }}
-                                                                >
-                                                                    View
-                                                                </button>
                                                                 <button
                                                                     onClick={() => handleDownloadLogs(user.id)}
                                                                     style={{
@@ -651,6 +698,81 @@ const Debug = () => {
                     </div>
                 </div>
             )}
+
+            {/* Screenshot Modal */}
+            {viewingScreenshot && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        background: 'rgba(0,0,0,0.85)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1700,
+                        backdropFilter: 'blur(8px)',
+                        flexDirection: 'column',
+                        gap: '1rem'
+                    }}
+                    onClick={() => setViewingScreenshot(null)}
+                >
+                    <img
+                        src={`/api/debug/screenshot/${viewingScreenshot}`}
+                        alt="Debug Screenshot"
+                        style={{
+                            maxWidth: '90vw',
+                            maxHeight: '80vh',
+                            borderRadius: '8px',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <a
+                            href={`/api/debug/screenshot/${viewingScreenshot}`}
+                            download={viewingScreenshot}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                background: '#3b82f6',
+                                color: '#fff',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                fontSize: '0.9rem'
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            ⬇️ Download
+                        </a>
+                        <button
+                            onClick={() => setViewingScreenshot(null)}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                background: '#475569',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontWeight: 600,
+                                fontSize: '0.9rem'
+                            }}
+                        >
+                            ✕ Close
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Shutter Animation */}
+            <style>
+                {`
+                    @keyframes shutterBlink {
+                        0% { opacity: 1; transform: scale(1); }
+                        50% { opacity: 0.3; transform: scale(0.95); background: #f0f0f0; }
+                        100% { opacity: 1; transform: scale(1); }
+                    }
+                `}
+            </style>
         </div>
     );
 };

@@ -3,10 +3,28 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import multer from 'multer';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOG_FILE = path.join(__dirname, '../../debug_logs.txt');
+const SCREENSHOTS_DIR = path.join(__dirname, '../data/screenshots');
+
+// Ensure screenshots directory exists
+if (!fs.existsSync(SCREENSHOTS_DIR)) {
+    fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+}
+
+// Multer setup for screenshot uploads
+const screenshotStorage = multer.diskStorage({
+    destination: SCREENSHOTS_DIR,
+    filename: (req, file, cb) => {
+        const userId = req.body.userId || 'unknown';
+        const timestamp = Date.now();
+        cb(null, `${userId}_${timestamp}.webp`);
+    }
+});
+const uploadScreenshot = multer({ storage: screenshotStorage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 import { requireAdmin, requireUser } from '../middleware/auth.js';
 import { getSetting, all, run, get } from '../database.js';
@@ -370,6 +388,85 @@ router.get('/dump/tables', requireAdmin, (req, res) => {
         });
     } catch (err) {
         console.error('Dump error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==========================================
+// SCREENSHOT ENDPOINTS
+// ==========================================
+
+// POST /api/debug/screenshot - Upload screenshot from client
+router.post('/screenshot', requireUser, requireDebugMode, uploadScreenshot.single('screenshot'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No screenshot file received' });
+        }
+
+        const userId = req.body.userId || req.user?.id || 'unknown';
+        const filename = req.file.filename;
+        const timestamp = req.body.timestamp || new Date().toISOString();
+
+        // Store metadata in database
+        run(`
+            INSERT INTO screenshots (user_id, filename, uploaded_at)
+            VALUES (?, ?, ?)
+        `, [userId, filename, timestamp]);
+
+        // Broadcast to admin that screenshot is ready
+        const wss = req.app?.get('wss');
+        if (wss) {
+            const payload = JSON.stringify({
+                type: 'screenshot_ready',
+                userId,
+                filename,
+                timestamp
+            });
+            wss.clients.forEach(client => {
+                if (client.readyState === 1) client.send(payload);
+            });
+        }
+
+        res.json({
+            success: true,
+            filename,
+            message: 'Screenshot uploaded successfully'
+        });
+    } catch (err) {
+        console.error('Screenshot upload error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/debug/users/:id/screenshots - List screenshots for user
+router.get('/users/:id/screenshots', requireAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        const screenshots = all(
+            'SELECT * FROM screenshots WHERE user_id = ? ORDER BY uploaded_at DESC LIMIT 20',
+            [id]
+        );
+        res.json({ screenshots });
+    } catch (err) {
+        console.error('Error fetching screenshots:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/debug/screenshot/:filename - Serve screenshot file
+router.get('/screenshot/:filename', requireAdmin, (req, res) => {
+    try {
+        const { filename } = req.params;
+        const filePath = path.join(SCREENSHOTS_DIR, filename);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Screenshot not found' });
+        }
+
+        res.setHeader('Content-Type', 'image/webp');
+        res.sendFile(filePath);
+    } catch (err) {
+        console.error('Error serving screenshot:', err);
         res.status(500).json({ error: err.message });
     }
 });

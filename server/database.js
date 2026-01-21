@@ -328,6 +328,19 @@ export const initDatabase = async () => {
   `);
   db.run(`CREATE INDEX IF NOT EXISTS idx_client_logs_user_id ON client_logs(user_id);`);
 
+  // Screenshots table (debug screenshot captures)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS screenshots (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      filename TEXT NOT NULL,
+      uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(user_id) REFERENCES users(id)
+    );
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_screenshots_user_id ON screenshots(user_id);`);
+
+
   // ==========================================
   // DEFAULT DATA
   // ==========================================
