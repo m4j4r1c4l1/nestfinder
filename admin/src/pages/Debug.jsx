@@ -565,9 +565,15 @@ const Debug = () => {
                                                                     if (receivedScreenshots[user.id]) {
                                                                         setViewingScreenshot(receivedScreenshots[user.id]);
                                                                     } else {
+                                                                        console.log('[Debug] Requesting screenshot for:', user.id);
                                                                         setPendingScreenshots(prev => ({ ...prev, [user.id]: true }));
                                                                         if (window.adminWs && window.adminWs.readyState === 1) {
                                                                             window.adminWs.send(JSON.stringify({ type: 'capture_request', userId: user.id }));
+                                                                            console.log('[Debug] Sent capture_request WS message');
+                                                                        } else {
+                                                                            console.warn('[Debug] Admin WS not ready:', window.adminWs?.readyState);
+                                                                            alert('Connection to server lost. Please refresh.');
+                                                                            setPendingScreenshots(prev => ({ ...prev, [user.id]: false }));
                                                                         }
                                                                     }
                                                                 }}

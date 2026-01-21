@@ -208,6 +208,75 @@ const App = () => {
         return () => window.removeEventListener('server:unavailable', handleServerUnavailable);
     }, []);
 
+    // WebSocket Initialization for Admin
+    React.useEffect(() => {
+        if (!token) return;
+
+        let ws = null;
+        let reconnectTimeout = null;
+
+        const connect = () => {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            // Use VITE_API_URL host if available, otherwise window.location.host
+            // In dev, admin is 5174, server is 3001. We need to hit 3001.
+            let host = window.location.host;
+            if (host.includes('localhost') || host.includes('127.0.0.1')) {
+                // Determine port from environment or default to 3001
+                host = 'localhost:3001';
+            }
+
+            // If we have a full API URL configured, extract host
+            if (import.meta.env.VITE_API_URL) {
+                try {
+                    const url = new URL(import.meta.env.VITE_API_URL);
+                    host = url.host;
+                } catch (e) { /* ignore */ }
+            }
+
+            const wsUrl = `${protocol}//${host}`;
+            console.log(`[AdminWS] Connecting to ${wsUrl}...`);
+
+            ws = new WebSocket(wsUrl);
+            window.adminWs = ws;
+
+            ws.onopen = () => {
+                console.log('[AdminWS] Connected');
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    // Handle incoming messages if needed (e.g., screenshot_ready)
+                    if (data.type === 'screenshot_ready') {
+                        // Dispatch event for Debug page to pick up
+                        window.dispatchEvent(new CustomEvent('screenshot_ready', { detail: data }));
+                    }
+                } catch (e) {
+                    console.error('[AdminWS] Parse error:', e);
+                }
+            };
+
+            ws.onclose = () => {
+                console.warn('[AdminWS] Disconnected. Reconnecting...');
+                window.adminWs = null;
+                reconnectTimeout = setTimeout(connect, 3000);
+            };
+
+            ws.onerror = (err) => {
+                console.error('[AdminWS] Error:', err);
+                ws.close();
+            };
+        };
+
+        connect();
+
+        return () => {
+            if (ws) ws.close();
+            if (reconnectTimeout) clearTimeout(reconnectTimeout);
+            window.adminWs = null;
+        };
+    }, [token]);
+
     if (!token) {
         return <Login onLogin={setToken} />;
     }
