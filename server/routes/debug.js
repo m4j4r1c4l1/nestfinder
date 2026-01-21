@@ -29,6 +29,13 @@ const uploadScreenshot = multer({ storage: screenshotStorage, limits: { fileSize
 import { requireAdmin, requireUser } from '../middleware/auth.js';
 import { getSetting, all, run, get } from '../database.js';
 
+// Migration: Add ip_address to client_logs
+try {
+    run("ALTER TABLE client_logs ADD COLUMN ip_address TEXT");
+} catch (e) {
+    // Column likely exists
+}
+
 // Middleware: Check if Debug Mode is globally enabled
 const requireDebugMode = (req, res, next) => {
     // Exception: Crash reports are always allowed
@@ -161,13 +168,29 @@ router.get('/users/:id/logs', requireAdmin, (req, res) => {
         // Find the new max ID for incremental fetching
         const maxId = logs.reduce((max, entry) => Math.max(max, entry.id), since);
 
-        // Combine all log entries
+        // Combine all log entries and inject metadata from the DB row
         const allLogs = logs.map(entry => {
+            let parsed;
             try {
-                return JSON.parse(entry.logs);
+                parsed = JSON.parse(entry.logs);
+                if (!Array.isArray(parsed)) parsed = [parsed];
             } catch {
-                return [entry.logs];
+                parsed = [{ msg: entry.logs }];
             }
+
+            return parsed.map(l => {
+                const logObj = typeof l === 'object' ? l : { msg: l };
+                // Ensure data object exists and contains metadata
+                return {
+                    ...logObj,
+                    data: {
+                        ...(logObj.data || {}),
+                        ip: entry.ip_address,
+                        platform: entry.platform,
+                        userAgent: entry.user_agent
+                    }
+                };
+            });
         }).flat();
 
         res.json({
@@ -320,10 +343,11 @@ router.post('/logs', (req, res, next) => {
             }
 
             // Store in database
+            const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
             run(`
-                INSERT INTO client_logs (user_id, logs, platform, user_agent)
-                VALUES (?, ?, ?, ?)
-            `, [req.user.id, JSON.stringify(logs), platform || null, userAgent || null]);
+                INSERT INTO client_logs (user_id, logs, platform, user_agent, ip_address)
+                VALUES (?, ?, ?, ?, ?)
+            `, [req.user.id, JSON.stringify(logs), platform || null, userAgent || null, clientIp || null]);
 
             // Update last seen
             run('UPDATE users SET debug_last_seen = CURRENT_TIMESTAMP WHERE id = ?', [req.user.id]);
