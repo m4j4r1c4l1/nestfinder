@@ -58,6 +58,14 @@ const Debug = () => {
         }
     };
 
+    // Fetch users with debug status
+    useEffect(() => {
+        fetchUsers();
+        // Poll every 5 seconds for live updates
+        const interval = setInterval(() => fetchUsers(true), 5000);
+        return () => clearInterval(interval);
+    }, []);
+
     // Sorting state
     const [sortConfig, setSortConfig] = useState({ column: 'debug_enabled', direction: 'desc' });
 
