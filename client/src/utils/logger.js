@@ -7,7 +7,7 @@
  * L3: Remote (Upload to server for admin access)
  */
 
-import html2canvas from 'html2canvas';
+
 
 const LOG_PREFIX = '[NestFinder]';
 const STORAGE_KEY = 'nestfinder_debug_logs';
@@ -67,9 +67,6 @@ class DebugLogger {
             this.log('System', 'Received ASAP debug update signal via WS');
             this._checkStatus();
         }
-
-        // Handle screenshot capture request
-        // Handled by handleCaptureRequest() called from usePoints.js
     }
 
     async _checkStatus() {
@@ -366,70 +363,7 @@ class DebugLogger {
         }
     }
 
-    /**
-     * Capture screenshot using html2canvas and upload to server
-     */
-    async captureScreen() {
-        try {
-            this.log('System', 'Capturing screen with html2canvas...');
 
-            const canvas = await html2canvas(document.body, {
-                useCORS: true,
-                allowTaint: true,
-                scale: window.devicePixelRatio || 1,
-                logging: false
-            });
-
-            // Convert to WebP blob for compression
-            const blob = await new Promise(resolve =>
-                canvas.toBlob(resolve, 'image/webp', 0.8)
-            );
-
-            if (!blob) {
-                throw new Error('Failed to create image blob');
-            }
-
-            // Upload to server
-            const formData = new FormData();
-            formData.append('userId', this.userId || 'unknown');
-            formData.append('timestamp', new Date().toISOString());
-            formData.append('screenshot', blob, `screenshot_${Date.now()}.webp`);
-
-            const response = await fetch('/api/debug/screenshot', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('nestfinder_user_token') || ''}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`Upload failed: ${response.status}`);
-            }
-
-            const result = await response.json();
-            this.log('System', 'Screenshot uploaded successfully', result);
-            return result;
-        } catch (e) {
-            console.error(LOG_PREFIX, 'Screenshot capture failed:', e);
-            this.error('System', 'Screenshot capture failed', { error: e.message });
-            throw e;
-        }
-    }
-
-    /**
-     * Handle capture request from WebSocket
-     */
-    handleCaptureRequest(message) {
-        if (!this.userId) {
-            console.warn(LOG_PREFIX, 'Received capture request but userId is not set');
-            return;
-        }
-        if (message.userId === this.userId) {
-            this.log('System', 'Received remote screenshot request');
-            this.captureScreen();
-        }
-    }
 
     clear() {
         this.logs = [];

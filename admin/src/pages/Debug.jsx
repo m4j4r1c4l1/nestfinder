@@ -25,120 +25,7 @@ const formatTimestampCET = (isoString) => {
 
 import LogModal from '../components/LogModal';
 
-const ScreenshotModal = ({ filename, onClose }) => {
-    const [imgSrc, setImgSrc] = React.useState(null);
-    const [error, setError] = React.useState(null);
-    const [loading, setLoading] = React.useState(true);
 
-    React.useEffect(() => {
-        let active = true;
-        const fetchImage = async () => {
-            try {
-                const token = localStorage.getItem('nestfinder_admin_token');
-                const res = await fetch(`/api/debug/screenshot/${filename}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!res.ok) throw new Error(res.statusText);
-
-                const blob = await res.blob();
-                if (active) {
-                    const url = URL.createObjectURL(blob);
-                    setImgSrc(url);
-                    setLoading(false);
-                }
-            } catch (err) {
-                if (active) {
-                    console.error("Failed to load screenshot:", err);
-                    setError(err.message);
-                    setLoading(false);
-                }
-            }
-        };
-
-        fetchImage();
-        return () => {
-            active = false;
-            if (imgSrc) URL.revokeObjectURL(imgSrc);
-        };
-    }, [filename]);
-
-    return (
-        <div
-            style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0,0,0,0.85)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1700,
-                backdropFilter: 'blur(8px)',
-                flexDirection: 'column',
-                gap: '1rem'
-            }}
-            onClick={onClose}
-        >
-            {loading && <div style={{ color: 'white' }}>Loading screenshot...</div>}
-
-            {error && (
-                <div style={{ color: '#ef4444', textAlign: 'center' }}>
-                    <p>Failed to load image</p>
-                    <small>{error}</small>
-                </div>
-            )}
-
-            {imgSrc && (
-                <>
-                    <img
-                        src={imgSrc}
-                        alt="Debug Screenshot"
-                        style={{
-                            maxWidth: '90vw',
-                            maxHeight: '80vh',
-                            borderRadius: '8px',
-                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                    />
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <a
-                            href={imgSrc}
-                            download={filename}
-                            style={{
-                                padding: '0.75rem 1.5rem',
-                                background: '#3b82f6',
-                                color: '#fff',
-                                borderRadius: '8px',
-                                textDecoration: 'none',
-                                fontWeight: 600,
-                                fontSize: '0.9rem'
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            ⬇️ Download
-                        </a>
-                        <button
-                            onClick={onClose}
-                            style={{
-                                padding: '0.75rem 1.5rem',
-                                background: '#475569',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontWeight: 600,
-                                fontSize: '0.9rem'
-                            }}
-                        >
-                            ✕ Close
-                        </button>
-                    </div>
-                </>
-            )}
-        </div>
-    );
-};
 
 const Debug = () => {
     const [users, setUsers] = useState([]);
@@ -150,37 +37,7 @@ const Debug = () => {
     const [page, setPage] = useState(1);
     const pageSize = 30;
 
-    // Screenshot state
-    const [pendingScreenshots, setPendingScreenshots] = useState({}); // userId -> true (pending)
-    const [receivedScreenshots, setReceivedScreenshots] = useState({}); // userId -> filename
-    const [viewingScreenshot, setViewingScreenshot] = useState(null); // filename to view in modal
 
-    // Fetch users with debug status
-    useEffect(() => {
-        fetchUsers();
-        // Poll every 5 seconds for live updates
-        const interval = setInterval(() => fetchUsers(true), 5000);
-        return () => clearInterval(interval);
-    }, []);
-
-    // WebSocket listener for screenshot_ready
-    useEffect(() => {
-        const handleWsMessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                if (data.type === 'screenshot_ready') {
-                    setPendingScreenshots(prev => ({ ...prev, [data.userId]: false }));
-                    setReceivedScreenshots(prev => ({ ...prev, [data.userId]: data.filename }));
-                }
-            } catch { }
-        };
-
-        // Attach to existing WebSocket if available
-        if (window.adminWs) {
-            window.adminWs.addEventListener('message', handleWsMessage);
-            return () => window.adminWs.removeEventListener('message', handleWsMessage);
-        }
-    }, []);
 
     const fetchUsers = async (isBackground = false) => {
         if (!isBackground) setLoading(true);
@@ -674,47 +531,8 @@ const Debug = () => {
                                                                 {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
                                                             </div>
 
-                                                            {/* Camera Badge - Matches Download Button Height/Style */}
-                                                            <button
-                                                                onClick={() => {
-                                                                    if (receivedScreenshots[user.id]) {
-                                                                        setViewingScreenshot(receivedScreenshots[user.id]);
-                                                                    } else {
-                                                                        console.log('[Debug] Requesting screenshot for:', user.id);
-                                                                        setPendingScreenshots(prev => ({ ...prev, [user.id]: true }));
-                                                                        if (window.adminWs && window.adminWs.readyState === 1) {
-                                                                            window.adminWs.send(JSON.stringify({ type: 'capture_request', userId: user.id }));
-                                                                            console.log('[Debug] Sent capture_request WS message');
-                                                                        } else {
-                                                                            console.warn('[Debug] Admin WS not ready:', window.adminWs?.readyState);
-                                                                            alert('Connection to server lost. Please refresh.');
-                                                                            setPendingScreenshots(prev => ({ ...prev, [user.id]: false }));
-                                                                        }
-                                                                    }
-                                                                }}
-                                                                disabled={pendingScreenshots[user.id]}
-                                                                style={{
-                                                                    padding: '0.4rem 0.8rem', // Matched padding
-                                                                    background: 'rgba(255, 255, 255, 0.05)', // Transparent-ish
-                                                                    border: '1px solid rgba(148, 163, 184, 0.3)', // Solid border
-                                                                    borderRadius: '4px', // Matches buttons
-                                                                    cursor: pendingScreenshots[user.id] ? 'wait' : 'pointer',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '4px',
-                                                                    fontSize: '1rem',
-                                                                    height: '32px', // Enforce height alignment if needed, but padding should suffice with font-size
-                                                                    animation: pendingScreenshots[user.id] ? 'shutterBlink 0.3s ease-in-out' : 'none',
-                                                                    transition: 'all 0.2s ease',
-                                                                    color: '#e2e8f0'
-                                                                }}
-                                                                title={receivedScreenshots[user.id] ? 'View Screenshot' : 'Request Screenshot'}
-                                                            >
-                                                                📸
-                                                                {receivedScreenshots[user.id] && (
-                                                                    <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.7rem' }}>(!)</span>
-                                                                )}
-                                                            </button>
+
+
                                                         </>
                                                     ) : (
                                                         /* Debug Disabled: Just Text */
@@ -836,34 +654,7 @@ const Debug = () => {
                 </div>
             )}
 
-            {/* Screenshot Modal */}
-            {viewingScreenshot && (
-                <ScreenshotModal
-                    filename={viewingScreenshot}
-                    onClose={() => {
-                        // Clear the received status so the user can take another picture
-                        setReceivedScreenshots(prev => {
-                            const next = { ...prev };
-                            const userId = Object.keys(next).find(key => next[key] === viewingScreenshot);
-                            if (userId) delete next[userId];
-                            return next;
-                        });
-                        setViewingScreenshot(null);
-                    }}
-                />
-            )}
 
-
-            {/* Shutter Animation */}
-            <style>
-                {`
-                    @keyframes shutterBlink {
-                        0% { opacity: 1; transform: scale(1); }
-                        50% { opacity: 0.3; transform: scale(0.95); background: #f0f0f0; }
-                        100% { opacity: 1; transform: scale(1); }
-                    }
-                `}
-            </style>
         </div>
     );
 };

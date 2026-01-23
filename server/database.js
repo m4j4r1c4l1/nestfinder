@@ -332,17 +332,7 @@ export const initDatabase = async () => {
   // Migration: Add ip_address to client_logs
   try { db.run("ALTER TABLE client_logs ADD COLUMN ip_address TEXT"); } catch (e) { /* Exists */ }
 
-  // Screenshots table (debug screenshot captures)
-  db.run(`
-    CREATE TABLE IF NOT EXISTS screenshots (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id TEXT NOT NULL,
-      filename TEXT NOT NULL,
-      uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(user_id) REFERENCES users(id)
-    );
-  `);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_screenshots_user_id ON screenshots(user_id);`);
+
 
 
   // ==========================================
