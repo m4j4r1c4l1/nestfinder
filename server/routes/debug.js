@@ -38,7 +38,9 @@ const requireDebugMode = (req, res, next) => {
 
 // GET /api/debug/users - List users with debug status
 router.get('/users', requireAdmin, (req, res) => {
+    // console.time('fetchDebugUsers');
     try {
+        // console.log('[Debug] Fetching users list...');
         const users = all(`
             SELECT 
                 u.id, 
@@ -54,6 +56,7 @@ router.get('/users', requireAdmin, (req, res) => {
             ORDER BY u.debug_enabled DESC, u.last_active DESC
             LIMIT 5000
         `);
+        // console.timeEnd('fetchDebugUsers');
         res.json({ users });
     } catch (err) {
         console.error('Error fetching debug users:', err);

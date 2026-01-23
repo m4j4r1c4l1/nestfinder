@@ -41,8 +41,10 @@ const Debug = () => {
 
     const fetchUsers = async (isBackground = false) => {
         if (!isBackground) setLoading(true);
+        console.log('[Debug] Fetching users...', { isBackground });
         try {
             const res = await adminApi.fetch('/debug/users');
+            console.log('[Debug] Users fetched:', res.users?.length);
             // Sort by debug_enabled desc, then last_active desc to keep relevant users on top
             const sorted = (res.users || []).sort((a, b) => {
                 if (a.debug_enabled !== b.debug_enabled) return b.debug_enabled - a.debug_enabled;
@@ -510,30 +512,27 @@ const Debug = () => {
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                                                     {/* Events Status */}
+                                                    {/* Events Status */}
                                                     {user.debug_enabled ? (
-                                                        <>
-                                                            {/* Clickable Events Badge */}
-                                                            <div
-                                                                onClick={() => user.log_count > 0 && setViewingUser(user)}
-                                                                style={{
-                                                                    padding: '0.4rem 0.8rem',
-                                                                    borderRadius: '20px',
-                                                                    border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
-                                                                    background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
-                                                                    color: user.log_count > 0 ? '#f59e0b' : '#94a3b8',
-                                                                    fontSize: '0.8rem',
-                                                                    fontWeight: 600,
-                                                                    minWidth: '80px',
-                                                                    textAlign: 'center',
-                                                                    cursor: user.log_count > 0 ? 'pointer' : 'default',
-                                                                    transition: 'all 0.2s ease'
-                                                                }}>
-                                                                {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
-                                                            </div>
-
-
-
-                                                        </>
+                                                        /* Clickable Events Badge */
+                                                        <div
+                                                            onClick={() => user.log_count > 0 && setViewingUser(user)}
+                                                            style={{
+                                                                padding: '0.4rem 0.8rem',
+                                                                borderRadius: '20px',
+                                                                border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
+                                                                background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
+                                                                color: user.log_count > 0 ? '#f59e0b' : '#94a3b8',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: 600,
+                                                                minWidth: '80px',
+                                                                textAlign: 'center',
+                                                                cursor: user.log_count > 0 ? 'pointer' : 'default',
+                                                                transition: 'all 0.2s ease'
+                                                            }}
+                                                        >
+                                                            {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
+                                                        </div>
                                                     ) : (
                                                         /* Debug Disabled: Just Text */
                                                         <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic', padding: '0.4rem 0' }}>
