@@ -489,4 +489,9 @@ export const resetDatabase = (target = 'all') => {
   console.log(`Database reset completed: ${target}`);
 };
 
-export default { initDatabase, getDb, run, get, all, log, getSetting, getSettings, saveDatabase, resetDatabase };
+// Helper: run query WITHOUT immediate save (for batch operations)
+export const runWithoutSave = (sql, params = []) => {
+  db.run(sql, params);
+};
+
+export default { initDatabase, getDb, run, runWithoutSave, get, all, log, getSetting, getSettings, saveDatabase, resetDatabase };
