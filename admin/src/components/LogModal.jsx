@@ -97,14 +97,11 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
             remaining = remaining.replace(match[0], ' ');
         }
 
-        // 2. Extract Bracket Groups: [API] [Points]
-        // This regex matches consecutive brackets separated by optional spaces
-        const bracketGroupRegex = /((?:\[[^\]]+\]\s*)+)/g;
-        while ((match = bracketGroupRegex.exec(remaining)) !== null) {
-            const rawGroup = match[1];
-            // Split into individual tags
-            const tags = rawGroup.match(/\[([^\]]+)\]/g).map(t => t.replace(/[\[\]]/g, '').trim());
-            tokens.push({ type: 'category', tags });
+        // 2. Extract Bracket Groups: [API] [Notifications]
+        // Split each bracket into its own token to allow OR logic across different bracket sets
+        const bracketRegex = /\[([^\]]+)\]/g;
+        while ((match = bracketRegex.exec(remaining)) !== null) {
+            tokens.push({ type: 'category', tags: [match[1].trim()] });
             remaining = remaining.replace(match[0], ' ');
         }
 
@@ -139,16 +136,14 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
             const { category = '', level = 'INFO', msg = '', ts = '', dl = 'default' } = (typeof log === 'object' ? log : {});
             if (typeof log === 'string') return true; // Fail safe
 
-            // 1. Level Filter (Debug Level: D/A/P) - "Level" in UI usually means DL? 
-            //    User Request: "filter messages by level -default, aggressive, paranoic-"
-            // Stored as 'default', 'aggressive', 'paranoic'
-            // Check if filterLevel includes the log's dl
-            const logDl = (log.dl || 'default'); // Keep original case for comparison with filterLevel
-            const dlMatch = filterLevel.length === 0 || filterLevel.includes(logDl);
+            // 1. Level Filter (Debug Level: D/A/P)
+            // Check if filterLevel includes the log's dl (case-insensitive)
+            const logDl = (dl || 'default').toLowerCase();
+            const dlMatch = filterLevel.length === 0 || filterLevel.some(f => f.toLowerCase() === logDl);
 
             // 2. Severity Filter (INFO, WARN...)
-            const logSeverity = (level || 'INFO'); // Keep original case for comparison with filterSeverity
-            const severityMatch = filterSeverity.length === 0 || filterSeverity.includes(logSeverity);
+            const logSeverity = (level || 'INFO').toUpperCase();
+            const severityMatch = filterSeverity.length === 0 || filterSeverity.some(f => f.toUpperCase() === logSeverity);
 
             if (!dlMatch || !severityMatch) return false;
 
@@ -280,7 +275,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         Inbox: ['Sent', 'Composer', 'Message'],
         Report: ['Success', 'Submission'],
         MapView: ['Nav', 'Context'],
-        API: ['Request', 'Response', 'Error', 'Notifications', 'Points'],
+        API: ['Notifications', 'Points', 'Authentication', 'Settings', 'Admin', 'Debug', 'App'],
         App: ['Crash', 'Lifecycle'],
         Action: ['Workflow', 'Completed'],
         Debug: ['Logger', 'Status']
@@ -1036,7 +1031,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                             onMouseEnter={e => e.currentTarget.style.background = isSelected ? '#334155' : '#334155'}
                                             onMouseLeave={e => e.currentTarget.style.background = isSelected ? '#1e293b' : 'transparent'}
                                         >
-                                            <div style={{ opacity: isSelected ? 1 : 0.3 }}>
+                                            <div style={{ opacity: isSelected ? 1 : 0.7 }}>
                                                 <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
                                             </div>
                                             {lvl}
@@ -1137,7 +1132,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 minWidth: '60px',
                                                 textAlign: 'center',
                                                 backgroundColor: `${color}11`,
-                                                opacity: isSelected ? 1 : 0.5
+                                                opacity: isSelected ? 1 : 0.7
                                             }}>
                                                 {sev}
                                             </span>
@@ -1172,16 +1167,16 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                     ACTIVE FILTERS
                                 </div>
                                 {activeFiltersList.map((f, i) => (
-                                    <div key={i} style={{ marginBottom: '8px' }}>
-                                        <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginBottom: '4px', textTransform: 'uppercase' }}>{f.type}</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <div key={i} style={{ marginBottom: '12px' }}>
+                                        <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', textAlign: 'left' }}>{f.type}</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '60px' }}>
                                             {f.type === 'Level' ? (
                                                 f.val.map(lvl => {
                                                     const { char, color } = getDlStyle(lvl);
                                                     return (
-                                                        <div key={lvl} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <div key={lvl} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                             <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
-                                                            <span style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.8rem' }}>{lvl}</span>
+                                                            <span style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lvl}</span>
                                                         </div>
                                                     );
                                                 })
@@ -1189,29 +1184,28 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 f.val.map(sev => {
                                                     const { color } = getLevelStyles(sev);
                                                     return (
-                                                        <div key={sev} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <div key={sev} style={{ display: 'flex', alignItems: 'center' }}>
                                                             <span style={{
-                                                                color: color, fontWeight: 800, fontSize: '0.7rem',
-                                                                border: `1px solid ${color}44`, padding: '1px 6px',
-                                                                borderRadius: '4px', backgroundColor: `${color}11`, minWidth: '50px', textAlign: 'center'
+                                                                color: color, fontWeight: 800, fontSize: '0.75rem',
+                                                                border: `1px solid ${color}44`, padding: '2px 8px',
+                                                                borderRadius: '4px', backgroundColor: `${color}11`, minWidth: '70px', textAlign: 'center'
                                                             }}>{sev}</span>
                                                         </div>
                                                     );
                                                 })
                                             ) : (
-                                                // Text / Category (String)
-                                                <span style={{ color: '#f8fafc', fontSize: '0.85rem', fontFamily: 'monospace', marginLeft: '4px' }}>
-                                                    {['Category', 'Text'].includes(f.type) && f.val.startsWith('[') ? (
-                                                        f.val.match(/\[([^\]]+)\]/g).map((part, idx) => {
+                                                // Category / Text - Vertical alignment
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginLeft: '-50px' }}>
+                                                    {['Category', 'Text'].includes(f.type) && typeof f.val === 'string' && f.val.includes('[') ? (
+                                                        (f.val.match(/\[([^\]]+)\]/g) || []).map((part, idx) => {
                                                             const clean = part.replace(/[\[\]]/g, '');
-                                                            // Infer color
                                                             const color = CATEGORY_COLORS[clean] || '#e2e8f0';
-                                                            return <span key={idx} style={{ color: color, marginRight: '4px' }}>{part}</span>
+                                                            return <span key={idx} style={{ color: color, fontSize: '0.85rem', fontFamily: 'monospace' }}>{part}</span>
                                                         })
                                                     ) : (
-                                                        f.val
+                                                        <span style={{ color: '#f8fafc', fontSize: '0.85rem', fontFamily: 'monospace' }}>{f.val}</span>
                                                     )}
-                                                </span>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
