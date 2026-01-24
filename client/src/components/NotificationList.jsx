@@ -21,7 +21,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
         try {
             await api.submitFeedback(type, message.trim(), rating);
 
-            logger.default('Inbox', 'Message sent successfully');
+            logger.default(['Inbox', 'Composer'], 'Message sent successfully');
             setSuccess(true);
             setMessage('');
             setRating(5);

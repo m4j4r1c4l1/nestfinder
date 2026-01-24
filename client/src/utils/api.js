@@ -108,7 +108,7 @@ class ApiClient {
         logger.default(['API', area], `Request: ${humanName}`);
       }
     } else {
-      logger.default(['API', area], `Request: ${options.method || 'GET'} ${endpoint.split('?')[0]}`);
+      logger.aggressive(['API', area], `Request: ${options.method || 'GET'} ${endpoint.split('?')[0]}`);
     }
 
     // Aggressive: Technical Request Line

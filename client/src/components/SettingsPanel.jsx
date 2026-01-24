@@ -1475,8 +1475,6 @@ const SettingsPanel = ({ onClose }) => {
     const copyKey = () => {
         if (recoveryKey) {
             navigator.clipboard.writeText(recoveryKey);
-            // Aggressive: Log copy action
-            logger.aggressive(['Settings', 'Recovery Key', 'Interaction'], 'Clicked in Copy it! button.');
             setCopied(true);
 
             // Hide key after "Copied" message duration (3 seconds)

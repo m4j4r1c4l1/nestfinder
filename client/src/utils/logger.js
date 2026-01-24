@@ -96,14 +96,21 @@ class DebugLogger {
                 let changed = false;
                 if (isActive !== this.config.enabled) {
                     this.config.enabled = isActive;
-                    this.log('System', `Remote debug status changed: ${isActive ? 'ENABLED' : 'DISABLED'}`);
+                    this.log('System', 'Remote Debug Status changed');
+                    this.log('System', `Current Debug Status: ${isActive ? 'ENABLED' : 'DISABLED'}`);
                     changed = true;
 
                     if (isActive) {
+                        const lvl = this.config.debugLevel;
+                        const badge = lvl === 'paranoic' ? 'P' : lvl === 'aggressive' ? 'A' : 'D';
+                        const badgeLabel = lvl.charAt(0).toUpperCase() + lvl.slice(1);
+
                         this._logSystemInfo(); // Task #107: Initial Debug Packet
+                        this.log('System', `Debug Mode Activated (${badge} ${badgeLabel})`);
                         this.log('Debug', 'Next, the relation of live events -and pending if any- for this Debug Session:');
                         this._startUpload();
                     } else {
+                        this.log('System', 'Debug session finished');
                         this._stopUpload();
                         // Task #31: Clear logs when disabled for default level
                         if (this.config.debugLevel === 'default') {
@@ -113,8 +120,11 @@ class DebugLogger {
                 }
 
                 if (newLevel !== this.config.debugLevel) {
-                    this.log('System', `Debug level changed: ${this.config.debugLevel} -> ${newLevel}`);
+                    this.log('System', 'Debug Level changed');
                     this.config.debugLevel = newLevel;
+                    const badge = newLevel === 'paranoic' ? 'P' : newLevel === 'aggressive' ? 'A' : 'D';
+                    const label = newLevel.charAt(0).toUpperCase() + newLevel.slice(1);
+                    this.log('System', `Current Debug Level: (${badge}) ${label}`);
                     changed = true;
                 }
 
@@ -209,8 +219,9 @@ class DebugLogger {
                 usedJS: Math.round(performance.memory.usedJSHeapSize / 1048576) + 'MB'
             } : 'N/A'
         };
-
-        this.log('System', 'Debug Mode Activated (Initial Status)', info);
+        // The calling function handles the "Debug Mode Activated" message now to include level info
+        // this.log('System', 'Debug Mode Activated (Initial Status)', info); 
+        this.log('System', 'System Info', info);
     }
 
     /**
@@ -243,7 +254,6 @@ class DebugLogger {
         }
 
         // Format category for consistent storage/display
-        let formattedCategory = category;
         if (Array.isArray(category)) {
             const unique = [...new Set(category)];
             formattedCategory = unique.map(c => `[${c}]`).join('');

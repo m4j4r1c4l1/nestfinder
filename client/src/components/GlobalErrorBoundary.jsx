@@ -16,8 +16,8 @@ export class GlobalErrorBoundary extends Component {
         this.setState({ errorInfo });
         this.setState({ errorInfo });
         console.error("Uncaught error:", error, errorInfo);
-        logger.error('App', `Crash: Uncaught React Error: ${error?.message}`);
-        logger.error('App', `Crash Component Stack: ${errorInfo?.componentStack?.substring(0, 200)}`);
+        logger.error(['App', 'Crash'], `Uncaught React Error: ${error?.message}`);
+        logger.error(['App', 'Crash'], `Component Stack: ${errorInfo?.componentStack?.substring(0, 200)}`);
 
         // Attempt to upload logs immediately
         logger.upload(api, true).catch(e => console.error("Failed to emergency upload logs", e));
@@ -32,7 +32,7 @@ export class GlobalErrorBoundary extends Component {
                 error: error || new Error(message),
                 errorInfo: { componentStack: `at ${source}:${lineno}:${colno}` }
             });
-            logger.error('App', `Crash: Window Error: ${errDetails}`);
+            logger.error(['App', 'Crash'], `Window Error: ${errDetails}`);
             return true; // Prevent default browser error handling
         };
 
@@ -44,7 +44,7 @@ export class GlobalErrorBoundary extends Component {
                 error: event.reason || new Error('Unhandled Promise Rejection'),
                 errorInfo: { componentStack: 'Promise rejection - no stack available' }
             });
-            logger.error('App', `Crash: Unhandled Promise Rejection: ${reason}`);
+            logger.error(['App', 'Crash'], `Unhandled Promise Rejection: ${reason}`);
         };
     }
 

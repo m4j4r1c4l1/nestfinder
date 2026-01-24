@@ -214,9 +214,6 @@ const MapView = () => {
         // Log New Menu Status
         if (next) {
             logger.default([getAreaName(next), 'Interaction'], 'Menu opened');
-        } else if (activeSheet === sheetKey) {
-            // Toggling off
-            logger.default([getAreaName(sheetKey), 'Interaction'], 'Menu closed.');
         }
 
         setActiveSheet(next);
