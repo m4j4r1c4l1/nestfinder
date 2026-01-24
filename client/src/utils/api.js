@@ -65,8 +65,8 @@ class ApiClient {
 
   getAreaFromEndpoint(endpoint) {
     if (endpoint.startsWith('/settings') || endpoint.startsWith('/auth')) return 'Settings';
-    if (endpoint.startsWith('/points')) return 'Map'; // Or Submit? Context depends. Map seems safe default.
-    return 'API'; // Fallback
+    if (endpoint.startsWith('/points')) return 'Map';
+    return 'App'; // Default for background/system calls
   }
 
   async fetch(endpoint, options = {}, isRetry = false) {

@@ -274,7 +274,16 @@ class DebugLogger {
                         requiredLevel === 'aggressive' ? 'color: #a855f7; font-weight: bold' :
                             'color: #3b82f6; font-weight: bold';
 
-            const args = [`%c${LOG_PREFIX} [${category}]`, style, message];
+            let categoryLabel;
+            if (Array.isArray(category)) {
+                // Dedup and format: [Tag][Tag]
+                const unique = [...new Set(category)];
+                categoryLabel = unique.map(c => `[${c}]`).join('');
+            } else {
+                categoryLabel = `[${category}]`;
+            }
+
+            const args = [`%c${LOG_PREFIX} ${categoryLabel}`, style, message];
             if (data) args.push(data);
 
             const fn = console[level] || console.log;
