@@ -119,7 +119,7 @@ const RecoveryKeySection = ({ t }) => {
                 <div style={{ fontWeight: 500 }}>
                     🔑 {t?.('settings.recoveryKey') || 'Recovery Key'}
                 </div>
-                {recoveryKey && keyVisible && (
+                {(recoveryKey || user?.has_recovery_key) && keyVisible && (
                     <button
                         onClick={() => setShowKey(!showKey)}
                         style={{
@@ -138,7 +138,7 @@ const RecoveryKeySection = ({ t }) => {
                 {t?.('settings.recoveryKeyDescription') || 'Save this key to restore your identity on a new device.'}
             </div>
 
-            {recoveryKey ? (
+            {(recoveryKey || user?.has_recovery_key) ? (
                 <div>
                     {keyVisible && (
                         <div style={{
@@ -150,22 +150,23 @@ const RecoveryKeySection = ({ t }) => {
                             fontWeight: 600,
                             textAlign: 'center',
                             letterSpacing: '0.05em',
-                            color: 'var(--color-primary)', // Restored blue color
+                            color: recoveryKey ? 'var(--color-primary)' : 'var(--color-text-tertiary)', // Dim if missing
                             marginBottom: 'var(--space-2)',
                             opacity: fadeOpacity,
                             transition: 'opacity 0.2s ease-out',
-                            cursor: 'pointer',
+                            cursor: recoveryKey ? 'pointer' : 'default',
                             border: '1px solid var(--color-border)'
                         }}
-                            onClick={copyKey}
-                            title="Click to copy and hide"
+                            onClick={recoveryKey ? copyKey : undefined}
+                            title={recoveryKey ? "Click to copy and hide" : "Key not in session"}
                         >
-                            {showKey ? recoveryKey : '•••-•••-•••'}
+                            {showKey ? (recoveryKey || 'Error: Key missing') : '•••-•••-•••'}
                         </div>
                     )}
                     {keyVisible ? (
                         <button
                             onClick={copyKey}
+                            disabled={!recoveryKey}
                             style={{
                                 width: '100%',
                                 padding: 'var(--space-2)',
@@ -173,7 +174,8 @@ const RecoveryKeySection = ({ t }) => {
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: 'var(--radius-md)',
-                                cursor: 'pointer',
+                                cursor: recoveryKey ? 'pointer' : 'not-allowed',
+                                opacity: recoveryKey ? 1 : 0.5,
                                 transition: 'background 0.3s'
                             }}
                         >

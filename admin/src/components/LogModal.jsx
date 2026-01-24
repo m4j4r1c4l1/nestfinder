@@ -373,7 +373,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 justifyContent: 'center',
                 borderRadius: '50%',
                 flexShrink: 0,
-                paddingTop: '1px', // Optical centering for uppercase
+                lineHeight: 1,
                 boxSizing: 'border-box'
             }}>
                 {char}
@@ -454,8 +454,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 </span>
                 {data && Object.keys(data).filter(k => !['ip', 'userAgent', 'platform'].includes(k)).length > 0 && (
                     <div style={{
-                        width: '100%',
-                        marginLeft: '0',
+                        width: 'calc(100% - 8px)',
+                        marginLeft: '8px',
                         marginTop: '2px',
                         padding: '6px 12px',
                         backgroundColor: 'rgba(15, 23, 42, 0.5)',
