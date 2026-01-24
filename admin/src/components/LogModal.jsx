@@ -261,7 +261,23 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         Inbox: '#818cf8',       // Indigo 400 (Messaging)
         Settings: '#a8a29e',    // Stone 400 (Configuration)
         Home: '#38bdf8',        // Sky 400 (Dashboard)
+        Action: '#84cc16',      // Lime 500 (Workflows)
         Default: '#94a3b8'
+    };
+
+    // Static Manifest for comprehensive dropdowns (Matches DEBUG_EVENT_MANIFEST.md)
+    const STATIC_SUBCATEGORIES = {
+        System: ['Internal', 'Initialization', 'Status', 'Location'],
+        Auth: ['Login', 'Logout', 'Session'],
+        Interaction: ['Menu', 'View', 'Button', 'Input', 'Composer', 'Toggle', 'Navigation'],
+        Settings: ['Performance', 'Retention Period', 'Recovery Key', 'Saved'],
+        Inbox: ['Sent', 'Composer', 'Message'],
+        Report: ['Success', 'Submission'],
+        MapView: ['Nav', 'Context'],
+        API: ['Request', 'Response', 'Error', 'Notifications', 'Points'],
+        App: ['Crash', 'Lifecycle'],
+        Action: ['Workflow', 'Completed'],
+        Debug: ['Logger', 'Status']
     };
 
     const fetchLogs = async (sinceId = 0) => {
@@ -552,33 +568,35 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         };
 
         return (
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-                <span title={`Source Level: ${dl || 'Default'}`}>
-                    <Badge char={dlChar} color={dlColor} />
-                </span>
-                <span style={{ color: '#64748b', fontSize: '0.85em', minWidth: '110px' }}>
-                    {formatTime(ts)}
-                </span>
-                <span style={{
-                    color: levelColor,
-                    fontWeight: 800,
-                    fontSize: '0.7em',
-                    letterSpacing: '0.05em',
-                    border: `1px solid ${levelColor}44`,
-                    padding: '1px 4px',
-                    borderRadius: '3px',
-                    minWidth: '50px',
-                    textAlign: 'center',
-                    backgroundColor: `${levelColor}11`
-                }}>
-                    {levelLabel}
-                </span>
-                <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category.replace(/[\[\]]/g, ' ').trim().split(/\s+/)[0]] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
-                    {category || '[General]'}
-                </span>
-                <span style={{ color: '#f8fafc', flex: 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {renderMessage(typeof msg === 'string' ? msg.replace(/\.$/, '') : msg)}
-                </span>
+            <>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                    <span title={`Source Level: ${dl || 'Default'}`}>
+                        <Badge char={dlChar} color={dlColor} />
+                    </span>
+                    <span style={{ color: '#64748b', fontSize: '0.85em', minWidth: '110px' }}>
+                        {formatTime(ts)}
+                    </span>
+                    <span style={{
+                        color: levelColor,
+                        fontWeight: 800,
+                        fontSize: '0.7em',
+                        letterSpacing: '0.05em',
+                        border: `1px solid ${levelColor}44`,
+                        padding: '1px 4px',
+                        borderRadius: '3px',
+                        minWidth: '50px',
+                        textAlign: 'center',
+                        backgroundColor: `${levelColor}11`
+                    }}>
+                        {levelLabel}
+                    </span>
+                    <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category.replace(/[\[\]]/g, ' ').trim().split(/\s+/)[0]] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
+                        {category || '[General]'}
+                    </span>
+                    <span style={{ color: '#f8fafc', flex: 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {renderMessage(typeof msg === 'string' ? msg.replace(/\.$/, '') : msg)}
+                    </span>
+                </div>
                 {data && Object.keys(data).filter(k => !['ip', 'userAgent', 'platform'].includes(k)).length > 0 && (
                     <div style={{
                         width: 'calc(100% - 8px)',
@@ -597,7 +615,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         {typeof data === 'object' ? JSON.stringify(data) : data}
                     </div>
                 )}
-            </div>
+            </>
         );
     };
 
@@ -628,17 +646,26 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         return [...new Set([...predefined, ...logCats])].sort();
     }, [logs]);
 
-    const subCategoryMap = logs.reduce((acc, l) => {
-        const catStr = typeof l === 'object' ? l.category : '';
-        const tags = catStr.match(/\[([^\]]+)\]/g)?.map(t => t.replace(/[\[\]]/g, '').trim()) || [];
-        if (tags.length > 0) {
-            const main = tags[0];
-            const subs = tags.slice(1);
-            if (!acc[main]) acc[main] = new Set();
-            subs.forEach(s => acc[main].add(s));
-        }
-        return acc;
-    }, {});
+    const subCategoryMap = React.useMemo(() => {
+        // Start with Static definitions
+        const map = {};
+        Object.keys(STATIC_SUBCATEGORIES).forEach(k => {
+            map[k] = new Set(STATIC_SUBCATEGORIES[k]);
+        });
+
+        // Merge from Logs
+        logs.forEach(l => {
+            const catStr = typeof l === 'object' ? l.category : '';
+            const tags = catStr.match(/\[([^\]]+)\]/g)?.map(t => t.replace(/[\[\]]/g, '').trim()) || [];
+            if (tags.length > 0) {
+                const main = tags[0];
+                const subs = tags.slice(1);
+                if (!map[main]) map[main] = new Set();
+                subs.forEach(s => map[main].add(s));
+            }
+        });
+        return map;
+    }, [logs]);
 
     const activeFiltersList = [];
     if (filterLevel) activeFiltersList.push({ type: 'Level', val: filterLevel });
@@ -712,7 +739,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                     {deviceInfo.device?.name && <div style={{ display: 'flex', gap: '6px' }}>{Icons[deviceInfo.device.icon] || Icons.Phone} {deviceInfo.device.name}</div>}
                                     <div style={{ display: 'flex', gap: '6px' }}>{Icons[deviceInfo.os.icon] || Icons.Windows} {deviceInfo.os.name} {deviceInfo.os.ver}</div>
                                     <div style={{ display: 'flex', gap: '6px' }}>{Icons[deviceInfo.browser.icon] || Icons.Safari} {deviceInfo.browser.name} {deviceInfo.browser.ver}</div>
-                                    {deviceInfo.ip && <div style={{ display: 'flex', gap: '6px' }}>📡 {deviceInfo.ip.split(',')[0]}</div>}
+                                    {deviceInfo.ip && <div style={{ display: 'flex', gap: '6px' }}>📡 {deviceInfo.ip.split(',').map(ip => ip.trim()).join(' ⚔️ ')}</div>}
                                 </>
                             )}
                         </div>
@@ -786,7 +813,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         {showSearchDropdown && (
                             <div style={{
                                 position: 'absolute', top: '100%', left: 0, width: '100%',
-                                background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
+                                background: '#0f172a', border: '1px solid #475569', borderRadius: '4px',
                                 marginTop: '4px', zIndex: 60, maxHeight: '300px', overflowY: 'auto',
                                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                             }}>
@@ -883,7 +910,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         {showLevelDropdown && (
                             <div style={{
                                 position: 'absolute', top: '100%', left: 0, width: '100%',
-                                background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
+                                background: '#0f172a', border: '1px solid #475569', borderRadius: '4px',
                                 marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                             }}>
                                 {['', 'Default', 'Aggressive', 'Paranoic'].map(lvl => {
@@ -891,7 +918,16 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                     return (
                                         <div key={lvl || 'all'}
                                             onClick={() => { setFilterLevel(lvl); setShowLevelDropdown(false); }}
-                                            style={{ padding: '6px 10px', cursor: 'pointer', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                            style={{
+                                                padding: '6px 10px',
+                                                cursor: 'pointer',
+                                                color: '#e2e8f0',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                fontFamily: 'monospace', // Mimic log style
+                                                fontSize: '0.9rem'
+                                            }}
                                             onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                         >
@@ -921,7 +957,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         {showSeverityDropdown && (
                             <div style={{
                                 position: 'absolute', top: '100%', left: 0, width: '100%',
-                                background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
+                                background: '#0f172a', border: '1px solid #475569', borderRadius: '4px',
                                 marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                             }}>
                                 {['', 'INFO', 'WARN', 'ERROR', 'SUCCESS', 'DEBUG'].map(sev => {
