@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from './ToastProvider';
+import { logger } from '../utils/logger';
 
 const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onClose }) => {
     const { t } = useLanguage();
@@ -31,9 +32,12 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
 
     // Wrapper to handle confirm and update trust score
     const handleConfirm = async (id) => {
+        logger.aggressive(['PointDetails', 'Interaction'], 'Button clicked: Confirm', { pointId: id });
         const oldScore = user?.trust_score || 0;
         const result = await onConfirm(id);
         if (result?.user_trust_score !== undefined) {
+            // ...
+            // Not modifying the rest
             updateTrustScore(result.user_trust_score);
             checkBadgeUnlock(oldScore, result.user_trust_score);
         }
@@ -104,7 +108,10 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
                         /* Deactivated points: show reactivate option */
                         <button
                             className="btn btn-primary btn-block"
-                            onClick={() => onReactivate(point.id)}
+                            onClick={() => {
+                                logger.aggressive(['PointDetails', 'Interaction'], 'Button clicked: Reactivate', { pointId: point.id });
+                                onReactivate(point.id);
+                            }}
                         >
                             🔄 {t('point.reactivateBtn')}
                         </button>
@@ -120,7 +127,10 @@ const PointDetails = ({ point, user, onConfirm, onDeactivate, onReactivate, onCl
 
                             <button
                                 className="btn btn-danger btn-block"
-                                onClick={() => onDeactivate(point.id)}
+                                onClick={() => {
+                                    logger.aggressive(['PointDetails', 'Interaction'], 'Button clicked: Deactivate', { pointId: point.id });
+                                    onDeactivate(point.id);
+                                }}
                             >
                                 {t('point.deactivateBtn')}
                             </button>

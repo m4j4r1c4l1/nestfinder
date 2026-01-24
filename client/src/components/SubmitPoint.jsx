@@ -36,6 +36,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     ];
 
     const toggleTag = (tagId) => {
+        logger.aggressive(['SubmitPoint', 'Interaction'], 'Tag toggled', { tag: tagId });
         setTags(prev =>
             prev.includes(tagId)
                 ? prev.filter(t => t !== tagId)
@@ -44,6 +45,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
     };
 
     const toggleNeed = (needId) => {
+        logger.aggressive(['SubmitPoint', 'Interaction'], 'Need toggled', { need: needId });
         setNeeds(prev =>
             prev.includes(needId)
                 ? prev.filter(n => n !== needId)
@@ -119,7 +121,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         e.preventDefault();
         if (!location) {
             setError(t('submit.locationRequired'));
-            logger.log('SubmitPoint', 'Error', 'Submission attempted without location');
+            logger.default('SubmitPoint', 'Error: Submission attempted without location');
             return;
         }
 
@@ -129,7 +131,12 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
             const allNotes = [...tags, ...needs];
             if (voiceNotes.trim()) allNotes.push(voiceNotes.trim());
 
-            logger.log('SubmitPoint', 'Action', `Submitting point at ${location.latitude},${location.longitude} [${allNotes.join(',')}]`);
+            // Aggressive: Log the detailed attempt with payload
+            logger.aggressive('SubmitPoint', 'Submission payload prepared', {
+                lat: location.latitude,
+                lon: location.longitude,
+                tags: allNotes
+            });
 
             await onSubmit({
                 latitude: location.latitude,
@@ -137,11 +144,13 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                 address,
                 notes: allNotes.join(',')
             });
-            logger.log('SubmitPoint', 'Success', 'Point submitted successfully');
+
+            // Default: Log success summary
+            logger.default('SubmitPoint', 'Point submitted successfully');
         } catch (err) {
             console.error('Submit point error:', err);
             setError(err.message || t('submit.error'));
-            logger.log('SubmitPoint', 'Error', `Submission failed: ${err.message}`);
+            logger.error('SubmitPoint', `Submission failed: ${err.message}`);
             setIsSubmitting(false);
         }
     };
@@ -165,7 +174,10 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'gps' ? 'active' : ''}`}
-                            onClick={() => setInputMode('gps')}
+                            onClick={() => {
+                                logger.aggressive(['SubmitPoint', 'Interaction'], 'Input mode changed: GPS');
+                                setInputMode('gps');
+                            }}
                             style={{ justifyContent: 'center', textAlign: 'center' }}
                         >
                             📍<br /><span style={{ fontSize: '0.75rem' }}>{t('submit.gpsMode')}</span>
@@ -173,7 +185,10 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'map' ? 'active' : ''}`}
-                            onClick={() => setInputMode('map')}
+                            onClick={() => {
+                                logger.aggressive(['SubmitPoint', 'Interaction'], 'Input mode changed: Map');
+                                setInputMode('map');
+                            }}
                             style={{ justifyContent: 'center', textAlign: 'center' }}
                         >
                             🗺️<br /><span style={{ fontSize: '0.75rem' }}>{t('submit.mapMode')}</span>
@@ -181,7 +196,10 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'address' ? 'active' : ''}`}
-                            onClick={() => setInputMode('address')}
+                            onClick={() => {
+                                logger.aggressive(['SubmitPoint', 'Interaction'], 'Input mode changed: Address');
+                                setInputMode('address');
+                            }}
                             style={{ justifyContent: 'center', textAlign: 'center' }}
                         >
                             🏠<br /><span style={{ fontSize: '0.75rem' }}>{t('submit.addressMode')}</span>
@@ -189,7 +207,10 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
                         <button
                             type="button"
                             className={`toggle-btn ${inputMode === 'voice' ? 'active' : ''}`}
-                            onClick={() => setInputMode('voice')}
+                            onClick={() => {
+                                logger.aggressive(['SubmitPoint', 'Interaction'], 'Input mode changed: Voice');
+                                setInputMode('voice');
+                            }}
                             style={{ justifyContent: 'center', textAlign: 'center' }}
                         >
                             🎤<br /><span style={{ fontSize: '0.75rem' }}>{t('submit.voiceMode')}</span>

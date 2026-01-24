@@ -5,10 +5,6 @@ import { logger } from '../utils/logger';
 const FilterPanel = ({ filters, onChange, onClose }) => {
     const { t } = useLanguage();
 
-    useEffect(() => {
-        logger.log('Interaction', 'Entering Filters section');
-    }, []);
-
     const toggleStatus = (status) => {
         const current = filters.status;
         const next = current.includes(status)
@@ -16,7 +12,7 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
             : [...current, status];
 
         const action = current.includes(status) ? 'unselected' : 'selected';
-        logger.log('Interaction', `${action} ${status}`, { previous: current, next });
+        logger.aggressive(['Filter', 'Interaction'], `Filter ${action}: ${status}`);
 
         onChange({ ...filters, status: next });
     };
@@ -80,7 +76,7 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
                 <div style={{ marginTop: 'var(--space-6)', display: 'flex', justifyContent: 'center' }}>
                     <button
                         onClick={() => {
-                            logger.log('Interaction', 'Clicked Done in Filters');
+                            logger.aggressive(['Filter', 'Interaction'], 'Button clicked: Done');
                             onClose();
                         }}
                         className="btn btn-primary"

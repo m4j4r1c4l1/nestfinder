@@ -215,12 +215,31 @@ class DebugLogger {
 
     /**
      * Internal log entry creation
+     * @param {string} level - 'info', 'warn', 'error', 'debug'
+     * @param {string} category - Log category
+     * @param {string} message - Log message
+     * @param {any} data - Metadata
+     * @param {string} requiredLevel - Minimum debug level required ('default', 'aggressive', 'paranoic')
      */
-    _entry(level, category, message, data = null) {
+    _entry(level, category, message, data = null, requiredLevel = 'default') {
         // Task #106: Filter internal upload noise
         const internalMsgs = ['Uploading logs to server...', 'Logs uploaded successfully'];
         if (category === 'System' && internalMsgs.includes(message)) {
             return;
+        }
+
+        // Filtering Logic: Check if current config level satisfies requiredLevel
+        const currentConfig = this.config.debugLevel; // 'default', 'aggressive', 'paranoic'
+
+        let shouldLog = false;
+        if (this.config.enabled) {
+            if (requiredLevel === 'default') {
+                shouldLog = true; // Default logs show in all enabled modes
+            } else if (requiredLevel === 'aggressive') {
+                shouldLog = ['aggressive', 'paranoic'].includes(currentConfig);
+            } else if (requiredLevel === 'paranoic') {
+                shouldLog = currentConfig === 'paranoic';
+            }
         }
 
         const entry = {
@@ -230,14 +249,15 @@ class DebugLogger {
             category: category || 'General',
             msg: message,
             data,
-            dl: this.config.debugLevel // Capture the source debug level (d=default, a=aggressive, p=paranoic)
+            dl: requiredLevel // Store the *required* level so Admin UI knows the source
         };
 
-        // Task #31: Conditional buffering based on level
-        // Default level: Only buffer when enabled. Aggressive/Paranoic: Always buffer.
-        const shouldBuffer = this.config.enabled || this.config.debugLevel !== 'default';
-
-        if (shouldBuffer) {
+        // Task #31: Buffer Logic
+        // Always buffer if we should log it locally according to the rules.
+        // Or if aggressive/paranoic is active, we might want to capture everything for upload 
+        // even if not shown in console? 
+        // For now, let's align buffering with "is this log valid for the current session".
+        if (shouldLog) {
             // 1. Add to internal buffer
             this.logs.push(entry);
             if (this.logs.length > MAX_LOGS) this.logs.shift();
@@ -246,42 +266,12 @@ class DebugLogger {
             this._saveToStorage();
         }
 
-        // 3. Console Output (L1) & Filtering
-        const currentLevel = this.config.debugLevel;
-        const isError = level === 'error' || level === 'warn';
-
-        // Verbosity check
-        let shouldShow = isError; // Errors always show
-        if (!shouldShow && this.config.enabled) {
-            if (currentLevel === 'paranoic') {
-                // Optimization: Throttle RawGPS ticks to prevent spam
-                if (category === 'RawGPS' && data?.latitude && data?.longitude) {
-                    const last = this.lastGpsTick;
-                    const now = Date.now();
-                    const distMoved = last ? Math.sqrt(Math.pow(data.latitude - last.lat, 2) + Math.pow(data.longitude - last.lon, 2)) : 1;
-
-                    // Only log if moved significantly or every 10s
-                    if (last && distMoved < 0.0001 && (now - last.ts < 10000)) return;
-                    this.lastGpsTick = { lat: data.latitude, lon: data.longitude, ts: now };
-                }
-                shouldShow = true;
-            }
-            else if (currentLevel === 'aggressive') {
-                // In aggressive, hide high-frequency or raw data categories
-                const rawCategories = ['RawMap', 'RawGPS', 'RawPayload'];
-                shouldShow = !rawCategories.includes(category);
-            } else {
-                // Default: Major categories + Interaction
-                const majorCategories = ['System', 'Auth', 'Home', 'MapView', 'API', 'Interaction'];
-                shouldShow = majorCategories.includes(category);
-            }
-        }
-
-        if (shouldShow) {
+        // 3. Console Output (L1)
+        if (shouldLog) {
             const style = level === 'error' ? 'color: #ef4444; font-weight: bold' :
                 level === 'warn' ? 'color: #f59e0b; font-weight: bold' :
-                    currentLevel === 'paranoic' ? 'color: #ef4444; font-weight: bold' :
-                        currentLevel === 'aggressive' ? 'color: #a855f7; font-weight: bold' :
+                    requiredLevel === 'paranoic' ? 'color: #ef4444; font-weight: bold' :
+                        requiredLevel === 'aggressive' ? 'color: #a855f7; font-weight: bold' :
                             'color: #3b82f6; font-weight: bold';
 
             const args = [`%c${LOG_PREFIX} [${category}]`, style, message];
@@ -292,14 +282,20 @@ class DebugLogger {
         }
     }
 
-    log(category, message, data) { this._entry('info', category, message, data); }
-    warn(category, message, data) { this._entry('warn', category, message, data); }
-    error(category, message, data) { this._entry('error', category, message, data); }
-    debug(category, message, data) { this._entry('debug', category, message, data); }
+    // New API Methods mapping to Manifest Levels
+    default(category, message, data) { this._entry('info', category, message, data, 'default'); }
+    aggressive(category, message, data) { this._entry('info', category, message, data, 'aggressive'); }
+    paranoic(category, message, data) { this._entry('info', category, message, data, 'paranoic'); }
+
+    // Legacy/Convenience Mappings
+    log(category, message, data) { this.default(category, message, data); }
+    warn(category, message, data) { this._entry('warn', category, message, data, 'default'); }
+    error(category, message, data) { this._entry('error', category, message, data, 'default'); } // Errors always Default
+    debug(category, message, data) { this._entry('debug', category, message, data, 'aggressive'); } // explicit debug() is usually detailed
 
     setUserId(id) {
         this.userId = id;
-        this.log('System', `User ID set: ${id}`);
+        this.default('System', `User ID set: ${id}`);
     }
 
     /**

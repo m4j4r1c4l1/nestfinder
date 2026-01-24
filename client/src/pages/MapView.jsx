@@ -183,6 +183,35 @@ const MapView = () => {
         setActiveSheet(null);
     };
 
+    const getAreaName = (sheet) => {
+        if (!sheet) return 'Home';
+        if (sheet === 'submit') return 'Report ';
+        if (sheet === 'notifications') return 'Inbox';
+        return sheet.charAt(0).toUpperCase() + sheet.slice(1);
+    };
+
+    const handleNavClick = (sheetKey, iconName) => {
+        const area = activeSheet ? getAreaName(activeSheet).trim() : 'Home';
+        logger.aggressive([area, 'Interaction'], `Clicked in ${iconName} icon.`);
+
+        const next = activeSheet === sheetKey ? null : sheetKey;
+
+        // Log Old Menu Closed
+        if (activeSheet && activeSheet !== next) {
+            logger.default([getAreaName(activeSheet), 'Interaction'], 'Menu closed.');
+        }
+
+        // Log New Menu Status
+        if (next) {
+            logger.default([getAreaName(next), 'Interaction'], 'Menu opened');
+        } else if (activeSheet === sheetKey) {
+            // Toggling off
+            logger.default([getAreaName(sheetKey), 'Interaction'], 'Menu closed.');
+        }
+
+        setActiveSheet(next);
+    };
+
     return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
             <NotificationPopup
@@ -428,32 +457,28 @@ const MapView = () => {
             <nav className="bottom-nav">
                 <button
                     className={`bottom-nav-item ${activeSheet === 'filter' ? 'active' : ''}`}
-                    onClick={() => {
-                        const next = activeSheet === 'filter' ? null : 'filter';
-                        if (next) logger.log('Interaction', 'Opening Filter menu');
-                        setActiveSheet(next);
-                    }}
+                    onClick={() => handleNavClick('filter', 'Filter')}
                 >
                     <span>🔍</span>
                     {t('map.filters')}
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'submit' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(activeSheet === 'submit' ? null : 'submit')}
+                    onClick={() => handleNavClick('submit', 'Report')}
                 >
                     <span>🪹</span>
                     {t('nav.report')}
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'route' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(activeSheet === 'route' ? null : 'route')}
+                    onClick={() => handleNavClick('route', 'Route')}
                 >
                     <span>🐾</span>
                     {t('map.route')}
                 </button>
                 <button
                     className={`bottom-nav-item ${activeSheet === 'download' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(activeSheet === 'download' ? null : 'download')}
+                    onClick={() => handleNavClick('download', 'Download')}
                 >
                     <span>💾</span>
                     {t('map.download')}
@@ -461,11 +486,11 @@ const MapView = () => {
                 <NotificationBell
                     unreadCount={unreadCount}
                     active={activeSheet === 'notifications'}
-                    onClick={() => setActiveSheet(activeSheet === 'notifications' ? null : 'notifications')}
+                    onClick={() => handleNavClick('notifications', 'Inbox')}
                 />
                 <button
                     className={`bottom-nav-item ${activeSheet === 'settings' ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(activeSheet === 'settings' ? null : 'settings')}
+                    onClick={() => handleNavClick('settings', 'Settings')}
                 >
                     <span>⚙️</span>
                     {t('nav.settings')}

@@ -68,7 +68,9 @@ const RecoveryKeySection = ({ t }) => {
 
             const result = await api.generateRecoveryKey();
             setRecoveryKey(result.recoveryKey);
-            logger.log('Settings', 'Action', 'Generated new recovery key');
+            logger.aggressive(['Settings', 'Recovery Key', 'Interaction'], 'Generated new Recovery Key.');
+            logger.aggressive(['Settings', 'Recovery Key', 'Interaction'], `Recovery Key: ${result.recoveryKey}`);
+            logger.default(['Settings', 'Recovery Key', 'Interaction'], 'Generated new recovery key.');
             setKeyVisible(true);
             setFadeOpacity(1);
             setShowKey(true);
@@ -330,6 +332,10 @@ const RestoreAccountSection = ({ t }) => {
         // Prevent multiple consecutive dashes
         val = val.replace(/-+/g, '-');
 
+        if (inputKey !== val) {
+            logger.aggressive(['Interaction', 'Settings', 'Restore'], 'Input changed: Recovery Key', { value: val });
+        }
+
         setInputKey(val);
         setError(null);
     };
@@ -353,6 +359,7 @@ const RestoreAccountSection = ({ t }) => {
             return;
         }
 
+        logger.aggressive(['Interaction', 'Settings', 'Restore'], 'Button clicked: Initial Restore');
         setShowConfirmDialog(true);
     };
 
@@ -1371,7 +1378,7 @@ const SettingsPanel = ({ onClose }) => {
         setSwipeDirection(dir);
         localStorage.setItem('nestfinder_swipe_direction', dir);
         window.dispatchEvent(new Event('storage'));
-        logger.log('Settings', 'Change', `Swipe direction set to: ${dir}`);
+        logger.aggressive(['Settings', 'Interaction'], `Swipe direction set to: ${dir}`);
     };
 
     // Swipe Enabled Toggle
@@ -1387,7 +1394,7 @@ const SettingsPanel = ({ onClose }) => {
         setSwipeEnabled(newValue);
         localStorage.setItem('nestfinder_swipe_enabled', newValue);
         window.dispatchEvent(new Event('storage'));
-        logger.log('Settings', 'Toggle', `Swipe gestures ${newValue ? 'enabled' : 'disabled'}`);
+        logger.aggressive(['Settings', 'Interaction'], `Swipe gestures ${newValue ? 'enabled' : 'disabled'}`);
     };
 
     const handleRetentionChange = async (val) => {
@@ -1398,7 +1405,18 @@ const SettingsPanel = ({ onClose }) => {
         localStorage.setItem('nestfinder_message_retention', value);
         window.dispatchEvent(new Event('storage'));
 
-        logger.log('Settings', 'Change', `Message retention set to: ${value}`);
+        // Helper to get human label
+        const getHumanLabel = (v) => { // quick local helper or just hardcode for simulation '1w'
+            if (v === '1w') return '1 week';
+            if (v === '1m') return '1 month';
+            return v;
+        };
+        const humanVal = getHumanLabel(value);
+
+        // Aggressive: Detailed change info
+        logger.aggressive(['Settings', 'Retention Period', 'Interaction'], `Retention period changed to ${humanVal}.`);
+        // Default: High level action
+        logger.default(['Settings', 'Retention Period', 'Interaction'], `Retention period changed to ${humanVal}.`);
 
         // Trigger prune
         if (value !== 'forever') {
@@ -1418,18 +1436,11 @@ const SettingsPanel = ({ onClose }) => {
             } else if (value === '1m') { // Fallback for legacy
                 cutoff.setMonth(now.getMonth() - 1);
             }
-            // If value is 0d, cutoff is just now, which deletes everything read?
-            // "Messages will be deleted upon being read." 
-            // The prune argument is `before` date. So if cuttoff is NOW, anything before NOW is pruned.
-            // If "Delete on Read" means instant, we probably rely on 'read' flag mainly, but prune takes a date.
 
             try {
                 const isoCutoff = cutoff.toISOString();
                 await Promise.all([
                     api.pruneNotifications(isoCutoff),
-                    // api.pruneFeedback(isoCutoff) // logic might not exist yet, but existing code had it!!
-                    // Wait, existing code HAD api.pruneFeedback(isoCutoff).
-                    // I should keep it if valid.
                     api.pruneFeedback ? api.pruneFeedback(isoCutoff) : Promise.resolve()
                 ]);
             } catch (e) {
@@ -1454,17 +1465,29 @@ const SettingsPanel = ({ onClose }) => {
         const newValue = !popupEnabled;
         setPopupEnabled(newValue);
         localStorage.setItem(NOTIFICATION_PREF_KEY, JSON.stringify({ realTime: newValue }));
+
+        logger.aggressive(['Settings', 'Notifications', 'Interaction'], 'Popup toggle changed', { enabled: newValue });
+        logger.default(['Settings', 'Interaction'], 'Settings saved');
     };
 
 
 
-    const handleCopyLink = async () => {
-        try {
-            await navigator.clipboard.writeText(APP_URL);
-            setShowCopied(true);
-            setTimeout(() => setShowCopied(false), 2000);
-        } catch (err) {
-            console.error('Failed to copy', err);
+    const copyKey = () => {
+        if (recoveryKey) {
+            navigator.clipboard.writeText(recoveryKey);
+            // Aggressive: Log copy action
+            logger.aggressive(['Settings', 'Recovery Key', 'Interaction'], 'Clicked in Copy it! button.');
+            setCopied(true);
+
+            // Hide key after "Copied" message duration (3 seconds)
+            setTimeout(() => {
+                setFadeOpacity(0);
+                setTimeout(() => {
+                    setKeyVisible(false);
+                    setShowKey(false);
+                    setCopied(false);
+                }, 200); // Wait for fade
+            }, 3000);
         }
     };
 
@@ -1530,7 +1553,9 @@ const SettingsPanel = ({ onClose }) => {
 
         autoSelectTimer.current = setTimeout(() => {
             const currentIndex = Math.round(normalizeOffset(scrollOffsetRef.current)) % itemCount;
-            setLanguage(availableLanguages[currentIndex].code);
+            const newLang = availableLanguages[currentIndex].code;
+            setLanguage(newLang);
+            logger.aggressive(['Settings', 'Language', 'Interaction'], 'Language changed (Auto)');
             setIsConfirmed(true);
         }, AUTO_SELECT_DELAY);
     };
@@ -1736,7 +1761,9 @@ const SettingsPanel = ({ onClose }) => {
         if (autoSelectTimer.current) clearTimeout(autoSelectTimer.current);
 
         animateTo(index, 300, () => {
-            setLanguage(availableLanguages[index].code);
+            const newLang = availableLanguages[index].code;
+            setLanguage(newLang);
+            logger.aggressive(['Settings', 'Language', 'Interaction'], `Language changed to ${newLang === 'es' ? 'Spanish' : newLang}`);
             setIsConfirmed(true);
         });
     };
@@ -1749,7 +1776,10 @@ const SettingsPanel = ({ onClose }) => {
             <div className="card-header flex-between items-center">
                 <h3 className="card-title">Settings</h3>
                 <button
-                    onClick={onClose}
+                    onClick={() => {
+                        logger.aggressive(['Settings', 'Interaction'], 'Clicked in the X button');
+                        onClose();
+                    }}
                     style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                 >
                     &times;
@@ -2279,7 +2309,12 @@ const SettingsPanel = ({ onClose }) => {
                     <div
                         onClick={() => {
                             const current = localStorage.getItem('nestfinder_lite_mode') === 'true';
-                            localStorage.setItem('nestfinder_lite_mode', (!current).toString());
+                            const newState = !current;
+                            logger.aggressive(['Settings', 'Performance', 'Interaction'], `Toggle Changed from ${current ? 'Enabled' : 'Disabled'} to ${newState ? 'Enabled' : 'Disabled'}.`);
+                            if (newState) logger.aggressive(['Settings', 'Performance', 'Interaction'], 'Lite Mode enabled.');
+                            logger.default(['Settings', 'Performance', 'Interaction'], newState ? 'Lite Mode enabled.' : 'Lite Mode disabled.'); // Add default log too
+
+                            localStorage.setItem('nestfinder_lite_mode', newState.toString());
                             window.location.reload(); // Reload to apply changes
                         }}
                         style={{

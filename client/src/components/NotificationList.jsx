@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { api } from '../utils/api';
+import { logger } from '../utils/logger';
 import NotificationPopup from './NotificationPopup';
 
 // Feedback Section Component (moved from SettingsPanel)
@@ -15,9 +16,12 @@ const FeedbackSection = ({ onFeedbackSent }) => {
     const handleSubmit = async () => {
         if (!message.trim()) return;
 
+        logger.aggressive('Inbox', 'Sending feedback/message...', { type, length: message.length });
         setLoading(true);
         try {
             await api.submitFeedback(type, message.trim(), rating);
+
+            logger.default('Inbox', 'Message sent successfully');
             setSuccess(true);
             setMessage('');
             setRating(5);
@@ -25,6 +29,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
             if (onFeedbackSent) onFeedbackSent();
         } catch (err) {
             console.error('Failed to submit feedback:', err);
+            logger.error('Inbox', 'Failed to send message', { error: err.message });
         }
         setLoading(false);
     };
@@ -39,7 +44,10 @@ const FeedbackSection = ({ onFeedbackSent }) => {
                 {['bug', 'suggestion', 'other'].map(typeOption => (
                     <button
                         key={typeOption}
-                        onClick={() => setType(typeOption)}
+                        onClick={() => {
+                            logger.aggressive(['Inbox', 'Interaction'], 'Feedback type changed', { type: typeOption });
+                            setType(typeOption);
+                        }}
                         style={{
                             flex: 1,
                             padding: '0.4rem',
@@ -60,7 +68,12 @@ const FeedbackSection = ({ onFeedbackSent }) => {
             <textarea
                 key={success ? 'submitted' : 'editing'}
                 value={message}
-                onChange={(e) => setMessage(e.target.value.slice(0, 500))}
+                onChange={(e) => {
+                    setMessage(e.target.value.slice(0, 500));
+                    if (e.target.value.length % 10 === 0) { // Log every 10 chars to avoid spamming aggressive inputs too much
+                        logger.aggressive(['Inbox', 'Interaction'], 'Feedback input changed', { length: e.target.value.length });
+                    }
+                }}
                 placeholder={t('feedback.placeholder') || 'Describe your feedback...'}
                 maxLength={500}
                 style={{
@@ -95,7 +108,10 @@ const FeedbackSection = ({ onFeedbackSent }) => {
                     {[1, 2, 3, 4, 5].map((star) => (
                         <button
                             key={star}
-                            onClick={() => setRating(star)}
+                            onClick={() => {
+                                logger.aggressive(['Inbox', 'Interaction'], 'Rating selected', { rating: star });
+                                setRating(star);
+                            }}
                             style={{
                                 background: 'none',
                                 border: 'none',
@@ -519,9 +535,9 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 borderTop: 'none',
                 flexShrink: 0
             }}>
-                <SummaryBadge label="Total" count={totalCount} color="#a855f7" onClick={() => setReceivedFilter(null)} isActive={receivedFilter === null} />
-                <SummaryBadge label="Pending" count={unreadCount} color="#22c55e" onClick={() => setReceivedFilter('new')} isActive={receivedFilter === 'new'} />
-                <SummaryBadge label="Read" count={readCount} color="#3b82f6" onClick={() => setReceivedFilter('read')} isActive={receivedFilter === 'read'} />
+                <SummaryBadge label="Total" count={totalCount} color="#a855f7" onClick={() => { logger.aggressive(['Inbox', 'Interaction'], 'Filter changed: Total'); setReceivedFilter(null); }} isActive={receivedFilter === null} />
+                <SummaryBadge label="Pending" count={unreadCount} color="#22c55e" onClick={() => { logger.aggressive(['Inbox', 'Interaction'], 'Filter changed: Pending'); setReceivedFilter('new'); }} isActive={receivedFilter === 'new'} />
+                <SummaryBadge label="Read" count={readCount} color="#3b82f6" onClick={() => { logger.aggressive(['Inbox', 'Interaction'], 'Filter changed: Read'); setReceivedFilter('read'); }} isActive={receivedFilter === 'read'} />
             </div>
         );
     };
@@ -550,10 +566,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                 borderTop: 'none',
                 flexShrink: 0
             }}>
-                <SummaryBadge label="Total" count={totalCount} color="#a855f7" onClick={() => setSentFilter(null)} isActive={sentFilter === null} />
-                <SummaryBadge label="Sent" count={sentCount} color="#94a3b8" onClick={() => setSentFilter('sent')} isActive={sentFilter === 'sent'} />
-                <SummaryBadge label="Delivered" count={deliveredCount} color="#22c55e" onClick={() => setSentFilter('delivered')} isActive={sentFilter === 'delivered'} />
-                <SummaryBadge label="Read" count={readCount} color="#3b82f6" onClick={() => setSentFilter('read')} isActive={sentFilter === 'read'} />
+                <SummaryBadge label="Total" count={totalCount} color="#a855f7" onClick={() => { logger.aggressive(['Inbox', 'Interaction'], 'Filter changed: Total (Sent)'); setSentFilter(null); }} isActive={sentFilter === null} />
+                <SummaryBadge label="Sent" count={sentCount} color="#94a3b8" onClick={() => { logger.aggressive(['Inbox', 'Interaction'], 'Filter changed: Sent'); setSentFilter('sent'); }} isActive={sentFilter === 'sent'} />
+                <SummaryBadge label="Delivered" count={deliveredCount} color="#22c55e" onClick={() => { logger.aggressive(['Inbox', 'Interaction'], 'Filter changed: Delivered'); setSentFilter('delivered'); }} isActive={sentFilter === 'delivered'} />
+                <SummaryBadge label="Read" count={readCount} color="#3b82f6" onClick={() => { logger.aggressive(['Inbox', 'Interaction'], 'Filter changed: Read (Sent)'); setSentFilter('read'); }} isActive={sentFilter === 'read'} />
             </div>
         );
     };
@@ -728,7 +744,10 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => {
+                                logger.aggressive(['Inbox', 'Interaction'], 'Tab switched', { tab: tab.id });
+                                setActiveTab(tab.id);
+                            }}
                             style={{
                                 flex: 1, padding: '1rem 0.25rem', background: activeTab === tab.id ? 'rgba(15, 23, 42, 0.95)' : 'transparent', border: 'none',
                                 borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',

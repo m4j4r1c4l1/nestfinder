@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
+import { logger } from '../utils/logger';
+
 const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLocation }) => {
     const { t } = useLanguage();
     const [routeData, setRouteData] = useState(null);
@@ -21,6 +23,7 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLoca
     ];
 
     const toggleStatus = (status) => {
+        logger.aggressive(['Route', 'Interaction'], 'Route preference toggled', { status, newValue: !statusFilter[status] });
         setRouteData(null);
         onClear();
         setStatusFilter(prev => ({ ...prev, [status]: !prev[status] }));
@@ -44,6 +47,7 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLoca
 
     // OSRM Route with Nearest Neighbor ordering
     const calculateRoute = async () => {
+        logger.aggressive(['Route', 'Interaction'], 'Button clicked: Optimize Route', { pointCount: points.length });
         const filteredPoints = getFilteredPoints();
         if (filteredPoints.length < 2) {
             setError(t('route.needPointsError'));
@@ -130,6 +134,7 @@ const RoutePanel = ({ points, mapBounds, onCalculate, onClear, onClose, userLoca
     };
 
     const handleClear = () => {
+        logger.aggressive(['Route', 'Interaction'], 'Button clicked: Clear Route');
         setRouteData(null);
         setError('');
         onClear();
