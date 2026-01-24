@@ -8,8 +8,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     const [isFollowing, setIsFollowing] = useState(user?.debug_enabled ?? true);
     const [lastBatchId, setLastBatchId] = useState(0);
     const [filterQuery, setFilterQuery] = useState('');
-    const [filterLevel, setFilterLevel] = useState('');
-    const [filterSeverity, setFilterSeverity] = useState('');
+    const [filterLevel, setFilterLevel] = useState([]);
+    const [filterSeverity, setFilterSeverity] = useState([]);
 
     // Dropdown States
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -121,7 +121,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
     // --- FILTER LOGIC ---
     const getFilteredLogs = () => {
-        if (!filterQuery && !filterLevel && !filterSeverity) return logs;
+        if (!filterQuery && filterLevel.length === 0 && filterSeverity.length === 0) return logs;
 
         const tokens = parseSearchQuery(filterQuery);
 
@@ -141,10 +141,16 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
             // 1. Level Filter (Debug Level: D/A/P) - "Level" in UI usually means DL? 
             //    User Request: "filter messages by level -default, aggressive, paranoic-"
-            if (filterLevel && (dl || 'default').toLowerCase() !== filterLevel.toLowerCase()) return false;
+            // Stored as 'default', 'aggressive', 'paranoic'
+            // Check if filterLevel includes the log's dl
+            const logDl = (log.dl || 'default'); // Keep original case for comparison with filterLevel
+            const dlMatch = filterLevel.length === 0 || filterLevel.includes(logDl);
 
             // 2. Severity Filter (INFO, WARN...)
-            if (filterSeverity && (level || 'INFO').toLowerCase() !== filterSeverity.toLowerCase()) return false;
+            const logSeverity = (level || 'INFO'); // Keep original case for comparison with filterSeverity
+            const severityMatch = filterSeverity.length === 0 || filterSeverity.includes(logSeverity);
+
+            if (!dlMatch || !severityMatch) return false;
 
             // 3. Search Query (Tokens -> OR Logic between Token Groups)
             if (tokens.length === 0) return true;
@@ -374,7 +380,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     browser = { icon: 'Chrome', name: 'Chrome', ver };
                 }
                 else if (ua.includes('Firefox/')) {
-                    browser = { icon: 'Firefox', name: 'Firefox', ver: ua.split('Firefox/')[1].split(' ')[0] };
+                    const ver = ua.split('Firefox/')[1].split(' ')[0];
+                    browser = { icon: 'Firefox', name: 'Firefox', ver };
                 }
                 else if (ua.includes('Safari/') && !ua.includes('Chrome/')) {
                     browser = { icon: 'Safari', name: 'Safari', ver: ua.split('Version/')[1]?.split(' ')[0] || '' };
@@ -452,6 +459,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         if (l.includes('warn')) return { color: '#fbbf24', label: 'WARN' };
         if (l.includes('debug')) return { color: '#a855f7', label: 'DEBUG' };
         if (l.includes('system')) return { color: '#10b981', label: 'SYSTEM' };
+        if (l.includes('success')) return { color: '#22c55e', label: 'SUCCESS' }; // Distinct Green
         return { color: '#3b82f6', label: 'INFO' };
     };
 
@@ -668,8 +676,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     }, [logs]);
 
     const activeFiltersList = [];
-    if (filterLevel) activeFiltersList.push({ type: 'Level', val: filterLevel });
-    if (filterSeverity) activeFiltersList.push({ type: 'Severity', val: filterSeverity });
+    if (filterLevel.length > 0) activeFiltersList.push({ type: 'Level', val: filterLevel });
+    if (filterSeverity.length > 0) activeFiltersList.push({ type: 'Severity', val: filterSeverity });
     if (filterQuery) {
         parseSearchQuery(filterQuery).forEach(t => {
             if (t.type === 'category') activeFiltersList.push({ type: 'Category', val: `[${t.tags.join('][')}]` });
@@ -792,24 +800,74 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     position: 'relative' // For dropdown positioning if needed
                 }}>
                     {/* 1. Main Search (Filter Action style) */}
-                    <div style={{ position: 'relative', flex: 2 }} ref={searchRef}>
+                    <div style={{ position: 'relative', flex: 2, height: '36px', background: '#0f172a', border: '1px solid #334155', borderRadius: '4px', display: 'flex', alignItems: 'center' }} ref={searchRef}>
+
+                        {/* Highlight Layer */}
+                        <div style={{
+                            position: 'absolute', inset: '0', padding: '0 12px', display: 'flex', alignItems: 'center',
+                            pointerEvents: 'none', whiteSpace: 'pre', overflow: 'hidden', fontFamily: 'monospace', fontSize: '0.9rem'
+                        }}>
+                            {!filterQuery && <span style={{ color: '#64748b', fontFamily: 'sans-serif' }}>Search logs, [API] [Points]...</span>}
+                            {filterQuery && (() => {
+                                // Simple tokenizer for coloring
+                                const parts = filterQuery.split(/(\[[^\]]+\])/g);
+                                return parts.map((part, i) => {
+                                    if (part.startsWith('[') && part.endsWith(']')) {
+                                        const clean = part.slice(1, -1);
+                                        // Attempt to find color: exact match OR First word match (for [API][Request] -> API)
+                                        // But here 'part' is ONE bracket group [API]. 
+                                        // If user types [API] [Request], we get distinct parts.
+                                        // We check if 'clean' is a known category.
+                                        const color = CATEGORY_COLORS[clean] || (isColorEnabled ? '#e2e8f0' : '#e2e8f0');
+
+                                        // If it's a subcategory (e.g. [Request]), it might not be in CATEGORY_COLORS.
+                                        // We could try to infer parent? 
+                                        // Actually, if we just use the active palette for known text, it helps.
+                                        // If not found, white. 
+                                        // START SMART COLOR INFERENCE:
+                                        // If part is [Request], and we are drilling down [API], we want Blue.
+                                        // But here we are rendering the string. We don't track context easily per token.
+                                        // We can try to look up if this tag appears in ANY static subcategory list.
+                                        let inferredColor = color;
+                                        if (!CATEGORY_COLORS[clean]) {
+                                            const parent = Object.keys(STATIC_SUBCATEGORIES).find(k => STATIC_SUBCATEGORIES[k].includes(clean));
+                                            if (parent) inferredColor = CATEGORY_COLORS[parent];
+                                        }
+
+                                        return <span key={i} style={{ color: inferredColor, textShadow: `0 0 5px ${inferredColor}44` }}>{part}</span>;
+                                    }
+                                    return <span key={i} style={{ color: '#f8fafc' }}>{part}</span>;
+                                });
+                            })()}
+                        </div>
+
                         <input
                             type="text"
-                            placeholder="Search logs, [API] [Points], 'Exact Phrase'..."
                             value={filterQuery}
                             onChange={e => setFilterQuery(e.target.value)}
                             onFocus={() => setShowSearchDropdown(true)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') setShowSearchDropdown(false);
+                            }}
                             style={{
                                 width: '100%',
-                                padding: '6px 10px',
-                                borderRadius: '4px',
-                                border: '1px solid #475569',
-                                background: '#0f172a',
-                                color: '#e2e8f0',
+                                height: '100%',
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'transparent', // Hide text, show caret
+                                caretColor: '#f8fafc',
+                                padding: '0 12px',
+                                outline: 'none',
+                                fontFamily: 'monospace',
                                 fontSize: '0.9rem',
-                                fontFamily: 'monospace'
+                                zIndex: 1
                             }}
                         />
+                        {filterQuery && (
+                            <button onClick={() => setFilterQuery('')} style={{
+                                position: 'absolute', right: '8px', zIndex: 2, background: 'none', border: 'none', color: '#64748b', cursor: 'pointer'
+                            }}>×</button>
+                        )}
                         {showSearchDropdown && (
                             <div style={{
                                 position: 'absolute', top: '100%', left: 0, width: '100%',
@@ -862,7 +920,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             // Keep dropdown open? Or close? Usually close after leaf selection.
                                                             // setShowSearchDropdown(false); 
                                                         }}
-                                                        style={{ padding: '6px 10px', cursor: 'pointer', color: '#e2e8f0', paddingLeft: '20px' }}
+                                                        style={{ padding: '6px 10px', cursor: 'pointer', color: CATEGORY_COLORS[activeMain] || '#e2e8f0', paddingLeft: '20px' }}
                                                         onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                                     >
@@ -875,64 +933,114 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
                                     // Default: Show Main Categories
                                     return uniqueCategories.map(cat => (
-                                        <div key={cat}
-                                            onClick={() => {
-                                                const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
-                                                setFilterQuery(prev => prev + pad + `[${cat}]`);
-                                                // Don't close, allow drill-down
-                                            }}
-                                            style={{ padding: '6px 10px', cursor: 'pointer', color: CATEGORY_COLORS[cat] || '#cbd5e1', fontWeight: 600, borderBottom: '1px solid #334155' }}
-                                            onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                        >
-                                            [{cat}]
-                                        </div>
+                                        <React.Fragment key={cat}>
+                                            <div
+                                                onClick={() => {
+                                                    const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
+                                                    setFilterQuery(prev => prev + pad + `[${cat}]`);
+                                                    // Don't close, allow drill-down
+                                                }}
+                                                style={{ padding: '6px 10px', cursor: 'pointer', color: CATEGORY_COLORS[cat] || '#cbd5e1', fontWeight: 600, borderBottom: '1px solid #334155' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                            >
+                                                [{cat}]
+                                            </div>
+                                            {/* Subcategories */}
+                                            {subCategoryMap[cat] && [...subCategoryMap[cat]].map(sub => (
+                                                <div key={`${cat}-${sub}`}
+                                                    onClick={() => {
+                                                        const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
+                                                        setFilterQuery(prev => prev + pad + `[${cat}] [${sub}]`);
+                                                    }}
+                                                    style={{ padding: '4px 10px 4px 24px', cursor: 'pointer', color: CATEGORY_COLORS[cat] || '#94a3b8', fontSize: '0.85rem' }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                >
+                                                    [{sub}]
+                                                </div>
+                                            ))}
+                                        </React.Fragment>
                                     ));
                                 })()}
                             </div>
                         )}
                     </div>
 
-                    {/* 2. Level Filter */}
-                    <div style={{ position: 'relative', width: '140px' }} ref={levelRef}>
-                        <input
-                            type="text"
-                            placeholder="Level: All"
-                            value={filterLevel}
-                            readOnly
+                    {/* 2. Level Filter (Multi-Select) */}
+                    <div style={{ position: 'relative', flex: 1, minWidth: '140px' }} ref={levelRef}>
+                        <div
                             onClick={() => setShowLevelDropdown(!showLevelDropdown)}
                             style={{
-                                width: '100%', padding: '6px 10px', borderRadius: '4px',
-                                border: '1px solid #475569', background: '#0f172a', color: '#e2e8f0',
-                                fontSize: '0.9rem', cursor: 'pointer'
+                                width: '100%',
+                                height: '36px',
+                                padding: '0 12px',
+                                background: '#0f172a',
+                                border: '1px solid #334155',
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                cursor: 'pointer',
+                                overflow: 'hidden'
                             }}
-                        />
+                        >
+                            {filterLevel.length === 0 ? (
+                                <span style={{ color: '#64748b', fontSize: '0.9rem' }}>Level: All</span>
+                            ) : filterLevel.length === 1 ? (
+                                (() => {
+                                    const { char, color } = getDlStyle(filterLevel[0]);
+                                    return (
+                                        <>
+                                            <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
+                                            <span style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.9rem' }}>{filterLevel[0]}</span>
+                                        </>
+                                    );
+                                })()
+                            ) : (
+                                filterLevel.map(lvl => {
+                                    const { char, color } = getDlStyle(lvl);
+                                    return <Badge key={lvl} char={char} color={color} size="16px" fontSize="0.6rem" />;
+                                })
+                            )}
+                        </div>
+
                         {showLevelDropdown && (
                             <div style={{
                                 position: 'absolute', top: '100%', left: 0, width: '100%',
                                 background: '#0f172a', border: '1px solid #475569', borderRadius: '4px',
                                 marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                             }}>
-                                {['', 'Default', 'Aggressive', 'Paranoic'].map(lvl => {
-                                    const { color, char } = getDlStyle(lvl || 'default');
+                                {['Default', 'Aggressive', 'Paranoic'].map(lvl => {
+                                    const { color, char } = getDlStyle(lvl);
+                                    const isSelected = filterLevel.includes(lvl);
                                     return (
-                                        <div key={lvl || 'all'}
-                                            onClick={() => { setFilterLevel(lvl); setShowLevelDropdown(false); }}
+                                        <div key={lvl}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setFilterLevel(prev =>
+                                                    prev.includes(lvl) ? prev.filter(p => p !== lvl) : [...prev, lvl]
+                                                );
+                                            }}
                                             style={{
                                                 padding: '6px 10px',
                                                 cursor: 'pointer',
-                                                color: '#e2e8f0',
+                                                color: isSelected ? '#fff' : '#e2e8f0',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '8px',
-                                                fontFamily: 'monospace', // Mimic log style
-                                                fontSize: '0.9rem'
+                                                fontFamily: 'monospace',
+                                                fontSize: '0.9rem',
+                                                background: isSelected ? '#1e293b' : 'transparent'
                                             }}
-                                            onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                            onMouseEnter={e => e.currentTarget.style.background = isSelected ? '#334155' : '#334155'}
+                                            onMouseLeave={e => e.currentTarget.style.background = isSelected ? '#1e293b' : 'transparent'}
                                         >
-                                            {lvl && <Badge char={char} color={color} size="16px" fontSize="0.6rem" />}
-                                            {lvl || 'All Levels'}
+                                            <div style={{ opacity: isSelected ? 1 : 0.3 }}>
+                                                <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
+                                            </div>
+                                            {lvl}
+                                            {isSelected && <span style={{ marginLeft: 'auto', fontSize: '0.7rem' }}>✓</span>}
                                         </div>
                                     );
                                 })}
@@ -940,53 +1048,100 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         )}
                     </div>
 
-                    {/* 3. Severity Filter */}
-                    <div style={{ position: 'relative', width: '140px' }} ref={severityRef}>
-                        <input
-                            type="text"
-                            placeholder="Severity: All"
-                            value={filterSeverity}
-                            readOnly
+                    {/* 3. Severity Filter (Multi-Select) */}
+                    <div style={{ position: 'relative', flex: 1, minWidth: '140px' }} ref={severityRef}>
+                        <div
                             onClick={() => setShowSeverityDropdown(!showSeverityDropdown)}
                             style={{
-                                width: '100%', padding: '6px 10px', borderRadius: '4px',
-                                border: '1px solid #475569', background: '#0f172a', color: '#e2e8f0',
-                                fontSize: '0.9rem', cursor: 'pointer'
+                                width: '100%',
+                                height: '36px',
+                                padding: '0 12px',
+                                background: '#0f172a',
+                                border: '1px solid #334155',
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                cursor: 'pointer',
+                                overflow: 'hidden'
                             }}
-                        />
+                        >
+                            {filterSeverity.length === 0 ? (
+                                <span style={{ color: '#64748b', fontSize: '0.9rem' }}>Severity: All</span>
+                            ) : filterSeverity.length === 1 ? (
+                                (() => {
+                                    const sev = filterSeverity[0];
+                                    const { color } = getLevelStyles(sev);
+                                    return (
+                                        <span style={{
+                                            color: color, fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.05em',
+                                            border: `1px solid ${color}44`, padding: '2px 8px', borderRadius: '4px',
+                                            minWidth: '60px', textAlign: 'center', backgroundColor: `${color}11`
+                                        }}>
+                                            {sev}
+                                        </span>
+                                    );
+                                })()
+                            ) : (
+                                filterSeverity.map(sev => {
+                                    const { color } = getLevelStyles(sev);
+                                    return (
+                                        <span key={sev} style={{
+                                            color: color, fontWeight: 800, fontSize: '0.75rem',
+                                            border: `1px solid ${color}44`, padding: '1px 5px', borderRadius: '4px',
+                                            backgroundColor: `${color}11`
+                                        }}>
+                                            {sev.charAt(0)}
+                                        </span>
+                                    );
+                                })
+                            )}
+                        </div>
+
                         {showSeverityDropdown && (
                             <div style={{
                                 position: 'absolute', top: '100%', left: 0, width: '100%',
                                 background: '#0f172a', border: '1px solid #475569', borderRadius: '4px',
                                 marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                             }}>
-                                {['', 'INFO', 'WARN', 'ERROR', 'SUCCESS', 'DEBUG'].map(sev => {
-                                    const { color } = getLevelStyles(sev || 'INFO');
+                                {['INFO', 'WARN', 'ERROR', 'SUCCESS', 'DEBUG'].map(sev => {
+                                    const { color } = getLevelStyles(sev);
+                                    const isSelected = filterSeverity.includes(sev);
                                     return (
-                                        <div key={sev || 'all'}
-                                            onClick={() => { setFilterSeverity(sev); setShowSeverityDropdown(false); }}
-                                            style={{ padding: '6px 10px', cursor: 'pointer', color: sev === 'ERROR' ? '#ef4444' : sev === 'WARN' ? '#f59e0b' : '#e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}
-                                            onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                        <div key={sev}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setFilterSeverity(prev =>
+                                                    prev.includes(sev) ? prev.filter(p => p !== sev) : [...prev, sev]
+                                                );
+                                            }}
+                                            style={{
+                                                padding: '6px 10px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                background: isSelected ? '#1e293b' : 'transparent'
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.background = isSelected ? '#334155' : '#334155'}
+                                            onMouseLeave={e => e.currentTarget.style.background = isSelected ? '#1e293b' : 'transparent'}
                                         >
-                                            {sev ? (
-                                                <span style={{
-                                                    color: color,
-                                                    fontWeight: 800,
-                                                    fontSize: '0.75rem',
-                                                    letterSpacing: '0.05em',
-                                                    border: `1px solid ${color}44`,
-                                                    padding: '2px 8px',
-                                                    borderRadius: '4px',
-                                                    minWidth: '60px',
-                                                    textAlign: 'center',
-                                                    backgroundColor: `${color}11`
-                                                }}>
-                                                    {sev}
-                                                </span>
-                                            ) : (
-                                                'All Severities'
-                                            )}
+                                            <span style={{
+                                                color: color,
+                                                fontWeight: 800,
+                                                fontSize: '0.75rem',
+                                                letterSpacing: '0.05em',
+                                                border: `1px solid ${color}44`,
+                                                padding: '2px 8px',
+                                                borderRadius: '4px',
+                                                minWidth: '60px',
+                                                textAlign: 'center',
+                                                backgroundColor: `${color}11`,
+                                                opacity: isSelected ? 1 : 0.5
+                                            }}>
+                                                {sev}
+                                            </span>
+                                            {isSelected && <span style={{ marginLeft: 'auto', color: '#e2e8f0', fontSize: '0.7rem' }}>✓</span>}
                                         </div>
                                     );
                                 })}
@@ -1009,20 +1164,61 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         {showActiveFilters && activeFiltersList.length > 0 && (
                             <div style={{
                                 position: 'absolute', top: '100%', right: 0, width: '250px',
-                                background: '#1e293b', border: '1px solid #38bdf8', borderRadius: '4px',
-                                padding: '8px', zIndex: 70, boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                                background: '#0f172a', border: '1px solid #334155', borderRadius: '4px',
+                                padding: '12px', zIndex: 70, boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
                                 marginTop: '8px'
                             }}>
-                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', borderBottom: '1px solid #334155', paddingBottom: '4px' }}>ACTIVE FILTERS</div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', marginBottom: '8px', textAlign: 'center', borderBottom: '1px solid #334155', paddingBottom: '6px' }}>
+                                    ACTIVE FILTERS
+                                </div>
                                 {activeFiltersList.map((f, i) => (
-                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#e2e8f0', marginBottom: '2px' }}>
-                                        <span style={{ color: '#94a3b8' }}>{f.type}:</span>
-                                        <span style={{ fontFamily: 'monospace' }}>{f.val}</span>
+                                    <div key={i} style={{ marginBottom: '8px' }}>
+                                        <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginBottom: '4px', textTransform: 'uppercase' }}>{f.type}</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            {f.type === 'Level' ? (
+                                                f.val.map(lvl => {
+                                                    const { char, color } = getDlStyle(lvl);
+                                                    return (
+                                                        <div key={lvl} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
+                                                            <span style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.8rem' }}>{lvl}</span>
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : f.type === 'Severity' ? (
+                                                f.val.map(sev => {
+                                                    const { color } = getLevelStyles(sev);
+                                                    return (
+                                                        <div key={sev} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <span style={{
+                                                                color: color, fontWeight: 800, fontSize: '0.7rem',
+                                                                border: `1px solid ${color}44`, padding: '1px 6px',
+                                                                borderRadius: '4px', backgroundColor: `${color}11`, minWidth: '50px', textAlign: 'center'
+                                                            }}>{sev}</span>
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                // Text / Category (String)
+                                                <span style={{ color: '#f8fafc', fontSize: '0.85rem', fontFamily: 'monospace', marginLeft: '4px' }}>
+                                                    {['Category', 'Text'].includes(f.type) && f.val.startsWith('[') ? (
+                                                        f.val.match(/\[([^\]]+)\]/g).map((part, idx) => {
+                                                            const clean = part.replace(/[\[\]]/g, '');
+                                                            // Infer color
+                                                            const color = CATEGORY_COLORS[clean] || '#e2e8f0';
+                                                            return <span key={idx} style={{ color: color, marginRight: '4px' }}>{part}</span>
+                                                        })
+                                                    ) : (
+                                                        f.val
+                                                    )}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                                 <div
-                                    onClick={() => { setFilterQuery(''); setFilterLevel(''); setFilterSeverity(''); }}
-                                    style={{ marginTop: '8px', fontSize: '0.75rem', color: '#f87171', textAlign: 'center', cursor: 'pointer', borderTop: '1px solid #334155', paddingTop: '4px' }}
+                                    onClick={() => { setFilterQuery(''); setFilterLevel([]); setFilterSeverity([]); }}
+                                    style={{ marginTop: '12px', fontSize: '0.75rem', color: '#f87171', textAlign: 'center', cursor: 'pointer', borderTop: '1px solid #334155', paddingTop: '8px', fontWeight: 600 }}
                                 >
                                     CLEAR ALL
                                 </div>
