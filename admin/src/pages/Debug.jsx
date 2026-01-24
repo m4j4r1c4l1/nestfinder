@@ -522,8 +522,7 @@ const Debug = () => {
                                                 ) : <span style={{ opacity: 0.5 }}>—</span>}
                                             </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                                    {/* Events Status */}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                                                     {/* Events Status */}
                                                     {user.debug_enabled ? (
                                                         /* Clickable Events Badge */
@@ -531,7 +530,7 @@ const Debug = () => {
                                                             onClick={() => user.log_count > 0 && setViewingUser(user)}
                                                             style={{
                                                                 padding: '0.4rem 0.8rem',
-                                                                borderRadius: '20px',
+                                                                borderRadius: '4px',
                                                                 border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
                                                                 background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
                                                                 color: user.log_count > 0 ? '#f59e0b' : '#94a3b8',
@@ -553,7 +552,7 @@ const Debug = () => {
                                                                 onClick={() => setViewingUser(user)}
                                                                 style={{
                                                                     padding: '0.4rem 0.8rem',
-                                                                    borderRadius: '20px',
+                                                                    borderRadius: '4px',
                                                                     border: '1px solid rgba(255, 255, 255, 0.3)',
                                                                     background: 'rgba(255, 255, 255, 0.1)',
                                                                     color: '#e2e8f0',
@@ -571,7 +570,7 @@ const Debug = () => {
                                                             /* No Events */
                                                             <div style={{
                                                                 padding: '0.4rem 0.8rem',
-                                                                borderRadius: '20px',
+                                                                borderRadius: '4px',
                                                                 border: '1px solid rgba(255, 255, 255, 0.3)',
                                                                 background: 'rgba(255, 255, 255, 0.1)',
                                                                 color: '#e2e8f0',
@@ -586,42 +585,40 @@ const Debug = () => {
                                                         )
                                                     )}
 
-                                                    {/* Actions (Download/Clear) */}
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        {user.log_count > 0 && (
-                                                            <>
-                                                                <button
-                                                                    onClick={() => handleDownloadLogs(user.id)}
-                                                                    style={{
-                                                                        padding: '0.4rem 0.8rem',
-                                                                        background: 'rgba(59, 130, 246, 0.1)',
-                                                                        color: '#3b82f6',
-                                                                        border: '1px solid rgba(59, 130, 246, 0.3)',
-                                                                        borderRadius: '4px',
-                                                                        cursor: 'pointer',
-                                                                        fontSize: '0.8rem'
-                                                                    }}
-                                                                >
-                                                                    Download
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleClearLogs(user.id, user.nickname)}
-                                                                    disabled={actionLoading === user.id}
-                                                                    style={{
-                                                                        padding: '0.4rem 0.8rem',
-                                                                        background: 'rgba(168, 85, 247, 0.1)', // Purple Badge
-                                                                        color: '#a855f7',
-                                                                        border: '1px solid rgba(168, 85, 247, 0.3)',
-                                                                        borderRadius: '4px',
-                                                                        cursor: 'pointer',
-                                                                        fontSize: '0.8rem'
-                                                                    }}
-                                                                >
-                                                                    Clear
-                                                                </button>
-                                                            </>
-                                                        )}
-                                                    </div>
+                                                    {/* Actions (Download/Clear) - MERGED into parent flex */}
+                                                    {user.log_count > 0 && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleDownloadLogs(user.id)}
+                                                                style={{
+                                                                    padding: '0.4rem 0.8rem',
+                                                                    background: 'rgba(59, 130, 246, 0.1)',
+                                                                    color: '#3b82f6',
+                                                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                                                    borderRadius: '4px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem'
+                                                                }}
+                                                            >
+                                                                Download
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleClearLogs(user.id, user.nickname)}
+                                                                disabled={actionLoading === user.id}
+                                                                style={{
+                                                                    padding: '0.4rem 0.8rem',
+                                                                    background: 'rgba(168, 85, 247, 0.1)', // Purple Badge
+                                                                    color: '#a855f7',
+                                                                    border: '1px solid rgba(168, 85, 247, 0.3)',
+                                                                    borderRadius: '4px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem'
+                                                                }}
+                                                            >
+                                                                Clear
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
