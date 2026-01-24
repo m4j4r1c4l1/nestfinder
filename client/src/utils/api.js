@@ -64,9 +64,13 @@ class ApiClient {
   }
 
   getAreaFromEndpoint(endpoint) {
-    if (endpoint.startsWith('/settings') || endpoint.startsWith('/auth')) return 'Settings';
-    if (endpoint.startsWith('/points')) return 'Map';
-    return 'App'; // Default for background/system calls
+    if (endpoint.startsWith('/auth')) return 'Authentication';
+    if (endpoint.startsWith('/admin')) return 'Admin';
+    if (endpoint.startsWith('/debug')) return 'Debug';
+    if (endpoint.startsWith('/settings')) return 'Settings';
+    if (endpoint.startsWith('/push')) return 'Notifications';
+    if (endpoint.startsWith('/points')) return 'Points';
+    return 'App';
   }
 
   async fetch(endpoint, options = {}, isRetry = false) {
