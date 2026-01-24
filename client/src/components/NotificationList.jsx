@@ -16,7 +16,7 @@ const FeedbackSection = ({ onFeedbackSent }) => {
     const handleSubmit = async () => {
         if (!message.trim()) return;
 
-        logger.aggressive('Inbox', 'Sending feedback/message...', { type, length: message.length });
+        logger.aggressive(['Inbox', 'Composer', 'Interaction'], 'Sending message', { type, length: message.length, content: message.trim() });
         setLoading(true);
         try {
             await api.submitFeedback(type, message.trim(), rating);
@@ -745,7 +745,7 @@ const NotificationList = ({ notifications, markAsRead, markAllAsRead, settings, 
                         <button
                             key={tab.id}
                             onClick={() => {
-                                logger.aggressive(['Inbox', 'Interaction'], 'Tab switched', { tab: tab.id });
+                                logger.aggressive(['Inbox', 'Composer', 'Interaction'], `Tab switched to ${tab.label}`, { from: activeTab, to: tab.id });
                                 setActiveTab(tab.id);
                             }}
                             style={{

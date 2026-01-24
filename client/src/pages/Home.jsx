@@ -32,7 +32,9 @@ const Home = () => {
         try {
             if (isRecoveryKey(nickname)) {
                 // Attempt recovery
-                await recoverFromKey(nickname.trim().toLowerCase());
+                const cleanKey = nickname.trim().toLowerCase();
+                await recoverFromKey(cleanKey);
+                sessionStorage.setItem('nestfinder_recovery_key_temp', cleanKey);
             } else {
                 // Normal registration
                 await login(nickname);

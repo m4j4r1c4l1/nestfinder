@@ -416,7 +416,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             display: 'inline-block',
                             marginRight: '6px'
                         }} />
-                        {status})
+                        {status} )
                     </>
                 );
             }
@@ -459,7 +459,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         marginTop: '2px',
                         padding: '6px 12px',
                         backgroundColor: 'rgba(15, 23, 42, 0.5)',
-                        borderLeft: `2px solid ${levelColor}`,
+                        borderLeft: `2px solid ${dlColor}`,
                         color: levelColor === '#3b82f6' ? '#94a3b8' : levelColor,
                         fontSize: '0.85em',
                         borderRadius: '0 4px 4px 0',

@@ -53,8 +53,8 @@ class ApiClient {
     if (path === '/auth/recover') return 'Recover Identity';
     if (path === '/settings') return 'User settings';
     if (path === '/settings/app-config') return 'App config';
-    if (path === '/points/feedback' && method === 'GET') return 'Sent messages';
-    if (path === '/points/feedback' && method === 'POST') return 'Submit feedback/message';
+    if (path === '/points/feedback' && method === 'GET') return 'Update Sent messages';
+    if (path === '/points/feedback' && method === 'POST') return 'Submitting message';
     if (path.includes('/confirm')) return 'Confirm point';
     if (path.includes('/deactivate')) return 'Deactivate point';
     if (path.includes('/reactivate')) return 'Reactivate point';
@@ -186,14 +186,30 @@ class ApiClient {
     if (response.ok) {
       if (humanName) {
         let suffix = '';
+        let count = null;
+
         if (Array.isArray(data)) {
-          suffix = ` (${data.length})`;
-        } else if (data && typeof data.count === 'number') {
-          suffix = ` (${data.count})`;
+          count = data.length;
+        } else if (data) {
+          if (typeof data.count === 'number') count = data.count;
+          else if (Array.isArray(data.feedback)) count = data.feedback.length;
+          else if (Array.isArray(data.broadcasts)) count = data.broadcasts.length;
         }
+
+        if (count !== null) suffix = ` (${count})`;
 
         if (humanName === 'Update Notification status' || humanName === 'Update notification status') {
           logger.default(['API', area], `Response: Notification status successfully updated.${suffix}`);
+        } else if (humanName === 'Submitting message') {
+          logger.default(['API', area], `Response: Submission successfully received.${suffix}`);
+        } else if (humanName === 'Update Sent messages') {
+          logger.default(['API', area], `Response: Sent messages successfully updated.${suffix}`);
+          // Aggressive Data Block for Sent Messages
+          logger.aggressive(['API', area], 'Sent Messages Data', data);
+        } else if (humanName === 'Active broadcasts') {
+          logger.default(['API', area], `Response: Active broadcasts successfully received${suffix}`);
+          // Aggressive Data Block for Broadcasts
+          logger.aggressive(['API', area], 'Broadcasts Data', data);
         } else {
           logger.default(['API', area], `Response: ${humanName} successfully received.${suffix}`);
         }
