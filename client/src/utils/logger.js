@@ -64,7 +64,7 @@ class DebugLogger {
             // If it's a specific userId, only react if it's ours.
             if (!message.global && message.userId && message.userId !== this.userId) return;
 
-            this.log('System', 'Received ASAP debug update signal via WS');
+            this.log('System', 'Debug Level update received via WS');
             this._checkStatus();
         }
     }
@@ -80,7 +80,7 @@ class DebugLogger {
 
             const currentLevel = this.config.debugLevel;
             if (currentLevel !== 'default') {
-                this.log('System', `Checking remote debug status (ASAP Sync)...`, { url });
+                this.log('System', `Checking remote Debug Status`, { url });
             }
 
             const res = await fetch(url, {
@@ -97,7 +97,7 @@ class DebugLogger {
                 if (isActive !== this.config.enabled) {
                     this.config.enabled = isActive;
                     this.log('System', 'Remote Debug Status changed');
-                    this.log('System', `Current Debug Status: ${isActive ? 'ENABLED' : 'DISABLED'}`);
+                    this.log('System', `Current Debug Status: (${isActive ? 'Enabled' : 'Disabled'})`);
                     changed = true;
 
                     if (isActive) {
@@ -124,7 +124,7 @@ class DebugLogger {
                     this.config.debugLevel = newLevel;
                     const badge = newLevel === 'paranoic' ? 'P' : newLevel === 'aggressive' ? 'A' : 'D';
                     const label = newLevel.charAt(0).toUpperCase() + newLevel.slice(1);
-                    this.log('System', `Current Debug Level: (${badge}) ${label}`);
+                    this.log('System', `Current Debug Level: (${badge} ${label})`); // Removed parenthesis around badge only, aligning with Activated format
                     changed = true;
                 }
 

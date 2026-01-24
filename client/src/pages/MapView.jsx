@@ -92,7 +92,7 @@ const MapView = () => {
     // Log location status changes
     useEffect(() => {
         if (userLocation) {
-            logger.default(['System', 'Location'], 'Location enabled and active');
+            logger.default(['System', 'Location', 'Interaction'], 'Location enabled and active');
         }
     }, [userLocation]);
 

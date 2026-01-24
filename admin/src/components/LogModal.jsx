@@ -373,8 +373,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 justifyContent: 'center',
                 borderRadius: '50%',
                 flexShrink: 0,
-                lineHeight: 1, // Ensure critical centering
-                padding: 0,     // Remove any padding offset
+                paddingTop: '1px', // Optical centering for uppercase
                 boxSizing: 'border-box'
             }}>
                 {char}
@@ -431,7 +430,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 </span>
                 {data && Object.keys(data).filter(k => !['ip', 'userAgent', 'platform'].includes(k)).length > 0 && (
                     <div style={{
-                        width: '100%',
+                        width: 'calc(100% - 26px)', // Adjust width to account for margin
+                        marginLeft: '26px',         // Align with timestamp (18px badge + 8px gap)
                         marginTop: '4px',
                         padding: '6px 12px',
                         backgroundColor: 'rgba(15, 23, 42, 0.5)',
@@ -484,7 +484,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         }} onClick={onClose}>
             <div style={{
                 width: '90%',
-                maxWidth: '1000px',
+                maxWidth: '1200px',
                 height: '85vh',
                 backgroundColor: '#0f172a',
                 borderRadius: '12px',

@@ -215,7 +215,25 @@ Generated: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/Paris' })} (
                 const parsed = JSON.parse(entry.logs);
                 // Format each line for better readability
                 content += parsed.map(line => {
-                    // Try to align timestamps strictly if possible, otherwise just output content
+                    if (typeof line === 'object' && line !== null) {
+                        const { ts, level, category, msg, data } = line;
+                        // Format: YYYY-MM-DDTHH:mm:ss.sssZ [Category] [LEVEL] Message
+                        let str = `${ts || ''} ${category || ''} [${level || 'INFO'}] ${msg || ''}`;
+
+                        // Append data if present and not empty/generic
+                        if (data && Object.keys(data).length > 0) {
+                            // Filter out redundant fields if needed, or just dump it
+                            const cleanData = { ...data };
+                            delete cleanData.ip;
+                            delete cleanData.userAgent;
+                            delete cleanData.platform;
+
+                            if (Object.keys(cleanData).length > 0) {
+                                str += `\n      DATA: ${JSON.stringify(cleanData)}`;
+                            }
+                        }
+                        return str.trim();
+                    }
                     return line;
                 }).join('\n') + '\n';
             } catch {
