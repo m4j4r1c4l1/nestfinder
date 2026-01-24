@@ -253,6 +253,10 @@ const Debug = () => {
 
     // Stats
     const debugEnabledCount = users.filter(u => u.debug_enabled).length;
+    const defaultCount = users.filter(u => u.debug_enabled && (u.debug_level === 'default' || !u.debug_level)).length;
+    const aggressiveCount = users.filter(u => u.debug_enabled && u.debug_level === 'aggressive').length;
+    const paranoicCount = users.filter(u => u.debug_enabled && u.debug_level === 'paranoic').length;
+
     const usersWithLogs = users.filter(u => u.log_count > 0).length;
 
     // Resize handle sits between leftCol and rightCol
@@ -304,11 +308,56 @@ const Debug = () => {
 
             {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.5rem', fontWeight: 600, alignSelf: 'flex-start', textAlign: 'left' }}>🐛 Debug Enabled</div>
-                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: '#8b5cf6', lineHeight: 1 }}>{debugEnabledCount}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'left' }}>users enabled</div>
+                <div className="card" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%', minWidth: '320px' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.4rem', fontWeight: 600, alignSelf: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '1rem' }}>🐛</span> Debug Enabled
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, gap: '1rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#8b5cf6', lineHeight: 1 }}>{debugEnabledCount}</div>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'left' }}>users enabled</div>
+                        </div>
+
+                        {/* Breakdown Container (Green Box Reference) */}
+                        <div style={{
+                            border: '1px solid #8b5cf6', // Purple border same as parent element
+                            background: '#0f172a',      // Debug section main background 
+                            borderRadius: '8px',
+                            padding: '10px 12px',
+                            display: 'flex',
+                            gap: '12px',
+                            alignItems: 'flex-end'
+                        }}>
+                            {[
+                                { label: 'Default', count: defaultCount, color: '#3b82f6', char: 'D' },
+                                { label: 'Aggresiv', count: aggressiveCount, color: '#a855f7', char: 'A' },
+                                { label: 'Paranoic', count: paranoicCount, color: '#ef4444', char: 'P' }
+                            ].map(lvl => (
+                                <div key={lvl.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                    {/* Level Box (White Box Reference) */}
+                                    <div style={{
+                                        border: `1.5px solid ${lvl.color}`,
+                                        background: '#8b5cf6', // Same color as debug enabled badge
+                                        borderRadius: '4px',
+                                        padding: '4px 8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        minWidth: '55px'
+                                    }}>
+                                        <div style={{
+                                            width: '16px', height: '16px', borderRadius: '50%', border: `1px solid ${lvl.color}`,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: '0.6rem', fontWeight: 800, color: lvl.color, background: 'rgba(0,0,0,0.2)'
+                                        }}>
+                                            {lvl.char}
+                                        </div>
+                                        <span style={{ fontSize: '1rem', fontWeight: 900, color: lvl.color }}>{lvl.count}</span>
+                                    </div>
+                                    <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 500 }}>{lvl.label}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
