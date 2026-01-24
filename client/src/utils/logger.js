@@ -257,7 +257,7 @@ class DebugLogger {
         let formattedCategory = category;
         if (Array.isArray(category)) {
             const unique = [...new Set(category)];
-            formattedCategory = unique.map(c => `[${c}]`).join('');
+            formattedCategory = unique.map(c => `[${c}]`).join(' ');
         } else if (category && !category.startsWith('[')) {
             // Ensure single strings also have brackets if not already present
             formattedCategory = `[${category}]`;
