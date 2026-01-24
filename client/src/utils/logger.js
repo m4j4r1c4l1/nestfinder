@@ -254,6 +254,7 @@ class DebugLogger {
         }
 
         // Format category for consistent storage/display
+        let formattedCategory = category;
         if (Array.isArray(category)) {
             const unique = [...new Set(category)];
             formattedCategory = unique.map(c => `[${c}]`).join('');
