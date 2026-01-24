@@ -1771,6 +1771,13 @@ const SettingsPanel = ({ onClose }) => {
     // Get the currently centered item index
     const centeredItemIndex = Math.round(normalizeOffset(scrollOffsetRef.current)) % itemCount;
 
+    // Copy Share Link (handleCopyLink implementation)
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(APP_URL);
+        setShowCopied(true);
+        setTimeout(() => setShowCopied(false), 2000);
+    };
+
     return (
         <div className="card" style={{ height: '100%', maxHeight: '100%', overflowY: 'auto' }}>
             <div className="card-header flex-between items-center">
