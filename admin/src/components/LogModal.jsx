@@ -669,12 +669,12 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     gap: '12px'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                         <button onClick={() => setIsFollowing(!isFollowing)} style={{
-                                padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
-                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
-                                backgroundColor: isFollowing ? '#059669' : 'transparent', color: isFollowing ? 'white' : '#94a3b8',
-                                border: `1px solid ${isFollowing ? '#059669' : '#334155'}`
-                            }}>
+                        <button onClick={() => setIsFollowing(!isFollowing)} style={{
+                            padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                            backgroundColor: isFollowing ? '#059669' : 'transparent', color: isFollowing ? 'white' : '#94a3b8',
+                            border: `1px solid ${isFollowing ? '#059669' : '#334155'}`
+                        }}>
                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isFollowing ? '#ef4444' : '#64748b', animation: isFollowing ? 'pulse 1.5s infinite' : 'none' }} />
                             {isFollowing ? 'LIVE' : 'OFF'}
                         </button>
@@ -705,7 +705,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 }}>
                     {/* 1. Main Search (Filter Action style) */}
                     <div style={{ position: 'relative', flex: 2 }} ref={searchRef}>
-                        <input 
+                        <input
                             type="text"
                             placeholder="Search logs, [API] [Points], 'Exact Phrase'..."
                             value={filterQuery}
@@ -731,7 +731,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             }}>
                                 {uniqueCategories.map(cat => (
                                     <div key={cat}>
-                                        <div 
+                                        <div
                                             onClick={() => {
                                                 // Append "[Cat] " to query
                                                 const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
@@ -745,7 +745,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         </div>
                                         {/* Subcategories */}
                                         {subCategoryMap[cat] && [...subCategoryMap[cat]].map(sub => (
-                                             <div key={`${cat}-${sub}`}
+                                            <div key={`${cat}-${sub}`}
                                                 onClick={() => {
                                                     const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
                                                     setFilterQuery(prev => prev + pad + `[${cat}] [${sub}]`);
@@ -753,9 +753,9 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 style={{ padding: '4px 10px 4px 24px', cursor: 'pointer', color: '#94a3b8', fontSize: '0.85rem' }}
                                                 onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                             >
+                                            >
                                                 [{sub}]
-                                             </div>
+                                            </div>
                                         ))}
                                     </div>
                                 ))}
@@ -765,7 +765,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
                     {/* 2. Level Filter */}
                     <div style={{ position: 'relative', width: '140px' }} ref={levelRef}>
-                        <input 
+                        <input
                             type="text"
                             placeholder="Level: All"
                             value={filterLevel}
@@ -799,7 +799,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
                     {/* 3. Severity Filter */}
                     <div style={{ position: 'relative', width: '140px' }} ref={severityRef}>
-                        <input 
+                        <input
                             type="text"
                             placeholder="Severity: All"
                             value={filterSeverity}
@@ -812,7 +812,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             }}
                         />
                         {showSeverityDropdown && (
-                             <div style={{
+                            <div style={{
                                 position: 'absolute', top: '100%', left: 0, width: '100%',
                                 background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
                                 marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
@@ -832,16 +832,16 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
 
                     {/* 4. Active Filters Tooltip Area */}
-                    <div 
+                    <div
                         onMouseEnter={() => setShowActiveFilters(true)}
                         onMouseLeave={() => setShowActiveFilters(false)}
                         style={{ position: 'relative', cursor: 'help' }}
                     >
-                        <div style={{ 
+                        <div style={{
                             fontSize: '1.2rem', color: activeFiltersList.length > 0 ? '#38bdf8' : '#64748b',
                             opacity: activeFiltersList.length > 0 ? 1 : 0.5
                         }}>
-                             ⚡
+                            ⚡
                         </div>
                         {showActiveFilters && activeFiltersList.length > 0 && (
                             <div style={{
@@ -857,7 +857,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         <span style={{ fontFamily: 'monospace' }}>{f.val}</span>
                                     </div>
                                 ))}
-                                <div 
+                                <div
                                     onClick={() => { setFilterQuery(''); setFilterLevel(''); setFilterSeverity(''); }}
                                     style={{ marginTop: '8px', fontSize: '0.75rem', color: '#f87171', textAlign: 'center', cursor: 'pointer', borderTop: '1px solid #334155', paddingTop: '4px' }}
                                 >
@@ -901,6 +901,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 </div>
 
                 {/* FOOTER (Existing) */}
+                <div style={{
+                    padding: '0.75rem 1.5rem',
                     borderTop: '1px solid #334155',
                     background: '#1e293b',
                     display: 'grid',
@@ -1032,15 +1034,15 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
                 </div>
             </div>
-            <style>
-                {`
+            <style dangerouslySetInnerHTML={{
+                __html: `
                     @keyframes pulse {
                         0% { opacity: 1; transform: scale(1); }
                         50% { opacity: 0.5; transform: scale(1.2); }
                         100% { opacity: 1; transform: scale(1); }
                     }
-                `}
-            </style>
+                `
+            }} />
         </div >
     );
 };
