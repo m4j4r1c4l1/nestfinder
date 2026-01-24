@@ -99,17 +99,25 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         }
 
         // 2. Extract Bracket Groups: [API] [Notifications]
-        // Split each bracket into its own token to allow OR logic across different bracket sets
         const bracketRegex = /\[([^\]]+)\]/g;
         while ((match = bracketRegex.exec(remaining)) !== null) {
             tokens.push({ type: 'category', tags: [match[1].trim()] });
             remaining = remaining.replace(match[0], ' ');
         }
 
-        // 3. Extract Remaining Words (OR Logic default, unless timestamp)
+        // 3. Extract Paren OR Groups: (Notifications|Points)
+        const parenRegex = /\(([^)]+)\)/g;
+        while ((match = parenRegex.exec(remaining)) !== null) {
+            const tags = match[1].split('|').map(t => t.trim()).filter(t => t);
+            if (tags.length > 0) {
+                tokens.push({ type: 'category-or', tags });
+            }
+            remaining = remaining.replace(match[0], ' ');
+        }
+
+        // 4. Extract Remaining Words
         const words = remaining.trim().split(/\s+/).filter(w => w);
         words.forEach(w => {
-            // Check for Timestamp (simple check: includes :)
             if (w.includes(':')) tokens.push({ type: 'timestamp', value: w });
             else tokens.push({ type: 'text', value: w });
         });
@@ -153,14 +161,11 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
             return tokens.every(token => {
                 if (token.type === 'category') {
-                    // ALL tags must be present in the Category string
-                    // Category string: "Settings" or "[Settings][Interaction]"?
-                    // Server sends "Settings" usually. 
-                    // Wait, `logger.js` sends ARRAY `['Settings', 'Interaction']`.
-                    // DB `client_logs` stores `category` as string? 
-                    // `logger.js` joins with space? Yes `[A] [B]`.
-                    // So we check if `category` string contains `[Tag]`.
                     return token.tags.every(tag => category.toLowerCase().includes(tag.toLowerCase()));
+                }
+                if (token.type === 'category-or') {
+                    // OR relationship internally
+                    return token.tags.some(tag => category.toLowerCase().includes(tag.toLowerCase()));
                 }
                 if (token.type === 'exact') {
                     return (msg + ' ' + category).toLowerCase().includes(token.value.toLowerCase());
@@ -756,7 +761,6 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     backgroundColor: '#1e293b',
                     borderBottom: '1px solid #334155',
                     display: 'flex',
-                    justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: '12px'
                 }}>
@@ -770,19 +774,104 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isFollowing ? '#ef4444' : '#64748b', animation: isFollowing ? 'pulse 1.5s infinite' : 'none' }} />
                             {isFollowing ? 'LIVE' : 'OFF'}
                         </button>
-                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: isFollowing ? 'italic' : 'normal' }}>
-                            {isFollowing ? `Auto-refreshing live${refreshDots}` : 'Auto-refreshing stopped'}
-                        </span>
                     </div>
-                    <button onClick={() => setIsColorEnabled(!isColorEnabled)} style={{
-                        padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
-                        backgroundColor: isColorEnabled ? '#059669' : 'transparent', color: isColorEnabled ? 'white' : '#94a3b8',
-                        border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`
-                    }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isColorEnabled ? '#172554' : '#64748b', boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none' }} />
-                        {isColorEnabled ? 'FOCUS ON' : 'FOCUS OFF'}
-                    </button>
+
+                    {/* Centered Debug Level Status */}
+                    <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                        <div
+                            style={{ position: 'relative', display: 'flex', alignItems: 'center', cursor: user.debug_enabled ? 'pointer' : 'default' }}
+                            ref={selectorRef}
+                            onMouseEnter={() => setShowLevelSelector(true)}
+                        >
+                            <div
+                                style={{
+                                    width: '10px',
+                                    height: '10px',
+                                    borderRadius: '50%',
+                                    backgroundColor: !user.debug_enabled ? '#64748b' :
+                                        user.debug_level === 'paranoic' ? '#ef4444' :
+                                            user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                    boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
+                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
+                                        }` : 'none',
+                                    zIndex: 50
+                                }}
+                            />
+                            <span style={{
+                                marginLeft: '8px',
+                                fontSize: '0.85rem',
+                                fontWeight: 700,
+                                color: !user.debug_enabled ? '#64748b' :
+                                    user.debug_level === 'paranoic' ? '#ef4444' :
+                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                            }}>
+                                {user.debug_enabled ? user.debug_level : 'Off'}
+                            </span>
+
+                            {showLevelSelector && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    marginTop: '8px',
+                                    background: '#0f172a',
+                                    border: '1px solid #334155',
+                                    borderRadius: '8px',
+                                    padding: '4px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '2px',
+                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+                                    zIndex: 100,
+                                    minWidth: '120px'
+                                }}>
+                                    {[
+                                        { id: 'default', label: 'Default', color: '#3b82f6' },
+                                        { id: 'aggressive', label: 'Aggressive', color: '#a855f7' },
+                                        { id: 'paranoic', label: 'Paranoic', color: '#ef4444' },
+                                        { id: 'off', label: 'Deactivate', color: '#64748b' }
+                                    ].map(lvl => (
+                                        <div
+                                            key={lvl.id}
+                                            onClick={(e) => { e.stopPropagation(); handleSetLevel(lvl.id); }}
+                                            style={{
+                                                padding: '8px 12px',
+                                                cursor: 'pointer',
+                                                borderRadius: '4px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px',
+                                                background: (user.debug_level === lvl.id || (!user.debug_enabled && lvl.id === 'off')) ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                                                transition: 'background 0.2s'
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = (user.debug_level === lvl.id || (!user.debug_enabled && lvl.id === 'off')) ? 'rgba(255, 255, 255, 0.05)' : 'transparent'}
+                                        >
+                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: lvl.color }} />
+                                            <span style={{ color: (user.debug_level === lvl.id || (!user.debug_enabled && lvl.id === 'off')) ? '#f8fafc' : '#94a3b8', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                {lvl.label}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <button onClick={() => setIsColorEnabled(!isColorEnabled)} style={{
+                            padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                            backgroundColor: isColorEnabled ? '#059669' : 'transparent', color: isColorEnabled ? 'white' : '#94a3b8',
+                            border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`
+                        }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isColorEnabled ? '#172554' : '#64748b', boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none' }} />
+                            {isColorEnabled ? 'FOCUS ON' : 'FOCUS OFF'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* HEADER ROW 3: Filter Toolbar (NEW) */}
@@ -806,31 +895,28 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             {!filterQuery && <span style={{ color: '#64748b', fontFamily: 'sans-serif' }}>Search logs, [API] [Points]...</span>}
                             {filterQuery && (() => {
                                 // Simple tokenizer for coloring
-                                const parts = filterQuery.split(/(\[[^\]]+\])/g);
-                                return parts.map((part, i) => {
+                                // Highlight Layer - Colored highlighting
+                                const highlightParts = filterQuery.split(/(\[[^\]]+\]|\([^)]+\))/g);
+                                return highlightParts.map((part, i) => {
                                     if (part.startsWith('[') && part.endsWith(']')) {
                                         const clean = part.slice(1, -1);
-                                        // Attempt to find color: exact match OR First word match (for [API][Request] -> API)
-                                        // But here 'part' is ONE bracket group [API]. 
-                                        // If user types [API] [Request], we get distinct parts.
-                                        // We check if 'clean' is a known category.
-                                        const color = CATEGORY_COLORS[clean] || (isColorEnabled ? '#e2e8f0' : '#e2e8f0');
-
-                                        // If it's a subcategory (e.g. [Request]), it might not be in CATEGORY_COLORS.
-                                        // We could try to infer parent? 
-                                        // Actually, if we just use the active palette for known text, it helps.
-                                        // If not found, white. 
-                                        // START SMART COLOR INFERENCE:
-                                        // If part is [Request], and we are drilling down [API], we want Blue.
-                                        // But here we are rendering the string. We don't track context easily per token.
-                                        // We can try to look up if this tag appears in ANY static subcategory list.
-                                        let inferredColor = color;
+                                        let inferredColor = CATEGORY_COLORS[clean] || (isColorEnabled ? '#e2e8f0' : '#e2e8f0');
                                         if (!CATEGORY_COLORS[clean]) {
                                             const parent = Object.keys(STATIC_SUBCATEGORIES).find(k => STATIC_SUBCATEGORIES[k].includes(clean));
                                             if (parent) inferredColor = CATEGORY_COLORS[parent];
                                         }
-
                                         return <span key={i} style={{ color: inferredColor, textShadow: `0 0 5px ${inferredColor}44` }}>{part}</span>;
+                                    }
+                                    if (part.startsWith('(') && part.endsWith(')')) {
+                                        // Find color from children tags
+                                        const inner = part.slice(1, -1);
+                                        const tags = inner.split('|').filter(t => t);
+                                        const colorTag = tags.find(t => CATEGORY_COLORS[t]) || tags.find(t => Object.keys(STATIC_SUBCATEGORIES).find(k => STATIC_SUBCATEGORIES[k].includes(t)));
+                                        let color = '#f8fafc';
+                                        if (colorTag) {
+                                            color = CATEGORY_COLORS[colorTag] || CATEGORY_COLORS[Object.keys(STATIC_SUBCATEGORIES).find(k => STATIC_SUBCATEGORIES[k].includes(colorTag))];
+                                        }
+                                        return <span key={i} style={{ color: color, opacity: 0.9 }}>{part}</span>;
                                     }
                                     return <span key={i} style={{ color: '#f8fafc' }}>{part}</span>;
                                 });
@@ -917,8 +1003,37 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 {subs.map(sub => (
                                                     <div key={sub}
                                                         onClick={() => {
-                                                            const needsSpace = filterQuery.length > 0 && !filterQuery.endsWith(' ');
-                                                            setFilterQuery(prev => prev + (needsSpace ? ' ' : '') + `[${sub}]`);
+                                                            const query = filterQuery;
+                                                            // SMART OR GROUPING:
+                                                            // Does query already contain a match for this parent?
+                                                            // e.g. [API] (Sub1|Sub2) or [API] [Sub1]
+                                                            const orRegex = /\(([^)]+)\)/;
+                                                            const parenMatch = query.match(orRegex);
+
+                                                            if (parenMatch && subCategoryMap[activeMain].has(parenMatch[1].split('|')[0].trim())) {
+                                                                // Append to existing paren group
+                                                                const inner = parenMatch[1];
+                                                                if (!inner.includes(sub)) {
+                                                                    setFilterQuery(prev => prev.replace(`(${inner})`, `(${inner}|${sub})`));
+                                                                }
+                                                            } else {
+                                                                // Check if there is a standalone sub for this parent
+                                                                // We'll iterate tokens to find a category tag that belongs to this activeMain
+                                                                const tokens = parseSearchQuery(query);
+                                                                const siblingToken = tokens.find(t =>
+                                                                    t.type === 'category' &&
+                                                                    t.tags.length === 1 &&
+                                                                    subCategoryMap[activeMain].has(t.tags[0])
+                                                                );
+
+                                                                if (siblingToken) {
+                                                                    const sib = siblingToken.tags[0];
+                                                                    setFilterQuery(prev => prev.replace(`[${sib}]`, `(${sib}|${sub})`));
+                                                                } else {
+                                                                    const needsSpace = filterQuery.length > 0 && !filterQuery.endsWith(' ');
+                                                                    setFilterQuery(prev => prev + (needsSpace ? ' ' : '') + `[${sub}]`);
+                                                                }
+                                                            }
                                                             setActiveMainOverride(null); // Reset override on selection
                                                         }}
                                                         style={{
