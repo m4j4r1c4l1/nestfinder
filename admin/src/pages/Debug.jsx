@@ -312,38 +312,38 @@ const Debug = () => {
                     <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginBottom: '0.4rem', fontWeight: 600, alignSelf: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '1rem' }}>🐛</span> Debug Enabled
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flex: 1, gap: '0.75rem', marginTop: 'auto' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                             <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#8b5cf6', lineHeight: 1 }}>{debugEnabledCount}</div>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'left' }}>users enabled</div>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'left', whiteSpace: 'nowrap' }}>users enabled</div>
                         </div>
 
-                        {/* Breakdown Container (Green Box Reference) */}
+                        {/* Breakdown Container */}
                         <div style={{
-                            border: '1px solid #8b5cf6', // Purple border same as parent element
-                            background: '#0f172a',      // Debug section main background 
+                            border: '1px solid #8b5cf6',
+                            background: '#0f172a',
                             borderRadius: '8px',
-                            padding: '10px 12px',
+                            padding: '8px 10px',
                             display: 'flex',
-                            gap: '12px',
-                            alignItems: 'flex-end'
+                            gap: '8px',
+                            alignItems: 'flex-end',
+                            marginBottom: '2px' // Minor lift to match baseline of huge stat number
                         }}>
                             {[
                                 { label: 'Default', count: defaultCount, color: '#3b82f6', char: 'D' },
-                                { label: 'Aggresiv', count: aggressiveCount, color: '#a855f7', char: 'A' },
+                                { label: 'Aggressive', count: aggressiveCount, color: '#a855f7', char: 'A' },
                                 { label: 'Paranoic', count: paranoicCount, color: '#ef4444', char: 'P' }
                             ].map(lvl => (
                                 <div key={lvl.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                    {/* Level Box (White Box Reference) */}
                                     <div style={{
                                         border: `1.5px solid ${lvl.color}`,
-                                        background: '#8b5cf6', // Same color as debug enabled badge
+                                        background: '#1e293b', // Matches table row background
                                         borderRadius: '4px',
-                                        padding: '4px 8px',
+                                        padding: '4px 6px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '6px',
-                                        minWidth: '55px'
+                                        minWidth: '48px'
                                     }}>
                                         <div style={{
                                             width: '16px', height: '16px', borderRadius: '50%', border: `1px solid ${lvl.color}`,
@@ -354,7 +354,7 @@ const Debug = () => {
                                         </div>
                                         <span style={{ fontSize: '1rem', fontWeight: 900, color: lvl.color }}>{lvl.count}</span>
                                     </div>
-                                    <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 500 }}>{lvl.label}</span>
+                                    <span style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 500 }}>{lvl.label}</span>
                                 </div>
                             ))}
                         </div>
