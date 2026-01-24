@@ -162,7 +162,7 @@ class ApiClient {
       // ... existing retry logic ...
       const deviceId = localStorage.getItem('nestfinder_device_id');
       if (deviceId) {
-        // ...
+        logger.warn(['Auth', 'Session'], 'Access token expired, attempting silent refresh');
         try {
           // ...
           const refreshResponse = await fetch(`${API_URL}/auth/register`, {
@@ -211,7 +211,7 @@ class ApiClient {
       const errorMessage = data.error || `Server error: ${response.status} ${response.statusText}`;
       // Log error (excluding temporary server unavailable errors which are handled by toast)
       if (response.status !== 502 && response.status !== 503 && response.status !== 504) {
-        logger.log('API', 'Error', `${endpoint} - ${errorMessage}`);
+        logger.error('API', 'Error', `${endpoint} - ${errorMessage}`);
       }
       throw new Error(errorMessage);
     }

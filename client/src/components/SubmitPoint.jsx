@@ -121,7 +121,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
         e.preventDefault();
         if (!location) {
             setError(t('submit.locationRequired'));
-            logger.default('SubmitPoint', 'Error: Submission attempted without location');
+            logger.warn(['Interaction', 'Validation'], 'Point submission blocked - Missing Location');
             return;
         }
 
