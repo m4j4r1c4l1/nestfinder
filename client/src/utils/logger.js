@@ -242,14 +242,24 @@ class DebugLogger {
             }
         }
 
+        // Format category for consistent storage/display
+        let formattedCategory = category;
+        if (Array.isArray(category)) {
+            const unique = [...new Set(category)];
+            formattedCategory = unique.map(c => `[${c}]`).join('');
+        } else if (category && !category.startsWith('[')) {
+            // Ensure single strings also have brackets if not already present
+            formattedCategory = `[${category}]`;
+        }
+
         const entry = {
             id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
             ts: new Date().toISOString(),
             level,
-            category: category || 'General',
+            category: formattedCategory || '[General]',
             msg: message,
             data,
-            dl: requiredLevel // Store the *required* level so Admin UI knows the source
+            dl: requiredLevel
         };
 
         // Task #31: Buffer Logic
