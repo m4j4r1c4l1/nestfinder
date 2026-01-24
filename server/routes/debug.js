@@ -77,9 +77,8 @@ router.post('/users/:id/toggle', requireAdmin, (req, res) => {
         if (newState === 1) {
             // Enabling: Set session start, clear session end
             run('UPDATE users SET debug_enabled = 1, debug_session_start = CURRENT_TIMESTAMP, debug_session_end = NULL WHERE id = ?', [id]);
-        } else {
-            // Disabling: Set session end
-            run('UPDATE users SET debug_enabled = 0, debug_session_end = CURRENT_TIMESTAMP WHERE id = ?', [id]);
+            // Disabling: Set session end and reset level to default
+            run("UPDATE users SET debug_enabled = 0, debug_session_end = CURRENT_TIMESTAMP, debug_level = 'default' WHERE id = ?", [id]);
         }
 
         // ASAP Sync: Broadcast update

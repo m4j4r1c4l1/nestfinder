@@ -105,7 +105,7 @@ const DebugIndicator = () => {
             letterSpacing: '0.05em', color: colors.text, textTransform: 'uppercase',
             boxShadow: `0 2px 8px ${colors.bg}`, pointerEvents: 'none'
         }}>
-            🐛 DEBUG MODE {status.level !== 'default' && `(${status.level})`}
+            🐛 DEBUG MODE
         </div>
     );
 };

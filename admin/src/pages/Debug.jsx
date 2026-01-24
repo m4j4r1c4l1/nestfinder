@@ -180,7 +180,11 @@ const Debug = () => {
         setActionLoading(user.id);
         try {
             const res = await adminApi.fetch(`/debug/users/${user.id}/toggle`, { method: 'POST' });
-            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, debug_enabled: res.debug_enabled ? 1 : 0 } : u));
+            setUsers(prev => prev.map(u => u.id === user.id ? {
+                ...u,
+                debug_enabled: res.debug_enabled ? 1 : 0,
+                debug_level: res.debug_enabled ? u.debug_level : 'default' // Reset to default if disabled
+            } : u));
         } catch (err) {
             console.error('Failed to toggle debug:', err);
         } finally {
@@ -475,7 +479,7 @@ const Debug = () => {
                                                         textAlign: 'center'
                                                     }}
                                                 >
-                                                    {user.debug_enabled ? 'Enabled' : (actionLoading === user.id ? 'Enabling...' : 'Off')}
+                                                    {user.debug_enabled ? 'On' : (actionLoading === user.id ? 'Enabling...' : 'Off')}
                                                 </button>
                                             </td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
@@ -542,10 +546,44 @@ const Debug = () => {
                                                             {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
                                                         </div>
                                                     ) : (
-                                                        /* Debug Disabled: Just Text */
-                                                        <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic', padding: '0.4rem 0' }}>
-                                                            No events
-                                                        </div>
+                                                        /* Debug Disabled */
+                                                        user.log_count > 0 ? (
+                                                            /* Clickable Past Events Badge */
+                                                            <div
+                                                                onClick={() => setViewingUser(user)}
+                                                                style={{
+                                                                    padding: '0.4rem 0.8rem',
+                                                                    borderRadius: '20px',
+                                                                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                                                                    background: 'rgba(255, 255, 255, 0.1)',
+                                                                    color: '#e2e8f0',
+                                                                    fontSize: '0.8rem',
+                                                                    fontWeight: 600,
+                                                                    minWidth: '80px',
+                                                                    textAlign: 'center',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'all 0.2s ease'
+                                                                }}
+                                                            >
+                                                                Past events ({user.log_count})
+                                                            </div>
+                                                        ) : (
+                                                            /* No Events */
+                                                            <div style={{
+                                                                padding: '0.4rem 0.8rem',
+                                                                borderRadius: '20px',
+                                                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                                                background: 'rgba(255, 255, 255, 0.1)',
+                                                                color: '#e2e8f0',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: 600,
+                                                                minWidth: '80px',
+                                                                textAlign: 'center',
+                                                                opacity: 0.7
+                                                            }}>
+                                                                No live events
+                                                            </div>
+                                                        )
                                                     )}
 
                                                     {/* Actions (Download/Clear) */}

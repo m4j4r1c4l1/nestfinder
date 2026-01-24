@@ -5,7 +5,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isFollowing, setIsFollowing] = useState(true);
+    const [isFollowing, setIsFollowing] = useState(user?.debug_enabled ?? true);
     const [lastBatchId, setLastBatchId] = useState(0);
     const contentRef = useRef(null);
     const scrollRef = useRef(null);

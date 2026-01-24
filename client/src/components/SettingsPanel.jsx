@@ -68,7 +68,6 @@ const RecoveryKeySection = ({ t }) => {
 
             const result = await api.generateRecoveryKey();
             setRecoveryKey(result.recoveryKey);
-            logger.aggressive(['Settings', 'Recovery Key', 'Interaction'], 'Generated new Recovery Key.');
             logger.aggressive(['Settings', 'Recovery Key', 'Interaction'], `Recovery Key: ${result.recoveryKey}`);
             logger.default(['Settings', 'Recovery Key', 'Interaction'], 'Generated new recovery key.');
             setKeyVisible(true);
@@ -1552,8 +1551,9 @@ const SettingsPanel = ({ onClose }) => {
         autoSelectTimer.current = setTimeout(() => {
             const currentIndex = Math.round(normalizeOffset(scrollOffsetRef.current)) % itemCount;
             const newLang = availableLanguages[currentIndex].code;
+            const langObj = availableLanguages[currentIndex];
             setLanguage(newLang);
-            logger.aggressive(['Settings', 'Language', 'Interaction'], 'Language changed (Auto)');
+            logger.aggressive(['Settings', 'Language', 'Interaction'], `Language changed to ${langObj.name} (${langObj.flag})`);
             setIsConfirmed(true);
         }, AUTO_SELECT_DELAY);
     };
@@ -1760,8 +1760,9 @@ const SettingsPanel = ({ onClose }) => {
 
         animateTo(index, 300, () => {
             const newLang = availableLanguages[index].code;
+            const langObj = availableLanguages[index];
             setLanguage(newLang);
-            logger.aggressive(['Settings', 'Language', 'Interaction'], `Language changed to ${newLang === 'es' ? 'Spanish' : newLang}`);
+            logger.aggressive(['Settings', 'Language', 'Interaction'], `Language changed to ${langObj.name} (${langObj.flag})`);
             setIsConfirmed(true);
         });
     };
