@@ -28,6 +28,15 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     // Debug Level Selector State (Footer)
     const [showLevelSelector, setShowLevelSelector] = useState(false);
 
+    // --- RESTORED STATE ---
+    const isUserScrollingRef = useRef(false);
+    const [copied, setCopied] = useState(false);
+    const [isColorEnabled, setIsColorEnabled] = useState(false);
+    const [liveTime, setLiveTime] = useState(new Date());
+    const [deviceInfo, setDeviceInfo] = useState(null);
+    const [refreshDots, setRefreshDots] = useState('');
+    const [animating, setAnimating] = useState(false);
+
     // ... (Keep existing refs/effects for click outside, polling, etc) ...
 
     // --- SMART PARSER LOGIC ---
@@ -123,7 +132,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
     const filteredLogs = getFilteredLogs();
 
-    // ... (Rest of existing state: Icons, CATEGORY_COLORS, fetchLogs ...) ...
+
 
 
     // --- High-Fidelity Colorful Brand SVGs ---
