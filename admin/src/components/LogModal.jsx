@@ -13,6 +13,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
     // Dropdown States
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+    const [activeMainOverride, setActiveMainOverride] = useState(null); // Force back to top level
     const [showLevelDropdown, setShowLevelDropdown] = useState(false);
     const [showSeverityDropdown, setShowSeverityDropdown] = useState(false);
     const [showActiveFilters, setShowActiveFilters] = useState(false);
@@ -147,10 +148,10 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
             if (!dlMatch || !severityMatch) return false;
 
-            // 3. Search Query (Tokens -> OR Logic between Token Groups)
+            // 3. Search Query (Tokens -> AND Logic between Token Groups)
             if (tokens.length === 0) return true;
 
-            return tokens.some(token => {
+            return tokens.every(token => {
                 if (token.type === 'category') {
                     // ALL tags must be present in the Category string
                     // Category string: "Settings" or "[Settings][Interaction]"?
@@ -875,17 +876,12 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                 {(() => {
                                     // Drill-down Logic: Check if we have an active Main Category in the filter
                                     const tokens = parseSearchQuery(filterQuery);
-                                    const lastCatToken = tokens.slice().reverse().find(t => t.type === 'category');
-                                    // Extract the last tag from the group (Main or Sub?)
-                                    // If strict [Main], we want subs. If [Main] [Sub], we might want siblings?
-                                    // Simplest: Check if the last tag matches a known Main Category
-                                    const lastTag = lastCatToken ? lastCatToken.tags[lastCatToken.tags.length - 1] : null;
-                                    const isMainSelected = lastTag && (CATEGORY_COLORS[lastTag] || uniqueCategories.includes(lastTag));
 
-                                    // If Main is selected and has subs, show subs.
-                                    // We need to know if 'lastTag' IS a main category. 
-                                    // We can check if it exists in subCategoryMap keys.
-                                    const activeMain = isMainSelected && subCategoryMap[lastTag] ? lastTag : null;
+                                    // SMART DETECTION: Find the last tag in the whole query that IS a Main Category
+                                    const allTagsInQuery = tokens.filter(t => t.type === 'category').flatMap(t => t.tags);
+                                    const lastKnownMain = allTagsInQuery.slice().reverse().find(t => subCategoryMap[t]);
+
+                                    const activeMain = (activeMainOverride === null) ? lastKnownMain : null;
 
                                     if (activeMain) {
                                         // Show Subcategories
@@ -903,15 +899,27 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                     textTransform: 'uppercase',
                                                     letterSpacing: '0.05em',
                                                     borderBottom: '1px solid rgba(51, 65, 85, 0.3)',
-                                                    marginBottom: '4px'
+                                                    marginBottom: '4px',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center'
                                                 }}>
-                                                    {activeMain} › SELECT SUBCATEGORY
+                                                    <span>{activeMain} › SELECT SUBCATEGORY</span>
+                                                    <span
+                                                        onClick={(e) => { e.stopPropagation(); setActiveMainOverride(true); }}
+                                                        style={{ cursor: 'pointer', opacity: 0.6, fontSize: '0.6rem' }}
+                                                        onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                                                        onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+                                                    >
+                                                        ← ALL CATEGORIES
+                                                    </span>
                                                 </div>
                                                 {subs.map(sub => (
                                                     <div key={sub}
                                                         onClick={() => {
                                                             const needsSpace = filterQuery.length > 0 && !filterQuery.endsWith(' ');
                                                             setFilterQuery(prev => prev + (needsSpace ? ' ' : '') + `[${sub}]`);
+                                                            setActiveMainOverride(null); // Reset override on selection
                                                         }}
                                                         style={{
                                                             padding: '8px 12px 8px 24px',
@@ -946,6 +954,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                     onClick={() => {
                                                         const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
                                                         setFilterQuery(prev => prev + pad + `[${cat}]`);
+                                                        setActiveMainOverride(null);
                                                     }}
                                                     style={{
                                                         padding: '10px 12px 6px',
@@ -969,8 +978,13 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 {subCategoryMap[cat] && Array.from(subCategoryMap[cat]).sort().map(sub => (
                                                     <div key={`${cat}-${sub}`}
                                                         onClick={() => {
+                                                            // Logic: If [cat] is already in the query, just append [sub]. Otherwise prepend [cat]
+                                                            const queryLower = filterQuery.toLowerCase();
+                                                            const hasParent = queryLower.includes(`[${cat.toLowerCase()}]`);
                                                             const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
-                                                            setFilterQuery(prev => prev + pad + `[${cat}] [${sub}]`);
+                                                            const insertion = hasParent ? `[${sub}]` : `[${cat}] [${sub}]`;
+                                                            setFilterQuery(prev => prev + pad + insertion);
+                                                            setActiveMainOverride(null);
                                                         }}
                                                         style={{
                                                             padding: '5px 12px 5px 32px',
@@ -1005,7 +1019,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
 
                     {/* 2. Level Filter (Multi-Select) */}
-                    <div style={{ position: 'relative', width: '110px', flexShrink: 0 }} ref={levelRef}>
+                    <div style={{ position: 'relative', width: '121px', flexShrink: 0 }} ref={levelRef}>
                         <div
                             onClick={() => setShowLevelDropdown(!showLevelDropdown)}
                             style={{
@@ -1086,7 +1100,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
 
                     {/* 3. Severity Filter (Multi-Select) */}
-                    <div style={{ position: 'relative', width: '140px', flexShrink: 0 }} ref={severityRef}>
+                    <div style={{ position: 'relative', width: '154px', flexShrink: 0 }} ref={severityRef}>
                         <div
                             onClick={() => setShowSeverityDropdown(!showSeverityDropdown)}
                             style={{
