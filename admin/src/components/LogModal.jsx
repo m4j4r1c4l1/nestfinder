@@ -359,23 +359,52 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         };
         const { color: dlColor, char: dlChar } = getDlStyle(dl);
 
+        const Badge = ({ char, color, size = '18px', fontSize = '0.65rem' }) => (
+            <span style={{
+                fontSize: fontSize,
+                fontWeight: 900,
+                color: color,
+                backgroundColor: `${color}22`,
+                border: `1px solid ${color}44`,
+                width: size,
+                height: size,
+                display: 'inline-flex', // Changed to inline-flex for better flow
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                flexShrink: 0,
+                lineHeight: 1, // Ensure critical centering
+                padding: 0,     // Remove any padding offset
+                boxSizing: 'border-box'
+            }}>
+                {char}
+            </span>
+        );
+
+        const renderMessage = (txt) => {
+            if (typeof txt !== 'string') return txt;
+
+            // Match: "Debug Mode Activated (D Default)" or (A Aggressive) or (P Paranoic)
+            const match = txt.match(/^Debug Mode Activated \(([DAP]) (\w+)\)$/);
+            if (match) {
+                const [_, badgeChar, levelName] = match;
+                // Determine color based on char/name
+                const badgeStyle = getDlStyle(levelName);
+                return (
+                    <>
+                        Debug Mode Activated (
+                        <Badge char={badgeChar} color={badgeStyle.color} size="16px" fontSize="0.6rem" />
+                        <span style={{ marginLeft: '4px' }}>{levelName}</span>)
+                    </>
+                );
+            }
+            return txt;
+        };
+
         return (
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-                <span title={`Source Level: ${dl || 'Default'}`} style={{
-                    fontSize: '0.65rem',
-                    fontWeight: 900,
-                    color: dlColor,
-                    backgroundColor: `${dlColor}22`,
-                    border: `1px solid ${dlColor}44`,
-                    width: '18px',
-                    height: '18px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    flexShrink: 0
-                }}>
-                    {dlChar}
+                <span title={`Source Level: ${dl || 'Default'}`}>
+                    <Badge char={dlChar} color={dlColor} />
                 </span>
                 <span style={{ color: '#64748b', fontSize: '0.85em', minWidth: '110px' }}>
                     {formatTime(ts)}
@@ -397,8 +426,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category.replace(/[\[\]]/g, ' ').trim().split(/\s+/)[0]] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
                     {category || '[General]'}
                 </span>
-                <span style={{ color: '#f8fafc', flex: 1 }}>
-                    {typeof msg === 'string' ? msg.replace(/\.$/, '') : msg}
+                <span style={{ color: '#f8fafc', flex: 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {renderMessage(typeof msg === 'string' ? msg.replace(/\.$/, '') : msg)}
                 </span>
                 {data && Object.keys(data).filter(k => !['ip', 'userAgent', 'platform'].includes(k)).length > 0 && (
                     <div style={{
