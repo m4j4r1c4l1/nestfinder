@@ -43,6 +43,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 if (user.debug_enabled) {
                     await adminApi.toggleDebug(user.id);
                     if (onUserUpdate) onUserUpdate({ debug_enabled: false });
+                    setIsFollowing(false); // Stop live following
                 }
             } else {
                 await adminApi.setDebugLevel(user.id, newLevel);
@@ -50,6 +51,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     await adminApi.toggleDebug(user.id);
                 }
                 if (onUserUpdate) onUserUpdate({ debug_enabled: true, debug_level: newLevel });
+                setIsFollowing(true); // Auto-start live following
             }
             setShowLevelSelector(false);
         } catch (err) {
@@ -58,7 +60,28 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         }
     };
 
-    // ... (Keep existing refs/effects for click outside, polling, etc) ...
+    // Click Outside Handler
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setShowSearchDropdown(false);
+            }
+            if (levelRef.current && !levelRef.current.contains(event.target)) {
+                setShowLevelDropdown(false);
+            }
+            if (severityRef.current && !severityRef.current.contains(event.target)) {
+                setShowSeverityDropdown(false);
+            }
+            if (selectorRef.current && !selectorRef.current.contains(event.target)) {
+                setShowLevelSelector(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // --- SMART PARSER LOGIC ---
     const parseSearchQuery = (query) => {
@@ -405,6 +428,44 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         return () => clearInterval(timer);
     }, []);
 
+    // --- HELPERS & STYLES ---
+    const getLevelStyles = (lvl) => {
+        const l = lvl?.toLowerCase() || '';
+        if (l.includes('error') || l.includes('fail')) return { color: '#ef4444', label: 'ERROR' };
+        if (l.includes('warn')) return { color: '#fbbf24', label: 'WARN' };
+        if (l.includes('debug')) return { color: '#a855f7', label: 'DEBUG' };
+        if (l.includes('system')) return { color: '#10b981', label: 'SYSTEM' };
+        return { color: '#3b82f6', label: 'INFO' };
+    };
+
+    const getDlStyle = (sourceLvl) => {
+        const s = (sourceLvl || 'default').toLowerCase();
+        if (s === 'paranoic') return { color: '#ef4444', char: 'P' };
+        if (s === 'aggressive') return { color: '#a855f7', char: 'A' };
+        return { color: '#3b82f6', char: 'D' };
+    };
+
+    const Badge = ({ char, color, size = '18px', fontSize = '0.65rem' }) => (
+        <span style={{
+            fontSize: fontSize,
+            fontWeight: 900,
+            color: color,
+            backgroundColor: `${color}22`,
+            border: `1px solid ${color}44`,
+            width: size,
+            height: size,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            flexShrink: 0,
+            lineHeight: 1,
+            boxSizing: 'border-box'
+        }}>
+            {char}
+        </span>
+    );
+
     // Syntax Highlighting parser
     const parseLogLine = (line) => {
         let ts, level, category, msg, data, dl;
@@ -442,45 +503,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
             }) + ' CET';
         };
 
-        const getLevelStyles = (lvl) => {
-            const l = lvl?.toLowerCase() || '';
-            if (l.includes('error') || l.includes('fail')) return { color: '#ef4444', label: 'ERROR' };
-            if (l.includes('warn')) return { color: '#fbbf24', label: 'WARN' };
-            if (l.includes('debug')) return { color: '#a855f7', label: 'DEBUG' };
-            if (l.includes('system')) return { color: '#10b981', label: 'SYSTEM' };
-            return { color: '#3b82f6', label: 'INFO' };
-        };
-
         const { color: levelColor, label: levelLabel } = getLevelStyles(level);
-
-        const getDlStyle = (sourceLvl) => {
-            const s = (sourceLvl || 'default').toLowerCase();
-            if (s === 'paranoic') return { color: '#ef4444', char: 'P' };
-            if (s === 'aggressive') return { color: '#a855f7', char: 'A' };
-            return { color: '#3b82f6', char: 'D' };
-        };
         const { color: dlColor, char: dlChar } = getDlStyle(dl);
-
-        const Badge = ({ char, color, size = '18px', fontSize = '0.65rem' }) => (
-            <span style={{
-                fontSize: fontSize,
-                fontWeight: 900,
-                color: color,
-                backgroundColor: `${color}22`,
-                border: `1px solid ${color}44`,
-                width: size,
-                height: size,
-                display: 'inline-flex', // Changed to inline-flex for better flow
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '50%',
-                flexShrink: 0,
-                lineHeight: 1,
-                boxSizing: 'border-box'
-            }}>
-                {char}
-            </span>
-        );
 
         const renderMessage = (txt) => {
             if (typeof txt !== 'string') return txt;
@@ -592,10 +616,16 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     };
 
     // --- DROPDOWN DATA PREPARATION ---
-    const uniqueCategories = [...new Set(logs.map(l => {
-        const cat = typeof l === 'object' ? l.category : '';
-        return cat ? cat.replace(/[\[\]]/g, ' ').trim().split(/\s+/)[0] : '';
-    }).filter(c => c))].sort();
+    // Show ALL predefined categories + any others found in logs
+    const uniqueCategories = React.useMemo(() => {
+        const logCats = new Set(logs.map(l => {
+            const cat = typeof l === 'object' ? l.category : '';
+            return cat ? cat.replace(/[\[\]]/g, ' ').trim().split(/\s+/)[0] : '';
+        }).filter(c => c));
+
+        const predefined = Object.keys(CATEGORY_COLORS).filter(k => k !== 'Default');
+        return [...new Set([...predefined, ...logCats])].sort();
+    }, [logs]);
 
     const subCategoryMap = logs.reduce((acc, l) => {
         const catStr = typeof l === 'object' ? l.category : '';
@@ -813,16 +843,20 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                 background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
                                 marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                             }}>
-                                {['', 'Default', 'Aggressive', 'Paranoic'].map(lvl => (
-                                    <div key={lvl || 'all'}
-                                        onClick={() => { setFilterLevel(lvl); setShowLevelDropdown(false); }}
-                                        style={{ padding: '6px 10px', cursor: 'pointer', color: '#e2e8f0' }}
-                                        onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                        {lvl || 'All Levels'}
-                                    </div>
-                                ))}
+                                {['', 'Default', 'Aggressive', 'Paranoic'].map(lvl => {
+                                    const { color, char } = getDlStyle(lvl || 'default');
+                                    return (
+                                        <div key={lvl || 'all'}
+                                            onClick={() => { setFilterLevel(lvl); setShowLevelDropdown(false); }}
+                                            style={{ padding: '6px 10px', cursor: 'pointer', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                            onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            {lvl && <Badge char={char} color={color} size="16px" fontSize="0.6rem" />}
+                                            {lvl || 'All Levels'}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -847,16 +881,20 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                 background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
                                 marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                             }}>
-                                {['', 'INFO', 'WARN', 'ERROR', 'SUCCESS', 'DEBUG'].map(sev => (
-                                    <div key={sev || 'all'}
-                                        onClick={() => { setFilterSeverity(sev); setShowSeverityDropdown(false); }}
-                                        style={{ padding: '6px 10px', cursor: 'pointer', color: sev === 'ERROR' ? '#ef4444' : sev === 'WARN' ? '#f59e0b' : '#e2e8f0' }}
-                                        onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                        {sev || 'All Severities'}
-                                    </div>
-                                ))}
+                                {['', 'INFO', 'WARN', 'ERROR', 'SUCCESS', 'DEBUG'].map(sev => {
+                                    const { color } = getLevelStyles(sev || 'INFO');
+                                    return (
+                                        <div key={sev || 'all'}
+                                            onClick={() => { setFilterSeverity(sev); setShowSeverityDropdown(false); }}
+                                            style={{ padding: '6px 10px', cursor: 'pointer', color: sev === 'ERROR' ? '#ef4444' : sev === 'WARN' ? '#f59e0b' : '#e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                            onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            {sev && <Badge char={sev[0]} color={color} size="16px" fontSize="0.6rem" />}
+                                            {sev || 'All Severities'}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
