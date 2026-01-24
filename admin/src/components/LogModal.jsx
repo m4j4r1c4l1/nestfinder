@@ -37,6 +37,27 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     const [refreshDots, setRefreshDots] = useState('');
     const [animating, setAnimating] = useState(false);
 
+    const handleSetLevel = async (newLevel) => {
+        try {
+            if (newLevel === 'off') {
+                if (user.debug_enabled) {
+                    await adminApi.toggleDebug(user.id);
+                    if (onUserUpdate) onUserUpdate({ debug_enabled: false });
+                }
+            } else {
+                await adminApi.setDebugLevel(user.id, newLevel);
+                if (!user.debug_enabled) {
+                    await adminApi.toggleDebug(user.id);
+                }
+                if (onUserUpdate) onUserUpdate({ debug_enabled: true, debug_level: newLevel });
+            }
+            setShowLevelSelector(false);
+        } catch (err) {
+            console.error('Failed to set debug level:', err);
+            setError(err.message);
+        }
+    };
+
     // ... (Keep existing refs/effects for click outside, polling, etc) ...
 
     // --- SMART PARSER LOGIC ---
