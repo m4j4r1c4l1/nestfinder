@@ -204,19 +204,27 @@ class ApiClient {
           logger.default(['API', area], `Response: Submission successfully received.${suffix}`);
         } else if (humanName === 'Update Sent messages') {
           logger.default(['API', area], `Response: Sent messages successfully updated.${suffix}`);
+
+          // Aggressive: Response Status
+          logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
           // Aggressive Data Block for Sent Messages
           logger.aggressive(['API', area], 'Sent Messages Data', data);
         } else if (humanName === 'Active broadcasts') {
           logger.default(['API', area], `Response: Active broadcasts successfully received${suffix}`);
+
+          // Aggressive: Response Status
+          logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
           // Aggressive Data Block for Broadcasts
           logger.aggressive(['API', area], 'Broadcasts Data', data);
         } else {
           logger.default(['API', area], `Response: ${humanName} successfully received.${suffix}`);
+          // Aggressive: Response Status
+          logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
         }
+      } else {
+        // Aggressive: Response Status (Fallback)
+        logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
       }
-
-      // Aggressive: Response Status
-      logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
 
       // Paranoic: Full Response Data
       logger.paranoic(['API', area], 'Response Data', data);

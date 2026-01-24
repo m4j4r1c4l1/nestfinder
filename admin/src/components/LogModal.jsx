@@ -33,12 +33,17 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
     const handleSetLevel = async (newLevel) => {
         try {
-            // Optimistically update logic handled by parent via callback, but we trigger API here
-            await adminApi.setDebugLevel(user.id, newLevel);
-
-            // Notify parent to update local state immediately
-            if (onUserUpdate) {
-                onUserUpdate({ debug_level: newLevel });
+            if (newLevel === 'off') {
+                if (user.debug_enabled) {
+                    await adminApi.toggleDebug(user.id);
+                    if (onUserUpdate) onUserUpdate({ debug_enabled: false });
+                }
+            } else {
+                await adminApi.setDebugLevel(user.id, newLevel);
+                if (!user.debug_enabled) {
+                    await adminApi.toggleDebug(user.id);
+                }
+                if (onUserUpdate) onUserUpdate({ debug_enabled: true, debug_level: newLevel });
             }
             setShowLevelSelector(false);
         } catch (err) {
@@ -789,7 +794,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             boxShadow: isOff ? 'none' : `0 0 4px ${color}`,
                                                             opacity: isOff ? 0.7 : 1
                                                         }} />
-                                                        <span style={{ textTransform: 'capitalize' }}>{isOff ? 'Turn Off' : lvl}</span>
+                                                        <span style={{ textTransform: 'capitalize' }}>{isOff ? 'Disabled' : lvl}</span>
                                                     </button>
                                                 );
                                             })}

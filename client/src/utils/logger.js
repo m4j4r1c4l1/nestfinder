@@ -80,7 +80,8 @@ class DebugLogger {
 
             const currentLevel = this.config.debugLevel;
             if (currentLevel !== 'default') {
-                this.log('System', `Checking remote Debug Status`, { url });
+                this.log('System', `Checking remote Debug Status`);
+                this.aggressive('System', 'Debug Status Check Data', { url });
             }
 
             const res = await fetch(url, {

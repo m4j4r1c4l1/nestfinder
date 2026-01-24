@@ -156,6 +156,12 @@ export const adminApi = {
         });
     },
 
+    toggleDebug(userId) {
+        return this.fetch(`/debug/users/${userId}/toggle`, {
+            method: 'POST'
+        });
+    },
+
     getUsers() {
         return this.fetch('/admin/users');
     },
