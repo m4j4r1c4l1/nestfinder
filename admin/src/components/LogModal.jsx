@@ -732,33 +732,31 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                             zIndex: 50
                                         }}
                                         title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`}
-                                        onMouseEnter={() => {
-                                            if (user.debug_enabled) setShowLevelSelector(true);
-                                        }}
+                                        onMouseEnter={() => setShowLevelSelector(true)}
                                     />
-
-                                    {/* Level Selector Popup */}
-                                    {showLevelSelector && user.debug_enabled && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: '20px',
-                                            left: '50%',
-                                            transform: 'translateX(-50%)',
-                                            background: '#0f172a',
-                                            border: '1px solid #334155',
-                                            borderRadius: '8px',
-                                            padding: '4px',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '2px',
-                                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
-                                            zIndex: 100,
-                                            minWidth: '110px'
-                                        }}>
-                                            {['default', 'aggressive', 'paranoic']
-                                                .filter(lvl => lvl !== user.debug_level)
-                                                .map(lvl => {
-                                                    const color = lvl === 'paranoic' ? '#ef4444' : lvl === 'aggressive' ? '#a855f7' : '#3b82f6';
+                                        {showLevelSelector && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: '20px',
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                                background: '#0f172a',
+                                                border: '1px solid #334155',
+                                                borderRadius: '8px',
+                                                padding: '4px',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '2px',
+                                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+                                                zIndex: 100,
+                                                minWidth: '120px'
+                                            }}>
+                                                {(user.debug_enabled
+                                                    ? ['off', 'default', 'aggressive', 'paranoic'].filter(lvl => lvl !== user.debug_level)
+                                                    : ['default', 'aggressive', 'paranoic']
+                                                ).map(lvl => {
+                                                    const isOff = lvl === 'off';
+                                                    const color = isOff ? '#64748b' : lvl === 'paranoic' ? '#ef4444' : lvl === 'aggressive' ? '#a855f7' : '#3b82f6';
                                                     return (
                                                         <button
                                                             key={lvl}
@@ -788,14 +786,15 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                 height: '8px',
                                                                 borderRadius: '50%',
                                                                 backgroundColor: color,
-                                                                boxShadow: `0 0 4px ${color}`
+                                                                boxShadow: isOff ? 'none' : `0 0 4px ${color}`,
+                                                                opacity: isOff ? 0.7 : 1
                                                             }} />
-                                                            <span style={{ textTransform: 'capitalize' }}>{lvl}</span>
+                                                            <span style={{ textTransform: 'capitalize' }}>{isOff ? 'Turn Off' : lvl}</span>
                                                         </button>
                                                     );
                                                 })}
-                                        </div>
-                                    )}
+                                            </div>
+                                        )}
                                 </div>
                             </>
                         )}
