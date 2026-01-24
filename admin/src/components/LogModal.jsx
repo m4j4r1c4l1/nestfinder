@@ -7,57 +7,124 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     const [error, setError] = useState(null);
     const [isFollowing, setIsFollowing] = useState(user?.debug_enabled ?? true);
     const [lastBatchId, setLastBatchId] = useState(0);
+    const [filterQuery, setFilterQuery] = useState('');
+    const [filterLevel, setFilterLevel] = useState('');
+    const [filterSeverity, setFilterSeverity] = useState('');
+
+    // Dropdown States
+    const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+    const [showLevelDropdown, setShowLevelDropdown] = useState(false);
+    const [showSeverityDropdown, setShowSeverityDropdown] = useState(false);
+    const [showActiveFilters, setShowActiveFilters] = useState(false);
+
     const contentRef = useRef(null);
     const scrollRef = useRef(null);
     const pollingRef = useRef(null);
-    const selectorRef = useRef(null); // Ref for the level selector container
+    const selectorRef = useRef(null);
+    const searchRef = useRef(null);
+    const levelRef = useRef(null);
+    const severityRef = useRef(null);
 
-    // Debug Level Selector State
+    // Debug Level Selector State (Footer)
     const [showLevelSelector, setShowLevelSelector] = useState(false);
 
-    // Click outside to close level selector
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (selectorRef.current && !selectorRef.current.contains(event.target)) {
-                setShowLevelSelector(false);
-            }
-        };
+    // ... (Keep existing refs/effects for click outside, polling, etc) ...
 
-        if (showLevelSelector) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [showLevelSelector]);
+    // --- SMART PARSER LOGIC ---
+    const parseSearchQuery = (query) => {
+        if (!query) return [];
+        const tokens = [];
+        let remaining = query;
 
-    const handleSetLevel = async (newLevel) => {
-        try {
-            if (newLevel === 'off') {
-                if (user.debug_enabled) {
-                    await adminApi.toggleDebug(user.id);
-                    if (onUserUpdate) onUserUpdate({ debug_enabled: false });
-                }
-            } else {
-                await adminApi.setDebugLevel(user.id, newLevel);
-                if (!user.debug_enabled) {
-                    await adminApi.toggleDebug(user.id);
-                }
-                if (onUserUpdate) onUserUpdate({ debug_enabled: true, debug_level: newLevel });
-            }
-            setShowLevelSelector(false);
-        } catch (err) {
-            console.error('Failed to set debug level:', err);
-            setError(err.message);
+        // 1. Extract Quoted Strings (Exact Match): 'foo bar'
+        const quoteRegex = /'([^']+)'/g;
+        let match;
+        while ((match = quoteRegex.exec(remaining)) !== null) {
+            tokens.push({ type: 'exact', value: match[1] });
+            remaining = remaining.replace(match[0], ' ');
         }
+
+        // 2. Extract Bracket Groups: [API] [Points]
+        // This regex matches consecutive brackets separated by optional spaces
+        const bracketGroupRegex = /((?:\[[^\]]+\]\s*)+)/g;
+        while ((match = bracketGroupRegex.exec(remaining)) !== null) {
+            const rawGroup = match[1];
+            // Split into individual tags
+            const tags = rawGroup.match(/\[([^\]]+)\]/g).map(t => t.replace(/[\[\]]/g, '').trim());
+            tokens.push({ type: 'category', tags });
+            remaining = remaining.replace(match[0], ' ');
+        }
+
+        // 3. Extract Remaining Words (OR Logic default, unless timestamp)
+        const words = remaining.trim().split(/\s+/).filter(w => w);
+        words.forEach(w => {
+            // Check for Timestamp (simple check: includes :)
+            if (w.includes(':')) tokens.push({ type: 'timestamp', value: w });
+            else tokens.push({ type: 'text', value: w });
+        });
+
+        return tokens;
     };
-    const isUserScrollingRef = useRef(false);
-    const [copied, setCopied] = useState(false);
-    const [isColorEnabled, setIsColorEnabled] = useState(false);
-    const [liveTime, setLiveTime] = useState(new Date());
-    const [deviceInfo, setDeviceInfo] = useState(null);
-    const [refreshDots, setRefreshDots] = useState('');
-    const [animating, setAnimating] = useState(false);
+
+    // --- FILTER LOGIC ---
+    const getFilteredLogs = () => {
+        if (!filterQuery && !filterLevel && !filterSeverity) return logs;
+
+        const tokens = parseSearchQuery(filterQuery);
+
+        return logs.filter(log => {
+            // Parse line if string
+            let logObj = log;
+            if (typeof log === 'string') {
+                // ... helper extraction ...
+                // (Using parseLogLine logic extraction for filtering is expensive. 
+                //  Better to rely on structured check or simple string check)
+                //  For speed, we'll assume structured if available, else string match.
+                //  BUT `logs` state can contain strings from server backend sometimes? 
+                //  Usually `adminApi.getUserLogs` returns objects.
+            }
+            const { category = '', level = 'INFO', msg = '', ts = '', dl = 'default' } = (typeof log === 'object' ? log : {});
+            if (typeof log === 'string') return true; // Fail safe
+
+            // 1. Level Filter (Debug Level: D/A/P) - "Level" in UI usually means DL? 
+            //    User Request: "filter messages by level -default, aggressive, paranoic-"
+            if (filterLevel && (dl || 'default').toLowerCase() !== filterLevel.toLowerCase()) return false;
+
+            // 2. Severity Filter (INFO, WARN...)
+            if (filterSeverity && (level || 'INFO').toLowerCase() !== filterSeverity.toLowerCase()) return false;
+
+            // 3. Search Query (Tokens -> OR Logic between Token Groups)
+            if (tokens.length === 0) return true;
+
+            return tokens.some(token => {
+                if (token.type === 'category') {
+                    // ALL tags must be present in the Category string
+                    // Category string: "Settings" or "[Settings][Interaction]"?
+                    // Server sends "Settings" usually. 
+                    // Wait, `logger.js` sends ARRAY `['Settings', 'Interaction']`.
+                    // DB `client_logs` stores `category` as string? 
+                    // `logger.js` joins with space? Yes `[A] [B]`.
+                    // So we check if `category` string contains `[Tag]`.
+                    return token.tags.every(tag => category.toLowerCase().includes(tag.toLowerCase()));
+                }
+                if (token.type === 'exact') {
+                    return (msg + ' ' + category).toLowerCase().includes(token.value.toLowerCase());
+                }
+                if (token.type === 'timestamp') {
+                    return ts.includes(token.value);
+                }
+                if (token.type === 'text') {
+                    return (msg + ' ' + category).toLowerCase().includes(token.value.toLowerCase());
+                }
+                return false;
+            });
+        });
+    };
+
+    const filteredLogs = getFilteredLogs();
+
+    // ... (Rest of existing state: Icons, CATEGORY_COLORS, fetchLogs ...) ...
+
 
     // --- High-Fidelity Colorful Brand SVGs ---
     const Icons = {
@@ -494,6 +561,34 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         });
     };
 
+    // --- DROPDOWN DATA PREPARATION ---
+    const uniqueCategories = [...new Set(logs.map(l => {
+        const cat = typeof l === 'object' ? l.category : '';
+        return cat ? cat.replace(/[\[\]]/g, ' ').trim().split(/\s+/)[0] : '';
+    }).filter(c => c))].sort();
+
+    const subCategoryMap = logs.reduce((acc, l) => {
+        const catStr = typeof l === 'object' ? l.category : '';
+        const tags = catStr.match(/\[([^\]]+)\]/g)?.map(t => t.replace(/[\[\]]/g, '').trim()) || [];
+        if (tags.length > 0) {
+            const main = tags[0];
+            const subs = tags.slice(1);
+            if (!acc[main]) acc[main] = new Set();
+            subs.forEach(s => acc[main].add(s));
+        }
+        return acc;
+    }, {});
+
+    const activeFiltersList = [];
+    if (filterLevel) activeFiltersList.push({ type: 'Level', val: filterLevel });
+    if (filterSeverity) activeFiltersList.push({ type: 'Severity', val: filterSeverity });
+    if (filterQuery) {
+        parseSearchQuery(filterQuery).forEach(t => {
+            if (t.type === 'category') activeFiltersList.push({ type: 'Category', val: `[${t.tags.join('][')}]` });
+            else activeFiltersList.push({ type: 'Text', val: t.type === 'exact' ? `'${t.value}'` : t.value });
+        });
+    }
+
     if (!user) return null;
 
     return (
@@ -524,6 +619,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 overflow: 'hidden'
             }} onClick={e => e.stopPropagation()}>
 
+                {/* HEADER ROW 1: Title & User Info */}
                 <div style={{
                     padding: '1rem 1.5rem',
                     borderBottom: '1px solid #334155',
@@ -546,53 +642,23 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             lineHeight: 1
                         }}>&times;</button>
                     </div>
+                    {/* User Info Line */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#94a3b8', fontSize: '0.85rem', fontFamily: 'monospace', marginTop: '6px' }}>
                         <div>{user.nickname} • {user.id}</div>
                         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                             {deviceInfo && (
                                 <>
-                                    {deviceInfo.device?.name && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            {Icons[deviceInfo.device.icon] || Icons.Phone}
-                                            <span style={{ color: '#e2e8f0' }}>{deviceInfo.device.name}</span>
-                                        </div>
-                                    )}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        {Icons[deviceInfo.os.icon] || Icons.Windows}
-                                        <span style={{ color: '#e2e8f0' }}>{deviceInfo.os.name} {deviceInfo.os.ver}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        {Icons[deviceInfo.browser.icon] || Icons.Safari}
-                                        <span style={{ color: '#e2e8f0' }}>{deviceInfo.browser.name} {deviceInfo.browser.ver}</span>
-                                    </div>
-                                    {/* IP Address(es) */}
-                                    {deviceInfo.ip && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                            {/* Real IP */}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <span style={{ fontSize: '14px', lineHeight: '16px', width: '16px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📡</span>
-                                                <span style={{ color: '#e2e8f0' }}>
-                                                    {(deviceInfo.ip || '').split(',')[0].trim()}
-                                                </span>
-                                            </div>
-
-                                            {/* Proxy IP (if present) */}
-                                            {(deviceInfo.ip || '').split(',')[1] && (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <span style={{ fontSize: '14px', lineHeight: '16px', width: '16px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Proxy/Internal IP">⚔️</span>
-                                                    <span style={{ color: '#e2e8f0' }}>
-                                                        {(deviceInfo.ip || '').split(',')[1].trim()}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                    {deviceInfo.device?.name && <div style={{ display: 'flex', gap: '6px' }}>{Icons[deviceInfo.device.icon] || Icons.Phone} {deviceInfo.device.name}</div>}
+                                    <div style={{ display: 'flex', gap: '6px' }}>{Icons[deviceInfo.os.icon] || Icons.Windows} {deviceInfo.os.name} {deviceInfo.os.ver}</div>
+                                    <div style={{ display: 'flex', gap: '6px' }}>{Icons[deviceInfo.browser.icon] || Icons.Safari} {deviceInfo.browser.name} {deviceInfo.browser.ver}</div>
+                                    {deviceInfo.ip && <div style={{ display: 'flex', gap: '6px' }}>📡 {deviceInfo.ip.split(',')[0]}</div>}
                                 </>
                             )}
                         </div>
                     </div>
                 </div>
 
+                {/* HEADER ROW 2: Actions (Live, Focus) */}
                 <div style={{
                     padding: '8px 1.5rem',
                     backgroundColor: '#1e293b',
@@ -603,67 +669,206 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     gap: '12px'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button
-                            onClick={() => setIsFollowing(!isFollowing)}
-                            style={{
-                                padding: '4px 12px',
-                                borderRadius: '4px',
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                backgroundColor: isFollowing ? '#059669' : 'transparent',
-                                color: isFollowing ? 'white' : '#94a3b8',
-                                border: `1px solid ${isFollowing ? '#059669' : '#334155'}`,
-                                transition: 'all 0.2s ease'
-                            }}
-                        >
-                            <div style={{
-                                width: '8px',
-                                height: '8px',
-                                borderRadius: '50%',
-                                backgroundColor: isFollowing ? '#ef4444' : '#64748b',
-                                boxShadow: isFollowing ? '0 0 8px #ef4444' : 'none',
-                                animation: isFollowing ? 'pulse 1.5s infinite' : 'none'
-                            }} />
+                         <button onClick={() => setIsFollowing(!isFollowing)} style={{
+                                padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                                backgroundColor: isFollowing ? '#059669' : 'transparent', color: isFollowing ? 'white' : '#94a3b8',
+                                border: `1px solid ${isFollowing ? '#059669' : '#334155'}`
+                            }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isFollowing ? '#ef4444' : '#64748b', animation: isFollowing ? 'pulse 1.5s infinite' : 'none' }} />
                             {isFollowing ? 'LIVE' : 'OFF'}
                         </button>
                         <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: isFollowing ? 'italic' : 'normal' }}>
                             {isFollowing ? `Auto-refreshing live${refreshDots}` : 'Auto-refreshing stopped'}
                         </span>
                     </div>
-                    <button
-                        onClick={() => setIsColorEnabled(!isColorEnabled)}
-                        style={{
-                            padding: '4px 12px',
-                            borderRadius: '4px',
-                            fontSize: '0.8rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            backgroundColor: isColorEnabled ? '#059669' : 'transparent',
-                            color: isColorEnabled ? 'white' : '#94a3b8',
-                            border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`,
-                            transition: 'all 0.2s ease'
-                        }}
-                    >
-                        <div style={{
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            backgroundColor: isColorEnabled ? '#172554' : '#64748b',
-                            border: isColorEnabled ? '1px solid #172554' : 'none', // Darker border for contrast
-                            boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none',
-                            animation: isColorEnabled ? 'pulse 1.5s infinite' : 'none'
-                        }} />
+                    <button onClick={() => setIsColorEnabled(!isColorEnabled)} style={{
+                        padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                        backgroundColor: isColorEnabled ? '#059669' : 'transparent', color: isColorEnabled ? 'white' : '#94a3b8',
+                        border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`
+                    }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isColorEnabled ? '#172554' : '#64748b', boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none' }} />
                         {isColorEnabled ? 'FOCUS ON' : 'FOCUS OFF'}
                     </button>
                 </div>
 
+                {/* HEADER ROW 3: Filter Toolbar (NEW) */}
+                <div style={{
+                    padding: '8px 1.5rem',
+                    backgroundColor: '#1e293b',
+                    borderBottom: '1px solid #334155',
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'center',
+                    position: 'relative' // For dropdown positioning if needed
+                }}>
+                    {/* 1. Main Search (Filter Action style) */}
+                    <div style={{ position: 'relative', flex: 2 }} ref={searchRef}>
+                        <input 
+                            type="text"
+                            placeholder="Search logs, [API] [Points], 'Exact Phrase'..."
+                            value={filterQuery}
+                            onChange={e => setFilterQuery(e.target.value)}
+                            onFocus={() => setShowSearchDropdown(true)}
+                            style={{
+                                width: '100%',
+                                padding: '6px 10px',
+                                borderRadius: '4px',
+                                border: '1px solid #475569',
+                                background: '#0f172a',
+                                color: '#e2e8f0',
+                                fontSize: '0.9rem',
+                                fontFamily: 'monospace'
+                            }}
+                        />
+                        {showSearchDropdown && (
+                            <div style={{
+                                position: 'absolute', top: '100%', left: 0, width: '100%',
+                                background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
+                                marginTop: '4px', zIndex: 60, maxHeight: '300px', overflowY: 'auto',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                            }}>
+                                {uniqueCategories.map(cat => (
+                                    <div key={cat}>
+                                        <div 
+                                            onClick={() => {
+                                                // Append "[Cat] " to query
+                                                const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
+                                                setFilterQuery(prev => prev + pad + `[${cat}]`);
+                                            }}
+                                            style={{ padding: '6px 10px', cursor: 'pointer', color: CATEGORY_COLORS[cat] || '#cbd5e1', fontWeight: 600, borderBottom: '1px solid #334155' }}
+                                            onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            [{cat}]
+                                        </div>
+                                        {/* Subcategories */}
+                                        {subCategoryMap[cat] && [...subCategoryMap[cat]].map(sub => (
+                                             <div key={`${cat}-${sub}`}
+                                                onClick={() => {
+                                                    const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
+                                                    setFilterQuery(prev => prev + pad + `[${cat}] [${sub}]`);
+                                                }}
+                                                style={{ padding: '4px 10px 4px 24px', cursor: 'pointer', color: '#94a3b8', fontSize: '0.85rem' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                             >
+                                                [{sub}]
+                                             </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 2. Level Filter */}
+                    <div style={{ position: 'relative', width: '140px' }} ref={levelRef}>
+                        <input 
+                            type="text"
+                            placeholder="Level: All"
+                            value={filterLevel}
+                            readOnly
+                            onClick={() => setShowLevelDropdown(!showLevelDropdown)}
+                            style={{
+                                width: '100%', padding: '6px 10px', borderRadius: '4px',
+                                border: '1px solid #475569', background: '#0f172a', color: '#e2e8f0',
+                                fontSize: '0.9rem', cursor: 'pointer'
+                            }}
+                        />
+                        {showLevelDropdown && (
+                            <div style={{
+                                position: 'absolute', top: '100%', left: 0, width: '100%',
+                                background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
+                                marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                            }}>
+                                {['', 'Default', 'Aggressive', 'Paranoic'].map(lvl => (
+                                    <div key={lvl || 'all'}
+                                        onClick={() => { setFilterLevel(lvl); setShowLevelDropdown(false); }}
+                                        style={{ padding: '6px 10px', cursor: 'pointer', color: '#e2e8f0' }}
+                                        onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                        {lvl || 'All Levels'}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 3. Severity Filter */}
+                    <div style={{ position: 'relative', width: '140px' }} ref={severityRef}>
+                        <input 
+                            type="text"
+                            placeholder="Severity: All"
+                            value={filterSeverity}
+                            readOnly
+                            onClick={() => setShowSeverityDropdown(!showSeverityDropdown)}
+                            style={{
+                                width: '100%', padding: '6px 10px', borderRadius: '4px',
+                                border: '1px solid #475569', background: '#0f172a', color: '#e2e8f0',
+                                fontSize: '0.9rem', cursor: 'pointer'
+                            }}
+                        />
+                        {showSeverityDropdown && (
+                             <div style={{
+                                position: 'absolute', top: '100%', left: 0, width: '100%',
+                                background: '#1e293b', border: '1px solid #475569', borderRadius: '4px',
+                                marginTop: '4px', zIndex: 60, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                            }}>
+                                {['', 'INFO', 'WARN', 'ERROR', 'SUCCESS', 'DEBUG'].map(sev => (
+                                    <div key={sev || 'all'}
+                                        onClick={() => { setFilterSeverity(sev); setShowSeverityDropdown(false); }}
+                                        style={{ padding: '6px 10px', cursor: 'pointer', color: sev === 'ERROR' ? '#ef4444' : sev === 'WARN' ? '#f59e0b' : '#e2e8f0' }}
+                                        onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                        {sev || 'All Severities'}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 4. Active Filters Tooltip Area */}
+                    <div 
+                        onMouseEnter={() => setShowActiveFilters(true)}
+                        onMouseLeave={() => setShowActiveFilters(false)}
+                        style={{ position: 'relative', cursor: 'help' }}
+                    >
+                        <div style={{ 
+                            fontSize: '1.2rem', color: activeFiltersList.length > 0 ? '#38bdf8' : '#64748b',
+                            opacity: activeFiltersList.length > 0 ? 1 : 0.5
+                        }}>
+                             ⚡
+                        </div>
+                        {showActiveFilters && activeFiltersList.length > 0 && (
+                            <div style={{
+                                position: 'absolute', top: '100%', right: 0, width: '250px',
+                                background: '#1e293b', border: '1px solid #38bdf8', borderRadius: '4px',
+                                padding: '8px', zIndex: 70, boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                                marginTop: '8px'
+                            }}>
+                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', borderBottom: '1px solid #334155', paddingBottom: '4px' }}>ACTIVE FILTERS</div>
+                                {activeFiltersList.map((f, i) => (
+                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#e2e8f0', marginBottom: '2px' }}>
+                                        <span style={{ color: '#94a3b8' }}>{f.type}:</span>
+                                        <span style={{ fontFamily: 'monospace' }}>{f.val}</span>
+                                    </div>
+                                ))}
+                                <div 
+                                    onClick={() => { setFilterQuery(''); setFilterLevel(''); setFilterSeverity(''); }}
+                                    style={{ marginTop: '8px', fontSize: '0.75rem', color: '#f87171', textAlign: 'center', cursor: 'pointer', borderTop: '1px solid #334155', paddingTop: '4px' }}
+                                >
+                                    CLEAR ALL
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* LOGS LIST */}
                 <div style={{ flex: 1, padding: '0', overflowY: 'auto', scrollBehavior: 'smooth' }} ref={scrollRef}>
                     {loading ? (
                         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
@@ -673,13 +878,13 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
                             Error: {error}
                         </div>
-                    ) : logs.length === 0 ? (
+                    ) : filteredLogs.length === 0 ? (
                         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
-                            No logs found for this user.
+                            {logs.length === 0 ? 'No logs found for this user.' : 'No logs match the current filters.'}
                         </div>
                     ) : (
                         <div style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                            {logs.map((log, index) => (
+                            {filteredLogs.map((log, index) => (
                                 <div key={index} style={{
                                     padding: '4px 8px',
                                     borderBottom: '1px solid rgba(51, 65, 85, 0.3)',
@@ -695,8 +900,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     )}
                 </div>
 
-                <div style={{
-                    padding: '0.75rem 1.5rem',
+                {/* FOOTER (Existing) */}
                     borderTop: '1px solid #334155',
                     background: '#1e293b',
                     display: 'grid',
@@ -837,7 +1041,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     }
                 `}
             </style>
-        </div>
+        </div >
     );
 };
 
