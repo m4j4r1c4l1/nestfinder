@@ -529,7 +529,11 @@ const Debug = () => {
                                                         <div
                                                             onClick={() => user.log_count > 0 && setViewingUser(user)}
                                                             style={{
-                                                                padding: '0.4rem 0.8rem',
+                                                                padding: '0 0.8rem',
+                                                                height: '28px',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
                                                                 borderRadius: '4px',
                                                                 border: user.log_count > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
                                                                 background: user.log_count > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
@@ -537,9 +541,9 @@ const Debug = () => {
                                                                 fontSize: '0.8rem',
                                                                 fontWeight: 600,
                                                                 minWidth: '80px',
-                                                                textAlign: 'center',
                                                                 cursor: user.log_count > 0 ? 'pointer' : 'default',
-                                                                transition: 'all 0.2s ease'
+                                                                transition: 'all 0.2s ease',
+                                                                boxSizing: 'border-box'
                                                             }}
                                                         >
                                                             {user.log_count > 0 ? `${user.log_count} Events` : 'No Events'}
@@ -551,7 +555,11 @@ const Debug = () => {
                                                             <div
                                                                 onClick={() => setViewingUser(user)}
                                                                 style={{
-                                                                    padding: '0.4rem 0.8rem',
+                                                                    padding: '0 0.8rem',
+                                                                    height: '28px',
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
                                                                     borderRadius: '4px',
                                                                     border: '1px solid rgba(255, 255, 255, 0.3)',
                                                                     background: 'rgba(255, 255, 255, 0.1)',
@@ -559,9 +567,9 @@ const Debug = () => {
                                                                     fontSize: '0.8rem',
                                                                     fontWeight: 600,
                                                                     minWidth: '80px',
-                                                                    textAlign: 'center',
                                                                     cursor: 'pointer',
-                                                                    transition: 'all 0.2s ease'
+                                                                    transition: 'all 0.2s ease',
+                                                                    boxSizing: 'border-box'
                                                                 }}
                                                             >
                                                                 Past events ({user.log_count})
@@ -569,7 +577,11 @@ const Debug = () => {
                                                         ) : (
                                                             /* No Events */
                                                             <div style={{
-                                                                padding: '0.4rem 0.8rem',
+                                                                padding: '0 0.8rem',
+                                                                height: '28px',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
                                                                 borderRadius: '4px',
                                                                 border: '1px solid rgba(255, 255, 255, 0.3)',
                                                                 background: 'rgba(255, 255, 255, 0.1)',
@@ -577,8 +589,8 @@ const Debug = () => {
                                                                 fontSize: '0.8rem',
                                                                 fontWeight: 600,
                                                                 minWidth: '80px',
-                                                                textAlign: 'center',
-                                                                opacity: 0.7
+                                                                opacity: 0.7,
+                                                                boxSizing: 'border-box'
                                                             }}>
                                                                 No live events
                                                             </div>
@@ -591,13 +603,18 @@ const Debug = () => {
                                                             <button
                                                                 onClick={() => handleDownloadLogs(user.id)}
                                                                 style={{
-                                                                    padding: '0.4rem 0.8rem',
+                                                                    padding: '0 0.8rem',
+                                                                    height: '28px',
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
                                                                     background: 'rgba(59, 130, 246, 0.1)',
                                                                     color: '#3b82f6',
                                                                     border: '1px solid rgba(59, 130, 246, 0.3)',
                                                                     borderRadius: '4px',
                                                                     cursor: 'pointer',
-                                                                    fontSize: '0.8rem'
+                                                                    fontSize: '0.8rem',
+                                                                    boxSizing: 'border-box'
                                                                 }}
                                                             >
                                                                 Download
@@ -606,13 +623,18 @@ const Debug = () => {
                                                                 onClick={() => handleClearLogs(user.id, user.nickname)}
                                                                 disabled={actionLoading === user.id}
                                                                 style={{
-                                                                    padding: '0.4rem 0.8rem',
+                                                                    padding: '0 0.8rem',
+                                                                    height: '28px',
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
                                                                     background: 'rgba(168, 85, 247, 0.1)', // Purple Badge
                                                                     color: '#a855f7',
                                                                     border: '1px solid rgba(168, 85, 247, 0.3)',
                                                                     borderRadius: '4px',
                                                                     cursor: 'pointer',
-                                                                    fontSize: '0.8rem'
+                                                                    fontSize: '0.8rem',
+                                                                    boxSizing: 'border-box'
                                                                 }}
                                                             >
                                                                 Clear
