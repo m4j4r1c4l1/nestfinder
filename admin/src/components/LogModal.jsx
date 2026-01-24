@@ -248,18 +248,19 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     };
 
     // Category color map for COLOR toggle
+    // Category color map for COLOR toggle (Harmonious/Professional Palette)
     const CATEGORY_COLORS = {
-        System: '#10b981',
-        API: '#3b82f6',
-        Interaction: '#f59e0b',
-        MapView: '#06b6d4',
-        Auth: '#8b5cf6',
-        Debug: '#6b7280',
-        App: '#ec4899',
-        Report: '#14b8a6',
-        Inbox: '#f472b6',
-        Settings: '#a78bfa',
-        Home: '#22d3ee',
+        System: '#94a3b8',      // Slate 400 (Neutral/Structure)
+        API: '#60a5fa',         // Blue 400 (Information/Network)
+        Interaction: '#fbbf24', // Amber 400 (Action/Warning-lite)
+        MapView: '#22d3ee',     // Cyan 400 (Spatial/Map)
+        Auth: '#a78bfa',        // Violet 400 (Security/Identity)
+        Debug: '#a1a1aa',       // Zinc 400 (Low-level/Noise)
+        App: '#f472b6',         // Pink 400 (Core Application)
+        Report: '#34d399',      // Emerald 400 (Success/Status)
+        Inbox: '#818cf8',       // Indigo 400 (Messaging)
+        Settings: '#a8a29e',    // Stone 400 (Configuration)
+        Home: '#38bdf8',        // Sky 400 (Dashboard)
         Default: '#94a3b8'
     };
 
@@ -582,7 +583,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     <div style={{
                         width: 'calc(100% - 8px)',
                         marginLeft: '8px',
-                        marginTop: '2px',
+                        marginTop: '4px',
                         padding: '6px 12px',
                         backgroundColor: 'rgba(15, 23, 42, 0.5)',
                         borderLeft: `2px solid ${dlColor}`,
@@ -789,13 +790,69 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                 marginTop: '4px', zIndex: 60, maxHeight: '300px', overflowY: 'auto',
                                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                             }}>
-                                {uniqueCategories.map(cat => (
-                                    <div key={cat}>
-                                        <div
+                                {(() => {
+                                    // Drill-down Logic: Check if we have an active Main Category in the filter
+                                    const tokens = parseSearchQuery(filterQuery);
+                                    const lastCatToken = tokens.slice().reverse().find(t => t.type === 'category');
+                                    // Extract the last tag from the group (Main or Sub?)
+                                    // If strict [Main], we want subs. If [Main] [Sub], we might want siblings?
+                                    // Simplest: Check if the last tag matches a known Main Category
+                                    const lastTag = lastCatToken ? lastCatToken.tags[lastCatToken.tags.length - 1] : null;
+                                    const isMainSelected = lastTag && (CATEGORY_COLORS[lastTag] || uniqueCategories.includes(lastTag));
+
+                                    // If Main is selected and has subs, show subs.
+                                    // We need to know if 'lastTag' IS a main category. 
+                                    // We can check if it exists in subCategoryMap keys.
+                                    const activeMain = isMainSelected && subCategoryMap[lastTag] ? lastTag : null;
+
+                                    if (activeMain) {
+                                        // Show Subcategories
+                                        const subs = Array.from(subCategoryMap[activeMain]).sort();
+                                        if (subs.length === 0) return <div style={{ padding: '6px 10px', color: '#64748b', fontSize: '0.85rem' }}>No subcategories</div>;
+
+                                        return (
+                                            <>
+                                                <div style={{
+                                                    padding: '4px 10px', background: '#334155', color: '#94a3b8',
+                                                    fontSize: '0.75rem', fontWeight: 600, borderBottom: '1px solid #475569'
+                                                }}>
+                                                    {activeMain} › Select Subcategory
+                                                </div>
+                                                {subs.map(sub => (
+                                                    <div key={sub}
+                                                        onClick={() => {
+                                                            // Logic: Append [Sub] to the EXISTING [Main] group? 
+                                                            // Or append "[Main] [Sub]"?
+                                                            // Filter Query: "[Main]" -> "[Main] [Sub]"
+                                                            // We need to replace the last "[Main]" occurrence or append to it.
+                                                            // Simplest: Append " [Sub]"
+                                                            // But wait, user might have typed "[Main] ". 
+                                                            // If we append "[Sub]", we get "[Main] [Sub]". 
+                                                            // If user clicked [Main], query is "[Main]".
+                                                            // We set query to prev + " [" + sub + "]";
+                                                            const needsSpace = filterQuery.length > 0 && !filterQuery.endsWith(' ');
+                                                            setFilterQuery(prev => prev + (needsSpace ? ' ' : '') + `[${sub}]`);
+                                                            // Keep dropdown open? Or close? Usually close after leaf selection.
+                                                            // setShowSearchDropdown(false); 
+                                                        }}
+                                                        style={{ padding: '6px 10px', cursor: 'pointer', color: '#e2e8f0', paddingLeft: '20px' }}
+                                                        onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        [{sub}]
+                                                    </div>
+                                                ))}
+                                            </>
+                                        );
+                                    }
+
+                                    // Default: Show Main Categories
+                                    return uniqueCategories.map(cat => (
+                                        <div key={cat}
                                             onClick={() => {
-                                                // Append "[Cat] " to query
                                                 const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
                                                 setFilterQuery(prev => prev + pad + `[${cat}]`);
+                                                // Don't close, allow drill-down
                                             }}
                                             style={{ padding: '6px 10px', cursor: 'pointer', color: CATEGORY_COLORS[cat] || '#cbd5e1', fontWeight: 600, borderBottom: '1px solid #334155' }}
                                             onMouseEnter={e => e.currentTarget.style.background = '#334155'}
@@ -803,22 +860,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         >
                                             [{cat}]
                                         </div>
-                                        {/* Subcategories */}
-                                        {subCategoryMap[cat] && [...subCategoryMap[cat]].map(sub => (
-                                            <div key={`${cat}-${sub}`}
-                                                onClick={() => {
-                                                    const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
-                                                    setFilterQuery(prev => prev + pad + `[${cat}] [${sub}]`);
-                                                }}
-                                                style={{ padding: '4px 10px 4px 24px', cursor: 'pointer', color: '#94a3b8', fontSize: '0.85rem' }}
-                                                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                            >
-                                                [{sub}]
-                                            </div>
-                                        ))}
-                                    </div>
-                                ))}
+                                    ));
+                                })()}
                             </div>
                         )}
                     </div>
@@ -890,8 +933,24 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                             onMouseEnter={e => e.currentTarget.style.background = '#334155'}
                                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                         >
-                                            {sev && <Badge char={sev[0]} color={color} size="16px" fontSize="0.6rem" />}
-                                            {sev || 'All Severities'}
+                                            {sev ? (
+                                                <span style={{
+                                                    color: color,
+                                                    fontWeight: 800,
+                                                    fontSize: '0.75rem',
+                                                    letterSpacing: '0.05em',
+                                                    border: `1px solid ${color}44`,
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px',
+                                                    minWidth: '60px',
+                                                    textAlign: 'center',
+                                                    backgroundColor: `${color}11`
+                                                }}>
+                                                    {sev}
+                                                </span>
+                                            ) : (
+                                                'All Severities'
+                                            )}
                                         </div>
                                     );
                                 })}
