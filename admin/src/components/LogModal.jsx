@@ -864,12 +864,14 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             }}>×</button>
                         )}
                         {showSearchDropdown && (
-                            <div style={{
-                                position: 'absolute', top: '100%', left: 0, width: '100%',
-                                background: '#0f172a', border: '1px solid #475569', borderRadius: '4px',
-                                marginTop: '4px', zIndex: 60, maxHeight: '300px', overflowY: 'auto',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
-                            }}>
+                            <div
+                                className="search-dropdown"
+                                style={{
+                                    position: 'absolute', top: '100%', left: 0, width: '100%',
+                                    background: '#0f172a', border: '1px solid #475569', borderRadius: '4px',
+                                    marginTop: '4px', zIndex: 60, maxHeight: '300px', overflowY: 'auto',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                                }}>
                                 {(() => {
                                     // Drill-down Logic: Check if we have an active Main Category in the filter
                                     const tokens = parseSearchQuery(filterQuery);
@@ -888,75 +890,115 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                     if (activeMain) {
                                         // Show Subcategories
                                         const subs = Array.from(subCategoryMap[activeMain]).sort();
-                                        if (subs.length === 0) return <div style={{ padding: '6px 10px', color: '#64748b', fontSize: '0.85rem' }}>No subcategories</div>;
+                                        if (subs.length === 0) return <div style={{ padding: '8px 12px', color: '#64748b', fontSize: '0.85rem' }}>No subcategories</div>;
 
                                         return (
-                                            <>
+                                            <div style={{ padding: '4px 0' }}>
                                                 <div style={{
-                                                    padding: '4px 10px', background: '#334155', color: '#94a3b8',
-                                                    fontSize: '0.75rem', fontWeight: 600, borderBottom: '1px solid #475569'
+                                                    padding: '6px 12px',
+                                                    background: `${CATEGORY_COLORS[activeMain] || '#334155'}11`,
+                                                    color: CATEGORY_COLORS[activeMain] || '#94a3b8',
+                                                    fontSize: '0.7rem',
+                                                    fontWeight: 800,
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.05em',
+                                                    borderBottom: '1px solid rgba(51, 65, 85, 0.3)',
+                                                    marginBottom: '4px'
                                                 }}>
-                                                    {activeMain} › Select Subcategory
+                                                    {activeMain} › SELECT SUBCATEGORY
                                                 </div>
                                                 {subs.map(sub => (
                                                     <div key={sub}
                                                         onClick={() => {
-                                                            // Logic: Append [Sub] to the EXISTING [Main] group? 
-                                                            // Or append "[Main] [Sub]"?
-                                                            // Filter Query: "[Main]" -> "[Main] [Sub]"
-                                                            // We need to replace the last "[Main]" occurrence or append to it.
-                                                            // Simplest: Append " [Sub]"
-                                                            // But wait, user might have typed "[Main] ". 
-                                                            // If we append "[Sub]", we get "[Main] [Sub]". 
-                                                            // If user clicked [Main], query is "[Main]".
-                                                            // We set query to prev + " [" + sub + "]";
                                                             const needsSpace = filterQuery.length > 0 && !filterQuery.endsWith(' ');
                                                             setFilterQuery(prev => prev + (needsSpace ? ' ' : '') + `[${sub}]`);
-                                                            // Keep dropdown open? Or close? Usually close after leaf selection.
-                                                            // setShowSearchDropdown(false); 
                                                         }}
-                                                        style={{ padding: '6px 10px', cursor: 'pointer', color: CATEGORY_COLORS[activeMain] || '#e2e8f0', paddingLeft: '20px' }}
-                                                        onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                        style={{
+                                                            padding: '8px 12px 8px 24px',
+                                                            cursor: 'pointer',
+                                                            color: CATEGORY_COLORS[activeMain] || '#e2e8f0',
+                                                            fontSize: '0.9rem',
+                                                            transition: 'all 0.15s ease'
+                                                        }}
+                                                        onMouseEnter={e => {
+                                                            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.1)';
+                                                            e.currentTarget.style.paddingLeft = '28px';
+                                                        }}
+                                                        onMouseLeave={e => {
+                                                            e.currentTarget.style.background = 'transparent';
+                                                            e.currentTarget.style.paddingLeft = '24px';
+                                                        }}
                                                     >
+                                                        <span style={{ opacity: 0.5, marginRight: '8px' }}>↳</span>
                                                         [{sub}]
                                                     </div>
                                                 ))}
-                                            </>
+                                            </div>
                                         );
                                     }
 
-                                    // Default: Show Main Categories
-                                    return uniqueCategories.map(cat => (
-                                        <React.Fragment key={cat}>
-                                            <div
-                                                onClick={() => {
-                                                    const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
-                                                    setFilterQuery(prev => prev + pad + `[${cat}]`);
-                                                    // Don't close, allow drill-down
-                                                }}
-                                                style={{ padding: '6px 10px', cursor: 'pointer', color: CATEGORY_COLORS[cat] || '#cbd5e1', fontWeight: 600, borderBottom: '1px solid #334155' }}
-                                                onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                            >
-                                                [{cat}]
-                                            </div>
-                                            {/* Subcategories */}
-                                            {subCategoryMap[cat] && [...subCategoryMap[cat]].map(sub => (
-                                                <div key={`${cat}-${sub}`}
+                                    // Default: Show Main Categories with nested style
+                                    return uniqueCategories.map(cat => {
+                                        const color = CATEGORY_COLORS[cat] || '#cbd5e1';
+                                        return (
+                                            <div key={cat} style={{ borderBottom: '1px solid rgba(51, 65, 85, 0.3)', paddingBottom: '4px' }}>
+                                                <div
                                                     onClick={() => {
                                                         const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
-                                                        setFilterQuery(prev => prev + pad + `[${cat}] [${sub}]`);
+                                                        setFilterQuery(prev => prev + pad + `[${cat}]`);
                                                     }}
-                                                    style={{ padding: '4px 10px 4px 24px', cursor: 'pointer', color: CATEGORY_COLORS[cat] || '#94a3b8', fontSize: '0.85rem' }}
-                                                    onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                                                    style={{
+                                                        padding: '10px 12px 6px',
+                                                        cursor: 'pointer',
+                                                        color: color,
+                                                        fontWeight: 800,
+                                                        fontSize: '0.75rem',
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: '0.05em',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '8px',
+                                                        transition: 'background 0.2s'
+                                                    }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
                                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                                 >
-                                                    [{sub}]
+                                                    <span style={{ opacity: 0.4 }}>●</span> {cat}
                                                 </div>
-                                            ))}
-                                        </React.Fragment>
-                                    ));
+                                                {/* Subcategories */}
+                                                {subCategoryMap[cat] && Array.from(subCategoryMap[cat]).sort().map(sub => (
+                                                    <div key={`${cat}-${sub}`}
+                                                        onClick={() => {
+                                                            const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
+                                                            setFilterQuery(prev => prev + pad + `[${cat}] [${sub}]`);
+                                                        }}
+                                                        style={{
+                                                            padding: '5px 12px 5px 32px',
+                                                            cursor: 'pointer',
+                                                            color: color,
+                                                            fontSize: '0.85rem',
+                                                            opacity: 0.7,
+                                                            position: 'relative',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        onMouseEnter={e => {
+                                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                                                            e.currentTarget.style.opacity = '1';
+                                                            e.currentTarget.style.paddingLeft = '36px';
+                                                        }}
+                                                        onMouseLeave={e => {
+                                                            e.currentTarget.style.background = 'transparent';
+                                                            e.currentTarget.style.opacity = '0.7';
+                                                            e.currentTarget.style.paddingLeft = '32px';
+                                                        }}
+                                                    >
+                                                        <div style={{ position: 'absolute', left: '18px', top: '0', bottom: '0', width: '1px', background: 'rgba(51, 65, 85, 0.5)' }} />
+                                                        [{sub}]
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        );
+                                    });
                                 })()}
                             </div>
                         )}
@@ -1393,6 +1435,20 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         0% { opacity: 1; transform: scale(1); }
                         50% { opacity: 0.5; transform: scale(1.2); }
                         100% { opacity: 1; transform: scale(1); }
+                    }
+
+                    .search-dropdown::-webkit-scrollbar {
+                        width: 6px;
+                    }
+                    .search-dropdown::-webkit-scrollbar-track {
+                        background: transparent;
+                    }
+                    .search-dropdown::-webkit-scrollbar-thumb {
+                        background: #334155;
+                        border-radius: 10px;
+                    }
+                    .search-dropdown::-webkit-scrollbar-thumb:hover {
+                        background: #475569;
                     }
                 `
             }} />
