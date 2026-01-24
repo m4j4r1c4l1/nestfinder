@@ -181,9 +181,9 @@ class ApiClient {
       if (humanName) {
         let suffix = '';
         if (Array.isArray(data)) {
-          suffix = ` (${data.length} received)`;
+          suffix = ` (${data.length})`;
         } else if (data && typeof data.count === 'number') {
-          suffix = ` (${data.count} received)`;
+          suffix = ` (${data.count})`;
         }
 
         if (humanName === 'Update Notification status' || humanName === 'Update notification status') {
