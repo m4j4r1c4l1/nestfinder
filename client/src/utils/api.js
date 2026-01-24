@@ -47,7 +47,7 @@ class ApiClient {
     // Mappings
     if (path === '/points/broadcast/active') return 'active broadcasts';
     if (path === '/points' && method === 'GET') return 'points';
-    if (path === '/points' && method === 'POST') return 'Submit point report';
+    if (path === '/points' && method === 'POST') return 'Point submission';
     if (path === '/auth/generate-key') return 'recovery key';
     if (path === '/auth/register') return 'Register/Refresh Identity';
     if (path === '/auth/recover') return 'Recover Identity';
@@ -100,13 +100,13 @@ class ApiClient {
 
     // Default: Human readable summary
     if (humanName) {
-      logger.default([area, 'API'], `Request: ${humanName}`);
+      logger.default(['API', area], `Request: ${humanName}`);
     } else {
-      logger.default([area, 'API'], `Request: ${options.method || 'GET'} ${endpoint.split('?')[0]}`);
+      logger.default(['API', area], `Request: ${options.method || 'GET'} ${endpoint.split('?')[0]}`);
     }
 
     // Aggressive: Technical Request Line
-    logger.aggressive([area, 'API'], `Request: ${options.method || 'GET'} ${endpoint}`);
+    logger.aggressive(['API', area], `Request: ${options.method || 'GET'} ${endpoint}`);
 
     // Paranoic: Full Request Options (Headers, Body)
     if (options.body) {
@@ -179,14 +179,14 @@ class ApiClient {
 
     if (response.ok) {
       if (humanName) {
-        logger.default([area, 'API'], `Response: ${humanName} successfully received.`);
+        logger.default(['API', area], `Response: ${humanName} successfully received.`);
       }
 
       // Aggressive: Response Status
-      logger.aggressive([area, 'API'], `Response: ${response.status} from ${endpoint}`);
+      logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
 
       // Paranoic: Full Response Data
-      logger.paranoic([area, 'API'], 'Response Data', data);
+      logger.paranoic(['API', area], 'Response Data', data);
     }
 
 

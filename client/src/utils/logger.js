@@ -284,14 +284,8 @@ class DebugLogger {
                         requiredLevel === 'aggressive' ? 'color: #a855f7; font-weight: bold' :
                             'color: #3b82f6; font-weight: bold';
 
-            let categoryLabel;
-            if (Array.isArray(category)) {
-                // Dedup and format: [Tag][Tag]
-                const unique = [...new Set(category)];
-                categoryLabel = unique.map(c => `[${c}]`).join('');
-            } else {
-                categoryLabel = `[${category}]`;
-            }
+            // Use the already formatted entry.category for consistent display
+            const categoryLabel = entry.category;
 
             const args = [`%c${LOG_PREFIX} ${categoryLabel}`, style, message];
             if (data) args.push(data);

@@ -394,8 +394,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 }}>
                     {levelLabel}
                 </span>
-                <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
-                    [{category || 'General'}]
+                <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category.replace(/[\[\]]/g, '')] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
+                    {category || '[General]'}
                 </span>
                 <span style={{ color: '#f8fafc', flex: 1 }}>
                     {msg}
@@ -598,6 +598,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             height: '8px',
                             borderRadius: '50%',
                             backgroundColor: isColorEnabled ? '#3b82f6' : '#64748b',
+                            border: isColorEnabled ? '1px solid #172554' : 'none', // Darker border for contrast
                             boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none',
                             animation: isColorEnabled ? 'pulse 1.5s infinite' : 'none'
                         }} />
