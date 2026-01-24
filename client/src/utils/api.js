@@ -45,8 +45,8 @@ class ApiClient {
     const path = endpoint.split('?')[0]; // Ignore query params
 
     // Mappings
-    if (path === '/points/broadcast/active') return 'active broadcasts';
-    if (path === '/points' && method === 'GET') return 'points';
+    if (path === '/points/broadcast/active') return 'Active broadcasts';
+    if (path === '/points' && method === 'GET') return 'Points';
     if (path === '/points' && method === 'POST') return 'Point submission';
     if (path === '/auth/generate-key') return 'recovery key';
     if (path === '/auth/register') return 'Register/Refresh Identity';
@@ -100,7 +100,13 @@ class ApiClient {
 
     // Default: Human readable summary
     if (humanName) {
-      logger.default(['API', area], `Request: ${humanName}`);
+      if (humanName === 'Points') {
+        logger.default(['API', area], 'Request: Update actual points');
+      } else if (humanName === 'Active broadcasts') {
+        logger.default(['API', area], 'Request: Update active broadcasts');
+      } else {
+        logger.default(['API', area], `Request: ${humanName}`);
+      }
     } else {
       logger.default(['API', area], `Request: ${options.method || 'GET'} ${endpoint.split('?')[0]}`);
     }
