@@ -146,7 +146,7 @@ const SubmitPoint = ({ onSubmit, onCancel, initialLocation }) => {
             });
 
             // Default: Log success summary
-            logger.default('SubmitPoint', 'Point submitted successfully');
+            logger.default(['Report', 'Interaction'], 'Point submitted successfully');
         } catch (err) {
             console.error('Submit point error:', err);
             setError(err.message || t('submit.error'));

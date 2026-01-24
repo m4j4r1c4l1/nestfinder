@@ -89,6 +89,13 @@ const MapView = () => {
         }
     }, [geoError, permissionState]);
 
+    // Log location status changes
+    useEffect(() => {
+        if (userLocation) {
+            logger.default(['System', 'Location'], 'Location enabled and active');
+        }
+    }, [userLocation]);
+
     // Auto-hide toast
     useEffect(() => {
         if (toast) {
@@ -188,7 +195,7 @@ const MapView = () => {
 
     const getAreaName = (sheet) => {
         if (!sheet) return 'Home';
-        if (sheet === 'submit') return 'Report ';
+        if (sheet === 'submit') return 'Report';
         if (sheet === 'notifications') return 'Inbox';
         return sheet.charAt(0).toUpperCase() + sheet.slice(1);
     };
@@ -313,6 +320,7 @@ const MapView = () => {
                         <button
                             onClick={() => {
                                 setToast(null);
+                                logger.aggressive(['System', 'Interaction'], 'User requested location enable');
                                 getCurrentLocation()
                                     .then(() => {
                                         showToast(t('geo.locationEnabled'), 'success', '🗺️', true);

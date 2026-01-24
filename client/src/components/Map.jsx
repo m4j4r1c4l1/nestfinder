@@ -63,6 +63,7 @@ const RecenterButton = ({ userLocation }) => {
             <button
                 onClick={(e) => {
                     e.stopPropagation(); // Prevent triggering map click
+                    import('../utils/logger').then(m => m.logger.default(['Map', 'Interaction'], 'Focus: Recenter map on user'));
                     map.flyTo([userLocation.latitude, userLocation.longitude], 15);
                 }}
                 style={{

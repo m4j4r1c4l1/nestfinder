@@ -394,11 +394,11 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 }}>
                     {levelLabel}
                 </span>
-                <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category.replace(/[\[\]]/g, '')] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
+                <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category.replace(/[\[\]]/g, ' ').trim().split(/\s+/)[0]] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
                     {category || '[General]'}
                 </span>
                 <span style={{ color: '#f8fafc', flex: 1 }}>
-                    {msg}
+                    {typeof msg === 'string' ? msg.replace(/\.$/, '') : msg}
                 </span>
                 {data && Object.keys(data).filter(k => !['ip', 'userAgent', 'platform'].includes(k)).length > 0 && (
                     <div style={{
@@ -597,7 +597,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            backgroundColor: isColorEnabled ? '#3b82f6' : '#64748b',
+                            backgroundColor: isColorEnabled ? '#172554' : '#64748b',
                             border: isColorEnabled ? '1px solid #172554' : 'none', // Darker border for contrast
                             boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none',
                             animation: isColorEnabled ? 'pulse 1.5s infinite' : 'none'

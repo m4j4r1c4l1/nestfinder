@@ -58,7 +58,7 @@ class ApiClient {
     if (path.includes('/confirm')) return 'Confirm point';
     if (path.includes('/deactivate')) return 'Deactivate point';
     if (path.includes('/reactivate')) return 'Reactivate point';
-    if (path.includes('/push/notifications')) return method === 'DELETE' ? 'Delete notification' : 'Update notification status';
+    if (path.includes('/push/notifications')) return method === 'DELETE' ? 'Delete notification' : 'Update Notification status';
 
     return null; // Unknown
   }
@@ -179,7 +179,18 @@ class ApiClient {
 
     if (response.ok) {
       if (humanName) {
-        logger.default(['API', area], `Response: ${humanName} successfully received.`);
+        let suffix = '';
+        if (Array.isArray(data)) {
+          suffix = ` (${data.length} received)`;
+        } else if (data && typeof data.count === 'number') {
+          suffix = ` (${data.count} received)`;
+        }
+
+        if (humanName === 'Update Notification status' || humanName === 'Update notification status') {
+          logger.default(['API', area], `Response: Notification status successfully updated.${suffix}`);
+        } else {
+          logger.default(['API', area], `Response: ${humanName} successfully received.${suffix}`);
+        }
       }
 
       // Aggressive: Response Status
