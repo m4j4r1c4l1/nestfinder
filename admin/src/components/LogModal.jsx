@@ -1354,6 +1354,17 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`}
                                         onMouseEnter={() => setShowLevelSelector(true)}
                                     />
+                                    <span style={{
+                                        marginLeft: '6px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 600,
+                                        color: !user.debug_enabled ? '#64748b' :
+                                            user.debug_level === 'paranoic' ? '#ef4444' :
+                                                user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                        textTransform: 'capitalize'
+                                    }}>
+                                        {user.debug_enabled ? user.debug_level : 'Off'}
+                                    </span>
                                     {showLevelSelector && (
                                         <div style={{
                                             position: 'absolute',
