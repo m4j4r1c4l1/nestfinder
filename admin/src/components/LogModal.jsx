@@ -383,20 +383,44 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         const renderMessage = (txt) => {
             if (typeof txt !== 'string') return txt;
 
-            // Match: "Debug Mode Activated (D Default)" or (A Aggressive) or (P Paranoic)
-            const match = txt.match(/^Debug Mode Activated \(([DAP]) (\w+)\)$/);
-            if (match) {
-                const [_, badgeChar, levelName] = match;
-                // Determine color based on char/name
+            // Match: "Debug Mode Activated (D Default)" OR "Current Debug Level: (A Aggressive)"
+            // Strict Unified Format: (Badge LevelName)
+            const levelMatch = txt.match(/^(?:Debug Mode Activated|Current Debug Level:)\s+\(([DAP])\s+(\w+)\)$/);
+            if (levelMatch) {
+                const [_, badgeChar, levelName] = levelMatch;
                 const badgeStyle = getDlStyle(levelName);
+                const prefix = txt.startsWith('Debug Mode Activated') ? 'Debug Mode Activated' : 'Current Debug Level:';
                 return (
                     <>
-                        Debug Mode Activated (
+                        {prefix} (
                         <Badge char={badgeChar} color={badgeStyle.color} size="16px" fontSize="0.6rem" />
                         <span style={{ marginLeft: '4px' }}>{levelName}</span>)
                     </>
                 );
             }
+
+            // Match: "Current Debug Status: (Enabled)" or "(Disabled)"
+            const statusMatch = txt.match(/^Current Debug Status: \((Enabled|Disabled)\)$/);
+            if (statusMatch) {
+                const [_, status] = statusMatch;
+                const isEnabled = status === 'Enabled';
+                const color = isEnabled ? '#22c55e' : '#64748b'; // Green vs Slate
+                return (
+                    <>
+                        Current Debug Status: (
+                        <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: color,
+                            display: 'inline-block',
+                            marginRight: '6px'
+                        }} />
+                        {status})
+                    </>
+                );
+            }
+
             return txt;
         };
 
