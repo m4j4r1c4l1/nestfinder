@@ -454,9 +454,9 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 </span>
                 {data && Object.keys(data).filter(k => !['ip', 'userAgent', 'platform'].includes(k)).length > 0 && (
                     <div style={{
-                        width: 'calc(100% - 26px)', // Adjust width to account for margin
-                        marginLeft: '26px',         // Align with timestamp (18px badge + 8px gap)
-                        marginTop: '4px',
+                        width: '100%',
+                        marginLeft: '0',
+                        marginTop: '2px',
                         padding: '6px 12px',
                         backgroundColor: 'rgba(15, 23, 42, 0.5)',
                         borderLeft: `2px solid ${levelColor}`,
