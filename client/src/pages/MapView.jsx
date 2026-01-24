@@ -125,7 +125,10 @@ const MapView = () => {
     };
 
     const handleSheetClose = () => {
-        logger.log('Interaction', `Closing sheet: ${activeSheet}`);
+        if (activeSheet) {
+            const area = getAreaName(activeSheet);
+            logger.default([area, 'Interaction'], 'Menu closed.');
+        }
         setActiveSheet(null);
         setSelectedPoint(null);
     };
