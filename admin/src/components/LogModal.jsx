@@ -795,7 +795,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     position: 'relative' // For dropdown positioning if needed
                 }}>
                     {/* 1. Main Search (Filter Action style) */}
-                    <div style={{ position: 'relative', flex: 2, height: '36px', background: '#0f172a', border: '1px solid #334155', borderRadius: '4px', display: 'flex', alignItems: 'center' }} ref={searchRef}>
+                    <div style={{ position: 'relative', flex: 1, height: '36px', background: '#0f172a', border: '1px solid #334155', borderRadius: '4px', display: 'flex', alignItems: 'center' }} ref={searchRef}>
 
                         {/* Highlight Layer */}
                         <div style={{
@@ -963,7 +963,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
 
                     {/* 2. Level Filter (Multi-Select) */}
-                    <div style={{ position: 'relative', flex: 1, minWidth: '140px' }} ref={levelRef}>
+                    <div style={{ position: 'relative', width: '110px', flexShrink: 0 }} ref={levelRef}>
                         <div
                             onClick={() => setShowLevelDropdown(!showLevelDropdown)}
                             style={{
@@ -1044,7 +1044,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
 
                     {/* 3. Severity Filter (Multi-Select) */}
-                    <div style={{ position: 'relative', flex: 1, minWidth: '140px' }} ref={severityRef}>
+                    <div style={{ position: 'relative', width: '140px', flexShrink: 0 }} ref={severityRef}>
                         <div
                             onClick={() => setShowSeverityDropdown(!showSeverityDropdown)}
                             style={{
