@@ -514,6 +514,59 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
     }
 });
 
+// Get batch details (for Admin "Message Details" view)
+router.get('/admin/notifications/batch/:batchId', requireAdmin, (req, res) => {
+    try {
+        const { batchId } = req.params;
+
+        // Get notifications in this batch joined with users
+        const rows = all(`
+            SELECT 
+                n.id, n.user_id, n.title, n.body, n.read, n.delivered, n.created_at, n.delivered_at, n.read_at,
+                u.nickname, u.device_id
+            FROM notifications n
+            LEFT JOIN users u ON n.user_id = u.id
+            WHERE n.batch_id = ?
+            ORDER BY n.read DESC, n.delivered DESC
+        `, [batchId]);
+
+        // Calculate stats
+        const stats = {
+            total: rows.length,
+            delivered: rows.filter(r => r.delivered && !r.read).length,
+            read: rows.filter(r => r.read).length
+        };
+
+        res.json({ messages: rows, stats });
+    } catch (error) {
+        console.error('Batch details error:', error);
+        res.status(500).json({ error: 'Failed to get batch details' });
+    }
+});
+
+// Clean up/Clear all sent notification logs (admin only)
+router.post('/admin/notifications/cleanup', requireAdmin, (req, res) => {
+    try {
+        // Delete ALL logs regarding sent notifications
+        const result = run("DELETE FROM logs WHERE action = 'notification_sent'");
+
+        log('admin', 'history_cleared', null, {
+            deletedCount: result?.changes || 0
+        });
+
+        res.json({
+            success: true,
+            message: `Sent history cleared. Removed ${result?.changes || 0} entries.`,
+            stats: {
+                deleted: result?.changes || 0
+            }
+        });
+    } catch (error) {
+        console.error('Cleanup error:', error);
+        res.status(500).json({ error: 'Failed to clear history' });
+    }
+});
+
 router.get('/admin/notifications/history', requireAdmin, (req, res) => {
     try {
         const { page = 1, limit = 50 } = req.query;

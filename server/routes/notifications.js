@@ -67,6 +67,14 @@ router.get('/admin/notifications/history', requireAdmin, (req, res) => {
     res.redirect(307, '/api/messages/admin/notifications/history');
 });
 
+router.get('/admin/notifications/batch/:batchId', requireAdmin, (req, res) => {
+    res.redirect(307, `/api/messages/admin/notifications/batch/${req.params.batchId}`);
+});
+
+router.post('/admin/notifications/cleanup', requireAdmin, (req, res) => {
+    res.redirect(307, '/api/messages/admin/notifications/cleanup');
+});
+
 router.get('/admin/broadcasts/:id/views', requireAdmin, (req, res) => {
     res.redirect(307, `/api/messages/admin/broadcasts/${req.params.id}/views`);
 });

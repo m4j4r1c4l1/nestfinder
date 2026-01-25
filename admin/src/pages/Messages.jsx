@@ -463,7 +463,7 @@ const Messages = () => {
         try {
             const [broadcastRes, statsRes] = await Promise.all([
                 adminApi.fetch('/admin/broadcasts'),
-                adminApi.fetch('/push/admin/stats').catch(() => ({ subscribers: [], totalSubscribers: 0 }))
+                adminApi.fetch('/messages/admin/stats').catch(() => ({ subscribers: [], totalSubscribers: 0 }))
             ]);
 
             setBroadcasts(broadcastRes.broadcasts || []);
@@ -2189,7 +2189,7 @@ const ComposeSection = ({ subscribers, totalSubscribers, onSent }) => {
         try {
             setSending(true);
             setResult(null);
-            const data = await adminApi.fetch(`/push/admin/send`, {
+            const data = await adminApi.fetch(`/messages/admin/send`, {
                 method: 'POST',
                 body: JSON.stringify({
                     template: selectedTemplate,
@@ -2942,7 +2942,7 @@ const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, se
     const loadHistory = async () => {
         setLoading(true);
         try {
-            const data = await adminApi.fetch(`/push/admin/notifications/history?page=${page}&limit=${pageSize}&sort=${sortColumn}&dir=${sortDirection}`);
+            const data = await adminApi.fetch(`/messages/admin/notifications/history?page=${page}&limit=${pageSize}&sort=${sortColumn}&dir=${sortDirection}`);
             setHistory(data.logs || []);
             setTotalLogs(data.total || 0);
         } catch (err) {
@@ -2967,7 +2967,7 @@ const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, se
         if (meta.count === 1 && log.target_id) {
             try {
                 // We reuse the existing endpoint that the DetailModal uses
-                const data = await adminApi.fetch(`/push/admin/notifications/batch/${log.target_id}`);
+                const data = await adminApi.fetch(`/messages/admin/notifications/batch/${log.target_id}`);
                 if (data.messages && data.messages.length > 0) {
                     // We found the user!
                     resolvedNickname = data.messages[0].nickname || 'Anonymous';
@@ -3032,7 +3032,7 @@ const HistorySection = ({ users = [], totalSent = 0, delivered = 0, read = 0, se
                                     message: 'Are you sure you want to CLEAR ALL Sent History? This will remove all records of sent notifications from this list.',
                                     onConfirm: async () => {
                                         try {
-                                            const data = await adminApi.fetch(`/push/admin/notifications/cleanup`, { method: 'POST' });
+                                            const data = await adminApi.fetch(`/messages/admin/notifications/cleanup`, { method: 'POST' });
                                             if (data.success) {
                                                 loadHistory();
                                             }
@@ -3303,7 +3303,7 @@ const DetailModal = ({ batchId, onClose }) => {
     useEffect(() => {
         const fetchDetails = async () => {
             try {
-                const data = await adminApi.fetch(`/push/admin/notifications/batch/${batchId}`);
+                const data = await adminApi.fetch(`/messages/admin/notifications/batch/${batchId}`);
                 setDetails(data);
             } catch (err) { console.error(err); }
             setLoading(false);

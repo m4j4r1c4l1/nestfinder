@@ -335,7 +335,7 @@ export default function Observability() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const data = await adminApi.fetch('/push/admin/stats');
+            const data = await adminApi.fetch('/messages/admin/stats');
             // Merge with default structure to ensure no undefined access
             setStats(prev => ({ ...prev, ...data }));
         } catch (err) {
