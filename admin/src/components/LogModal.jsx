@@ -662,7 +662,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </span>
                     <span style={{ color: isColorEnabled ? (CATEGORY_COLORS[category.replace(/[\[\]]/g, ' ').trim().split(/\s+/)[0]] || CATEGORY_COLORS.Default) : '#94a3b8', fontWeight: 600 }}>
                         {category || '[General]'}
-                    </span>
+                    </span>{' '}
                     <span style={{ color: '#f8fafc', flex: 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {renderMessage(typeof msg === 'string' ? msg.replace(/\.$/, '') : msg)}
                     </span>
@@ -694,7 +694,9 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         const text = filtered.map(line => {
             if (typeof line === 'object') {
                 const { ts, level, category, msg, data } = line;
-                return `${ts} [${category}] [${level}] ${msg} ${data ? JSON.stringify(data) : ''}`;
+                // Category already has brackets from logger. Ensure exactly one space before and after
+                const cat = (category || '[General]').trim();
+                return `${ts} ${cat} [${level}] ${msg.trim()} ${data ? JSON.stringify(data) : ''}`;
             }
             return line;
         }).join('\n');
@@ -883,9 +885,10 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: '12px'
+                    gap: '12px',
+                    position: 'relative' // Position relative for absolute centering of child
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1, minWidth: '200px' }}>
                         <button
                             onClick={() => setIsFollowing(!isFollowing)}
                             style={{
@@ -913,13 +916,19 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             }} />
                             {isFollowing ? 'LIVE' : 'OFF'}
                         </button>
-                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: isFollowing ? 'italic' : 'normal' }}>
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: isFollowing ? 'italic' : 'normal', minWidth: '150px' }}>
                             {isFollowing ? `Auto-refreshing live${refreshDots}` : 'Auto-refreshing stopped'}
                         </span>
                     </div>
 
-                    {/* Centered Debug Level Status */}
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                    {/* Centered Debug Level Status - Fixed position to avoid shift */}
+                    <div style={{
+                        position: 'absolute',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        display: 'flex',
+                        justifyContent: 'center'
+                    }}>
                         <div
                             style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
                             ref={selectorRef}
@@ -1030,7 +1039,10 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             backgroundColor: isColorEnabled ? '#059669' : 'transparent',
                             color: isColorEnabled ? 'white' : '#94a3b8',
                             border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`,
-                            transition: 'all 0.2s ease'
+                            transition: 'all 0.2s ease',
+                            zIndex: 1,
+                            minWidth: '110px',
+                            justifyContent: 'center'
                         }}
                     >
                         <div style={{

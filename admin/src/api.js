@@ -216,7 +216,7 @@ export const adminApi = {
     },
 
     getNotifications() {
-        return this.fetch('/admin/notifications');
+        return this.fetch('/messages/notifications');
     },
 
     getConfirmations() {
@@ -357,16 +357,38 @@ export const adminApi = {
         return this.fetch('/admin/db/backup-now', { method: 'POST' });
     },
 
+    // ========== Messages & Communications ==========
+
+    getMessagingStats() {
+        return this.fetch('/messages/admin/stats');
+    },
+
+    getMessageTemplates() {
+        return this.fetch('/messages/admin/templates');
+    },
+
+    sendMessage(data) {
+        return this.fetch('/messages/admin/send', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
+    getMessageHistory(page = 1, limit = 50) {
+        return this.fetch(`/messages/admin/notifications/history?page=${page}&limit=${limit}`);
+    },
+
+    getBroadcastViews(broadcastId) {
+        return this.fetch(`/messages/admin/broadcasts/${broadcastId}/views`);
+    },
+
     submitFeedback(type, text, rating) {
-        // Use the public feedback endpoint (same as client)
-        // We don't have a userId context easily, so we can omit it or send 'admin-crash'
-        return this.fetch('/admin/feedback', {
+        return this.fetch('/messages/feedback', {
             method: 'POST',
             body: JSON.stringify({
                 type,
                 message: text,
                 rating,
-                // user_id: 'admin' // server might strip this if valid user check fails, but allowed for anon
             })
         });
     }

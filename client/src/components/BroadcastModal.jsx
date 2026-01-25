@@ -10,6 +10,7 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
     const [broadcasts, setBroadcasts] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [visible, setVisible] = useState(false);
+    const processingRef = useRef(false);
 
     // Get seen broadcast IDs from localStorage
     const getSeenIds = () => {
@@ -56,7 +57,7 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
                 // Actually, the server only returns ONE active broadcast at a time based on priority.
                 // To support sequential, we need to fetch -> dismiss -> fetch next.
 
-                const response = await api.fetch('/points/broadcast/active');
+                const response = await api.fetch('/messages/broadcast/active');
                 if (response.broadcast) {
                     const seenIds = getSeenIds();
                     if (!seenIds.includes(response.broadcast.id)) {
@@ -91,15 +92,18 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
 
     const handleDismiss = async () => {
         const currentBroadcast = broadcasts[currentIndex];
-        if (currentBroadcast) {
-            markSeen(currentBroadcast.id);
-            try {
-                // Tell server we read it (so it serves the next priority one next time)
-                await api.markBroadcastRead(currentBroadcast.id);
-                if (onBroadcastRead) onBroadcastRead();
-            } catch (e) {
-                console.warn('Failed to mark broadcast as read:', e);
-            }
+        if (!currentBroadcast || processingRef.current) return;
+
+        processingRef.current = true;
+        markSeen(currentBroadcast.id);
+        try {
+            // Tell server we read it (so it serves the next priority one next time)
+            await api.markBroadcastRead(currentBroadcast.id);
+            if (onBroadcastRead) onBroadcastRead();
+        } catch (e) {
+            console.warn('Failed to mark broadcast as read:', e);
+        } finally {
+            processingRef.current = false;
         }
 
         // If we had a list, we would go to next. 
@@ -111,7 +115,7 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
         setTimeout(async () => {
             if (document.hidden || !isRealTimeEnabled()) return;
             try {
-                const response = await api.fetch('/points/broadcast/active');
+                const response = await api.fetch('/messages/broadcast/active');
                 if (response.broadcast) {
                     const seenIds = getSeenIds();
                     if (!seenIds.includes(response.broadcast.id)) {

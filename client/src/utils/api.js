@@ -45,7 +45,7 @@ class ApiClient {
     const path = endpoint.split('?')[0]; // Ignore query params
 
     // Mappings
-    if (path === '/points/broadcast/active') return 'Active broadcasts';
+    if (path === '/messages/broadcast/active') return 'Active broadcasts';
     if (path === '/points' && method === 'GET') return 'Points';
     if (path === '/points' && method === 'POST') return 'Point submission';
     if (path === '/auth/generate-key') return 'recovery key';
@@ -53,12 +53,13 @@ class ApiClient {
     if (path === '/auth/recover') return 'Recover Identity';
     if (path === '/settings') return 'User settings';
     if (path === '/settings/app-config') return 'App config';
-    if (path === '/points/feedback' && method === 'GET') return 'Update Sent messages';
-    if (path === '/points/feedback' && method === 'POST') return 'Submitting message';
+    if (path === '/messages/feedback' && method === 'GET') return 'Update Sent messages';
+    if (path === '/messages/feedback' && method === 'POST') return 'Submitting message';
     if (path.includes('/confirm')) return 'Confirm point';
     if (path.includes('/deactivate')) return 'Deactivate point';
     if (path.includes('/reactivate')) return 'Reactivate point';
-    if (path.includes('/push/notifications')) return method === 'DELETE' ? 'Delete notification' : 'Update Notification status';
+    if (path === '/messages/notifications' && method === 'GET') return 'Update Notifications';
+    if (path.includes('/messages/notifications/') && (method === 'POST' || method === 'DELETE')) return 'Update Notification status';
 
     return null; // Unknown
   }
@@ -68,7 +69,7 @@ class ApiClient {
     if (endpoint.startsWith('/admin')) return 'Admin';
     if (endpoint.startsWith('/debug')) return 'Debug';
     if (endpoint.startsWith('/settings')) return 'Settings';
-    if (endpoint.startsWith('/push')) return 'Notifications';
+    if (endpoint.startsWith('/messages')) return 'Messages';
     if (endpoint.startsWith('/points')) return 'Points';
     return 'App';
   }
@@ -199,25 +200,25 @@ class ApiClient {
         if (count !== null) suffix = ` (${count})`;
 
         if (humanName === 'Update Notification status' || humanName === 'Update notification status') {
-          logger.default(['API', area], `Response: Notification status successfully updated.${suffix}`);
+          logger.default(['API', area], ` Response: Notification status successfully updated${suffix}`);
         } else if (humanName === 'Submitting message') {
-          logger.default(['API', area], `Response: Submission successfully received.${suffix}`);
+          logger.default(['API', area], ` Response: Submission successfully received${suffix}`);
         } else if (humanName === 'Update Sent messages') {
-          logger.default(['API', area], `Response: Sent messages successfully updated.${suffix}`);
+          logger.default(['API', area], ` Response: Sent messages successfully updated${suffix}`);
 
           // Aggressive: Response Status
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
           // Aggressive Data Block for Sent Messages
           logger.aggressive(['API', area], 'Sent Messages Data', data);
         } else if (humanName === 'Active broadcasts') {
-          logger.default(['API', area], `Response: Active broadcasts successfully received${suffix}`);
+          logger.default(['API', area], ` Response: Active broadcasts successfully received${suffix}`);
 
           // Aggressive: Response Status
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
           // Aggressive Data Block for Broadcasts
           logger.aggressive(['API', area], 'Broadcasts Data', data);
         } else {
-          logger.default(['API', area], `Response: ${humanName} successfully received.${suffix}`);
+          logger.default(['API', area], ` Response: ${humanName} successfully received${suffix}`);
           // Aggressive: Response Status
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
         }
@@ -325,59 +326,59 @@ class ApiClient {
 
   // Feedback
   getFeedback() {
-    return this.fetch('/points/feedback');
+    return this.fetch('/messages/feedback');
   }
 
   pruneFeedback(cutoffDate) {
-    return this.fetch('/points/feedback/prune', {
+    return this.fetch('/messages/feedback/prune', {
       method: 'DELETE',
       body: JSON.stringify({ cutoff: cutoffDate }),
     });
   }
 
   pruneNotifications(cutoffDate) {
-    return this.fetch('/push/prune', {
+    return this.fetch('/messages/notifications/prune', {
       method: 'DELETE',
       body: JSON.stringify({ cutoff: cutoffDate }),
     });
   }
 
   deleteNotification(id) {
-    return this.fetch(`/push/notifications/${id}`, { method: 'DELETE' });
+    return this.fetch(`/messages/notifications/${id}`, { method: 'DELETE' });
   }
 
   deleteFeedback(id) {
-    return this.fetch(`/points/feedback/${id}`, { method: 'DELETE' });
+    return this.fetch(`/messages/feedback/${id}`, { method: 'DELETE' });
   }
 
   // ========================================
   // NOTIFICATION STATUS METHODS (Regular In-App)
   // ========================================
   markNotificationDelivered(id) {
-    return this.fetch(`/push/notifications/${id}/delivered`, { method: 'POST' });
+    return this.fetch(`/messages/notifications/${id}/delivered`, { method: 'POST' });
   }
 
   markNotificationRead(id) {
-    return this.fetch(`/push/notifications/${id}/read`, { method: 'POST' });
+    return this.fetch(`/messages/notifications/${id}/read`, { method: 'POST' });
   }
 
   // ========================================
   // BROADCAST STATUS METHODS
   // ========================================
   markBroadcastSent(id) {
-    return this.fetch(`/push/broadcasts/${id}/sent`, { method: 'POST' });
+    return this.fetch(`/messages/broadcasts/${id}/sent`, { method: 'POST' });
   }
 
   markBroadcastDelivered(id) {
-    return this.fetch(`/push/broadcasts/${id}/delivered`, { method: 'POST' });
+    return this.fetch(`/messages/broadcasts/${id}/delivered`, { method: 'POST' });
   }
 
   markBroadcastRead(id) {
-    return this.fetch(`/push/broadcasts/${id}/read`, { method: 'POST' });
+    return this.fetch(`/messages/broadcasts/${id}/read`, { method: 'POST' });
   }
 
   deleteBroadcast(id) {
-    return this.fetch(`/push/broadcasts/${id}`, { method: 'DELETE' });
+    return this.fetch(`/messages/broadcasts/${id}`, { method: 'DELETE' });
   }
 
   // Legacy alias for backward compatibility - now truly deletes/dismisses
@@ -386,7 +387,7 @@ class ApiClient {
   }
 
   submitFeedback(type, message, rating) {
-    return this.fetch('/points/feedback', {
+    return this.fetch('/messages/feedback', {
       method: 'POST',
       body: JSON.stringify({ type, message, rating }),
     });

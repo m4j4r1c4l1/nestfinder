@@ -20,121 +20,35 @@ const escapeXml = (str) => {
 let broadcast = () => { };
 export const setBroadcast = (fn) => { broadcast = fn; };
 
-// Get currently active broadcast (with view tracking)
+// ========================================
+// LEGACY MESSAGING ALIASES (Deprecated)
+// Routes below migrated to messages.js router
+// ========================================
+
 router.get('/broadcast/active', requireUser, (req, res) => {
-  const userId = req.user.id;
-  const now = new Date().toISOString();
-
-  // Get all active broadcasts
-  const activeBroadcasts = all(`
-    SELECT * FROM broadcasts 
-    WHERE datetime(start_time) <= datetime(?)
-    AND datetime(end_time) >= datetime(?)
-    ORDER BY priority DESC, created_at DESC
-  `, [now, now]);
-
-  if (!activeBroadcasts.length) {
-    return res.json({ broadcast: null });
-  }
-
-  // Find a broadcast the user hasn't exceeded max_views for
-  let selectedBroadcast = null;
-
-  for (const broadcast of activeBroadcasts) {
-    // Check user's view record for this broadcast
-    let viewRecord = get(`
-      SELECT * FROM broadcast_views 
-      WHERE broadcast_id = ? AND user_id = ?
-    `, [broadcast.id, userId]);
-
-    // Check User Status (Dismissed/Read) - Universal Rule
-    if (viewRecord && viewRecord.status === 'read') {
-      continue; // User explicitly dismissed it
-    }
-
-    // Global Max Views Enforcement
-    if (broadcast.max_views !== null) {
-      // If user ALREADY has a view record, they "own" a slot, so they can keep seeing it until they dismiss it.
-      // If they DON'T have a record, we must check if there are slots available.
-      if (!viewRecord) {
-        const globalCount = get('SELECT COUNT(*) as count FROM broadcast_views WHERE broadcast_id = ?', [broadcast.id]).count;
-        if (globalCount >= broadcast.max_views) {
-          continue; // Global cap met, no new slots available
-        }
-      }
-    }
-
-    // This is a valid broadcast for this user
-    selectedBroadcast = broadcast;
-
-    // Create or update view record
-    if (!viewRecord) {
-      // First time seeing - create record with 'delivered' status
-      run(`
-        INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at)
-        VALUES (?, ?, 'delivered', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `, [broadcast.id, userId]);
-    } else {
-      // Increment view count and ensure delivered
-      run(`
-        UPDATE broadcast_views 
-        SET view_count = view_count + 1, 
-            status = CASE WHEN status = 'sent' THEN 'delivered' ELSE status END,
-            delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP)
-        WHERE broadcast_id = ? AND user_id = ?
-      `, [broadcast.id, userId]);
-    }
-
-    break;
-  }
-
-  res.json({ broadcast: selectedBroadcast });
+  // Proxy to internal logic or just redirect? 
+  // For simplicity while maintaining the same response shape:
+  res.redirect(307, '/api/messages/broadcast/active');
 });
 
-// Mark broadcast as read (when user dismisses/closes it)
 router.post('/broadcast/:id/read', requireUser, (req, res) => {
-  const userId = req.user.id;
-  const broadcastId = parseInt(req.params.id);
+  res.redirect(307, `/api/messages/broadcasts/${req.params.id}/read`);
+});
 
-  if (isNaN(broadcastId)) {
-    return res.status(400).json({ error: 'Invalid broadcast ID' });
-  }
+router.get('/feedback', requireUser, (req, res) => {
+  res.redirect(307, '/api/messages/feedback');
+});
 
-  try {
-    const nowStr = new Date().toISOString();
+router.post('/feedback', requireUser, (req, res) => {
+  res.redirect(307, '/api/messages/feedback');
+});
 
-    // Check if view exists
-    const existing = get('SELECT id FROM broadcast_views WHERE broadcast_id = ? AND user_id = ?', [broadcastId, userId]);
+router.delete('/feedback/prune', requireUser, (req, res) => {
+  res.redirect(307, '/api/messages/feedback/prune');
+});
 
-    if (existing) {
-      // Update existing
-      run(`
-        UPDATE broadcast_views 
-        SET status = 'read', 
-            view_count = view_count + 1, 
-            read_at = ?,
-            dismissed = 0
-        WHERE broadcast_id = ? AND user_id = ?
-      `, [nowStr, broadcastId, userId]);
-      console.log(`[Broadcast Read] Updated existing view: User ${userId}, Broadcast ${broadcastId}`);
-    } else {
-      // Create new with read status
-      run(`
-        INSERT INTO broadcast_views (broadcast_id, user_id, status, view_count, first_seen_at, delivered_at, read_at, dismissed)
-        VALUES (?, ?, 'read', 1, ?, ?, ?, 0)
-      `, [broadcastId, userId, nowStr, nowStr, nowStr]);
-      console.log(`[Broadcast Read] Created new read view: User ${userId}, Broadcast ${broadcastId}`);
-    }
-
-    // NOTE: We successfully updated the view.
-    // We removed the legacy 'notifications' table update to avoid potential errors or confusion,
-    // as modern broadcasts rely solely on broadcast_views.
-
-    res.json({ success: true, status: 'read' });
-  } catch (err) {
-    console.error('[Broadcast Read] Error:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+router.delete('/feedback/:id', requireUser, (req, res) => {
+  res.redirect(307, `/api/messages/feedback/${req.params.id}`);
 });
 
 // Get all points (with optional filters)
@@ -593,77 +507,6 @@ router.post('/:id/validate', requireUser, (req, res) => {
 });
 
 // ================== FEEDBACK ==================
-
-// Get feedback history for a user
-router.get('/feedback', requireUser, (req, res) => {
-  const userId = req.user.id;
-
-  const feedback = all(`
-    SELECT * FROM feedback
-    WHERE user_id = ? AND (deleted_by_sender = 0 OR deleted_by_sender IS NULL)
-    ORDER BY created_at DESC
-  `, [userId]);
-
-  res.json({ feedback });
-});
-
-// Prune old feedback
-router.delete('/feedback/prune', requireUser, (req, res) => {
-  const { cutoff } = req.body;
-  if (!cutoff) return res.status(400).json({ error: 'Cutoff date required' });
-
-  const userId = req.user.id;
-
-  run(`
-    UPDATE feedback SET deleted_by_sender = 1
-    WHERE user_id = ? AND created_at < ?
-  `, [userId, cutoff]);
-
-  res.json({ success: true, message: 'Feedback pruned' });
-});
-
-// Delete individual feedback
-router.delete('/feedback/:id', requireUser, (req, res) => {
-  const userId = req.user.id;
-
-  run('UPDATE feedback SET deleted_by_sender = 1 WHERE id = ? AND user_id = ?', [req.params.id, userId]);
-  res.json({ success: true });
-});
-
-// Submit feedback (bugs, suggestions)
-router.post('/feedback', requireUser, (req, res) => {
-  const userId = req.user.id;
-  const { type, message, rating } = req.body;
-
-  if (!message) {
-    return res.status(400).json({ error: 'Message required' });
-  }
-
-  // Store feedback with optional rating
-  run(`
-    INSERT INTO feedback (user_id, type, message, rating, status)
-    VALUES (?, ?, ?, ?, 'sent')
-  `, [userId, type || 'general', message, rating || null]);
-
-  // If rating provided, update daily_ratings aggregation
-  if (rating && rating >= 1 && rating <= 5) {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const ratingCol = `rating_${rating}`;
-
-    // Upsert into daily_ratings
-    run(`
-      INSERT INTO daily_ratings (date, total_ratings, rating_sum, ${ratingCol})
-      VALUES (?, 1, ?, 1)
-      ON CONFLICT(date) DO UPDATE SET
-        total_ratings = total_ratings + 1,
-        rating_sum = rating_sum + ?,
-        ${ratingCol} = ${ratingCol} + 1
-    `, [today, rating, rating]);
-  }
-
-  log(userId, 'feedback_submitted', null, { type, rating });
-
-  res.json({ success: true, message: 'Thank you for your feedback!' });
-});
+// Logic migrated to messages.js and aliased above
 
 export default router;

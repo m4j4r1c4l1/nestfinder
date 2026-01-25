@@ -18,6 +18,7 @@ import settingsRoutes, { setBroadcast as setSettingsBroadcast } from './routes/s
 import adminRoutes, { setBroadcast as setAdminBroadcast } from './routes/admin.js';
 import notificationsRoutes, { setBroadcast as setNotificationsBroadcast } from './routes/notifications.js';
 import webhookRoutes, { setBroadcast as setWebhookBroadcast } from './routes/webhook.js';
+import messagesRoutes, { setBroadcast as setMessagesBroadcast } from './routes/messages.js';
 import debugRoutes from './routes/debug.js';
 
 const app = express();
@@ -116,6 +117,7 @@ setSettingsBroadcast(broadcast);
 setWebhookBroadcast(broadcast);
 setAdminBroadcast(broadcast);
 setNotificationsBroadcast(broadcast);
+setMessagesBroadcast(broadcast);
 
 // Import rate limiters
 import { apiLimiter } from './middleware/rateLimiter.js';
@@ -137,8 +139,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api', (req, res, next) => {
     // Exempt polling and admin endpoints from rate limiting
     const isExempt = req.path === '/points/broadcast/active' ||
+        req.path === '/messages/broadcast/active' ||
         req.path.startsWith('/admin') ||
-        req.path.startsWith('/push/admin');
+        req.path.startsWith('/push/admin') ||
+        req.path.startsWith('/messages/admin');
 
     if (isExempt) {
         return next();
@@ -159,6 +163,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/push', notificationsRoutes);
 app.use('/api/webhook', webhookRoutes);
+app.use('/api/messages', messagesRoutes);
 app.use('/api/debug', debugRoutes);
 
 // Serve static files in production

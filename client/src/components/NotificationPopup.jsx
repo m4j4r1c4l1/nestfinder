@@ -19,10 +19,13 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }
 
     const icon = message.icon || getIconForType(message.type);
 
-    // Define handleDismiss to use the component's props
+    // Define handleDismiss for overlay click (avoids double triggering if both props are same)
     const handleDismiss = () => {
-        onMarkRead?.(message);
-        onDismiss?.();
+        if (onMarkRead) {
+            onMarkRead(message);
+        } else if (onDismiss) {
+            onDismiss();
+        }
     };
 
     return ReactDOM.createPortal(
