@@ -91,29 +91,25 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         let remaining = query;
 
         // 1. Extract Quoted Strings (Exact Match): 'foo bar'
-        const quoteRegex = /'([^']+)'/g;
-        let match;
-        while ((match = quoteRegex.exec(remaining)) !== null) {
-            tokens.push({ type: 'exact', value: match[1] });
-            remaining = remaining.replace(match[0], ' ');
-        }
+        remaining = remaining.replace(/'([^']+)'/g, (match, val) => {
+            tokens.push({ type: 'exact', value: val });
+            return ' ';
+        });
 
         // 2. Extract Bracket Groups: [API] [Notifications]
-        const bracketRegex = /\[([^\]]+)\]/g;
-        while ((match = bracketRegex.exec(remaining)) !== null) {
-            tokens.push({ type: 'category', tags: [match[1].trim()] });
-            remaining = remaining.replace(match[0], ' ');
-        }
+        remaining = remaining.replace(/\[([^\]]+)\]/g, (match, val) => {
+            tokens.push({ type: 'category', tags: [val.trim()] });
+            return ' ';
+        });
 
         // 3. Extract Paren OR Groups: (Notifications|Points)
-        const parenRegex = /\(([^)]+)\)/g;
-        while ((match = parenRegex.exec(remaining)) !== null) {
-            const tags = match[1].split('|').map(t => t.trim()).filter(t => t);
+        remaining = remaining.replace(/\(([^)]+)\)/g, (match, val) => {
+            const tags = val.split('|').map(t => t.trim()).filter(t => t);
             if (tags.length > 0) {
                 tokens.push({ type: 'category-or', tags });
             }
-            remaining = remaining.replace(match[0], ' ');
-        }
+            return ' ';
+        });
 
         // 4. Extract Remaining Words
         const words = remaining.trim().split(/\s+/).filter(w => w);
@@ -132,18 +128,23 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         const tokens = parseSearchQuery(filterQuery);
 
         return logs.filter(log => {
-            // Parse line if string
+            // Normalize log entry
             let logObj = log;
             if (typeof log === 'string') {
-                // ... helper extraction ...
-                // (Using parseLogLine logic extraction for filtering is expensive. 
-                //  Better to rely on structured check or simple string check)
-                //  For speed, we'll assume structured if available, else string match.
-                //  BUT `logs` state can contain strings from server backend sometimes? 
-                //  Usually `adminApi.getUserLogs` returns objects.
+                if (log.trim().startsWith('{')) {
+                    try { logObj = JSON.parse(log); } catch { }
+                }
+                // If it's still a string (parse failed or didn't start with {)
+                if (typeof logObj === 'string') {
+                    // Create a dummy object for filtering so it doesn't bypass logic
+                    // If we have a timestamp regex in parseLogLine we could try to extract it, 
+                    // but for filtering speed we'll treat the whole string as msg.
+                    logObj = { msg: log, category: 'General', level: 'INFO', dl: 'default' };
+                }
             }
-            const { category = '', level = 'INFO', msg = '', ts = '', dl = 'default' } = (typeof log === 'object' ? log : {});
-            if (typeof log === 'string') return true; // Fail safe
+
+            // Safe destructuring from the normalized object
+            const { category = 'General', level = 'INFO', msg = '', ts = '', dl = 'default' } = (logObj || {});
 
             // 1. Level Filter (Debug Level: D/A/P)
             // Check if filterLevel includes the log's dl (case-insensitive)
@@ -159,24 +160,74 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
             // 3. Search Query (Tokens -> AND Logic between Token Groups)
             if (tokens.length === 0) return true;
 
-            return tokens.every(token => {
-                if (token.type === 'category') {
-                    return token.tags.every(tag => category.toLowerCase().includes(tag.toLowerCase()));
+            // Perform logical grouping for categories (OR between branches, AND/OR within branches)
+            // Branch: { parent: string|null, tokens: [] }
+            const branches = [];
+            const nonCategoryTokens = [];
+
+            tokens.forEach(t => {
+                if (t.type === 'category' || t.type === 'category-or') {
+                    // Identify the parent for this token
+                    const tags = t.tags;
+                    const possibleParent = tags.find(tag => subCategoryMap[tag]);
+
+                    if (possibleParent) {
+                        // This is a Main Category [API]
+                        let branch = branches.find(b => b.parent === possibleParent);
+                        if (!branch) {
+                            branch = { parent: possibleParent, tokens: [] };
+                            branches.push(branch);
+                        }
+                        // We don't necessarily need to add the parent tag itself to filters if it's the head
+                        // but including it in tokens helps validation.
+                        branch.tokens.push(t);
+                    } else {
+                        // It's a subcategory [Notifications] or group (A|B)
+                        // Find which parent it belongs to based on static map
+                        const parent = Object.keys(subCategoryMap).find(k => tags.some(tag => subCategoryMap[k].has(tag)));
+                        if (parent) {
+                            let branch = branches.find(b => b.parent === parent);
+                            if (!branch) {
+                                branch = { parent, tokens: [] };
+                                branches.push(branch);
+                            }
+                            branch.tokens.push(t);
+                        } else {
+                            // Lone tag without known parent
+                            branches.push({ parent: null, tokens: [t] });
+                        }
+                    }
+                } else {
+                    nonCategoryTokens.push(t);
                 }
-                if (token.type === 'category-or') {
-                    // OR relationship internally
-                    return token.tags.some(tag => category.toLowerCase().includes(tag.toLowerCase()));
-                }
-                if (token.type === 'exact') {
-                    return (msg + ' ' + category).toLowerCase().includes(token.value.toLowerCase());
-                }
-                if (token.type === 'timestamp') {
-                    return ts.includes(token.value);
-                }
-                if (token.type === 'text') {
-                    return (msg + ' ' + category).toLowerCase().includes(token.value.toLowerCase());
-                }
+            });
+
+            // 1. Global AND for non-category tokens (Text, Exact, Timestamp)
+            const matchesGlobal = nonCategoryTokens.every(token => {
+                const searchStr = (msg + ' ' + category).toLowerCase();
+                if (token.type === 'exact') return searchStr.includes(token.value.toLowerCase());
+                if (token.type === 'timestamp') return ts.includes(token.value);
+                if (token.type === 'text') return searchStr.includes(token.value.toLowerCase());
                 return false;
+            });
+
+            if (!matchesGlobal) return false;
+
+            // 2. OR between Branches (Union of Intersections)
+            if (branches.length === 0) return true;
+
+            return branches.some(branch => {
+                const lowerCat = category.toLowerCase();
+                // Match ALL tokens within this branch (Intersection)
+                return branch.tokens.every(token => {
+                    if (token.type === 'category') {
+                        return token.tags.every(tag => lowerCat.includes(`[${tag.toLowerCase()}]`));
+                    }
+                    if (token.type === 'category-or') {
+                        return token.tags.some(tag => lowerCat.includes(`[${tag.toLowerCase()}]`));
+                    }
+                    return false;
+                });
             });
         });
     };
@@ -960,19 +1011,24 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                                 }}>
                                 {(() => {
-                                    // Drill-down Logic: Check if we have an active Main Category in the filter
                                     const tokens = parseSearchQuery(filterQuery);
 
-                                    // SMART DETECTION: Find the last tag in the whole query that IS a Main Category
-                                    const allTagsInQuery = tokens.filter(t => t.type === 'category').flatMap(t => t.tags);
-                                    const lastKnownMain = allTagsInQuery.slice().reverse().find(t => subCategoryMap[t]);
+                                    // Identify current search context
+                                    const lastToken = tokens[tokens.length - 1];
+                                    const searchText = (lastToken?.type === 'text') ? lastToken.value.toLowerCase() : '';
 
-                                    const activeMain = (activeMainOverride === null) ? lastKnownMain : null;
+                                    // Find last Main Category for drill-down context
+                                    const allCategoryTags = tokens.filter(t => t.type === 'category').flatMap(t => t.tags);
+                                    const lastMainInQuery = allCategoryTags.slice().reverse().find(t => subCategoryMap[t]);
+                                    const activeMain = (activeMainOverride === null) ? lastMainInQuery : null;
 
                                     if (activeMain) {
-                                        // Show Subcategories
-                                        const subs = Array.from(subCategoryMap[activeMain]).sort();
-                                        if (subs.length === 0) return <div style={{ padding: '8px 12px', color: '#64748b', fontSize: '0.85rem' }}>No subcategories</div>;
+                                        // View: Subcategories for [activeMain]
+                                        const subs = Array.from(subCategoryMap[activeMain])
+                                            .filter(s => s.toLowerCase().includes(searchText))
+                                            .sort();
+
+                                        if (subs.length === 0) return <div style={{ padding: '8px 24px', color: '#64748b', fontSize: '0.85rem' }}>No matches found</div>;
 
                                         return (
                                             <div style={{ padding: '4px 0' }}>
@@ -1003,7 +1059,12 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 {subs.map(sub => (
                                                     <div key={sub}
                                                         onClick={() => {
-                                                            const query = filterQuery;
+                                                            let newQuery = filterQuery;
+                                                            // Remove search text from end if present
+                                                            if (searchText) {
+                                                                const lastSpace = newQuery.lastIndexOf(' ');
+                                                                newQuery = lastSpace >= 0 ? newQuery.substring(0, lastSpace).trim() : '';
+                                                            }
                                                             // SMART OR GROUPING:
                                                             // Does query already contain a match for this parent?
                                                             // e.g. [API] (Sub1|Sub2) or [API] [Sub1]
@@ -1061,73 +1122,65 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                     }
 
                                     // Default: Show Main Categories with nested style
-                                    return uniqueCategories.map(cat => {
-                                        const color = CATEGORY_COLORS[cat] || '#cbd5e1';
-                                        return (
-                                            <div key={cat} style={{ borderBottom: '1px solid rgba(51, 65, 85, 0.3)', paddingBottom: '4px' }}>
-                                                <div
-                                                    onClick={() => {
-                                                        const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
-                                                        setFilterQuery(prev => prev + pad + `[${cat}]`);
-                                                        setActiveMainOverride(null);
-                                                    }}
-                                                    style={{
-                                                        padding: '10px 12px 6px',
-                                                        cursor: 'pointer',
-                                                        color: color,
-                                                        fontWeight: 800,
-                                                        fontSize: '0.75rem',
-                                                        textTransform: 'uppercase',
-                                                        letterSpacing: '0.05em',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '8px',
-                                                        transition: 'background 0.2s'
-                                                    }}
-                                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
-                                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                                >
-                                                    <span style={{ opacity: 0.4 }}>●</span> {cat}
-                                                </div>
-                                                {/* Subcategories */}
-                                                {subCategoryMap[cat] && Array.from(subCategoryMap[cat]).sort().map(sub => (
-                                                    <div key={`${cat}-${sub}`}
+                                    // View: All Main Categories
+                                    const filteredMains = uniqueCategories
+                                        .filter(cat => cat.toLowerCase().includes(searchText))
+                                        .sort();
+
+                                    return (
+                                        <div style={{ padding: '4px 0' }}>
+                                            <div style={{ padding: '6px 12px', color: '#64748b', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid rgba(51, 65, 85, 0.3)', marginBottom: '4px' }}>
+                                                Select Category
+                                            </div>
+                                            {filteredMains.length === 0 ? (
+                                                <div style={{ padding: '8px 12px', color: '#64748b', fontSize: '0.85rem' }}>No matches found</div>
+                                            ) : filteredMains.map(cat => {
+                                                const color = CATEGORY_COLORS[cat] || '#cbd5e1';
+                                                return (
+                                                    <div key={cat}
                                                         onClick={() => {
-                                                            // Logic: If [cat] is already in the query, just append [sub]. Otherwise prepend [cat]
-                                                            const queryLower = filterQuery.toLowerCase();
-                                                            const hasParent = queryLower.includes(`[${cat.toLowerCase()}]`);
-                                                            const pad = filterQuery.length > 0 && !filterQuery.endsWith(' ') ? ' ' : '';
-                                                            const insertion = hasParent ? `[${sub}]` : `[${cat}] [${sub}]`;
-                                                            setFilterQuery(prev => prev + pad + insertion);
+                                                            let newQuery = filterQuery;
+                                                            if (searchText) {
+                                                                const lastSpace = newQuery.lastIndexOf(' ');
+                                                                newQuery = lastSpace >= 0 ? newQuery.substring(0, lastSpace).trim() : '';
+                                                            }
+                                                            if (!newQuery.toLowerCase().includes(`[${cat.toLowerCase()}]`)) {
+                                                                const pad = newQuery.length > 0 && !newQuery.endsWith(' ') ? ' ' : '';
+                                                                setFilterQuery(newQuery + pad + `[${cat}]`);
+                                                            }
                                                             setActiveMainOverride(null);
                                                         }}
                                                         style={{
-                                                            padding: '5px 12px 5px 32px',
+                                                            padding: '12px 16px',
                                                             cursor: 'pointer',
                                                             color: color,
+                                                            fontWeight: 800,
                                                             fontSize: '0.85rem',
-                                                            opacity: 0.7,
-                                                            position: 'relative',
-                                                            transition: 'all 0.2s'
+                                                            textTransform: 'uppercase',
+                                                            letterSpacing: '0.05em',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '12px',
+                                                            borderBottom: '1px solid rgba(51, 65, 85, 0.1)',
+                                                            transition: 'all 0.2s ease'
                                                         }}
                                                         onMouseEnter={e => {
-                                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                                                            e.currentTarget.style.opacity = '1';
-                                                            e.currentTarget.style.paddingLeft = '36px';
+                                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                                            e.currentTarget.style.paddingLeft = '22px';
                                                         }}
                                                         onMouseLeave={e => {
                                                             e.currentTarget.style.background = 'transparent';
-                                                            e.currentTarget.style.opacity = '0.7';
-                                                            e.currentTarget.style.paddingLeft = '32px';
+                                                            e.currentTarget.style.paddingLeft = '16px';
                                                         }}
                                                     >
-                                                        <div style={{ position: 'absolute', left: '18px', top: '0', bottom: '0', width: '1px', background: 'rgba(51, 65, 85, 0.5)' }} />
-                                                        [{sub}]
+                                                        <span style={{ opacity: 0.6, fontSize: '0.6rem' }}>●</span>
+                                                        {cat}
+                                                        <span style={{ marginLeft: 'auto', opacity: 0.4, fontSize: '0.7rem', fontWeight: 700 }}>DRILL DOWN →</span>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        );
-                                    });
+                                                );
+                                            })}
+                                        </div>
+                                    );
                                 })()}
                             </div>
                         )}

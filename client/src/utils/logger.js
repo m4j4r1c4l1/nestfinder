@@ -96,23 +96,33 @@ class DebugLogger {
 
                 let changed = false;
                 if (isActive !== this.config.enabled) {
-                    this.config.enabled = isActive;
-                    this.log('System', 'Remote Debug Status changed');
-                    this.log('System', `Current Debug Status: (${isActive ? 'Enabled' : 'Disabled'})`);
                     changed = true;
 
                     if (isActive) {
+                        this.config.enabled = true;
+                        this.log('System', 'Remote Debug Status changed');
+                        this.log('System', 'Current Debug Status: (Enabled)');
+
                         const lvl = this.config.debugLevel;
                         const badge = lvl === 'paranoic' ? 'P' : lvl === 'aggressive' ? 'A' : 'D';
                         const badgeLabel = lvl.charAt(0).toUpperCase() + lvl.slice(1);
 
                         this._logSystemInfo(); // Task #107: Initial Debug Packet
                         this.log('System', `Debug Mode Activated (${badge} ${badgeLabel})`);
-                        this.log('Debug', 'Next, the relation of live events -and pending if any- for this Debug Session:');
+                        this.log('System', 'Next, the relation of live events -and pending if any- for this Debug Session:');
                         this._startUpload();
                     } else {
+                        // Task: Log confirmation BEFORE disabling (Step 2800)
+                        this.log('System', 'Remote Debug Status changed');
+                        this.log('System', 'Current Debug Status: (Disabled)');
                         this.log('System', 'Debug session finished');
+
+                        // Force final upload of these logs
+                        this.upload();
                         this._stopUpload();
+
+                        this.config.enabled = false;
+
                         // Task #31: Clear logs when disabled for default level
                         if (this.config.debugLevel === 'default') {
                             this.clear();
@@ -222,7 +232,7 @@ class DebugLogger {
         };
         // The calling function handles the "Debug Mode Activated" message now to include level info
         // this.log('System', 'Debug Mode Activated (Initial Status)', info); 
-        this.log('System', 'System Info', info);
+        this.aggressive('System', 'System Info', info);
     }
 
     /**
