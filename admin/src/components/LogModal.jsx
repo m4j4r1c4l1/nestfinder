@@ -733,9 +733,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     const filteredLogs = getFilteredLogs();
 
     const activeFiltersList = [];
-    if (filterLevel.length > 0) activeFiltersList.push({ type: 'Level', val: filterLevel });
-    if (filterSeverity.length > 0) activeFiltersList.push({ type: 'Severity', val: filterSeverity });
 
+    // 1. Categories (Top Priority)
     if (filterQuery) {
         const tokens = parseSearchQuery(filterQuery);
         // Group Categories
@@ -777,6 +776,12 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
             activeFiltersList.push({ type: 'Category', val: groupedCategories });
         }
     }
+
+    // 2. Level
+    if (filterLevel.length > 0) activeFiltersList.push({ type: 'Level', val: filterLevel });
+
+    // 3. Severity (Last)
+    if (filterSeverity.length > 0) activeFiltersList.push({ type: 'Severity', val: filterSeverity });
 
     if (!user) return null;
 
@@ -1510,7 +1515,11 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                     marginTop: '2px'
                                                                 }}>
                                                                     <span style={{ fontSize: '0.7rem', color: '#64748b' }}>↳</span>
-                                                                    <span style={{ color: '#cbd5e1', fontSize: '0.75rem' }}>[{sub}]</span>
+                                                                    <span style={{
+                                                                        color: CATEGORY_COLORS[group.main] || '#cbd5e1',
+                                                                        fontSize: '0.75rem',
+                                                                        opacity: 0.9
+                                                                    }}>[{sub}]</span>
                                                                 </div>
                                                             ))}
                                                         </div>
