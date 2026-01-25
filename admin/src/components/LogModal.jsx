@@ -745,7 +745,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     // 1. Categories (Top Priority)
     if (filterQuery) {
         const tokens = parseSearchQuery(filterQuery);
-        
+
         // Data structures for grouping
         const categories = new Set();
         const subcategories = new Map(); // Parent -> Set(Subs)
@@ -786,7 +786,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
             });
             // If the parent itself was also explicitly in the query (e.g. [API]), remove it from standalone
             if (categories.has(parent)) {
-                 categories.delete(parent);
+                categories.delete(parent);
             }
         });
 
@@ -1030,7 +1030,6 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         }}>
                             {!filterQuery && <span style={{ color: '#64748b', fontFamily: 'sans-serif' }}>Search logs, [API] [Points]...</span>}
                             {filterQuery && (() => {
-                                // Simple tokenizer for coloring
                                 // Highlight Layer - Colored highlighting
                                 const highlightParts = filterQuery.split(/(\[[^\]]+\]|\([^)]+\))/g);
                                 return highlightParts.map((part, i) => {
@@ -1047,22 +1046,22 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         // Find color from children tags
                                         const inner = part.slice(1, -1);
                                         const tags = inner.split('|').filter(t => t);
-                                        
+
                                         // Helper to find category for a tag (Case Insensitive)
                                         const findCatForTag = (tag) => {
+                                            const t = tag.toLowerCase();
                                             // 1. Is it a Main Category?
-                                            const main = Object.keys(CATEGORY_COLORS).find(k => k.toLowerCase() === tag.toLowerCase());
+                                            const main = Object.keys(CATEGORY_COLORS).find(k => k.toLowerCase() === t);
                                             if (main) return main;
                                             // 2. Is it a Subcategory?
-                                            const parent = Object.keys(STATIC_SUBCATEGORIES).find(k => 
-                                                STATIC_SUBCATEGORIES[k].some(sub => sub.toLowerCase() === tag.toLowerCase())
+                                            return Object.keys(STATIC_SUBCATEGORIES).find(k =>
+                                                STATIC_SUBCATEGORIES[k].some(sub => sub.toLowerCase() === t)
                                             );
-                                            return parent;
                                         };
 
                                         const colorTag = tags.find(t => findCatForTag(t));
                                         let color = '#f8fafc';
-                                        
+
                                         if (colorTag) {
                                             const cat = findCatForTag(colorTag);
                                             if (cat) color = CATEGORY_COLORS[cat] || '#e2e8f0';
@@ -1163,22 +1162,35 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                 const lastSpace = newQuery.lastIndexOf(' ');
                                                                 newQuery = lastSpace >= 0 ? newQuery.substring(0, lastSpace).trim() : '';
                                                             }
-                                                            // SMART OR GROUPING:
-                                                            // Does query already contain a match for this parent?
-                                                            // e.g. [API] (Sub1|Sub2) or [API] [Sub1]
-                                                            const orRegex = /\(([^)]+)\)/;
-                                                            const parenMatch = filterQuery.match(orRegex);
 
-                                                            if (parenMatch && subCategoryMap[activeMain].has(parenMatch[1].split('|')[0].trim())) {
-                                                                // Append to existing paren group
-                                                                const inner = parenMatch[1];
-                                                                if (!inner.includes(sub)) {
-                                                                    setFilterQuery(prev => prev.replace(`(${inner})`, `(${inner}|${sub})`));
+                                                            // Ensure proper spacing
+                                                            const pad = (q) => (q.length > 0 && !q.endsWith(' ') ? ' ' : '');
+
+                                                            // Ensure Parent [Main] is present if not already
+                                                            const mainRegex = new RegExp(`\\[${activeMain}\\]`, 'i');
+                                                            if (!mainRegex.test(newQuery)) {
+                                                                newQuery = newQuery + pad(newQuery) + `[${activeMain}]`;
+                                                            }
+
+                                                            // SMART OR GROUPING:
+                                                            const orRegex = /\(([^)]+)\)/;
+                                                            const parenMatch = newQuery.match(orRegex);
+                                                            let grouped = false;
+
+                                                            if (parenMatch) {
+                                                                // Check if this group belongs to activeMain
+                                                                const parts = parenMatch[1].split('|').map(s => s.trim());
+                                                                if (parts.length > 0 && subCategoryMap[activeMain].has(parts[0])) {
+                                                                    if (!parenMatch[1].includes(sub)) {
+                                                                        newQuery = newQuery.replace(`(${parenMatch[1]})`, `(${parenMatch[1]}|${sub})`);
+                                                                    }
+                                                                    grouped = true;
                                                                 }
-                                                            } else {
+                                                            }
+
+                                                            if (!grouped) {
                                                                 // Check if there is a standalone sub for this parent
-                                                                // We'll iterate tokens to find a category tag that belongs to this activeMain
-                                                                const tokens = parseSearchQuery(filterQuery);
+                                                                const tokens = parseSearchQuery(newQuery);
                                                                 const siblingToken = tokens.find(t =>
                                                                     t.type === 'category' &&
                                                                     t.tags.length === 1 &&
@@ -1187,16 +1199,15 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
                                                                 if (siblingToken) {
                                                                     const sib = siblingToken.tags[0];
-                                                                    setFilterQuery(prev => prev.replace(`[${sib}]`, `(${sib}|${sub})`));
+                                                                    newQuery = newQuery.replace(`[${sib}]`, `(${sib}|${sub})`);
                                                                 } else {
-                                                                    const needsSpace = filterQuery.length > 0 && !filterQuery.endsWith(' ');
-                                                                    setFilterQuery(prev => prev + (needsSpace ? ' ' : '') + `[${sub}]`);
+                                                                    // Append as new tag
+                                                                    newQuery = newQuery + pad(newQuery) + `[${sub}]`;
                                                                 }
                                                             }
-                                                            // Optional: Stay in menu or close? 
-                                                            // User didn't specify, but usually selecting a leaf stays or closes.
-                                                            // Since "trap" was the issue, let's keep it open but maybe reset focus?
-                                                            // No, let's keep focus so they can select more subs (Multi-select).
+                                                            setFilterQuery(newQuery);
+
+                                                            // Keep focus so they can select more subs (Multi-select).
                                                         }}
                                                         style={{
                                                             padding: '8px 12px 8px 24px',
@@ -1488,7 +1499,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             fontSize: '1.2rem', color: activeFiltersList.length > 0 ? '#38bdf8' : '#64748b',
                             opacity: activeFiltersList.length > 0 ? 1 : 0.5
                         }}>
-                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={activeFiltersList.length > 0 ? '#38bdf8' : '#64748b'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={activeFiltersList.length > 0 ? '#38bdf8' : '#64748b'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                             </svg>
                         </div>
