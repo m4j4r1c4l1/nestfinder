@@ -1204,7 +1204,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
 
                     {/* 2. Level Filter (Multi-Select) */}
-                    <div style={{ position: 'relative', width: '135px', flexShrink: 0 }} ref={levelRef}>
+                    <div style={{ position: 'relative', width: '150px', flexShrink: 0 }} ref={levelRef}>
                         <div
                             onClick={() => setShowLevelDropdown(!showLevelDropdown)}
                             style={{
