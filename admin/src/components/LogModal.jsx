@@ -29,6 +29,9 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     // Debug Level Selector State (Footer)
     const [showLevelSelector, setShowLevelSelector] = useState(false);
 
+    // Explicit Navigation State for Dropdown (Fixes "Trap")
+    const [focusedCategory, setFocusedCategory] = useState(null);
+
     // --- RESTORED STATE ---
     const isUserScrollingRef = useRef(false);
     const [copied, setCopied] = useState(false);
@@ -732,11 +735,47 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     const activeFiltersList = [];
     if (filterLevel.length > 0) activeFiltersList.push({ type: 'Level', val: filterLevel });
     if (filterSeverity.length > 0) activeFiltersList.push({ type: 'Severity', val: filterSeverity });
+
     if (filterQuery) {
-        parseSearchQuery(filterQuery).forEach(t => {
-            if (t.type === 'category') activeFiltersList.push({ type: 'Category', val: `[${t.tags.join('][')}]` });
-            else activeFiltersList.push({ type: 'Text', val: t.type === 'exact' ? `'${t.value}'` : t.value });
+        const tokens = parseSearchQuery(filterQuery);
+        // Group Categories
+        const categoryTokens = tokens.filter(t => t.type === 'category' || t.type === 'category-or');
+
+        // Map to track Main -> Subs relationships
+        const groupedMap = {};
+
+        categoryTokens.forEach(t => {
+            // Flatten tags (handle both single [API] and group (A|B))
+            // For simplicity in tooltip, we treat all as tags to display
+            // If we want hierarchy, we try to find parent.
+            const tags = t.tags;
+            tags.forEach(tag => {
+                // Is this a main category?
+                if (subCategoryMap[tag] || STATIC_SUBCATEGORIES[tag]) {
+                    if (!groupedMap[tag]) groupedMap[tag] = new Set();
+                } else {
+                    // It's likely a sub. Find its parent.
+                    const parent = Object.keys(STATIC_SUBCATEGORIES).find(k => STATIC_SUBCATEGORIES[k].includes(tag));
+                    if (parent) {
+                        if (!groupedMap[parent]) groupedMap[parent] = new Set();
+                        groupedMap[parent].add(tag);
+                    } else {
+                        // Orphan
+                        if (!groupedMap['Other']) groupedMap['Other'] = new Set();
+                        groupedMap['Other'].add(tag);
+                    }
+                }
+            });
         });
+
+        const groupedCategories = Object.keys(groupedMap).map(main => ({
+            main,
+            subs: Array.from(groupedMap[main]).sort()
+        })).sort((a, b) => a.main.localeCompare(b.main));
+
+        if (groupedCategories.length > 0) {
+            activeFiltersList.push({ type: 'Category', val: groupedCategories });
+        }
     }
 
     if (!user) return null;
@@ -1034,10 +1073,9 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                     const lastToken = tokens[tokens.length - 1];
                                     const searchText = (lastToken?.type === 'text') ? lastToken.value.toLowerCase() : '';
 
-                                    // Find last Main Category for drill-down context
-                                    const allCategoryTags = tokens.filter(t => t.type === 'category').flatMap(t => t.tags);
-                                    const lastMainInQuery = allCategoryTags.slice().reverse().find(t => subCategoryMap[t]);
-                                    const activeMain = (activeMainOverride === null) ? lastMainInQuery : null;
+                                    // EXPLICIT STATE NAVIGATION
+                                    // We use 'focusedCategory' state to determine if we are in a subcategory view.
+                                    const activeMain = focusedCategory;
 
                                     if (activeMain) {
                                         // View: Subcategories for [activeMain]
@@ -1065,7 +1103,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 }}>
                                                     <span>{activeMain} › SELECT SUBCATEGORY</span>
                                                     <span
-                                                        onClick={(e) => { e.stopPropagation(); setActiveMainOverride(true); }}
+                                                        onClick={(e) => { e.stopPropagation(); setFocusedCategory(null); }}
                                                         style={{ cursor: 'pointer', opacity: 0.6, fontSize: '0.6rem' }}
                                                         onMouseEnter={e => e.currentTarget.style.opacity = '1'}
                                                         onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
@@ -1086,7 +1124,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             // Does query already contain a match for this parent?
                                                             // e.g. [API] (Sub1|Sub2) or [API] [Sub1]
                                                             const orRegex = /\(([^)]+)\)/;
-                                                            const parenMatch = filterQuery.match(orRegex); // FIX: query -> filterQuery
+                                                            const parenMatch = filterQuery.match(orRegex);
 
                                                             if (parenMatch && subCategoryMap[activeMain].has(parenMatch[1].split('|')[0].trim())) {
                                                                 // Append to existing paren group
@@ -1097,7 +1135,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             } else {
                                                                 // Check if there is a standalone sub for this parent
                                                                 // We'll iterate tokens to find a category tag that belongs to this activeMain
-                                                                const tokens = parseSearchQuery(filterQuery); // FIX: query -> filterQuery
+                                                                const tokens = parseSearchQuery(filterQuery);
                                                                 const siblingToken = tokens.find(t =>
                                                                     t.type === 'category' &&
                                                                     t.tags.length === 1 &&
@@ -1112,7 +1150,10 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                     setFilterQuery(prev => prev + (needsSpace ? ' ' : '') + `[${sub}]`);
                                                                 }
                                                             }
-                                                            setActiveMainOverride(null); // Reset override on selection
+                                                            // Optional: Stay in menu or close? 
+                                                            // User didn't specify, but usually selecting a leaf stays or closes.
+                                                            // Since "trap" was the issue, let's keep it open but maybe reset focus?
+                                                            // No, let's keep focus so they can select more subs (Multi-select).
                                                         }}
                                                         style={{
                                                             padding: '8px 12px 8px 24px',
@@ -1156,6 +1197,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 return (
                                                     <div key={cat}
                                                         onClick={() => {
+                                                            // Just add the category filter, DO NOT drill down automatically
                                                             let newQuery = filterQuery;
                                                             if (searchText) {
                                                                 const lastSpace = newQuery.lastIndexOf(' ');
@@ -1165,7 +1207,6 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                 const pad = newQuery.length > 0 && !newQuery.endsWith(' ') ? ' ' : '';
                                                                 setFilterQuery(newQuery + pad + `[${cat}]`);
                                                             }
-                                                            setActiveMainOverride(null);
                                                         }}
                                                         style={{
                                                             padding: '12px 16px',
@@ -1192,7 +1233,17 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                     >
                                                         {/* Removed dot circle and added brackets */}
                                                         [{cat}]
-                                                        <span style={{ marginLeft: 'auto', opacity: 0.4, fontSize: '0.7rem', fontWeight: 700 }}>DRILL DOWN →</span>
+                                                        <span
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setFocusedCategory(cat); // Explicitly enter drill down
+                                                            }}
+                                                            style={{ marginLeft: 'auto', opacity: 0.4, fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}
+                                                            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                                                            onMouseLeave={e => e.currentTarget.style.opacity = '0.4'}
+                                                        >
+                                                            DRILL DOWN →
+                                                        </span>
                                                     </div>
                                                 );
                                             })}
@@ -1435,19 +1486,38 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                     );
                                                 })
                                             ) : (
-                                                // Category / Text - Vertical alignment
+                                                // Category - Vertical alignment with Nesting
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginLeft: '-50px' }}>
-                                                    {['Category', 'Text'].includes(f.type) && typeof f.val === 'string' && f.val.includes('[') ? (
-                                                        (f.val.match(/\[([^\]]+)\]/g) || []).map((part, idx) => {
-                                                            const clean = part.replace(/[\[\]]/g, '');
-                                                            const color = CATEGORY_COLORS[clean] || '#e2e8f0';
-                                                            return <span key={idx} style={{ color: color, fontSize: '0.85rem', fontFamily: 'monospace' }}>{part}</span>
-                                                        })
-                                                    ) : (
-                                                        <span style={{ color: '#f8fafc', fontSize: '0.85rem', fontFamily: 'monospace' }}>{f.val}</span>
-                                                    )}
+                                                    {Array.isArray(f.val) ? f.val.map((group, gIdx) => (
+                                                        <div key={gIdx} style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px' }}>
+                                                            {/* Main Category */}
+                                                            <div style={{
+                                                                color: CATEGORY_COLORS[group.main] || '#e2e8f0',
+                                                                fontWeight: 700,
+                                                                fontSize: '0.8rem',
+                                                                textTransform: 'uppercase'
+                                                            }}>
+                                                                [{group.main}]
+                                                            </div>
+                                                            {/* Subcategories */}
+                                                            {group.subs.map(sub => (
+                                                                <div key={sub} style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '6px',
+                                                                    marginLeft: '12px',
+                                                                    opacity: 0.8,
+                                                                    marginTop: '2px'
+                                                                }}>
+                                                                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>↳</span>
+                                                                    <span style={{ color: '#cbd5e1', fontSize: '0.75rem' }}>[{sub}]</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )) : null}
                                                 </div>
                                             )}
+
                                         </div>
                                     </div>
                                 ))}
