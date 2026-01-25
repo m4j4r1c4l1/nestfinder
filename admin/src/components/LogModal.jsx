@@ -829,33 +829,34 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
 
                     {/* Centered Debug Level Status */}
                     <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                        <div
-                            style={{ position: 'relative', display: 'flex', alignItems: 'center', cursor: user.debug_enabled ? 'pointer' : 'default' }}
-                            ref={selectorRef}
-                            onMouseEnter={() => setShowLevelSelector(true)}
-                        >
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} ref={selectorRef}>
                             <div
                                 style={{
                                     width: '10px',
                                     height: '10px',
                                     borderRadius: '50%',
+                                    marginLeft: '4px',
                                     backgroundColor: !user.debug_enabled ? '#64748b' :
                                         user.debug_level === 'paranoic' ? '#ef4444' :
                                             user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
                                     boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
                                         user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
                                         }` : 'none',
+                                    cursor: user.debug_enabled ? 'pointer' : 'default',
+                                    position: 'relative',
                                     zIndex: 50
                                 }}
+                                title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`}
+                                onMouseEnter={() => setShowLevelSelector(true)}
                             />
                             <span style={{
-                                marginLeft: '8px',
+                                marginLeft: '6px',
                                 fontSize: '0.85rem',
                                 fontWeight: 700,
                                 color: !user.debug_enabled ? '#64748b' :
                                     user.debug_level === 'paranoic' ? '#ef4444' :
                                         user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                textTransform: 'uppercase',
+                                textTransform: 'uppercase', // Kept Uppercase for header style
                                 letterSpacing: '0.05em'
                             }}>
                                 {user.debug_enabled ? user.debug_level : 'Off'}
@@ -864,7 +865,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             {showLevelSelector && (
                                 <div style={{
                                     position: 'absolute',
-                                    top: '100%',
+                                    top: '100%', // Open downwards for header
                                     left: '50%',
                                     transform: 'translateX(-50%)',
                                     marginTop: '8px',
@@ -879,34 +880,48 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                     zIndex: 100,
                                     minWidth: '120px'
                                 }}>
-                                    {[
-                                        { id: 'default', label: 'Default', color: '#3b82f6' },
-                                        { id: 'aggressive', label: 'Aggressive', color: '#a855f7' },
-                                        { id: 'paranoic', label: 'Paranoic', color: '#ef4444' },
-                                        { id: 'off', label: 'Deactivate', color: '#64748b' }
-                                    ].map(lvl => (
-                                        <div
-                                            key={lvl.id}
-                                            onClick={(e) => { e.stopPropagation(); handleSetLevel(lvl.id); }}
-                                            style={{
-                                                padding: '8px 12px',
-                                                cursor: 'pointer',
-                                                borderRadius: '4px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '10px',
-                                                background: (user.debug_level === lvl.id || (!user.debug_enabled && lvl.id === 'off')) ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                                                transition: 'background 0.2s'
-                                            }}
-                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
-                                            onMouseLeave={e => e.currentTarget.style.background = (user.debug_level === lvl.id || (!user.debug_enabled && lvl.id === 'off')) ? 'rgba(255, 255, 255, 0.05)' : 'transparent'}
-                                        >
-                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: lvl.color }} />
-                                            <span style={{ color: (user.debug_level === lvl.id || (!user.debug_enabled && lvl.id === 'off')) ? '#f8fafc' : '#94a3b8', fontSize: '0.8rem', fontWeight: 600 }}>
-                                                {lvl.label}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {(user.debug_enabled
+                                        ? ['off', 'default', 'aggressive', 'paranoic'].filter(lvl => lvl !== user.debug_level)
+                                        : ['default', 'aggressive', 'paranoic']
+                                    ).map(lvl => {
+                                        const isOff = lvl === 'off';
+                                        const color = isOff ? '#64748b' : lvl === 'paranoic' ? '#ef4444' : lvl === 'aggressive' ? '#a855f7' : '#3b82f6';
+                                        return (
+                                            <button
+                                                key={lvl}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSetLevel(lvl);
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    padding: '6px 10px',
+                                                    background: 'transparent',
+                                                    border: 'none',
+                                                    color: '#e2e8f0',
+                                                    fontSize: '0.8rem',
+                                                    cursor: 'pointer',
+                                                    borderRadius: '4px',
+                                                    width: '100%',
+                                                    textAlign: 'left'
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: '8px',
+                                                    height: '8px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: color,
+                                                    boxShadow: isOff ? 'none' : `0 0 4px ${color}`,
+                                                    opacity: isOff ? 0.7 : 1
+                                                }} />
+                                                <span style={{ textTransform: 'capitalize' }}>{isOff ? 'Disabled' : lvl}</span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -1069,7 +1084,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             // Does query already contain a match for this parent?
                                                             // e.g. [API] (Sub1|Sub2) or [API] [Sub1]
                                                             const orRegex = /\(([^)]+)\)/;
-                                                            const parenMatch = query.match(orRegex);
+                                                            const parenMatch = filterQuery.match(orRegex); // FIX: query -> filterQuery
 
                                                             if (parenMatch && subCategoryMap[activeMain].has(parenMatch[1].split('|')[0].trim())) {
                                                                 // Append to existing paren group
@@ -1080,7 +1095,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             } else {
                                                                 // Check if there is a standalone sub for this parent
                                                                 // We'll iterate tokens to find a category tag that belongs to this activeMain
-                                                                const tokens = parseSearchQuery(query);
+                                                                const tokens = parseSearchQuery(filterQuery); // FIX: query -> filterQuery
                                                                 const siblingToken = tokens.find(t =>
                                                                     t.type === 'category' &&
                                                                     t.tags.length === 1 &&
@@ -1156,7 +1171,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             color: color,
                                                             fontWeight: 800,
                                                             fontSize: '0.85rem',
-                                                            textTransform: 'uppercase',
+                                                            textTransform: 'uppercase', // Kept for styling consistency
                                                             letterSpacing: '0.05em',
                                                             display: 'flex',
                                                             alignItems: 'center',
@@ -1173,8 +1188,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             e.currentTarget.style.paddingLeft = '16px';
                                                         }}
                                                     >
-                                                        <span style={{ opacity: 0.6, fontSize: '0.6rem' }}>●</span>
-                                                        {cat}
+                                                        {/* Removed dot circle and added brackets */}
+                                                        [{cat}]
                                                         <span style={{ marginLeft: 'auto', opacity: 0.4, fontSize: '0.7rem', fontWeight: 700 }}>DRILL DOWN →</span>
                                                     </div>
                                                 );
@@ -1187,7 +1202,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
 
                     {/* 2. Level Filter (Multi-Select) */}
-                    <div style={{ position: 'relative', width: '121px', flexShrink: 0 }} ref={levelRef}>
+                    <div style={{ position: 'relative', width: '135px', flexShrink: 0 }} ref={levelRef}>
                         <div
                             onClick={() => setShowLevelDropdown(!showLevelDropdown)}
                             style={{
@@ -1259,7 +1274,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
                                             </div>
                                             {lvl}
-                                            {isSelected && <span style={{ marginLeft: 'auto', fontSize: '0.7rem' }}>✓</span>}
+                                            {isSelected && <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: '#3b82f6' }}>✓</span>}
                                         </div>
                                     );
                                 })}
@@ -1360,7 +1375,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                             }}>
                                                 {sev}
                                             </span>
-                                            {isSelected && <span style={{ marginLeft: 'auto', color: '#e2e8f0', fontSize: '0.7rem' }}>✓</span>}
+                                            {isSelected && <span style={{ marginLeft: 'auto', color: '#3b82f6', fontSize: '0.7rem' }}>✓</span>}
                                         </div>
                                     );
                                 })}
