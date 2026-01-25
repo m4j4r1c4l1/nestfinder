@@ -506,7 +506,14 @@ router.post('/admin/send', requireAdmin, async (req, res) => {
         targetUserIds.forEach(uid => stmt.run([uid, notificationTitle, notificationBody, type, image, batchId]));
         stmt.free();
 
-        log('admin', 'notification_sent', batchId, { template, target, count: targetUserIds.length, title: notificationTitle });
+        log('admin', 'notification_sent', batchId, {
+            template,
+            target,
+            count: targetUserIds.length,
+            title: notificationTitle,
+            body: notificationBody,
+            image
+        });
         res.json({ success: true, sent: targetUserIds.length, message: `Notification sent to ${targetUserIds.length} users` });
     } catch (error) {
         console.error('Send notification error:', error);
@@ -574,13 +581,26 @@ router.get('/admin/notifications/history', requireAdmin, (req, res) => {
         const logs = all(`
             SELECT l.*, 
                 (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.target_id AND n.read = 1) as read_count, 
-                (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.target_id AND n.delivered = 1) as delivered_count
+                (SELECT COUNT(*) FROM notifications n WHERE n.batch_id = l.target_id AND n.delivered = 1) as delivered_count,
+                (SELECT body FROM notifications n WHERE n.batch_id = l.target_id LIMIT 1) as fallback_body,
+                (SELECT image_url FROM notifications n WHERE n.batch_id = l.target_id LIMIT 1) as fallback_image
              FROM logs l
              WHERE l.action = 'notification_sent' 
              ORDER BY created_at DESC 
              LIMIT ? OFFSET ?`, [limit, offset]);
+
+        // Process logs to ensure body/image exist in metadata
+        const processedLogs = logs.map(l => {
+            const meta = typeof l.metadata === 'string' ? JSON.parse(l.metadata || '{}') : (l.metadata || {});
+
+            if (!meta.body && l.fallback_body) meta.body = l.fallback_body;
+            if (!meta.image && l.fallback_image) meta.image = l.fallback_image;
+
+            return { ...l, metadata: JSON.stringify(meta) };
+        });
+
         const total = get("SELECT COUNT(*) as count FROM logs WHERE action = 'notification_sent'").count;
-        res.json({ logs, total });
+        res.json({ logs: processedLogs, total });
     } catch (error) {
         console.error('History error:', error);
         res.status(500).json({ error: 'Failed to get history' });
