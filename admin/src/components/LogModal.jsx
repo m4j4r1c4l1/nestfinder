@@ -232,7 +232,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         });
     };
 
-    const filteredLogs = getFilteredLogs();
+
 
 
 
@@ -726,6 +726,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         });
         return map;
     }, [logs]);
+
+    const filteredLogs = getFilteredLogs();
 
     const activeFiltersList = [];
     if (filterLevel.length > 0) activeFiltersList.push({ type: 'Level', val: filterLevel });
