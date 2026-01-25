@@ -393,7 +393,7 @@ const Dashboard = ({ onNavigate }) => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.75rem', padding: '1.5rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>🐥 Dashboard Overview</h2>
+            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>🐥 Dashboard Overview</h2>
 
             {/* Main Content: Map + Right Sidebar */}
             <div style={{ flex: 1, display: 'flex', gap: '1rem', minHeight: 0 }}>
@@ -405,7 +405,7 @@ const Dashboard = ({ onNavigate }) => {
                         background: 'rgba(15, 23, 42, 0.6)', borderBottom: '1px solid #334155',
                         padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0'
                     }}>
-                        <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>🗺️ Global Activity Map</h3>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>🗺️ Global Activity Map</h3>
                     </div>
 
                     <div style={{ padding: '1rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>

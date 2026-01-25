@@ -102,6 +102,7 @@ const ToastContainer = ({ toasts, onDismiss }) => {
                         boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: toast.centered ? 'center' : 'flex-start',
                         gap: 'var(--space-3)',
                         cursor: 'pointer',
                         animation: 'slideUp 0.3s ease-out',
@@ -111,7 +112,7 @@ const ToastContainer = ({ toasts, onDismiss }) => {
                     <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>{toast.icon}</span>
                     <span style={{
                         fontWeight: 500,
-                        flex: 1,
+                        flex: toast.centered ? '0 1 auto' : 1,
                         textAlign: toast.centered ? 'center' : 'left',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',

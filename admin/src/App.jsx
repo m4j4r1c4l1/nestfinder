@@ -435,6 +435,7 @@ const App = () => {
                         alignItems: 'center',
                         gap: '1rem',
                         cursor: 'pointer',
+                        justifyContent: 'center',
                         animation: 'fadeIn 0.3s ease-out'
                     }}
                 >

@@ -875,140 +875,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
                 </div>
 
-                {/* HEADER ROW 2: Actions (Live, Focus) */}
-                <div style={{
-                    padding: '8px 1.5rem',
-                    backgroundColor: '#1e293b',
-                    borderBottom: '1px solid #334155',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button onClick={() => setIsFollowing(!isFollowing)} style={{
-                            padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
-                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
-                            backgroundColor: isFollowing ? '#059669' : 'transparent', color: isFollowing ? 'white' : '#94a3b8',
-                            border: `1px solid ${isFollowing ? '#059669' : '#334155'}`
-                        }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isFollowing ? '#ef4444' : '#64748b', animation: isFollowing ? 'pulse 1.5s infinite' : 'none' }} />
-                            {isFollowing ? 'LIVE' : 'OFF'}
-                        </button>
-                    </div>
-
-                    {/* Centered Debug Level Status */}
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                        <div
-                            style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
-                            ref={selectorRef}
-                            onMouseEnter={() => setShowLevelSelector(true)}
-                        >
-                            <div
-                                style={{
-                                    width: '10px',
-                                    height: '10px',
-                                    borderRadius: '50%',
-                                    marginLeft: '4px',
-                                    backgroundColor: !user.debug_enabled ? '#64748b' :
-                                        user.debug_level === 'paranoic' ? '#ef4444' :
-                                            user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                    boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
-                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
-                                        }` : 'none',
-                                    cursor: user.debug_enabled ? 'pointer' : 'default',
-                                    position: 'relative',
-                                    zIndex: 50
-                                }}
-                                title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`}
-                            />
-                            <span style={{
-                                marginLeft: '6px',
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                color: !user.debug_enabled ? '#64748b' :
-                                    user.debug_level === 'paranoic' ? '#ef4444' :
-                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                textTransform: 'capitalize'
-                            }}>
-                                {user.debug_enabled ? user.debug_level : 'Off'}
-                            </span>
-                            {showLevelSelector && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '100%',
-                                    left: '50%',
-                                    transform: 'translateX(-50%)',
-                                    marginTop: '8px',
-                                    background: '#0f172a',
-                                    border: '1px solid #334155',
-                                    borderRadius: '8px',
-                                    padding: '4px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '2px',
-                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
-                                    zIndex: 100,
-                                    minWidth: '120px'
-                                }}>
-                                    {(user.debug_enabled
-                                        ? ['off', 'default', 'aggressive', 'paranoic'].filter(lvl => lvl !== user.debug_level)
-                                        : ['default', 'aggressive', 'paranoic']
-                                    ).map(lvl => {
-                                        const isOff = lvl === 'off';
-                                        const color = isOff ? '#64748b' : lvl === 'paranoic' ? '#ef4444' : lvl === 'aggressive' ? '#a855f7' : '#3b82f6';
-                                        return (
-                                            <button
-                                                key={lvl}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleSetLevel(lvl);
-                                                }}
-                                                onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
-                                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                                style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                    padding: '6px 10px',
-                                                    background: 'transparent',
-                                                    border: 'none',
-                                                    color: '#e2e8f0',
-                                                    fontSize: '0.8rem',
-                                                    cursor: 'pointer',
-                                                    borderRadius: '4px',
-                                                    width: '100%',
-                                                    textAlign: 'left'
-                                                }}
-                                            >
-                                                <div style={{
-                                                    width: '8px',
-                                                    height: '8px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: color,
-                                                    boxShadow: isOff ? 'none' : `0 0 4px ${color}`,
-                                                    opacity: isOff ? 0.7 : 1
-                                                }} />
-                                                <span style={{ textTransform: 'capitalize' }}>{isOff ? 'Disabled' : lvl}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button onClick={() => setIsColorEnabled(!isColorEnabled)} style={{
-                            padding: '4px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
-                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
-                            backgroundColor: isColorEnabled ? '#059669' : 'transparent', color: isColorEnabled ? 'white' : '#94a3b8',
-                            border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`
-                        }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isColorEnabled ? '#172554' : '#64748b', boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none' }} />
-                            {isColorEnabled ? 'FOCUS ON' : 'FOCUS OFF'}
-                        </button>
-                    </div>
-                </div>
+                {/* Status Bar removed and combined with the one above the logs list */}
 
                 {/* HEADER ROW 3: Filter Toolbar (NEW) */}
                 <div style={{
@@ -1713,6 +1580,107 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                         <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: isFollowing ? 'italic' : 'normal' }}>
                             {isFollowing ? `Auto-refreshing live${refreshDots}` : 'Auto-refreshing stopped'}
                         </span>
+                    </div>
+
+                    {/* Centered Debug Level Status */}
+                    <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                        <div
+                            style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+                            ref={selectorRef}
+                            onMouseEnter={() => setShowLevelSelector(true)}
+                        >
+                            <div
+                                style={{
+                                    width: '10px',
+                                    height: '10px',
+                                    borderRadius: '50%',
+                                    marginLeft: '4px',
+                                    backgroundColor: !user.debug_enabled ? '#64748b' :
+                                        user.debug_level === 'paranoic' ? '#ef4444' :
+                                            user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                    boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
+                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
+                                        }` : 'none',
+                                    cursor: user.debug_enabled ? 'pointer' : 'default',
+                                    position: 'relative',
+                                    zIndex: 50
+                                }}
+                                title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`}
+                            />
+                            <span style={{
+                                marginLeft: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                color: !user.debug_enabled ? '#64748b' :
+                                    user.debug_level === 'paranoic' ? '#ef4444' :
+                                        user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
+                                textTransform: 'capitalize'
+                            }}>
+                                {user.debug_enabled ? user.debug_level : 'Off'}
+                            </span>
+                            {showLevelSelector && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    marginTop: '8px',
+                                    background: '#0f172a',
+                                    border: '1px solid #334155',
+                                    borderRadius: '8px',
+                                    padding: '4px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '2px',
+                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+                                    zIndex: 100,
+                                    minWidth: '120px'
+                                }}>
+                                    {(user.debug_enabled
+                                        ? ['off', 'default', 'aggressive', 'paranoic'].filter(lvl => lvl !== user.debug_level)
+                                        : ['default', 'aggressive', 'paranoic']
+                                    ).map(lvl => {
+                                        const isOff = lvl === 'off';
+                                        const color = isOff ? '#64748b' : lvl === 'paranoic' ? '#ef4444' : lvl === 'aggressive' ? '#a855f7' : '#3b82f6';
+                                        return (
+                                            <button
+                                                key={lvl}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSetLevel(lvl);
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    padding: '6px 10px',
+                                                    background: 'transparent',
+                                                    border: 'none',
+                                                    color: '#e2e8f0',
+                                                    fontSize: '0.8rem',
+                                                    cursor: 'pointer',
+                                                    borderRadius: '4px',
+                                                    width: '100%',
+                                                    textAlign: 'left'
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: '8px',
+                                                    height: '8px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: color,
+                                                    boxShadow: isOff ? 'none' : `0 0 4px ${color}`,
+                                                    opacity: isOff ? 0.7 : 1
+                                                }} />
+                                                <span style={{ textTransform: 'capitalize' }}>{isOff ? 'Disabled' : lvl}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <button
                         onClick={() => setIsColorEnabled(!isColorEnabled)}
