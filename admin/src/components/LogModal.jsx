@@ -1554,23 +1554,25 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginBottom: '6px', textAlign: 'left' }}>{f.type}</div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '12px' }}>
                                             {f.type === 'Level' ? (
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                                                    {f.val.map(lvl => {
-                                                        const { char, color } = getDlStyle(lvl);
-                                                        return (
-                                                            <div key={lvl}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setFilterLevel(prev => prev.filter(p => p !== lvl));
-                                                                }}
-                                                                style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', width: '130px' }}
-                                                                title="Click to remove"
-                                                            >
-                                                                <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
-                                                                <span style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lvl}</span>
-                                                            </div>
-                                                        );
-                                                    })}
+                                                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                                                        {f.val.map(lvl => {
+                                                            const { char, color } = getDlStyle(lvl);
+                                                            return (
+                                                                <div key={lvl}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setFilterLevel(prev => prev.filter(p => p !== lvl));
+                                                                    }}
+                                                                    style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+                                                                    title="Click to remove"
+                                                                >
+                                                                    <Badge char={char} color={color} size="20px" fontSize="0.75rem" />
+                                                                    <span style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.9rem', fontWeight: 500 }}>{lvl}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
                                             ) : f.type === 'Severity' ? (
                                                 f.val.map(sev => {
@@ -1594,79 +1596,71 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 })
                                             ) : (
                                                 // Category - Vertical alignment with Nesting
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                    {Array.isArray(f.val) ? f.val.map((group, gIdx) => (
-                                                        <div key={gIdx} style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px' }}>
-                                                            {/* Main Category */}
-                                                            <div
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setFilterQuery(prev => {
-                                                                        // Remove [Main]
-                                                                        let q = prev;
-                                                                        const pattern = new RegExp(`\\[${group.main}\\]`, 'gi');
-                                                                        q = q.replace(pattern, '').replace(/\s+/g, ' ').trim();
-                                                                        return q;
-                                                                    });
-                                                                }}
-                                                                style={{
-                                                                    color: CATEGORY_COLORS[group.main] || '#e2e8f0',
-                                                                    fontWeight: 700,
-                                                                    fontSize: '0.8rem',
-                                                                    cursor: 'pointer',
-                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                                }}
-                                                                title="Click to remove category"
-                                                            >
-                                                                [{formatCategory(group.main)}]
-                                                            </div>
-                                                            {/* Subcategories */}
-                                                            {group.subs.map(sub => (
-                                                                <div key={sub}
+                                                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
+                                                        {Array.isArray(f.val) ? f.val.map((group, gIdx) => (
+                                                            <div key={gIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                {/* Main Category */}
+                                                                <div
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         setFilterQuery(prev => {
                                                                             let q = prev;
-                                                                            // 1. Try removing standalone [Sub]
-                                                                            q = q.replace(new RegExp(`\\[${sub}\\]`, 'gi'), '');
-
-                                                                            // 2. Try removing from groups (A|Sub|B)
-                                                                            // Complex regex to find parens containing the sub
-                                                                            const parenRegex = /\(([^)]+)\)/g;
-                                                                            q = q.replace(parenRegex, (match, content) => {
-                                                                                const parts = content.split('|').map(s => s.trim());
-                                                                                const filtered = parts.filter(p => p.toLowerCase() !== sub.toLowerCase());
-                                                                                if (filtered.length === 0) return ''; // Remove empty group
-                                                                                if (filtered.length === 1) return `[${filtered[0]}]`; // Degrade to single tag
-                                                                                return `(${filtered.join('|')})`; // Keep group
-                                                                            });
-
-                                                                            return q.replace(/\s+/g, ' ').trim();
+                                                                            const pattern = new RegExp(`\\[${group.main}\\]`, 'gi');
+                                                                            q = q.replace(pattern, '').replace(/\s+/g, ' ').trim();
+                                                                            return q;
                                                                         });
                                                                     }}
                                                                     style={{
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        gap: '6px',
-                                                                        opacity: 0.8,
-                                                                        marginTop: '2px',
-                                                                        cursor: 'pointer'
+                                                                        color: CATEGORY_COLORS[group.main] || '#e2e8f0',
+                                                                        fontWeight: 700,
+                                                                        fontSize: '0.9rem',
+                                                                        cursor: 'pointer',
+                                                                        display: 'flex', alignItems: 'center'
                                                                     }}
-                                                                    title="Click to remove subcategory"
+                                                                    title="Click to remove category"
                                                                 >
-                                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                                                                        <span style={{ fontSize: '0.7rem', color: '#64748b', position: 'absolute', left: '-14px', top: '2px' }}>↳</span>
+                                                                    [{formatCategory(group.main)}]
+                                                                </div>
+                                                                {/* Subcategories */}
+                                                                {group.subs.map(sub => (
+                                                                    <div key={sub}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setFilterQuery(prev => {
+                                                                                let q = prev;
+                                                                                q = q.replace(new RegExp(`\\[${sub}\\]`, 'gi'), '');
+                                                                                const parenRegex = /\(([^)]+)\)/g;
+                                                                                q = q.replace(parenRegex, (match, content) => {
+                                                                                    const parts = content.split('|').map(s => s.trim());
+                                                                                    const filtered = parts.filter(p => p.toLowerCase() !== sub.toLowerCase());
+                                                                                    if (filtered.length === 0) return '';
+                                                                                    if (filtered.length === 1) return `[${filtered[0]}]`;
+                                                                                    return `(${filtered.join('|')})`;
+                                                                                });
+                                                                                return q.replace(/\s+/g, ' ').trim();
+                                                                            });
+                                                                        }}
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            paddingLeft: '22px',
+                                                                            position: 'relative',
+                                                                            cursor: 'pointer'
+                                                                        }}
+                                                                        title="Click to remove subcategory"
+                                                                    >
+                                                                        <span style={{ fontSize: '0.7rem', color: '#64748b', position: 'absolute', left: '6px' }}>↳</span>
                                                                         <span style={{
                                                                             color: CATEGORY_COLORS[group.main] || '#cbd5e1',
-                                                                            fontSize: '0.75rem',
+                                                                            fontSize: '0.8rem',
                                                                             opacity: 0.9
                                                                         }}>[{formatCategory(sub)}]</span>
                                                                     </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )) : null}
+                                                                ))}
+                                                            </div>
+                                                        )) : null}
+                                                    </div>
                                                 </div>
                                             )}
 
