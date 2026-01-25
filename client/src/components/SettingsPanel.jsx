@@ -1555,7 +1555,7 @@ const SettingsPanel = ({ onClose }) => {
             const newLang = availableLanguages[currentIndex].code;
             const langObj = availableLanguages[currentIndex];
             setLanguage(newLang);
-            logger.aggressive(['Settings', 'Language', 'Interaction'], `Language changed to ${langObj.name} (${langObj.flag})`);
+            logger.aggressive(['Settings', 'Language', 'Interaction'], `Language changed to ${langObj.name} ${langObj.flag}`);
             setIsConfirmed(true);
         }, AUTO_SELECT_DELAY);
     };

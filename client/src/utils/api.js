@@ -59,7 +59,8 @@ class ApiClient {
     if (path.includes('/deactivate')) return 'Deactivate point';
     if (path.includes('/reactivate')) return 'Reactivate point';
     if (path === '/messages/notifications' && method === 'GET') return 'Update Notifications';
-    if (path.includes('/messages/notifications/') && (method === 'POST' || method === 'DELETE')) return 'Update Notification status';
+    if (path.includes('/messages/notifications/') && (method === 'POST' || method === 'DELETE')) return 'Update notification status';
+    if (path.includes('/messages/broadcasts/') && (method === 'POST' || method === 'DELETE')) return 'Update broadcast status';
 
     return null; // Unknown
   }
@@ -96,10 +97,11 @@ class ApiClient {
     });
 
     // Logging Logic
-    const humanName = this.getHumanReadableName(options.method || 'GET', endpoint);
+    const method = options.method || 'GET';
+    const humanName = this.getHumanReadableName(method, endpoint);
     const area = this.getAreaFromEndpoint(endpoint);
 
-    // Default: Human readable summary
+    // 1. Human Readable Line (Default Level)
     if (humanName) {
       if (humanName === 'Points') {
         logger.default(['API', area], 'Request: Update actual points');
@@ -108,12 +110,10 @@ class ApiClient {
       } else {
         logger.default(['API', area], `Request: ${humanName}`);
       }
-    } else {
-      logger.aggressive(['API', area], `Request: ${options.method || 'GET'} ${endpoint.split('?')[0]}`);
     }
 
-    // Aggressive: Technical Request Line
-    logger.aggressive(['API', area], `Request: ${options.method || 'GET'} ${endpoint}`);
+    // 2. Technical Request Line (Aggressive Level) - ALWAYS LOGGED
+    logger.aggressive(['API', area], `Request: ${method} ${endpoint}`);
 
     // Paranoic: Full Request Options (Headers, Body)
     if (options.body) {
@@ -126,7 +126,6 @@ class ApiClient {
 
     let data;
     try {
-      // ... existing error handling ...
       if (response.status === 502 || response.status === 503 || response.status === 504) {
         window.dispatchEvent(new CustomEvent('server:unavailable', { detail: { status: response.status } }));
         throw new Error('Server is updating. Please wait...');
@@ -135,7 +134,6 @@ class ApiClient {
       if (isJson) {
         data = await response.json();
       } else {
-        // ... existing text handling ...
         const text = await response.text();
         if (text.includes('<title>502') || text.includes('<title>503') || text.includes('<title>504')) {
           window.dispatchEvent(new CustomEvent('server:unavailable', { detail: { status: response.status } }));
@@ -145,7 +143,6 @@ class ApiClient {
         throw new Error('Server Error: The server returned an invalid response format.');
       }
     } catch (parseError) {
-      // ... existing error catch ...
       if (parseError.message.includes('Server is updating') || parseError.message.includes('Server Error') || parseError.message.includes('The server returned')) {
         logger.error('API', `Request to ${endpoint} failed: ${parseError.message}`);
         throw parseError;
@@ -157,15 +154,12 @@ class ApiClient {
       throw new Error('Invalid response from server. Please try again or contact support.');
     }
 
-    // ... existing 401 handling ...
     // Handle 401: Attempt token refresh if not already retrying
     if (response.status === 401 && !isRetry) {
-      // ... existing retry logic ...
       const deviceId = localStorage.getItem('nestfinder_device_id');
       if (deviceId) {
         logger.warn(['Auth', 'Session'], 'Access token expired, attempting silent refresh');
         try {
-          // ...
           const refreshResponse = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -179,7 +173,9 @@ class ApiClient {
               return this.fetch(endpoint, options, true);
             }
           }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+          console.error(e);
+        }
       }
       throw new Error(data.error || 'Session expired. Please login again.');
     }
@@ -199,31 +195,23 @@ class ApiClient {
 
         if (count !== null) suffix = ` (${count})`;
 
-        if (humanName === 'Update Notification status' || humanName === 'Update notification status') {
+        if (humanName.includes('Notification status')) {
           logger.default(['API', area], ` Response: Notification status successfully updated${suffix}`);
         } else if (humanName === 'Submitting message') {
           logger.default(['API', area], ` Response: Submission successfully received${suffix}`);
         } else if (humanName === 'Update Sent messages') {
           logger.default(['API', area], ` Response: Sent messages successfully updated${suffix}`);
-
-          // Aggressive: Response Status
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
-          // Aggressive Data Block for Sent Messages
           logger.aggressive(['API', area], 'Sent Messages Data', data);
         } else if (humanName === 'Active broadcasts') {
           logger.default(['API', area], ` Response: Active broadcasts successfully received${suffix}`);
-
-          // Aggressive: Response Status
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
-          // Aggressive Data Block for Broadcasts
           logger.aggressive(['API', area], 'Broadcasts Data', data);
         } else {
           logger.default(['API', area], ` Response: ${humanName} successfully received${suffix}`);
-          // Aggressive: Response Status
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
         }
       } else {
-        // Aggressive: Response Status (Fallback)
         logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
       }
 
@@ -231,10 +219,8 @@ class ApiClient {
       logger.paranoic(['API', area], 'Response Data', data);
     }
 
-
     if (!response.ok) {
       const errorMessage = data.error || `Server error: ${response.status} ${response.statusText}`;
-      // Log error (excluding temporary server unavailable errors which are handled by toast)
       if (response.status !== 502 && response.status !== 503 && response.status !== 504) {
         logger.error('API', 'Error', `${endpoint} - ${errorMessage}`);
       }
