@@ -1676,6 +1676,78 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     </div>
                 </div>
 
+                {/* STATUS BAR (Restored) */}
+                <div style={{
+                    padding: '8px 1.5rem',
+                    backgroundColor: '#1e293b',
+                    borderBottom: '1px solid #334155',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '12px'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <button
+                            onClick={() => setIsFollowing(!isFollowing)}
+                            style={{
+                                padding: '4px 12px',
+                                borderRadius: '4px',
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                backgroundColor: isFollowing ? '#059669' : 'transparent',
+                                color: isFollowing ? 'white' : '#94a3b8',
+                                border: `1px solid ${isFollowing ? '#059669' : '#334155'}`,
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <div style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                backgroundColor: isFollowing ? '#ef4444' : '#64748b',
+                                boxShadow: isFollowing ? '0 0 8px #ef4444' : 'none',
+                                animation: isFollowing ? 'pulse 1.5s infinite' : 'none'
+                            }} />
+                            {isFollowing ? 'LIVE' : 'OFF'}
+                        </button>
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', fontStyle: isFollowing ? 'italic' : 'normal' }}>
+                            {isFollowing ? `Auto-refreshing live${refreshDots}` : 'Auto-refreshing stopped'}
+                        </span>
+                    </div>
+                    <button
+                        onClick={() => setIsColorEnabled(!isColorEnabled)}
+                        style={{
+                            padding: '4px 12px',
+                            borderRadius: '4px',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            backgroundColor: isColorEnabled ? '#059669' : 'transparent',
+                            color: isColorEnabled ? 'white' : '#94a3b8',
+                            border: `1px solid ${isColorEnabled ? '#059669' : '#334155'}`,
+                            transition: 'all 0.2s ease'
+                        }}
+                    >
+                        <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: isColorEnabled ? '#172554' : '#64748b',
+                            border: isColorEnabled ? '1px solid #172554' : 'none',
+                            boxShadow: isColorEnabled ? '0 0 8px #3b82f6' : 'none',
+                            animation: isColorEnabled ? 'pulse 1.5s infinite' : 'none'
+                        }} />
+                        {isColorEnabled ? 'FOCUS ON' : 'FOCUS OFF'}
+                    </button>
+                </div>
+
                 {/* LOGS LIST */}
                 <div style={{ flex: 1, padding: '0', overflowY: 'auto', scrollBehavior: 'smooth' }} ref={scrollRef}>
                     {loading ? (
