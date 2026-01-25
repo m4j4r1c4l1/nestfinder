@@ -1526,12 +1526,11 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                 e.stopPropagation();
                                                                 setFilterLevel(prev => prev.filter(p => p !== lvl));
                                                             }}
-                                                            style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+                                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer' }}
                                                             title="Click to remove"
                                                         >
                                                             <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
                                                             <span style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lvl}</span>
-                                                            <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#ef4444', opacity: 0.6 }}>✖</span>
                                                         </div>
                                                     );
                                                 })
@@ -1544,7 +1543,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                 e.stopPropagation();
                                                                 setFilterSeverity(prev => prev.filter(p => p !== sev));
                                                             }}
-                                                            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                                                             title="Click to remove"
                                                         >
                                                             <span style={{
@@ -1552,7 +1551,6 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                 border: `1px solid ${color}44`, padding: '2px 8px',
                                                                 borderRadius: '4px', backgroundColor: `${color}11`, minWidth: '70px', textAlign: 'center'
                                                             }}>{sev}</span>
-                                                            <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#ef4444', opacity: 0.6 }}>✖</span>
                                                         </div>
                                                     );
                                                 })
@@ -1578,12 +1576,11 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                     fontWeight: 700,
                                                                     fontSize: '0.8rem',
                                                                     cursor: 'pointer',
-                                                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
                                                                 }}
                                                                 title="Click to remove category"
                                                             >
                                                                 [{formatCategory(group.main)}]
-                                                                <span style={{ fontSize: '10px', color: '#94a3b8', opacity: 0.5 }}>✖</span>
                                                             </div>
                                                             {/* Subcategories */}
                                                             {group.subs.map(sub => (
@@ -1612,8 +1609,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                     style={{
                                                                         display: 'flex',
                                                                         alignItems: 'center',
+                                                                        justifyContent: 'center',
                                                                         gap: '6px',
-                                                                        marginLeft: '12px',
                                                                         opacity: 0.8,
                                                                         marginTop: '2px',
                                                                         cursor: 'pointer'
@@ -1626,7 +1623,6 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                         fontSize: '0.75rem',
                                                                         opacity: 0.9
                                                                     }}>[{formatCategory(sub)}]</span>
-                                                                    <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#94a3b8', opacity: 0.5 }}>✖</span>
                                                                 </div>
                                                             ))}
                                                         </div>
