@@ -1385,22 +1385,24 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginBottom: '6px', textAlign: 'left' }}>{f.type}</div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '12px' }}>
                                             {f.type === 'Level' ? (
-                                                f.val.map(lvl => {
-                                                    const { char, color } = getDlStyle(lvl);
-                                                    return (
-                                                        <div key={lvl}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setFilterLevel(prev => prev.filter(p => p !== lvl));
-                                                            }}
-                                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer' }}
-                                                            title="Click to remove"
-                                                        >
-                                                            <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
-                                                            <span style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lvl}</span>
-                                                        </div>
-                                                    );
-                                                })
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                                                    {f.val.map(lvl => {
+                                                        const { char, color } = getDlStyle(lvl);
+                                                        return (
+                                                            <div key={lvl}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setFilterLevel(prev => prev.filter(p => p !== lvl));
+                                                                }}
+                                                                style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', width: '130px' }}
+                                                                title="Click to remove"
+                                                            >
+                                                                <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
+                                                                <span style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lvl}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             ) : f.type === 'Severity' ? (
                                                 f.val.map(sev => {
                                                     const { color } = getLevelStyles(sev);
@@ -1484,12 +1486,14 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                     }}
                                                                     title="Click to remove subcategory"
                                                                 >
-                                                                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>↳</span>
-                                                                    <span style={{
-                                                                        color: CATEGORY_COLORS[group.main] || '#cbd5e1',
-                                                                        fontSize: '0.75rem',
-                                                                        opacity: 0.9
-                                                                    }}>[{formatCategory(sub)}]</span>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                                                                        <span style={{ fontSize: '0.7rem', color: '#64748b', position: 'absolute', left: '-14px', top: '2px' }}>↳</span>
+                                                                        <span style={{
+                                                                            color: CATEGORY_COLORS[group.main] || '#cbd5e1',
+                                                                            fontSize: '0.75rem',
+                                                                            opacity: 0.9
+                                                                        }}>[{formatCategory(sub)}]</span>
+                                                                    </div>
                                                                 </div>
                                                             ))}
                                                         </div>
