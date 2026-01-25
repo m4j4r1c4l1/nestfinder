@@ -124,6 +124,13 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
         return tokens;
     };
 
+    // --- HELPERS ---
+    const formatCategory = (cat) => {
+        if (!cat) return '';
+        if (cat.toUpperCase() === 'API') return 'API';
+        return cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
+    };
+
     // --- FILTER LOGIC ---
     const getFilteredLogs = () => {
         if (!filterQuery && filterLevel.length === 0 && filterSeverity.length === 0) return logs;
@@ -1098,7 +1105,6 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                     color: CATEGORY_COLORS[activeMain] || '#94a3b8',
                                                     fontSize: '0.7rem',
                                                     fontWeight: 800,
-                                                    textTransform: 'uppercase',
                                                     letterSpacing: '0.05em',
                                                     borderBottom: '1px solid rgba(51, 65, 85, 0.3)',
                                                     marginBottom: '4px',
@@ -1106,7 +1112,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center'
                                                 }}>
-                                                    <span>{activeMain} › SELECT SUBCATEGORY</span>
+                                                    <span>{formatCategory(activeMain)} › SELECT SUBCATEGORY</span>
                                                     <span
                                                         onClick={(e) => { e.stopPropagation(); setFocusedCategory(null); }}
                                                         style={{ cursor: 'pointer', opacity: 0.6, fontSize: '0.6rem' }}
@@ -1219,7 +1225,6 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             color: color,
                                                             fontWeight: 800,
                                                             fontSize: '0.85rem',
-                                                            textTransform: 'uppercase', // Kept for styling consistency
                                                             letterSpacing: '0.05em',
                                                             display: 'flex',
                                                             alignItems: 'center',
@@ -1237,7 +1242,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                         }}
                                                     >
                                                         {/* Removed dot circle and added brackets */}
-                                                        [{cat}]
+                                                        [{formatCategory(cat)}]
                                                         <span
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
@@ -1499,10 +1504,9 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             <div style={{
                                                                 color: CATEGORY_COLORS[group.main] || '#e2e8f0',
                                                                 fontWeight: 700,
-                                                                fontSize: '0.8rem',
-                                                                textTransform: 'uppercase'
+                                                                fontSize: '0.8rem'
                                                             }}>
-                                                                [{group.main}]
+                                                                [{formatCategory(group.main)}]
                                                             </div>
                                                             {/* Subcategories */}
                                                             {group.subs.map(sub => (
@@ -1519,7 +1523,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                                         color: CATEGORY_COLORS[group.main] || '#cbd5e1',
                                                                         fontSize: '0.75rem',
                                                                         opacity: 0.9
-                                                                    }}>[{sub}]</span>
+                                                                    }}>[{formatCategory(sub)}]</span>
                                                                 </div>
                                                             ))}
                                                         </div>
