@@ -23,6 +23,7 @@ export const useNotifications = (userId) => {
 
     const maxKnownIdRef = useRef(0);
     const initialLoaded = useRef(false);
+    const readingRef = useRef(new Set());
 
     const toggleSettings = () => {
         const newSettings = { ...settings, realTime: !settings.realTime };
@@ -208,7 +209,8 @@ export const useNotifications = (userId) => {
             setPopupMessage(null);
         }
 
-        if (notification.read) return;
+        if (notification.read || readingRef.current.has(notification.id)) return;
+        readingRef.current.add(notification.id);
 
         try {
             if (notification.type === 'broadcast') {
@@ -223,6 +225,8 @@ export const useNotifications = (userId) => {
             setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (err) {
             console.error('Failed to mark read:', err);
+        } finally {
+            readingRef.current.delete(notification.id);
         }
     };
 
