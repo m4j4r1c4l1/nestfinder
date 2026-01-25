@@ -87,7 +87,7 @@ class ApiClient {
     }
 
     // Admin token overrides for admin endpoints
-    if (this.adminToken && (endpoint.includes('/admin') || endpoint.includes('/push/admin'))) {
+    if (this.adminToken && (endpoint.includes('/admin') || endpoint.includes('/messages/admin'))) {
       headers['Authorization'] = `Bearer ${this.adminToken}`;
     }
 

@@ -37,7 +37,7 @@ export const useNotifications = (userId) => {
             return;
         }
         try {
-            const data = await api.get(`/push/notifications?userId=${userId}`);
+            const data = await api.get('/messages/notifications');
 
             if (data.notifications && data.notifications.length > 0) {
                 // Ensure new broadcasts have a fetch time for UI display (popup/list)
@@ -107,7 +107,7 @@ export const useNotifications = (userId) => {
             .catch(err => console.error('Config fetch failed', err));
 
         if (userId && !initialLoaded.current) {
-            api.get(`/push/notifications?userId=${userId}`)
+            api.get('/messages/notifications')
                 .then(data => {
                     if (data.notifications && data.notifications.length > 0) {
                         maxKnownIdRef.current = data.notifications[0].id;
@@ -232,7 +232,7 @@ export const useNotifications = (userId) => {
 
     const markAllAsRead = async () => {
         try {
-            await api.post('/push/notifications/read-all', { userId });
+            await api.post('/messages/notifications/read-all');
 
             setNotifications(prev => prev.map(n => ({ ...n, read: 1 })));
             setUnreadCount(0);
