@@ -690,7 +690,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     };
 
     const handleCopy = () => {
-        const text = logs.map(line => {
+        const filtered = getFilteredLogs();
+        const text = filtered.map(line => {
             if (typeof line === 'object') {
                 const { ts, level, category, msg, data } = line;
                 return `${ts} [${category}] [${level}] ${msg} ${data ? JSON.stringify(data) : ''}`;
@@ -744,44 +745,59 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     // 1. Categories (Top Priority)
     if (filterQuery) {
         const tokens = parseSearchQuery(filterQuery);
-        // Group Categories
-        const categoryTokens = tokens.filter(t => t.type === 'category' || t.type === 'category-or');
+        
+        // Data structures for grouping
+        const categories = new Set();
+        const subcategories = new Map(); // Parent -> Set(Subs)
 
-        // Map to track Main -> Subs relationships
-        const groupedMap = {};
+        // Helper to find parent (Case Insensitive)
+        const findParent = (tag) => {
+            const t = tag.toLowerCase();
+            return Object.keys(STATIC_SUBCATEGORIES).find(k =>
+                STATIC_SUBCATEGORIES[k].some(sub => sub.toLowerCase() === t)
+            );
+        };
 
-        categoryTokens.forEach(t => {
-            // Flatten tags (handle both single [API] and group (A|B))
-            // For simplicity in tooltip, we treat all as tags to display
-            // If we want hierarchy, we try to find parent.
-            const tags = t.tags;
-            tags.forEach(tag => {
-                // Is this a main category?
-                if (subCategoryMap[tag] || STATIC_SUBCATEGORIES[tag]) {
-                    if (!groupedMap[tag]) groupedMap[tag] = new Set();
-                } else {
-                    // It's likely a sub. Find its parent.
-                    const parent = Object.keys(STATIC_SUBCATEGORIES).find(k => STATIC_SUBCATEGORIES[k].includes(tag));
+        tokens.forEach(t => {
+            if (t.type === 'category' || t.type === 'category-or') {
+                t.tags.forEach(tag => {
+                    const parent = findParent(tag);
                     if (parent) {
-                        if (!groupedMap[parent]) groupedMap[parent] = new Set();
-                        groupedMap[parent].add(tag);
+                        // It is a subcategory -> Group under parent
+                        if (!subcategories.has(parent)) subcategories.set(parent, new Set());
+                        subcategories.get(parent).add(tag);
                     } else {
-                        // Orphan
-                        if (!groupedMap['Other']) groupedMap['Other'] = new Set();
-                        groupedMap['Other'].add(tag);
+                        // It is either a Main category or unknown -> Treat as Main
+                        // But wait, check if this 'Main' is actually a parent that has subcategories logic?
+                        // If the tag matches a parent key, keep it.
+                        categories.add(tag);
                     }
-                }
-            });
+                });
+            }
         });
 
-        const groupedCategories = Object.keys(groupedMap).map(main => ({
-            main,
-            subs: Array.from(groupedMap[main]).sort()
-        })).sort((a, b) => a.main.localeCompare(b.main));
+        const groups = [];
 
-        if (groupedCategories.length > 0) {
-            activeFiltersList.push({ type: 'Category', val: groupedCategories });
-        }
+        // 1. Convert Map to Groups (Parents with Subcategories)
+        subcategories.forEach((subs, parent) => {
+            groups.push({
+                main: parent,
+                subs: Array.from(subs).sort()
+            });
+            // If the parent itself was also explicitly in the query (e.g. [API]), remove it from standalone
+            if (categories.has(parent)) {
+                 categories.delete(parent);
+            }
+        });
+
+        // 2. Remaining Standalone Categories
+        categories.forEach(cat => {
+            groups.push({ main: cat, subs: [] });
+        });
+
+        groups.sort((a, b) => a.main.localeCompare(b.main));
+
+        if (groups.length > 0) activeFiltersList.push({ type: 'Category', val: groups });
     }
 
     // 2. Level
@@ -1599,7 +1615,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     gridTemplateColumns: '1fr auto 1fr',
                     alignItems: 'center'
                 }}>
-                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>{logs.length} entries</span>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>{filteredLogs.length} entries</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {logs.length > 0 && (
                             <>
