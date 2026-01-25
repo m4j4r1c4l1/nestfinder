@@ -904,21 +904,19 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                             />
                             <span style={{
                                 marginLeft: '6px',
-                                fontSize: '0.85rem',
-                                fontWeight: 700,
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
                                 color: !user.debug_enabled ? '#64748b' :
                                     user.debug_level === 'paranoic' ? '#ef4444' :
                                         user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                textTransform: 'uppercase', // Kept Uppercase for header style
-                                letterSpacing: '0.05em'
+                                textTransform: 'capitalize'
                             }}>
                                 {user.debug_enabled ? user.debug_level : 'Off'}
                             </span>
-
                             {showLevelSelector && (
                                 <div style={{
                                     position: 'absolute',
-                                    top: '100%', // Open downwards for header
+                                    top: '100%',
                                     left: '50%',
                                     transform: 'translateX(-50%)',
                                     marginTop: '8px',
@@ -1470,8 +1468,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                 </div>
                                 {activeFiltersList.map((f, i) => (
                                     <div key={i} style={{ marginBottom: '12px' }}>
-                                        <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', textAlign: 'left' }}>{f.type}</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '60px' }}>
+                                        <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginBottom: '6px', textAlign: 'left' }}>{f.type}</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '12px' }}>
                                             {f.type === 'Level' ? (
                                                 f.val.map(lvl => {
                                                     const { char, color } = getDlStyle(lvl);
@@ -1497,7 +1495,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                 })
                                             ) : (
                                                 // Category - Vertical alignment with Nesting
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginLeft: '-50px' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                     {Array.isArray(f.val) ? f.val.map((group, gIdx) => (
                                                         <div key={gIdx} style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px' }}>
                                                             {/* Main Category */}
@@ -1602,99 +1600,6 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         return `${datePart} - ${timePart} CET`;
                                     })()}
                                 </span>
-                                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} ref={selectorRef}>
-                                    <div
-                                        style={{
-                                            width: '10px',
-                                            height: '10px',
-                                            borderRadius: '50%',
-                                            marginLeft: '4px',
-                                            backgroundColor: !user.debug_enabled ? '#64748b' :
-                                                user.debug_level === 'paranoic' ? '#ef4444' :
-                                                    user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                            boxShadow: user.debug_enabled ? `0 0 6px ${user.debug_level === 'paranoic' ? '#ef4444' :
-                                                user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6'
-                                                }` : 'none',
-                                            cursor: user.debug_enabled ? 'pointer' : 'default',
-                                            position: 'relative',
-                                            zIndex: 50
-                                        }}
-                                        title={`Status: ${user.debug_enabled ? user.debug_level : 'Disabled'}`}
-                                        onMouseEnter={() => setShowLevelSelector(true)}
-                                    />
-                                    <span style={{
-                                        marginLeft: '6px',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 600,
-                                        color: !user.debug_enabled ? '#64748b' :
-                                            user.debug_level === 'paranoic' ? '#ef4444' :
-                                                user.debug_level === 'aggressive' ? '#a855f7' : '#3b82f6',
-                                        textTransform: 'capitalize'
-                                    }}>
-                                        {user.debug_enabled ? user.debug_level : 'Off'}
-                                    </span>
-                                    {showLevelSelector && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: '20px',
-                                            left: '50%',
-                                            transform: 'translateX(-50%)',
-                                            background: '#0f172a',
-                                            border: '1px solid #334155',
-                                            borderRadius: '8px',
-                                            padding: '4px',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '2px',
-                                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
-                                            zIndex: 100,
-                                            minWidth: '120px'
-                                        }}>
-                                            {(user.debug_enabled
-                                                ? ['off', 'default', 'aggressive', 'paranoic'].filter(lvl => lvl !== user.debug_level)
-                                                : ['default', 'aggressive', 'paranoic']
-                                            ).map(lvl => {
-                                                const isOff = lvl === 'off';
-                                                const color = isOff ? '#64748b' : lvl === 'paranoic' ? '#ef4444' : lvl === 'aggressive' ? '#a855f7' : '#3b82f6';
-                                                return (
-                                                    <button
-                                                        key={lvl}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleSetLevel(lvl);
-                                                        }}
-                                                        onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
-                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                                        style={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '8px',
-                                                            padding: '6px 10px',
-                                                            background: 'transparent',
-                                                            border: 'none',
-                                                            color: '#e2e8f0',
-                                                            fontSize: '0.8rem',
-                                                            cursor: 'pointer',
-                                                            borderRadius: '4px',
-                                                            width: '100%',
-                                                            textAlign: 'left'
-                                                        }}
-                                                    >
-                                                        <div style={{
-                                                            width: '8px',
-                                                            height: '8px',
-                                                            borderRadius: '50%',
-                                                            backgroundColor: color,
-                                                            boxShadow: isOff ? 'none' : `0 0 4px ${color}`,
-                                                            opacity: isOff ? 0.7 : 1
-                                                        }} />
-                                                        <span style={{ textTransform: 'capitalize' }}>{isOff ? 'Disabled' : lvl}</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
                             </>
                         )}
                     </div>
