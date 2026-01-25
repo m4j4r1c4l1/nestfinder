@@ -137,6 +137,7 @@ const BroadcastModal = ({ isSettled = false, onBroadcastRead }) => {
                 image_url: broadcast.image_url
             }}
             onDismiss={handleDismiss}
+            onMarkRead={handleDismiss}
         />
     );
 };

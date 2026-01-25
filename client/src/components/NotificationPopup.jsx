@@ -19,8 +19,14 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }
 
     const icon = message.icon || getIconForType(message.type);
 
+    // Define handleDismiss to use the component's props
+    const handleDismiss = () => {
+        onMarkRead?.(message);
+        onDismiss?.();
+    };
+
     return ReactDOM.createPortal(
-        <div className="notification-popup-overlay" onClick={() => { onMarkRead(message); onDismiss(); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+        <div className="notification-popup-overlay" onClick={handleDismiss} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
             <div className={`notification-popup ${imageOnly ? 'image-only' : ''}`} onClick={e => e.stopPropagation()} style={imageOnly ? { padding: 0, background: 'transparent', boxShadow: 'none', maxWidth: '90vw', maxHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}}>
                 {imageOnly ? (
                     message.image_url && <img src={message.image_url} alt="Notification" style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }} />
@@ -65,7 +71,7 @@ const NotificationPopup = ({ message, onDismiss, onMarkRead, imageOnly = false }
                         <p style={{ margin: '0 0 24px 0', color: '#666', lineHeight: '1.5' }}>{message.body}</p>
                         <button
                             className="btn btn-primary btn-block"
-                            onClick={() => onMarkRead(message)}
+                            onClick={() => onMarkRead?.(message)}
                             style={{ width: '100%', padding: '12px' }}
                         >
                             Got it
