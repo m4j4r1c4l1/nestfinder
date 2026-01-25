@@ -1028,10 +1028,25 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                         // Find color from children tags
                                         const inner = part.slice(1, -1);
                                         const tags = inner.split('|').filter(t => t);
-                                        const colorTag = tags.find(t => CATEGORY_COLORS[t]) || tags.find(t => Object.keys(STATIC_SUBCATEGORIES).find(k => STATIC_SUBCATEGORIES[k].includes(t)));
+                                        
+                                        // Helper to find category for a tag (Case Insensitive)
+                                        const findCatForTag = (tag) => {
+                                            // 1. Is it a Main Category?
+                                            const main = Object.keys(CATEGORY_COLORS).find(k => k.toLowerCase() === tag.toLowerCase());
+                                            if (main) return main;
+                                            // 2. Is it a Subcategory?
+                                            const parent = Object.keys(STATIC_SUBCATEGORIES).find(k => 
+                                                STATIC_SUBCATEGORIES[k].some(sub => sub.toLowerCase() === tag.toLowerCase())
+                                            );
+                                            return parent;
+                                        };
+
+                                        const colorTag = tags.find(t => findCatForTag(t));
                                         let color = '#f8fafc';
+                                        
                                         if (colorTag) {
-                                            color = CATEGORY_COLORS[colorTag] || CATEGORY_COLORS[Object.keys(STATIC_SUBCATEGORIES).find(k => STATIC_SUBCATEGORIES[k].includes(colorTag))];
+                                            const cat = findCatForTag(colorTag);
+                                            if (cat) color = CATEGORY_COLORS[cat] || '#e2e8f0';
                                         }
                                         return <span key={i} style={{ color: color, opacity: 0.9 }}>{part}</span>;
                                     }
