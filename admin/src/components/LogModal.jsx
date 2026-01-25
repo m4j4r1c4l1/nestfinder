@@ -1530,7 +1530,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                                                             title="Click to remove"
                                                         >
                                                             <Badge char={char} color={color} size="16px" fontSize="0.6rem" />
-                                                            <span style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lvl}</span>
+                                                            <span style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lvl}</span>
                                                         </div>
                                                     );
                                                 })
