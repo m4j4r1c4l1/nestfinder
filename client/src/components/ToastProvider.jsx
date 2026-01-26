@@ -17,10 +17,12 @@ export const ToastProvider = ({ children }) => {
         };
         setToasts(prev => [...prev, toast]);
 
-        // Auto-remove
-        setTimeout(() => {
-            setToasts(prev => prev.filter(t => t.id !== id));
-        }, toast.duration);
+        // Auto-remove if not persistent
+        if (toast.duration !== Infinity) {
+            setTimeout(() => {
+                setToasts(prev => prev.filter(t => t.id !== id));
+            }, toast.duration);
+        }
 
         return id;
     }, []);
@@ -29,28 +31,75 @@ export const ToastProvider = ({ children }) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
 
+    const clearAllToasts = useCallback(() => {
+        setToasts([]);
+    }, []);
+
     // Listen for server:unavailable events (from api.js)
     useEffect(() => {
+        let pollingInterval = null;
+        let toastId = null;
+
+        const cleanup = () => {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+            if (toastId) {
+                removeToast(toastId);
+                toastId = null;
+            }
+            window.removeEventListener('click', dismiss);
+            serverUnavailableRef.current = false;
+        };
+
+        const dismiss = () => {
+            cleanup();
+        };
+
+        const checkServer = async () => {
+            try {
+                // Try a simple health check or config fetch
+                const res = await fetch('/api/settings/app-config');
+                if (res.ok) {
+                    cleanup();
+                }
+            } catch (e) {
+                // Still down, keep polling
+            }
+        };
+
         const handleServerUnavailable = () => {
             // Debounce: only show once every 10 seconds
             if (serverUnavailableRef.current) return;
             serverUnavailableRef.current = true;
 
-            addToast('Server is restarting...', {
+            toastId = addToast('Server is restarting...', {
                 type: 'warning',
                 icon: '🙊',
-                duration: 5000,
+                duration: Infinity, // Persistent
                 centered: true
             });
 
+            // Start polling
+            pollingInterval = setInterval(checkServer, 2000);
+
+            // Add global click listener for manual dismiss
+            // Use setTimeout to avoid immediate trigger from the click that caused the error (if any)
             setTimeout(() => {
-                serverUnavailableRef.current = false;
-            }, 60000); // 1 minute debounce
+                window.addEventListener('click', dismiss, { once: true });
+            }, 100);
+
+            // Safety fallback: Clear after 2 minutes if polling fails forever
+            setTimeout(cleanup, 120000);
         };
 
         window.addEventListener('server:unavailable', handleServerUnavailable);
-        return () => window.removeEventListener('server:unavailable', handleServerUnavailable);
-    }, [addToast]);
+        return () => {
+            window.removeEventListener('server:unavailable', handleServerUnavailable);
+            cleanup();
+        };
+    }, [addToast, removeToast]);
 
     return (
         <ToastContext.Provider value={{ addToast, removeToast }}>

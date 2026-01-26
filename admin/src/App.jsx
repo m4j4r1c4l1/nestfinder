@@ -192,20 +192,57 @@ const App = () => {
     // Listen for server:unavailable events and show toast
     const serverToastDebounce = React.useRef(false);
     React.useEffect(() => {
+        let pollingInterval = null;
+
+        const cleanup = () => {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+            window.removeEventListener('click', dismiss);
+            setServerToast(null);
+            serverToastDebounce.current = false;
+        };
+
+        const dismiss = () => {
+            cleanup();
+        };
+
+        const checkServer = async () => {
+            try {
+                // Try a simple health check or config fetch
+                const res = await fetch('/api/settings/app-config');
+                if (res.ok) {
+                    cleanup();
+                }
+            } catch (e) {
+                // Still down, keep polling
+            }
+        };
+
         const handleServerUnavailable = () => {
             if (serverToastDebounce.current) return;
             serverToastDebounce.current = true;
 
             setServerToast({ message: 'Server is restarting...', icon: '🙊' });
 
-            // Auto-hide after 5 seconds
-            setTimeout(() => setServerToast(null), 5000);
-            // Debounce: only allow once per minute
-            setTimeout(() => { serverToastDebounce.current = false; }, 60000);
+            // Start polling
+            pollingInterval = setInterval(checkServer, 2000);
+
+            // Add global click listener for manual dismiss
+            setTimeout(() => {
+                window.addEventListener('click', dismiss, { once: true });
+            }, 100);
+
+            // Safety fallback: Clear after 2 minutes if polling fails forever
+            setTimeout(cleanup, 120000);
         };
 
         window.addEventListener('server:unavailable', handleServerUnavailable);
-        return () => window.removeEventListener('server:unavailable', handleServerUnavailable);
+        return () => {
+            window.removeEventListener('server:unavailable', handleServerUnavailable);
+            cleanup();
+        };
     }, []);
 
     // WebSocket Initialization for Admin
