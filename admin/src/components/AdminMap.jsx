@@ -27,11 +27,15 @@ const icons = {
 // Component to handle map resize
 const MapResizer = () => {
     const map = useMap();
+    const timeoutRef = useRef(null);
 
     useEffect(() => {
         // Invalidate size after mount and on window resize
         const handleResize = () => {
-            setTimeout(() => map.invalidateSize(), 100);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(() => {
+                if (map) map.invalidateSize();
+            }, 100);
         };
 
         handleResize();
@@ -39,14 +43,17 @@ const MapResizer = () => {
 
         // Also observe parent container size changes
         const resizeObserver = new ResizeObserver(handleResize);
-        if (map.getContainer().parentElement) {
-            resizeObserver.observe(map.getContainer().parentElement);
+        const container = map.getContainer().parentElement;
+        if (container) {
+            resizeObserver.observe(container);
         }
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
             resizeObserver.disconnect();
         };
+
     }, [map]);
 
     return null;
