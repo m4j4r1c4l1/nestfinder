@@ -189,9 +189,11 @@ class ApiClient {
           count = data.length;
         } else if (data) {
           if (typeof data.count === 'number') count = data.count;
-          else if (Array.isArray(data.feedback)) count = data.feedback.length;
           else if (Array.isArray(data.broadcasts)) count = data.broadcasts.length;
-          else if (Array.isArray(data.notifications)) count = data.notifications.length;
+          else if (Array.isArray(data.notifications)) {
+            // Only count UNREAD items for the log summary
+            count = data.notifications.filter(n => !n.read).length;
+          }
         }
 
         if (count !== null) suffix = ` (${count})`;
