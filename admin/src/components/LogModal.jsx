@@ -842,7 +842,9 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                 <div style={{
                     padding: '1rem 1.5rem',
                     borderBottom: '1px solid #334155',
-                    background: '#1e293b'
+                    background: '#1e293b',
+                    position: 'relative',
+                    zIndex: 20
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -886,7 +888,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: '12px',
-                    position: 'relative' // Position relative for absolute centering of child
+                    position: 'relative',
+                    zIndex: 50 // High stacking for debug level dropdown
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1, minWidth: '200px' }}>
                         <button
@@ -1066,7 +1069,8 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
                     display: 'flex',
                     gap: '12px',
                     alignItems: 'center',
-                    position: 'relative' // For dropdown positioning if needed
+                    position: 'relative',
+                    zIndex: 40 // Stacks above logs but below row 2 dropdowns
                 }}>
                     {/* 1. Main Search (Filter Action style) */}
                     <div style={{ position: 'relative', flex: 1, height: '36px', background: '#0f172a', border: '1px solid #334155', borderRadius: '4px', display: 'flex', alignItems: 'center' }} ref={searchRef}>

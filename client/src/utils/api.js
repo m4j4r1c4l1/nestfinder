@@ -199,21 +199,21 @@ class ApiClient {
         if (count !== null) suffix = ` (${count})`;
 
         if (humanName === 'Notifications') {
-          logger.default(['API', area], ` Response: Notifications successfully updated${suffix}`);
+          logger.default(['API', area], `Response: Notifications successfully updated${suffix}`);
         } else if (humanName.includes('Notification status')) {
-          logger.default(['API', area], ` Response: Notification status successfully updated${suffix}`);
+          logger.default(['API', area], `Response: Notification status successfully updated${suffix}`);
         } else if (humanName === 'Submitting message') {
-          logger.default(['API', area], ` Response: Submission successfully received${suffix}`);
+          logger.default(['API', area], `Response: Submission successfully received${suffix}`);
         } else if (humanName === 'Update Sent messages') {
-          logger.default(['API', area], ` Response: Sent messages successfully updated${suffix}`);
+          logger.default(['API', area], `Response: Sent messages successfully updated${suffix}`);
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
           logger.aggressive(['API', area], 'Sent Messages Data', data);
         } else if (humanName === 'Active broadcasts') {
-          logger.default(['API', area], ` Response: Active broadcasts successfully received${suffix}`);
+          logger.default(['API', area], `Response: Active broadcasts successfully received${suffix}`);
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
           logger.aggressive(['API', area], 'Broadcasts Data', data);
         } else {
-          logger.default(['API', area], ` Response: ${humanName} successfully received${suffix}`);
+          logger.default(['API', area], `Response: ${humanName} successfully received${suffix}`);
           logger.aggressive(['API', area], `Response: ${response.status} from ${endpoint}`);
         }
       } else {
