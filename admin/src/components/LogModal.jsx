@@ -35,7 +35,7 @@ const LogModal = ({ user, onClose, onUserUpdate }) => {
     // --- RESTORED STATE ---
     const isUserScrollingRef = useRef(false);
     const [copied, setCopied] = useState(false);
-    const [isColorEnabled, setIsColorEnabled] = useState(false);
+    const [isColorEnabled, setIsColorEnabled] = useState(true);
     const [liveTime, setLiveTime] = useState(new Date());
     const [deviceInfo, setDeviceInfo] = useState(null);
     const [refreshDots, setRefreshDots] = useState('');

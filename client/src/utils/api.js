@@ -58,7 +58,7 @@ class ApiClient {
     if (path.includes('/confirm')) return 'Confirm point';
     if (path.includes('/deactivate')) return 'Deactivate point';
     if (path.includes('/reactivate')) return 'Reactivate point';
-    if (path === '/messages/notifications' && method === 'GET') return 'Update Notifications';
+    if (path === '/messages/notifications' && method === 'GET') return 'Notifications';
     if (path.includes('/messages/notifications/') && (method === 'POST' || method === 'DELETE')) return 'Update notification status';
     if (path.includes('/messages/broadcasts/') && (method === 'POST' || method === 'DELETE')) return 'Update broadcast status';
 
@@ -191,11 +191,14 @@ class ApiClient {
           if (typeof data.count === 'number') count = data.count;
           else if (Array.isArray(data.feedback)) count = data.feedback.length;
           else if (Array.isArray(data.broadcasts)) count = data.broadcasts.length;
+          else if (Array.isArray(data.notifications)) count = data.notifications.length;
         }
 
         if (count !== null) suffix = ` (${count})`;
 
-        if (humanName.includes('Notification status')) {
+        if (humanName === 'Notifications') {
+          logger.default(['API', area], ` Response: Notifications successfully updated${suffix}`);
+        } else if (humanName.includes('Notification status')) {
           logger.default(['API', area], ` Response: Notification status successfully updated${suffix}`);
         } else if (humanName === 'Submitting message') {
           logger.default(['API', area], ` Response: Submission successfully received${suffix}`);
